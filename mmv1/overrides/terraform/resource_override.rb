@@ -35,6 +35,10 @@ module Overrides
           # i.e. 'google_project' for resourcemanager.Project
           # Use Provider::Terraform::Config.legacy_name to override just
           # product name.
+          # Note: This should not be used for vanity names for new products.
+          # This was added to handle preexisting handwritten resources that
+          # don't match the natural generated name exactly, and to support
+          # services with a mix of handwritten and generated resources.
           :legacy_name,
 
           # The Terraform resource id format used when calling #setId(...).
@@ -57,6 +61,7 @@ module Overrides
           :virtual_fields,
 
           # TODO(alexstephen): Deprecate once all resources using autogen async.
+          # If true, generates product operation handling logic.
           :autogen_async,
 
           # If true, resource is not importable
@@ -89,8 +94,10 @@ module Overrides
           # an error and returns one.
           :read_error_transform,
 
-          # If true, only generate tests and cgc samples
-          :cgc_only
+          # If true, resources that failed creation will be marked as tainted. As a consequence
+          # these resources will be deleted and recreated on the next apply call. This pattern
+          # is preferred over deleting the resource directly in post_create_failure hooks.
+          :taint_resource_on_failed_create
         ]
       end
 
@@ -125,7 +132,7 @@ module Overrides
         check :skip_delete, type: :boolean, default: false
         check :supports_indirect_user_project_override, type: :boolean, default: false
         check :read_error_transform, type: String
-        check :cgc_only, type: :boolean, default: false
+        check :taint_resource_on_failed_create, type: :boolean, default: false
       end
 
       def apply(resource)

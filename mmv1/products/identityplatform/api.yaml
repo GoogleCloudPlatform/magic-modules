@@ -28,6 +28,36 @@ apis_required:
     url: https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity/
 objects:
   - !ruby/object:Api::Resource
+    name: 'Config'
+    base_url: 'projects/{{project}}/config'
+    self_link: 'projects/{{project}}/config'
+    create_url: 'projects/{{project}}/identityPlatform:initializeAuth'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Identity Platform configuration for a Cloud project. Identity Platform is an
+      end-to-end authentication system for third-party users to access apps
+      and services.
+  
+      This entity is created only once during intialization and cannot be deleted, 
+      individual Identity Providers may be disabled instead.  This resource may only
+      be created in billing-enabled projects.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/identity-platform/docs'
+      api: 'https://cloud.google.com/identity-platform/docs/reference/rest/v2/Config'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The name of the Config resource
+      - !ruby/object:Api::Type::Boolean
+        name: 'autodeleteAnonymousUsers'
+        description: |
+          Whether anonymous users will be auto-deleted after a period of 30 days
+  - !ruby/object:Api::Resource
     name: 'DefaultSupportedIdpConfig'
     base_url: 'projects/{{project}}/defaultSupportedIdpConfigs'
     self_link: 'projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}'

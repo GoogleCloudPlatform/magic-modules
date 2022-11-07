@@ -14,65 +14,26 @@ change.
 
 ---
 
-- [Getting Started with Magic Modules](#getting-started-with-magic-modules)
-   - [Preparing your environment](#preparing-your-environment)
-   - [Preparing Magic Modules / One-time setup](#preparing-magic-modules--one-time-setup)
-   - [Generating the Terraform Providers](#generating-the-terraform-providers)
-   - [Testing](#testing)
+- [Magic Modules](#magic-modules)
+  - [Getting Started with Magic Modules](#getting-started-with-magic-modules)
+    - [Cloning Terraform providers](#cloning-terraform-providers)
+    - [Setting up a container-based environment](#setting-up-a-container-based-environment)
+    - [Preparing your environment manually](#preparing-your-environment-manually)
+    - [Generating the Terraform Providers](#generating-the-terraform-providers)
+    - [Testing](#testing)
       - [Using released terraform binary with local provider binary](#using-released-terraform-binary-with-local-provider-binary)
-   - [Submitting a PR](#submitting-a-pr)
-- [Contributing](#contributing)
-   - [General contributing steps](#general-contributing-steps)
-   - [Detailed contributing guide](#detailed-contributing-guide)
-- [Glossary](#glossary)
-- [Other Resources](#other-resources)
+    - [Submitting a PR](#submitting-a-pr)
+  - [Contributing](#contributing)
+    - [General contributing steps](#general-contributing-steps)
+    - [Detailed contributing guide](#detailed-contributing-guide)
+  - [Glossary](#glossary)
+  - [Other Resources](#other-resources)
 
 ---
 
 ## Getting Started with Magic Modules
 
-### Preparing your environment
-
-To get started, you'll need:
-
-* Go
-  * If you're using a Mac with Homebrew installed, you can follow these
-    instructions to set up Go: [YouTube video](https://www.youtube.com/watch?v=VQVyvulNnzs).
-  * If you're using Cloud Shell, Go is already installed.
-* Ruby 2.6.0
-  * You can use `rbenv` to manage your Ruby version(s).
-  * To install `rbenv`, run `sudo apt install rbenv`.
-  * Then run `rbenv install 2.6.0`. 
-    * For M1 Mac users, run `RUBY_CFLAGS="-Wno-error=implicit-function-declaration" rbenv install 2.6.0`
-* [`Bundler`](https://github.com/bundler/bundler)
-  * This can be installed with `gem install bundler`
-* Goimports
-  * go install golang.org/x/tools/cmd/goimports / go install golang.org/x/tools/cmd/goimports@latest
-* Terraform
-  * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
-* If you are getting "Too many open files" ulimit needs to be raised.
-  * Mac OSX: `ulimit -n 1000`
-
----
-
-### Preparing Magic Modules / One-time setup
-
-**Important:**
-Compiling Magic Modules can be done directly from the `mmv1` directory within this repository.
-In the future we will add hybrid generation with multiple generators. All the information below
-pertains only to the contents of the `mmv1` directory, and commands should be executed from
-that directory.
-
-To get started right away, use the bootstrap script with:
-
-```bash
-cd mmv1
-./tools/bootstrap
-```
-
----
-
-Otherwise, follow the manual steps below:
+### Cloning Terraform providers
 
 If you're generating the Terraform providers (`google` and `google-beta`),
 you'll need to check out the repo(s) you're generating in your GOPATH. For
@@ -83,17 +44,70 @@ git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src
 git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
 ```
 
+Or run the following to check them all out:
+
+```bash
+./tools/bootstrap
+```
+
 Magic Modules won't work with old versions of the Terraform provider repos. If
 you're encountering issues with vendoring and paths, make sure both MM and the
 Terraform provider are running on up to date copies of `main`.
 
-Once you've prepared the target folders for the tools, run the following to
-finish getting Magic Modules set up by installing the Ruby gems it needs to run:
+### Setting up a container-based environment
 
-```bash
-cd mmv1
-bundle install
+*NOTE* this approach is in beta and still collecting feedback. Please file an issue if you encounter challenges, and try pulling the latest container (see command below) first to see if any recent changes may fix you.
+
+You do not need to run these instructions if you are setting up your environment manually.
+
+For ease of contribution, we provide containers with the required dependencies for building magic-modules, as well as the option to build them yourself.
+
+You can work with containers with either [Podman](https://podman.io/) or [Docker](https://docker.io/).
+
+[scripts/make-in-container.sh](scripts/make-in-container.sh) includes all the
+instructions to build and run containers by hand. Refer to the script for
+individual steps, but for most users you only have to run the script directly, as a replacement for make.
+
+Here is an example of how to build Terraform (after [cloning the provider](#cloning-terraform-providers)):
+
+```shell
+./scripts/make-in-container.sh \
+  terraform VERSION=ga \
+  OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
 ```
+
+Generally, you can replace any reference to `make` in this guide with `scripts/make-in-container.sh`.
+
+### Preparing your environment manually
+
+*NOTE*: you don't need to run these instructions if you are using a container-based environment.
+
+You can also build magic-modules
+within your local development environment.
+
+To get started, you'll need:
+
+* Go
+  * If you're using a Mac with Homebrew installed, you can follow these
+    instructions to set up Go: [YouTube video](https://www.youtube.com/watch?v=VQVyvulNnzs).
+  * If you're using Cloud Shell, Go is already installed.
+* Ruby 2.6.0
+  * You can use [`rbenv`](https://github.com/rbenv/rbenv) to manage your Ruby version(s).
+  * To install `rbenv`:
+    * Homebrew: run `brew install rbenv ruby-build`
+    * Debian, Ubuntu, and their derivatives: run `sudo apt install rbenv`
+  * Then run `rbenv install 2.6.0`.
+    * For M1 Mac users, run `RUBY_CFLAGS="-Wno-error=implicit-function-declaration" rbenv install 2.6.0`
+* [`Bundler`](https://github.com/bundler/bundler)
+  * This can be installed with `gem install bundler`
+* Gems for magic-modules
+  * This can be installed with `cd mmv1 && bundler install`
+* Goimports
+  * go install golang.org/x/tools/cmd/goimports / go install golang.org/x/tools/cmd/goimports@latest
+* Terraform
+  * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+* If you are getting "Too many open files" ulimit needs to be raised.
+  * Mac OSX: `ulimit -n 1000`
 
 Now, you can verify you're ready with:
 
@@ -138,7 +152,19 @@ make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terrafor
 make terraform VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
 
 # Only generate a specific product (plus all common files)
-make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=dataproc
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub
+
+# Only generate only a specific resources for a product
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub RESOURCE=Topic
+```
+The `PRODUCT` variable values correspond to folder names in `mmv1/products` for generated resources. The `RESOURCE` variable value needs to match the name of the resource inside the `api.yaml` file for that product.
+
+Handwritten files in `mmv1/third_party` are always compiled. If you are only working on common files or third_party code, you can pass a non-existent `PRODUCT`
+to reduce the generation time.
+
+```bash
+# Only generate common files, including all third_party code
+make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=foo
 ```
 
 It's worth noting that Magic Modules will only generate new files when run
@@ -150,38 +176,66 @@ files when creating PRs.
 ### Testing
 
 Once you've made changes to resource definition, you can run Magic Modules
-to generate changes to your tool; see
+to generate changes to your provider; see
 ["Generating the Terraform Providers"](#generating-the-terraform-providers)
 above if you need a refresher. Once it's generated, you should run the
-tool-specific tests as if you were submitting a PR against that tool.
+tests to ensure your change work for the providers.
 
-You can run tests in the `{{output_folder}}` you generated the tool in.
-See the following tool-specific documentation for more details on testing that
-tool;
+Tests generally assume the following environment variables must be set in order to run tests:
 
-Tool             | Testing Guide
------------------|--------------
-terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#tests)
-terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/.github/CONTRIBUTING.md#tests)
+```
+GOOGLE_PROJECT
+GOOGLE_CREDENTIALS|GOOGLE_CLOUD_KEYFILE_JSON|GCLOUD_KEYFILE_JSON|GOOGLE_USE_DEFAULT_CREDENTIALS
+GOOGLE_REGION
+GOOGLE_ZONE
+```
 
-Don't worry about testing every tool, only the primary tool you're making
-changes against. The Magic Modules maintainers will ensure your changes work
-against each tool.
+Note that the credentials you provide must be granted wide permissions on the specified project. These tests provision real resources, and require permission in order to do so. Most developers on the team grant their test service account `roles/editor` or `roles/owner` on their project. Additionally, to ensure that your tests are performed in a region and zone with wide support for GCP features, `GOOGLE_REGION` should be set to `us-central1` and `GOOGLE_ZONE` to `us-central1-a`.
 
-If your changes have unintended consequences in another tool, a reviewer will
-instruct you to mark the field excluded or provide specific feedback on what
-changes to make to the tool-specific overrides in order for them to work
-correctly.
+Additional variable may be required for other tests, and should get flagged when running them by Go skipping the test and flagging in the output it was skipped, with a skip message explaining why. The most typical extra values required are those required for project creation:
+
+```
+GOOGLE_ORG
+GOOGLE_BILLING_ACCOUNT
+```
+
+You can run tests against the provider you generated in the `OUTPUT_PATH` location. When running tests, specify which to run using `TESTARGS`, such as:
+
+```bash
+# for ga provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+TF_LOG=TRACE make testacc TEST=./google TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+
+# for beta provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+TF_LOG=TRACE make testacc TEST=./google-beta TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+```
+
+The `TESTARGS` variable is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests). There are 2000+ tests, and running all of them takes over 9 hours and requires a lot of GCP quota.
+
+Note: `TF_LOG=TRACE` is optional; it [enables verbose logging](https://www.terraform.io/docs/internals/debugging.html) during tests, including all API request/response cycles. `> output.log` redirects the test output to a file for analysis, which is useful because `TRACE` logging can be extremely verbose.
+
+Tests will use whatever version of the `terraform` binary is found on your path. To test with multiple versions of `terraform` core, you must run the tests multiple times with different versions. You can use [`tfenv`](https://github.com/tfutils/tfenv) to manage your system `terraform` versions.
 
 #### Using released terraform binary with local provider binary
 
-Setup:
+After the provider code is generated into the location at `OUTPUT_PATH`, you need to build the code in your generated provider
+to compile the provider binary:
 ```bash
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_amd64
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_amd64
-ln -s $GOPATH/bin/terraform-provider-google ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_amd64/terraform-provider-google_v5.0.0
-ln -s $GOPATH/bin/terraform-provider-google-beta ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_amd64/terraform-provider-google-beta_v5.0.0
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+make build
 ```
+
+Setup:
+
+```bash
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_arm64
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_arm64
+ln -s $GOPATH/bin/terraform-provider-google ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google/5.0.0/darwin_arm64/terraform-provider-google_v5.0.0
+ln -s $GOPATH/bin/terraform-provider-google-beta ~/.terraform.d/plugins/registry.terraform.io/hashicorp/google-beta/5.0.0/darwin_arm64/terraform-provider-google-beta_v5.0.0
+```
+
+NOTE: Substitute your machine architecture for `darwin_arm64`, i.e. `darwin_amd64` or `linux_amd64`
 
 Once this setup is complete, terraform will automatically use the binaries generated by the `make build` commands in the `terraform-provider-google` and `terraform-provider-google-beta` repositories instead of downloading the latest versions. To undo this, you can run:
 
@@ -200,12 +254,6 @@ If multiple versions are available in a plugin directory (for example after `ter
 Before creating a commit, if you've modified any .rb files, make sure you run
 `rake test`! That will run rubocop to ensure that the code you've written will
 pass Travis.
-
-To run rubocop automatically before committing, add a Git pre-commit hook with:
-
-```bash
-cp .github/pre-commit .git/hooks
-```
 
 Once you've created your commit(s), you can submit the code normally as a PR in
 the GitHub UI. The PR template includes some instructions to make sure we
@@ -242,11 +290,11 @@ any affected tools, the primary reviewer will merge your changes.
    * If it exists, check the header of the downstream file to identify the type of tools used to generate the resource. For some resources, the code file, the test file and the documentation file may not be generated via the same tools.
       * Generated resources like [`google_compute_address`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) can be identified by looking in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_compute_address.go) for an `AUTO GENERATED CODE` header as well as a `Type`. "Generated resources" typically refers to just the `MMv1` type, and `DCL` type resources are considered "DCL-based". (Currently DCL-related contribution are not supported)
       * Handwritten resources like [`google_container_cluster`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster) can be identified if they have source code present under the [`mmv1/third_party/terraform/resources`](./mmv1/third_party/terraform/resources) folder or by the absence of the `AUTO GENERATED CODE header` in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_container_cluster.go).
-   * If not, decide which tool you would like to use to implement the resource. 
+   * If not, decide which tool you would like to use to implement the resource.
       * MMv1 is strongly preferred over handwriting the resource unless the resource can not be generated.
       * Currently, only handwritten datasources are supported.
 1. Make the actual code change.
-   * The [Contribution Guide](#contribution-guide) below will guide you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code.
+   * The [Contribution Guide](#detailed-contributing-guide) below will guide you to the detailed instructions on how to make your change, based on the type of the change + the tool used to generate the code.
 1. Build the providers that includes your change. Check [Generating the Terraform Providers](#generating-the-terraform-providers) section for details on how to generate the providers locally.
 1. Test the feature against the providers you generated in the last step locally. Check [Testing Guidance](#testing) for details on how to run provider test locally. (Testing the PR locally and pushing the commit to the PR only after the tests pass locally may significantly reduce review cycles)
 1. Push your changes to your `magic-modules` repo fork and send a pull request from that branch to the main branch on `magic-modules`. A reviewer will be assigned automatically to your PR. Check [Submitting a PR](#submitting-a-PR) section for details on how to submit a PR.

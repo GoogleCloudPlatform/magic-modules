@@ -41,6 +41,9 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Dataset name'
+      - !ruby/object:Api::Type::String
+        name: 'maxTimeTravelHours'
+        description: 'Defines the time travel window in hours. The value can be from 48 to 168 hours (2 to 7 days).'
       - !ruby/object:Api::Type::Array
         name: 'access'
         description: 'An array of objects that define dataset access for one or more entities.'
@@ -803,6 +806,12 @@ objects:
                   For orc, specify "ORC". [Beta] For Bigtable, specify "BIGTABLE".
                   The default value is CSV.
                 default_value: 'CSV'
+              - !ruby/object:Api::Type::String
+                name: 'jsonExtension'
+                description: |
+                  If sourceFormat is set to newline-delimited JSON, indicates whether it should be processed as a JSON variant such as GeoJSON.
+                  For a sourceFormat other than JSON, omit this field. If the sourceFormat is newline-delimited JSON: - for newline-delimited
+                  GeoJSON: set to GEOJSON.
               - !ruby/object:Api::Type::Boolean
                 name: 'allowJaggedRows'
                 description: |

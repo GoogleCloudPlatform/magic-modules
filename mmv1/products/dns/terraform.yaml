@@ -67,12 +67,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           zone_name: "peering-zone"
           network_name: "network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_cloud_logging"
+        primary_resource_id: "cloud-logging-enabled-zone"
+        vars:
+          zone_name: "cloud-logging-enabled-zone"
     properties:
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           A textual description field. Defaults to 'Managed by Terraform'.
         default_value: 'Managed by Terraform'
         required: false
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringIsNotEmpty'
       dnssecConfig.defaultKeySpecs: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       dnssecConfig.nonExistence: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -145,6 +152,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       reverseLookup: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
+      cloudLoggingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'force_destroy'
