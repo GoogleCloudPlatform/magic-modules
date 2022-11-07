@@ -136,34 +136,6 @@ steps:
           - -c
           - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync
 
-    # TF-CLOUD-DOCS
-    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
-      id: tf-cloud-docs-sync
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["checkout"]
-      args:
-          - 'tf-cloud-docs-sync'
-          - $BRANCH_NAME
-          - $COMMIT_SHA
-
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      secretEnv: ["GITHUB_TOKEN"]
-      id: tf-cloud-docs-push
-      waitFor: ["tf-cloud-docs-sync"]
-      args:
-          - 'downstream'
-          - 'tf-cloud-docs'
-          - 'beta'
-          - $COMMIT_SHA
-
-    - name: 'gcr.io/cloud-builders/git'
-      waitFor: ["tf-cloud-docs-push"]
-      secretEnv: ["GITHUB_TOKEN"]
-      entrypoint: 'bash'
-      args:
-          - -c
-          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-cloud-docs-sync
-
     - name: 'gcr.io/graphite-docker-images/vcr-cassette-merger'
       secretEnv: ["GITHUB_TOKEN", "GOOGLE_PROJECT"]
       waitFor: ["tpg-push"]

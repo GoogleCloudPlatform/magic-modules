@@ -80,7 +80,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       noRemoveDataDisk: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       dataDiskType: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'emptyOrDefaultStringSuppress("DISK_TYPE_UNSPECIFIED")'
+        ignore_read: true
       diskEncryption: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'emptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
       instanceOwners: !ruby/object:Overrides::Terraform::PropertyOverride

@@ -34,7 +34,7 @@ module Provider
     end
 
     def generate_object(object, output_folder, version_name, generate_code, generate_docs)
-      if object.exclude_validator || object.cgc_only
+      if object.exclude_validator
         Google::LOGGER.info "Skipping fine-grained resource #{object.name}"
         return
       end

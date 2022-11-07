@@ -206,7 +206,7 @@ func fetchIamPolicy(
 	}
 
 	iamPolicy, err := updater.GetResourceIamPolicy()
-	if isGoogleApiErrorWithCode(err, 403) {
+	if isGoogleApiErrorWithCode(err, 403) || isGoogleApiErrorWithCode(err, 404) {
 		return Asset{}, ErrResourceInaccessible
 	}
 

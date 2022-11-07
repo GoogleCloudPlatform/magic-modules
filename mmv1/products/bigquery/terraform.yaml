@@ -27,6 +27,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dataset_id: "example_dataset"
           account_name: "bqowner"
       - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_with_max_time_travel_hours"
+        primary_resource_id: "dataset"
+        skip_docs: true
+        vars:
+          dataset_id: "example_dataset"
+          account_name: "bqowner"
+      - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_cmek"
         skip_test: true
         primary_resource_id: "dataset"
@@ -175,6 +182,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "job"
         vars:
           job_id: "job_load"
+        ignore_read_extra:
+          - "etag"
+          - "status.0.state"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_load_geojson"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_load"
+          bucket_name: "bq-geojson-sample"
+        test_env_vars:
+          project: :PROJECT_NAME
         ignore_read_extra:
           - "etag"
           - "status.0.state"

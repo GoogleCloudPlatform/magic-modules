@@ -16,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/googleapi"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type TerraformResourceDataChange interface {
@@ -156,6 +158,15 @@ func isConflictError(err error) bool {
 		if e.Code == 409 || e.Code == 412 {
 			return true
 		}
+	}
+	return false
+}
+
+// gRPC does not return errors of type *googleapi.Error. Instead the errors returned are *status.Error.
+// See the types of codes returned here (https://pkg.go.dev/google.golang.org/grpc/codes#Code).
+func isNotFoundGrpcError(err error) bool {
+	if errorStatus, ok := status.FromError(err); ok && errorStatus.Code() == codes.NotFound {
+		return true
 	}
 	return false
 }
@@ -548,6 +559,14 @@ func checkGCSName(name string) error {
 		if !valid {
 			return fmt.Errorf("error: bucket name validation failed %v", str)
 		}
+	}
+	return nil
+}
+
+// checkGoogleIamPolicy makes assertions about the contents of a google_iam_policy data source's policy_data attribute
+func checkGoogleIamPolicy(value string) error {
+	if strings.Contains(value, "\"description\":\"\"") {
+		return fmt.Errorf("found an empty description field (should be omitted) in google_iam_policy data source: %s", value)
 	}
 	return nil
 }

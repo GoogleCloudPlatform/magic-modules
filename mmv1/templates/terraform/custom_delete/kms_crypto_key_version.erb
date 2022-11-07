@@ -1,0 +1,13 @@
+    
+    cryptoKeyVersionId, err := parseKmsCryptoKeyVersionId(d.Id(), config)
+    if err != nil {
+        return err
+    }
+    if cryptoKeyVersionId == nil {
+        return nil
+    }
+    if err := deleteCryptoKeyVersions(cryptoKeyVersionId, d, userAgent, config); err != nil { 
+        return nil
+    }
+    d.SetId("")
+	return nil

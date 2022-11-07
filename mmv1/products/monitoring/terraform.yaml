@@ -17,6 +17,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
     error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    properties:
+      conditions.conditionAbsent.aggregations.crossSeriesReducer: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: crossSeriesReducerDiffSuppress
+      conditions.conditionThreshold.denominatorAggregations.crossSeriesReducer: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: crossSeriesReducerDiffSuppress
+      conditions.conditionThreshold.aggregations.crossSeriesReducer: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: crossSeriesReducerDiffSuppress
     examples:
       - !ruby/object:Provider::Terraform::Examples
         # skipping tests because the API is full of race conditions
@@ -33,6 +40,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           alert_policy_display_name: "My Alert Policy"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/monitoring_alert_policy.go.erb
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
 
@@ -146,6 +154,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       encoder: templates/terraform/encoders/monitoring_service.go.erb
+
+  GenericService: !ruby/object:Overrides::Terraform::ResourceOverride
+    legacy_name: 'google_monitoring_service'
+    id_format: "projects/{{project}}/services/{{service_id}}"
+    import_format: ["projects/{{project}}/services/{{service_id}}"]
+    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_service_example"
+        primary_resource_id: "my_service"
+        vars:
+          service_id: "my-service"
 
   Slo: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
