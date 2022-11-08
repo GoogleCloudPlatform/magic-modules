@@ -7,20 +7,20 @@ resource "google_compute_region_network_firewall_policy" "basic_regional_network
 
 resource "google_compute_region_network_firewall_policy_rule" "primary" {
  firewall_policy = google_compute_region_network_firewall_policy.basic_regional_network_firewall_policy.name
- action = "allow"
- direction = "INGRESS"
+ action = "deny"
+ direction = "EGRESS"
  priority = 1000
 match {
- src_secure_tags {
+layer4_configs {
+ip_protocol = "tcp"
+ports = ["123"]
+ }
+ dest_ip_ranges = ["0.0.0.0/0"]
+ }
+  target_secure_tags {
  name = "tagValues/${google_tags_tag_value.basic_value.name}"
  }
- src_ip_ranges = ["10.100.0.1/32"]
-layer4_configs {
-ip_protocol = "all"
- }
- }
- target_service_accounts = ["{{test_service_account}}"]
- region = "{{region}}"
+ region = "{{region}}"  
 }
 
 resource "google_compute_network" "basic_network" {
