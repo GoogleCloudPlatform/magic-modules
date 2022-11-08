@@ -129,7 +129,7 @@ func TestAccBigQueryDatasetAccess_authorizedRoutine(t *testing.T) {
 			},
 			{
 				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
-				Config: testAccBigQueryDatasetAccess_destroy(context["private_dataset"].(string), "private_dataset"),
+				Config: testAccBigQueryDatasetAccess_destroy(context["private_dataset"].(string), "private"),
 				Check:  testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.private", expected),
 			},
 		},
