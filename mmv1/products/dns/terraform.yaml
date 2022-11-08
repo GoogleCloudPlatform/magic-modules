@@ -78,6 +78,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           A textual description field. Defaults to 'Managed by Terraform'.
         default_value: 'Managed by Terraform'
         required: false
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringIsNotEmpty'
       dnssecConfig.defaultKeySpecs: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       dnssecConfig.nonExistence: !ruby/object:Overrides::Terraform::PropertyOverride

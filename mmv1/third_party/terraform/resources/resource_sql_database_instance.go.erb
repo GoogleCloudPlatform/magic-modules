@@ -18,7 +18,8 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-const privateNetworkLinkRegex = "projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
+// Match fully-qualified or relative URLs
+const privateNetworkLinkRegex = "^(?:http(?:s)?://.+/)?projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
 
 var sqlDatabaseAuthorizedNetWorkSchemaElem *schema.Resource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
@@ -81,6 +82,7 @@ var (
 		"settings.0.insights_config.0.query_string_length",
 		"settings.0.insights_config.0.record_application_tags",
 		"settings.0.insights_config.0.record_client_address",
+		"settings.0.insights_config.0.query_plans_per_minute",
   }
 )
 
@@ -181,6 +183,12 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 		 							},
 								},
 							},
+						},
+						"time_zone": {
+							Type:             schema.TypeString,
+							ForceNew:         true,
+							Optional:         true,
+							Description:      `The timezone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.`,
 						},
 						"availability_type": {
 							Type:             schema.TypeString,
@@ -459,6 +467,14 @@ is set to true. Defaults to ZONAL.`,
 										Optional:     true,
 										AtLeastOneOf: insightsConfigKeys,
 										Description:  `True if Query Insights will record client address when enabled.`,
+									},
+									"query_plans_per_minute": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										ValidateFunc: validation.IntBetween(0, 20),
+										AtLeastOneOf: insightsConfigKeys,
+										Description:  `Number of query execution plans captured by Insights per minute for all queries combined. Between 0 and 20. Default to 5.`,
 									},
 								},
 							},
@@ -1046,6 +1062,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 		ActivationPolicy:         _settings["activation_policy"].(string),
 		ActiveDirectoryConfig:    expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
 		SqlServerAuditConfig:     expandSqlServerAuditConfig(_settings["sql_server_audit_config"].([]interface{})),
+		TimeZone:                 _settings["time_zone"].(string),
 		AvailabilityType:         _settings["availability_type"].(string),
 		Collation:                _settings["collation"].(string),
 		DataDiskSizeGb:           int64(_settings["disk_size"].(int)),
@@ -1247,6 +1264,7 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 		QueryStringLength:     int64(_insightsConfig["query_string_length"].(int)),
 		RecordApplicationTags: _insightsConfig["record_application_tags"].(bool),
 		RecordClientAddress:   _insightsConfig["record_client_address"].(bool),
+		QueryPlansPerMinute:   int64(_insightsConfig["query_plans_per_minute"].(int)),
 	}
 }
 
@@ -1565,6 +1583,7 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		"pricing_plan":               settings.PricingPlan,
 		"user_labels":                settings.UserLabels,
 		"password_validation_policy": settings.PasswordValidationPolicy,
+		"time_zone":                  settings.TimeZone,
 	}
 
 	if settings.ActiveDirectoryConfig != nil {
@@ -1799,6 +1818,7 @@ func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} 
 		"query_string_length":     insightsConfig.QueryStringLength,
 		"record_application_tags": insightsConfig.RecordApplicationTags,
 		"record_client_address":   insightsConfig.RecordClientAddress,
+		"query_plans_per_minute":  insightsConfig.QueryPlansPerMinute,
 	}
 
 	return []map[string]interface{}{data}
