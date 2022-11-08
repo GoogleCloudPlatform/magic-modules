@@ -885,18 +885,22 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 			np.UpgradeSettings.Strategy = v.(string)
 		}
 
-		if v, ok := upgradeSettingsConfig["max_surge"]; ok {
+		if d.HasChange(prefix + "upgrade_settings.0.max_surge") {
 			if np.UpgradeSettings.Strategy != "SURGE" {
 				return nil, fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
 			}
-			np.UpgradeSettings.MaxSurge = int64(v.(int))
+			if v, ok := upgradeSettingsConfig["max_surge"]; ok {
+				np.UpgradeSettings.MaxSurge = int64(v.(int))
+			}
 		}
 
-		if v, ok := upgradeSettingsConfig["max_unavailable"]; ok {
+		if d.HasChange(prefix + "upgrade_settings.0.max_unavailable") {
 			if np.UpgradeSettings.Strategy != "SURGE" {
 				return nil, fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
 			}
-			np.UpgradeSettings.MaxUnavailable = int64(v.(int))
+			if v, ok := upgradeSettingsConfig["max_unavailable"]; ok {
+				np.UpgradeSettings.MaxUnavailable = int64(v.(int))
+			}
 		}
 
 		if v, ok := upgradeSettingsConfig["blue_green_settings"]; ok && len(v.([]interface{})) > 0 {
@@ -1503,7 +1507,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 			if d.HasChange(prefix + "upgrade_settings.0.max_surge") {
 				if upgradeSettings.Strategy != "SURGE" {
-					return fmt.Errorf("%v Surge upgrade settings may not be changed when surge strategy is not enabled", v)
+					return fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
 				}
 				if v, ok := upgradeSettingsConfig["max_surge"]; ok {
 					upgradeSettings.MaxSurge = int64(v.(int))
@@ -1512,7 +1516,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 			if d.HasChange(prefix + "upgrade_settings.0.max_unavailable") {
 				if upgradeSettings.Strategy != "SURGE" {
-					return fmt.Errorf("%v Surge upgrade settings may not be changed when surge strategy is not enabled", v)
+					return fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
 				}
 				if v, ok := upgradeSettingsConfig["max_unavailable"]; ok {
 					upgradeSettings.MaxUnavailable = int64(v.(int))
