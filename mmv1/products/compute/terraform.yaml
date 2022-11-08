@@ -2353,24 +2353,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
         description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
-      defaultRouteAction.weightedBackendServices: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
-      defaultRouteAction.weightedBackendServices.backendService: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
-      defaultRouteAction.weightedBackendServices.headerAction.requestHeadersToRemove: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
-      defaultRouteAction.weightedBackendServices.headerAction.requestHeadersToAdd: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
-      defaultRouteAction.weightedBackendServices.headerAction.responseHeadersToRemove: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
-      defaultRouteAction.weightedBackendServices.headerAction.responseHeadersToAdd: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
+      defaultRouteAction.timeout: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       defaultRouteAction.retryPolicy.numRetries: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(1)'
       defaultRouteAction.retryPolicy.perTryTimeout.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0, 999999999)'
+      defaultRouteAction.weightedBackendServices.weight: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 1000)'
   ResourcePolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
