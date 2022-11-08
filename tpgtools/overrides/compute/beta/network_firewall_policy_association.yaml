@@ -18,12 +18,12 @@
 - type: IMPORT_FORMAT
   details:
     formats:
-    - projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getAssociation\\?name={{name}}
+    - "projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}"
     - "{{project}}/{{region}}/{{firewall_policy}}/{{name}}"
   location: region
 - type: IMPORT_FORMAT
   details:
     formats:
-    -  projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/getAssociation\\?name={{name}}
-    -  "{{project}}/{{firewall_policy}}/{{name}}"
+    - "projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}"
+    - "{{project}}/{{firewall_policy}}/{{name}}"
   location: global 
