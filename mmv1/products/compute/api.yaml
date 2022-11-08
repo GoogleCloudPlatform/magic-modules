@@ -12114,12 +12114,12 @@ objects:
               Specifies the retry policy associated with this route.
             at_least_one_of:
               - default_route_action.0.weighted_backend_services
-              - default_route_action.0.url_rewrite
-              - default_route_action.0.timeout
+              # - default_route_action.0.url_rewrite
+              # - default_route_action.0.timeout
               - default_route_action.0.retry_policy
               - default_route_action.0.request_mirror_policy
-              - default_route_action.0.cors_policy
-              - default_route_action.0.fault_injection_policy
+              # - default_route_action.0.cors_policy
+              # - default_route_action.0.fault_injection_policy
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'retryConditions'
@@ -12184,6 +12184,14 @@ objects:
               Specifies the policy on how requests intended for the route's backends are shadowed to a separate mirrored backend service.
               The load balancer does not wait for responses from the shadow service. Before sending traffic to the shadow service, the host / authority header is suffixed with -shadow.
               Not supported when the URL map is bound to a target gRPC proxy that has the validateForProxyless field set to true.
+            at_least_one_of:
+              - default_route_action.0.weighted_backend_services
+              # - default_route_action.0.url_rewrite
+              # - default_route_action.0.timeout
+              - default_route_action.0.retry_policy
+              - default_route_action.0.request_mirror_policy
+              # - default_route_action.0.cors_policy
+              # - default_route_action.0.fault_injection_policy
             properties:
               - !ruby/object:Api::Type::ResourceRef
                 name: 'backendService'
