@@ -12112,6 +12112,14 @@ objects:
             name: 'retryPolicy'
             description : |
               Specifies the retry policy associated with this route.
+            at_least_one_of:
+              - default_route_action.0.weighted_backend_services
+              - default_route_action.0.url_rewrite
+              - default_route_action.0.timeout
+              - default_route_action.0.retry_policy
+              - default_route_action.0.request_mirror_policy
+              - default_route_action.0.cors_policy
+              - default_route_action.0.fault_injection_policy
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'retryConditions'
@@ -12129,11 +12137,19 @@ objects:
                     - internal :  a retry is attempted if the gRPC status code in the response header is set to internal.
                     - resource-exhausted : a retry is attempted if the gRPC status code in the response header is set to resource-exhausted.
                     - unavailable : a retry is attempted if the gRPC status code in the response header is set to unavailable.
+                at_least_one_of:
+                  - default_route_action.0.retry_policy.0.retry_conditions
+                  - default_route_action.0.retry_policy.0.num_retries
+                  - default_route_action.0.retry_policy.0.per_try_timeout
               - !ruby/object:Api::Type::Integer
                 name: 'numRetries'
                 description: |
                   Specifies the allowed number retries. This number must be > 0. If not specified, defaults to 1.
                 default_value: 1
+                at_least_one_of:
+                  - default_route_action.0.retry_policy.0.retry_conditions
+                  - default_route_action.0.retry_policy.0.num_retries
+                  - default_route_action.0.retry_policy.0.per_try_timeout
               - !ruby/object:Api::Type::NestedObject
                 name: 'perTryTimeout'
                 description: |
@@ -12141,17 +12157,27 @@ objects:
 
                   If not specified, will use the timeout set in HttpRouteAction. If timeout in HttpRouteAction is not set,
                   will use the largest timeout among all backend services associated with the route.
+                at_least_one_of:
+                  - default_route_action.0.retry_policy.0.retry_conditions
+                  - default_route_action.0.retry_policy.0.num_retries
+                  - default_route_action.0.retry_policy.0.per_try_timeout
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'seconds'
                     description: |
                       Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
                       Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+                    at_least_one_of:
+                      - default_route_action.0.retry_policy.0.per_try_timeout.0.seconds
+                      - default_route_action.0.retry_policy.0.per_try_timeout.0.nanos
                   - !ruby/object:Api::Type::Integer
                     name: 'nanos'
                     description: |
                       Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are
                       represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+                    at_least_one_of:
+                      - default_route_action.0.retry_policy.0.per_try_timeout.0.seconds
+                      - default_route_action.0.retry_policy.0.per_try_timeout.0.nanos
           - !ruby/object:Api::Type::NestedObject
             name: 'requestMirrorPolicy'
             description: |
