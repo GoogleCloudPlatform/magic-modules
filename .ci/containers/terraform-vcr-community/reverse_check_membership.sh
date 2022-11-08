@@ -9,7 +9,7 @@ USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
 
 # This image runs tests for community PRs. This script reverses check_membership.sh to exit without running tests
 # for users for who tests are automatically run.
-if $(echo $USER | fgrep -wq -e megan07 -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson -e melinath -e ScottSuarez -e shuyama1 -e trodge); then
+if $(echo $USER | fgrep -wq -e megan07 -e slevenick -e c2thorn -e rileykarson -e melinath -e ScottSuarez -e shuyama1 -e trodge -e roaks3); then
 	echo "User is on the list, skipping."
 	exit 0
 else
