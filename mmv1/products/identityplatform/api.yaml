@@ -505,3 +505,95 @@ objects:
           Whether authentication is disabled for the tenant. If true, the users under
           the disabled tenant are not allowed to sign-in. Admins of the disabled tenant
           are not able to manage its users.
+  - !ruby/object:Api::Resource
+    name: ProjectDefaultConfig
+    base_url: 'projects/{{project}}/config'
+    self_link: 'projects/{{project}}/config'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      There is no persistent data associated with this resource.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name of the Config resource. Example: "projects/my-awesome-project/config"
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'signIn'
+        description: |
+         Configuration related to local sign in methods.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: email 
+            description: |
+              Configuration options related to authenticating a user by their email address.
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: enabled
+              description: |
+                Whether email auth is enabled for the project or not.
+            - !ruby/object:Api::Type::Boolean
+              name: 'passwordRequired'
+              description: |
+                Whether a password is required for email auth or not. If true, both an email and 
+                password must be provided to sign in. If false, a user may sign in via either 
+                email/password or email link.
+          - !ruby/object:Api::Type::NestedObject
+            name: phoneNumber 
+            description: |
+              Configuration options related to authenticated a user by their phone number.
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: enabled
+              description: |
+                Whether phone number auth is enabled for the project or not.
+            - !ruby/object:Api::Type::KeyValuePairs
+              name: 'testPhoneNumbers'
+              description: |
+                A map of <test phone number, fake code> that can be used for phone auth testing.
+          - !ruby/object:Api::Type::NestedObject
+            name: anonymous 
+            description: |
+              Configuration options related to authenticating an anonymous user.
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: enabled
+              required: true
+              description: |
+                Whether anonymous user auth is enabled for the project or not.
+          - !ruby/object:Api::Type::Boolean
+            name: allowDuplicateEmails 
+            description: |
+              Whether to allow more than one account to have the same email.
+          - !ruby/object:Api::Type::NestedObject
+            name: hashConfig
+            output: true 
+            description: |
+              Output only. Hash config information.
+            properties:
+            - !ruby/object:Api::Type::String
+              name: algorithm
+              output: true
+              description: |
+                Different password hash algorithms used in Identity Toolkit.
+            - !ruby/object:Api::Type::String
+              name: 'signerKey'
+              output: true
+              description: |
+                Signer key in base64.
+            - !ruby/object:Api::Type::String
+              name: 'saltSeparator'
+              output: true
+              description: |
+                Non-printable character to be inserted between the salt and plain text password in base64.
+            - !ruby/object:Api::Type::Integer
+              name: rounds
+              output: true
+              description: |
+                How many rounds for hash calculation. Used by scrypt and other similar password derivation algorithms.
+            - !ruby/object:Api::Type::Integer
+              name: 'memoryCost'
+              output: true
+              description: |
+                Memory cost for hash calculation. Used by scrypt and other similar password derivation algorithms. See https://tools.ietf.org/html/rfc7914 for explanation of field.
