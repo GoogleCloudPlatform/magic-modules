@@ -11956,6 +11956,8 @@ objects:
           - default_service
           - default_url_redirect
           - default_route_action.0.weighted_backend_services
+        conflicts:
+          - default_route_action
         description: |
           When none of the specified hostRules match, the request is redirected to a URL specified
           by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -12021,6 +12023,8 @@ objects:
               retained.
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultRouteAction'
+        conflicts:
+          - default_url_redirect
         description: |
           defaultRouteAction takes effect when none of the hostRules match. The load balancer performs advanced routing actions, such as URL rewrites and header transformations, before forwarding the request to the selected backend. If defaultRouteAction specifies any weightedBackendServices, defaultService must not be set. Conversely if defaultService is set, defaultRouteAction cannot contain any weightedBackendServices.
           Only one of defaultRouteAction or defaultUrlRedirect must be set.
