@@ -13,7 +13,7 @@ if config.BillingProject != "" {
 
 res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
 if err != nil {
-    return fmt.Errorf("sometihng went wrong trying to get the IdentityPlatformProjectDefaultConfig at %s", url)
+    return fmt.Errorf("something went wrong trying to get the IdentityPlatformProjectDefaultConfig at %s", url)
 }
 
 signIn := res["signIn"]
