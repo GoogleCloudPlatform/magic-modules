@@ -371,3 +371,97 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: "cpuCount"
             description: "The number of CPU's in the VM instance."
+  - !ruby/object:Api::Resource
+    name: "Backup"
+    self_link: "projects/{{project}}/locations/{{location}}/backups/{{backup_id}}"
+    base_url: "projects/{{project}}/locations/{{location}}/backups"
+    create_url: "projects/{{project}}/locations/{{location}}/backups?backupId={{backup_id}}"
+    update_verb: :PATCH
+    update_mask: true
+    min_version: beta
+    description: "An AlloyDB Backup."
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        "AlloyDB": "https://cloud.google.com/alloydb/docs/"
+      api: "https://cloud.google.com/alloydb/docs/reference/rest/v1beta/projects.locations.backups/create"
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: "name"
+        base_url: "{{op_id}}"
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 10
+          update_minutes: 10
+          delete_minutes: 10
+      result: !ruby/object:Api::OpAsync::Result
+        path: "response"
+      status: !ruby/object:Api::OpAsync::Status
+        path: "done"
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: "error"
+        message: "message"
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: "backupId"
+        required: true
+        input: true
+        url_param_only: true
+        description: |
+          The ID of the alloydb backup.
+      - !ruby/object:Api::Type::String
+        name: "location"
+        input: true
+        url_param_only: true
+        description: |
+          The location where the alloydb backup should reside.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "name"
+        output: true
+        description: |
+          Output only. The name of the backup resource with the format: * projects/{project}/locations/{region}/backups/{backupId}
+      - !ruby/object:Api::Type::String
+        name: "uid"
+        output: true
+        description: |
+          Output only. The system-generated UID of the resource. The UID is assigned when the resource is created, and it is retained until it is deleted.
+      - !ruby/object:Api::Type::String
+        name: "clusterName"
+        description: "The full resource name of the backup source cluster (e.g., projects/{project}/locations/{location}/clusters/{clusterId})."
+        required: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "labels"
+        description: "User-defined labels for the alloydb backup."
+      - !ruby/object:Api::Type::Time
+        name: "createTime"
+        description: |
+          Time the Backup was created in UTC.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: "updateTime"
+        description: |
+          Time the Backup was updated in UTC.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: "state"
+        output: true
+        description: |
+          The current state of the backup.
+      - !ruby/object:Api::Type::String
+        name: "description"
+        description: |
+          User-provided description of the backup.
+      - !ruby/object:Api::Type::Boolean
+        name: "reconciling"
+        output: true
+        description: |
+          If true, indicates that the service is actively updating the resource. This can happen due to user-triggered updates or system actions like failover or maintenance.
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: |
+          A hash of the resource.
+        output: true
