@@ -22,10 +22,15 @@ resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id
 			}
 		}
 		storage_config {
-			cloud_storage_options {
-				file_set {
-					url = "gs://mybucket/directory/"
+			big_query_options {
+				table_reference {
+				    project_id = "project"
+				    dataset_id = "dataset"
+				    table_id = "table_to_scan"
 				}
+
+				rows_limit = 1000
+				sample_method = "RANDOM_START"
 			}
 		}
 	}
