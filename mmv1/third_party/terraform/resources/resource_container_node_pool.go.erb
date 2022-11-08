@@ -937,7 +937,7 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 	return np, nil
 }
 
-func flattenStandardRolloutPolicy(rp *container.StandardRolloutPolicy) []map[string]interface{} {
+func flattenNodePoolStandardRolloutPolicy(rp *container.StandardRolloutPolicy) []map[string]interface{} {
 	if rp == nil {
 		return nil
 	}
@@ -951,26 +951,26 @@ func flattenStandardRolloutPolicy(rp *container.StandardRolloutPolicy) []map[str
 	}
 }
 
-func flattenBlueGreenSettings(bg *container.BlueGreenSettings) []map[string]interface{} {
+func flattenNodePoolBlueGreenSettings(bg *container.BlueGreenSettings) []map[string]interface{} {
 	if bg == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
 			"node_pool_soak_duration": bg.NodePoolSoakDuration,
-			"standard_rollout_policy": flattenStandardRolloutPolicy(bg.StandardRolloutPolicy),
+			"standard_rollout_policy": flattenNodePoolStandardRolloutPolicy(bg.StandardRolloutPolicy),
 		},
 	}
 }
 
-func flattenUpgradeSettings(us *container.UpgradeSettings) []map[string]interface{} {
+func flattenNodePoolUpgradeSettings(us *container.UpgradeSettings) []map[string]interface{} {
 	if us == nil {
 		return nil
 	}
 
 	upgradeSettings := make(map[string]interface{})
 
-	upgradeSettings["blue_green_settings"] = flattenBlueGreenSettings(us.BlueGreenSettings)
+	upgradeSettings["blue_green_settings"] = flattenNodePoolBlueGreenSettings(us.BlueGreenSettings)
 	upgradeSettings["max_surge"] = us.MaxSurge
 	upgradeSettings["max_unavailable"] = us.MaxUnavailable
 
@@ -1065,7 +1065,7 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *container.NodeP
 	}
 
 	if np.UpgradeSettings != nil {
-		nodePool["upgrade_settings"] = flattenUpgradeSettings(np.UpgradeSettings)
+		nodePool["upgrade_settings"] = flattenNodePoolUpgradeSettings(np.UpgradeSettings)
 	} else {
 		delete(nodePool, "upgrade_settings")
 	}
