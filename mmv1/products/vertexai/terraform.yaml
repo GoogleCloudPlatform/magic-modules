@@ -118,6 +118,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      monitoringConfig.snapshotAnalysis.monitoringInterval: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
       pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
