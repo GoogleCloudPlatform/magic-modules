@@ -1,4 +1,5 @@
 updates:
+- resource: ./regional_update.tf.tmpl
 variables:
 - name: association
   type: resource_name
