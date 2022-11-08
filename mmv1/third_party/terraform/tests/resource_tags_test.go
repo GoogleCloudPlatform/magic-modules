@@ -419,7 +419,7 @@ func testAccTagsTagKeyIamBinding(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"role":          "roles/viewer",
+		"role":          "roles/user",
 		"org_id":        getTestOrgFromEnv(t),
 
 		"short_name": "tf-test-key-" + randString(t, 10),
@@ -445,7 +445,7 @@ func testAccTagsTagKeyIamMember(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"role":          "roles/viewer",
+		"role":          "roles/user",
 		"org_id":        getTestOrgFromEnv(t),
 
 		"short_name": "tf-test-key-" + randString(t, 10),
@@ -468,7 +468,7 @@ func testAccTagsTagKeyIamPolicy(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"role":          "roles/viewer",
+		"role":          "roles/user",
 		"org_id":        getTestOrgFromEnv(t),
 
 		"short_name": "tf-test-key-" + randString(t, 10),
@@ -586,7 +586,7 @@ func testAccTagsTagValueIamBinding(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"role":          "roles/viewer",
+		"role":          "roles/user",
 		"org_id":        getTestOrgFromEnv(t),
 
 		"key_short_name":   "tf-test-key-" + randString(t, 10),
@@ -613,7 +613,7 @@ func testAccTagsTagValueIamMember(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"role":          "roles/viewer",
+		"role":          "roles/user",
 		"org_id":        getTestOrgFromEnv(t),
 
 		"key_short_name":   "tf-test-key-" + randString(t, 10),
@@ -637,7 +637,7 @@ func testAccTagsTagValueIamPolicy(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"role":          "roles/viewer",
+		"role":          "roles/user",
 		"org_id":        getTestOrgFromEnv(t),
 
 		"key_short_name":   "tf-test-key-" + randString(t, 10),
