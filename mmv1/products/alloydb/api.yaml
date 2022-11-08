@@ -236,3 +236,139 @@ objects:
           - !ruby/object:Api::Type::String
             name: "sourceType"
             description: "Type of migration source."
+  - !ruby/object:Api::Resource
+    name: "Instance"
+    self_link: "{{cluster}}/instances/{{instance_id}}"
+    base_url: "{{cluster}}/instances?instanceId={{instance_id}}"
+    update_verb: :PATCH
+    update_mask: true
+    min_version: beta
+    description: "A managed alloydb cluster instance."
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        "AlloyDB": "https://cloud.google.com/alloydb/docs/"
+      api: "https://cloud.google.com/alloydb/docs/reference/rest/v1beta/projects.locations.clusters.instances/create"
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: "name"
+        base_url: "{{op_id}}"
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 10
+          update_minutes: 10
+          delete_minutes: 10
+      result: !ruby/object:Api::OpAsync::Result
+        path: "response"
+      status: !ruby/object:Api::OpAsync::Status
+        path: "done"
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: "error"
+        message: "message"
+      include_project: true
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'cluster'
+        description: |
+          Identifies the alloydb cluster. Must be in the format
+          'projects/{project}/locations/{location}/clusters/{cluster_id}'
+        required: true
+        input: true
+        resource: 'Cluster'
+        imports: 'name'
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: "instanceId"
+        required: true
+        input: true
+        url_param_only: true
+        description: |
+          The ID of the alloydb instance.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "name"
+        output: true
+        description: |
+          The name of the instance resource.
+      - !ruby/object:Api::Type::Time
+        name: "createTime"
+        description: |
+          Time the Instance was created in UTC.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: "updateTime"
+        description: |
+          Time the Instance was updated in UTC.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: "uid"
+        output: true
+        description: |
+          The system-generated UID of the resource.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "labels"
+        description: "User-defined labels for the alloydb instance."
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "annotations"
+        description: "Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels."
+      - !ruby/object:Api::Type::String
+        name: "state"
+        output: true
+        description: |
+          The current state of the alloydb instance.
+      - !ruby/object:Api::Type::String
+        name: "displayName"
+        description: |
+          User-settable and human-readable display name for the Instance.
+      - !ruby/object:Api::Type::String
+        name: "gceZone"
+        description: |
+          The Compute Engine zone that the instance should serve from, per https://cloud.google.com/compute/docs/regions-zones This can ONLY be specified for ZONAL instances. If present for a REGIONAL instance, an error will be thrown. If this is absent for a ZONAL instance, instance is created in a random zone with available capacity.
+      - !ruby/object:Api::Type::Boolean
+        name: "reconciling"
+        output: true
+        description: |
+          Set to true if the current state of Instance does not match the user's intended state, and the service is actively updating the resource to reconcile them. This can happen due to user-triggered updates or system actions like failover or maintenance.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "databaseFlags"
+        description: "Database flags. Set at instance level. * They are copied from primary instance on read instance creation. * Read instances can set new or override existing flags that are relevant for reads, e.g. for enabling columnar cache on a read instance. Flags set on read instance may or may not be present on primary."
+      - !ruby/object:Api::Type::Enum
+        name: "availabilityType"
+        description: |
+          Availability type of an Instance. Defaults to REGIONAL for both primary and read instances. Note that primary and read instances can have different availability types.
+        values:
+          - :AVAILABILITY_TYPE_UNSPECIFIED
+          - :ZONAL
+          - :REGIONAL
+      - !ruby/object:Api::Type::Enum
+        name: "instanceType"
+        required: true
+        input: true
+        description: |
+          The type of the instance.
+        values:
+          - :PRIMARY
+          - :READ_POOL
+      - !ruby/object:Api::Type::String
+        name: "ipAddress"
+        output: true
+        description: |
+          The IP address for the Instance. This is the connection endpoint for an end-user application.
+      - !ruby/object:Api::Type::NestedObject
+        name: "readPoolConfig"
+        description: "Read pool specific config."
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: "nodeCount"
+            description: "Read capacity, i.e. number of nodes in a read pool instance."
+      - !ruby/object:Api::Type::NestedObject
+        name: "machineConfig"
+        description: "Configurations for the machines that host the underlying database engine."
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: "cpuCount"
+            input: true
+            description: "The number of CPU's in the VM instance."
