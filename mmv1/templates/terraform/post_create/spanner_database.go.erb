@@ -21,7 +21,9 @@ if retentionPeriodOk || ddlOk {
 
 	if ddlOk {
 		for i := 0; i < len(ddlStatements); i++ {
-			updateDdls = append(updateDdls, ddlStatements[i].(string))
+			if ddlStatements[i] != nil {
+				updateDdls = append(updateDdls, ddlStatements[i].(string))
+			}
 		}
 	}
 
