@@ -103,6 +103,10 @@ objects:
         name: 'enableStackdriverMonitoring'
         description: |
           Option to enable Stackdriver Monitoring.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableRbac'
+        description: |
+          Option to enable granular role-based access control.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
