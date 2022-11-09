@@ -1081,7 +1081,6 @@ func flattenBucketLifecycleRuleAction(action *storage.BucketLifecycleRuleAction)
 
 func flattenBucketLifecycleRuleCondition(condition *storage.BucketLifecycleRuleCondition) map[string]interface{} {
 	ruleCondition := map[string]interface{}{
-		"age":                        int(*condition.Age),
 		"created_before":             condition.CreatedBefore,
 		"matches_storage_class":      convertStringArrToInterface(condition.MatchesStorageClass),
 		"num_newer_versions":         int(condition.NumNewerVersions),
@@ -1091,6 +1090,9 @@ func flattenBucketLifecycleRuleCondition(condition *storage.BucketLifecycleRuleC
 		"noncurrent_time_before":     condition.NoncurrentTimeBefore,
 		"matches_prefix":             convertStringArrToInterface(condition.MatchesPrefix),
 		"matches_suffix":             convertStringArrToInterface(condition.MatchesSuffix),
+	}
+	if condition.Age != nil {
+		ruleCondition["age"] = int(*condition.Age)
 	}
 	if condition.IsLive == nil {
 		ruleCondition["with_state"] = "ANY"

@@ -1,0 +1,39 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  AgentPool: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'agent_pool_basic'
+        primary_resource_id: 'example'
+        # Skip generating this test as the example is covered in resource_storage_transfer_agent_pool_test.go
+        skip_test: true
+        vars:
+          agent-pool-name: 'agent-pool-example'
+        test_env_vars:
+          project_id: :PROJECT_NAME
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 30
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/agent_pool.go.erb
+      post_create: templates/terraform/post_create/agent_pool.go.erb
+      pre_update: templates/terraform/pre_update/agent_pool.go.erb
+      post_import: templates/terraform/post_import/agent_pool.go.erb
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

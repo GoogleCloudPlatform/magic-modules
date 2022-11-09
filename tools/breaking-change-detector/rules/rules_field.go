@@ -108,7 +108,7 @@ func fieldRule_BecomingComputedOnly_func(old, new *schema.Schema, mc MessageCont
 
 var fieldRule_OptionalComputedToOptional = FieldRule{
 	name:        "Optional and Computed to Optional",
-	definition:  "A field cannot go from Computed + Optional to Optional. On a sequential "apply" the terraform state will have the previously computed value. The value won't be present in the config, thus ultimately causing a diff.",
+	definition:  "A field cannot go from Computed + Optional to Optional. On a sequential `apply` the terraform state will have the previously computed value. The value won't be present in the config, thus ultimately causing a diff.",
 	message:     "Field {{field}} transitioned from optional+computed to optional {{resource}}",
 	identifier:  "field-oc-to-c",
 	isRuleBreak: fieldRule_OptionalComputedToOptional_func,
