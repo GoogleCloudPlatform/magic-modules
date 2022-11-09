@@ -839,7 +839,7 @@ resource "google_cloud_run_service" "default" {
 }
 data "google_iam_policy" "admin" {
 	binding {
-	  role = "roles/run.services.createTagBinding"
+	  role = "roles/run.createTagBinding"
 	  members = [
 		"user:admin@hashicorptest.com",
 	  ]
