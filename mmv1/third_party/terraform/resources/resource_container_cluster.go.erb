@@ -673,7 +673,6 @@ func resourceContainerCluster() *schema.Resource {
 												},
 												"upgrade_options": {
 													Type:        schema.TypeList,
-													Optional:    true,
 													Computed:    true,
 													Description: `Specifies the Auto Upgrade knobs for the node pool.`,
 													Elem: &schema.Resource{
@@ -3933,7 +3932,7 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 		ImageType:      	config["image_type"].(string),
 		BootDiskKmsKey: 	config["boot_disk_kms_key"].(string),
 		UpgradeSettings:	expandUpgradeSettings(config["upgrade_settings"]),
-		Management:         expandManagement(config["management"]),
+		Management:			expandManagement(config["management"]),
 	}
 
 	if v, ok := config["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {
