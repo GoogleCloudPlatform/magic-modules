@@ -146,18 +146,6 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 	iface := &compute.RouterInterface{Name: ifaceName}
 
 	if riVal, ok := d.GetOk("redundant_interface"); ok {
-		ifaceFound := false	
-		for _, iface := range ifaces {
-			if iface.Name == riVal {
-				ifaceFound = true
-				break	
-			}
-		}
-		if !ifaceFound {
-			d.SetId("")
-			return fmt.Errorf("Router %s does not have interface named %s", routerName, riVal)
-		}
-
 		iface.RedundantInterface = riVal.(string)
 	}
 
