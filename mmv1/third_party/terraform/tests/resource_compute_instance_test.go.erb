@@ -5,6 +5,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+<% if version == "ga" -%>
+<% else -%>
+	"reflect"
+<% end -%>
 	"regexp"
 	"sort"
 	"strconv"
@@ -2236,6 +2240,12 @@ func TestAccComputeInstance_spotVM(t *testing.T) {
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", randString(t, 10))
+<% unless version == 'ga' -%>
+	var expectedMaxRunDuration = compute.Duration{}
+	// Define in testAccComputeInstance_spotVM
+	expectedMaxRunDuration.Nanos = 123
+	expectedMaxRunDuration.Seconds = 60
+<% end -%>
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -2248,6 +2258,9 @@ func TestAccComputeInstance_spotVM(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceTerminationAction(&instance, "STOP"),
+<% unless version == 'ga' -%>
+					testAccCheckComputeInstanceMaxRunDuration(&instance, expectedMaxRunDuration),
+<% end -%>
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -2260,7 +2273,12 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", randString(t, 10))
-
+<% unless version == 'ga' -%>
+	// Define in testAccComputeInstance_spotVM
+	var expectedMaxRunDuration = compute.Duration{}
+	expectedMaxRunDuration.Nanos = 123
+	expectedMaxRunDuration.Seconds = 60
+<% end -%>
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -2279,6 +2297,11 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+<% unless version == 'ga' -%>
+					testAccCheckComputeInstanceMaxRunDuration(&instance, expectedMaxRunDuration),
+<% end -%>
+
+
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -2602,6 +2625,26 @@ func testAccCheckComputeResourcePolicy(instance *compute.Instance, scheduleName 
 		return nil
 	}
 }
+
+<% unless version == 'ga' -%>
+func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, instanceMaxRunDurationWant compute.Duration) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instance == nil {
+			return fmt.Errorf("instance is nil")
+		}
+		if instance.Scheduling == nil {
+			return fmt.Errorf("no scheduling")
+		}
+
+		if !reflect.DeepEqual(*instance.Scheduling.MaxRunDuration, instanceMaxRunDurationWant) {
+			return fmt.Errorf("got the wrong instance max run duration action: have: %#v; want: %#v",instance.Scheduling.MaxRunDuration, instanceMaxRunDurationWant)
+		}
+
+		return nil
+	}
+}
+<% end -%>
+
 
 func testAccCheckComputeInstanceTerminationAction(instance *compute.Instance, instanceTerminationActionWant string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -6315,8 +6358,13 @@ resource "google_compute_instance" "foobar" {
     automatic_restart = false
     preemptible = true
 		instance_termination_action = "STOP"
+<% unless version == 'ga' -%>
+		max_run_duration {
+			nanos = 123
+			seconds = 60
+		}
+<% end -%>
   }
-
 }
 `, instance)
 }

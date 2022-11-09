@@ -1102,7 +1102,7 @@ func TestAccComputeInstanceTemplate_managedEnvoy(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-		},
+		}, 
 	})
 }
 
@@ -1110,6 +1110,12 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
+<% unless version == 'ga' -%>
+	var expectedMaxRunDuration = compute.Duration{}
+	// Define in testAccComputeInstanceTemplate_spot
+	expectedMaxRunDuration.Nanos = 123
+	expectedMaxRunDuration.Seconds = 60
+<% end -%>
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1125,6 +1131,9 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 					testAccCheckComputeInstanceTemplatePreemptible(&instanceTemplate, true),
 					testAccCheckComputeInstanceTemplateProvisioningModel(&instanceTemplate, "SPOT"),
 					testAccCheckComputeInstanceTemplateInstanceTerminationAction(&instanceTemplate, "STOP"),
+<% unless version == 'ga' -%>
+					testAccCheckComputeInstanceTemplateMaxRunDuration(&instanceTemplate, expectedMaxRunDuration),
+<% end -%>
 				),
 			},
 			{
@@ -1300,6 +1309,20 @@ func testAccCheckComputeInstanceTemplateInstanceTerminationAction(instanceTempla
 		return nil
 	}
 }
+
+
+<% unless version == 'ga' -%>
+func testAccCheckComputeInstanceTemplateMaxRunDuration(instanceTemplate *compute.InstanceTemplate, instance_max_run_duration_want compute.Duration) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if !reflect.DeepEqual(*instanceTemplate.Properties.Scheduling.MaxRunDuration, instance_max_run_duration_want) {
+			return fmt.Errorf("gExpected instance_termination_action: %#v; got %#v", instance_max_run_duration_want, instanceTemplate.Properties.Scheduling.MaxRunDuration)
+		}
+
+		return nil
+	}
+}
+<% end -%>
+
 
 
 func testAccCheckComputeInstanceTemplateAutomaticRestart(instanceTemplate *compute.InstanceTemplate, automaticRestart bool) resource.TestCheckFunc {
@@ -2874,6 +2897,13 @@ resource "google_compute_instance_template" "foobar" {
     automatic_restart = false
     provisioning_model = "SPOT"
     instance_termination_action = "STOP"
+<% unless version == 'ga' -%>
+		max_run_duration {
+			nanos = 123
+			seconds = 60
+		}
+<% end -%>
+
   }
 
   metadata = {
