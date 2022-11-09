@@ -116,6 +116,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "true"
           bucket_id: "my-bucket"
           destination_connection_profile_id: "destination-profile"
+          skip_docs: true
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_full"
+        primary_resource_id: "default"
+        vars:
+          stream_id: "my-stream"
+          private_connection_id: "my-connection"
+          network_name: "my-network"
+          source_connection_profile_id: "source-profile"
+          database_instance_name: "my-instance"
+          deletion_protection: "true"
+          bucket_id: "my-bucket"
+          destination_connection_profile_id: "destination-profile"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
