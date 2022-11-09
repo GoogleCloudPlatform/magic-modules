@@ -189,6 +189,63 @@ resource "google_dialogflow_cx_environment" "development" {
 `, context)
 }
 
+func TestAccDialogflowCXEnvironment_dialogflowcxEnvironmentRegional(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDialogflowCXEnvironmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowCXEnvironment_dialogflowcxEnvironmentFRegional(context),
+			},
+			{
+				ResourceName:            "google_dialogflow_cx_environment.development",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+		},
+	})
+}
+
+func testAccDialogflowCXEnvironment_dialogflowcxEnvironmentFRegional(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_dialogflow_cx_agent" "agent" {
+	display_name = "issue12880"
+	location = "europe-west2"
+	default_language_code = "en"
+	supported_language_codes = ["fr","de","es"]
+	time_zone = "Europe/London"
+	description = "CX BOT Agent"
+	enable_stackdriver_logging = true
+		speech_to_text_settings {
+			enable_speech_adaptation = true
+		}
+	}
+
+resource "google_dialogflow_cx_version" "version_1" {
+	parent       = google_dialogflow_cx_agent.agent.start_flow
+	display_name = "1.0.0"
+	description  = "version 1.0.0"
+}
+
+resource "google_dialogflow_cx_environment" "development" {
+	parent       = google_dialogflow_cx_agent.agent.id
+	display_name = "Development"
+	description  = "Development Environment"
+	version_configs {
+		version = google_dialogflow_cx_version.version_1.id
+	}
+}
+`, context)
+}
+
 func testAccCheckDialogflowCXEnvironmentDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
