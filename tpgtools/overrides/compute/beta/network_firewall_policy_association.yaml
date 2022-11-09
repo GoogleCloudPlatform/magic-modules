@@ -13,8 +13,12 @@
   field: location
 - type: CUSTOM_ID
   details:
-    id: projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}
+    id: "projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}"
   location: region
+- type: CUSTOM_ID
+  details:
+    id: "projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}"
+  location: global  
 - type: IMPORT_FORMAT
   details:
     formats:
