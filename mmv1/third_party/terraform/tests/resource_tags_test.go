@@ -882,7 +882,6 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 				return fmt.Errorf("TagsTagBinding still exists at %s", url)
 			}
 		}
-
 		return nil
 	}
 }
