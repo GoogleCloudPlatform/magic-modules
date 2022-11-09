@@ -328,7 +328,6 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	t.Parallel()
 
@@ -367,7 +366,6 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 	t.Parallel()
@@ -3813,7 +3811,6 @@ resource "google_container_cluster" "confidential_nodes" {
 `, clusterName, npName)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withILBSubSetting(clusterName string, npName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
@@ -3857,7 +3854,6 @@ resource "google_container_cluster" "confidential_nodes" {
 }
 `, clusterName, npName)
 }
-<% end -%>
 
 func testAccContainerCluster_withNetworkPolicyEnabled(clusterName string) string {
 	return fmt.Sprintf(`
