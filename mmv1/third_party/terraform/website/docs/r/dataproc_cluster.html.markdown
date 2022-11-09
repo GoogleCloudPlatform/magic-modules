@@ -430,6 +430,8 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
 * `shielded_instance_config` (Optional) Shielded Instance Config for clusters using [Compute Engine Shielded VMs](https://cloud.google.com/security/shielded-cloud/shielded-vm).
 
+* `confidential_instance_config` (Optional) Confidential Instance Config for clusters using [Confidential VMs](https://cloud.google.com/compute/confidential-vm/docs).
+
 - - -
 
 
@@ -454,7 +456,19 @@ cluster_config{
 * `enable_integrity_monitoring` - (Optional) Defines whether instances have integrity monitoring enabled.
 
 - - -
+The `cluster_config.gce_cluster_config.confidential_instance_config` block supports:
 
+```hcl
+cluster_config{
+  gce_cluster_config{
+    confidential_instance_config{
+      enable_confidential_compute = true
+    }
+  }
+}
+```
+* `enable_confidential_compute` - (Optional) Defines whether the instance should have confidential compute enabled.
+- - -
 <a name="nested_master_config"></a>The `cluster_config.master_config` block supports:
 
 ```hcl
