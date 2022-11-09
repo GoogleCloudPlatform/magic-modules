@@ -837,13 +837,20 @@ resource "google_cloud_run_service" "default" {
 	  latest_revision = true
 	}
 }
-
-resource "google_cloud_run_service_iam_member" "member" {
+data "google_iam_policy" "admin" {
+	binding {
+	  role = "roles/run.services.createTagBinding"
+	  members = [
+		"user:admin@hashicorptest.com",
+	  ]
+	}
+  }
+  
+resource "google_cloud_run_service_iam_policy" "policy" {
 	location = google_cloud_run_service.default.location
 	project = google_cloud_run_service.default.project
 	service = google_cloud_run_service.default.name
-	role = "roles/run.services.createTagBinding"
-	member = "user:admin@hashicorptest.com"
+	policy_data = data.google_iam_policy.admin.policy_data
 }
 
 resource "google_tags_location_tag_binding" "binding" {
