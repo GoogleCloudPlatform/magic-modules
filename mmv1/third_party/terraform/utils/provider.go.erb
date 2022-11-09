@@ -416,7 +416,9 @@ end     # products.each do
 				<% unless version == 'ga' -%>
 				"google_dataflow_flex_template_job":            resourceDataflowFlexTemplateJob(),
 				<% end -%>
+				<% unless version == 'beta' -%>
 				"google_dataproc_cluster":                      resourceDataprocCluster(),
+				<% end -%>
 				"google_dataproc_job":                          resourceDataprocJob(),
 				"google_dns_record_set":                        resourceDnsRecordSet(),
 				"google_endpoints_service":                     resourceEndpointsService(),
