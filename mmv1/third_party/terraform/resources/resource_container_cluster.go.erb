@@ -3932,7 +3932,7 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 		ImageType:      	config["image_type"].(string),
 		BootDiskKmsKey: 	config["boot_disk_kms_key"].(string),
 		UpgradeSettings:	expandUpgradeSettings(config["upgrade_settings"]),
-		Management:			expandManagement(config["management"]),
+		Management:		expandManagement(config["management"]),
 	}
 
 	if v, ok := config["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {
