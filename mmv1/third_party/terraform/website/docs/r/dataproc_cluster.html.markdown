@@ -456,6 +456,8 @@ cluster_config{
 * `enable_integrity_monitoring` - (Optional) Defines whether instances have integrity monitoring enabled.
 
 - - -
+
+
 The `cluster_config.gce_cluster_config.confidential_instance_config` block supports:
 
 ```hcl
@@ -482,6 +484,7 @@ cluster_config {
       boot_disk_type    = "pd-ssd"
       boot_disk_size_gb = 30
       num_local_ssds    = 1
+      local_ssd_interface = "scsi"
     }
   }
 }
@@ -516,6 +519,8 @@ cluster_config {
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each master cluster node. Defaults to 0.
 
+  * `local_ssd_interface` - (Optional) Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).
+
 * `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
 
     * `accelerator_type` - (Required) The short name of the accelerator type to expose to this instance. For example, `nvidia-tesla-k80`.
@@ -541,6 +546,7 @@ cluster_config {
       boot_disk_type    = "pd-standard"
       boot_disk_size_gb = 30
       num_local_ssds    = 1
+      local_ssd_interface = "scsi"
     }
   }
 }
@@ -576,6 +582,8 @@ cluster_config {
     * `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each worker cluster node. Defaults to 0.
 
+    * `local_ssd_interface` - (Optional) Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface),"nvme" (Non-Volatile Memory Express).
+
 * `image_uri` (Optional) The URI for the image to use for this worker.  See [the guide](https://cloud.google.com/dataproc/docs/guides/dataproc-images)
     for more information.
 
@@ -602,6 +610,7 @@ cluster_config {
       boot_disk_type    = "pd-standard"
       boot_disk_size_gb = 30
       num_local_ssds    = 1
+      local_ssd_interface = "scsi"
     }
   }
 }
@@ -631,6 +640,8 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each preemptible worker node. Defaults to 0.
+
+  * `local_ssd_interface` - (Optional) Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).
 
 - - -
 
