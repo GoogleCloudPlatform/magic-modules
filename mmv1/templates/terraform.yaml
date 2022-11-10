@@ -1,0 +1,9 @@
+# Base terraform.yaml for product folders that have been converted over to the 
+# per-resource format.
+--- !ruby/object:Provider::Terraform::Config
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
