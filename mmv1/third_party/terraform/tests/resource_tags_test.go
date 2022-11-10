@@ -808,6 +808,15 @@ resource "google_project" "project" {
 	org_id     = "%{org_id}"
 }
 
+resource "google_organization_iam_binding" "organization" {
+	org_id  = google_project.project.org_id
+	role    = "roles/resourcemanager.tagUser"
+  
+	members = [
+	  "user:admin@hashicorptest.com",
+	]
+  }
+
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "keyname%{random_suffix}"
@@ -839,7 +848,7 @@ resource "google_cloud_run_service" "default" {
 }
   
 resource "google_tags_location_tag_binding" "binding" {
-	parent = "//run.googleapis.com/projects/${google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
+	parent = "//run.googleapis.com/projects/${google_project.project.number}/locations/${google_cloud_run_service.project.location}/services/${google_cloud_run_service.default.name}"
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
 	location = "us-central1"
 }
