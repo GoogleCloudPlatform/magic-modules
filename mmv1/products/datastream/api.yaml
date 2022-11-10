@@ -1044,8 +1044,6 @@ objects:
                       - GZIP
           - !ruby/object:Api::Type::NestedObject
             name: 'bigqueryDestinationConfig'
-            allow_empty_object: true
-            send_empty_value: true
             exactly_one_of:
               - destination_config.0.gcs_destination_config
               - destination_config.0.bigquery_destination_config
