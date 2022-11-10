@@ -28,7 +28,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "billing_project"},
 			},
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelTtl(context, "8600s"),
@@ -37,7 +37,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "billing_project"},
 			},
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelTtl(context, "86400s"),
@@ -46,7 +46,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "billing_project"},
 			},
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelRetainedReleaseCount(context, 30),
@@ -55,7 +55,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "billing_project"},
 			},
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelRetainedReleaseCount(context, 20),
@@ -64,7 +64,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "billing_project"},
 			},
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelLabels(context),
@@ -73,7 +73,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "billing_project"},
 			},
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelMultipleFields(context),
@@ -82,7 +82,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "billing_project"},
 			},
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelBasic(context),
@@ -91,7 +91,7 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelUpdate(t *testing.T) {
 				ResourceName:            "google_firebase_hosting_channel.update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id"},
+				ImportStateVerifyIgnore: []string{"ttl", "site_id", "channel_id", "billing_project"},
 			},
 		},
 	})
@@ -107,7 +107,7 @@ resource "google_firebase_hosting_site" "default" {
 
 resource "google_firebase_hosting_channel" "update" {
   provider = google-beta
-  project  = "%{project_id}"
+  billing_project  = "%{project_id}"
   site_id = google_firebase_hosting_site.default.site_id
   channel_id = "tf-test-channel-update%{random_suffix}"
 }
@@ -125,7 +125,7 @@ resource "google_firebase_hosting_site" "default" {
 
 resource "google_firebase_hosting_channel" "update" {
   provider = google-beta
-  project  = "%{project_id}"
+  billing_project  = "%{project_id}"
   site_id = google_firebase_hosting_site.default.site_id
   channel_id = "tf-test-channel-update%{random_suffix}"
   ttl = "%{ttl}"
@@ -144,7 +144,7 @@ resource "google_firebase_hosting_site" "default" {
 
 resource "google_firebase_hosting_channel" "update" {
   provider = google-beta
-  project  = "%{project_id}"
+  billing_project  = "%{project_id}"
   site_id = google_firebase_hosting_site.default.site_id
   channel_id = "tf-test-channel-update%{random_suffix}"
   ttl = "86400s"
@@ -163,7 +163,7 @@ resource "google_firebase_hosting_site" "default" {
 
 resource "google_firebase_hosting_channel" "update" {
   provider = google-beta
-  project  = "%{project_id}"
+  billing_project  = "%{project_id}"
   site_id = google_firebase_hosting_site.default.site_id
   channel_id = "tf-test-channel-update%{random_suffix}"
   ttl = "86400s"
@@ -185,7 +185,7 @@ resource "google_firebase_hosting_site" "default" {
 
 resource "google_firebase_hosting_channel" "update" {
   provider = google-beta
-  project  = "%{project_id}"
+  billing_project  = "%{project_id}"
   site_id = google_firebase_hosting_site.default.site_id
   channel_id = "tf-test-channel-update%{random_suffix}"
   ttl = "86400s"
