@@ -4,16 +4,19 @@ package google
 <% unless version == 'ga' -%>
 
 import (
+    "fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 )
 
 func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 	t.Parallel()
 
+    random_suffix := randString(t, 10)
 	context := map[string]interface{}{
 		"org_id":        getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"random_suffix": random_suffix,
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -48,7 +51,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
             {
 			    Config: testAccIAMWorkforcePoolWorkforcePoolProvider_destroy(context),
 			    Check: resource.ComposeTestCheckFunc(
-			            testAccCheckIAMWorkforcePoolWorkforcePoolProviderDestroyProducer(t),
+			            testAccCheckIAMWorkforcePoolWorkforcePoolProviderAccess(t, random_suffix),
 			    ),
 			},
 		},
@@ -58,9 +61,10 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 func TestAccIAMWorkforcePoolWorkforcePoolProvider_saml(t *testing.T) {
 	t.Parallel()
 
+    random_suffix := randString(t, 10)
 	context := map[string]interface{}{
 		"org_id":        getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"random_suffix": random_suffix,
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -95,11 +99,39 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_saml(t *testing.T) {
             {
 			    Config: testAccIAMWorkforcePoolWorkforcePoolProvider_destroy(context),
 			    Check: resource.ComposeTestCheckFunc(
-			            testAccCheckIAMWorkforcePoolWorkforcePoolProviderDestroyProducer(t),
+			            testAccCheckIAMWorkforcePoolWorkforcePoolProviderAccess(t, random_suffix),
 			    ),
 			},
 		},
 	})
+}
+
+func testAccCheckIAMWorkforcePoolWorkforcePoolProviderAccess(t *testing.T, random_suffix string) resource.TestCheckFunc {
+    return func(s *terraform.State) error {
+        pool_resource_name := "google_iam_workforce_pool.my_pool"
+        pool_rs, ok := s.RootModule().Resources[pool_resource_name]
+		if !ok {
+			return fmt.Errorf("Resource %s Not found", pool_resource_name)
+		}
+        config := googleProviderConfig(t)
+
+        pool_url, err := replaceVarsForTest(config, pool_rs, "{{IAMWorkforcePoolBasePath}}locations/{{location}}/workforcePools/{{workforce_pool_id}}")
+        if err != nil {
+          return err
+        }
+
+        url := fmt.Sprintf("%s/providers/my-provider-%s", pool_url, random_suffix)
+        res, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
+        if err != nil {
+          return nil
+        }
+
+        if v := res["state"]; v == "DELETED" {
+        	return nil
+        }
+
+        return fmt.Errorf("IAMWorkforcePoolProvider still exists at %s", url)
+    }
 }
 
 func testAccIAMWorkforcePoolWorkforcePoolProvider_oidc_full(context map[string]interface{}) string {

@@ -190,7 +190,7 @@ objects:
           * ACTIVE: The provider is active and may be used to validate authentication credentials.
           * DELETED: The provider is soft-deleted. Soft-deleted providers are permanently
             deleted after approximately 30 days. You can restore a soft-deleted provider using
-            [UndeleteWorkforcePoolProvider][WorkforcePools.UndeleteWorkforcePoolProvider].
+            [providers.undelete](https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers/undelete#google.iam.admin.v1.WorkforcePools.UndeleteWorkforcePoolProvider).
         output: true
         values:
           - :STATE_UNSPECIFIED
