@@ -848,7 +848,7 @@ resource "google_cloud_run_service" "default" {
 }
   
 resource "google_tags_location_tag_binding" "binding" {
-	parent = "//run.googleapis.com/projects/${google_project.project.number}/locations/${google_project.project.location}/services/${google_cloud_run_service.default.name}"
+	parent = "//run.googleapis.com/projects/${google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
 	location = "us-central1"
 }
