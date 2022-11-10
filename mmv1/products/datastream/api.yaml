@@ -621,6 +621,25 @@ objects:
                 description: |
                   Maximum number of concurrent CDC tasks. The number should be non negative.
                   If not set (or set to 0), the system's default value will be used.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'dropLargeObjects'
+                allow_empty_object: true
+                send_empty_value: true
+                conflicts:
+                  - oracle_source_config.0.stream_large_objects
+                description: |
+                  Drop large object values.
+                properties: []
+              - !ruby/object:Api::Type::NestedObject
+                name: 'streamLargeObjects'
+                allow_empty_object: true
+                send_empty_value: true
+                conflicts:
+                  - oracle_source_config.0.drop_large_objects
+                description: |
+                  Stream large object values. NOTE: This feature is currently experimental.
+                properties: []
+
           - !ruby/object:Api::Type::NestedObject
             name: 'mysqlSourceConfig'
             allow_empty_object: true
