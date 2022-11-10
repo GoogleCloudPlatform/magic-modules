@@ -899,11 +899,6 @@ objects:
                         description: |
                           If supplied, every created dataset will have its name prefixed by the provided value.
                           The prefix and name will be separated by an underscore. i.e. _.
-                      - !ruby/object:Api::Type::String
-                        name: 'location'
-                        description: |
-                          The geographic location where the dataset should reside.
-                          See https://cloud.google.com/bigquery/docs/locations for supported locations.
       - !ruby/object:Api::Type::NestedObject
         name: 'backfillAll'
         exactly_one_of:

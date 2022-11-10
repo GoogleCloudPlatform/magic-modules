@@ -104,6 +104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_basic"
         primary_resource_id: "default"
+        skip_docs: true
         vars:
           stream_id: "my-stream"
           private_connection_id: "my-connection"
@@ -113,7 +114,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "true"
           bucket_id: "my-bucket"
           destination_connection_profile_id: "destination-profile"
-          skip_docs: true
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_full"
         primary_resource_id: "default"
