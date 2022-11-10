@@ -35,6 +35,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  AppGateway: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "beyondcorp_app_gateway_basic"
+        primary_resource_id: "app_gateway"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_gateway%s\", context[\"random_suffix\"])"
+        vars:
+          app_gateway_name: "my-app-gateway"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "beyondcorp_app_gateway_full"
+        primary_resource_id: "app_gateway"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_gateway%s\", context[\"random_suffix\"])"
+        vars:
+          app_gateway_name: "my-app-gateway"
+          display_name: "some display name"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
