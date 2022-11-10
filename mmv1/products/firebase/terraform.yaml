@@ -95,9 +95,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_apple_app_basic"
         min_version: "beta"
-        primary_resource_id: "basic"
+        primary_resource_id: "default"
         vars:
           display_name: "Display Name Basic"
+        test_env_vars:
+          org_id: :ORG_ID
+          project_id: :PROJECT_NAME
+        test_vars_overrides:
+          bundle_id: '"apple.app." + randString(t, 5)'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_apple_app_full"
+        min_version: "beta"
+        primary_resource_id: "full"
+        vars:
+          display_name: "Display Name Full"
         test_env_vars:
           org_id: :ORG_ID
           project_id: :PROJECT_NAME
