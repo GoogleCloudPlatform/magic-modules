@@ -443,10 +443,190 @@ objects:
             description: |
               Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
           - !ruby/object:Api::Type::NestedObject
+            name: 'oracleSourceConfig'
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - source_config.0.oracle_source_config
+              - source_config.0.mysql_source_config
+              - source_config.0.postgresql_source_config
+            description: |
+              Oracle data source configuration.
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: 'includeObjects'
+                description: |
+                  Oracle objects to include in the stream.
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'oracleSchemas'
+                    required: true
+                    min_size: 1
+                    description: |
+                      Oracle schemas/databases in the database server.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      description: |
+                        Oracle schema.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'schema'
+                          required: true
+                          description: |
+                            Schema name.
+                        - !ruby/object:Api::Type::Array
+                          name: 'oracleTables'
+                          required: true
+                          min_size: 1
+                          description: |
+                            Tables in the schema.
+                          item_type: !ruby/object:Api::Type::NestedObject
+                            description: |
+                              Oracle table.
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: 'table'
+                                required: true
+                                description: |
+                                  Table name.
+                              - !ruby/object:Api::Type::Array
+                                name: 'oracleColumns'
+                                required: true
+                                min_size: 1
+                                description: |
+                                  Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
+                                item_type: !ruby/object:Api::Type::NestedObject
+                                  description: |
+                                    Oracle Column.
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'column'
+                                      description: |
+                                        Column name.
+                                    - !ruby/object:Api::Type::String
+                                      name: 'dataType'
+                                      description: |
+                                        The Oracle data type.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'length'
+                                      description: |
+                                        Column length.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'precision'
+                                      description: |
+                                        Column precision.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'scale'
+                                      description: |
+                                        Column scale.
+                                    - !ruby/object:Api::Type::String
+                                      name: 'encoding'
+                                      description: |
+                                        Column encoding.
+                                    - !ruby/object:Api::Type::Boolean
+                                      name: 'primaryKey'
+                                      description: |
+                                        Whether or not the column represents a primary key.
+                                    - !ruby/object:Api::Type::Boolean
+                                      name: 'nullable'
+                                      description: |
+                                        Whether or not the column can accept a null value.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'ordinalPosition'
+                                      description: |
+                                        The ordinal position of the column in the table.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'excludeObjects'
+                description: |
+                  Oracle objects to exclude from the stream.
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'oracleSchemas'
+                    required: true
+                    min_size: 1
+                    description: |
+                      Oracle schemas/databases in the database server.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      description: |
+                        Oracle schema.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'schema'
+                          required: true
+                          description: |
+                            Schema name.
+                        - !ruby/object:Api::Type::Array
+                          name: 'oracleTables'
+                          required: true
+                          min_size: 1
+                          description: |
+                            Tables in the schema.
+                          item_type: !ruby/object:Api::Type::NestedObject
+                            description: |
+                              Oracle table.
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: 'table'
+                                required: true
+                                description: |
+                                  Table name.
+                              - !ruby/object:Api::Type::Array
+                                name: 'oracleColumns'
+                                required: true
+                                min_size: 1
+                                description: |
+                                  Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
+                                item_type: !ruby/object:Api::Type::NestedObject
+                                  description: |
+                                    Oracle Column.
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'column'
+                                      description: |
+                                        Column name.
+                                    - !ruby/object:Api::Type::String
+                                      name: 'dataType'
+                                      description: |
+                                        The Oracle data type.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'length'
+                                      description: |
+                                        Column length.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'precision'
+                                      description: |
+                                        Column precision.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'scale'
+                                      description: |
+                                        Column scale.
+                                    - !ruby/object:Api::Type::String
+                                      name: 'encoding'
+                                      description: |
+                                        Column encoding.
+                                    - !ruby/object:Api::Type::Boolean
+                                      name: 'primaryKey'
+                                      description: |
+                                        Whether or not the column represents a primary key.
+                                    - !ruby/object:Api::Type::Boolean
+                                      name: 'nullable'
+                                      description: |
+                                        Whether or not the column can accept a null value.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'ordinalPosition'
+                                      description: |
+                                        The ordinal position of the column in the table.
+              - !ruby/object:Api::Type::Integer
+                name: 'maxConcurrentCdcTasks'
+                send_empty_value: true
+                description: |
+                  Maximum number of concurrent CDC tasks. The number should be non negative.
+                  If not set (or set to 0), the system's default value will be used.
+          - !ruby/object:Api::Type::NestedObject
             name: 'mysqlSourceConfig'
             allow_empty_object: true
             send_empty_value: true
             exactly_one_of:
+              - source_config.0.oracle_source_config
               - source_config.0.mysql_source_config
               - source_config.0.postgresql_source_config
             description: |
@@ -609,6 +789,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'postgresqlSourceConfig'
             exactly_one_of:
+              - source_config.0.oracle_source_config
               - source_config.0.mysql_source_config
               - source_config.0.postgresql_source_config
             description: |
