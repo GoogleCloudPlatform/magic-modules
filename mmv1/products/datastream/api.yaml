@@ -910,10 +910,95 @@ objects:
           Backfill strategy to automatically backfill the Stream's objects. Specific objects can be excluded.
         properties:
           - !ruby/object:Api::Type::NestedObject
+            name: 'oracleExcludedObjects'
+            conflicts:
+              - backfill_all.0.mysql_excluded_objects
+              - backfill_all.0.postgresql_excluded_objects
+            description: |
+              Oracle data source objects to avoid backfilling.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'oracleSchemas'
+                required: true
+                min_size: 1
+                description: |
+                  Oracle schemas/databases in the database server.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  description: |
+                    Oracle schema.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'schema'
+                      required: true
+                      description: |
+                        Schema name.
+                    - !ruby/object:Api::Type::Array
+                      name: 'oracleTables'
+                      required: true
+                      min_size: 1
+                      description: |
+                        Tables in the schema.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        description: |
+                          Oracle table.
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: 'table'
+                            required: true
+                            description: |
+                              Table name.
+                          - !ruby/object:Api::Type::Array
+                            name: 'oracleColumns'
+                            required: true
+                            min_size: 1
+                            description: |
+                              Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
+                            item_type: !ruby/object:Api::Type::NestedObject
+                              description: |
+                                Oracle Column.
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: 'column'
+                                  description: |
+                                    Column name.
+                                - !ruby/object:Api::Type::String
+                                  name: 'dataType'
+                                  description: |
+                                    The Oracle data type.
+                                - !ruby/object:Api::Type::Integer
+                                  name: 'length'
+                                  description: |
+                                    Column length.
+                                - !ruby/object:Api::Type::Integer
+                                  name: 'precision'
+                                  description: |
+                                    Column precision.
+                                - !ruby/object:Api::Type::Integer
+                                  name: 'scale'
+                                  description: |
+                                    Column scale.
+                                - !ruby/object:Api::Type::String
+                                  name: 'encoding'
+                                  description: |
+                                    Column encoding.
+                                - !ruby/object:Api::Type::Boolean
+                                  name: 'primaryKey'
+                                  description: |
+                                    Whether or not the column represents a primary key.
+                                - !ruby/object:Api::Type::Boolean
+                                  name: 'nullable'
+                                  description: |
+                                    Whether or not the column can accept a null value.
+                                - !ruby/object:Api::Type::Integer
+                                  name: 'ordinalPosition'
+                                  description: |
+                                    The ordinal position of the column in the table.
+          - !ruby/object:Api::Type::NestedObject
             name: 'mysqlExcludedObjects'
             description: |
               MySQL data source objects to avoid backfilling.
             conflicts:
+              - backfill_all.0.oracle_excluded_objects
               - backfill_all.0.postgresql_excluded_objects
             properties:
               - !ruby/object:Api::Type::Array
@@ -988,6 +1073,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'postgresqlExcludedObjects'
             conflicts:
+              - backfill_all.0.oracle_excluded_objects
               - backfill_all.0.mysql_excluded_objects
             description: |
               PostgreSQL data source objects to avoid backfilling.
