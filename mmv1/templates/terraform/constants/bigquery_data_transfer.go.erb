@@ -11,7 +11,7 @@ func sensitiveParamCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v
 	return nil
 }
 
-func paramsCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+func paramsCustomizeDiffFunc(diff TerraformResourceDiff) error {
 	old, new := diff.GetChange("params")
 	oldParams := old.(map[string]interface{})
 	newParams := new.(map[string]interface{})
@@ -34,4 +34,8 @@ func paramsCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interfa
 	}
 
 	return nil
+}
+
+func paramsCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	return paramsCustomizeDiffFunc(diff)
 }
