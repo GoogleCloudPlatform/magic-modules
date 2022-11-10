@@ -31,10 +31,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           app_connector_name: "my-app-connector"
           account_id: "my-account"
           display_name: "some display name"
-    properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   AppGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     examples:
@@ -51,10 +47,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           app_gateway_name: "my-app-gateway"
           display_name: "some display name"
-    properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
