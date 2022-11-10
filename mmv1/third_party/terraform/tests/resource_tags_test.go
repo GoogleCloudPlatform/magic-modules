@@ -837,19 +837,9 @@ resource "google_cloud_run_service" "default" {
 	  latest_revision = true
 	}
 }
-
-resource "google_cloud_run_service_iam_binding" "binding" {
-	location = google_cloud_run_service.default.location
-	project = google_cloud_run_service.default.project
-	service = google_cloud_run_service.default.name
-	role = "roles/run.services.createTagBinding"
-	members = [
-	  "user:admin@hashicorptest.com",
-	]
-  }
   
 resource "google_tags_location_tag_binding" "binding" {
-	parent = "//run.googleapis.com/projects/crest-359621/locations/us-central1/services/${google_cloud_run_service.default.name}"
+	parent = "//run.googleapis.com/projects/${google_cloud_run_service.default.project}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
 	location = "us-central1"
 }
