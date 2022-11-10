@@ -6,6 +6,6 @@ resource "google_firebase_hosting_site" "default" {
 
 resource "google_firebase_hosting_site_config" "default" {
   provider = google-beta
-  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  billing_project  = "<%= ctx[:test_env_vars]['project_id'] %>"
   site_id = google_firebase_hosting_site.default.site_id
 }

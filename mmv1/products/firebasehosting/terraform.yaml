@@ -33,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project_id: :PROJECT_NAME
   SiteConfig: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ['projects/{{project}}/sites/{{site_id}}/config', 'sites/{{site_id}}/config', '{{site_id}}/config']
+    import_format: ['projects/{{billing_project}}/sites/{{site_id}}/config', 'sites/{{site_id}}/config', '{{site_id}}/config']
     skip_delete: true # SiteConfig is a singleton child of Site
     skip_sweeper: true # no sweeper
     examples:

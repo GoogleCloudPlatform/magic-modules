@@ -68,7 +68,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'SiteConfig'
     min_version: beta
-    base_url: projects/{{project}}/sites/{{site_id}}
+    base_url: sites/{{site_id}}
     self_link: sites/{{site_id}}/config
     create_url: sites/{{site_id}}/config?update_mask=maxVersions,cloudLoggingEnabled # SiteConfig is created as part of Site creation, treat as an update
     create_verb: :PATCH
@@ -85,6 +85,16 @@ objects:
           used to construct the Firebase-provisioned subdomains for the site, so it must also be a valid
           domain name label.
         input: true
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: billing_project
+        description: |
+          Required. The project whose identity will be used when calling Firebase Hosting API.
+          It also specifies the project for API enablement check, quota, and billing. It should
+          usually be the same project the Hosting Site is associated with.
+        input: true
+        required: true
         url_param_only: true
     properties:
       - !ruby/object:Api::Type::Integer
