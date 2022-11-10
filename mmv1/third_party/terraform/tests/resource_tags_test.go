@@ -837,22 +837,17 @@ resource "google_cloud_run_service" "default" {
 	  latest_revision = true
 	}
 }
-data "google_iam_policy" "admin" {
-	binding {
-	  role = "roles/run.createTagBinding"
-	  members = [
-		"user:admin@hashicorptest.com",
-	  ]
-	}
-  }
-  
-resource "google_cloud_run_service_iam_policy" "policy" {
+
+resource "google_cloud_run_service_iam_binding" "binding" {
 	location = google_cloud_run_service.default.location
 	project = google_cloud_run_service.default.project
 	service = google_cloud_run_service.default.name
-	policy_data = data.google_iam_policy.admin.policy_data
-}
-
+	role = "roles/run.services.createTagBinding"
+	members = [
+	  "user:admin@hashicorptest.com",
+	]
+  }
+  
 resource "google_tags_location_tag_binding" "binding" {
 	parent = "//run.googleapis.com/projects/crest-359621/locations/us-central1/services/${google_cloud_run_service.default.name}"
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
