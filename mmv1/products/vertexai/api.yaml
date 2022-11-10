@@ -471,16 +471,16 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: The resource name of the Index. This value is set by Google.
+        description: The resource name of the Index.
         output: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
-        description: The display name of the Index. The name can be up to 128 characters long and can be consist of any UTF-8 characters.
+        description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
         required: true
       - !ruby/object:Api::Type::String
         name: 'description'
         description: The description of the Index.
-        # Please take a look at the following links for the original definition:
+      # Please take a look at the following links for the original definition:
         # https://cloud.google.com/vertex-ai/docs/matching-engine/create-manage-index#create_index-drest
         # https://cloud.google.com/vertex-ai/docs/matching-engine/configuring-indexes
       - !ruby/object:Api::Type::NestedObject
@@ -568,7 +568,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'metadataSchemaUri'
         description: |-
-          Immutable. Points to a YAML file stored on Google Cloud Storage describing additional information about the Index, that is specific to it. Unset if the Index does not have any additional information.
+         Points to a YAML file stored on Google Cloud Storage describing additional information about the Index, that is specific to it. Unset if the Index does not have any additional information.
         output: true
       - !ruby/object:Api::Type::Array
         name: 'deployedIndexes'
@@ -579,11 +579,11 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'indexEndpoint'
             output: true
-            description: Immutable. A resource name of the IndexEndpoint.
+            description: A resource name of the IndexEndpoint.
           - !ruby/object:Api::Type::String
             name: 'deployedIndexId'
             output: true
-            description: Immutable. The ID of the DeployedIndex in the above IndexEndpoint.
+            description: The ID of the DeployedIndex in the above IndexEndpoint.
       - !ruby/object:Api::Type::String
         name: 'etag'
         description: Used to perform consistent read-modify-write updates.
