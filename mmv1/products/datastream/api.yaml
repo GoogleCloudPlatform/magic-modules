@@ -1025,8 +1025,6 @@ objects:
                 exactly_one_of:
                   - destination_config.0.gcs_destination_config.0.avro_file_format
                   - destination_config.0.gcs_destination_config.0.json_file_format
-                allow_empty_object: true
-                send_empty_value: true
                 description: |
                   JSON file format configuration.
                 properties:
