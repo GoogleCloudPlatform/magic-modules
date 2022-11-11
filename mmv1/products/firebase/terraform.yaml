@@ -114,6 +114,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
           project_id: :PROJECT_NAME
+        test_vars_overrides:
           app_store_id: "12345"
           team_id: "9987654321"
         ignore_read_extra:
