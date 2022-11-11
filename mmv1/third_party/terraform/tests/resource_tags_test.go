@@ -807,6 +807,14 @@ resource "google_project" "project" {
 	name       = "%{project_id}"
 	org_id     = "%{org_id}"
 }
+resource "google_organization_iam_binding" "organization" {
+	org_id  = google_project.project.org_id
+	role    = "roles/iam.securityReviewer"
+  
+	members = [
+	  "user:admin@hashicorptest.com",
+	]
+}
 
 resource "google_organization_iam_binding" "organization" {
 	org_id  = google_project.project.org_id
