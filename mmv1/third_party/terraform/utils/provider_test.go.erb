@@ -35,8 +35,10 @@ import (
 )
 
 var testAccProviders map[string]*schema.Provider
+var testAccProviderFactories map[string]func() (*schema.Provider, error)
 <% unless version == 'ga' -%>
 var testAccProvidersOiCS map[string]*schema.Provider
+var testAccProviderFactoriesOiCS map[string]func() (*schema.Provider, error)
 <% end -%>
 var testAccProvider *schema.Provider
 
@@ -133,9 +135,15 @@ func init() {
 	testAccProviders = map[string]*schema.Provider{
 		"google": testAccProvider,
 	}
+	testAccProviderFactories = map[string]func()(*schema.Provider, error){
+		"google": func() (*schema.Provider, error) { return testAccProvider, nil },
+	}
 	<% else -%>
 	testAccProviders = map[string]*schema.Provider{
 		"google": testAccProvider,
+	}
+	testAccProviderFactories = map[string]func()(*schema.Provider, error){
+		"google": func() (*schema.Provider, error) { return testAccProvider, nil },
 	}
 
 	// The OiCS provider map is used to ensure that OiCS examples use `google-beta`
@@ -145,6 +153,11 @@ func init() {
 <%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
 <% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
 		"google-<%= aliased_version -%>": testAccProvider,
+<% end -%>
+    }
+    testAccProviderFactoriesOiCS = map[string]func()(*schema.Provider, error){
+<% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
+	"google-<%= aliased_version -%>": func() (*schema.Provider, error) { return testAccProvider, nil },
 <% end -%>
 	}
 	<% end -%>
