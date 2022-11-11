@@ -3918,7 +3918,7 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 		DiskType:       	config["disk_type"].(string),
 		ImageType:      	config["image_type"].(string),
 		BootDiskKmsKey: 	config["boot_disk_kms_key"].(string),
-		Management:			expandManagement(config["management"]),
+		Management:		expandManagement(config["management"]),
 		UpgradeSettings:	expandUpgradeSettings(config["upgrade_settings"]),
 	}
 
