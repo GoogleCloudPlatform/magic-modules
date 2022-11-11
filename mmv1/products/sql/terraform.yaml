@@ -42,6 +42,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       charset: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: 'caseDiffSuppress'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/sql_database_deletion_policy.erb
   SourceRepresentationInstance: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

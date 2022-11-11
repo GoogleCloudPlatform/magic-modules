@@ -215,6 +215,71 @@ func testAccSqlDatabaseDestroyProducer(t *testing.T) func(s *terraform.State) er
 	}
 }
 
+func TestAccSqlDatabase_postgresAbandon(t *testing.T) {
+	t.Parallel()
+
+	var database sqladmin.Database
+
+	resourceName := "google_sql_database.database"
+	instanceName := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
+	dbName := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testGoogleSqlDatabase_deletion_policy_abandon, instanceName, dbName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlDatabaseExists(t, resourceName, &database),
+					testAccCheckGoogleSqlDatabaseEquals(resourceName, &database),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      resourceName,
+				ImportStateId:     fmt.Sprintf("%s/%s", instanceName, dbName),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+
+			{
+				ResourceName:      resourceName,
+				ImportStateId:     fmt.Sprintf("instances/%s/databases/%s", instanceName, dbName),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:            resourceName,
+				ImportStateId:           fmt.Sprintf("%s/%s/%s", getTestProjectFromEnv(), instanceName, dbName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            resourceName,
+				ImportStateId:           fmt.Sprintf("projects/%s/instances/%s/databases/%s", getTestProjectFromEnv(), instanceName, dbName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+
+			{
+				// Abandon user
+				Config: fmt.Sprintf(testGoogleSqlDatabase_deletion_policy_abandon_no_database, instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlDatabaseExists(t, resourceName, &database),
+				),
+			},
+		},
+	})
+}
+
 var testGoogleSqlDatabase_basic = `
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -247,5 +312,34 @@ resource "google_sql_database" "database" {
   instance  = google_sql_database_instance.instance.name
   charset   = "latin1"
   collation = "latin1_swedish_ci"
+}
+`
+var testGoogleSqlDatabase_deletion_policy_abandon = `
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+  }
+}
+
+resource "google_sql_database" "database" {
+  name     		  = "%s"
+  instance 		  = google_sql_database_instance.instance.name
+  deletion_policy = "ABANDON"
+}
+`
+
+var testGoogleSqlDatabase_deletion_policy_abandon_no_database = `
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+  }
 }
 `
