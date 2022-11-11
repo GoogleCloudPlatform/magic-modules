@@ -1,0 +1,55 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  AppConnector: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "beyondcorp_app_connector_basic"
+        primary_resource_id: "app_connector"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_connector%s\", context[\"random_suffix\"])"
+        vars:
+          app_connector_name: "my-app-connector"
+          account_id: "my-account"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "beyondcorp_app_connector_full"
+        primary_resource_id: "app_connector"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_connector%s\", context[\"random_suffix\"])"
+        vars:
+          app_connector_name: "my-app-connector"
+          account_id: "my-account"
+          display_name: "some display name"
+  AppGateway: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "beyondcorp_app_gateway_basic"
+        primary_resource_id: "app_gateway"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_gateway%s\", context[\"random_suffix\"])"
+        vars:
+          app_gateway_name: "my-app-gateway"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "beyondcorp_app_gateway_full"
+        primary_resource_id: "app_gateway"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_gateway%s\", context[\"random_suffix\"])"
+        vars:
+          app_gateway_name: "my-app-gateway"
+          display_name: "some display name"
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
