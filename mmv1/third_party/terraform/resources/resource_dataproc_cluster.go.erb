@@ -647,7 +647,7 @@ func resourceDataprocCluster() *schema.Resource {
 										Description:  `Reservation Affinity for consuming Zonal reservation.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												"consume_reservation_tyoe": {
+												"consume_reservation_type": {
 													Type:         schema.TypeEnum,
 													Optional:     true,
 													Default:      false,
