@@ -98,7 +98,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           display_name: "Display Name Basic"
-          bundle_id: "apple.app."
+          bundle_id: "apple.app.12345"
         test_env_vars:
           org_id: :ORG_ID
           project_id: :PROJECT_NAME
