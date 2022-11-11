@@ -108,7 +108,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "full"
         vars:
           display_name: "Display Name Full"
-          bundle_id: "apple.app."
+          bundle_id: "apple.app.12345"
           app_store_id: "12345"
           team_id: "9987654321" # Has to be a 10-digit number.
         test_env_vars:
