@@ -780,8 +780,8 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"project_id":    "tf-test-" + randString(t, 10),
+		// "org_id":        getTestOrgFromEnv(t),
+		// "project_id":    "tf-test-" + randString(t, 10),
 		"random_suffix": randString(t, 10),
 	}
 
@@ -802,13 +802,13 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 
 func testAccTagsLocationTagBinding_locationTagBindingBasicExample(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_project" "project" {
-	project_id = "%{project_id}"
-	name       = "%{project_id}"
-	org_id     = "%{org_id}"
+data "google_project" "project" {
+	# project_id = "%{project_id}"
+	# name       = "%{project_id}"
+	# org_id     = "%{org_id}"
 }
 resource "google_organization_iam_binding" "organization" {
-	org_id  = google_project.project.org_id
+	org_id  = data.google_project.project.org_id
 	role    = "roles/iam.securityReviewer"
   
 	members = [
@@ -817,7 +817,7 @@ resource "google_organization_iam_binding" "organization" {
 }
 
 resource "google_organization_iam_binding" "org" {
-	org_id  = google_project.project.org_id
+	org_id  = data.google_project.project.org_id
 	role    = "roles/resourcemanager.folderAdmin"
   
 	members = [
@@ -826,7 +826,7 @@ resource "google_organization_iam_binding" "org" {
 }
 
 resource "google_organization_iam_binding" "myorg" {
-	org_id  = google_project.project.org_id
+	org_id  = data.google_project.project.org_id
 	role    = "roles/resourcemanager.tagUser"
   
 	members = [
@@ -865,7 +865,7 @@ resource "google_cloud_run_service" "default" {
 }
   
 resource "google_tags_location_tag_binding" "binding" {
-	parent = "//run.googleapis.com/projects/${google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
+	parent = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
 	location = "us-central1"
 }
