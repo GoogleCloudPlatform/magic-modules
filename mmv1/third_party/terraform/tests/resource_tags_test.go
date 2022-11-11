@@ -816,7 +816,7 @@ resource "google_organization_iam_binding" "organization" {
 	]
 }
 
-resource "google_organization_iam_binding" "organization" {
+resource "google_organization_iam_binding" "org" {
 	org_id  = google_project.project.org_id
 	role    = "roles/resourcemanager.folderAdmin"
   
@@ -825,7 +825,7 @@ resource "google_organization_iam_binding" "organization" {
 	]
 }
 
-resource "google_organization_iam_binding" "myord" {
+resource "google_organization_iam_binding" "myorg" {
 	org_id  = google_project.project.org_id
 	role    = "roles/resourcemanager.tagUser"
   
