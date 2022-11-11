@@ -810,7 +810,7 @@ resource "google_project" "project" {
 
 resource "google_organization_iam_binding" "organization" {
 	org_id  = google_project.project.org_id
-	role    = "roles/resourcemanager.tagUser"
+	role    = "roles/resourcemanager.folderAdmin"
   
 	members = [
 	  "user:admin@hashicorptest.com",
