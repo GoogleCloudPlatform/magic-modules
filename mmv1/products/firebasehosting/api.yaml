@@ -97,15 +97,6 @@ objects:
         input: true
         required: true
         url_param_only: true
-      - !ruby/object:Api::Type::String
-        name: billing_project
-        description: |
-          Required. The project whose identity will be used when calling Firebase Hosting API.
-          It also specifies the project for API enablement check, quota, and billing. It should
-          usually be the same project the Hosting Site is associated with.
-        input: true
-        required: true
-        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: name

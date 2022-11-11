@@ -33,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project_id: :PROJECT_NAME
   Channel: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ['projects/{{billing_project}}/sites/{{site_id}}/channels/{{channel_id}}', 'sites/{{site_id}}/channels/{{channel_id}}']
+    import_format: ['sites/{{site_id}}/channels/{{channel_id}}']
     properties:
       expireTime: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true # API computes value from ttl if not set directly

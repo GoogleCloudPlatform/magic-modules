@@ -6,7 +6,6 @@ resource "google_firebase_hosting_site" "default" {
 
 resource "google_firebase_hosting_channel" "default" {
   provider = google-beta
-  billing_project  = "<%= ctx[:test_env_vars]['project_id'] %>"
   site_id = google_firebase_hosting_site.default.site_id
   channel_id = "<%= ctx[:vars]['channel_id'] %>"
 }
