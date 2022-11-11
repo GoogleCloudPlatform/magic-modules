@@ -25,7 +25,7 @@ resource "google_compute_network" "network-1" {
 }
 
 resource "google_container_cluster" "cluster-1" {
-  name               = "tf-test-cluster-1-%s"
+  name               = "tf-test-cluster-1"
   location           = "us-central1-c"
   initial_node_count = 1
   cluster_autoscaling {
