@@ -10,6 +10,8 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
  action = "deny"
  direction = "EGRESS"
  priority = 1000
+ rule_name = "updated-test-rule"
+ description = "This is an updated rule description"
 match {
 layer4_configs {
 ip_protocol = "tcp"
@@ -20,7 +22,9 @@ ports = ["123"]
   target_secure_tags {
  name = "tagValues/${google_tags_tag_value.basic_value.name}"
  }
- region = "{{region}}"  
+ region = "{{region}}"
+ enable_logging = false
+ disabled = true  
 }
 
 resource "google_compute_network" "basic_network" {

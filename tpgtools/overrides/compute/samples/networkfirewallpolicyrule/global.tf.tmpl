@@ -9,6 +9,8 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
  action = "allow"
  direction = "INGRESS"
  priority = 1000
+ rule_name = "test-rule"
+ description = "This is a simple rule description" 
 match {
  src_secure_tags {
  name = "tagValues/${google_tags_tag_value.basic_value.name}"
@@ -19,6 +21,8 @@ ip_protocol = "all"
  }
  }
  target_service_accounts = ["{{test_service_account}}"]
+ enable_logging = true
+ disabled = false
 }
 resource "google_compute_network" "basic_network" {
   name = "{{network}}"
