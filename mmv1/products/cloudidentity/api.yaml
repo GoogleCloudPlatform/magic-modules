@@ -42,6 +42,27 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/identity/docs/how-to/setup'
       api: 'https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 5
+          update_minutes: 5
+          delete_minutes: 5
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::Enum
         name: 'initialGroupConfig'
@@ -129,13 +150,16 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         required: true
-        input: true
         description: |
-          The labels that apply to the Group.
+          One or more label entries that apply to the Group. Currently supported labels contain a key with an empty value.
 
-          Must not contain more than one entry. Must contain the entry
-          'cloudidentity.googleapis.com/groups.discussion_forum': '' if the Group is a Google Group or
-          'system/groups/external': '' if the Group is an external-identity-mapped group.
+          Google Groups are the default type of group and have a label with a key of cloudidentity.googleapis.com/groups.discussion_forum and an empty value.
+
+          Existing Google Groups can have an additional label with a key of cloudidentity.googleapis.com/groups.security and an empty value added to them. This is an immutable change and the security label cannot be removed once added.
+          
+          Dynamic groups have a label with a key of cloudidentity.googleapis.com/groups.dynamic.
+          
+          Identity-mapped groups for Cloud Search have a label with a key of system/groups/external and an empty value.
   - !ruby/object:Api::Resource
     name: 'GroupMembership'
     base_url: '{{group}}/memberships'
