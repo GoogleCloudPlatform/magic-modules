@@ -320,6 +320,10 @@ channel. Structure is [documented below](#nested_release_channel).
 
 * `resource_labels` - (Optional) The GCE resource labels (a map of key/value pairs) to be applied to the cluster.
 
+* `cost_management_config` - (Optional) Configuration for the
+    [Cost Allocation](https://cloud.google.com/kubernetes-engine/docs/how-to/cost-allocations) feature.
+    Structure is [documented below](#nested_cost_management_config).
+
 * `resource_usage_export_config` - (Optional) Configuration for the
     [ResourceUsageExportConfig](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-usage-metering) feature.
     Structure is [documented below](#nested_resource_usage_export_config).
@@ -512,6 +516,8 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 * `disk_type` - (Optional) Type of the disk attached to each node (e.g. 'pd-standard', 'pd-ssd' or 'pd-balanced'). Defaults to `pd-standard`
 
 * `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU]. __NOTE__ : COS AND UBUNTU are deprecated as of `GKE 1.24`
+
+* `shielded_instance_config` - (Optional) Shielded Instance options. Structure is [documented below](#nested_shielded_instance_config).
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
@@ -993,6 +999,10 @@ not.
     * RAPID: Weekly upgrade cadence; Early testers and developers who requires new features.
     * REGULAR: Multiple per month upgrade cadence; Production users who need features not yet offered in the Stable channel.
     * STABLE: Every few months upgrade cadence; Production users who need stability above all else, and for whom frequent upgrades are too risky.
+
+<a name="nested_cost_management_config"></a>The `cost_management_config` block supports:
+
+* `enabled` (Optional) - Whether to enable the [cost allocation](https://cloud.google.com/kubernetes-engine/docs/how-to/cost-allocations) feature.
 
 <a name="nested_resource_usage_export_config"></a>The `resource_usage_export_config` block supports:
 
