@@ -24,7 +24,7 @@ func TestAccFirebaseAppleApp_update(t *testing.T) {
 				Config: testAccFirebaseAppleApp(context, 12345, "1"),
 			},
 			{
-				Config: testAccFirebaseAppleApp(context, randInt(t), "2"),
+				Config: testAccFirebaseAppleApp(context, 67890, "2"),
 			},
 		},
 	})
