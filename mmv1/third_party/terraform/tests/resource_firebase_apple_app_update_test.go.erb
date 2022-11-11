@@ -21,7 +21,7 @@ func TestAccFirebaseAppleApp_update(t *testing.T) {
 		Providers: testAccProvidersOiCS,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirebaseAppleApp(context, randInt(t), "1"),
+				Config: testAccFirebaseAppleApp(context, 12345, "1"),
 			},
 			{
 				Config: testAccFirebaseAppleApp(context, randInt(t), "2"),
