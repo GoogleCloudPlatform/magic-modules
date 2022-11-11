@@ -61,8 +61,14 @@ type Sample struct {
 	// DocHide specifies a list of samples to hide from docs
 	DocHide []string `yaml:"doc_hide"`
 
+	// DocHideConditional specifies a list of samples to hide from docs when resource location matches
+	DocHideConditional []DocHideCondition `yaml:"doc_hide_conditional"`
+
 	// Testhide specifies a list of samples to hide from tests
 	Testhide []string `yaml:"test_hide"`
+
+	// TesthideConditional specifies a list of samples to hide from tests when resource location matches
+	TestHideConditional []TestHideCondition `yaml:"test_hide_conditional"`
 
 	// ExtraDependencies are the additional golang dependencies the injected code may require
 	ExtraDependencies []string `yaml:"extra_dependencies"`
@@ -87,6 +93,19 @@ type Variable struct {
 	DocsValue string `yaml:"docs_value"`
 }
 
+type DocHideCondition struct {
+	// Location is the location attribute to match, if matched, append Name to list of DocHide
+	Location string `yaml:"location"`
+	// Name specifies sample file name to add to DocHide if location matches.
+	Name string `yaml:"file_name"`
+}
+
+type TestHideCondition struct {
+        // Location is the location attribute to match, if matched, append Name to list of Testhide
+        Location string `yaml:"location"`
+        // Name specifies sample file name to add to Testhide if location matches.
+        Name string `yaml:"file_name"`
+}
 // Dependency contains data that describes a single resource in a sample
 type Dependency struct {
 	// FileName is the name of the file as it appears in testcases.yaml
