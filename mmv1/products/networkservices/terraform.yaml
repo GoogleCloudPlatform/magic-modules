@@ -45,6 +45,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           resource_name_2: "my-fallback"
         ignore_read_extra:
          - "timeout"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_services_edge_cache_origin_v4auth"
+        primary_resource_id: "default"
+        vars:
+          resource_name: "my-origin"
+          secret_name: "secret-name"
+        ignore_read_extra:
+         - "timeout"
     properties:
       failoverOrigin: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareResourceNames'

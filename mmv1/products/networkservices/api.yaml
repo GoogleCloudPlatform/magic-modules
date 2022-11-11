@@ -292,6 +292,28 @@ objects:
               - timeout.0.max_attempts_timeout
               - timeout.0.response_timeout
               - timeout.0.read_timeout
+      - !ruby/object:Api::Type::NestedObject
+        name: 'awsV4Authentication'
+        description: |
+          Enable AWS Signature Version 4 origin authentication.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'accessKeyId'
+            required: true
+            description: |
+              The access key ID your origin uses to identify the key.
+          - !ruby/object:Api::Type::String
+            name: 'secretAccessKeyVersion'
+            required: true
+            description: |
+              The Secret Manager secret version of the secret access key used by your origin.
+
+              This is the resource name of the secret version in the format `projects/*/secrets/*/versions/*` where the `*` values are replaced by the project, secret, and version you require.
+          - !ruby/object:Api::Type::String
+            name: 'originRegion'
+            required: true
+            description: |
+              The name of the AWS region that your origin is in.
   - !ruby/object:Api::Resource
     name: 'EdgeCacheService'
     base_url: 'projects/{{project}}/locations/global/edgeCacheServices'
