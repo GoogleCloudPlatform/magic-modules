@@ -390,6 +390,9 @@ resource "google_dns_managed_zone" "private" {
     networks {
       network_url = google_compute_network.%s.self_link
     }
+    gke_clusters {
+		gke_cluster_name = google_container_cluster.cluster-1.id
+	}
   }
 }
 
@@ -407,7 +410,30 @@ resource "google_compute_network" "network-3" {
   name                    = "tf-test-network-3-%s"
   auto_create_subnetworks = false
 }
-`, suffix, first_network, second_network, suffix, suffix, suffix)
+
+resource "google_container_cluster" "cluster-1" {
+    name               = "tf-test-cluster-1-%s"
+    location           = "us-central1-c"
+    initial_node_count = 1
+    cluster_autoscaling {
+      enabled = false
+    }
+
+    ip_allocation_policy {
+      cluster_ipv4_cidr_block = "10.4.0.0/14"
+      services_ipv4_cidr_block = "10.8.0.0/20"
+    }
+
+  private_cluster_config {
+    enable_private_endpoint =  false
+    enable_private_nodes = true
+    master_global_access_config {
+      enabled =  false
+    }
+    master_ipv4_cidr_block  = "10.42.0.0/28"
+  }
+}
+`, suffix, first_network, second_network, suffix, suffix, suffix, suffix)
 }
 
 func testAccDnsManagedZone_privateForwardingUpdate(suffix, first_nameserver, second_nameserver, first_forwarding_path, second_forwarding_path string) string {
