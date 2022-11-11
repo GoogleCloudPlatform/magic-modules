@@ -205,6 +205,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.template.spec.containers.startupProbe.tcpSocket.port: !ruby/object:Overrides::Terraform::PropertyOverride
         # when port is not specified, container.ports[0].port is a possible default value 
         default_from_api: true
+      spec.template.spec.containers.startupProbe.grpc.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        # when port is not specified, container.ports[0].port is a possible default value 
+        default_from_api: true
+      spec.template.spec.containers.livenessProbe.grpc.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        # when port is not specified, container.ports[0].port is a possible default value 
+        default_from_api: true
       # Terraform autofills the only required field in metadata
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

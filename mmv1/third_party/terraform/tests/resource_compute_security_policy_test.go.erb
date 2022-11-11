@@ -76,6 +76,46 @@ func TestAccComputeSecurityPolicy_withRuleExpr(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccComputeSecurityPolicy_withPreconfiguredWafConfig(t *testing.T) {
+	t.Parallel()
+
+	spName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSecurityPolicy_withPreconfiguredWafConfig(spName),
+			},
+			{
+				ResourceName:      "google_compute_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicy_withPreconfiguredWafConfig_update(spName),
+			},
+			{
+				ResourceName:      "google_compute_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicy_withPreconfiguredWafConfig_clear(spName),
+			},
+			{
+				ResourceName:      "google_compute_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func TestAccComputeSecurityPolicy_update(t *testing.T) {
 	t.Parallel()
 
@@ -424,6 +464,167 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
+
+<% unless version == 'ga' -%>
+func testAccComputeSecurityPolicy_withPreconfiguredWafConfig(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+	name = "%s"
+
+	rule {
+		action   = "allow"
+		priority = "2147483647"
+		match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = ["*"]
+			}
+		}
+		description = "default rule"
+	}
+
+	rule {
+		action   = "deny"
+		priority = "1000"
+		match {
+			expr {
+				expression = "evaluatePreconfiguredWaf('sqli-stable')"
+			}
+		}
+		preconfigured_waf_config {
+			exclusion {
+				request_cookie {
+					operator = "EQUALS_ANY"
+				}
+				request_header {
+					operator = "EQUALS"
+					value    = "Referer"
+				}
+				request_uri {
+					operator = "STARTS_WITH"
+					value    = "/admin"
+				}
+				request_query_param {
+					operator = "EQUALS"
+					value    = "password"
+				}
+				request_query_param {
+					operator = "STARTS_WITH"
+					value    = "freeform"
+				}
+				target_rule_set = "sqli-stable"
+			}
+			exclusion {
+				request_query_param {
+					operator = "CONTAINS"
+					value    = "password"
+				}
+				request_query_param {
+					operator = "STARTS_WITH"
+					value    = "freeform"
+				}
+				target_rule_set = "xss-stable"
+			}
+		}
+		preview = false
+	}
+}
+`, spName)
+}
+
+func testAccComputeSecurityPolicy_withPreconfiguredWafConfig_update(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+	name = "%s"
+
+	rule {
+		action   = "allow"
+		priority = "2147483647"
+		match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = ["*"]
+			}
+		}
+		description = "default rule"
+	}
+
+	rule {
+		action   = "deny"
+		priority = "1000"
+		match {
+			expr {
+				expression = "evaluatePreconfiguredWaf('rce-stable') || evaluatePreconfiguredWaf('xss-stable')"
+			}
+		}
+		preconfigured_waf_config {
+			exclusion {
+				request_uri {
+					operator = "STARTS_WITH"
+					value    = "/admin"
+				}
+				target_rule_set = "rce-stable"
+			}
+			exclusion {
+				request_query_param {
+					operator = "CONTAINS"
+					value    = "password"
+				}
+				request_query_param {
+					operator = "STARTS_WITH"
+					value    = "freeform"
+				}
+				request_query_param {
+					operator = "EQUALS"
+					value    = "description"
+				}
+				target_rule_set = "xss-stable"
+				target_rule_ids = [
+					"owasp-crs-v030001-id941330-xss",
+					"owasp-crs-v030001-id941340-xss",
+				]
+			}
+		}
+		preview = false
+	}
+}
+`, spName)
+}
+
+func testAccComputeSecurityPolicy_withPreconfiguredWafConfig_clear(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+	name = "%s"
+
+	rule {
+		action   = "allow"
+		priority = "2147483647"
+		match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = ["*"]
+			}
+		}
+		description = "default rule"
+	}
+
+	rule {
+		action   = "deny"
+		priority = "1000"
+		match {
+			expr {
+				expression = "evaluatePreconfiguredWaf('rce-stable') || evaluatePreconfiguredWaf('xss-stable')"
+			}
+		}
+		preconfigured_waf_config {
+			// ensure empty waf config //
+		}
+		preview = false
+	}
+}
+`, spName)
+}
+<% end -%>
 
 func testAccComputeSecurityPolicy_withAdvancedOptionsConfig(spName string) string {
 	return fmt.Sprintf(`

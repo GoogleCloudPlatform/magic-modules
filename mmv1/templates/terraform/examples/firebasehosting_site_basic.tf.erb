@@ -1,0 +1,5 @@
+resource "google_firebase_hosting_site" "default" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  site_id = "<%= ctx[:vars]['site_id'] %>"
+}

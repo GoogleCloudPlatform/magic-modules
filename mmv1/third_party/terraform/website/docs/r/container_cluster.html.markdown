@@ -519,6 +519,16 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `shielded_instance_config` - (Optional) Shielded Instance options. Structure is [documented below](#nested_shielded_instance_config).
 
+* `management` - (Optional) NodeManagement configuration for this NodePool. Structure is [documented below](#nested_management).
+
+<a name="nested_management"></a>The `management` block supports:
+
+* `auto_upgrade` - (Optional) Specifies whether node auto-upgrade is enabled for the node pool. If enabled, node auto-upgrade helps keep the nodes in your node pool up to date with the latest release version of Kubernetes.
+
+* `auto_repair` - (Optional) Specifies whether the node auto-repair is enabled for the node pool. If enabled, the nodes in this node pool will be monitored and, if they fail health checks too many times, an automatic repair action will be triggered.
+
+This block also contains several computed attributes, documented below.
+
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
 * `security_group` - (Required) The name of the RBAC security group for use with Google security groups in Kubernetes RBAC. Group name must be in format `gke-security-groups@yourdomain.com`.
@@ -526,7 +536,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 <a name="nested_logging_config"></a>The `logging_config` block supports:
 
 *  `enable_components` - (Required) The GKE components exposing logs. Supported values include:
-`SYSTEM_COMPONENTS` and `WORKLOADS`.
+`SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, and `WORKLOADS`.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
@@ -857,11 +867,11 @@ linux_node_config {
 
 <a name="nested_gpu_sharing_config"></a>The `gpu_sharing_config` block supports:
 
-* `gpu_sharing_strategy` (Required) - The type of GPU sharing strategy to enable on the GPU node. 
+* `gpu_sharing_strategy` (Required) - The type of GPU sharing strategy to enable on the GPU node.
     Accepted values are:
-    * `"TIME_SHARING"`: Allow multiple containers to have [time-shared](https://cloud.google.com/kubernetes-engine/docs/concepts/timesharing-gpus) access to a single GPU device. 
+    * `"TIME_SHARING"`: Allow multiple containers to have [time-shared](https://cloud.google.com/kubernetes-engine/docs/concepts/timesharing-gpus) access to a single GPU device.
 
-* `max_shared_clients_per_gpu` (Required) - The maximum number of containers that can share a GPU. 
+* `max_shared_clients_per_gpu` (Required) - The maximum number of containers that can share a GPU.
 
 <a name="nested_workload_identity_config"></a> The `workload_identity_config` block supports:
 
@@ -1131,6 +1141,8 @@ exported:
   cluster, in [CIDR](http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
   notation (e.g. `1.2.3.4/29`). Service addresses are typically put in the last
   `/16` from the container CIDR.
+
+* `cluster_autoscaling.0.auto_provisioning_defaults.0.management.0.upgrade_options` - Specifies the [Auto Upgrade knobs](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/NodeManagement#AutoUpgradeOptions) for the node pool.
 
 ## Timeouts
 

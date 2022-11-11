@@ -49,6 +49,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           trigger: "trigger"
         test_env_vars:
           project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_job_trigger_bigquery_row_limit"
+        primary_resource_id: "bigquery_row_limit"
+        vars:
+          trigger: "trigger"
+        test_env_vars:
+          project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_job_trigger_bigquery_row_limit_percentage"
+        primary_resource_id: "bigquery_row_limit_percentage"
+        vars:
+          trigger: "trigger"
+        test_env_vars:
+          project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/wrap_object.go.erb
       custom_import: templates/terraform/custom_import/dlp_import.go.erb
