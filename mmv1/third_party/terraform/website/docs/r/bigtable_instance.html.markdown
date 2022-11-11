@@ -131,6 +131,8 @@ for a `DEVELOPMENT` instance.
 
 * `kms_key_name` - (Optional) Describes the Cloud KMS encryption key that will be used to protect the destination Bigtable cluster. The requirements for this key are: 1) The Cloud Bigtable service account associated with the project that contains this cluster must be granted the `cloudkms.cryptoKeyEncrypterDecrypter` role on the CMEK key. 2) Only regional keys can be used and the region of the CMEK key must match the region of the cluster.
 
+-> **Note**: Removing the field entirely from the config will cause the provider to default to the backend value.
+
 !> **Warning:** Modifying the `storage_type`, `zone` or `kms_key_name` of an existing cluster (by
 `cluster_id`) will cause Terraform to delete/recreate the entire
 `google_bigtable_instance` resource. If these values are changing, use a new
