@@ -12,7 +12,7 @@ func TestAccFirebaseAppleApp_update(t *testing.T) {
 	t.Parallel()
         context := map[string]interface{}{
                 "project_id": getTestProjectFromEnv(),
-                "bundle_id":  "apple.app." + randString(t, 5),
+                "bundle_id":  "apple.app.12345",
                 "random_suffix": randString(t, 10),
                 "display_name":  "Display Name N",
 	}
