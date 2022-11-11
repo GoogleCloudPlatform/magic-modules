@@ -82,13 +82,6 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>GkeClusters(v inter
 			transformed["gkeClusterName"] = transformedGkeClusterName
 		}
 
-		transformedKind, err := expandDNSManagedZonePrivateVisibilityConfigGkeClustersKind(original["kind"], d, config)
-		if err != nil {
-			return nil, err
-		} else if val := reflect.ValueOf(transformedKind); val.IsValid() && !isEmptyValue(val) {
-			transformed["kind"] = transformedKind
-		}
-
 		req = append(req, transformed)
 	}
 	return req, nil
@@ -108,9 +101,5 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>NetworksNetworkUrl(
 }
 
 func expandDNSManagedZonePrivateVisibilityConfigGkeClustersGkeClusterName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandDNSManagedZonePrivateVisibilityConfigGkeClustersKind(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
