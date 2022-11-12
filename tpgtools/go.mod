@@ -4,7 +4,11 @@ go 1.18
 
 require (
 	bitbucket.org/creachadair/stringset v0.0.9
+<<<<<<< HEAD
 	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.26.0
+=======
+	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.26.4
+>>>>>>> 1fa1cd29d (upgrading DCL to 1.26.4)
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/hcl v1.0.0
