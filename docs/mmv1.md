@@ -1,3 +1,9 @@
+---
+layout: default
+title: MMv1
+permalink: /mmv1/
+---
+
 # MMv1
 
 ## Overview

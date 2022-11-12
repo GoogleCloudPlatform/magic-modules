@@ -1,3 +1,9 @@
+---
+layout: default
+title: Handwritten
+permalink: /handwritten/
+---
+
 # Handwritten
 
 ## Overview
