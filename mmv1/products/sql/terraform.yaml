@@ -46,7 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           deletion_protection: "false"
         oics_vars_overrides:
-          deletion_protection: "false"    
+          deletion_protection: "false"
     properties:
       collation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
