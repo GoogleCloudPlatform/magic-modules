@@ -835,7 +835,7 @@ resource "google_organization_iam_binding" "myorg" {
 }
 
 resource "google_tags_tag_key" "key" {
-	parent = data.google_project.project.org_id
+	parent = "organizations/${data.google_project.project.org_id}"
 	short_name = "keyname%{random_suffix}"
 	description = "For a certain set of resources."
 }
