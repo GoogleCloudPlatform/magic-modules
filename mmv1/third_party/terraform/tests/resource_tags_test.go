@@ -807,32 +807,6 @@ data "google_project" "project" {
 	# name       = "%{project_id}"
 	# org_id     = "%{org_id}"
 }
-resource "google_organization_iam_binding" "organization" {
-	org_id  = data.google_project.project.org_id
-	role    = "roles/iam.securityReviewer"
-  
-	members = [
-	  "user:admin@hashicorptest.com",
-	]
-}
-
-resource "google_organization_iam_binding" "org" {
-	org_id  = data.google_project.project.org_id
-	role    = "roles/resourcemanager.folderAdmin"
-  
-	members = [
-	  "user:admin@hashicorptest.com",
-	]
-}
-
-resource "google_organization_iam_binding" "myorg" {
-	org_id  = data.google_project.project.org_id
-	role    = "roles/resourcemanager.tagUser"
-  
-	members = [
-	  "user:admin@hashicorptest.com",
-	]
-}
 
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/${data.google_project.project.org_id}"
