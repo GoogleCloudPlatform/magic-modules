@@ -602,4 +602,23 @@ objects:
         name: 'updateTime'
         output: true
         description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-
+      - !ruby/object:Api::Type::NestedObject
+        name: 'indexStats'
+        output: true
+        description: Stats of the index resource.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'vectorsCount'
+            output: true
+            description: The number of vectors in the Index.
+          - !ruby/object:Api::Type::Integer
+            name: 'shardsCount'
+            output: true
+            description: The number of shards in the Index.
+      - !ruby/object:Api::Type::String
+        name: 'indexUpdateMethod'
+        default_value: BATCH_UPDATE
+        description: |-
+          The update method to use with this Index. The value must be the followings. If not set, BATCH_UPDATE will be used by default.
+          * BATCH_UPDATE: user can call indexes.patch with files on Cloud Storage of datapoints to update.
+          * STREAM_UPDATE: user can call indexes.upsertDatapoints/DeleteDatapoints to update the Index and the updates will be applied in corresponding DeployedIndexes in nearly real-time.
