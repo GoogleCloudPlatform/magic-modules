@@ -27,14 +27,11 @@ resource "google_vertex_ai_index" "index" {
     config {
       dimensions = 2
       approximate_neighbors_count = 150
-      distance_measure_type = "DOT_PRODUCT_DISTANCE"
+      distance_measure_type = "COSINE_DISTANCE"
       algorithm_config {
-        tree_ah_config {
-          leaf_node_embedding_count = 500
-          leaf_nodes_to_search_percent = 7
-        }
+        brute_force_config {}
       }
     }
   }
-  index_update_method = "BATCH_UPDATE"
+  index_update_method = "STREAM_UPDATE"
 }
