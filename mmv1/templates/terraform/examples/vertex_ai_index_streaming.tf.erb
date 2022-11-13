@@ -28,6 +28,7 @@ resource "google_vertex_ai_index" "index" {
       dimensions = 2
       approximate_neighbors_count = 150
       distance_measure_type = "COSINE_DISTANCE"
+      feature_norm_type = "UNIT_L2_NORM"
       algorithm_config {
         brute_force_config {}
       }
