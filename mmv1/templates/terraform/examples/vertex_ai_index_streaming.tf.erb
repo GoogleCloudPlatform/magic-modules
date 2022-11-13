@@ -26,7 +26,6 @@ resource "google_vertex_ai_index" "index" {
     contents_delta_uri = "gs://${google_storage_bucket.bucket.name}/contents"
     config {
       dimensions = 2
-      approximate_neighbors_count = 150
       distance_measure_type = "COSINE_DISTANCE"
       feature_norm_type = "UNIT_L2_NORM"
       algorithm_config {
