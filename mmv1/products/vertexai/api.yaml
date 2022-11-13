@@ -489,7 +489,6 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'contentsDeltaUri'
-            input: true
             description: |-
               Allows inserting, updating  or deleting the contents of the Matching Engine Index.
               The string must be a valid Cloud Storage directory path. If this
