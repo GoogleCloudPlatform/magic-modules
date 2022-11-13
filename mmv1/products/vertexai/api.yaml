@@ -557,8 +557,11 @@ objects:
                           The default percentage of leaf nodes that any query may be searched. Must be in
                           range 1-100, inclusive. The default value is 10 (means 10%) if not set.
                         default_value: 10
-                  - !ruby/object:Api::Type::String
+                  - !ruby/object:Api::Type::NestedObject
                     name: 'bruteForceConfig'
+                    allow_empty_object: true
+                    send_empty_value: true
+                    properties: []
                     exactly_one_of:
                       - treeAhConfig
                       - bruteForceConfig
