@@ -1,4 +1,4 @@
-<img src="docs/assets/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
+<img src="docs/static/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
 
 # Magic Modules
 
