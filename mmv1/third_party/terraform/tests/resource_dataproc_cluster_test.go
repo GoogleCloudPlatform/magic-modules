@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -16,11 +15,7 @@ import (
 
 	"google.golang.org/api/googleapi"
 
-<% if version == "ga" -%>
 	"google.golang.org/api/dataproc/v1"
-<% else -%>
-	dataproc "google.golang.org/api/dataproc/v1beta2"
-<% end -%>
 )
 
 func TestDataprocExtractInitTimeout(t *testing.T) {
@@ -220,7 +215,6 @@ func TestAccDataprocCluster_basic(t *testing.T) {
 	})
 }
 
-<% if version == "ga" -%>
 func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 	t.Parallel()
 
@@ -257,7 +251,6 @@ func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 	t.Parallel()
@@ -1156,7 +1149,7 @@ resource "google_dataproc_cluster" "basic" {
 `, rnd)
 }
 
-<% if version == "ga" -%>
+
 func testAccDataprocVirtualCluster_basic(projectID string, rnd string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -1228,7 +1221,7 @@ func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster,
 		return fmt.Errorf("Cluster NodePools does not contain expected roles : %v", roles)
 	}
 }
-<% end -%>
+
 
 func testAccDataprocCluster_withAccelerators(rnd, acceleratorType, zone string) string {
 	return fmt.Sprintf(`
