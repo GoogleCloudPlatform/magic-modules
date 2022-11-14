@@ -825,7 +825,8 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	<% end -%>
 
 	isStatefulPolicyExpanded := false
-	if d.HasChange("stateful_disk") && !d.HasChange("stateful_internal_ips") && !d.HasChange("stateful_external_ips") {
+	//Add validation for isStatefulPolicyExpanded here to avoid variable declared but not used in GA
+	if d.HasChange("stateful_disk") && isStatefulPolicyExpanded == false {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 		isStatefulPolicyExpanded = true
