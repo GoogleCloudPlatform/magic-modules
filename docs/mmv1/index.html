@@ -1,0 +1,468 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="MMv1 # Overview # MMv1 is a Ruby-based code generator that implements Terraform Provider Google (TPG) resources from YAML specification files.
+MMv1-generated resources like google_compute_address can be identified by looking in their Go source for an AUTO GENERATED CODE header as well as a Type MMv1. MMv1-generated resources should have source code present under their product folders, like mmv1/products/compute for the google_compute_address resource.
+Table of Contents # Contributing Resource Field Configuration api."><meta name=theme-color content="#FFFFFF"><meta name=color-scheme content="light dark"><meta property="og:title" content="MMv1"><meta property="og:description" content="MMv1 # Overview # MMv1 is a Ruby-based code generator that implements Terraform Provider Google (TPG) resources from YAML specification files.
+MMv1-generated resources like google_compute_address can be identified by looking in their Go source for an AUTO GENERATED CODE header as well as a Type MMv1. MMv1-generated resources should have source code present under their product folders, like mmv1/products/compute for the google_compute_address resource.
+Table of Contents # Contributing Resource Field Configuration api."><meta property="og:type" content="article"><meta property="og:url" content="https://googlecloudplatform.github.io/magic-modules/docs/mmv1/"><meta property="article:section" content="docs"><meta property="article:modified_time" content="2022-11-14T13:02:47-08:00"><title>MMv1 | Magic Modules</title><link rel=manifest href=/magic-modules/manifest.json><link rel=icon href=/magic-modules/favicon.png type=image/x-icon><link rel=stylesheet href=/magic-modules/book.min.c58292d36b18b675680ab9baea2029204537b839ea72f258746ec0f32ce8d6c8.css integrity="sha256-xYKS02sYtnVoCrm66iApIEU3uDnqcvJYdG7A8yzo1sg=" crossorigin=anonymous><script defer src=/magic-modules/flexsearch.min.js></script>
+<script defer src=/magic-modules/en.search.min.9d7a1ca8b29cdcaa39a469c51c639f44e129b8ffa08149880edd1fe289b2e477.js integrity="sha256-nXocqLKc3Ko5pGnFHGOfROEpuP+ggUmIDt0f4omy5Hc=" crossorigin=anonymous></script></head><body dir=ltr><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><div class=book-menu-content><nav><h2 class=book-brand><a class="flex align-center" href=/magic-modules/><img src=/magic-modules/magic-modules.svg alt=Logo><span>Magic Modules</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=Search aria-label=Search maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/magic-modules/docs/handwritten/>Handwritten</a></li><li><a href=/magic-modules/docs/mmv1/ class=active>MMv1</a></li></ul></nav><script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></div></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/magic-modules/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>MMv1</strong>
+<label for=toc-control><img src=/magic-modules/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#table-of-contents>Table of Contents</a></li><li><a href=#contributing>Contributing</a><ul><li><a href=#resource>Resource</a></li><li><a href=#iam-resource>IAM Resource</a></li><li><a href=#testing>Testing</a></li><li><a href=#documentation>Documentation</a></li><li><a href=#beta-feature>Beta Feature</a></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=mmv1>MMv1
+<a class=anchor href=#mmv1>#</a></h1><h2 id=overview>Overview
+<a class=anchor href=#overview>#</a></h2><p>MMv1 is a Ruby-based code generator that implements Terraform Provider Google (TPG) resources from YAML specification files.</p><p>MMv1-generated resources like <a href=https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address>google_compute_address</a> can be identified by looking in their <a href=https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_compute_address.go>Go source</a> for an <code>AUTO GENERATED CODE</code> header as well as a Type <code>MMv1</code>. MMv1-generated resources should have source code present under their product folders, like <a href=./products/compute>mmv1/products/compute</a> for the <a href=https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address>google_compute_address</a> resource.</p><h2 id=table-of-contents>Table of Contents
+<a class=anchor href=#table-of-contents>#</a></h2><ul><li><a href=#contributing>Contributing</a><ul><li><a href=#resource>Resource</a><ul><li><a href=#field-configuration>Field Configuration</a><ul><li><a href=#apiyaml><code>api.yaml</code></a></li><li><a href=#terraformyaml><code>terraform.yaml</code></a></li></ul></li><li><a href=#field-configuration---complex-types>Field Configuration - Complex Types</a><ul><li><a href=#enum>Enum</a></li><li><a href=#resourceref>ResourceRef</a></li><li><a href=#array>Array</a></li><li><a href=#nestedobject>NestedObject</a></li><li><a href=#keyvaluepairs-labels--annotations>KeyValuePairs (Labels / Annotations)</a></li><li><a href=#exactly-one-of>Exactly One Of</a></li></ul></li><li><a href=#advanced-customization>Advanced customization</a><ul><li><a href=#diffsuppressfunc>DiffSuppressFunc</a></li></ul></li></ul></li><li><a href=#iam-resource>IAM Resources</a></li><li><a href=#testing>Testing</a><ul><li><a href=#example-configuration-file>Example Configuration File</a></li><li><a href=#terraformyaml-metadata><code>terraform.yaml</code> metadata</a></li><li><a href=#results>Results</a></li><li><a href=#tests-that-use-beta-features>Tests that use beta features</a></li></ul></li><li><a href=#documentation>Documentation</a></li><li><a href=#beta-feature>Beta Feature</a><ul><li><a href=#adding-a-beta-resource>Adding a beta resource</a></li><li><a href=#adding-beta-fields>Adding beta field(s)</a></li><li><a href=#tests-that-use-a-beta-feature>Tests that use a beta feature</a></li><li><a href=#promote-a-beta-feature>Promote a beta feature</a></li></ul></li></ul></li></ul><h2 id=contributing>Contributing
+<a class=anchor href=#contributing>#</a></h2><p>We&rsquo;re glad to accept contributions to MMv1-generated resources. Tutorials and guidance on making changes are available below.</p><h3 id=resource>Resource
+<a class=anchor href=#resource>#</a></h3><p>Generated resources are created using the <code>mmv1</code> code generator, and are
+configured by editing definition files under the
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products><code>mmv1/products</code></a>
+path. Go to the service for your resource like
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products/compute><code>compute</code></a>
+and open the <code>api.yaml</code> and <code>terraform.yaml</code> files. In each of those, find the
+resource&rsquo;s <code>properties</code> field.</p><p>For example, for <code>google_spanner_database</code>:</p><ul><li><p><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/8728bc89c37d5033b530c7d7157bb43865d9df58/mmv1/products/spanner/api.yaml#L123-L158><code>api.yaml</code></a></p></li><li><p><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/8728bc89c37d5033b530c7d7157bb43865d9df58/mmv1/products/spanner/terraform.yaml#L16-L51><code>terraform.yaml</code></a></p></li></ul><p>In short,<code>properties</code> is an array of the resource&rsquo;s fields. <code>api.yaml</code> it
+contains the fields of the resource based on how it behaves in the API, and
+<code>terraform.yaml</code> contains Terraform-specific amendments to those fields'
+behaviour. Not all fields will need to be added to <code>terraform.yaml</code>- only add an
+entry for your field if you need to configure one of the available option(s).</p><h4 id=field-configuration>Field Configuration
+<a class=anchor href=#field-configuration>#</a></h4><h5 id=apiyaml><code>api.yaml</code>
+<a class=anchor href=#apiyaml>#</a></h5><p>To add a field, you&rsquo;ll append an entry to <code>properties</code> within <code>api.yaml</code>, such
+as the following adding support for a <code>fooBar</code> field in the API:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Api::Type::String</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;fooBar&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>min_version</span>: <span style=color:#ae81ff>beta</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>input</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          </span>          <span style=color:#ae81ff>The cloud.google.com description of this field.</span>
+</span></span></code></pre></div><p>The first line of that snippet is the type of the field in the API, including
+primitives like <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Double</code>. Additional special
+types are detailed below in &ldquo;Complex Types&rdquo;.</p><p>You can configure settings on the field that describe it in the API. Avoid
+setting values to <code>false</code>, and omit them instead.</p><ul><li><code>description</code> is the cloud.google.com description of the field, and must be
+filled out manually.</li><li><code>min_version</code> can be set to <code>beta</code> if the field is only available at public
+preview or beta. If it is GA, do not set a <code>min_version</code> value.</li><li><code>required: true</code> indicates that a field is required. New top-level fields
+should not be considered required, as that is a breaking change. Subfields
+of newly-added optional fields can be added as required.</li><li><code>input: true</code> indicates that a field can only be set when the API resource is
+created. Changing the field will force the resource to be recreated.</li><li><code>output: true</code> indicates that a field is output-only in the API and cannot
+be configured by the user.</li><li><code>default_value: {{value}}</code> adds a default value for the field. This should
+only be used if the default value is fixed in the API.</li><li><code>send_empty_value: true</code> indicates that an explicit zero value should be
+sent to the API. This is useful when a value has a nonzero default in the
+API but the zero value for the type can be set. This is extremely common for
+booleans that default to <code>true</code>.</li><li><code>update_verb</code> and <code>update_url</code> configure a custom update function for a
+field.<code>update_verb</code>should be set to a literal symbol for the type (such
+as :POST for <code>POST</code>) and the URL to a templated URL such
+as<code>projects/{{project}}/global/backendServices/{{name}}/setSecurityPolicy</code>.</li></ul><h5 id=terraformyaml><code>terraform.yaml</code>
+<a class=anchor href=#terraformyaml>#</a></h5><p>You can add additional values within <code>terraform.yaml</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      <span style=color:#f92672>foobar</span>: !<span style=color:#ae81ff>ruby/object:Overrides::Terraform::PropertyOverride</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>ignore_read</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>default_from_api</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>custom_expand</span>: <span style=color:#e6db74>&#39;templates/terraform/custom_expand/shortname_to_url.go.erb&#39;</span>
+</span></span></code></pre></div><p>Commonly configured values include the following:</p><ul><li><code>default_from_api: true</code> indicates that Terraform needs to handle a field
+specially. This is common for fields with complex defaults from the API that
+can&rsquo;t be represented with <code>default_value</code>. If a <code>default_from_api: true</code>
+field is set in a user&rsquo;s config, Terraform will treat it as an optional
+field, detecting drift and correcting drift. If it is not set, it will be
+treated as an output-only field.</li><li><code>ignore_read: true</code> indicates that a value is not returned from an API, and
+Terraform should not look for it in API responses.</li><li><code>custom_expand</code> and <code>custom_flatten</code> are custom functions to read/write a
+value from state. They refer to files holding function contents under
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/8728bc89c37d5033b530c7d7157bb43865d9df58/mmv1/templates/terraform/custom_expand><code>mmv1/template/terraform/custom_expand</code></a>
+and
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/8728bc89c37d5033b530c7d7157bb43865d9df58/mmv1/templates/terraform/custom_flatten><code>mmv1/template/terraform/custom_flatten</code></a>
+respectively.</li></ul><h4 id=field-configuration---complex-types>Field Configuration - Complex Types
+<a class=anchor href=#field-configuration---complex-types>#</a></h4><h5 id=enum>Enum
+<a class=anchor href=#enum>#</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>          - !<span style=color:#ae81ff>ruby/object:Api::Type::Enum</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;metadata&#39;</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              Can only be specified if VPC flow logging for this subnetwork is enabled.
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              Configures whether metadata fields should be added to the reported VPC
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              flow logs.</span>              
+</span></span><span style=display:flex><span>            <span style=color:#f92672>values</span>:
+</span></span><span style=display:flex><span>              - :<span style=color:#ae81ff>EXCLUDE_ALL_METADATA</span>
+</span></span><span style=display:flex><span>              - :<span style=color:#ae81ff>INCLUDE_ALL_METADATA</span>
+</span></span><span style=display:flex><span>              - :<span style=color:#ae81ff>CUSTOM_METADATA</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>default_value</span>: :<span style=color:#ae81ff>INCLUDE_ALL_METADATA</span>
+</span></span></code></pre></div><p>Enum values represent enums in the underlying API where it is valuable to
+restrict the range of inputs to a fixed set of values. They are strings that
+support a <code>values</code> key to define the array of possible values specified as
+literal constants, and <code>default_value</code> should be specified as a literal constant
+as well.</p><p>Most API enums should be typed as <code>String</code> instead- if the value will not be
+fixed for >1 year, use a <code>String</code>.</p><h5 id=resourceref>ResourceRef
+<a class=anchor href=#resourceref>#</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Api::Type::ResourceRef</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;urlMap&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>resource</span>: <span style=color:#e6db74>&#39;UrlMap&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>imports</span>: <span style=color:#e6db74>&#39;selfLink&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          A reference to the UrlMap resource that defines the mapping from URL
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          to the BackendService.</span>          
+</span></span></code></pre></div><p>ResourceRefs are fields that reference other resource. They&rsquo;re most typical in
+GCE, and making a field a <code>ResourceRef</code> instead of a <code>String</code> will cause
+Terraform to allow switching between reference formats and versions safely. If a
+field can refer to multiple resource types, use a <code>String</code> instead.</p><p>In a <code>ResourceRef</code>, <code>resource</code> and <code>imports</code> must be defined but Terraform
+ignores those values. <code>resource</code> should be set to the resource kind, and
+<code>imports</code> to <code>selfLink</code> within GCE and <code>name</code> elsewhere.</p><h5 id=array>Array
+<a class=anchor href=#array>#</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Api::Type::Array</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#ae81ff>scopes</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>item_type</span>: <span style=color:#ae81ff>Api::Type::String</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          The list of scopes to be made available for this service
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          account.</span>          
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Api::Type::Array</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;instances&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          A list of virtual machine instances serving this pool.
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          They must live in zones contained in the same region as this pool.</span>          
+</span></span><span style=display:flex><span>        <span style=color:#f92672>item_type</span>: !<span style=color:#ae81ff>ruby/object:Api::Type::ResourceRef</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;instance&#39;</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>description</span>: <span style=color:#e6db74>&#39;The instance being served by this pool.&#39;</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>resource</span>: <span style=color:#e6db74>&#39;Instance&#39;</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>imports</span>: <span style=color:#e6db74>&#39;selfLink&#39;</span>
+</span></span></code></pre></div><p>Arrays refer to arrays in the underlying API, with their item being specified
+through an <code>item_type</code> field. <code>item_type</code> accepts any type, although primitives
+(String / Integer / Boolean) must be specified differently than other types as
+shown above.</p><h5 id=nestedobject>NestedObject
+<a class=anchor href=#nestedobject>#</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Api::Type::NestedObject</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;imageEncryptionKey&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          Encrypts the image using a customer-supplied encryption key.
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          After you encrypt an image with a customer-supplied key, you must
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          provide the same key if you use the image later (e.g. to create a
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          disk from the image)</span>          
+</span></span><span style=display:flex><span>        <span style=color:#f92672>properties</span>:
+</span></span><span style=display:flex><span>          - !<span style=color:#ae81ff>ruby/object:Api::Type::String</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;rawKey&#39;</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              Specifies a 256-bit customer-supplied encryption key, encoded in
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              RFC 4648 base64 to either encrypt or decrypt this resource.</span>              
+</span></span><span style=display:flex><span>          - !<span style=color:#ae81ff>ruby/object:Api::Type::String</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;sha256&#39;</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>output</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>description</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              The RFC 4648 base64 encoded SHA-256 hash of the
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              customer-supplied encryption key that protects this resource.</span>              
+</span></span></code></pre></div><p>NestedObject is an object in the JSON API, and contains a <code>properties</code> subfield
+where a sub-properties array can be defined (including additional NestedObjects)</p><h5 id=keyvaluepairs-labels--annotations>KeyValuePairs (Labels / Annotations)
+<a class=anchor href=#keyvaluepairs-labels--annotations>#</a></h5><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Api::Type::KeyValuePairs</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;labels&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>description</span>: <span style=color:#ae81ff>Labels to apply to this address.  A list of key-&gt;value pairs.</span>
+</span></span></code></pre></div><p>KeyValuePairs is a special type to handle string -> string maps, such as GCE
+<code>labels</code> fields. No extra configuration is required.</p><h5 id=exactly-one-of>Exactly One Of
+<a class=anchor href=#exactly-one-of>#</a></h5><p>To restrain a parent object to contain exactly one of its nested objects,
+use <code>exactly_one_of</code> in the affected child objects.</p><p>Yaml:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>objects</span>:
+</span></span><span style=display:flex><span>  - !<span style=color:#ae81ff>ruby/object:Api::Resource</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;Connection&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ae81ff>...</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>properties</span>:
+</span></span><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Api::Type::NestedObject</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;cloudSql&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>exactly_one_of</span>:
+</span></span><span style=display:flex><span>          - <span style=color:#ae81ff>cloud_sql</span>
+</span></span><span style=display:flex><span>          - <span style=color:#ae81ff>aws</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>properties</span>:
+</span></span><span style=display:flex><span>          <span style=color:#ae81ff>...</span>
+</span></span><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Api::Type::NestedObject</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#ae81ff>aws</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>exactly_one_of</span>:
+</span></span><span style=display:flex><span>          - <span style=color:#ae81ff>cloud_sql</span>
+</span></span><span style=display:flex><span>          - <span style=color:#ae81ff>aws</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>properties</span>:
+</span></span><span style=display:flex><span>          <span style=color:#ae81ff>...</span>
+</span></span></code></pre></div><h4 id=advanced-customization>Advanced customization
+<a class=anchor href=#advanced-customization>#</a></h4><h5 id=diffsuppressfunc>DiffSuppressFunc
+<a class=anchor href=#diffsuppressfunc>#</a></h5><p>Terraform allows fields to specify a
+<a href=https://www.terraform.io/plugin/sdkv2/schemas/schema-behaviors#diffsuppressfunc>DiffSuppressFunc</a>,
+which allows you to ignore diffs in cases where the two values are
+<strong>functionally identical</strong>. This is generally useful when the API returns a
+normalized value - for example by standardizing the case.</p><p>Note: The <em>preferred</em> behavior for APIs is to always return the value that the
+user sent. DiffSuppressFunc is a workaround for APIs that don&rsquo;t.</p><p>The Terraform provider comes with a set of
+<a href=https://github.com/hashicorp/terraform-provider-google/blob/main/google/common_diff_suppress.go>&ldquo;common diff suppress functions&rdquo;</a>.
+These fit frequent needs like ignoring whitespace at the beginning and end of a
+string, or ignoring case differences.</p><p>If you need to define a custom diff specifically for your resource, you can do
+so in a &ldquo;constants&rdquo; file, which is a <code>.go.erb</code> file in
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/constants>mmv1/templates/terraform/constants</a>
+named <code>&lt;product>_&lt;resource>.erb</code>. You can then declare this custom code in
+<code>terraform.yaml</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>--- !<span style=color:#ae81ff>ruby/object:Provider::Terraform::Config</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>overrides</span>: !<span style=color:#ae81ff>ruby/object:Overrides::ResourceOverrides</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>ResourceName</span>:
+</span></span><span style=display:flex><span>    <span style=color:#75715e># various overrides go here</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>custom_code</span>: !<span style=color:#ae81ff>ruby/object:Provider::Terraform::CustomCode</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>constants</span>: <span style=color:#ae81ff>templates/terraform/constants/product_resource_name.go.erb</span>
+</span></span></code></pre></div><p>Once you have chosen a DiffSuppressFunc, you can declare it as an override on
+your resource:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>--- !<span style=color:#ae81ff>ruby/object:Provider::Terraform::Config</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>overrides</span>: !<span style=color:#ae81ff>ruby/object:Overrides::ResourceOverrides</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>ResourceName</span>:
+</span></span><span style=display:flex><span>    <span style=color:#75715e># various overrides go here</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>properties</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>myField</span>: !<span style=color:#ae81ff>ruby/object:Overrides::Terraform::PropertyOverride</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>diff_suppress_func</span>: <span style=color:#e6db74>&#39;caseDiffSuppress&#39;</span>
+</span></span></code></pre></div><p>The value of diff_suppress_func can be any valid DiffSuppressFunc, including the
+result of a function call. For example:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>diff_suppress_func</span>: <span style=color:#e6db74>&#39;optionalPrefixSuppress(&#34;folders/&#34;)&#39;</span>
+</span></span></code></pre></div><p>Please make sure to add thorough unit tests (in addition to basic integration
+tests) for your diff suppress func.</p><p>Example: DomainMapping (domainMappingLabelDiffSuppress)</p><ul><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L16>terraform.yaml resource overrides</a><ul><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L31><code>custom_code</code></a></li><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L46><code>diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'</code></a></li></ul></li><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/templates/terraform/constants/cloud_run_domain_mapping.go.erb>constants file</a></li><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/third_party/terraform/tests/resource_cloud_run_domain_mapping_test.go#L9>unit tests</a></li></ul><h3 id=iam-resource>IAM Resource
+<a class=anchor href=#iam-resource>#</a></h3><p>For resources implemented through the MMv1 engine, the majority of configuration
+for IAM support can be inferred based on the preexisting YAML specification file.</p><p>To add support for IAM resources based on an existing resource, add an
+<code>iam_policy</code> block to the resource&rsquo;s definition in <code>api.yaml</code>, such as the
+following:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>    <span style=color:#f92672>iam_policy</span>: !<span style=color:#ae81ff>ruby/object:Api::Resource::IamPolicy</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>method_name_separator</span>: <span style=color:#e6db74>&#39;:&#39;</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>fetch_iam_policy_verb</span>: :<span style=color:#ae81ff>POST      </span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>parent_resource_attribute</span>: <span style=color:#e6db74>&#39;registry&#39;</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>import_format</span>: [<span style=color:#e6db74>&#34;projects/{{project}}/locations/{{location}}/registries/{{name}}&#34;</span>, <span style=color:#e6db74>&#34;{{name}}&#34;</span>]         
+</span></span></code></pre></div><p>The specification values can be determined based on a mixture of the resource
+specification and the cloud.google.com <code>setIamPolicy</code>/<code>getIamPolicy</code> REST
+documentation, such as
+<a href=https://cloud.google.com/iot/docs/reference/cloudiot/rest/v1/projects.locations.registries/setIamPolicy>this page</a>
+for Cloud IOT Registries.</p><p><code>parent_resource_attribute</code> - (Required) determines the field name of the parent
+resource reference in the IAM resources. Generally, this should be the singular
+form of the parent resource kind in snake case, i.e. <code>registries</code> -> <code>registry</code>
+or <code>backendServices</code> -> <code>backend_service</code>.</p><p><code>method_name_separator</code> - (Required) should be set to the character preceding
+<code>setIamPolicy</code> in the &ldquo;HTTP Request&rdquo; section on the resource&rsquo;s <code>setIamPolicy</code>
+page. This is almost always <code>:</code> for APIs other than Google Compute Engine (GCE),
+MMv1&rsquo;s <code>compute</code> product.</p><p><code>fetch_iam_policy_verb</code> - (Required) should be set to the HTTP verb listed in
+the &ldquo;HTTP Request&rdquo; section on the resource&rsquo;s <code>getIamPolicy</code> page. This is
+generally <code>POST</code> but is occasionally <code>GET</code>. Note: This is specified as a Ruby
+symbol, prefixed with a <code>:</code>. For example, for <code>GET</code>, you would specify <code>:GET</code>.</p><p><code>import_format</code> - (Optional) A list of templated strings used to determine the
+Terraform import format. If the resource has a custom <code>import_format</code> or
+<code>id_format</code> defined in <code>terraform.yaml</code>, this must be supplied.</p><ul><li>If an <code>import_format</code> is set on the parent resource use that set of values exactly, substituting <code>parent_resource_attribute</code> for the field name of the <strong>final</strong> templated value.</li><li>If an <code>id_format</code> is set on the parent resource use that as the first entry (substituting the final templated value, as with <code>import_format</code>) and define a second format with <strong>only</strong> the templated values, <code>/</code>-separated. For example, <code>projects/{{project}}/locations/{{region}}/myResources/{{name}}</code> -> <code>["projects/{{project}}/locations/{{region}}/myResources/{{myResource}}", "{{project}}/{{region}}/{{myResource}}"]</code>.<ul><li>Optionally, you may provide a version of the shortened format that excludes entries called <code>{{project}}</code>, <code>{{region}}</code>, and <code>{{zone}}</code>. For example, given <code>{{project}}/{{region}}/{{myResource}}/{{entry}}</code>, <code>{{myResource}}/{{entry}}</code> is a valid format. When a user specifies this format, the provider&rsquo;s default values for <code>project</code>/<code>region</code>/<code>zone</code> will be used.</li></ul></li></ul><p><code>allowed_iam_role</code> - (Optional) If the resource does not allow the
+<code>roles/viewer</code> IAM role to be set, an alternate, valid role must be provided.</p><p><code>iam_conditions_request_type</code> - (Optional) The method the IAM policy version is
+set in <code>getIamPolicy</code>. If unset, IAM conditions are assumed to not be supported for the resource. One of <code>QUERY_PARAM</code>, <code>QUERY_PARAM_NESTED</code> or <code>REQUEST_BODY</code>. For resources where a query parameter is expected, <code>QUERY_PARAM</code> should be used if the key is <code>optionsRequestedPolicyVersion</code>, while <code>QUERY_PARAM_NESTED</code> should be used if it is <code>options.requestedPolicyVersion</code>.</p><p><code>min_version</code> - (Optional) If the resource or IAM method is not generally
+available, this should be set to <code>beta</code> or <code>alpha</code> as appropriate.</p><p><code>set_iam_policy_verb</code> - (Optional, rare) Similar to <code>fetch_iam_policy_verb</code>, the
+HTTP verb expected by <code>setIamPolicy</code>. Defaults to <code>:POST</code>, and should only be
+specified if it differs (typically if <code>:PUT</code> is expected).</p><p>Several single-user settings are not documented on this page as they are not
+expected to recur often. If you are unable to configure your API successfully,
+you may want to consult <a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/iam_policy.rb>https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/iam_policy.rb</a>
+for additional configuration options.</p><p>Additionally, in order to generate IAM tests based on a preexisting resource
+configuration, the first <code>examples</code> entry in <code>terraform.yaml</code> must be modified
+to include a <code>primary_resource_name</code> entry:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-diff data-lang=diff><span style=display:flex><span>      - !ruby/object:Provider::Terraform::Examples
+</span></span><span style=display:flex><span>        name: &#34;disk_basic&#34;
+</span></span><span style=display:flex><span>        primary_resource_id: &#34;default&#34;
+</span></span><span style=display:flex><span><span style=color:#a6e22e>+        primary_resource_name: &#34;fmt.Sprintf(\&#34;tf-test-test-disk%s\&#34;, context[\&#34;random_suffix\&#34;])&#34;
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e></span>        vars:
+</span></span><span style=display:flex><span>          disk_name: &#34;test-disk&#34;
+</span></span></code></pre></div><p><code>primary_resource_name</code> - Typically
+<code>"fmt.Sprintf(\"tf-test-{{shortname}}%s\", context[\"random_suffix\"])"</code>,
+substituting the parent resource&rsquo;s shortname from the example configuration for
+<code>{{shortname}}</code>, such as <code>test-disk</code> above. This value is variable, as both the
+key and value are user-defined parts of the example configuration. In some cases
+the value must be customized further, albeit rarely.</p><p>Once an <code>iam_policy</code> block is added and filled out, and <code>primary_resource_name</code>
+is set on the first example, you&rsquo;re finished, and you can run MMv1 to generate
+the IAM resources you&rsquo;ve added, alongside documentation, and tests.</p><h4 id=adding-iam-support-to-nonexistent-resources>Adding IAM support to nonexistent resources
+<a class=anchor href=#adding-iam-support-to-nonexistent-resources>#</a></h4><p>Some IAM targets don&rsquo;t exist as distinct resources, such as IAP, or their target
+is supported through an engine other than MMv1 (i.e. through tpgtools/DCL or a
+handwritten resource). For these resources, the <code>exclude_resource: true</code>
+annotation can be used. To use it, partially define the resource in the
+product&rsquo;s <code>api.yaml</code> file and apply the annotation. MMv1 won&rsquo;t attempt to
+generate the resource itself and will only generate IAM resources targeting it.</p><p>The IAP product is a good reference for adding these: <a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products/iap>https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products/iap</a></p><h3 id=testing>Testing
+<a class=anchor href=#testing>#</a></h3><p>For generated resources, you can add an example to the
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/templates/terraform/examples><code>mmv1/templates/terraform/examples</code></a>
+directory, which contains a set of templated Terraform configurations.</p><p>After writing out the example and filling out some metadata, Magic Modules will
+insert it into the resource documentation page, and generate a test case
+stepping through the following stages:</p><ol><li>Run <code>terraform apply</code> on the configuration, waiting for it to succeed and
+recording the results in Terraform state</li><li>Run <code>terraform plan</code>, and fail if Terraform detects any drift</li><li>Clear the resource from state and run <code>terraform import</code> on it</li><li>Deeply compare the original state from <code>terraform apply</code> and the <code>terraform import</code> results, returning an error if any values are not identical</li><li>Destroy all resources in the configuration using <code>terraform destroy</code>,
+waiting for the destroy command to succeed</li><li>Call <code>GET</code> on the resource, and fail the test if it is still present</li></ol><h4 id=example-configuration-file>Example Configuration File
+<a class=anchor href=#example-configuration-file>#</a></h4><p>First, you&rsquo;ll want to add the example file. It needs to end in the filename
+<code>.tf.erb</code>, and is typically named <code>service_resource_descriptive_name</code>. For
+example, <code>pubsub_topic_geo_restricted.tf.erb</code>. Inside, you&rsquo;ll write a complete
+Terraform configuration that provisions the resource and all of the required
+dependencies. For example, in
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/e7ef590f6007796f446b2d41875b3d26f4469ff4/mmv1/templates/terraform/examples/pubsub_subscription_dead_letter.tf.erb><code>mmv1/templates/terraform/examples/pubsub_subscription_dead_letter.tf.erb</code></a>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_topic&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;topic_name&#39;] %&gt;&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_topic&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;_dead_letter&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;topic_name&#39;] %&gt;-dead-letter&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_subscription&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>  = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;subscription_name&#39;] %&gt;&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>topic</span> = <span style=color:#a6e22e>google_pubsub_topic</span>.<span style=color:#f92672>&lt;%=</span> <span style=color:#a6e22e>ctx</span>[<span style=color:#f92672>:</span><span style=color:#a6e22e>primary_resource_id</span>] <span style=color:#f92672>%&gt;</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>dead_letter_policy</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>dead_letter_topic</span> = <span style=color:#a6e22e>google_pubsub_topic</span>.<span style=color:#f92672>&lt;%=</span> <span style=color:#a6e22e>ctx</span>[<span style=color:#f92672>:</span><span style=color:#a6e22e>primary_resource_id</span>] <span style=color:#f92672>%&gt;</span><span style=color:#960050;background-color:#1e0010>_</span><span style=color:#a6e22e>dead_letter</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>max_delivery_attempts</span> = <span style=color:#ae81ff>10</span>
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>The <code>ctx</code> variable provides metadata at generation time, and should be used in
+two ways:</p><ul><li>The Terraform ID of a single instance of the primary resource should be
+supplied through <code>&lt;%= ctx[:primary_resource_id] %></code> (in this example
+multiple resources use the value, although only the first
+<code>google_pubsub_topic</code> requires it). The resource kind you are testing with
+an id equal to <code>&lt;%= ctx[:primary_resource_id] %></code> is the one that will be
+imported.</li><li>Unique values can be supplied through <code>&lt;%= ctx[:vars]['{{var}}'] %></code>, where
+<code>{{var}}</code> is an arbitrary key you define. These values are created by
+appending suffixes to them, and are typically only used for names- most
+values should be constant within the configuration.</li></ul><h4 id=terraformyaml-metadata><code>terraform.yaml</code> metadata
+<a class=anchor href=#terraformyaml-metadata>#</a></h4><p>Once your configuration is written, go in <code>terraform.yaml</code> and find the
+<code>examples</code> block for the resource. Generally it&rsquo;ll be above the <code>properties</code>
+block. In there, append an entry such as the
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/e7ef590f6007796f446b2d41875b3d26f4469ff4/mmv1/products/pubsub/terraform.yaml#L108-L113>following</a>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Provider::Terraform::Examples</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#34;pubsub_subscription_dead_letter&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>primary_resource_id</span>: <span style=color:#e6db74>&#34;example&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>vars</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>topic_name</span>: <span style=color:#e6db74>&#34;example-topic&#34;</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>subscription_name</span>: <span style=color:#e6db74>&#34;example-subscription&#34;</span>
+</span></span></code></pre></div><p>The <code>name</code> should match the base name of your example file,
+<code>primary_resource_id</code> is an arbitrary snake_cased string that describes the
+resource, and the <code>vars</code> map should contain each key you defined previously.</p><p><strong>Important</strong>: Any vars that are part of the resource&rsquo;s id should include at
+least one hyphen or underscore; this
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/6858338f013f5dc57729ec037883a3594441ea62/mmv1/provider/terraform/examples.rb#L244>triggers addition of a <code>tf-test</code> or <code>tf_test</code> prefix</a>,
+which is what we use to detect and delete stray resources that are sometimes
+left over during test runs.</p><h4 id=results>Results
+<a class=anchor href=#results>#</a></h4><p>Your configuration will ultimately generate a Go test case similar to the
+<a href=https://github.com/hashicorp/terraform-provider-google/blob/38e2913cb102225f9f9bda9f04b5498d3386a79c/google/resource_pubsub_subscription_generated_test.go#L135-L180>following</a>
+based on the snippets above:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>TestAccPubsubSubscription_pubsubSubscriptionDeadLetterExample</span>(<span style=color:#a6e22e>t</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>testing</span>.<span style=color:#a6e22e>T</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>t</span>.<span style=color:#a6e22e>Parallel</span>()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>context</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>interface</span>{}{
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;random_suffix&#34;</span>: <span style=color:#a6e22e>randString</span>(<span style=color:#a6e22e>t</span>, <span style=color:#ae81ff>10</span>),
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>vcrTest</span>(<span style=color:#a6e22e>t</span>, <span style=color:#a6e22e>resource</span>.<span style=color:#a6e22e>TestCase</span>{
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>PreCheck</span>:     <span style=color:#66d9ef>func</span>() { <span style=color:#a6e22e>testAccPreCheck</span>(<span style=color:#a6e22e>t</span>) },
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>Providers</span>:    <span style=color:#a6e22e>testAccProviders</span>,
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>CheckDestroy</span>: <span style=color:#a6e22e>testAccCheckPubsubSubscriptionDestroyProducer</span>(<span style=color:#a6e22e>t</span>),
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>Steps</span>: []<span style=color:#a6e22e>resource</span>.<span style=color:#a6e22e>TestStep</span>{
+</span></span><span style=display:flex><span>            {
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>Config</span>: <span style=color:#a6e22e>testAccPubsubSubscription_pubsubSubscriptionDeadLetterExample</span>(<span style=color:#a6e22e>context</span>),
+</span></span><span style=display:flex><span>            },
+</span></span><span style=display:flex><span>            {
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>ResourceName</span>:            <span style=color:#e6db74>&#34;google_pubsub_subscription.example&#34;</span>,
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>ImportState</span>:             <span style=color:#66d9ef>true</span>,
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>ImportStateVerify</span>:       <span style=color:#66d9ef>true</span>,
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>ImportStateVerifyIgnore</span>: []<span style=color:#66d9ef>string</span>{<span style=color:#e6db74>&#34;topic&#34;</span>},
+</span></span><span style=display:flex><span>            },
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>    })
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>testAccPubsubSubscription_pubsubSubscriptionDeadLetterExample</span>(<span style=color:#a6e22e>context</span> <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>interface</span>{}) <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>Nprintf</span>(<span style=color:#e6db74>`
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>resource &#34;google_pubsub_topic&#34; &#34;example&#34; {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  name = &#34;tf-test-example-topic%{random_suffix}&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>}
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>resource &#34;google_pubsub_topic&#34; &#34;example_dead_letter&#34; {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  name = &#34;tf-test-example-topic%{random_suffix}-dead-letter&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>}
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>resource &#34;google_pubsub_subscription&#34; &#34;example&#34; {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  name  = &#34;tf-test-example-subscription%{random_suffix}&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  topic = google_pubsub_topic.example.name
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  dead_letter_policy {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    dead_letter_topic = google_pubsub_topic.example_dead_letter.id
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    max_delivery_attempts = 10
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  }
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>}
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>`</span>, <span style=color:#a6e22e>context</span>)
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=tests-that-use-beta-features>Tests that use beta features
+<a class=anchor href=#tests-that-use-beta-features>#</a></h4><p>See <a href=#tests-that-use-a-beta-feature>Tests that use a beta feature</a></p><h3 id=documentation>Documentation
+<a class=anchor href=#documentation>#</a></h3><h3 id=beta-feature>Beta Feature
+<a class=anchor href=#beta-feature>#</a></h3><p>When the underlying API of a feature is not final (i.e. a <code>vN</code> version like
+<code>v1</code> or <code>v2</code>), is in preview, or the API has no SLO we add it to the
+<code>google-beta</code> provider rather than the <code>google </code>provider, allowing users to
+self-select for the stability level they are comfortable with.</p><p>In MMv1, a &ldquo;version tag&rdquo; can be annotated on resources, fields, resource iam
+metadata and examples to control the stability level that a feature is available
+at. Version tags are a specification of the minimum version a feature is
+available at, written as <code>min_version: {{version}}</code>. This is only
+specified when a feature is available at <code>beta</code>, and omitting a tag indicates
+the target is generally available, or available at <code>ga</code>.</p><h4 id=adding-a-beta-resource>Adding a beta resource
+<a class=anchor href=#adding-a-beta-resource>#</a></h4><p>To add support for a beta resource in a preexisting product, ensure that a
+<code>beta</code> level exists in the <code>versions</code> map in the <code>api.yaml</code> file for the product.
+If one doesn&rsquo;t already exist, add it, setting the <code>base_url</code> to the appropriate
+value. This is generally an API version including <code>beta</code>, such as <code>v1beta</code>, but
+may be the same <code>base_url</code> as the <code>ga</code> entry for services that mix fields with
+different stability levels within a single endpoint.</p><p>For example:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-diff data-lang=diff><span style=display:flex><span>versions:
+</span></span><span style=display:flex><span>  - !ruby/object:Api::Product::Version
+</span></span><span style=display:flex><span>    name: ga
+</span></span><span style=display:flex><span>    base_url: https://compute.googleapis.com/compute/v1/
+</span></span><span style=display:flex><span><span style=color:#a6e22e>+  - !ruby/object:Api::Product::Version
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>+    name: beta
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>+    base_url: https://compute.googleapis.com/compute/beta/
+</span></span></span></code></pre></div><p>If the product doesn&rsquo;t already exist, it&rsquo;s only necessary to add the <code>beta</code>
+entry, i.e.:</p><pre tabindex=0><code>versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://runtimeconfig.googleapis.com/v1beta1/
+</code></pre><p>Next, annotate the resource (part of <code>resources</code> in <code>api.yaml</code>) i.e.:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-diff data-lang=diff><span style=display:flex><span>  - !ruby/object:Api::Resource
+</span></span><span style=display:flex><span>    name: &#39;Config&#39;
+</span></span><span style=display:flex><span>    base_url: projects/{{project}}/configs
+</span></span><span style=display:flex><span>    self_link: projects/{{project}}/configs/{{name}}
+</span></span><span style=display:flex><span><span style=color:#a6e22e>+    min_version: beta
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e></span>    description: |
+</span></span><span style=display:flex><span>      A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
+</span></span><span style=display:flex><span>      A RuntimeConfig resource consists of metadata and a hierarchy of variables.
+</span></span><span style=display:flex><span>    iam_policy: !ruby/object:Api::Resource::IamPolicy
+</span></span><span style=display:flex><span>      parent_resource_attribute: &#39;config&#39;
+</span></span><span style=display:flex><span>      method_name_separator: &#39;:&#39;
+</span></span><span style=display:flex><span>      exclude: false
+</span></span><span style=display:flex><span>    properties:
+</span></span><span style=display:flex><span>...
+</span></span></code></pre></div><p>You&rsquo;ll notice above that the <code>iam_policy</code> is not annotated with a version tag.
+Due to the resource having a <code>min_version</code> tagged already, that&rsquo;s passed through
+to the <code>iam_policy</code> (although the same is <em>not</em> true for <code>examples</code> entries used
+to <a href=#tests-that-use-a-beta-feature>create tests</a>). IAM-level tagging is only
+necessary in the (rare) case that a resource is available at a higher stability
+level than its <code>getIamPolicy</code>/<code>setIamPolicy</code> methods.</p><h4 id=adding-beta-fields>Adding beta field(s)
+<a class=anchor href=#adding-beta-fields>#</a></h4><p>NOTE: If a resource is already tagged as <code>min_version: beta</code>, follow the general
+instructions for adding a field instead.</p><p>To add support for a beta field to a GA resource, ensure that the <code>beta</code> entry
+already exists in the <code>versions</code> map for the product. See
+<a href=#adding-a-beta-resource>above</a> for details on doing so.</p><p>Next, add the field(s) as normal with a <code>min_version: beta</code> tag specified. In
+the case of nested fields, only the highest-level field must be tagged, as
+demonstrated below:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-diff data-lang=diff><span style=display:flex><span>         - !ruby/object:Api::Type::NestedObject
+</span></span><span style=display:flex><span>            name: &#39;scaleDownControl&#39;
+</span></span><span style=display:flex><span><span style=color:#a6e22e>+            min_version: beta
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e></span>            description: |
+</span></span><span style=display:flex><span>              Defines scale down controls to reduce the risk of response latency
+</span></span><span style=display:flex><span>              and outages due to abrupt scale-in events
+</span></span><span style=display:flex><span>            properties:
+</span></span><span style=display:flex><span>            - !ruby/object:Api::Type::Integer
+</span></span><span style=display:flex><span>              name: &#39;timeWindowSec&#39;
+</span></span><span style=display:flex><span>              description: |
+</span></span><span style=display:flex><span>                How long back autoscaling should look when computing recommendations
+</span></span><span style=display:flex><span>                to include directives regarding slower scale down, as described above.
+</span></span><span style=display:flex><span>...
+</span></span></code></pre></div><h4 id=tests-that-use-a-beta-feature>Tests that use a beta feature
+<a class=anchor href=#tests-that-use-a-beta-feature>#</a></h4><p>For tests that use beta features, you&rsquo;ll need to perform two additional steps:</p><ol><li>Add <code>provider = google-beta</code> to every resource in the test (even resources
+that aren&rsquo;t being tested and/or are also in the GA provider)</li><li>Add <code>min_version: beta</code> to the <code>Provider::Terraform::Examples</code> block</li></ol><p>For example, modifying the snippets above:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_topic&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;&#34;</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>  provider</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>google</span><span style=color:#f92672>-</span><span style=color:#a6e22e>beta</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;topic_name&#39;] %&gt;&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_topic&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;_dead_letter&#34;</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>  provider</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>google</span><span style=color:#f92672>-</span><span style=color:#a6e22e>beta</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;topic_name&#39;] %&gt;-dead-letter&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_subscription&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;&#34;</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>  provider</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>google</span><span style=color:#f92672>-</span><span style=color:#a6e22e>beta</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>  = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;subscription_name&#39;] %&gt;&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>topic</span> = <span style=color:#a6e22e>google_pubsub_topic</span>.<span style=color:#f92672>&lt;%=</span> <span style=color:#a6e22e>ctx</span>[<span style=color:#f92672>:</span><span style=color:#a6e22e>primary_resource_id</span>] <span style=color:#f92672>%&gt;</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>dead_letter_policy</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>dead_letter_topic</span> = <span style=color:#a6e22e>google_pubsub_topic</span>.<span style=color:#f92672>&lt;%=</span> <span style=color:#a6e22e>ctx</span>[<span style=color:#f92672>:</span><span style=color:#a6e22e>primary_resource_id</span>] <span style=color:#f92672>%&gt;</span><span style=color:#960050;background-color:#1e0010>_</span><span style=color:#a6e22e>dead_letter</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>max_delivery_attempts</span> = <span style=color:#ae81ff>10</span>
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Provider::Terraform::Examples</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#34;pubsub_subscription_dead_letter&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>min_version</span>: <span style=color:#ae81ff>beta</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>primary_resource_id</span>: <span style=color:#e6db74>&#34;example&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>vars</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>topic_name</span>: <span style=color:#e6db74>&#34;example-topic&#34;</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>subscription_name</span>: <span style=color:#e6db74>&#34;example-subscription&#34;</span>
+</span></span></code></pre></div><h4 id=promote-a-beta-feature>Promote a beta feature
+<a class=anchor href=#promote-a-beta-feature>#</a></h4><p>In order to promote a beta feature to GA, remove the version tags previously set
+on the feature or its tests. This will automatically make it available in the
+<code>google</code> provider and remove the note that the feature is in beta in the provider
+documentation.</p><p>For a resource, this typically means ensuring their removal:</p><ul><li>At the resource level, <code>resources</code> in <code>api.yaml</code></li><li>On all resource examples, <code>examples</code> in <code>terraform.yaml</code> (unless some examples
+use other beta resources or fields)<ul><li>Additionally, for any modified examples, all <code>provider = google-beta</code>
+annotations must be cleared</li></ul></li></ul><p>For a field, this typically means ensuring their removal:</p><ul><li>At the field level, <code>properties</code> in <code>api.yaml</code></li><li>On any resource examples where this was the last beta feature, <code>examples</code> in
+<code>terraform.yaml</code><ul><li>Additionally, for any modified examples, all <code>provider = google-beta</code>
+annotations must be cleared</li></ul></li></ul><p>If the feature was tested using handwritten tests, the version guards must be
+removed, as described in the
+<a href=third_party/terraform/README.md#promote-a-beta-feature>guidance for handwritten resources</a>.</p><p>When writing a changelog entry for a promotion, write it as if it was a new
+field or resource, and suffix it with <code>(ga only)</code>. For example, if the
+<code>google_container_cluster</code> resource was promoted to GA in your change:</p><pre tabindex=0><code>\`\`\`release-note:new-resource
+`google_container_cluster` (ga only)
+\`\`\`
+</code></pre><p>Alternatively, for field promotions, you may use &ldquo;{{service}}: promoted
+{{field}} in {{resource}} to GA&rdquo;, i.e.</p><pre tabindex=0><code>\`\`\`release-note:enhancement
+container: promoted `node_locations` field in google_container_cluster` to GA
+\`\`\`
+</code></pre></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/commit/b67f1560196ce353dadaaadac20855df9d3ae473 title='Last modified by Stephen Lewis (Burrows) | November 14, 2022' target=_blank rel=noopener><img src=/magic-modules/svg/calendar.svg class=book-icon alt=Calendar>
+<span>November 14, 2022</span></a></div><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/edit/main/docs/content/docs/mmv1.md target=_blank rel=noopener><img src=/magic-modules/svg/edit.svg class=book-icon alt=Edit>
+<span>Edit this page</span></a></div></div><script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script></footer><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><div class=book-toc-content><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#table-of-contents>Table of Contents</a></li><li><a href=#contributing>Contributing</a><ul><li><a href=#resource>Resource</a></li><li><a href=#iam-resource>IAM Resource</a></li><li><a href=#testing>Testing</a></li><li><a href=#documentation>Documentation</a></li><li><a href=#beta-feature>Beta Feature</a></li></ul></li></ul></nav></div></aside></main></body></html>
