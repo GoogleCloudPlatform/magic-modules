@@ -1001,7 +1001,7 @@ objects:
                 name: 'path'
                 description: |
                   Path inside the Cloud Storage bucket to write data to.
-              - !ruby/object:Api::Type::String
+              - !ruby/object:Api::Type::Integer
                 name: 'fileRotationMb'
                 description: |
                   The maximum file size to be saved in the bucket.
