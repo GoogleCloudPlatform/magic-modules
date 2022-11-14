@@ -13,24 +13,28 @@ func sensitiveParamCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v
 
 func paramsCustomizeDiffFunc(diff TerraformResourceDiff) error {
 	old, new := diff.GetChange("params")
+	dsId := diff.Get("data_source_id").(string)
 	oldParams := old.(map[string]interface{})
 	newParams := new.(map[string]interface{})
 	var err error
 
-	if oldParams["data_path_template"] != nil && newParams["data_path_template"] != nil && oldParams["data_path_template"].(string) != newParams["data_path_template"].(string) {
-		err = diff.ForceNew("params")
-		if err != nil {
-			return fmt.Errorf("ForceNew failed for params, old - %v and new - %v", oldParams, newParams)
+	// If data_source_id is google_cloud_storage, than data_path_template and destination_table_name_template are immutable fields
+	if dsId == "google_cloud_storage" {
+		if oldParams["data_path_template"] != nil && newParams["data_path_template"] != nil && oldParams["data_path_template"].(string) != newParams["data_path_template"].(string) {
+			err = diff.ForceNew("params")
+			if err != nil {
+				return fmt.Errorf("ForceNew failed for params, old - %v and new - %v", oldParams, newParams)
+			}
+			return nil
 		}
-		return nil
-	}
 
-	if oldParams["destination_table_name_template"] != nil && newParams["destination_table_name_template"] != nil && oldParams["destination_table_name_template"].(string) != newParams["destination_table_name_template"].(string) {
-		err = diff.ForceNew("params")
-		if err != nil {
-			return fmt.Errorf("ForceNew failed for params, old - %v and new - %v", oldParams, newParams)
+		if oldParams["destination_table_name_template"] != nil && newParams["destination_table_name_template"] != nil && oldParams["destination_table_name_template"].(string) != newParams["destination_table_name_template"].(string) {
+			err = diff.ForceNew("params")
+			if err != nil {
+				return fmt.Errorf("ForceNew failed for params, old - %v and new - %v", oldParams, newParams)
+			}
+			return nil
 		}
-		return nil
 	}
 
 	return nil

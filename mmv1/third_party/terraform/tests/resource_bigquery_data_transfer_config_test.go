@@ -20,52 +20,70 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 	}{
 		"changing_data_path_template": {
 			before: map[string]interface{}{
-				"data_path_template":              "gs://bq-bucket-temp/*.json",
-				"destination_table_name_template": "table-old",
-				"file_format":                     "JSON",
-				"max_bad_records":                 10,
-				"write_disposition":               "APPEND",
+				"data_source_id": "google_cloud_storage",
+				"params": map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},
 			},
 			after: map[string]interface{}{
-				"data_path_template":              "gs://bq-bucket-temp-new/*.json",
-				"destination_table_name_template": "table-old",
-				"file_format":                     "JSON",
-				"max_bad_records":                 10,
-				"write_disposition":               "APPEND",
+				"data_source_id": "google_cloud_storage",
+				"params": map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp-new/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},
 			},
 			forcenew: true,
 		},
 		"changing_destination_table_name_template": {
 			before: map[string]interface{}{
-				"data_path_template":              "gs://bq-bucket-temp/*.json",
-				"destination_table_name_template": "table-old",
-				"file_format":                     "JSON",
-				"max_bad_records":                 10,
-				"write_disposition":               "APPEND",
+				"data_source_id" : "google_cloud_storage",
+				"params" : map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},	
 			},
 			after: map[string]interface{}{
-				"data_path_template":              "gs://bq-bucket-temp/*.json",
-				"destination_table_name_template": "table-new",
-				"file_format":                     "JSON",
-				"max_bad_records":                 10,
-				"write_disposition":               "APPEND",
+				"data_source_id" : "google_cloud_storage",
+				"params" : map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-new",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},	
 			},
 			forcenew: true,
 		},
 		"changing_non_force_new_fields": {
 			before: map[string]interface{}{
-				"data_path_template":              "gs://bq-bucket-temp/*.json",
-				"destination_table_name_template": "table-old",
-				"file_format":                     "JSON",
-				"max_bad_records":                 10,
-				"write_disposition":               "APPEND",
+				"data_source_id" : "google_cloud_storage",
+				"params" : map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "APPEND",
+				},	
 			},
 			after: map[string]interface{}{
-				"data_path_template":              "gs://bq-bucket-temp/*.json",
-				"destination_table_name_template": "table-old",
-				"file_format":                     "JSON",
-				"max_bad_records":                 1000,
-				"write_disposition":               "APPEND",
+				"data_source_id" : "google_cloud_storage",
+				"params" : map[string]interface{}{
+					"data_path_template":              "gs://bq-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 1000,
+					"write_disposition":               "APPEND",
+				},	
 			},
 			forcenew: false,
 		},
@@ -74,10 +92,12 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 	for tn, tc := range cases {
 		d := &ResourceDiffMock{
 			Before: map[string]interface{}{
-				"params": tc.before,
+				"params":         tc.before["params"],
+				"data_source_id": tc.before["data_source_id"],
 			},
 			After: map[string]interface{}{
-				"params": tc.after,
+				"params": tc.after["params"],
+				"data_source_id": tc.after["data_source_id"],
 			},
 		}
 		err := paramsCustomizeDiffFunc(d)
