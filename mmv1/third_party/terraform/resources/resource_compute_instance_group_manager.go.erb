@@ -319,7 +319,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			},
 			<% unless version == "ga" -%>
 			"stateful_internal_ip": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: `External IPs considered stateful by the instance group. `,
@@ -328,7 +328,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 						"interface_name": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Default:     "nic0",
 							Description: `The network interface name`,
 						},
 						"delete_rule": {
@@ -342,7 +341,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 			"stateful_external_ip": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: `External IPs considered stateful by the instance group. `,
@@ -351,7 +350,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 						"interface_name": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Default:     "nic0",
 							Description: `The network interface name`,
 						},
 						"delete_rule": {
@@ -826,10 +824,18 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	}
 	<% end -%>
 
-	if d.HasChange("stateful_disk") {
+	isStatefulPolicyExpanded := false
+	if d.HasChange("stateful_disk") && !d.HasChange("stateful_internal_ips") && !d.HasChange("stateful_external_ips") {
+		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
+		change = true
+		isStatefulPolicyExpanded = true
+	}
+	<% unless version == "ga" -%>
+	if d.HasChange("stateful_internal_ips") || d.HasChange("stateful_external_ips") && isStatefulPolicyExpanded == false{
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 	}
+	<% end -%>
 
 	if change {
 		op, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Patch(project, zone, d.Get("name").(string), updatedManager).Do()
