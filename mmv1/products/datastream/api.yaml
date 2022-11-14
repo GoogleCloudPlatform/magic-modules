@@ -1095,7 +1095,7 @@ objects:
                         description: |
                           If supplied, every created dataset will have its name prefixed by the provided value.
                           The prefix and name will be separated by an underscore. i.e. _.
-      - !ruby/object::Api::Type::Enum
+      - !ruby/object:Api::Type::Enum
         name: 'state'
         description: The state of the stream.
         values:
