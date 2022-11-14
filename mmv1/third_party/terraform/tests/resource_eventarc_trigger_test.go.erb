@@ -8,11 +8,7 @@ import (
 	"testing"
 
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
-	<% if version == "ga" -%>
-	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
-	<% else -%>
-	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
-	<% end %>
+	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc<%= dcl_version(version) -%>"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
