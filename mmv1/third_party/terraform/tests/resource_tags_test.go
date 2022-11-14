@@ -849,6 +849,7 @@ resource "google_tags_location_tag_binding" "binding" {
 func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
+			
 			if rs.Type != "google_tags_location_tag_binding" {
 				continue
 			}
