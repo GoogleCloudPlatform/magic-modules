@@ -1,12 +1,27 @@
 
 resource "google_filestore_instance" "instance" {
   name     = "<%= ctx[:vars]["instance_name"] %>"
-  location = "us-central1"
-  tier     = "ENTERPRISE"
+  location = "us-central1-a"
+  tier     = "BASIC_HDD"
+
 
   file_shares {
     capacity_gb = 1024
-    name        = "share1"
+    name        = "share4"
+
+
+    nfs_export_options {
+      ip_ranges = ["10.0.0.0/24"]
+      access_mode = "READ_WRITE"
+      squash_mode = "NO_ROOT_SQUASH"
+    }
+
+    nfs_export_options {
+      ip_ranges = ["10.10.0.0/24"]
+      access_mode = "READ_ONLY"
+      squash_mode = "ROOT_SQUASH"
+      anon_uid = 123
+    }
   }
 
   networks {
@@ -16,7 +31,7 @@ resource "google_filestore_instance" "instance" {
 }
 
 resource "google_filestore_backup" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]["backup_name"] %>"
+  name        = "tf-test-test-backup%{random_suffix}"
   location    = google_filestore_instance.instance.location
   description = "This is a filestore backup for the test instance"
   labels = {
@@ -24,6 +39,5 @@ resource "google_filestore_backup" "<%= ctx[:primary_resource_id] %>" {
     "otherLabel": "label2"
     }
   source_instance   = google_filestore_instance.instance.id
-  source_file_share = "share1"
+  source_file_share = "share4"
 }
-

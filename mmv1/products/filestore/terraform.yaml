@@ -58,7 +58,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     error_retry_predicates: ["isNotFilestoreQuotaError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "filestore_backup_full"
+        name: "filestore_backup_basic"
         primary_resource_id: "backup"
         vars:
           backup_name: "test-backup"
