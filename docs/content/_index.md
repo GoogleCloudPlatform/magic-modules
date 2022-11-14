@@ -329,12 +329,12 @@ any affected tools, the primary reviewer will merge your changes.
 
 Task          | Section
 --------------|--------------
-Resource      | [handwritten](./handwritten/#resource) / [mmv1](./mmv1/#resource)
-Datasource    | [handwritten](./handwritten/#datasource) / (only handwritten datasources are supported)
-IAM resource  | [handwritten](./handwritten/#iam-resource) / [mmv1](./mmv1/#iam-resource)
-Testing       | [handwritten](./handwritten/#testing) / [mmv1](./mmv1/#testing)
-Documentation | [handwritten](./handwritten/#documentation) / [mmv1](./mmv1/#documentation)
-Beta feature  | [handwritten](./handwritten/#beta-feature) / [mmv1](./mmv1/#beta-feature)
+Resource      | [handwritten](./docs/handwritten/#resource) / [mmv1](./docs/mmv1/#resource)
+Datasource    | [handwritten](./docs/handwritten/#datasource) / (only handwritten datasources are supported)
+IAM resource  | [handwritten](./docs/handwritten/#iam-resource) / [mmv1](./docs/mmv1/#iam-resource)
+Testing       | [handwritten](./docs/handwritten/#testing) / [mmv1](./docs/mmv1/#testing)
+Documentation | [handwritten](./docs/handwritten/#documentation) / [mmv1](./docs/mmv1/#documentation)
+Beta feature  | [handwritten](./docs/handwritten/#beta-feature) / [mmv1](./docs/mmv1/#beta-feature)
 
 ---
 
