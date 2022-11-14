@@ -128,6 +128,7 @@ func skipResource(r *Resource) bool {
 	if sFilter != nil && *sFilter != "" && DCLPackageName(*sFilter) != r.ProductMetadata().PackageName {
 		return true
 	}
+
 	// skip filtered resources
 	if rFilter != nil && *rFilter != "" && SnakeCaseTerraformResourceName(*rFilter) != r.Name() {
 		return true

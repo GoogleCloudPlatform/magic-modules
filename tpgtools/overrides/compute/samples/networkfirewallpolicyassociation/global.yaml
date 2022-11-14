@@ -1,0 +1,11 @@
+updates:
+- resource: ./global_update.tf.tmpl
+variables:
+- name: association
+  type: resource_name
+- name: policy
+  type: resource_name
+- name: network
+  type: resource_name
+- name: project
+  type: project

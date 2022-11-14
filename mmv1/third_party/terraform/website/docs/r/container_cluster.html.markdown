@@ -470,15 +470,16 @@ addons_config {
 
 <a name="nested_cluster_autoscaling"></a>The `cluster_autoscaling` block supports:
 
-* `enabled` - (Required) Whether node auto-provisioning is enabled. Resource
-limits for `cpu` and `memory` must be defined to enable node auto-provisioning.
+* `enabled` - (Optional) Whether node auto-provisioning is enabled. Must be supplied for GKE Standard clusters, `true` is implied
+for autopilot clusters. Resource limits for `cpu` and `memory` must be defined to enable node auto-provisioning for GKE Standard.
 
 * `resource_limits` - (Optional) Global constraints for machine resources in the
 cluster. Configuring the `cpu` and `memory` types is required if node
 auto-provisioning is enabled. These limits will apply to node pool autoscaling
 in addition to node auto-provisioning. Structure is [documented below](#nested_resource_limits).
 
-* `auto_provisioning_defaults` - (Optional) Contains defaults for a node pool created by NAP.
+* `auto_provisioning_defaults` - (Optional) Contains defaults for a node pool created by NAP. A subset of fields also apply to
+GKE Autopilot clusters.
 Structure is [documented below](#nested_auto_provisioning_defaults).
 
 * `autoscaling_profile` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Configuration
@@ -503,11 +504,11 @@ Minimum CPU platform to be used for NAP created node pools. The instance may be 
 specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such
 as "Intel Haswell" or "Intel Sandy Bridge".
 
-* `oauth_scopes` - (Optional) Scopes that are used by NAP when creating node pools. Use the "https://www.googleapis.com/auth/cloud-platform" scope to grant access to all APIs. It is recommended that you set `service_account` to a non-default service account and grant IAM roles to that service account for only the resources that it needs.
+* `oauth_scopes` - (Optional) Scopes that are used by NAP and GKE Autopilot when creating node pools. Use the "https://www.googleapis.com/auth/cloud-platform" scope to grant access to all APIs. It is recommended that you set `service_account` to a non-default service account and grant IAM roles to that service account for only the resources that it needs.
 
 -> `monitoring.write` is always enabled regardless of user input.  `monitoring` and `logging.write` may also be enabled depending on the values for `monitoring_service` and `logging_service`.
 
-* `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs.
+* `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs created by GKE Autopilot or NAP.
 
 * `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
 
@@ -528,32 +529,6 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 * `auto_repair` - (Optional) Specifies whether the node auto-repair is enabled for the node pool. If enabled, the nodes in this node pool will be monitored and, if they fail health checks too many times, an automatic repair action will be triggered.
 
 This block also contains several computed attributes, documented below.
-
-* `upgrade_settings` - (Optional) Specifies the upgrade settings for NAP created node pools. Structure is [documented below](#nested_upgrade_settings).
-
-<a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
-
-* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN or SURGE. The default is value is SURGE.
-
-* `max_surge` - (Optional) The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
-
-* `max_unavailable` - (Optional) The maximum number of nodes that can be simultaneously unavailable during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
-
-* `blue_green_settings` - (Optional) Settings for blue-green upgrade strategy. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_blue_green_settings).
-
-<a name="nested_blue_green_settings"></a>The `blue_green_settings` block supports:
-
-* `node_pool_soak_duration` - (Optional) Time needed after draining entire blue pool. After this period, blue pool will be cleaned up. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-
-* `standard_rollout_policy`: (Optional) Standard policy for the blue-green upgrade. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_standard_rollout_policy).
-
-<a name="nested_standard_rollout_policy"></a>The `standard_rollout_policy` block supports:
-
-* `batch_percentage`: (Optional) Percentage of the bool pool nodes to drain in a batch. The range of this field should be (0.0, 1.0). Only one of the batch_percentage or batch_node_count can be specified.
-
-* `batch_node_count` - (Optional) Number of blue nodes to drain in a batch. Only one of the batch_percentage or batch_node_count can be specified.
-
-* `batch_soak_duration` - (Optional) Soak time after each batch gets drained. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".`.
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
