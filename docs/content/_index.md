@@ -1,9 +1,8 @@
 ---
-# Feel free to add content and custom Front Matter to this file.
-# To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
-
-layout: default
+title: ""
+date: 2022-11-14T09:50:49-08:00
 ---
+
 
 # Magic Modules
 
