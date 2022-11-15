@@ -950,6 +950,11 @@ resource "google_compute_region_url_map" "foobar" {
       }
     }
 
+    timeout {
+      seconds = 3
+      nanos = 0
+    }
+
     request_mirror_policy {
       backend_service = google_compute_region_backend_service.login.id
     }
@@ -1062,6 +1067,12 @@ resource "google_compute_region_url_map" "foobar" {
         seconds = 1
         nanos = 0
       }
+    }
+
+    # update to be <1 second
+    timeout {
+      seconds = 0
+      nanos = 10000000 # 0.01 seconds
     }
 
     # update backend_service field from 'login' to 'home'
