@@ -955,6 +955,11 @@ resource "google_compute_region_url_map" "foobar" {
       nanos = 0
     }
 
+    url_rewrite {
+      path_prefix_rewrite = "foobar"
+      host_rewrite = "fizzbuzz"
+    }
+
     request_mirror_policy {
       backend_service = google_compute_region_backend_service.login.id
     }
@@ -1073,6 +1078,12 @@ resource "google_compute_region_url_map" "foobar" {
     timeout {
       seconds = 0
       nanos = 10000000 # 0.01 seconds
+    }
+
+    # update both values
+    url_rewrite {
+      path_prefix_rewrite = "foobar-2"
+      host_rewrite = "fizzbuzz-2"
     }
 
     # update backend_service field from 'login' to 'home'
