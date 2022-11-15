@@ -964,6 +964,16 @@ resource "google_compute_region_url_map" "foobar" {
       backend_service = google_compute_region_backend_service.login.id
     }
 
+    cors_policy {
+      allow_origins = [ "https://www.example.com" ]
+      allow_methods = [ "GET" ]
+      allow_headers = [ "Content-Type" ]
+      expose_headers = [ "Authorization" ]
+      max_age = 600
+      allow_credentials = true
+      disabled = false
+    }
+
     weighted_backend_services {
       backend_service = google_compute_region_backend_service.login.id
       weight = 200
@@ -1089,6 +1099,17 @@ resource "google_compute_region_url_map" "foobar" {
     # update backend_service field from 'login' to 'home'
     request_mirror_policy {
       backend_service = google_compute_region_backend_service.home.id 
+    }
+
+    # update policy and disable it
+    cors_policy {
+      allow_origins = [ "https://xylophone.example.com", "https://www.example.com" ]
+      allow_methods = [ "PUT", "GET" ]
+      allow_headers = [ "Content-Type" ]
+      expose_headers = [ "Authorization" ]
+      max_age = 600
+      allow_credentials = true
+      disabled = true
     }
 
     # Change various fields - marked with comments
