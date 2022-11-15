@@ -7,20 +7,6 @@ resource "google_filestore_instance" "instance" {
   file_shares {
     capacity_gb = 2560
     name        = "share1"
-
-    nfs_export_options {
-      ip_ranges = ["10.0.0.0/24"]
-      access_mode = "READ_WRITE"
-      squash_mode = "NO_ROOT_SQUASH"
-   }
-
-   nfs_export_options {
-      ip_ranges = ["10.10.0.0/24"]
-      access_mode = "READ_ONLY"
-      squash_mode = "ROOT_SQUASH"
-      anon_uid = 123
-      anon_gid = 456
-   }
   }
 
   networks {
@@ -31,14 +17,15 @@ resource "google_filestore_instance" "instance" {
 }
 
 resource "google_filestore_backup" "<%= ctx[:primary_resource_id] %>" {
-  name        = "tf-test-backup%{random_suffix}"
-  location    = google_filestore_instance.instance.location
+  name        = "tf-tst-bkup%{random_suffix}"
+  location    = "us-central1"
+  source_instance   = google_filestore_instance.instance.name
+  source_file_share = "share1"
+
   description = "This is a filestore backup for the test instance"
   labels = {
     "files":"label1",
     "other-label": "label2"
   }
-  source_instance   = google_filestore_instance.instance.id
-  source_file_share = "share1"
 }
 

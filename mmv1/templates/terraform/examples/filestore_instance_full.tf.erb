@@ -31,12 +31,12 @@ resource "google_filestore_instance" "<%= ctx[:primary_resource_id] %>" {
 
 resource "google_filestore_backup" "default" {
   name        = "<%= ctx[:vars]["backup_name"] %>"
-  location    = google_filestore_instance.instance.location
+  location    = "us-central1"
   description = "This is a filestore backup for the test instance"
   labels = {
     "files":"label1",
     "other-label": "label2"
     }
-  source_instance   = google_filestore_instance.instance.id
+  source_instance   = google_filestore_instance.instance.name
   source_file_share = "share1"
 }
