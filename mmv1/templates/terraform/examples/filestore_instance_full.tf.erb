@@ -35,7 +35,7 @@ resource "google_filestore_backup" "default" {
   description = "This is a filestore backup for the test instance"
   labels = {
     "files":"label1",
-    "otherLabel": "label2"
+    "other-label": "label2"
     }
   source_instance   = google_filestore_instance.instance.id
   source_file_share = "share1"
