@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -15,11 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/googleapi"
-<% if version == "ga" -%>
+
 	"google.golang.org/api/dataproc/v1"
-<% else -%>
-	dataproc "google.golang.org/api/dataproc/v1beta2"
-<% end -%>
 )
 
 type jobTestField struct {
