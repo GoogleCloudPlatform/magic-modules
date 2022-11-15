@@ -10,65 +10,65 @@ import (
 )
 
 func TestAccDataprocWorkflowTemplate_basic(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": randString(t, 10),
-    "project": getTestProjectFromEnv(),
-    "version": "2.0.35-debian10",
-  }
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"project":       getTestProjectFromEnv(),
+		"version":       "2.0.35-debian10",
+	}
 
-  vcrTest(t, resource.TestCase{
-    PreCheck:          func() { testAccPreCheck(t) },
-    Providers:         testAccProviders,
-    CheckDestroy:      funcAccTestDataprocWorkflowTemplateCheckDestroy(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "random": {},
-    },
-    Steps: []resource.TestStep{
-      {
-        Config: testAccDataprocWorkflowTemplate_basic(context),
-      },
-      {
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ResourceName:            "google_dataproc_workflow_template.template",
-      },
-    },
-  })
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: funcAccTestDataprocWorkflowTemplateCheckDestroy(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocWorkflowTemplate_basic(context),
+			},
+			{
+				ImportState:       true,
+				ImportStateVerify: true,
+				ResourceName:      "google_dataproc_workflow_template.template",
+			},
+		},
+	})
 }
 
 func TestAccDataprocWorkflowTemplate_withShieldedVMs(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": randString(t, 10),
-    "project": getTestProjectFromEnv(),
-    "version": "2.0.35-debian10",
-  }
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"project":       getTestProjectFromEnv(),
+		"version":       "2.0.35-debian10",
+	}
 
-  vcrTest(t, resource.TestCase{
-    PreCheck:          func() { testAccPreCheck(t) },
-    Providers:         testAccProviders,
-    CheckDestroy:      funcAccTestDataprocWorkflowTemplateCheckDestroy(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "random": {},
-    },
-    Steps: []resource.TestStep{
-      {
-        Config: testAccDataprocWorkflowTemplate_withShieldedVMs(context),
-      },
-      {
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ResourceName:            "google_dataproc_workflow_template.shielded_vms_template",
-      },
-    },
-  })
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: funcAccTestDataprocWorkflowTemplateCheckDestroy(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocWorkflowTemplate_withShieldedVMs(context),
+			},
+			{
+				ImportState:       true,
+				ImportStateVerify: true,
+				ResourceName:      "google_dataproc_workflow_template.shielded_vms_template",
+			},
+		},
+	})
 }
 
 func testAccDataprocWorkflowTemplate_basic(context map[string]interface{}) string {
-  return Nprintf(`
+	return Nprintf(`
 resource "google_dataproc_workflow_template" "template" {
   name = "template%{random_suffix}"
   location = "us-central1"
@@ -124,7 +124,7 @@ resource "google_dataproc_workflow_template" "template" {
 }
 
 func testAccDataprocWorkflowTemplate_withShieldedVMs(context map[string]interface{}) string {
-  return Nprintf(`
+	return Nprintf(`
 resource "google_dataproc_workflow_template" "shielded_vms_template" {
   name = "template%{random_suffix}"
   location = "us-central1"
@@ -185,34 +185,34 @@ resource "google_dataproc_workflow_template" "shielded_vms_template" {
 }
 
 func funcAccTestDataprocWorkflowTemplateCheckDestroy(t *testing.T) func(s *terraform.State) error {
-  return func(s *terraform.State) error {
-    for name, rs := range s.RootModule().Resources {
-      if rs.Type != "google_dataproc_workflow_template" {
-        continue
-      }
-      if strings.HasPrefix(name, "data.") {
-        continue
-      }
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_dataproc_workflow_template" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
 
-      config := googleProviderConfig(t)
+			config := googleProviderConfig(t)
 
-      url, err := replaceVarsForTest(config, rs, "{{DataprocBasePath}}projects/{{project}}/locations/{{location}}/workflowTemplates/{{name}}")
-      if err != nil {
-        return err
-      }
+			url, err := replaceVarsForTest(config, rs, "{{DataprocBasePath}}projects/{{project}}/locations/{{location}}/workflowTemplates/{{name}}")
+			if err != nil {
+				return err
+			}
 
-      billingProject := ""
+			billingProject := ""
 
-      if config.BillingProject != "" {
-        billingProject = config.BillingProject
-      }
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
 
-      _, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
-      if err == nil {
-        return fmt.Errorf("DataprocWorkflowTemplate still exists at %s", url)
-      }
-    }
+			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			if err == nil {
+				return fmt.Errorf("DataprocWorkflowTemplate still exists at %s", url)
+			}
+		}
 
-    return nil
-  }
+		return nil
+	}
 }

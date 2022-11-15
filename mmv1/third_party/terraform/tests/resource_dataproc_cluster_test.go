@@ -677,13 +677,13 @@ func TestAccDataprocCluster_withLifecycleConfigAutoDeletion(t *testing.T) {
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour * 10).Format(fmtString)),
+				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour*10).Format(fmtString)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_lifecycle_config", &cluster),
 				),
 			},
 			{
-				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour * 20).Format(fmtString)),
+				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour*20).Format(fmtString)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_lifecycle_config", &cluster),
 				),
@@ -842,7 +842,7 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 	pid := getTestProjectFromEnv()
 	msName_basic := fmt.Sprintf("projects/%s/locations/us-central1/services/metastore-srv", pid)
 	msName_update := fmt.Sprintf("projects/%s/locations/us-central1/services/metastore-srv-update", pid)
-	
+
 	var cluster dataproc.Cluster
 	rnd := randString(t, 10)
 	vcrTest(t, resource.TestCase{
@@ -854,8 +854,7 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 				Config: testAccDataprocCluster_withMetastoreConfig(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service",msName_basic),
-					
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service", msName_basic),
 				),
 			},
 			{
@@ -863,7 +862,6 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service", msName_update),
-					
 				),
 			},
 		},
@@ -1149,7 +1147,6 @@ resource "google_dataproc_cluster" "basic" {
 `, rnd)
 }
 
-
 func testAccDataprocVirtualCluster_basic(projectID string, rnd string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -1221,7 +1218,6 @@ func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster,
 		return fmt.Errorf("Cluster NodePools does not contain expected roles : %v", roles)
 	}
 }
-
 
 func testAccDataprocCluster_withAccelerators(rnd, acceleratorType, zone string) string {
 	return fmt.Sprintf(`

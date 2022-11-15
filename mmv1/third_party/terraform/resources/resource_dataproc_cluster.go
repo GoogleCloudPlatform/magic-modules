@@ -18,7 +18,6 @@ import (
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
 
-
 	virtualClusterConfigKeys = []string{
 		"virtual_cluster_config.0.staging_bucket",
 		"virtual_cluster_config.0.auxiliary_services_config",
@@ -199,8 +198,8 @@ func resourceDataprocCluster() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				// GCP automatically adds labels
 				DiffSuppressFunc: resourceDataprocLabelDiffSuppress,
-				Computed:    true,
-				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
+				Computed:         true,
+				Description:      `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
 			},
 
 			"virtual_cluster_config": {
@@ -680,8 +679,8 @@ func resourceDataprocCluster() *schema.Resource {
 									// "machine_type": { ... }
 									// "min_cpu_platform": { ... }
 									"preemptibility": {
-										Type:		 schema.TypeString,
-										Optional: 	 true,
+										Type:        schema.TypeString,
+										Optional:    true,
 										Description: `Specifies the preemptibility of the secondary nodes. Defaults to PREEMPTIBLE.`,
 										AtLeastOneOf: []string{
 											"cluster_config.0.preemptible_worker_config.0.num_instances",
@@ -905,7 +904,7 @@ by Dataproc`,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 											ValidateFunc: validation.StringInSlice([]string{"COMPONENT_UNSPECIFIED", "ANACONDA", "DOCKER", "DRUID", "HBASE", "FLINK",
-												 "HIVE_WEBHCAT", "JUPYTER", "KERBEROS", "PRESTO", "RANGER", "SOLR", "ZEPPELIN", "ZOOKEEPER"}, false),
+												"HIVE_WEBHCAT", "JUPYTER", "KERBEROS", "PRESTO", "RANGER", "SOLR", "ZEPPELIN", "ZOOKEEPER"}, false),
 										},
 									},
 								},
@@ -972,22 +971,22 @@ by Dataproc`,
 							},
 						},
 						"metastore_config": {
-							Type:             schema.TypeList,
-							Optional:         true,
-							AtLeastOneOf:     clusterConfigKeys,
-							MaxItems:         1,
-							Description:      `Specifies a Metastore configuration.`,
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							MaxItems:     1,
+							Description:  `Specifies a Metastore configuration.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"dataproc_metastore_service": {
-										Type:             schema.TypeString,
-										Required:         true,
-										ForceNew:         true,
-										Description:      `Resource name of an existing Dataproc Metastore service.`,
+										Type:        schema.TypeString,
+										Required:    true,
+										ForceNew:    true,
+										Description: `Resource name of an existing Dataproc Metastore service.`,
 									},
 								},
 							},
-						},						
+						},
 						"lifecycle_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -1159,8 +1158,8 @@ func instanceConfigSchema(parent string) *schema.Schema {
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
 									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface",
 								},
-								ForceNew:     true,
-								Default:      "pd-standard",
+								ForceNew: true,
+								Default:  "pd-standard",
 							},
 							"local_ssd_interface": {
 								Type:        schema.TypeString,
