@@ -1,8 +1,10 @@
 package google
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
+	"strconv"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceGoogleStorageBucket() *schema.Resource {
@@ -33,5 +35,8 @@ func dataSourceGoogleStorageBucketRead(d *schema.ResourceData, meta interface{})
 	}
 	log.Printf("[DEBUG] Read bucket %v at location %v\n\n", res.Name, res.SelfLink)
 
-	return setStorageBucket(d, config, res, bucket, userAgent)
+	setStorageBucket(d, config, res, bucket, userAgent)
+
+	d.Set("project", strconv.Itoa(int(res.ProjectNumber)))
+	return nil
 }
