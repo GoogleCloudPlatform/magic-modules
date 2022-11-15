@@ -5,7 +5,7 @@ resource "google_filestore_instance" "instance" {
   tier = "BASIC_SSD"
 
   file_shares {
-    capacity_gb = 1024
+    capacity_gb = 2560
     name        = "share1"
 
     nfs_export_options {
