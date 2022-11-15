@@ -41,7 +41,7 @@ func resourceTagsLocationTagBinding() *schema.Resource {
 			"location": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Optional: true,
+				Required: true,
 				Description: `The geographic location where the transfer config should reside.
 Examples: US, EU, asia-northeast1. The default value is US.`,
 			},
@@ -230,19 +230,17 @@ func resourceTagsLocationTagBindingDelete(d *schema.ResourceData, meta interface
 
 func resourceTagsLocationTagBindingImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
+	
+	// current import_formats can't import fields with forward slashes in their value
 	if err := parseImportId([]string{
-		"tagBindings/(?P<name>[^/]+)",
-		"(?P<name>[^/]+)",
+		"tagBindings/(?P<name>.+)",
+		"(?P<name>.+)",
 	}, d, config); err != nil {
 		return nil, err
 	}
 
-	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "tagBindings/?parent={{parent}}&pageSize=300")
-	if err != nil {
-		return nil, fmt.Errorf("Error constructing id: %s", err)
-	}
-	d.SetId(id)
+	name := d.Get("name").(string)
+	d.SetId(name)
 
 	return []*schema.ResourceData{d}, nil
 }

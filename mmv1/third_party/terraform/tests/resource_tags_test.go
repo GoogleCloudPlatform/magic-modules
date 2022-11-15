@@ -803,9 +803,6 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 func testAccTagsLocationTagBinding_locationTagBindingBasicExample(context map[string]interface{}) string {
 	return Nprintf(`
 data "google_project" "project" {
-	# project_id = "%{project_id}"
-	# name       = "%{project_id}"
-	# org_id     = "%{org_id}"
 }
 
 resource "google_tags_tag_key" "key" {
