@@ -1,0 +1,1 @@
+Documentation is generated using [Hugo](https://gohugo.io/).

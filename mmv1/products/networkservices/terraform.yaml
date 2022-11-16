@@ -21,6 +21,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           resource_name: "default"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_services_edge_cache_keyset_dual_token"
+        primary_resource_id: "default"
+        vars:
+          resource_name: "default"
+          secret_name: "secret-name"
     properties:
       publicKeys: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "public_key"
@@ -43,6 +49,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           resource_name: "my-origin"
           resource_name_2: "my-fallback"
+        ignore_read_extra:
+         - "timeout"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_services_edge_cache_origin_v4auth"
+        primary_resource_id: "default"
+        vars:
+          resource_name: "my-origin"
+          secret_name: "secret-name"
         ignore_read_extra:
          - "timeout"
     properties:
@@ -80,6 +94,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "my-bucket"
           origin_name: "my-origin"
           origin_google: "origin-google"
+          service_name: "my-service"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_services_edge_cache_service_dual_token"
+        primary_resource_id: "instance"
+        vars:
+          secret_name: "secret-name"
+          keyset_name: "keyset-name"
+          origin_name: "my-origin"
           service_name: "my-service"
     properties:
       disableQuic: !ruby/object:Overrides::Terraform::PropertyOverride

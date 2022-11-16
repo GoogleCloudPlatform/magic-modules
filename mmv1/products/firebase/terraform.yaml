@@ -54,6 +54,71 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
         ignore_read_extra:
           - project
+          - deletion_policy
+    virtual_fields:
+      - !ruby/object:Api::Type::String
+        name: 'deletion_policy'
+        description: |
+          Set to `ABANDON` to allow the WebApp to be untracked from terraform state
+          rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be
+          serving traffic. Set to `DELETE` to delete the WebApp. Default to `ABANDON`
+        default_value: ABANDON
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
+  AndroidApp: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/androidApps/{{appId}}", "androidApps/{{appId}}", "{{appId}}"]
+    autogen_async: true
+    skip_sweeper: true # Skip sweeper generation and use hard-delete in hand-written sweeper
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_android_app_basic"
+        min_version: "beta"
+        primary_resource_id: "basic"
+        vars:
+          display_name: "Display Name Basic"
+        test_env_vars:
+          org_id: :ORG_ID
+          project_id: :PROJECT_NAME
+        test_vars_overrides:
+          package_name: '"android.package." + randString(t, 5)'
+        ignore_read_extra:
+          - project
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
+  AppleApp: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/iosApps/{{appId}}", "iosApps/{{appId}}", "{{appId}}"]
+    autogen_async: true
+    skip_sweeper: true # Skip sweeper generation and use hard-delete in hand-written sweeper
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_apple_app_basic"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          display_name: "Display Name Basic"
+          bundle_id: "apple.app.12345"
+        test_env_vars:
+          org_id: :ORG_ID
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_apple_app_full"
+        min_version: "beta"
+        primary_resource_id: "full"
+        vars:
+          display_name: "Display Name Full"
+          bundle_id: "apple.app.12345"
+          app_store_id: "12345"
+          team_id: "9987654321" # Has to be a 10-digit number.
+        test_env_vars:
+          org_id: :ORG_ID
+          project_id: :PROJECT_NAME
+        test_vars_overrides:
+          app_store_id: "12345"
+          team_id: "9987654321"
+        ignore_read_extra:
+          - project
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb

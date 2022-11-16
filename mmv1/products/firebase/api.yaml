@@ -49,7 +49,6 @@ objects:
       A Google Cloud Firebase instance. This enables Firebase resources on a given google project.
       Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
       identifiers (most importantly, the projectId) as its own for easy interop with GCP APIs.
-
       Once Firebase has been added to a Google Project it cannot be removed.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -79,10 +78,8 @@ objects:
     input: true
     description: |
       Sets the default Google Cloud Platform (GCP) resource location for the specified FirebaseProject.
-
       This method creates an App Engine application with a default Cloud Storage bucket, located in the specified
       locationId. This location must be one of the available GCP resource locations.
-
       After the default GCP resource location is finalized, or if it was already set, it cannot be changed.
       The default GCP resource location for the specified FirebaseProject might already be set because either the
       GCP Project already has an App Engine application or defaultLocation.finalize was previously called with a
@@ -134,22 +131,11 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
-    parameters:
-      - !ruby/object:Api::Type::String
-        name: 'deletion_policy'
-        description: |
-          (Optional) Set to `ABANDON` to allow the WebApp to be untracked from terraform state
-          rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be 
-          serving traffic. Set to `DELETE` to delete the WebApp. Default to `ABANDON`
-        input: true
-        url_param_only: true
-        default_value: ABANDON
     properties:
       - !ruby/object:Api::Type::String
         name: name
         description: |
           The fully qualified resource name of the App, for example:
-
           projects/projectId/webApps/appId
         output: true
       - !ruby/object:Api::Type::String
@@ -161,8 +147,7 @@ objects:
         name: appId
         output: true
         description: |
-          Immutable. The globally unique, Firebase-assigned identifier of the App.
-
+          The globally unique, Firebase-assigned identifier of the App.
           This identifier should be treated as an opaque token, as the data format is not specified.
       - !ruby/object:Api::Type::Array
         name: appUrls
@@ -170,3 +155,144 @@ objects:
         description: |
           The URLs where the `WebApp` is hosted.
         item_type: Api::Type::String
+  - !ruby/object:Api::Resource
+    name: 'AndroidApp'
+    min_version: beta
+    base_url: projects/{{project}}/androidApps
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    delete_verb: :POST
+    delete_url: '{{name}}:remove'
+    description: |
+      A Google Cloud Firebase Android application instance
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://firebase.google.com/docs/android/setup'
+      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.androidApps'
+    async: !ruby/object:Api::OpAsync
+      actions: ["create", "delete"]
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'deletion_policy'
+        description: |
+          (Optional) Set to `ABANDON` to allow the AndroidApp to be untracked from terraform state
+          rather than deleted upon `terraform destroy`. This is useful because the AndroidApp may be
+          serving traffic. Set to `DELETE` to delete the AndroidApp. Default to `DELETE`.
+        input: true
+        url_param_only: true
+        default_value: DELETE
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The fully qualified resource name of the App, for example:
+          projects/projectId/androidApps/appId
+        output: true
+      - !ruby/object:Api::Type::String
+        name: displayName
+        required: true
+        description: |
+          The user-assigned display name of the App.
+      - !ruby/object:Api::Type::String
+        name: appId
+        output: true
+        description: |
+          The globally unique, Firebase-assigned identifier of the App.
+          This identifier should be treated as an opaque token, as the data format is not specified.
+      - !ruby/object:Api::Type::String
+        name: packageName
+        description: |
+          Immutable. The canonical package name of the Android app as would appear in the Google Play
+          Developer Console.
+  - !ruby/object:Api::Resource
+    name: 'AppleApp'
+    min_version: beta
+    base_url: projects/{{project}}/iosApps
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    delete_verb: :POST
+    delete_url: 'projects/{{project}}/iosApps/{{app_id}}:remove'
+    update_mask: true
+    description: |
+      A Google Cloud Firebase Apple application instance
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://firebase.google.com/docs/ios/setup'
+      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.iosApps'
+    async: !ruby/object:Api::OpAsync
+      actions: ["create", "delete"]
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'deletion_policy'
+        description: |
+          (Optional) Set to `ABANDON` to allow the AppleApp to be untracked from terraform state
+          rather than deleted upon `terraform destroy`. This is useful because the AppleApp may be
+          serving traffic. Set to `DELETE` to delete the AppleApp. Default to `DELETE`.
+        input: true
+        url_param_only: true
+        default_value: DELETE
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The fully qualified resource name of the App, for example:
+          projects/projectId/iosApps/appId
+        output: true
+      - !ruby/object:Api::Type::String
+        name: displayName
+        required: true
+        description: |
+          The user-assigned display name of the App.
+      - !ruby/object:Api::Type::String
+        name: appId
+        output: true
+        description: |
+          The globally unique, Firebase-assigned identifier of the App.
+          This identifier should be treated as an opaque token, as the data format is not specified.
+      - !ruby/object:Api::Type::String
+        name: bundleId
+        description: |
+          The canonical bundle ID of the Apple app as it would appear in the Apple AppStore.
+      - !ruby/object:Api::Type::String
+        name: appStoreId
+        description: |
+          The automatically generated Apple ID assigned to the Apple app by Apple in the Apple App Store.
+      - !ruby/object:Api::Type::String
+        name: teamId
+        description: |
+          The Apple Developer Team ID associated with the App in the App Store.
