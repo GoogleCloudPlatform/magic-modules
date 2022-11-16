@@ -12040,6 +12040,14 @@ objects:
               - default_service
               - default_url_redirect
               - default_route_action.0.weighted_backend_services
+            at_least_one_of:
+              - default_route_action.0.weighted_backend_services
+              - default_route_action.0.url_rewrite
+              - default_route_action.0.timeout
+              - default_route_action.0.retry_policy
+              - default_route_action.0.request_mirror_policy
+              - default_route_action.0.cors_policy
+              - default_route_action.0.fault_injection_policy
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::ResourceRef
@@ -12174,12 +12182,12 @@ objects:
               Specifies the retry policy associated with this route.
             at_least_one_of:
               - default_route_action.0.weighted_backend_services
-              # - default_route_action.0.url_rewrite
-              # - default_route_action.0.timeout
+              - default_route_action.0.url_rewrite
+              - default_route_action.0.timeout
               - default_route_action.0.retry_policy
               - default_route_action.0.request_mirror_policy
-              # - default_route_action.0.cors_policy
-              # - default_route_action.0.fault_injection_policy
+              - default_route_action.0.cors_policy
+              - default_route_action.0.fault_injection_policy
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'retryConditions'
@@ -12246,12 +12254,12 @@ objects:
               Not supported when the URL map is bound to a target gRPC proxy that has the validateForProxyless field set to true.
             at_least_one_of:
               - default_route_action.0.weighted_backend_services
-              # - default_route_action.0.url_rewrite
-              # - default_route_action.0.timeout
+              - default_route_action.0.url_rewrite
+              - default_route_action.0.timeout
               - default_route_action.0.retry_policy
               - default_route_action.0.request_mirror_policy
-              # - default_route_action.0.cors_policy
-              # - default_route_action.0.fault_injection_policy
+              - default_route_action.0.cors_policy
+              - default_route_action.0.fault_injection_policy
             properties:
               - !ruby/object:Api::Type::ResourceRef
                 name: 'backendService'
