@@ -27,8 +27,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "filestore_instance_full"
         primary_resource_id: "instance"
         vars:
-          backup_name: "test-backup"
-          instance_name: "test-instance"
+          backup_name: "tst-backup"
+          instance_name: "tst-instance"
       - !ruby/object:Provider::Terraform::Examples
         name: "filestore_instance_enterprise"
         primary_resource_id: "instance"
