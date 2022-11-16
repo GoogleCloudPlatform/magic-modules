@@ -413,7 +413,6 @@ objects:
         description: |
           The resource name of the source Cloud Filestore instance, in the format projects/{projectId}/locations/{locationId}/instances/{instanceId}, used to create this backup.
         required: true
-        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'sourceFileShare'
         description: |
