@@ -1024,19 +1024,19 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ip") {
 		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
-		if len(newInternalIps.(*schema.Set).List()) == 0 {
+		if len(newInternalIps.([]interface{})) == 0 {
 			preservedState.NullFields = append(preservedState.NullFields, "internalIPs")
 		} else {
-			preservedState.InternalIPs = expandStatefulIps(oldInternalIps.(*schema.Set).List(), newInternalIps.(*schema.Set).List(), preservedState, "InternalIPs.%s")
+			preservedState.InternalIPs = expandStatefulIps(oldInternalIps.([]interface{}), newInternalIps.([]interface{}), preservedState, "InternalIPs.%s")
 		}
 		change = true
 	}
 	if d.HasChange("stateful_external_ip") {
 		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
-		if len(newExternalIps.(*schema.Set).List()) == 0 {
+		if len(newExternalIps.([]interface{})) == 0 {
 			preservedState.NullFields = append(preservedState.NullFields, "externalIPs")
 		} else {
-			preservedState.ExternalIPs = expandStatefulIps(oldExternalIps.(*schema.Set).List(), newExternalIps.(*schema.Set).List(), preservedState, "ExternalIPs.%s")
+			preservedState.ExternalIPs = expandStatefulIps(oldExternalIps.([]interface{}), newExternalIps.([]interface{}), preservedState, "ExternalIPs.%s")
 		}
 		change = true
 	}

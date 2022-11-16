@@ -81,7 +81,7 @@ func TestAccRegionInstanceGroupManager_basic(t *testing.T) {
 		CheckDestroy: testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccRegionInstanceGroupManager_basic(template, target, igm1, igm2),
+				Config: testAccRegionInstanceGroupManager_basic(template, target, igm1, igm2),
 			},
 			{
 				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
