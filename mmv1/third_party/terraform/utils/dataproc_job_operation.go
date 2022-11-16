@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -6,11 +5,7 @@ import (
 	"net/http"
 	"time"
 
-<% if version == "ga" -%>
 	"google.golang.org/api/dataproc/v1"
-<% else -%>
-	dataproc "google.golang.org/api/dataproc/v1beta2"
-<% end -%>
 )
 
 type DataprocJobOperationWaiter struct {
