@@ -261,6 +261,14 @@ The optional `settings.active_directory_config` subblock supports:
 * `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
     Can only be used with SQL Server.
 
+The optional `settings.deny_maintenance_period` subblock supports:
+
+* `end_date` - (Required) The end date (yyyy-mm-dd) or (mm-dd) for annual recurrence
+
+* `start_date` - (Required) The start date (yyyy-mm-dd) or (mm-dd) for annual recurrence
+
+* `time` - (Required) The start and end time (HH:mm:SS)
+
 The optional `settings.sql_server_audit_config` subblock supports:
 
 * `bucket` - (Required) The name of the destination bucket (e.g., gs://mybucket).
