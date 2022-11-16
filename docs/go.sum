@@ -1,0 +1,6 @@
+github.com/alex-shpak/hugo-book v0.0.0-20221111100854-d5b75f4fb3aa h1:VthswmcR+7NtpamidIRuFq+8JRAz4v+s7xVJ0MmeLqM=
+github.com/alex-shpak/hugo-book v0.0.0-20221111100854-d5b75f4fb3aa/go.mod h1:L4NMyzbn15fpLIpmmtDg9ZFFyTZzw87/lk7M2bMQ7ds=
+github.com/h-enk/doks-child-theme v0.5.0 h1:OrLbcGv6GfhDMs8O2OK93e0hUMvV1aygJWeAdKMcdiU=
+github.com/h-enk/doks-child-theme v0.5.0/go.mod h1:SCLBJIX7W4LH6rbaY9v31i1fwk0DRYoVwDWNMiRpE78=
+github.com/theNewDynamic/gohugo-theme-ananke v0.0.0-20221031153459-b393088d0930 h1:HH3nIivNlAVSYE9dvB0MD/cWunI1FpN6RDS6FziSFcs=
+github.com/theNewDynamic/gohugo-theme-ananke v0.0.0-20221031153459-b393088d0930/go.mod h1:yY14BLqqh5G61rO81YcJKMHY1rClY5iIiUK+K2JKSUM=
