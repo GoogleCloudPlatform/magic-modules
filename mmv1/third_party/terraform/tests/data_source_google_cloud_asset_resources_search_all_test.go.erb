@@ -20,7 +20,7 @@ func TestAccDataSourceGoogleCloudAssetResourcesSearchAll_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckGoogleCloudAssetProjectResorces(project),
+				Config: testAccCheckGoogleCloudAssetProjectResources(project),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.google_cloud_asset_resources_search_all.resources",
 						"results.0.asset_type", regexp.MustCompile("cloudresourcemanager.googleapis.com/Project")),
@@ -38,7 +38,7 @@ func TestAccDataSourceGoogleCloudAssetResourcesSearchAll_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckGoogleCloudAssetProjectResorces(project string) string {
+func testAccCheckGoogleCloudAssetProjectResources(project string) string {
 	return fmt.Sprintf(`
 data google_cloud_asset_resources_search_all resources {
 	scope = "projects/%s"
