@@ -22,6 +22,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "tensorboard"
         vars:
           display_name: "terraform"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_tensorboard_full"
+        skip_import_test: true
+        primary_resource_id: "tensorboard"
+        vars:
+          display_name: "terraform"
+          kms_key_name: "kms-name"
+        test_vars_overrides:
+          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
