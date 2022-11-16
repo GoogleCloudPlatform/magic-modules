@@ -749,7 +749,6 @@ func resourceDataprocCluster() *schema.Resource {
 													Default:      "pd-standard",
 													Description:  `The disk type of the primary disk attached to each preemptible worker node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
 												},
-												
 												<% if version == "ga" -%>
 												"local_ssd_interface": {
 													Type:         schema.TypeString,
@@ -1148,7 +1147,7 @@ func instanceConfigSchema(parent string) *schema.Schema {
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
 									<% if version == "ga" -%>
-									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface"
+									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface",
 									<% end -%>
 								},
 								ForceNew: true,
@@ -1164,7 +1163,7 @@ func instanceConfigSchema(parent string) *schema.Schema {
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
 									<% if version == "ga" -%>
-									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface"
+									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface",
 									<% end -%>
 								},
 								ForceNew:     true,
@@ -1180,7 +1179,7 @@ func instanceConfigSchema(parent string) *schema.Schema {
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
 									<% if version == "ga" -%>
-									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface"
+									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface",
 									<% end -%>
 								},
 								ForceNew:     true,
@@ -1195,7 +1194,7 @@ func instanceConfigSchema(parent string) *schema.Schema {
 									"cluster_config.0." + parent + ".0.disk_config.0.num_local_ssds",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
-									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface"
+									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface",
 								},
 								ForceNew:     true,
 								Default:      "scsi",
