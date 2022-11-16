@@ -66,10 +66,10 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
       }
     }
     url_rewrite {
-      host_rewrite = "A replacement header"
-      path_prefix_rewrite = "A replacement path"
-
+      host_rewrite = "dev.example.com"
+      path_prefix_rewrite = "/v1/api/"
     }
+  
     cors_policy {
       disabled = false
       allow_credentials = true
