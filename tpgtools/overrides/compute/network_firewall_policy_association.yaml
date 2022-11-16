@@ -1,0 +1,33 @@
+- type: CUSTOM_RESOURCE_NAME
+  details:
+    title: region_network_firewall_policy_association
+  location: region
+- type: EXCLUDE
+  field: location
+  location: global
+- type: EXCLUDE
+  field: region
+- type: CUSTOM_NAME
+  details:
+    name: region
+  field: location
+- type: CUSTOM_ID
+  details:
+    id: "projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}"
+  location: region
+- type: CUSTOM_ID
+  details:
+    id: "projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}"
+  location: global  
+- type: IMPORT_FORMAT
+  details:
+    formats:
+    - "projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}"
+    - "{{project}}/{{region}}/{{firewall_policy}}/{{name}}"
+  location: region
+- type: IMPORT_FORMAT
+  details:
+    formats:
+    - "projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}"
+    - "{{project}}/{{firewall_policy}}/{{name}}"
+  location: global 
