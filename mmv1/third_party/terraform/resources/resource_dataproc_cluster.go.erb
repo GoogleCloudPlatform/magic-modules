@@ -13,17 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-<% if version == "ga" -%>
 	"google.golang.org/api/dataproc/v1"
-<% else -%>
-	dataproc "google.golang.org/api/dataproc/v1beta2"
-<% end -%>
 )
 
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
 
-<% if version == "ga" -%>
 	virtualClusterConfigKeys = []string{
 		"virtual_cluster_config.0.staging_bucket",
 		"virtual_cluster_config.0.auxiliary_services_config",
@@ -51,7 +46,6 @@ var (
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.gke_cluster_target",
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target",
 	}
-<% end -%>
 
 	gceClusterConfigKeys = []string{
 		"cluster_config.0.gce_cluster_config.0.zone",
@@ -117,7 +111,7 @@ func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceDat
 	return false
 }
 
-<% if version == "ga" -%>
+
 const resourceDataprocGoogleProvidedDPGKEPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.dpgke"
 const resourceDataprocGoogleProvidedSparkPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.spark"
 
@@ -134,7 +128,6 @@ func resourceDataprocPropertyDiffSuppress(k, old, new string, d *schema.Resource
 	// For other keys, don't suppress diff.
 	return false
 }
-<% end -%>
 
 func resourceDataprocCluster() *schema.Resource {
 	return &schema.Resource{
@@ -211,7 +204,6 @@ func resourceDataprocCluster() *schema.Resource {
 				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
 			},
 
-<% if version == "ga" -%>
 			"virtual_cluster_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -473,7 +465,6 @@ func resourceDataprocCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"cluster_config": {
 				Type:        schema.TypeList,
@@ -638,6 +629,25 @@ func resourceDataprocCluster() *schema.Resource {
 											},
 										},
 									},
+									"confidential_instance_config": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										AtLeastOneOf: gceClusterConfigKeys,
+										Computed:     true,
+										MaxItems:     1,
+										Description:  `Confidential Instance Config for clusters using Confidential VMs.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enable_confidential_compute": {
+													Type:         schema.TypeBool,
+													Optional:     true,
+													AtLeastOneOf: schieldedInstanceConfigKeys,
+													ForceNew:     true,
+													Description:  `Defines whether the instance should have confidential compute enabled.`,
+												},
+											},
+										},
+									},
 								},
 							},
 						},
@@ -724,6 +734,14 @@ func resourceDataprocCluster() *schema.Resource {
 													ForceNew:     true,
 													Default:      "pd-standard",
 													Description:  `The disk type of the primary disk attached to each preemptible worker node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
+												},
+												"local_ssd_interface": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													AtLeastOneOf: preemptibleWorkerDiskConfigKeys,
+													ForceNew:     true,
+													Default:      "scsi",
+													Description:  `Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
 												},
 											},
 										},
@@ -1112,6 +1130,7 @@ func instanceConfigSchema(parent string) *schema.Schema {
 									"cluster_config.0." + parent + ".0.disk_config.0.num_local_ssds",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
+									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface",
 								},
 								ForceNew: true,
 							},
@@ -1125,6 +1144,7 @@ func instanceConfigSchema(parent string) *schema.Schema {
 									"cluster_config.0." + parent + ".0.disk_config.0.num_local_ssds",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
+									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface",
 								},
 								ForceNew:     true,
 								ValidateFunc: validation.IntAtLeast(10),
@@ -1138,9 +1158,23 @@ func instanceConfigSchema(parent string) *schema.Schema {
 									"cluster_config.0." + parent + ".0.disk_config.0.num_local_ssds",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
 									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
+									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface",
 								},
 								ForceNew:     true,
 								Default:      "pd-standard",
+							},
+							"local_ssd_interface": {
+								Type:        schema.TypeString,
+								Optional:    true,
+								Description: `Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
+								AtLeastOneOf: []string{
+									"cluster_config.0." + parent + ".0.disk_config.0.num_local_ssds",
+									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
+									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
+									"cluster_config.0." + parent + ".0.disk_config.0.local_ssd_interface",
+								},
+								ForceNew: true,
+								Default:  "scsi",
 							},
 						},
 					},
@@ -1206,15 +1240,11 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		ProjectId:   project,
 	}
 
-<% if version == "ga" -%>
 	if _, ok := d.GetOk("virtual_cluster_config"); ok {
 		cluster.VirtualClusterConfig, err = expandVirtualClusterConfig(d, config)
 	} else {
 		cluster.Config, err = expandClusterConfig(d, config)
 	}
-<% else -%>
-	cluster.Config, err = expandClusterConfig(d, config)
-<% end -%>
 
 	if err != nil {
 		return err
@@ -1253,7 +1283,6 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 	return resourceDataprocClusterRead(d, meta)
 }
 
-<% if version == "ga" -%>
 func expandVirtualClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.VirtualClusterConfig, error) {
 	conf := &dataproc.VirtualClusterConfig{}
 
@@ -1435,7 +1464,6 @@ func expandGkeNodePoolAutoscalingConfig(cfg map[string]interface{}) *dataproc.Gk
 	}
 	return conf
 }
-<% end -%>
 
 func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.ClusterConfig, error) {
 	conf := &dataproc.ClusterConfig{
@@ -1573,6 +1601,13 @@ func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.G
 		}
 		if v, ok := cfgSic["enable_vtpm"]; ok {
 			conf.ShieldedInstanceConfig.EnableVtpm = v.(bool)
+		}
+	}
+	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.confidential_instance_config"); ok {
+		cfgCic := v.([]interface{})[0].(map[string]interface{})
+		conf.ConfidentialInstanceConfig = &dataproc.ConfidentialInstanceConfig{}
+		if v, ok := cfgCic["enable_confidential_compute"]; ok {
+			conf.ConfidentialInstanceConfig.EnableConfidentialCompute = v.(bool)
 		}
 	}
 	return conf, nil
@@ -1742,6 +1777,9 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
 			}
+			if v, ok := dcfg["local_ssd_interface"]; ok {
+				icg.DiskConfig.LocalSsdInterface = v.(string)
+			}
 		}
 	}
 	if p, ok := cfg["preemptibility"]; ok {
@@ -1780,6 +1818,9 @@ func expandInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGro
 			}
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
+			}
+			if v, ok := dcfg["local_ssd_interface"]; ok {
+				icg.DiskConfig.LocalSsdInterface = v.(string)
 			}
 		}
 	}
@@ -1946,7 +1987,6 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 
 	var cfg []map[string]interface{}
 
-<% if version == "ga" -%>
 	if cluster.Config != nil {
 		cfg, err = flattenClusterConfig(d, cluster.Config)
 
@@ -1968,22 +2008,9 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
-<% else -%>
-	cfg, err = flattenClusterConfig(d, cluster.Config)
-
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("cluster_config", cfg)
-	if err != nil {
-		return err
-	}
-<% end -%>
 	return nil
 }
 
-<% if version == "ga" -%>
 func flattenVirtualClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) ([]map[string]interface{}, error) {
 	data := map[string]interface{}{
 		"staging_bucket":            d.Get("virtual_cluster_config.0.staging_bucket"),
@@ -2099,7 +2126,6 @@ func flattenKubernetesSoftwareConfig(d *schema.ResourceData, cfg *dataproc.Kuber
 
 	return []map[string]interface{}{data}
 }
-<% end -%>
 
 func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) ([]map[string]interface{}, error) {
 
@@ -2300,6 +2326,13 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 			},
 		}
 	}
+	if gcc.ConfidentialInstanceConfig != nil {
+		gceConfig["confidential_instance_config"] = []map[string]interface{}{
+			{
+				"enable_confidential_compute": gcc.ConfidentialInstanceConfig.EnableConfidentialCompute,
+			},
+		}
+	}
 
 	return []map[string]interface{}{gceConfig}
 }
@@ -2332,6 +2365,7 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
 	}
 
@@ -2353,6 +2387,7 @@ func flattenInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGr
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
 
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)

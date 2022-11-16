@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -16,11 +15,7 @@ import (
 
 	"google.golang.org/api/googleapi"
 
-<% if version == "ga" -%>
 	"google.golang.org/api/dataproc/v1"
-<% else -%>
-	dataproc "google.golang.org/api/dataproc/v1beta2"
-<% end -%>
 )
 
 func TestDataprocExtractInitTimeout(t *testing.T) {
@@ -220,7 +215,6 @@ func TestAccDataprocCluster_basic(t *testing.T) {
 	})
 }
 
-<% if version == "ga" -%>
 func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 	t.Parallel()
 
@@ -257,7 +251,6 @@ func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 	t.Parallel()
@@ -1135,7 +1128,6 @@ resource "google_dataproc_cluster" "basic" {
 `, rnd)
 }
 
-<% if version == "ga" -%>
 func testAccDataprocVirtualCluster_basic(projectID string, rnd string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -1207,7 +1199,6 @@ func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster,
 		return fmt.Errorf("Cluster NodePools does not contain expected roles : %v", roles)
 	}
 }
-<% end -%>
 
 func testAccDataprocCluster_withAccelerators(rnd, acceleratorType, zone string) string {
 	return fmt.Sprintf(`
@@ -1996,6 +1987,85 @@ resource "google_dataproc_metastore_service" "ms" {
 	hive_metastore_config {
 		version = "3.1.2"
 	}
+}
+`, rnd)
+}
+
+func TestAccDataprocCluster_withConfidentialInstanceConfig(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := randString(t, 10)
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withConfidentialInstanceConfig(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.confidential_instance_config.0.enable_confidential_compute", "true"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_withConfidentialInstanceConfig(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "basic" {
+  name   = "dproc-cluster-test-%s"
+  region = "us-central1"
+  graceful_decommission_timeout = "120s"
+  
+  cluster_config {
+    master_config {
+		num_instances = 1
+		machine_type  = "n2d-standard-2"
+		min_cpu_platform = "AMD Rome"
+		disk_config {
+		  boot_disk_type = "pd-standard"
+		  boot_disk_size_gb = 50
+		  num_local_ssds    = 1
+		  local_ssd_interface = "NVME"
+		}
+	  }
+  
+	  worker_config {
+		num_instances    = 2
+		machine_type     = "n2d-standard-2"
+		min_cpu_platform = "AMD Rome"
+		disk_config {
+		  boot_disk_type = "pd-standard"
+		  boot_disk_size_gb = 50
+		  num_local_ssds    = 1
+		  local_ssd_interface = "NVME"
+		}
+	  }
+  
+	  preemptible_worker_config {
+		num_instances = 0
+	  }
+  
+	  software_config {
+		image_version = "2.0-ubuntu18"
+		override_properties = {
+		  "dataproc:dataproc.allow.zero.workers" = "true"
+		}
+	  }
+  
+	  gce_cluster_config {
+		tags = ["foo", "bar"]
+		shielded_instance_config {
+		  enable_secure_boot = "false"
+		  enable_vtpm = "true"
+		}
+		confidential_instance_config{
+		  enable_confidential_compute = true
+		}
+	  }
+  }
 }
 `, rnd)
 }
