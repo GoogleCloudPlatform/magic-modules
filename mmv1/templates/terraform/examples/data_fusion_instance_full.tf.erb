@@ -18,7 +18,7 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
     ip_allocation = "${google_compute_global_address.private_ip_alloc.address}/${google_compute_global_address.private_ip_alloc.prefix_length}"
   }
   <%= ctx[:vars]['prober_test_run'] %>
-  version = "6.3.0"
+  version = "6.7.0"
   dataproc_service_account = data.google_app_engine_default_service_account.default.email
   accelerators {
     acceleratorType = "ACCELERATOR_TYPE_UNSPECIFIED"
