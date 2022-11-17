@@ -43,7 +43,7 @@ objects:
       fetch_iam_policy_verb: :POST
       parent_resource_attribute: 'managed_zone'
       set_iam_policy_verb: :POST
-      import_format: ["projects/{{project}}/managedZones/{{myResource}}", "{{project}}/{{myResource}}"]
+      import_format: ["projects/{{project}}/managedZones/{{managed_zone}}", "{{project}}/{{managed_zone}}"]
     properties:
       - !ruby/object:Api::Type::String
         name: 'description'
