@@ -161,6 +161,7 @@ objects:
           Endpoint on which the Data Fusion UI and REST APIs are accessible.
       - !ruby/object:Api::Type::String
         name: 'version'
+        input: true
         description: |
           Current version of the Data Fusion.
       - !ruby/object:Api::Type::String
@@ -261,3 +262,28 @@ objects:
               The resource name of the Pub/Sub topic. Format: projects/{projectId}/topics/{topic_id}
             required: true
             input: true            
+      - !ruby/object:Api::Type::Array
+        name: 'accelerators'
+        description: |
+          List of accelerators enabled for this CDF instance.
+
+          If accelerators are enabled it is possible a permadiff will be created with the Options field. 
+          Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'acceleratorType'
+              description: |
+                The type of an accelator for a CDF instance.
+              values:
+                - :CDC
+                - :HEALTHCARE
+                - :CCAI_INSIGHTS
+              required: true
+            - !ruby/object:Api::Type::Enum
+              name: 'state'
+              description: |
+                The type of an accelator for a CDF instance.
+              values:
+                - :ENABLED
+                - :DISABLED
