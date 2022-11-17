@@ -210,16 +210,18 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	if err := d.Set("name", flattenNestedTagsLocationTagBindingName(item["name"], d, config)); err != nil {
-		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
-	}
-	if err := d.Set("parent", flattenNestedTagsLocationTagBindingParent(item["parent"], d, config)); err != nil {
-		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
-	}
-	if err := d.Set("tag_value", flattenNestedTagsLocationTagBindingTagValue(item["tagValue"], d, config)); err != nil {
-		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
-	}
+	setResponse := item
 
+	if err := d.Set("name", flattenNestedTagsLocationTagBindingName(setResponse["name"], d, config)); err != nil {
+		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
+	}
+	if err := d.Set("parent", flattenNestedTagsLocationTagBindingParent(setResponse["parent"], d, config)); err != nil {
+		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
+	}
+	if err := d.Set("tag_value", flattenNestedTagsLocationTagBindingTagValue(setResponse["tagValue"], d, config)); err != nil {
+		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
+	}
+	
 	return nil
 }
 
