@@ -610,7 +610,11 @@ objects:
           If not set, defaults to an empty description.
       - !ruby/object:Api::Type::ResourceRef
         name: "parentPolicyTag"
+<<<<<<< HEAD
         resource: 'Taxonomy'
+=======
+        resource: 'PolicyTag'
+>>>>>>> 1b01e8e82 (Configure ResourceRef fields for DataCatalog PolicyTag)
         imports: 'name'
         description: |
           Resource name of this policy tag's parent policy tag.
