@@ -1528,9 +1528,9 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "db-custom-4-26624"
     deny_maintenance_period {
-      end_date      = "%s"
+      end_date     	= "%s"
       start_date	= "%s"
-      time          = "%s"
+      time 		= "%s"
     }
   }
 }`, databaseName, endDate, startDate, time)
