@@ -34,8 +34,7 @@ The following arguments are supported:
 * `router` - (Required) The name of the router this interface will be attached to.
     Changing this forces a new interface to be created.
 
-In addition to the above required fields, a router interface must have specified
-either `subnetwork` and `private_ip_address` or `ip_range` and exactly one of `vpn_tunnel` or `interconnect_attachment`.
+In addition to the above required fields, a router interface must have specified either `ip_range` or exactly one of `vpn_tunnel`, `interconnect_attachment` or `subnetwork`, or both.
 
 - - -
 

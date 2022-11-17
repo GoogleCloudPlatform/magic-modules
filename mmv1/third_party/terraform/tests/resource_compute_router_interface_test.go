@@ -491,7 +491,7 @@ resource "google_compute_router" "foobar" {
 resource "google_compute_router_interface" "foobar" {
   name               = "%s"
   router             = google_compute_router.foobar.name
-  region     		     = google_compute_router.foobar.region
+  region             = google_compute_router.foobar.region
   subnetwork         = google_compute_subnetwork.foobar.self_link
   private_ip_address = google_compute_address.foobar.address
 }
