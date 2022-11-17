@@ -167,19 +167,19 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"end_date": {
-										Type:		 schema.TypeString,
-										Required:     true,
-										Description: `End date before which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,
+										Type:		schema.TypeString,
+										Required:	true,
+										Description:	`End date before which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,
 									},
 									"start_date": {
-										Type:	     schema.TypeString,
-										Required:     true,
-										Description: `Start date after which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,								
+										Type:		schema.TypeString,
+										Required:	true,
+										Description:	`Start date after which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,								
 									},  
 									"time": { 
-										Type:		 schema.TypeString,
-										Required:     true,
-										Description: `Time in UTC when the "deny maintenance period" starts on start_date and ends on end_date. The time is in format: HH:mm:SS, i.e., 00:00:00`,
+										Type:		schema.TypeString,
+										Required:	true,
+										Description:	`Time in UTC when the "deny maintenance period" starts on start_date and ends on end_date. The time is in format: HH:mm:SS, i.e., 00:00:00`,
 									},  
 						
 								},
