@@ -2353,6 +2353,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
         description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      defaultRouteAction.urlRewrite.pathPrefixRewrite: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(1, 1024)'
+      defaultRouteAction.urlRewrite.hostRewrite: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(1, 255)'
+      defaultRouteAction.timeout.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 999999999)'
       defaultRouteAction.retryPolicy.numRetries: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(1)'
@@ -2362,6 +2371,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       defaultRouteAction.weightedBackendServices.weight: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0, 1000)'
+      defaultRouteAction.faultInjectionPolicy.delay.fixedDelay.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 999999999)'
+      defaultRouteAction.faultInjectionPolicy.delay.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
+      defaultRouteAction.faultInjectionPolicy.abort.httpStatus: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(200, 599)'
+      defaultRouteAction.faultInjectionPolicy.abort.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
   ResourcePolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

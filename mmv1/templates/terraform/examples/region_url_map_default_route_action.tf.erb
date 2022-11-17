@@ -65,6 +65,46 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
         response_headers_to_remove = ["buzz"]
       }
     }
+    url_rewrite {
+      host_rewrite = "dev.example.com"
+      path_prefix_rewrite = "/v1/api/"
+    }
+  
+    cors_policy {
+      disabled = false
+      allow_credentials = true
+      allow_headers = [
+        "foobar"
+      ]
+      allow_methods = [
+        "GET",
+        "POST",
+      ]
+      allow_origins = [
+        "example.com"
+      ]
+      expose_headers = [
+        "foobar"
+      ]
+      max_age = 60
+    }
+    fault_injection_policy {
+      delay {
+        fixed_delay {
+          seconds = 0
+          nanos = 500
+        }
+        percentage = 0.5
+      }
+      abort {
+        http_status = 500
+        percentage = 0.5
+      }
+    }
+    timeout {
+      seconds = 0
+      nanos = 500
+    }
   }
 
   host_rule {
