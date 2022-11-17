@@ -68,6 +68,7 @@ func resourceComputeRouterInterface() *schema.Resource {
 				Optional:       true,
 				ForceNew:       true,
 				Computed:       true,
+				AtLeastOneOf:   []string{"ip_range", "interconnect_attachment", "subnetwork", "vpn_tunnel"},
 				Description:    `The IP address and range of the interface. The IP range must be in the RFC3927 link-local IP space. Changing this forces a new interface to be created.`,
 			},
 			"private_ip_address": {
