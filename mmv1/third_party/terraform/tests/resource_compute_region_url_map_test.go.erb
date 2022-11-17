@@ -658,8 +658,8 @@ resource "google_compute_region_url_map" "foobar" {
           nanos = 760000000
         }
         url_rewrite {
-          host_rewrite = "A replacement header again"
-          path_prefix_rewrite = "A replacement path again"
+          host_rewrite = "stage.example.com" # updated
+          path_prefix_rewrite = "/v2/api/" # updated
         }
         weighted_backend_services {
           backend_service = google_compute_region_backend_service.home.self_link
@@ -956,8 +956,8 @@ resource "google_compute_region_url_map" "foobar" {
     }
 
     url_rewrite {
-      path_prefix_rewrite = "foobar"
-      host_rewrite = "fizzbuzz"
+      host_rewrite = "dev.example.com"
+      path_prefix_rewrite = "/v1/api/"
     }
 
     request_mirror_policy {
@@ -1092,8 +1092,8 @@ resource "google_compute_region_url_map" "foobar" {
 
     # update both values
     url_rewrite {
-      path_prefix_rewrite = "foobar-2"
-      host_rewrite = "fizzbuzz-2"
+      host_rewrite = "stage.example.com"
+      path_prefix_rewrite = "/v2/api/"
     }
 
     # update backend_service field from 'login' to 'home'
