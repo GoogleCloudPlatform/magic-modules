@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -41,7 +40,7 @@ func resourceTagsLocationTagBinding() *schema.Resource {
 			"location": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Required: true,
+				Optional: true,
 				Description: `The geographic location where the transfer config should reside.
 Examples: US, EU, asia-northeast1. The default value is US.`,
 			},
@@ -147,7 +146,7 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{TagsLocationBasePath}}tagBindings/?parent={{parent}}&pageSize=300")
+	url, err := replaceVars(d, config, "{{TagsLocationBasePath}}tagBindings/?parent={{parent}}&pageSize=1")
 	if err != nil {
 		return err
 	}
@@ -163,8 +162,6 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 	}
-
-	// handling the pagination
 
 	var p interface{}
 	var ok bool
@@ -186,6 +183,13 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 			if err != nil {
 				return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 			}
+			if res == nil {
+				// Object isn't there any more - remove it from the state.
+				log.Printf("[DEBUG] Removing TagsLocationTagBinding because it couldn't be matched.")
+				d.SetId("")
+				return nil
+			}
+
 			v, ok := res["tagBindings"]
 			if !ok || v == nil {
 				return nil
@@ -205,20 +209,13 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	if res == nil {
-		// Object isn't there any more - remove it from the state.
-		log.Printf("[DEBUG] Removing TagsLocationTagBinding because it couldn't be matched.")
-		d.SetId("")
-		return nil
-	}
-
-	if err := d.Set("name", flattenNestedTagsLocationTagBindingName(res["name"], d, config)); err != nil {
+	if err := d.Set("name", flattenNestedTagsLocationTagBindingName(item["name"], d, config)); err != nil {
 		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
 	}
-	if err := d.Set("parent", flattenNestedTagsLocationTagBindingParent(res["parent"], d, config)); err != nil {
+	if err := d.Set("parent", flattenNestedTagsLocationTagBindingParent(item["parent"], d, config)); err != nil {
 		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
 	}
-	if err := d.Set("tag_value", flattenNestedTagsLocationTagBindingTagValue(res["tagValue"], d, config)); err != nil {
+	if err := d.Set("tag_value", flattenNestedTagsLocationTagBindingTagValue(item["tagValue"], d, config)); err != nil {
 		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
 	}
 
@@ -266,17 +263,19 @@ func resourceTagsLocationTagBindingDelete(d *schema.ResourceData, meta interface
 
 func resourceTagsLocationTagBindingImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	
-	// current import_formats can't import fields with forward slashes in their value
 	if err := parseImportId([]string{
-		"tagBindings/(?P<name>.+)",
-		"(?P<name>.+)",
+		"tagBindings/(?P<name>[^/]+)",
+		"(?P<name>[^/]+)",
 	}, d, config); err != nil {
 		return nil, err
 	}
 
-	name := d.Get("name").(string)
-	d.SetId(name)
+	// Replace import id for the resource id
+	id, err := replaceVars(d, config, "tagBindings/?parent={{parent}}&pageSize=300")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
 }
