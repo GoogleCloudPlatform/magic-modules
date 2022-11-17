@@ -238,6 +238,8 @@ The `settings` block supports:
 
 * `collation` - (Optional) The name of server instance collation.
 
+* `connector_enforcement` - (Optional) Specifies if connections must use Cloud SQL connectors.
+
 * `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
 
 * `disk_autoresize_limit` - (Optional) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
@@ -269,7 +271,7 @@ The optional `settings.sql_server_audit_config` subblock supports:
 
 * `retention_interval` - (Optional) How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". 
 
-* `timezone` - (Optional) The timezone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
+* `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
 
 The optional `settings.backup_configuration` subblock supports:
 

@@ -269,7 +269,7 @@ region are guaranteed to support the same version.
     [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
     [node auto-provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)-enabled clusters. Structure is [documented below](#nested_node_pool_auto_config).
 
-* `node_pool_defaults` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Default NodePool settings for the entire cluster. These settings are overridden if specified on the specific NodePool object. Structure is [documented below](#nested_node_pool_defaults).
+* `node_pool_defaults` - (Optional) Default NodePool settings for the entire cluster. These settings are overridden if specified on the specific NodePool object. Structure is [documented below](#nested_node_pool_defaults).
 
 * `node_version` - (Optional) The Kubernetes version on the nodes. Must either be unset
     or set to the same value as `min_master_version` on create. Defaults to the default
@@ -470,15 +470,16 @@ addons_config {
 
 <a name="nested_cluster_autoscaling"></a>The `cluster_autoscaling` block supports:
 
-* `enabled` - (Required) Whether node auto-provisioning is enabled. Resource
-limits for `cpu` and `memory` must be defined to enable node auto-provisioning.
+* `enabled` - (Optional) Whether node auto-provisioning is enabled. Must be supplied for GKE Standard clusters, `true` is implied
+for autopilot clusters. Resource limits for `cpu` and `memory` must be defined to enable node auto-provisioning for GKE Standard.
 
 * `resource_limits` - (Optional) Global constraints for machine resources in the
 cluster. Configuring the `cpu` and `memory` types is required if node
 auto-provisioning is enabled. These limits will apply to node pool autoscaling
 in addition to node auto-provisioning. Structure is [documented below](#nested_resource_limits).
 
-* `auto_provisioning_defaults` - (Optional) Contains defaults for a node pool created by NAP.
+* `auto_provisioning_defaults` - (Optional) Contains defaults for a node pool created by NAP. A subset of fields also apply to
+GKE Autopilot clusters.
 Structure is [documented below](#nested_auto_provisioning_defaults).
 
 * `autoscaling_profile` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Configuration
@@ -503,11 +504,11 @@ Minimum CPU platform to be used for NAP created node pools. The instance may be 
 specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such
 as "Intel Haswell" or "Intel Sandy Bridge".
 
-* `oauth_scopes` - (Optional) Scopes that are used by NAP when creating node pools. Use the "https://www.googleapis.com/auth/cloud-platform" scope to grant access to all APIs. It is recommended that you set `service_account` to a non-default service account and grant IAM roles to that service account for only the resources that it needs.
+* `oauth_scopes` - (Optional) Scopes that are used by NAP and GKE Autopilot when creating node pools. Use the "https://www.googleapis.com/auth/cloud-platform" scope to grant access to all APIs. It is recommended that you set `service_account` to a non-default service account and grant IAM roles to that service account for only the resources that it needs.
 
 -> `monitoring.write` is always enabled regardless of user input.  `monitoring` and `logging.write` may also be enabled depending on the values for `monitoring_service` and `logging_service`.
 
-* `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs.
+* `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs created by GKE Autopilot or NAP.
 
 * `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
 
@@ -735,6 +736,8 @@ ephemeral_storage_config {
 }
 ```
 
+* `logging_variant` (Optional) Parameter for specifying the type of logging agent used in a node pool. This will override any [cluster-wide default value](#nested_node_pool_defaults). Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
+
 * `gcfs_config` - (Optional) Parameters for the Google Container Filesystem (GCFS).
     If unspecified, GCFS will not be enabled on the node pool. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version` from GKE versions 1.19 or later to use it.
     For GKE versions 1.19, 1.20, and 1.21, the recommended minimum `node_version` would be 1.19.15-gke.1300, 1.20.11-gke.1300, and 1.21.5-gke.1300 respectively.
@@ -926,11 +929,13 @@ node_pool_auto_config {
 ```
 
 <a name="nested_node_pool_defaults"></a>The `node_pool_defaults` block supports:
-* `node_config_defaults` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Subset of NodeConfig message that has defaults.
+* `node_config_defaults` (Optional) - Subset of NodeConfig message that has defaults.
 
 The `node_config_defaults` block supports:
 
-* `gcfs_config` (Optional) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
+* `logging_variant` (Optional) The type of logging agent that is deployed by default for newly created node pools in the cluster. Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
+
+* `gcfs_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
 
 <a name="nested_notification_config"></a>The `notification_config` block supports:
 

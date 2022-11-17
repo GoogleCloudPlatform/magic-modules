@@ -185,6 +185,18 @@ objects:
         send_empty_value: true
         properties:
           - !ruby/object:Api::Type::Array
+            name: 'gkeClusters'
+            description: 'The list of Google Kubernetes Engine clusters that can see this zone.'
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'gkeClusterName'
+                  description: |
+                    The resource name of the cluster to bind this ManagedZone to.  
+                    This should be specified in the format like  
+                    `projects/*/locations/*/clusters/*`
+                  required: true
+          - !ruby/object:Api::Type::Array
             name: 'networks'
             description: 'The list of VPC networks that can see this zone.'
             required: true
@@ -547,6 +559,18 @@ objects:
               The fully qualified URL of the VPC network to bind to.
               This should be formatted like
               `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+      - !ruby/object:Api::Type::Array
+            name: 'gkeClusters'
+            description: 'The list of Google Kubernetes Engine clusters that can see this zone.'
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'gkeClusterName'
+                  description: |
+                    The resource name of the cluster to bind this ManagedZone to.  
+                    This should be specified in the format like  
+                    `projects/*/locations/*/clusters/*`
+                  required: true
   - !ruby/object:Api::Resource
     name: 'ResponsePolicyRule'
     kind: 'dns#responsePolicyRule'

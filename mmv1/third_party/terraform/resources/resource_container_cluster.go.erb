@@ -78,6 +78,13 @@ var (
 	forceNewClusterNodeConfigFields = []string{
 		"workload_metadata_config",
 	}
+
+	suppressDiffForAutopilot = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		if v, _ := d.Get("enable_autopilot").(bool); v {
+			return true
+		}
+		return false
+	})
 )
 
 // This uses the node pool nodeConfig schema but sets
@@ -93,7 +100,6 @@ func clusterSchemaNodeConfig() *schema.Schema {
 	return nodeConfigSch
 }
 
-<% unless version == 'ga' -%>
 // Defines default nodel pool settings for the entire cluster. These settings are
 // overridden if specified on the specific NodePool object.
 func clusterSchemaNodePoolDefaults() *schema.Schema {
@@ -111,16 +117,18 @@ func clusterSchemaNodePoolDefaults() *schema.Schema {
 					Description: `Subset of NodeConfig message that has defaults.`,
 					MaxItems:    1,
 					Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-									"gcfs_config": schemaGcfsConfig(false),
-							},
+						Schema: map[string]*schema.Schema{
+<% unless version == 'ga' -%>
+							"gcfs_config": schemaGcfsConfig(false),
+<% end -%>
+							"logging_variant": schemaLoggingVariant(),
+						},
 					},
 				},
 			},
 		},
 	}
 }
-<% end -%>
 
 func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
 	// This diff gets applied in the cloud console if you specify
@@ -445,18 +453,21 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: `Per-cluster configuration of Node Auto-Provisioning with Cluster Autoscaler to automatically adjust the size of the cluster and create/delete node pools based on the current needs of the cluster's workload. See the guide to using Node Auto-Provisioning for more details.`,
-				ConflictsWith: []string{"enable_autopilot"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
-							Type:        schema.TypeBool,
-							Required:    true,
+							Type:          schema.TypeBool,
+							Optional:      true,
+							Computed:      true,
+							ConflictsWith: []string{"enable_autopilot"},
 							Description: `Whether node auto-provisioning is enabled. Resource limits for cpu and memory must be defined to enable node auto-provisioning.`,
 						},
 						"resource_limits": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: `Global constraints for machine resources in the cluster. Configuring the cpu and memory types is required if node auto-provisioning is enabled. These limits will apply to node pool autoscaling in addition to node auto-provisioning.`,
+							Type:             schema.TypeList,
+							Optional:         true,
+							ConflictsWith:    []string{"enable_autopilot"},
+							DiffSuppressFunc: suppressDiffForAutopilot,
+							Description:      `Global constraints for machine resources in the cluster. Configuring the cpu and memory types is required if node auto-provisioning is enabled. These limits will apply to node pool autoscaling in addition to node auto-provisioning.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"resource_type": {
@@ -500,24 +511,27 @@ func resourceContainerCluster() *schema.Resource {
 										Description: `The Google Cloud Platform Service Account to be used by the node VMs.`,
 									},
 									"disk_size": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Default:     100,
-										Description: `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+										Type:             schema.TypeInt,
+										Optional:         true,
+										Default:          100,
+										Description:      `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+										DiffSuppressFunc: suppressDiffForAutopilot,
 										ValidateFunc: validation.IntAtLeast(10),
 									},
 									"disk_type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Default:     "pd-standard",
-										Description: `Type of the disk attached to each node.`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										Default:          "pd-standard",
+										Description:      `Type of the disk attached to each node.`,
+										DiffSuppressFunc: suppressDiffForAutopilot,
 										ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd", "pd-balanced"}, false),
 									},
 									"image_type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Default:     "COS_CONTAINERD",
-										Description: `The default image type used by NAP once a new node pool is being created.`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										Default:          "COS_CONTAINERD",
+										Description:      `The default image type used by NAP once a new node pool is being created.`,
+										DiffSuppressFunc: suppressDiffForAutopilot,
 										ValidateFunc: validation.StringInSlice([]string{"COS_CONTAINERD", "COS", "UBUNTU_CONTAINERD", "UBUNTU"}, false),
 									},
 									"min_cpu_platform": {
@@ -693,11 +707,12 @@ func resourceContainerCluster() *schema.Resource {
 						},
 						<% unless version == 'ga' -%>
 						"autoscaling_profile": {
-							Type:         schema.TypeString,
-							Default:      "BALANCED",
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"BALANCED", "OPTIMIZE_UTILIZATION"}, false),
-							Description:  `Configuration options for the Autoscaling profile feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability when deciding to remove nodes from a cluster. Can be BALANCED or OPTIMIZE_UTILIZATION. Defaults to BALANCED.`,
+							Type:             schema.TypeString,
+							Default:          "BALANCED",
+							Optional:         true,
+							DiffSuppressFunc: suppressDiffForAutopilot,
+							ValidateFunc:     validation.StringInSlice([]string{"BALANCED", "OPTIMIZE_UTILIZATION"}, false),
+							Description:      `Configuration options for the Autoscaling profile feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability when deciding to remove nodes from a cluster. Can be BALANCED or OPTIMIZE_UTILIZATION. Defaults to BALANCED.`,
 						},
 						<% end -%>
 					},
@@ -1233,9 +1248,9 @@ func resourceContainerCluster() *schema.Resource {
 				ConflictsWith: []string{"enable_autopilot"},
 			},
 
-<% unless version == "ga" -%>
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
+<% unless version == "ga" -%>
 			"node_pool_auto_config": {
 				Type:             schema.TypeList,
 				Optional:         true,
@@ -1986,11 +2001,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.NodeConfig = expandNodeConfig([]interface{}{})
 	}
 
-<% unless version == 'ga' -%>
         if v, ok := d.GetOk("node_pool_defaults"); ok {
                 cluster.NodePoolDefaults = expandNodePoolDefaults(v)
         }
-<% end -%>
 
 	if v, ok := d.GetOk("node_config"); ok {
 		cluster.NodeConfig = expandNodeConfig(v)
@@ -2425,11 +2438,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 <% end -%>
 
-<% unless version == 'ga' -%>
         if err := d.Set("node_pool_defaults", flattenNodePoolDefaults(cluster.NodePoolDefaults)); err != nil {
                 return err
         }
-<% end -%>
 
 	return nil
 }
@@ -3386,6 +3397,29 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s resource usage export config has been updated", d.Id())
 	}
 
+	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.logging_variant") {
+		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.logging_variant"); ok {
+			loggingVariant := v.(string)
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredNodePoolLoggingConfig: &container.NodePoolLoggingConfig{
+						VariantConfig: &container.LoggingVariantConfig{
+							Variant: loggingVariant,
+						},
+					},
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE cluster desired node pool logging configuration defaults.")
+			// Call update serially.
+			if err := lockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s node pool logging configuration defaults have been updated", d.Id())
+		}
+	}
+
 <% unless version == 'ga' -%>
         if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.gcfs_config") {
                 if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.gcfs_config"); ok {
@@ -3860,8 +3894,12 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 
 func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *container.ClusterAutoscaling {
 	l, ok := configured.([]interface{})
+	enableAutopilot := false
+	if v, ok := d.GetOk("enable_autopilot"); ok && v == true {
+		enableAutopilot = true
+	}
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
-		if v, ok := d.GetOk("enable_autopilot"); ok && v == true {
+		if enableAutopilot {
 			return nil
 		}
 		return &container.ClusterAutoscaling{
@@ -4457,7 +4495,6 @@ func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) *co
 	}
 }
 
-<% unless version == 'ga' -%>
 func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults {
         l, ok := configured.([]interface{})
         if !ok || l == nil || len(l) == 0 || l[0] == nil {
@@ -4477,13 +4514,12 @@ func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interfa
 	}
 
 	result := make(map[string]interface{})
-	if c.NodeConfigDefaults != nil && c.NodeConfigDefaults.GcfsConfig != nil {
-			result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
+	if c.NodeConfigDefaults != nil {
+		result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
 	}
 
 	return []map[string]interface{}{result}
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoConfig {
