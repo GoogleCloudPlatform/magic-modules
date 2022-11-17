@@ -164,7 +164,43 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 	}
 
-	res, err = flattenNestedTagsLocationTagBinding(d, meta, res)
+	// handling the pagination
+
+	var p interface{}
+	var ok bool
+
+	p, ok = res["tagBindings"]
+	if !ok || p == nil {
+		return nil
+	}
+	allRes := make([]interface{}, 1)
+	allRes = append(allRes, p.([]interface{})...)
+
+	if pageToken, ok := res["nextPageToken"].(string); ok {
+		for pageToken != "" {
+			url, err = addQueryParams(url, map[string]string{"pageToken": fmt.Sprintf("%s", res["nextPageToken"])})
+			if err != nil {
+				return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
+			}
+			res, err = sendRequest(config, "GET", billingProject, url, userAgent, nil)
+			if err != nil {
+				return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
+			}
+			v, ok := res["tagBindings"]
+			if !ok || v == nil {
+				return nil
+			}
+			allRes = append(allRes, v.([]interface{})...)
+
+			if token, ok := res["nextPageToken"]; ok {
+				pageToken = token.(string)
+			} else {
+				pageToken = ""
+			}
+		}
+	}
+
+	_, item, err := resourceTagsLocationTagBindingFindNestedObjectInList(d, meta, allRes)
 	if err != nil {
 		return err
 	}
