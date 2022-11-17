@@ -440,6 +440,7 @@ objects:
     create_url: projects/{{project}}/locations/{{region}}/indexes
     self_link: projects/{{project}}/locations/{{region}}/indexes/{{name}}
     update_verb: :PATCH
+    update_mask: true
     create_verb: :POST
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexes/
