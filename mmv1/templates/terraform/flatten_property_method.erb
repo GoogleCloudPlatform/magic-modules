@@ -24,11 +24,13 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
   if v == nil {
     return nil
   }
+  <% if !property.allow_empty_object -%>
   original := v.(map[string]interface{})
-  <% unless property.allow_empty_object -%>
   if len(original) == 0 {
     return nil
   }
+  <% elsif !property.properties.empty? -%>
+  original := v.(map[string]interface{})
   <% end -%>
   transformed := make(map[string]interface{})
   <% property.properties.each do |prop| -%>
@@ -131,7 +133,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
   return v
 <% end # property.is_a?(Api::Type::NestedObject) -%>
 }
-<% if property.nested_properties? -%>
+<% if !property.nested_properties.nil? -%>
   <% property.nested_properties.each do |prop| -%>
     <%= lines(build_flatten_method(prefix + titlelize_property(property), prop, object, pwd), 1) -%>
   <% end -%>

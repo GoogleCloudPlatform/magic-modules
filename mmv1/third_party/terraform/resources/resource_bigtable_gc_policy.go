@@ -202,10 +202,17 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 	tableName := d.Get("table").(string)
 	columnFamily := d.Get("column_family").(string)
 
-	err = retryTimeDuration(func() error {
+	retryFunc := func() (interface{}, error) {
 		reqErr := c.SetGCPolicy(ctx, tableName, columnFamily, gcPolicy)
-		return reqErr
-	}, d.Timeout(schema.TimeoutCreate), isBigTableRetryableError)
+		return "", reqErr
+	}
+	// The default create timeout is 20 minutes.
+	timeout := d.Timeout(schema.TimeoutCreate)
+	pollInterval := time.Duration(30) * time.Second
+	// Mutations to gc policies can only happen one-at-a-time and take some amount of time.
+	// Use a fixed polling rate of 30s based on the RetryInfo returned by the server rather than
+	// the standard up-to-10s exponential backoff for those operations.
+	_, err = retryWithPolling(retryFunc, timeout, pollInterval, isBigTableRetryableError)
 	if err != nil {
 		return err
 	}
@@ -249,9 +256,12 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	columnFamily := d.Get("column_family").(string)
 	ti, err := c.TableInfo(ctx, name)
 	if err != nil {
-		log.Printf("[WARN] Removing %s because it's gone", name)
-		d.SetId("")
-		return nil
+		if isNotFoundGrpcError(err) {
+			log.Printf("[WARN] Removing the GC policy because the parent table %s is gone", name)
+			d.SetId("")
+			return nil
+		}
+		return err
 	}
 
 	for _, fi := range ti.FamilyInfos {
@@ -376,10 +386,14 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 
 	defer c.Close()
 
-	err = retryTimeDuration(func() error {
+	retryFunc := func() (interface{}, error) {
 		reqErr := c.SetGCPolicy(ctx, d.Get("table").(string), d.Get("column_family").(string), bigtable.NoGcPolicy())
-		return reqErr
-	}, d.Timeout(schema.TimeoutDelete), isBigTableRetryableError)
+		return "", reqErr
+	}
+	// The default delete timeout is 20 minutes.
+	timeout := d.Timeout(schema.TimeoutDelete)
+	pollInterval := time.Duration(30) * time.Second
+	_, err = retryWithPolling(retryFunc, timeout, pollInterval, isBigTableRetryableError)
 	if err != nil {
 		return err
 	}

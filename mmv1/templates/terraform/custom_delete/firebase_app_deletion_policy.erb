@@ -1,0 +1,49 @@
+	// Handwritten
+	obj := make(map[string]interface{})
+	if d.Get("deletion_policy") == "DELETE" {
+		obj["immediate"] = true
+	} else {
+		fmt.Printf("Skip deleting App %q due to deletion_policy: %q\n", d.Id(), d.Get("deletion_policy"))
+		return nil
+	}
+	// End of Handwritten
+	billingProject := ""
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for App: %s", err)
+	}
+	billingProject = project
+
+	url, err := replaceVars(d, config, "{{FirebaseBasePath}}{{name}}:remove")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Deleting App %q", d.Id())
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := getBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return handleNotFoundError(err, d, "App")
+	}
+
+	err = firebaseOperationWaitTime(
+		config, res, project, "Deleting App", userAgent,
+		d.Timeout(schema.TimeoutDelete))
+
+	if err != nil {
+		return err
+	}
+
+        log.Printf("[DEBUG] Finished deleting App %q: %#v", d.Id(), res)
+
+        // This is useful if the Delete operation returns before the Get operation
+        // during post-test destroy shows the completed state of the resource.
+        time.Sleep(5 * time.Second)
+
+	return nil

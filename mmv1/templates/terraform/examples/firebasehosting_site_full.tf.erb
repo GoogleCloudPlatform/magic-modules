@@ -1,0 +1,13 @@
+resource "google_firebase_web_app" "default" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  display_name = "Test web app for Firebase Hosting"
+  deletion_policy = "DELETE"
+}
+
+resource "google_firebase_hosting_site" "full" {
+  provider = google-beta
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
+  site_id = "<%= ctx[:vars]['site_id'] %>"
+  app_id = google_firebase_web_app.default.app_id
+}

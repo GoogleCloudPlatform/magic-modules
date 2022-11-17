@@ -1,0 +1,17 @@
+updates:
+- resource: ./global_update.tf.tmpl
+variables:
+- name: policy
+  type: resource_name
+- name: tagkey 
+  type: resource_name
+- name: tagvalue
+  type: resource_name
+- name: project
+  type: project
+- name: network
+  type: resource_name
+- name: org_id 
+  type: org_id
+- name: test_service_account
+  type: test_service_account

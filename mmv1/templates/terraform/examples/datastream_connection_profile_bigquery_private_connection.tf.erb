@@ -1,0 +1,30 @@
+resource "google_datastream_private_connection" "private_connection" {
+	display_name          = "Connection profile"
+	location              = "us-central1"
+	private_connection_id = "<%= ctx[:vars]['private_connection_id'] %>"
+
+	labels = {
+		key = "value"
+	}
+
+	vpc_peering_config {
+		vpc = google_compute_network.default.id
+		subnet = "10.0.0.0/29"
+	}
+}
+
+resource "google_compute_network" "default" {
+	name = "<%= ctx[:vars]['network_name'] %>"
+}
+
+resource "google_datastream_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+	display_name          = "Connection profile"
+	location              = "us-central1"
+	connection_profile_id = "<%= ctx[:vars]['connection_profile_id'] %>"
+
+	bigquery_profile {}
+
+	private_connectivity {
+		private_connection = google_datastream_private_connection.private_connection.id
+	}
+}

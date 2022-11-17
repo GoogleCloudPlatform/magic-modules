@@ -154,9 +154,11 @@ hand.
 ### Handwritten Tests
 
 Sometimes you may need to test unusual resource behavior in a way that does not
-fit well with generated tests. In this circumstance you can write a test file
+fit well with generated tests. In this circumstance you can write a
+[handwritten test file](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/README.md#testing)
 and add it
 [here](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests).
+
 These tests can be used for more granular testing of specific behavior and add
 custom checks. Tests in these files will not have examples generated for them,
 so handwritten tests should not be considered a replacement for samples.

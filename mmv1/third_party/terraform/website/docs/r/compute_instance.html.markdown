@@ -30,6 +30,9 @@ resource "google_compute_instance" "default" {
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-11"
+      labels = {
+        my_label = "value"
+      }
     }
   }
 
@@ -118,7 +121,8 @@ The following arguments are supported:
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within the instance. Ssh keys attached in the Cloud Console will be removed.
-    Add them to your config in order to keep them attached to your instance.
+    Add them to your config in order to keep them attached to your instance. A
+    list of default metadata values (e.g. ssh-keys) can be found [here](https://cloud.google.com/compute/docs/metadata/default-metadata-values)
 
 -> Depending on the OS you choose for your instance, some metadata keys have
    special functionality.  Most linux-based images will run the content of
@@ -230,6 +234,9 @@ is desired, you will need to modify your state file manually using
     [google_compute_image data source](/docs/providers/google/d/compute_image.html).
     For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
     These images can be referred by family name here.
+
+* `labels` - (Optional) A set of key/value label pairs assigned to the disk. This  
+    field is only applicable for persistent disks.
 
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
@@ -414,7 +421,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `threads_per_core` (Optional) he number of threads per physical core. To disable [simultaneous multithreading (SMT)](https://cloud.google.com/compute/docs/instances/disabling-smt) set this to 1.
 
-* `visible_core_count` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
+* `visible_core_count` (Optional) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
 
