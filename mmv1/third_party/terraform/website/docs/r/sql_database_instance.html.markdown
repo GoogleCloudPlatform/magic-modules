@@ -265,11 +265,11 @@ The optional `settings.active_directory_config` subblock supports:
 
 The optional `settings.deny_maintenance_period` subblock supports:
 
-* `end_date` - (Required) The end date (yyyy-mm-dd) or (mm-dd) for annual recurrence
+* `end_date` - (Required) "deny maintenance period" end date. If the year of the end date is empty, the year of the start date also must be empty. In this case, it means the no maintenance interval recurs every year. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01
 
-* `start_date` - (Required) The start date (yyyy-mm-dd) or (mm-dd) for annual recurrence
+* `start_date` - (Required) "deny maintenance period" start date. If the year of the start date is empty, the year of the end date also must be empty. In this case, it means the deny maintenance period recurs every year. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01
 
-* `time` - (Required) The start and end time (HH:mm:SS)
+* `time` - (Required) Time in UTC when the "deny maintenance period" starts on startDate and ends on endDate. The time is in format: HH:mm:SS, i.e., 00:00:00
 
 The optional `settings.sql_server_audit_config` subblock supports:
 
