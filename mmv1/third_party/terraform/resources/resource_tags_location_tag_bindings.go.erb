@@ -96,7 +96,7 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 	}
 
 	// Store the ID now
-	id, err := replaceVars(d, config, "tagBindings/?parent={{parent}}&pageSize=300")
+	id, err := replaceVars(d, config, "tagBindings/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -272,7 +272,7 @@ func resourceTagsLocationTagBindingImport(d *schema.ResourceData, meta interface
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "tagBindings/?parent={{parent}}&pageSize=300")
+	id, err := replaceVars(d, config, "tagBindings/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
