@@ -4175,7 +4175,7 @@ func TestAccContainerCluster_withEnablePrivateEndpointToggle(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withEnablePrivateEndpoint(clusterName, "", ""),
+				Config: testAccContainerCluster_withoutEnablePrivateEndpoint(clusterName),
 			},
 			{
 				ResourceName:				"google_container_cluster.with_enable_private_endpoint",
@@ -4184,7 +4184,7 @@ func TestAccContainerCluster_withEnablePrivateEndpointToggle(t *testing.T) {
 				ImportStateVerifyIgnore:	[]string{"min_master_version"},
 			},
 			{
-				Config: testAccContainerCluster_withEnablePrivateEndpoint(clusterName, "true", ""),
+				Config: testAccContainerCluster_withEnablePrivateEndpoint(clusterName, "true"),
 			},
 			{
 				ResourceName:				"google_container_cluster.with_enable_private_endpoint",
@@ -4193,7 +4193,7 @@ func TestAccContainerCluster_withEnablePrivateEndpointToggle(t *testing.T) {
 				ImportStateVerifyIgnore:	[]string{"min_master_version"},
 			},
 			{
-				Config: testAccContainerCluster_withEnablePrivateEndpoint(clusterName, "false", ""),
+				Config: testAccContainerCluster_withEnablePrivateEndpoint(clusterName, "false"),
 			},
 			{
 				ResourceName:				"google_container_cluster.with_enable_private_endpoint",
@@ -4205,17 +4205,7 @@ func TestAccContainerCluster_withEnablePrivateEndpointToggle(t *testing.T) {
 	})
 }
 
-func testAccContainerCluster_withEnablePrivateEndpoint(clusterName string, flag string, emptyValue string) string {
-
-	v := emptyValue
-	if flag != emptyValue {
-		var buf bytes.Buffer
-		buf.WriteString(fmt.Sprintf(`
-		private_cluster_config {
-			enable_private_endpoint = %s
-		}`, flag))
-		v = buf.String()
-	}
+func testAccContainerCluster_withEnablePrivateEndpoint(clusterName string, flag string) string {
 
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_enable_private_endpoint" {
@@ -4228,9 +4218,27 @@ resource "google_container_cluster" "with_enable_private_endpoint" {
     gcp_public_cidrs_access_enabled = false
   }
 
-  %s
+  private_cluster_config {
+	enable_private_endpoint = %s
+  }
 }
-`, clusterName, v)
+`, clusterName, flag)
+}
+
+func testAccContainerCluster_withoutEnablePrivateEndpoint(clusterName string) string {
+
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_enable_private_endpoint" {
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = "1.23"
+  initial_node_count = 1
+
+  master_authorized_networks_config {
+    gcp_public_cidrs_access_enabled = false
+  }
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_regionalWithNodePool(cluster, nodePool string) string {
