@@ -147,7 +147,7 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{TagsLocationBasePath}}tagBindings/?parent={{parent}}&pageSize=1")
+	url, err := replaceVars(d, config, "{{TagsLocationBasePath}}tagBindings/?parent={{parent}}&pageSize=300")
 	if err != nil {
 		return err
 	}
@@ -164,15 +164,11 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 	}
 
-	var p interface{}
-	var ok bool
-
-	p, ok = res["tagBindings"]
+	p, ok := res["tagBindings"]
 	if !ok || p == nil {
 		return nil
 	}
-	allRes := make([]interface{}, 1)
-	allRes = append(allRes, p.([]interface{})...)
+	pView := p.([]interface{})
 
 	if pageToken, ok := res["nextPageToken"].(string); ok {
 		for pageToken != "" {
@@ -195,7 +191,7 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 			if !ok || v == nil {
 				return nil
 			}
-			allRes = append(allRes, v.([]interface{})...)
+			pView = append(pView, v.([]interface{})...)
 
 			if token, ok := res["nextPageToken"]; ok {
 				pageToken = token.(string)
@@ -205,23 +201,23 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		}
 	}
 
-	_, item, err := resourceTagsLocationTagBindingFindNestedObjectInList(d, meta, allRes)
+	newMap := make(map[string]interface{}, 1)
+	newMap["tagBindings"] = pView
+	res, err = flattenNestedTagsLocationTagBinding(d, meta, newMap)
 	if err != nil {
 		return err
 	}
 
-	setResponse := item
+	if err := d.Set("name", flattenNestedTagsLocationTagBindingName(res["name"], d, config)); err != nil {
+		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
+	}
+	if err := d.Set("parent", flattenNestedTagsLocationTagBindingParent(res["parent"], d, config)); err != nil {
+		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
+	}
+	if err := d.Set("tag_value", flattenNestedTagsLocationTagBindingTagValue(res["tagValue"], d, config)); err != nil {
+		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
+	}
 
-	if err := d.Set("name", flattenNestedTagsLocationTagBindingName(setResponse["name"], d, config)); err != nil {
-		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
-	}
-	if err := d.Set("parent", flattenNestedTagsLocationTagBindingParent(setResponse["parent"], d, config)); err != nil {
-		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
-	}
-	if err := d.Set("tag_value", flattenNestedTagsLocationTagBindingTagValue(setResponse["tagValue"], d, config)); err != nil {
-		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
-	}
-	
 	return nil
 }
 
@@ -266,6 +262,8 @@ func resourceTagsLocationTagBindingDelete(d *schema.ResourceData, meta interface
 
 func resourceTagsLocationTagBindingImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
+	
+	// current import_formats can't import fields with forward slashes in their value
 	if err := parseImportId([]string{
 		"tagBindings/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",
