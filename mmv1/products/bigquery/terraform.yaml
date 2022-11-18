@@ -410,6 +410,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           dataset_id: "dataset_id"
           table_id: "table_id"
+        ignore_read_extra:
+          - "deletion_protection"
   Routine: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}"]
     examples:
