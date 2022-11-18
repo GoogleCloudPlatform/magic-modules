@@ -2482,26 +2482,6 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 	}
 }
 
-func testAccCheckComputeInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
-
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_compute_instance" {
-				continue
-			}
-
-			_, err := config.NewComputeClient(config.userAgent).Instances.Get(
-				config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
-			if err == nil {
-				return fmt.Errorf("Instance still exists")
-			}
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckComputeInstanceExists(t *testing.T, n string, instance interface{}) resource.TestCheckFunc {
 	if instance == nil {
 		panic("Attempted to check existence of Instance that was nil.")

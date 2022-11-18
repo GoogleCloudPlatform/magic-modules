@@ -1388,24 +1388,6 @@ func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resourc
 	}
 }
 
-func testAccCheckBigQueryTableDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_bigquery_table" {
-				continue
-			}
-
-			config := googleProviderConfig(t)
-			_, err := config.NewBigQueryClient(config.userAgent).Tables.Get(config.Project, rs.Primary.Attributes["dataset_id"], rs.Primary.Attributes["table_id"]).Do()
-			if err == nil {
-				return fmt.Errorf("Table still present")
-			}
-		}
-
-		return nil
-	}
-}
-
 func testAccBigQueryTableTimePartitioning(datasetID, tableID, partitioningType string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
