@@ -86,10 +86,7 @@ var (
 		"private_cluster_config.0.enable_private_endpoint",
 		"private_cluster_config.0.enable_private_nodes",
 		"private_cluster_config.0.master_ipv4_cidr_block",
-		"private_cluster_config.0.peering_name",
-		"private_cluster_config.0.private_endpoint",
 		"private_cluster_config.0.private_endpoint_subnetwork",
-		"private_cluster_config.0.public_endpoint",
 		"private_cluster_config.0.master_global_access_config",
 	}
 
@@ -1423,13 +1420,11 @@ func resourceContainerCluster() *schema.Resource {
 						"peering_name": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: privateClusterConfigKeys,
 							Description: `The name of the peering between this cluster and the Google owned VPC.`,
 						},
 						"private_endpoint": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: privateClusterConfigKeys,
 							Description: `The internal IP address of this cluster's master endpoint.`,
 						},
 						"private_endpoint_subnetwork": {
@@ -1443,7 +1438,6 @@ func resourceContainerCluster() *schema.Resource {
 						"public_endpoint": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: privateClusterConfigKeys,
 							Description: `The external IP address of this cluster's master endpoint.`,
 						},
 						"master_global_access_config": {
