@@ -133,6 +133,8 @@ module Provider
       )
 
       @non_defined_tests = retrieve_full_manifest_of_non_defined_tests
+      files = retrieve_full_list_of_test_files
+      @tests = files.map { |file| file.split('.')[0] } | []
 
       test_source = retrieve_test_source_code_with_location('[b]').map do |location|
         [location[0].sub('go.erb', 'go'), location[1]]
@@ -149,6 +151,8 @@ module Provider
                            'third_party/terraform/utils/compute_operation.go.erb'],
                           ['converters/google/resources/config.go',
                            'third_party/terraform/utils/config.go.erb'],
+                          ['converters/google/resources/config_test_utils.go',
+                           'third_party/terraform/utils/config_test_utils.go.erb'],
                           ['converters/google/resources/iam.go',
                            'third_party/terraform/utils/iam.go.erb'],
                           ['converters/google/resources/compute_instance_helpers.go',

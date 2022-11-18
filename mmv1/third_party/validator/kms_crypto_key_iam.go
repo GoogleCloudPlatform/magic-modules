@@ -93,7 +93,7 @@ func newKmsCryptoKeyIamAsset(
 
 func FetchKmsCryptoKeyIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
-	if _, ok := d.GetOk("{{crypto_key_id}}"); !ok {
+	if _, ok := d.GetOk("crypto_key_id"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}
 
