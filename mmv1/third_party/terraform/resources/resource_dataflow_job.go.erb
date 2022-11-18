@@ -376,11 +376,11 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 		if !found {
-			d.Set("additional_experiments", optionsMap["experiments"])
+			if err := d.Set("additional_experiments", optionsMap["experiments"]); err != nil {
+				return fmt.Errorf("Error setting additional_experiments: %s", err)
+			}
 		}
 	}
-	} else if err := d.Set("additional_experiments", optionsMap["experiments"]); err != nil {
-		return fmt.Errorf("Error setting additional_experiments: %s", err)
 	}
 
 	if ok := shouldStopDataflowJobDeleteQuery(job.CurrentState, d.Get("skip_wait_on_job_termination").(bool)); ok {
