@@ -224,11 +224,16 @@ module Provider
         Google::LOGGER.debug "Generating #{object.name} resource"
         generate_resource(pwd, data.clone, generate_code, generate_docs)
         if generate_code
-          Google::LOGGER.debug "Generating #{object.name} tests"
-          generate_resource_tests(pwd, data.clone)
-          generate_resource_sweepers(pwd, data.clone)
           generate_resource_files(pwd, data.clone)
         end
+        Dir.chdir pwd
+      end
+      if generate_code
+        FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+        Dir.chdir output_folder
+        Google::LOGGER.debug "Generating #{object.name} tests"
+        generate_resource_tests(pwd, data.clone)
+        generate_resource_sweepers(pwd, data.clone)
         Dir.chdir pwd
       end
 
