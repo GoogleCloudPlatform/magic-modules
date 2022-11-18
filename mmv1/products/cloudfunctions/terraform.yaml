@@ -20,6 +20,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     base_url: projects/{{project}}/locations/{{region}}/functions
     import_format: ["projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}"]
     exclude_resource: true
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudfunctions_cloud_function"

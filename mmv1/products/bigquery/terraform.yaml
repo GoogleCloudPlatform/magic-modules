@@ -389,6 +389,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     base_url: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
     self_link: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
     exclude_resource: true
+    skip_sweeper: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: ':'
       parent_resource_type: 'google_bigquery_table'

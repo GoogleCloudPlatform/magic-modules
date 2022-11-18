@@ -90,6 +90,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   Version: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_resource: true
+    skip_sweeper: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 40
       update_minutes: 40
@@ -169,6 +170,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validation.StringLenBetween(0, 64)'
   Environment: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_resource: true
+    skip_sweeper: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 40
       update_minutes: 40

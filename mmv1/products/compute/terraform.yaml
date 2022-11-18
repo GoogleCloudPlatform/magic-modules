@@ -1360,6 +1360,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       parent_resource_attribute: 'instance_name'
       iam_conditions_request_type: :QUERY_PARAM
     exclude_resource: true
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_basic"

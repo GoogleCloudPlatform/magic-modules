@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: 'services/{{service_name}}'
     import_format: ["services/{{service_name}}"]
     exclude_resource: true
+    skip_sweeper: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       parent_resource_attribute: 'service_name'
       method_name_separator: ':'
@@ -38,6 +39,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: 'services/{{service_name}}/consumers/{{consumer_project}}'
     import_format: ["services/{{service_name}}/consumers/{{consumer_project}}", "{{consumer_project}}"]
     exclude_resource: true
+    skip_sweeper: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: ':'
       parent_resource_type: 'google_endpoints_service'
