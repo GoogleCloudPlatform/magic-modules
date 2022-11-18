@@ -223,9 +223,7 @@ module Provider
         Dir.chdir output_folder
         Google::LOGGER.debug "Generating #{object.name} resource"
         generate_resource(pwd, data.clone, generate_code, generate_docs)
-        if generate_code
-          generate_resource_files(pwd, data.clone)
-        end
+        generate_resource_files(pwd, data.clone) if generate_code
         Dir.chdir pwd
       end
       if generate_code
