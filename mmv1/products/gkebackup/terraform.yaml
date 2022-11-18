@@ -43,6 +43,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           key_name: "backupkey"
         test_env_vars:
           project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "gkebackup_backupplan_full"
+        min_version: beta
+        primary_resource_id: "full"
+        vars:
+          name: "fullplan"
+          cluster_name: "fullcluster"
+        test_env_vars:
+          project: :PROJECT_NAME
     skip_sweeper: true
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride

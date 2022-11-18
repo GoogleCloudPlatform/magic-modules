@@ -189,13 +189,17 @@ objects:
             description: |
               If True, include all namespaced resources.
             exactly_one_of:
-              - allNamespaces
-              - selectedNamespaces
-              - selectedApplications
+              - all_namespaces
+              - selected_namespaces
+              - selected_applications
           - !ruby/object:Api::Type::NestedObject
             name: selectedNamespaces
             description: |
               If set, include just the resources in the listed namespaces.
+            exactly_one_of:
+              - all_namespaces
+              - selected_namespaces
+              - selected_applications
             properties:
               - !ruby/object:Api::Type::Array
                 name: namespaces
@@ -206,6 +210,10 @@ objects:
             name: selectedApplications
             description: |
               A list of namespaced Kubernetes Resources.
+            exactly_one_of:
+              - all_namespaces
+              - selected_namespaces
+              - selected_applications
             properties:
               - !ruby/object:Api::Type::Array
                 name: namespacedNames
@@ -213,14 +221,14 @@ objects:
                   A list of namespaced Kubernetes resources.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
-                  - !ruby/object:Api::Type::String
-                    name: namespace
-                    description: |
-                      The namespace of a Kubernetes Resource.
-                  - !ruby/object:Api::Type::String
-                    name: name
-                    description: |
-                      The name of a Kubernetes Resource.
+                    - !ruby/object:Api::Type::String
+                      name: namespace
+                      description: |
+                        The namespace of a Kubernetes Resource.
+                    - !ruby/object:Api::Type::String
+                      name: name
+                      description: |
+                        The name of a Kubernetes Resource.
       - !ruby/object:Api::Type::Integer
         name: protectedPodCount
         output: true
