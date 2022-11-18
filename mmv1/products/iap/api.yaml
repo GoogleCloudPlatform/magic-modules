@@ -32,7 +32,6 @@ objects:
     base_url: 'projects/{{project}}/iap_web'
     self_link: 'projects/{{project}}/iap_web'
     exclude_resource: true
-    skip_sweeper: true
     description: |
       Only used to generate IAM resources
     properties:
@@ -47,7 +46,6 @@ objects:
     base_url: 'projects/{{project}}/iap_web/compute'
     self_link: 'projects/{{project}}/iap_web/compute'
     exclude_resource: true
-    skip_sweeper: true
     description: |
       Only used to generate IAM resources
     properties:
@@ -62,7 +60,6 @@ objects:
     base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}'
     self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}'
     exclude_resource: true
-    skip_sweeper: true
     description: |
       Only used to generate IAM resources
     properties:
@@ -77,7 +74,6 @@ objects:
     base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
     self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
     exclude_resource: true
-    skip_sweeper: true
     description: |
       Only used to generate IAM resources
     properties:
@@ -100,7 +96,6 @@ objects:
     base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
     self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
     exclude_resource: true
-    skip_sweeper: true
     description: |
       Only used to generate IAM resources
     properties:
@@ -119,7 +114,6 @@ objects:
     base_url: 'projects/{{project}}/iap_web/compute/services/{{name}}'
     self_link: 'projects/{{project}}/iap_web/compute/services/{{name}}'
     exclude_resource: true
-    skip_sweeper: true
     description: |
       Only used to generate IAM resources
     properties:
@@ -134,7 +128,6 @@ objects:
     base_url: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
     self_link: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
     exclude_resource: true
-    skip_sweeper: true
     description: |
       Only used to generate IAM resources
     properties:
@@ -149,7 +142,6 @@ objects:
     base_url: 'projects/{{project}}/iap_tunnel'
     self_link: 'projects/{{project}}/iap_tunnel'
     exclude_resource: true
-    skip_sweeper: true
     description: |
       Only used to generate IAM resources
     properties:

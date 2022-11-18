@@ -1901,7 +1901,6 @@ objects:
     base_url: projects/{{project}}/locations/{{location}}/certificateTemplates
     self_link: projects/{{project}}/locations/{{location}}/certificateTemplates/{{name}}
     exclude_resource: true
-    skip_sweeper: true
     description: |
       Only used to generate IAM resources
     properties:

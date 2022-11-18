@@ -207,6 +207,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           my_ca_pool: "my-ca-pool"
           my_certificate: "my-certificate"
   CertificateTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
+    skip_sweeper: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/privateca.templateUser'
       method_name_separator: ':'
