@@ -353,8 +353,8 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			<% unless version == "ga" -%>
 			"stateful_internal_ip": {
 				Type:        schema.TypeList,
-				Optional:    true,
 				Computed:    true,
+				Optional:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -375,8 +375,8 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			},
 			"stateful_external_ip": {
 				Type:        schema.TypeList,
-				Optional:    true,
 				Computed:    true,
+				Optional:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
