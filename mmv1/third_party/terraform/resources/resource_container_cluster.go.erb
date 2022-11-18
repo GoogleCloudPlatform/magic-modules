@@ -629,13 +629,11 @@ func resourceContainerCluster() *schema.Resource {
 												"max_surge": {
 													Type:        schema.TypeInt,
 													Optional:    true,
-													Computed:    true,
 													Description: `The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process.`,
 												},
 												"max_unavailable": {
 													Type:        schema.TypeInt,
 													Optional:    true,
-													Computed:    true,
 													Description: `The maximum number of nodes that can be simultaneously unavailable during the upgrade process.`,
 												},
 												"strategy": {

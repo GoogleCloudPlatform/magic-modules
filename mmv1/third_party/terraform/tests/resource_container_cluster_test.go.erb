@@ -2171,6 +2171,14 @@ func TestAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(t *testing.
 				Config:      testAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(clusterName, 2, 1, "BLUE_GREEN"),
 				ExpectError: regexp.MustCompile(`Surge upgrade settings max_surge/max_unavailable can only be used when strategy is set to SURGE`),
 			},
+			{
+				Config:      testAccContainerCluster_autoprovisioningDefaultsUpgradeSettingsWithBlueGreenStrategy(clusterName, "3.500s", "BLUE_GREEN"),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_autoprovisioning_upgrade_settings",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -5193,6 +5201,43 @@ resource "google_container_cluster" "with_autoprovisioning_upgrade_settings" {
   }
 }
 `, clusterName, maxSurge, maxUnavailable, strategy, blueGreenSettings)
+}
+
+func testAccContainerCluster_autoprovisioningDefaultsUpgradeSettingsWithBlueGreenStrategy(clusterName string, duration, strategy string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_autoprovisioning_upgrade_settings" {
+  name               = "%s"
+  location           = "us-central1-f"
+  initial_node_count = 1
+
+  cluster_autoscaling {
+    enabled = true
+
+	resource_limits {
+	  resource_type = "cpu"
+	  maximum       = 2
+	}
+
+	resource_limits {
+	  resource_type = "memory"
+	  maximum       = 2048
+	}
+
+    auto_provisioning_defaults {
+      upgrade_settings {
+        strategy        = "%s"
+		blue_green_settings {
+			node_pool_soak_duration = "%s"
+			standard_rollout_policy {
+			  batch_percentage    = 0.5
+			  batch_soak_duration = "%s"
+			}
+		}
+      }
+    }
+  }
+}
+`, clusterName, strategy, duration, duration)
 }
 
 func testAccContainerCluster_autoprovisioningDefaultsDiskSizeGb(cluster string, includeDiskSizeGb bool) string {
