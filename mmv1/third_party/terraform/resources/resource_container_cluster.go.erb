@@ -82,6 +82,17 @@ var (
 	<% end -%>
 	}
 
+	privateClusterConfigKeys = []string{
+		"private_cluster_config.0.enable_private_endpoint",
+		"private_cluster_config.0.enable_private_nodes",
+		"private_cluster_config.0.master_ipv4_cidr_block",
+		"private_cluster_config.0.peering_name",
+		"private_cluster_config.0.private_endpoint",
+		"private_cluster_config.0.private_endpoint_subnetwork",
+		"private_cluster_config.0.public_endpoint",
+		"private_cluster_config.0.master_global_access_config",
+	}
+
 	forceNewClusterNodeConfigFields = []string{
 		"workload_metadata_config",
 	}
@@ -1380,9 +1391,15 @@ func resourceContainerCluster() *schema.Resource {
 				Description:      `Configuration for private clusters, clusters with private nodes.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						// enable_private_endpoint is orthogonal to private_endpoint_subnetwork.
+						// User can create a private_cluster_config block without including
+						// either one of those two fields. Both fields are optional.
+						// At the same time, we use 'AtLeastOneOf' to prevent an empty block
+						// like 'private_cluster_config{}'
 						"enable_private_endpoint": {
 							Type:             schema.TypeBool,
 							Optional:         true,
+							AtLeastOneOf:     privateClusterConfigKeys,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description:      `When true, the cluster's private endpoint is used as the cluster endpoint and access through the public endpoint is disabled. When false, either endpoint can be used. This field only applies to private clusters, when enable_private_nodes is true.`,
 						},
@@ -1390,6 +1407,7 @@ func resourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeBool,
 							Optional:         true,
 							ForceNew:         true,
+							AtLeastOneOf:     privateClusterConfigKeys,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description:      `Enables the private cluster feature, creating a private endpoint on the cluster. In a private cluster, nodes only have RFC 1918 private addresses and communicate with the master's private endpoint via private networking.`,
 						},
@@ -1398,36 +1416,42 @@ func resourceContainerCluster() *schema.Resource {
 							Computed:     true,
 							Optional:     true,
 							ForceNew:     true,
+							AtLeastOneOf: privateClusterConfigKeys,
 							ValidateFunc: orEmpty(validation.IsCIDRNetwork(28, 28)),
 							Description:  `The IP range in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. See Private Cluster Limitations for more details. This field only applies to private clusters, when enable_private_nodes is true.`,
 						},
 						"peering_name": {
-							Type:        schema.TypeString,
-							Computed:    true,
+							Type:         schema.TypeString,
+							Computed:     true,
+							AtLeastOneOf: privateClusterConfigKeys,
 							Description: `The name of the peering between this cluster and the Google owned VPC.`,
 						},
 						"private_endpoint": {
-							Type:        schema.TypeString,
-							Computed:    true,
+							Type:         schema.TypeString,
+							Computed:     true,
+							AtLeastOneOf: privateClusterConfigKeys,
 							Description: `The internal IP address of this cluster's master endpoint.`,
 						},
 						"private_endpoint_subnetwork": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							ForceNew:         true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: privateClusterConfigKeys,
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 							Description: `Subnetwork in cluster's network where master's endpoint will be provisioned.`,
 						},
 						"public_endpoint": {
-							Type:        schema.TypeString,
-							Computed:    true,
+							Type:         schema.TypeString,
+							Computed:     true,
+							AtLeastOneOf: privateClusterConfigKeys,
 							Description: `The external IP address of this cluster's master endpoint.`,
 						},
 						"master_global_access_config": {
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Optional: true,
-							Computed: true,
+							Type:         schema.TypeList,
+							MaxItems:     1,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: privateClusterConfigKeys,
 							Description: "Controls cluster master global access settings.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
