@@ -725,7 +725,7 @@ func TestAccContainerCluster_withGcpPublicCidrsAccessEnabledToggle(t *testing.T)
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withGcpPublicCidrsAccessEnabled(clusterName, "", ""),
+				Config: testAccContainerCluster_withoutGcpPublicCidrsAccessEnabled(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_gcp_public_cidrs_access_enabled",
 						"master_authorized_networks_config.#", "1"),
@@ -740,7 +740,7 @@ func TestAccContainerCluster_withGcpPublicCidrsAccessEnabledToggle(t *testing.T)
 				ImportStateVerifyIgnore:	[]string{"min_master_version"},
 			},
 			{
-				Config: testAccContainerCluster_withGcpPublicCidrsAccessEnabled(clusterName, "false", ""),
+				Config: testAccContainerCluster_withGcpPublicCidrsAccessEnabled(clusterName, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_gcp_public_cidrs_access_enabled",
 						"master_authorized_networks_config.0.gcp_public_cidrs_access_enabled", "false"),
@@ -753,7 +753,7 @@ func TestAccContainerCluster_withGcpPublicCidrsAccessEnabledToggle(t *testing.T)
 				ImportStateVerifyIgnore:	[]string{"min_master_version"},
 			},
 			{
-				Config: testAccContainerCluster_withGcpPublicCidrsAccessEnabled(clusterName, "true", ""),
+				Config: testAccContainerCluster_withGcpPublicCidrsAccessEnabled(clusterName, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_gcp_public_cidrs_access_enabled",
 						"master_authorized_networks_config.0.gcp_public_cidrs_access_enabled", "true"),
@@ -761,6 +761,34 @@ func TestAccContainerCluster_withGcpPublicCidrsAccessEnabledToggle(t *testing.T)
 			},
 		},
 	})
+}
+
+func testAccContainerCluster_withGcpPublicCidrsAccessEnabled(clusterName string, flag string) string {
+
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_gcp_public_cidrs_access_enabled" {
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = "1.23"
+  initial_node_count = 1
+
+  master_authorized_networks_config {
+	gcp_public_cidrs_access_enabled = %s
+  }
+}
+`, clusterName, flag)
+}
+
+func testAccContainerCluster_withoutGcpPublicCidrsAccessEnabled(clusterName string) string {
+
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_gcp_public_cidrs_access_enabled" {
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = "1.23"
+  initial_node_count = 1
+}
+`, clusterName)
 }
 
 func TestAccContainerCluster_regional(t *testing.T) {
@@ -4047,30 +4075,6 @@ resource "google_container_cluster" "with_master_authorized_networks" {
   }
 }
 `, clusterName, cidrBlocks)
-}
-
-func testAccContainerCluster_withGcpPublicCidrsAccessEnabled(clusterName string, flag string, emptyValue string) string {
-
-	v := emptyValue
-	if flag != emptyValue {
-		var buf bytes.Buffer
-		buf.WriteString(fmt.Sprintf(`
-		master_authorized_networks_config {
-			gcp_public_cidrs_access_enabled = %s
-		}`, flag))
-		v = buf.String()
-	}
-
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_gcp_public_cidrs_access_enabled" {
-  name               = "%s"
-  location           = "us-central1-a"
-  min_master_version = "1.23"
-  initial_node_count = 1
-
-  %s
-}
-`, clusterName, v)
 }
 
 func testAccContainerCluster_removeMasterAuthorizedNetworksConfig(clusterName string) string {
