@@ -80,7 +80,6 @@ func resourceComputeRouterInterface() *schema.Resource {
 			"subnetwork": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Computed:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: compareSelfLinkOrResourceName,
 				AtLeastOneOf:     []string{"ip_range", "interconnect_attachment", "subnetwork", "vpn_tunnel"},
