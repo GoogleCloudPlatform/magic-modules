@@ -63,6 +63,15 @@ resource "google_storage_bucket_object" "data" {
 EOF
 }
 
+resource "google_storage_bucket_object" "data-v2" {
+  name   = "contents-v2/data.json"
+  bucket = google_storage_bucket.bucket.name
+  content = <<EOF
+{"id": "1", "embedding": [0.5, 1.0], "restricts": [{"namespace": "class", "allow": ["cat", "pet"]},{"namespace": "category", "allow": ["feline"]}]}
+{"id": "2", "embedding": [0.6, 1.0], "restricts": [{"namespace": "class", "allow": ["dog", "pet"]},{"namespace": "category", "allow": ["canine"]}]}
+EOF
+}
+
 resource "google_vertex_ai_index" "index" {
   labels = {
     foo = "bar"
@@ -108,6 +117,16 @@ resource "google_storage_bucket_object" "data" {
 EOF
 }
 
+resource "google_storage_bucket_object" "data-v2" {
+  name   = "contents-v2/data.json"
+  bucket = google_storage_bucket.bucket.name
+  content = <<EOF
+{"id": "1", "embedding": [0.5, 1.0], "restricts": [{"namespace": "class", "allow": ["cat", "pet"]},{"namespace": "category", "allow": ["feline"]}]}
+{"id": "2", "embedding": [0.6, 1.0], "restricts": [{"namespace": "class", "allow": ["dog", "pet"]},{"namespace": "category", "allow": ["canine"]}]}
+EOF
+}
+
+
 resource "google_vertex_ai_index" "index" {
   labels = {
     foo = "bar"
@@ -116,7 +135,8 @@ resource "google_vertex_ai_index" "index" {
   display_name = "tf-test-test-index%{random_suffix}"
   description = "index for test (updated)"
   metadata {
-    contents_delta_uri = "gs://${google_storage_bucket.bucket.name}/contents"
+    contents_delta_uri = "gs://${google_storage_bucket.bucket.name}/contents-v2"
+    is_complete_overwrite = true
     config {
       dimensions = 2
       approximate_neighbors_count = 150

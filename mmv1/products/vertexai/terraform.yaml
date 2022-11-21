@@ -79,6 +79,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
         ignore_read_extra:
           - metadata.0.contents_delta_uri
+          - metadata.0.is_complete_overwrite
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_index_streaming"
         primary_resource_id: "index"
@@ -89,6 +90,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
         ignore_read_extra:
           - metadata.0.contents_delta_uri
+          - metadata.0.is_complete_overwrite
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -96,6 +98,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       metadata.contentsDeltaUri: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_update: templates/terraform/pre_update/vertex_ai_index.go.erb
   FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
     autogen_async: false
