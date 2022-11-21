@@ -18,12 +18,12 @@ resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
 
-	  env {
+      env {
         name = "FOO"
         value = "bar"
       }
       env {
-        name = "latestdclsecret"
+        name = "SECRET_ENV_VAR"
         value_source {
           secret_key_ref {
             secret = google_secret_manager_secret.secret.secret_id
@@ -31,7 +31,7 @@ resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
           }
         }
       }
-	  volume_mounts {
+      volume_mounts {
         name = "cloudsql"
         mount_path = "/cloudsql"
       }
