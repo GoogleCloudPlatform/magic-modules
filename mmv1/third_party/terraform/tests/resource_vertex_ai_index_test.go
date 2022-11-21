@@ -29,7 +29,7 @@ func TestAccVertexAIIndex_updated(t *testing.T) {
 				ResourceName:            "google_vertex_ai_index.index",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "region", "metadata.0.contents_delta_uri"},
+				ImportStateVerifyIgnore: []string{"etag", "region", "metadata.0.contents_delta_uri", "metadata.0.is_complete_overwrite"},
 			},
 			{
 				Config: testAccVertexAIIndex_updated(context),
@@ -38,7 +38,7 @@ func TestAccVertexAIIndex_updated(t *testing.T) {
 				ResourceName:            "google_vertex_ai_index.index",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "region", "metadata.0.contents_delta_uri"},
+				ImportStateVerifyIgnore: []string{"etag", "region", "metadata.0.contents_delta_uri", "metadata.0.is_complete_overwrite"},
 			},
 		},
 	})
