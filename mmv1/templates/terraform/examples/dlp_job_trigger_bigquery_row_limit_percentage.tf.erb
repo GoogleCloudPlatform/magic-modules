@@ -20,6 +20,8 @@ resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id
 					}
 				}
 			}
+			publishFindingsToCloudDataCatalog {
+			}
 		}
 		storage_config {
 			big_query_options {

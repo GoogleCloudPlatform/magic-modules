@@ -318,11 +318,8 @@ objects:
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'saveFindings'
-                  exactly_one_of:
-                    - save_findings
-                    - pub_sub
                   description: |
-                    Schedule for triggered jobs
+                    If set, the detailed findings will be persisted to the specified OutputStorageConfig. Only a single instance of this action can be specified. Compatible with: Inspect, Risk
                   properties:
                     - !ruby/object:Api::Type::NestedObject
                       name: 'outputConfig'
@@ -370,9 +367,6 @@ objects:
                             - :ALL_COLUMNS
                 - !ruby/object:Api::Type::NestedObject
                   name: 'pubSub'
-                  exactly_one_of:
-                    - save_findings
-                    - pub_sub
                   description: |
                     Publish a message into a given Pub/Sub topic when the job completes.
                   properties:
@@ -381,6 +375,14 @@ objects:
                       required: true
                       description: |
                         Cloud Pub/Sub topic to send notifications to.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'publishSummaryToCscc'
+                  description: |
+                    Publish the result summary of a DlpJob to the Cloud Security Command Center.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'publishFindingsToCloudDataCatalog'
+                  description: |
+                    Publish findings of a DlpJob to Data Catalog.
   - !ruby/object:Api::Resource
     name: 'InspectTemplate'
     create_url:  "{{parent}}/inspectTemplates"
