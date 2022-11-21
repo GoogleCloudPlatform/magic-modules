@@ -145,10 +145,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       consumerAcceptList: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: "projectListDiffSuppress"
       ipRange: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_instance.go.erb
+      constants: templates/terraform/constants/apigee_instance.go.erb
   Environment: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["{{org_id}}/environments/{{name}}", "{{org_id}}/{{name}}"]
