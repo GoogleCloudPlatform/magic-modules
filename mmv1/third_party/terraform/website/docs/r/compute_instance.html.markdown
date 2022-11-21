@@ -385,7 +385,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     
 * `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 
-* `max_run_duration` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration this instance will run and be terminated after then
+* `max_run_duration` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration this instance will run and be terminated after then. Accept 'nanos' and 'secoonds', or both.
 
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
