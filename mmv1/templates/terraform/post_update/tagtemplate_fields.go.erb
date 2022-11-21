@@ -40,7 +40,7 @@ for name, change := range vals {
     // A few different situations to deal with in here:
     // - change.Old is nil: create a new role
     // - change.New is nil: remove an existing role
-    // - both are set: test if New is different than Old and update if not
+    // - both are set: test if New is different than Old and update if so
 
     changeOldSet := schema.NewSet(schema.HashResource(dataCatalogTagTemplateFieldsSchema), []interface{}{})
     changeOldSet.Add(change.Old)
