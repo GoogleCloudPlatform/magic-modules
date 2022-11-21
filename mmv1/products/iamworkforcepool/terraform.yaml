@@ -89,9 +89,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       providerId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateWorkforcePoolProviderId'
-      saml: !ruby/object:Overrides::Terraform::PropertyOverride
-        update_mask_fields:
-          - "saml.idp_metadata_xml"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

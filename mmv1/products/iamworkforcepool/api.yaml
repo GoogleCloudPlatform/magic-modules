@@ -136,7 +136,7 @@ objects:
     min_version: beta
     description: |
       A configuration for an external identity provider.
-      Note: Ask your Google Cloud account team to request access to workforce identity
+      ~> **Note:** Ask your Google Cloud account team to request access to workforce identity
       federation for your billing/quota project. The account team notifies you when the project is
       granted access.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -204,7 +204,7 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'attributeMapping'
         description: |
-          Required. Maps attributes from the authentication credentials issued by an external identity provider
+          Maps attributes from the authentication credentials issued by an external identity provider
           to Google Cloud attributes, such as `subject` and `segment`.
           
           Each key must be a string specifying the Google Cloud IAM attribute to map to.
@@ -287,7 +287,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: idpMetadataXml
             description: |
-              Required. SAML Identity provider configuration metadata xml doc.
+              SAML Identity provider configuration metadata xml doc.
               The xml document should comply with [SAML 2.0 specification](https://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf).
               The max size of the acceptable xml document will be bounded to 128k characters.
               
@@ -312,9 +312,9 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: issuerUri
-            description: Required. The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
+            description: The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
             required: true
           - !ruby/object:Api::Type::String
             name: clientId
-            description: Required. The client ID. Must match the audience claim of the JWT issued by the identity provider.
+            description: The client ID. Must match the audience claim of the JWT issued by the identity provider.
             required: true
