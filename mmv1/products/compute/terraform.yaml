@@ -608,7 +608,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       Adds existing resource policies to a disk. You can only add one policy
       which will be applied to this disk for scheduling snapshot creation.
 
-      ~> **Note:** This resource does not support regional disks (`google_compute_region_disk`). For regional disks, please refer to [`google_compute_region_disk_resource_policy_attachment`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resourcescompute_region_disk_resource_policy_attachment)
+      ~> **Note:** This resource does not support regional disks (`google_compute_region_disk`). For regional disks, please refer to [`google_compute_region_disk_resource_policy_attachment`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_disk_resource_policy_attachment)
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_resource_policy_attachment_basic"
@@ -718,7 +718,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           ~>**NOTE** This value does not support updating the
           resource policy, as resource policies can not be updated more than
           one at a time. Use
-          [`google_compute_disk_resource_policy_attachment`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resourcescompute_disk_resource_policy_attachment)
+          [`google_compute_disk_resource_policy_attachment`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk_resource_policy_attachment)
           to allow for updating the resource policy attached to the disk.
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'alwaysDiffSuppress'
