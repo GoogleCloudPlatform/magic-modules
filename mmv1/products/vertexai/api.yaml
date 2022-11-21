@@ -505,6 +505,7 @@ objects:
             default_value: false
           - !ruby/object:Api::Type::NestedObject
             name: 'config'
+            input: true
             description: The configuration of the Matching Engine Index.
             properties:
               - !ruby/object:Api::Type::Integer
@@ -617,6 +618,7 @@ objects:
             description: The number of shards in the Index.
       - !ruby/object:Api::Type::String
         name: 'indexUpdateMethod'
+        input: true
         default_value: BATCH_UPDATE
         description: |-
           The update method to use with this Index. The value must be the followings. If not set, BATCH_UPDATE will be used by default.
