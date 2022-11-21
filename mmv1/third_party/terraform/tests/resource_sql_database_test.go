@@ -215,7 +215,6 @@ func testAccSqlDatabaseDestroyProducer(t *testing.T) func(s *terraform.State) er
 	}
 }
 
-
 var testGoogleSqlDatabase_basic = `
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -250,4 +249,3 @@ resource "google_sql_database" "database" {
   collation = "latin1_swedish_ci"
 }
 `
-
