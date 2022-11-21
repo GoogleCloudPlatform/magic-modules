@@ -87,6 +87,25 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 			},
 			forcenew: false,
 		},
+		"changing_destination_table_name_template_for_different_data_source_id": {
+			before: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"destination_table_name_template": "table-old",
+					"query":                           "SELECT 1 AS a",
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"destination_table_name_template": "table-new",
+					"query":                           "SELECT 1 AS a",
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			forcenew: false,
+		},
 	}
 
 	for tn, tc := range cases {
