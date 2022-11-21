@@ -13,6 +13,31 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Tensorboard: !ruby/object:Overrides::Terraform::ResourceOverride
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_tensorboard"
+        primary_resource_id: "tensorboard"
+        vars:
+          display_name: "terraform"
+        ignore_read_extra:
+          - "project"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_tensorboard_full"
+        primary_resource_id: "tensorboard"
+        vars:
+          display_name: "terraform"
+          kms_key_name: "kms-name"
+        test_vars_overrides:
+          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        ignore_read_extra:
+          - "project"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/vertex_ai_tensorboard_import.go.erb
   Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     id_format: '{{name}}'
