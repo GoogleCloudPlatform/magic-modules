@@ -89,3 +89,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           private_connection_id: "my-connection"
           network_name: "my-network"
+    virtual_fields:
+      - !ruby/object:Api::Type::Enum
+        name: 'desired_state'
+        description: |
+          Desired state of the PrivateConnection.
+        values:
+        - :CREATED
