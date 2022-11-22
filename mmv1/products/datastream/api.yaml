@@ -721,18 +721,9 @@ objects:
                         description: |
                           If supplied, every created dataset will have its name prefixed by the provided value.
                           The prefix and name will be separated by an underscore. i.e. _.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'state'
         description: The state of the stream.
-        values:
-          - :NOT_STARTED
-          - :RUNNING
-          - :PAUSED
-          - :MAINTENANCE
-          - :FAILED
-          - :FAILED_PERMANENTLY
-          - :STARTING
-          - :DRAINING
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'backfillAll'
