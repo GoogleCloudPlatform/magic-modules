@@ -1093,7 +1093,7 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 
 * `mode` (Required) How to expose the node metadata to the workload running on the node.
     Accepted values are:
-    * UNSPECIFIED: Not Set
+    * MODE_UNSPECIFIED: Not Set
     * GCE_METADATA: Expose all Compute Engine metadata to pods.
     * GKE_METADATA: Run the GKE Metadata Server on this node. The GKE Metadata Server exposes a metadata API to workloads that is compatible with the V1 Compute Metadata APIs exposed by the Compute Engine and App Engine Metadata Servers. This feature can only be enabled if [workload identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) is enabled at the cluster level.
 
@@ -1207,4 +1207,4 @@ For example, the following fields will show diffs if set in config:
 
 ## User Project Overrides
 
-This resource supports [User Project Overrides](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#user_project_override).
+This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).

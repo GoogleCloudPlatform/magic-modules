@@ -1208,6 +1208,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_http_headers
                   - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   If true requests to different hosts will be cached separately.
@@ -1220,6 +1221,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_http_headers
                   - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   If true, http and https requests will be cached separately.
@@ -1232,6 +1234,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_http_headers
                   - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   If true, include query string parameters in the cache key
@@ -1250,6 +1253,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_http_headers
                   - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   Names of query string parameters to exclude in cache keys.
@@ -1268,6 +1272,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_http_headers
                   - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   Names of query string parameters to include in cache keys.
@@ -1278,6 +1283,21 @@ objects:
                   delimiters.
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Array
+                name: 'includeHttpHeaders'
+                send_empty_value: true
+                at_least_one_of:
+                  - cdn_policy.0.cache_key_policy.0.include_host
+                  - cdn_policy.0.cache_key_policy.0.include_protocol
+                  - cdn_policy.0.cache_key_policy.0.include_query_string
+                  - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+                  - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_http_headers
+                  - cdn_policy.0.cache_key_policy.0.include_named_cookies
+                description: |
+                  Allows HTTP request headers (by name) to be used in the
+                  cache key.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
                 name: 'includeNamedCookies'
                 send_empty_value: true
                 at_least_one_of:
@@ -1286,6 +1306,7 @@ objects:
                   - cdn_policy.0.cache_key_policy.0.include_query_string
                   - cdn_policy.0.cache_key_policy.0.query_string_blacklist
                   - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                  - cdn_policy.0.cache_key_policy.0.include_http_headers
                   - cdn_policy.0.cache_key_policy.0.include_named_cookies
                 description: |
                   Names of cookies to include in cache keys.
