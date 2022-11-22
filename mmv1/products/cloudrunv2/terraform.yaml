@@ -75,8 +75,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       template.template.containers.resources: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      template.template.containers.resources.cpuIdle: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
       template.template.containers.resources.limits: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       template.template.containers.startupProbe: !ruby/object:Overrides::Terraform::PropertyOverride
