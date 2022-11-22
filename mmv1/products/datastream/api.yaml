@@ -733,7 +733,7 @@ objects:
           - :FAILED_PERMANENTLY
           - :STARTING
           - :DRAINING
-        default_value: :NOT_STARTED
+        output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'backfillAll'
         exactly_one_of:
