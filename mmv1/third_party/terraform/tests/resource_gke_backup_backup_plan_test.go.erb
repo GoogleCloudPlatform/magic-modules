@@ -18,7 +18,7 @@ func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    testAccProvidersOiCS,
 		CheckDestroy: testAccCheckGKEBackupBackupPlanDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -47,6 +47,7 @@ resource "google_container_cluster" "primary" {
   provider = google-beta
   name               = "testcluster%{random_suffix}"
   location           = "us-central1"
+  initial_node_count = 1
   workload_identity_config {
     workload_pool = "%{project}.svc.id.goog"
   }
@@ -76,6 +77,7 @@ resource "google_container_cluster" "primary" {
   provider = google-beta
   name               = "testcluster%{random_suffix}"
   location           = "us-central1"
+  initial_node_count = 1
   workload_identity_config {
     workload_pool = "%{project}.svc.id.goog"
   }
