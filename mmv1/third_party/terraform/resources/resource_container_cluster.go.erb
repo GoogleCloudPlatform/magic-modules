@@ -646,6 +646,7 @@ func resourceContainerCluster() *schema.Resource {
 												"blue_green_settings": {
 													Type:        schema.TypeList,
 													Optional:    true,
+													Computed:    true,
 													MaxItems:    1,
 													Description: `Settings for blue-green upgrade strategy.`,
 													Elem: &schema.Resource{
@@ -653,6 +654,7 @@ func resourceContainerCluster() *schema.Resource {
 															"node_pool_soak_duration": {
 																Type:     schema.TypeString,
 																Optional: true,
+																Computed: true,
 																Description: `Time needed after draining entire blue pool. After this period, blue pool will be cleaned up.
 
 																A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".`,
@@ -660,6 +662,7 @@ func resourceContainerCluster() *schema.Resource {
 															"standard_rollout_policy": {
 																Type:        schema.TypeList,
 																Optional:    true,
+																Computed:    true,
 																MaxItems:    1,
 																Description: `Standard policy for the blue-green upgrade.`,
 																Elem: &schema.Resource{
@@ -667,6 +670,7 @@ func resourceContainerCluster() *schema.Resource {
 																		"batch_percentage": {
 																			Type:         schema.TypeFloat,
 																			Optional:     true,
+																			Computed:     true,
 																			ValidateFunc: validation.FloatBetween(0.0, 1.0),
 																			ExactlyOneOf: []string{
 																				"cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings.0.standard_rollout_policy.0.batch_percentage",
@@ -677,6 +681,7 @@ func resourceContainerCluster() *schema.Resource {
 																		"batch_node_count": {
 																			Type:     schema.TypeInt,
 																			Optional: true,
+																			Computed: true,
 																			ExactlyOneOf: []string{
 																				"cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings.0.standard_rollout_policy.0.batch_percentage",
 																				"cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings.0.standard_rollout_policy.0.batch_node_count",
