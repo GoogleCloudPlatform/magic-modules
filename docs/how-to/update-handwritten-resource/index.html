@@ -1,0 +1,237 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Update a handwritten resource # The Google providers for Terraform have a large number of handwritten go files, primarily for resources written before Magic Modules was used with them. Most handwritten files are expected to stay handwritten indefinitely, although conversion to a generator may be possible for a limited subset of them.
+We no longer accept new handwritten resources except in rare cases. However, understanding how to edit and add to existing resources may be important for implementing new fields or changing existing behavior."><meta name=theme-color content="#FFFFFF"><meta name=color-scheme content="light dark"><meta property="og:title" content="Update a handwritten resource"><meta property="og:description" content="Update a handwritten resource # The Google providers for Terraform have a large number of handwritten go files, primarily for resources written before Magic Modules was used with them. Most handwritten files are expected to stay handwritten indefinitely, although conversion to a generator may be possible for a limited subset of them.
+We no longer accept new handwritten resources except in rare cases. However, understanding how to edit and add to existing resources may be important for implementing new fields or changing existing behavior."><meta property="og:type" content="article"><meta property="og:url" content="https://googlecloudplatform.github.io/magic-modules/docs/how-to/update-handwritten-resource/"><meta property="article:section" content="docs"><meta property="article:modified_time" content="2022-11-22T10:15:51-08:00"><title>Update a handwritten resource | Magic Modules</title><link rel=manifest href=/magic-modules/manifest.json><link rel=icon href=/magic-modules/favicon.png type=image/x-icon><link rel=stylesheet href=/magic-modules/book.min.c58292d36b18b675680ab9baea2029204537b839ea72f258746ec0f32ce8d6c8.css integrity="sha256-xYKS02sYtnVoCrm66iApIEU3uDnqcvJYdG7A8yzo1sg=" crossorigin=anonymous><script defer src=/magic-modules/flexsearch.min.js></script>
+<script defer src=/magic-modules/en.search.min.4521e4f86f0224717a55614621ef0dc47de8c7c7a3f7694394bdc4c88d77033a.js integrity="sha256-RSHk+G8CJHF6VWFGIe8NxH3ox8ej92lDlL3EyI13Azo=" crossorigin=anonymous></script></head><body dir=ltr><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><div class=book-menu-content><nav><h2 class=book-brand><a class="flex align-center" href=/magic-modules/><img src=/magic-modules/magic-modules.svg alt=Logo><span>Magic Modules</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=Search aria-label=Search maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><span>How To</span><ul><li><a href=/magic-modules/docs/how-to/identify-mmv1-vs-handwritten/>Identify MMv1 vs handwritten content</a></li><li><a href=/magic-modules/docs/how-to/add-mmv1-resource/>Add an MMv1 resource</a></li><li><a href=/magic-modules/docs/how-to/add-mmv1-iam/>Add MMv1 IAM resources</a></li><li><a href=/magic-modules/docs/how-to/add-mmv1-test/>Add an MMv1 test</a></li><li><a href=/magic-modules/docs/how-to/update-handwritten-resource/ class=active>Update a handwritten resource</a></li><li><a href=/magic-modules/docs/how-to/add-handwritten-test/>Add a handwritten test</a></li><li><a href=/magic-modules/docs/how-to/add-handwritten-datasource/>Add a handwritten datasource</a></li><li><a href=/magic-modules/docs/how-to/add-handwritten-iam/>Add handwritten IAM resources</a></li></ul></li><li><span>Reference</span><ul><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb target=_blank rel=noopener>api.yaml resource ↗</a></li><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/overrides/terraform/resource_override.rb target=_blank rel=noopener>terraform.yaml resource ↗</a></li></ul></li></ul></nav><script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></div></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/magic-modules/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>Update a handwritten resource</strong>
+<label for=toc-control><img src=/magic-modules/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#shared-concepts>Shared concepts</a><ul><li><a href=#serialization-strategy>Serialization strategy</a></li><li><a href=#go-and-goerb>go and go.erb</a></li><li><a href=#create-read-update-delete>Create, Read, Update, Delete</a></li><li><a href=#expanders-and-flatteners>Expanders and Flatteners</a></li></ul></li><li><a href=#adding-a-new-field-to-the-schema>Adding a new field to the schema</a></li><li><a href=#implement-the-respective-flattener-andor-expander-for-the-new-field>Implement the respective flattener and/or expander for the new field</a></li><li><a href=#add-a-testcase-for-the-field-or-extend-an-existing-one>Add a testcase for the field or extend an existing one</a></li><li><a href=#add-documentation-for-the-field-to-the-respective-markdown-file>Add documentation for the field to the respective markdown file</a></li><li><a href=#beta-features>Beta features</a><ul><li><a href=#adding-a-beta-resource>Adding a beta resource</a></li><li><a href=#adding-beta-fields>Adding beta field(s)</a></li><li><a href=#promoting-a-beta-feature>Promoting a beta feature</a></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=update-a-handwritten-resource>Update a handwritten resource
+<a class=anchor href=#update-a-handwritten-resource>#</a></h1><p>The Google providers for Terraform have a large number of handwritten go files, primarily for resources written before Magic Modules was used with them. Most handwritten files are expected to stay handwritten indefinitely, although conversion to a generator may be possible for a limited subset of them.</p><p>We no longer accept new handwritten resources except in rare cases. However, understanding
+how to edit and add to existing resources may be important for implementing new fields
+or changing existing behavior.</p><p>To edit an existing resource to add a field there are four steps you&rsquo;ll go through.</p><ol><li>Add the new field to the schema</li><li>Implement the respective flattener and/or expander for the new field</li><li>Add a testcase for the field or extend an existing one</li><li>Add documentation for the field to the respective markdown file</li></ol><h2 id=shared-concepts>Shared concepts
+<a class=anchor href=#shared-concepts>#</a></h2><p>This section will serve as a point of reference for some shared concepts that
+all handwritten files share. It&rsquo;s meant to be an introduction to our serialization
+strategy and overview.</p><h3 id=serialization-strategy>Serialization strategy
+<a class=anchor href=#serialization-strategy>#</a></h3><p>The go files within the directory files are copied literally to their respective providers.
+Our serialization methodology may seem complicated but for the case of handwritten resources its quite
+simple. Editing the file will change its counterpart downstream.</p><h3 id=go-and-goerb>go and go.erb
+<a class=anchor href=#go-and-goerb>#</a></h3><p>Within the third party library you&rsquo;ll notice <code>go</code> and <code>go.erb</code> files.
+Go files are native golang code while go.erb pass through ruby before
+being serialized. The reason <code>go.erb</code> files exist are to protect certain
+properties or fields from entering the <code>ga</code> provider. Thus you&rsquo;ll often see
+lines like <code>&lt;% unless version == 'ga' -%></code> within the file. These blocks
+will omit the enclosure from being output to the GA provider. In the
+rare case where you are promoting all fields to <code>ga</code> and these blocks
+are no longer needed you can remove the <code>.erb</code> extension.</p><h3 id=create-read-update-delete>Create, Read, Update, Delete
+<a class=anchor href=#create-read-update-delete>#</a></h3><p>As far as terraform schema is concerned these are the functions we
+need to provide for terraform to be able to provision and delete
+resources. In editing any fields you&rsquo;ll likely be adding functionality to
+these functions or implementing them wholesale.</p><h3 id=expanders-and-flatteners>Expanders and Flatteners
+<a class=anchor href=#expanders-and-flatteners>#</a></h3><p>Expanders and flatteners are concepts created to simplify common patterns
+and add conformity/code consistency. Essentially expanders are functions
+used to segregate some translation from terraform representation to api representation.
+We will use these to encapsulate this translation for blocks and/or complicated fields.
+This allows our code to be concise and functionality to be readable and easily
+apparent by separating these into their own functions. While expanders are used
+for terraform to api, flatteners do just the opposite. Converting api to terraform.</p><p>Thus</p><ul><li>expanders - helper functions used for translating tf -> api representation</li><li>flatteners - helper functions used for translating api -> tf representation</li></ul><h2 id=adding-a-new-field-to-the-schema>Adding a new field to the schema
+<a class=anchor href=#adding-a-new-field-to-the-schema>#</a></h2><p>To add a new field you will have to compare an existing resource
+to it&rsquo;s respective rest api documentation. Dependant on how the api implements
+the field we will in almost all cases mirror the structure. For example if there is
+an <code>enabled</code> field nested under a <code>IdentityServiceConfig</code> block we will mirror
+this within the schema.</p><p>Thus the block for terraform to utilize this field would then be</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-terraform data-lang=terraform><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;x&#34;</span> <span style=color:#e6db74>&#34;y&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>identity_service_config</span>{
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>enabled</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>You might think it convoluted to provide such a structure. Why not
+simply provide a single <code>enable_identity_service_config</code>. One constant
+has echoed through our mind as terraform developers through the years.
+Api&rsquo;s are ever evolving. Mirroring the api gives us the best chance to stay
+in step with that evolution. Therefore if <code>IdentityServiceConfig</code> is extended with new
+parameters in the future we can cleanly encapsulate those into the existing block(s).</p><p>As far as providing the field itself, it&rsquo;s fairly straightforward. Mirror the field
+from the api and look to the other fields and the schema type in the SDK to see
+what&rsquo;s available and how to structure it. For the documentation, copying the documentation
+from the rest api will be the usual practice.</p><p>If you are adding a field that is an ENUM from the api standpoint its best practice
+to provide it as as a string to the provider. This field will likely have values
+added to it by the api and this future proofs our provider to support new values without
+haven&rsquo;t to make new additions. There will be rare exceptions, but generally its a good
+practice.</p><h2 id=implement-the-respective-flattener-andor-expander-for-the-new-field>Implement the respective flattener and/or expander for the new field
+<a class=anchor href=#implement-the-respective-flattener-andor-expander-for-the-new-field>#</a></h2><p>Once you&rsquo;ve added the field to the schema you will implement the corresponding
+expander/flattener. See <a href=#expanders-and-flatteners>expanders and flatters</a> for
+more context on what these fields are used for. Essentially we will be editing the
+read, create, and update operations to parse the schema and call the api to make
+the changes to the state of the resource. Following existing patterns to create
+this operation will be the best way to implement this. As there are many unique ways
+to implement a given field we won&rsquo;t get into specifics.</p><p>For example a field in bigtable <code>google_sheets_options</code> containers two nested properties.
+<code>range</code> and <code>skip_leading_rows</code>.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-golang data-lang=golang><span style=display:flex><span>						<span style=color:#75715e>// GoogleSheetsOptions: [Optional] Additional options if sourceFormat is set to GOOGLE_SHEETS.
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>						<span style=color:#e6db74>&#34;google_sheets_options&#34;</span>: {
+</span></span><span style=display:flex><span>							<span style=color:#a6e22e>Type</span>:        <span style=color:#a6e22e>schema</span>.<span style=color:#a6e22e>TypeList</span>,
+</span></span><span style=display:flex><span>							<span style=color:#a6e22e>Optional</span>:    <span style=color:#66d9ef>true</span>,
+</span></span><span style=display:flex><span>							<span style=color:#a6e22e>MaxItems</span>:    <span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>							<span style=color:#a6e22e>Description</span>: <span style=color:#e6db74>`Additional options if source_format is set to &#34;GOOGLE_SHEETS&#34;.`</span>,
+</span></span><span style=display:flex><span>							<span style=color:#a6e22e>Elem</span>: <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>schema</span>.<span style=color:#a6e22e>Resource</span>{
+</span></span><span style=display:flex><span>								<span style=color:#a6e22e>Schema</span>: <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#f92672>*</span><span style=color:#a6e22e>schema</span>.<span style=color:#a6e22e>Schema</span>{
+</span></span><span style=display:flex><span>									<span style=color:#75715e>// Range: [Optional] Range of a sheet to query from. Only used when non-empty.
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>									<span style=color:#75715e>// Typical format: !:
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>									<span style=color:#e6db74>&#34;range&#34;</span>: {
+</span></span><span style=display:flex><span>										<span style=color:#a6e22e>Type</span>:        <span style=color:#a6e22e>schema</span>.<span style=color:#a6e22e>TypeString</span>,
+</span></span><span style=display:flex><span>										<span style=color:#a6e22e>Optional</span>:    <span style=color:#66d9ef>true</span>,
+</span></span><span style=display:flex><span>										<span style=color:#a6e22e>Description</span>: <span style=color:#e6db74>`Range of a sheet to query from. Only used when non-empty. At least one of range or skip_leading_rows must be set. Typical format: &#34;sheet_name!top_left_cell_id:bottom_right_cell_id&#34; For example: &#34;sheet1!A1:B20&#34;`</span>,
+</span></span><span style=display:flex><span>										<span style=color:#a6e22e>AtLeastOneOf</span>: []<span style=color:#66d9ef>string</span>{
+</span></span><span style=display:flex><span>											<span style=color:#e6db74>&#34;external_data_configuration.0.google_sheets_options.0.skip_leading_rows&#34;</span>,
+</span></span><span style=display:flex><span>											<span style=color:#e6db74>&#34;external_data_configuration.0.google_sheets_options.0.range&#34;</span>,
+</span></span><span style=display:flex><span>										},
+</span></span><span style=display:flex><span>									},
+</span></span><span style=display:flex><span>									<span style=color:#75715e>// SkipLeadingRows: [Optional] The number of rows at the top
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>									<span style=color:#75715e>// of the sheet that BigQuery will skip when reading the data.
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>									<span style=color:#e6db74>&#34;skip_leading_rows&#34;</span>: {
+</span></span><span style=display:flex><span>										<span style=color:#a6e22e>Type</span>:        <span style=color:#a6e22e>schema</span>.<span style=color:#a6e22e>TypeInt</span>,
+</span></span><span style=display:flex><span>										<span style=color:#a6e22e>Optional</span>:    <span style=color:#66d9ef>true</span>,
+</span></span><span style=display:flex><span>										<span style=color:#a6e22e>Description</span>: <span style=color:#e6db74>`The number of rows at the top of the sheet that BigQuery will skip when reading the data. At least one of range or skip_leading_rows must be set.`</span>,
+</span></span><span style=display:flex><span>										<span style=color:#a6e22e>AtLeastOneOf</span>: []<span style=color:#66d9ef>string</span>{
+</span></span><span style=display:flex><span>											<span style=color:#e6db74>&#34;external_data_configuration.0.google_sheets_options.0.skip_leading_rows&#34;</span>,
+</span></span><span style=display:flex><span>											<span style=color:#e6db74>&#34;external_data_configuration.0.google_sheets_options.0.range&#34;</span>,
+</span></span><span style=display:flex><span>										},
+</span></span><span style=display:flex><span>									},
+</span></span><span style=display:flex><span>								},
+</span></span><span style=display:flex><span>							},
+</span></span><span style=display:flex><span>						},
+</span></span></code></pre></div><p>To simplify the implementation management of these fields can be delegated to expanders and
+flatteners.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-golang data-lang=golang><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>expandGoogleSheetsOptions</span>(<span style=color:#a6e22e>configured</span> <span style=color:#66d9ef>interface</span>{}) <span style=color:#f92672>*</span><span style=color:#a6e22e>bigquery</span>.<span style=color:#a6e22e>GoogleSheetsOptions</span> {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> len(<span style=color:#a6e22e>configured</span>.([]<span style=color:#66d9ef>interface</span>{})) <span style=color:#f92672>==</span> <span style=color:#ae81ff>0</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>nil</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>raw</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>configured</span>.([]<span style=color:#66d9ef>interface</span>{})[<span style=color:#ae81ff>0</span>].(<span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>interface</span>{})
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>opts</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>bigquery</span>.<span style=color:#a6e22e>GoogleSheetsOptions</span>{}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>raw</span>[<span style=color:#e6db74>&#34;range&#34;</span>]; <span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>opts</span>.<span style=color:#a6e22e>Range</span> = <span style=color:#a6e22e>v</span>.(<span style=color:#66d9ef>string</span>)
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>raw</span>[<span style=color:#e6db74>&#34;skip_leading_rows&#34;</span>]; <span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>opts</span>.<span style=color:#a6e22e>SkipLeadingRows</span> = int64(<span style=color:#a6e22e>v</span>.(<span style=color:#66d9ef>int</span>))
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>opts</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>flattenGoogleSheetsOptions</span>(<span style=color:#a6e22e>opts</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>bigquery</span>.<span style=color:#a6e22e>GoogleSheetsOptions</span>) []<span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>interface</span>{} {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>result</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>interface</span>{}{}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>opts</span>.<span style=color:#a6e22e>Range</span> <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#34;&#34;</span> {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>result</span>[<span style=color:#e6db74>&#34;range&#34;</span>] = <span style=color:#a6e22e>opts</span>.<span style=color:#a6e22e>Range</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>opts</span>.<span style=color:#a6e22e>SkipLeadingRows</span> <span style=color:#f92672>!=</span> <span style=color:#ae81ff>0</span> {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>result</span>[<span style=color:#e6db74>&#34;skip_leading_rows&#34;</span>] = <span style=color:#a6e22e>opts</span>.<span style=color:#a6e22e>SkipLeadingRows</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> []<span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>interface</span>{}{<span style=color:#a6e22e>result</span>}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=add-a-testcase-for-the-field-or-extend-an-existing-one>Add a testcase for the field or extend an existing one
+<a class=anchor href=#add-a-testcase-for-the-field-or-extend-an-existing-one>#</a></h2><p>Once your field has been implemented, go to the corresponding test file for
+your resource and extend it. If your field is updatable it&rsquo;s good practice to
+have a two step apply to ensure that the field <em>can</em> be updated. You&rsquo;ll notice
+a lot of our tests have a import state verify directly after apply. These
+steps are important as they will essentially attempt to import the resource
+you just provisioned and <em>verify</em> that the field values are consistent with the
+applied state. Please test all fields you&rsquo;ve added to the provider. It&rsquo;s important
+for us to ensure all fields are usable and workable.</p><h2 id=add-documentation-for-the-field-to-the-respective-markdown-file>Add documentation for the field to the respective markdown file
+<a class=anchor href=#add-documentation-for-the-field-to-the-respective-markdown-file>#</a></h2><p>See <a href=#documentation>Documentation</a> for more information. Essentially you will
+just be opening the corresponding markdown file and adding documentation, likely
+copied from the rest api to the markdown file. Follow the existing patterns there-in.</p><h2 id=beta-features>Beta features
+<a class=anchor href=#beta-features>#</a></h2><p>When the underlying API of a feature is not final (i.e. a <code>vN</code> version like
+<code>v1</code> or <code>v2</code>), is in preview, or the API has no SLO we add it to the
+<code>google-beta</code> provider rather than the <code>google </code>provider, allowing users to
+self-select for the stability level they are comfortable with.</p><p>Both the <code>google</code> and <code>google-beta</code> providers operate off of a shared codebase,
+including for handwritten code. MMv1 allows us to write Go source files as
+<code>.go.erb</code> templated source, and renders them as <code>.go</code> files in the downstream
+repo.</p><p>The sole generator feature you need to be aware of is a &ldquo;version guard&rdquo;, what is
+effectively a preprocessor directive implemented using Embedded Ruby (ERB). A
+version guard is a snippet used across this codebase by convention guarding
+versioned code on an <code>unless</code> clause in a version check. For example:</p><pre tabindex=0><code>	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	if err != nil {
+		return nil, fmt.Errorf(&#34;Error creating network interfaces: %s&#34;, err)
+	}
+&lt;% unless version == &#39;ga&#39; -%&gt;
+	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
+	if err != nil {
+		return nil, fmt.Errorf(&#34;Error creating network performance config: %s&#34;, err)
+	}
+&lt;% end -%&gt;
+</code></pre><p>In the snippet above, the <code>networkInterfaces</code> field is generally available and
+is not guarded. The <code>networkPerformanceConfig</code> field is only available at beta,
+and is guarded by <code>unless version == ga</code>, and the guarded block is terminated by
+an <code>end</code> statement.</p><p>If a service includes handwritten resources and mixed features or resources at
+different versions, the client libraries used by each provider must be switched
+using guards so that the stability level of the client library matches that of
+the provider. For example, all handwritten Google Compute Engine (GCE) files
+have the following guarded import:</p><pre tabindex=0><code>&lt;% if version == &#34;ga&#34; -%&gt;
+	&#34;google.golang.org/api/compute/v1&#34;
+&lt;% else -%&gt;
+	compute &#34;google.golang.org/api/compute/v0.beta&#34;
+&lt;% end -%&gt;
+</code></pre><p>This is not necessary for beta-only services, or for services that are generally
+available in their entirety.</p><h3 id=adding-a-beta-resource>Adding a beta resource
+<a class=anchor href=#adding-a-beta-resource>#</a></h3><p>MMv1 doesn&rsquo;t selectively generate files, and any file that is beta-only must
+have all of its contents guarded. When writing a resource that&rsquo;s available at
+beta, start with the following snippet:</p><pre tabindex=0><code>
+&lt;% autogen_exception -%&gt;
+package google
+
+&lt;% unless version == &#39;ga&#39; -%&gt;
+
+// Add the implementation of the file here
+
+&lt;% end -&gt;
+</code></pre><p>This will generate a blank file in the <code>google</code> provider. The resource file,
+resource test file, and any service or resource specific utility files should be
+guarded in this way.</p><p>Documentation <strong>should not</strong> be guarded. Instead, write it as normal including
+the following snippet above the first example.</p><pre tabindex=0><code>~&gt; **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+</code></pre><p>When registering the resource in
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb><code>provider.go.erb</code></a>,
+the entry should be guarded:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-diff data-lang=diff><span style=display:flex><span>				&#34;google_monitoring_dashboard&#34;:                  resourceMonitoringDashboard(),
+</span></span><span style=display:flex><span><span style=color:#a6e22e>+				&lt;% unless version == &#39;ga&#39; -%&gt;
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>+				&#34;google_project_service_identity&#34;:              resourceProjectServiceIdentity(),
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>+				&lt;% end -%&gt;
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e></span>				&#34;google_service_networking_connection&#34;:         resourceServiceNetworkingConnection(),
+</span></span></code></pre></div><p>If this is a new service entirely, all service-specific entries like client
+factory initialization should be guarded as well. However, new services should
+generally be implemented using an alternate engine- either MMv1 or tpgtools/DCL.</p><h3 id=adding-beta-fields>Adding beta field(s)
+<a class=anchor href=#adding-beta-fields>#</a></h3><p>By contrast to beta resources, adding support for a beta field is much more
+involved as small snippets of code throughout a resource file must be annotated.</p><p>To begin with, add the field to the <code>Schema</code> of the resource with guards, i.e.:</p><pre tabindex=0><code>&lt;% unless version == &#39;ga&#39; -%&gt;
+			&#34;network_performance_config&#34;: {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Configures network performance settings for the instance. If not specified, the instance will be created with its default network performance configuration.`,
+				Elem: &amp;schema.Resource{
+					Schema: map[string]*schema.Schema{
+						&#34;total_egress_bandwidth_tier&#34;: {
+							// ...
+						},
+					},
+				},
+			},
+&lt;% end -%&gt;
+</code></pre><p>Next, implement the d.Get/d.Set calls (for top level fields) or
+expanders/flatteners for nested fields within guards.</p><p>Even if there are other guarded fields, it&rsquo;s recommended that you add distinct
+guards per feature- that way, promotion (covered below) will be simpler as
+you&rsquo;ll only need to remove lines rather that move them around.</p><h3 id=promoting-a-beta-feature>Promoting a beta feature
+<a class=anchor href=#promoting-a-beta-feature>#</a></h3><p>&ldquo;Promoting&rdquo; a beta feature- making it available in the GA <code>google</code> provider when
+the underlying feature or service has gone GA- requires removing the version
+guards placed previously, so that the previously beta-only code is generated in
+the <code>google</code> provider as well.</p><p>For all promotions, ensure that you remove the guards in:</p><ul><li>The documentation for the resource or field</li><li>The test(s) for the resource or field.</li></ul><p>For whole resource promotions, you&rsquo;ll generally only need to remove the file-level
+guards and the guards on the resource registration in <code>provider.go.erb</code>.</p><p>For field promotions ensure that you remove the guards in:</p><ul><li>The Resource schema</li><li>The Resource CRUD methods (for top level fields)</li><li>The Resource Expanders and Flatteners (for nested fields)</li></ul><p>When writing a changelog entry for a promotion, write it as if it was a new
+field or resource, and suffix it with <code>(ga only)</code>. For example, if the
+<code>google_container_cluster</code> resource was promoted to GA in your change:</p><pre tabindex=0><code>\`\`\`release-note:new-resource
+`google_container_cluster` (ga only)
+\`\`\`
+</code></pre><p>Alternatively, for field promotions, you may use &ldquo;{{service}}: promoted
+{{field}} in {{resource}} to GA&rdquo;, i.e.</p><pre tabindex=0><code>\`\`\`release-note:enhancement
+container: promoted `node_locations` field in google_container_cluster` to GA
+\`\`\`
+</code></pre></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/commit/76d5a06eb5d2b45ef51ee56954a15e71702a8613 title='Last modified by Stephen Lewis (Burrows) | November 22, 2022' target=_blank rel=noopener><img src=/magic-modules/svg/calendar.svg class=book-icon alt=Calendar>
+<span>November 22, 2022</span></a></div><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/edit/main/docs/content/docs/how-to/update-handwritten-resource.md target=_blank rel=noopener><img src=/magic-modules/svg/edit.svg class=book-icon alt=Edit>
+<span>Edit this page</span></a></div></div><script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script></footer><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><div class=book-toc-content><nav id=TableOfContents><ul><li><a href=#shared-concepts>Shared concepts</a><ul><li><a href=#serialization-strategy>Serialization strategy</a></li><li><a href=#go-and-goerb>go and go.erb</a></li><li><a href=#create-read-update-delete>Create, Read, Update, Delete</a></li><li><a href=#expanders-and-flatteners>Expanders and Flatteners</a></li></ul></li><li><a href=#adding-a-new-field-to-the-schema>Adding a new field to the schema</a></li><li><a href=#implement-the-respective-flattener-andor-expander-for-the-new-field>Implement the respective flattener and/or expander for the new field</a></li><li><a href=#add-a-testcase-for-the-field-or-extend-an-existing-one>Add a testcase for the field or extend an existing one</a></li><li><a href=#add-documentation-for-the-field-to-the-respective-markdown-file>Add documentation for the field to the respective markdown file</a></li><li><a href=#beta-features>Beta features</a><ul><li><a href=#adding-a-beta-resource>Adding a beta resource</a></li><li><a href=#adding-beta-fields>Adding beta field(s)</a></li><li><a href=#promoting-a-beta-feature>Promoting a beta feature</a></li></ul></li></ul></nav></div></aside></main></body></html>

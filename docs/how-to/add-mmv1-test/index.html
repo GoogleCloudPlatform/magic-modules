@@ -1,0 +1,145 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Add an MMv1 test # For generated resources, you can add an example to the mmv1/templates/terraform/examples directory, which contains a set of templated Terraform configurations.
+After writing out the example and filling out some metadata, Magic Modules will insert it into the resource documentation page, and generate a test case stepping through the following stages:
+Run terraform apply on the configuration, waiting for it to succeed and recording the results in Terraform state Run terraform plan, and fail if Terraform detects any drift Clear the resource from state and run terraform import on it Deeply compare the original state from terraform apply and the terraform import results, returning an error if any values are not identical Destroy all resources in the configuration using terraform destroy, waiting for the destroy command to succeed Call GET on the resource, and fail the test if it is still present Example Configuration File # First, you&rsquo;ll want to add the example file."><meta name=theme-color content="#FFFFFF"><meta name=color-scheme content="light dark"><meta property="og:title" content="Add an MMv1 test"><meta property="og:description" content="Add an MMv1 test # For generated resources, you can add an example to the mmv1/templates/terraform/examples directory, which contains a set of templated Terraform configurations.
+After writing out the example and filling out some metadata, Magic Modules will insert it into the resource documentation page, and generate a test case stepping through the following stages:
+Run terraform apply on the configuration, waiting for it to succeed and recording the results in Terraform state Run terraform plan, and fail if Terraform detects any drift Clear the resource from state and run terraform import on it Deeply compare the original state from terraform apply and the terraform import results, returning an error if any values are not identical Destroy all resources in the configuration using terraform destroy, waiting for the destroy command to succeed Call GET on the resource, and fail the test if it is still present Example Configuration File # First, you&rsquo;ll want to add the example file."><meta property="og:type" content="article"><meta property="og:url" content="https://googlecloudplatform.github.io/magic-modules/docs/how-to/add-mmv1-test/"><meta property="article:section" content="docs"><meta property="article:modified_time" content="2022-11-22T10:15:51-08:00"><title>Add an MMv1 test | Magic Modules</title><link rel=manifest href=/magic-modules/manifest.json><link rel=icon href=/magic-modules/favicon.png type=image/x-icon><link rel=stylesheet href=/magic-modules/book.min.c58292d36b18b675680ab9baea2029204537b839ea72f258746ec0f32ce8d6c8.css integrity="sha256-xYKS02sYtnVoCrm66iApIEU3uDnqcvJYdG7A8yzo1sg=" crossorigin=anonymous><script defer src=/magic-modules/flexsearch.min.js></script>
+<script defer src=/magic-modules/en.search.min.4521e4f86f0224717a55614621ef0dc47de8c7c7a3f7694394bdc4c88d77033a.js integrity="sha256-RSHk+G8CJHF6VWFGIe8NxH3ox8ej92lDlL3EyI13Azo=" crossorigin=anonymous></script></head><body dir=ltr><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><div class=book-menu-content><nav><h2 class=book-brand><a class="flex align-center" href=/magic-modules/><img src=/magic-modules/magic-modules.svg alt=Logo><span>Magic Modules</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=Search aria-label=Search maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><span>How To</span><ul><li><a href=/magic-modules/docs/how-to/identify-mmv1-vs-handwritten/>Identify MMv1 vs handwritten content</a></li><li><a href=/magic-modules/docs/how-to/add-mmv1-resource/>Add an MMv1 resource</a></li><li><a href=/magic-modules/docs/how-to/add-mmv1-iam/>Add MMv1 IAM resources</a></li><li><a href=/magic-modules/docs/how-to/add-mmv1-test/ class=active>Add an MMv1 test</a></li><li><a href=/magic-modules/docs/how-to/update-handwritten-resource/>Update a handwritten resource</a></li><li><a href=/magic-modules/docs/how-to/add-handwritten-test/>Add a handwritten test</a></li><li><a href=/magic-modules/docs/how-to/add-handwritten-datasource/>Add a handwritten datasource</a></li><li><a href=/magic-modules/docs/how-to/add-handwritten-iam/>Add handwritten IAM resources</a></li></ul></li><li><span>Reference</span><ul><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb target=_blank rel=noopener>api.yaml resource ↗</a></li><li><a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/overrides/terraform/resource_override.rb target=_blank rel=noopener>terraform.yaml resource ↗</a></li></ul></li></ul></nav><script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></div></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/magic-modules/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>Add an MMv1 test</strong>
+<label for=toc-control><img src=/magic-modules/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#example-configuration-file>Example Configuration File</a></li><li><a href=#terraformyaml-metadata><code>terraform.yaml</code> metadata</a></li><li><a href=#results>Results</a></li><li><a href=#update-tests>Update tests</a></li><li><a href=#tests-that-use-beta-features>Tests that use beta features</a></li></ul></nav></aside></header><article class=markdown><h1 id=add-an-mmv1-test>Add an MMv1 test
+<a class=anchor href=#add-an-mmv1-test>#</a></h1><p>For generated resources, you can add an example to the
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/templates/terraform/examples><code>mmv1/templates/terraform/examples</code></a>
+directory, which contains a set of templated Terraform configurations.</p><p>After writing out the example and filling out some metadata, Magic Modules will
+insert it into the resource documentation page, and generate a test case
+stepping through the following stages:</p><ol><li>Run <code>terraform apply</code> on the configuration, waiting for it to succeed and
+recording the results in Terraform state</li><li>Run <code>terraform plan</code>, and fail if Terraform detects any drift</li><li>Clear the resource from state and run <code>terraform import</code> on it</li><li>Deeply compare the original state from <code>terraform apply</code> and the <code>terraform import</code> results, returning an error if any values are not identical</li><li>Destroy all resources in the configuration using <code>terraform destroy</code>,
+waiting for the destroy command to succeed</li><li>Call <code>GET</code> on the resource, and fail the test if it is still present</li></ol><h2 id=example-configuration-file>Example Configuration File
+<a class=anchor href=#example-configuration-file>#</a></h2><p>First, you&rsquo;ll want to add the example file. It needs to end in the filename
+<code>.tf.erb</code>, and is typically named <code>service_resource_descriptive_name</code>. For
+example, <code>pubsub_topic_geo_restricted.tf.erb</code>. Inside, you&rsquo;ll write a complete
+Terraform configuration that provisions the resource and all of the required
+dependencies. For example, in
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/e7ef590f6007796f446b2d41875b3d26f4469ff4/mmv1/templates/terraform/examples/pubsub_subscription_dead_letter.tf.erb><code>mmv1/templates/terraform/examples/pubsub_subscription_dead_letter.tf.erb</code></a>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_topic&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;topic_name&#39;] %&gt;&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_topic&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;_dead_letter&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;topic_name&#39;] %&gt;-dead-letter&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_subscription&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>  = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;subscription_name&#39;] %&gt;&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>topic</span> = <span style=color:#a6e22e>google_pubsub_topic</span>.<span style=color:#f92672>&lt;%=</span> <span style=color:#a6e22e>ctx</span>[<span style=color:#f92672>:</span><span style=color:#a6e22e>primary_resource_id</span>] <span style=color:#f92672>%&gt;</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>dead_letter_policy</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>dead_letter_topic</span> = <span style=color:#a6e22e>google_pubsub_topic</span>.<span style=color:#f92672>&lt;%=</span> <span style=color:#a6e22e>ctx</span>[<span style=color:#f92672>:</span><span style=color:#a6e22e>primary_resource_id</span>] <span style=color:#f92672>%&gt;</span><span style=color:#960050;background-color:#1e0010>_</span><span style=color:#a6e22e>dead_letter</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>max_delivery_attempts</span> = <span style=color:#ae81ff>10</span>
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>The <code>ctx</code> variable provides metadata at generation time, and should be used in
+two ways:</p><ul><li>The Terraform ID of a single instance of the primary resource should be
+supplied through <code>&lt;%= ctx[:primary_resource_id] %></code> (in this example
+multiple resources use the value, although only the first
+<code>google_pubsub_topic</code> requires it). The resource kind you are testing with
+an id equal to <code>&lt;%= ctx[:primary_resource_id] %></code> is the one that will be
+imported.</li><li>Unique values can be supplied through <code>&lt;%= ctx[:vars]['{{var}}'] %></code>, where
+<code>{{var}}</code> is an arbitrary key you define. These values are created by
+appending suffixes to them, and are typically only used for names- most
+values should be constant within the configuration.</li></ul><h2 id=terraformyaml-metadata><code>terraform.yaml</code> metadata
+<a class=anchor href=#terraformyaml-metadata>#</a></h2><p>Once your configuration is written, go in <code>terraform.yaml</code> and find the
+<code>examples</code> block for the resource. Generally it&rsquo;ll be above the <code>properties</code>
+block. In there, append an entry such as the
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/e7ef590f6007796f446b2d41875b3d26f4469ff4/mmv1/products/pubsub/terraform.yaml#L108-L113>following</a>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Provider::Terraform::Examples</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#34;pubsub_subscription_dead_letter&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>primary_resource_id</span>: <span style=color:#e6db74>&#34;example&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>vars</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>topic_name</span>: <span style=color:#e6db74>&#34;example-topic&#34;</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>subscription_name</span>: <span style=color:#e6db74>&#34;example-subscription&#34;</span>
+</span></span></code></pre></div><p>The <code>name</code> should match the base name of your example file,
+<code>primary_resource_id</code> is an arbitrary snake_cased string that describes the
+resource, and the <code>vars</code> map should contain each key you defined previously.</p><p><strong>Important</strong>: Any vars that are part of the resource&rsquo;s id should include at
+least one hyphen or underscore; this
+<a href=https://github.com/GoogleCloudPlatform/magic-modules/blob/6858338f013f5dc57729ec037883a3594441ea62/mmv1/provider/terraform/examples.rb#L244>triggers addition of a <code>tf-test</code> or <code>tf_test</code> prefix</a>,
+which is what we use to detect and delete stray resources that are sometimes
+left over during test runs.</p><h2 id=results>Results
+<a class=anchor href=#results>#</a></h2><p>Your configuration will ultimately generate a Go test case similar to the
+<a href=https://github.com/hashicorp/terraform-provider-google/blob/38e2913cb102225f9f9bda9f04b5498d3386a79c/google/resource_pubsub_subscription_generated_test.go#L135-L180>following</a>
+based on the snippets above:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>TestAccPubsubSubscription_pubsubSubscriptionDeadLetterExample</span>(<span style=color:#a6e22e>t</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>testing</span>.<span style=color:#a6e22e>T</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>t</span>.<span style=color:#a6e22e>Parallel</span>()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>context</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>interface</span>{}{
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;random_suffix&#34;</span>: <span style=color:#a6e22e>randString</span>(<span style=color:#a6e22e>t</span>, <span style=color:#ae81ff>10</span>),
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>vcrTest</span>(<span style=color:#a6e22e>t</span>, <span style=color:#a6e22e>resource</span>.<span style=color:#a6e22e>TestCase</span>{
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>PreCheck</span>:     <span style=color:#66d9ef>func</span>() { <span style=color:#a6e22e>testAccPreCheck</span>(<span style=color:#a6e22e>t</span>) },
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>Providers</span>:    <span style=color:#a6e22e>testAccProviders</span>,
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>CheckDestroy</span>: <span style=color:#a6e22e>testAccCheckPubsubSubscriptionDestroyProducer</span>(<span style=color:#a6e22e>t</span>),
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>Steps</span>: []<span style=color:#a6e22e>resource</span>.<span style=color:#a6e22e>TestStep</span>{
+</span></span><span style=display:flex><span>            {
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>Config</span>: <span style=color:#a6e22e>testAccPubsubSubscription_pubsubSubscriptionDeadLetterExample</span>(<span style=color:#a6e22e>context</span>),
+</span></span><span style=display:flex><span>            },
+</span></span><span style=display:flex><span>            {
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>ResourceName</span>:            <span style=color:#e6db74>&#34;google_pubsub_subscription.example&#34;</span>,
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>ImportState</span>:             <span style=color:#66d9ef>true</span>,
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>ImportStateVerify</span>:       <span style=color:#66d9ef>true</span>,
+</span></span><span style=display:flex><span>                <span style=color:#a6e22e>ImportStateVerifyIgnore</span>: []<span style=color:#66d9ef>string</span>{<span style=color:#e6db74>&#34;topic&#34;</span>},
+</span></span><span style=display:flex><span>            },
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>    })
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>testAccPubsubSubscription_pubsubSubscriptionDeadLetterExample</span>(<span style=color:#a6e22e>context</span> <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>interface</span>{}) <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>Nprintf</span>(<span style=color:#e6db74>`
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>resource &#34;google_pubsub_topic&#34; &#34;example&#34; {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  name = &#34;tf-test-example-topic%{random_suffix}&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>}
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>resource &#34;google_pubsub_topic&#34; &#34;example_dead_letter&#34; {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  name = &#34;tf-test-example-topic%{random_suffix}-dead-letter&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>}
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>resource &#34;google_pubsub_subscription&#34; &#34;example&#34; {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  name  = &#34;tf-test-example-subscription%{random_suffix}&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  topic = google_pubsub_topic.example.name
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  dead_letter_policy {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    dead_letter_topic = google_pubsub_topic.example_dead_letter.id
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    max_delivery_attempts = 10
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  }
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>}
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>`</span>, <span style=color:#a6e22e>context</span>)
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=update-tests>Update tests
+<a class=anchor href=#update-tests>#</a></h2><p>Update tests can only be <a href=/magic-modules/docs/how-to/add-handwritten-test/#update-tests>added as handwritten tests</a>.</p><h2 id=tests-that-use-beta-features>Tests that use beta features
+<a class=anchor href=#tests-that-use-beta-features>#</a></h2><p>For tests that use beta features, you&rsquo;ll need to perform two additional steps:</p><ol><li>Add <code>provider = google-beta</code> to every resource in the test (even resources
+that aren&rsquo;t being tested and/or are also in the GA provider)</li><li>Add <code>min_version: beta</code> to the <code>Provider::Terraform::Examples</code> block</li></ol><p>For example, modifying the snippets above:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_topic&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;&#34;</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>  provider</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>google</span><span style=color:#f92672>-</span><span style=color:#a6e22e>beta</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;topic_name&#39;] %&gt;&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_topic&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;_dead_letter&#34;</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>  provider</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>google</span><span style=color:#f92672>-</span><span style=color:#a6e22e>beta</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;topic_name&#39;] %&gt;-dead-letter&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;google_pubsub_subscription&#34;</span> <span style=color:#e6db74>&#34;&lt;%= ctx[:primary_resource_id] %&gt;&#34;</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>  provider</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>google</span><span style=color:#f92672>-</span><span style=color:#a6e22e>beta</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>  = <span style=color:#e6db74>&#34;&lt;%= ctx[:vars][&#39;subscription_name&#39;] %&gt;&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>topic</span> = <span style=color:#a6e22e>google_pubsub_topic</span>.<span style=color:#f92672>&lt;%=</span> <span style=color:#a6e22e>ctx</span>[<span style=color:#f92672>:</span><span style=color:#a6e22e>primary_resource_id</span>] <span style=color:#f92672>%&gt;</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>dead_letter_policy</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>dead_letter_topic</span> = <span style=color:#a6e22e>google_pubsub_topic</span>.<span style=color:#f92672>&lt;%=</span> <span style=color:#a6e22e>ctx</span>[<span style=color:#f92672>:</span><span style=color:#a6e22e>primary_resource_id</span>] <span style=color:#f92672>%&gt;</span><span style=color:#960050;background-color:#1e0010>_</span><span style=color:#a6e22e>dead_letter</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>max_delivery_attempts</span> = <span style=color:#ae81ff>10</span>
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>      - !<span style=color:#ae81ff>ruby/object:Provider::Terraform::Examples</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#34;pubsub_subscription_dead_letter&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>min_version</span>: <span style=color:#ae81ff>beta</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>primary_resource_id</span>: <span style=color:#e6db74>&#34;example&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>vars</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>topic_name</span>: <span style=color:#e6db74>&#34;example-topic&#34;</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>subscription_name</span>: <span style=color:#e6db74>&#34;example-subscription&#34;</span>
+</span></span></code></pre></div></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/commit/76d5a06eb5d2b45ef51ee56954a15e71702a8613 title='Last modified by Stephen Lewis (Burrows) | November 22, 2022' target=_blank rel=noopener><img src=/magic-modules/svg/calendar.svg class=book-icon alt=Calendar>
+<span>November 22, 2022</span></a></div><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/edit/main/docs/content/docs/how-to/add-mmv1-test.md target=_blank rel=noopener><img src=/magic-modules/svg/edit.svg class=book-icon alt=Edit>
+<span>Edit this page</span></a></div></div><script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script></footer><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><div class=book-toc-content><nav id=TableOfContents><ul><li><a href=#example-configuration-file>Example Configuration File</a></li><li><a href=#terraformyaml-metadata><code>terraform.yaml</code> metadata</a></li><li><a href=#results>Results</a></li><li><a href=#update-tests>Update tests</a></li><li><a href=#tests-that-use-beta-features>Tests that use beta features</a></li></ul></nav></div></aside></main></body></html>
