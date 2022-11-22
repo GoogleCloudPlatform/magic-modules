@@ -99,10 +99,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       destinationConfig.gcsDestinationConfig.fileRotationInterval: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      sourceConfig.oracleSourceConfig.maxConcurrentCdcTasks: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validation.IntAtLeast(0)'
       sourceConfig.mysqlSourceConfig.maxConcurrentCdcTasks: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         validation: !ruby/object:Provider::Terraform::Validation
