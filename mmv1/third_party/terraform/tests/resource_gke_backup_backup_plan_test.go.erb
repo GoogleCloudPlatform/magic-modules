@@ -1,7 +1,8 @@
+<% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -10,7 +11,10 @@ import (
 func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 	t.Parallel()
 
-	random_suffix := fmt.Sprintf("tf-test-%d", randInt(t))
+	context := map[string]interface{}{
+		"project":       getTestProjectFromEnv(),
+		"random_suffix": randString(t, 10),
+	}
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -18,7 +22,7 @@ func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 		CheckDestroy: testAccCheckGKEBackupBackupPlanDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGKEBackupBackupPlan_basic(random_suffix),
+				Config: testAccGKEBackupBackupPlan_basic(context),
 			},
 			{
 				ResourceName:      "google_gke_backup_backup_plan.backupplan",
@@ -26,7 +30,7 @@ func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccGKEBackupBackupPlan_full(random_suffix),
+				Config: testAccGKEBackupBackupPlan_full(context),
 			},
 			{
 				ResourceName:      "google_gke_backup_backup_plan.backupplan",
@@ -37,16 +41,15 @@ func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 	})
 }
 
-func testAccGKEBackupBackupPlan_basic(random_suffix string) string {
-	return fmt.Sprintf(`
+func testAccGKEBackupBackupPlan_basic(context map[string]interface{}) string {
+	return Nprintf(`
 resource "google_container_cluster" "primary" {
   provider = google-beta
-  name               = "testcluster-%s"
+  name               = "testcluster%{random_suffix}"
   location           = "us-central1"
-  initial_node_count = 1
-	workload_identity_config {
-	  workload_pool = "%{project}.svc.id.goog"
-	}
+  workload_identity_config {
+    workload_pool = "%{project}.svc.id.goog"
+  }
   addons_config {
 	gke_backup_agent_config {
 	  enabled = true
@@ -56,7 +59,7 @@ resource "google_container_cluster" "primary" {
 	
 resource "google_gke_backup_backup_plan" "backupplan" {
   provider = google-beta
-  name = "testplan%s"
+  name = "testplan%{random_suffix}"
   cluster = google_container_cluster.primary.id
     backup_config {
 	  include_volume_data = false
@@ -64,18 +67,17 @@ resource "google_gke_backup_backup_plan" "backupplan" {
 	  all_namespaces = true
 	}
 }
-`, random_suffix)
+`, context)
 }
 
-func testAccGKEBackupBackupPlan_full(random_suffix string) string {
-	return fmt.Sprintf(`
+func testAccGKEBackupBackupPlan_full(context map[string]interface{}) string {
+	return Nprintf(`
 resource "google_container_cluster" "primary" {
   provider = google-beta
-  name               = "fullcluster-%s"
+  name               = "testcluster%{random_suffix}"
   location           = "us-central1"
-  initial_node_count = 1
   workload_identity_config {
-	workload_pool = "%{project}.svc.id.goog"
+    workload_pool = "%{project}.svc.id.goog"
   }
   addons_config {
 	gke_backup_agent_config {
@@ -86,7 +88,7 @@ resource "google_container_cluster" "primary" {
 	
 resource "google_gke_backup_backup_plan" "backupplan" {
   provider = google-beta
-  name = "fullplan%s"
+  name = "testplan%{random_suffix}"
   cluster = google_container_cluster.primary.id
   retention_policy {
 	backup_delete_lock_days = 30
@@ -110,5 +112,6 @@ resource "google_gke_backup_backup_plan" "backupplan" {
     }
   }
 }
-`, random_suffix)
+`, context)
 }
+<% end -%>
