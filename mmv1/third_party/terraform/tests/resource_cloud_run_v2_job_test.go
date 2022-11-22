@@ -77,7 +77,6 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
             container_port = 8080
           }
           resources {
-            cpu_idle = true
             limits = {
               cpu = "4"
               memory = "2Gi"
@@ -135,7 +134,6 @@ resource "google_cloud_run_v2_job" "default" {
           container_port = 8080
         }
         resources {
-          cpu_idle = true
           limits = {
             cpu = "2"
             memory = "8Gi"
