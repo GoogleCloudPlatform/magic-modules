@@ -728,9 +728,7 @@ func TestAccContainerCluster_withGcpPublicCidrsAccessEnabledToggle(t *testing.T)
 				Config: testAccContainerCluster_withoutGcpPublicCidrsAccessEnabled(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_gcp_public_cidrs_access_enabled",
-						"master_authorized_networks_config.#", "1"),
-					resource.TestCheckResourceAttr("google_container_cluster.with_gcp_public_cidrs_access_enabled",
-						"master_authorized_networks_config.0.gcp_public_cidrs_access_enabled", "true"),
+						"master_authorized_networks_config.#", "0"),
 				),
 			},
 			{
