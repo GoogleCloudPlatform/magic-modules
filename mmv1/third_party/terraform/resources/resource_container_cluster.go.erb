@@ -5004,20 +5004,18 @@ func flattenStandardRolloutPolicy(a *container.StandardRolloutPolicy) []map[stri
 }
 
 func flattenMasterAuthorizedNetworksConfig(c *container.MasterAuthorizedNetworksConfig) []map[string]interface{} {
-	if c == nil {
+	if c == nil || !c.Enabled {
 		return nil
 	}
 	result := make(map[string]interface{})
-	if c.Enabled {
-		cidrBlocks := make([]interface{}, 0, len(c.CidrBlocks))
-		for _, v := range c.CidrBlocks {
-			cidrBlocks = append(cidrBlocks, map[string]interface{}{
-				"cidr_block":   v.CidrBlock,
-				"display_name": v.DisplayName,
-			})
-		}
-		result["cidr_blocks"] = schema.NewSet(schema.HashResource(cidrBlockConfig), cidrBlocks)
+	cidrBlocks := make([]interface{}, 0, len(c.CidrBlocks))
+	for _, v := range c.CidrBlocks {
+		cidrBlocks = append(cidrBlocks, map[string]interface{}{
+			"cidr_block":   v.CidrBlock,
+			"display_name": v.DisplayName,
+		})
 	}
+	result["cidr_blocks"] = schema.NewSet(schema.HashResource(cidrBlockConfig), cidrBlocks)
 	result["gcp_public_cidrs_access_enabled"] = c.GcpPublicCidrsAccessEnabled
 	return []map[string]interface{}{result}
 }

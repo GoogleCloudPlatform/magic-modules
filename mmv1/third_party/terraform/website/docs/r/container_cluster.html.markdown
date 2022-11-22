@@ -693,7 +693,7 @@ This block also contains several computed attributes, documented below.
 * `cidr_blocks` - (Optional) External networks that can access the
     Kubernetes cluster master through HTTPS.
 
-* `with_gcp_public_cidrs_access_enabled` - (Optional) Whether Kubernetes master is
+* `gcp_public_cidrs_access_enabled` - (Optional) Whether Kubernetes master is
     accessible via Google Compute Engine Public IPs.
 
 The `master_authorized_networks_config.cidr_blocks` block supports:
