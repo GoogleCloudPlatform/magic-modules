@@ -286,6 +286,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
       - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_connection_tracking"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          health_check_name: "bs-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_cache"
         primary_resource_id: "default"
         vars:
