@@ -1337,5 +1337,22 @@ objects:
               - deidentify_config.0.info_type_transformations
               - deidentify_config.0.record_transformations
             properties:
-              # TODO
+              - !ruby/object:Api::Type::NestedObject
+                name: 'fieldTransformations'
+                description: Transform the record by applying various field transformations.
+                at_least_one_of:
+                  - deidentify_config.0.record_transformations.0.field_transformations
+                  # - deidentify_config.0.record_transformations.0.record_suppressions
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: fields
+                    description : |
+                      Input field(s) to apply the transformation to. When you have columns that reference their position within a list, omit the index from the FieldId.
+                      FieldId name matching ignores the index. For example, instead of "contact.nums[0].type", use "contact.nums.type".
+                    required: true
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: name
+                          description: Name describing the field.
 
