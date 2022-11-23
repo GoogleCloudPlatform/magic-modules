@@ -6,7 +6,7 @@ func extractError(d *schema.ResourceData) error {
 	message := error["message"].(string)
 	details := error["details"].(map[string]interface{})
 	detailsJSON, _ := json.Marshal(details)
-	return fmt.Errorf("Failed to create PrivateConnection. %s, details = %s", message, string(detailsJSON))
+	return fmt.Errorf("Failed to create PrivateConnection. %s details = %s", message, string(detailsJSON))
 }
 
 // waitForPrivateConnectionReady waits for a private connection state to become
