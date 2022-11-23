@@ -369,3 +369,14 @@ objects:
             required: true
             description: |
               A free subnet for peering. (CIDR of /29)
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            description: |
+              State of the PrivateConnection.
+            values:
+            - :CREATING
+            - :CREATED
+            - :FAILED
+            - :DELETING
+            - :FAILED_TO_DELETE
+            output: true
