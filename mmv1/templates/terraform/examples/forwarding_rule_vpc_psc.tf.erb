@@ -1,0 +1,29 @@
+// Forwarding rule for VPC private service connect endpoint
+resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
+  provider              = google-beta
+  name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  region                = "us-central1"
+  load_balancing_scheme = ""
+  target                = "projects/SERVICE_PROJECT/regions/REGION/serviceAttachments/SERVICE_NAME"
+  network               = google_compute_network.default.name
+  ip_address            = google_compute_address.default.id
+}
+
+resource "google_compute_network" "default" {
+  name = "<%= ctx[:vars]['network_name'] %>"
+  auto_create_subnetworks = false
+}
+resource "google_compute_subnetwork" "default" {
+  name          = "<%= ctx[:vars]['network_name'] %>"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+}
+
+resource "google_compute_address" "default" {
+  name = "<%= ctx[:vars]['ip_name'] %>-1"
+  provider = google-beta
+  region = "us-central1"
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+}
