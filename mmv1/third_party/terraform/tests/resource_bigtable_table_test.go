@@ -86,6 +86,31 @@ func TestAccBigtableTable_family(t *testing.T) {
 	})
 }
 
+func TestAccBigtableTable_deletionProtection(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccBigtableTable_deletionProtection(instanceName, tableName),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccBigtableTable_familyMany(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
@@ -237,6 +262,27 @@ resource "google_bigtable_table" "table" {
   }
 }
 `, instanceName, instanceName, tableName, family)
+}
+
+func testAccBigtableTable_deletionProtection(instanceName, tableName string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+  deletion_protection = true
+}
+`, instanceName, instanceName, tableName)
 }
 
 func testAccBigtableTable_familyMany(instanceName, tableName, family string) string {
