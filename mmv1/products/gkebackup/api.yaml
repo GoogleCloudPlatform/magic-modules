@@ -60,6 +60,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'region'
         url_param_only: true
+        required: true
         input: true
         description: |
           The region of the Backup Plan.

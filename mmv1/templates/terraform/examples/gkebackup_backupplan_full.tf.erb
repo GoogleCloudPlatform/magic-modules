@@ -17,6 +17,7 @@ resource "google_gke_backup_backup_plan" "full" {
   provider = google-beta
   name = "<%= ctx[:vars]['name'] %>"
   cluster = google_container_cluster.primary.id
+  region = "us-central1"
   retention_policy {
     backup_delete_lock_days = 30
     backup_retain_days = 180
