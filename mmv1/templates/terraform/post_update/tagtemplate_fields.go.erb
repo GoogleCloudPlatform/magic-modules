@@ -60,43 +60,20 @@ for name, change := range vals {
 
     // if old state is empty, then we have a new field to create
     if len(change.Old) == 0 {
-        url1, err := replaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields")
+        err := createTagTemplateField(d, config, changeNewProp, name, billingProject, userAgent)
         if err != nil {
             return err
         }
 
-        url1, err = addQueryParams(url1, map[string]string{"tagTemplateFieldId": name})
-        if err != nil {
-            return err
-        }
-
-        res, err := sendRequestWithTimeout(config, "POST", billingProject, url1, userAgent, changeNewProp, d.Timeout(schema.TimeoutCreate))
-        if err != nil {
-            return fmt.Errorf("Error creating TagTemplate Field: %s", err)
-        }
-
-        if err != nil {
-            return fmt.Errorf("Error creating TagTemplate Field %v: %s", name, err)
-        } else {
-            log.Printf("[DEBUG] Finished creating TagTemplate Field %v: %#v", name, res)
-        }
         continue
     }
 
     // if new state is empty, then we need to delete the current field
     if len(change.New) == 0 {
-        url1, err := replaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields/"+name+"?force={{force_delete}}")
+        err := deleteTagTemplateField(d, config, name, billingProject, userAgent)
         if err != nil {
             return err
         }
-
-        var obj map[string]interface{}
-        res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url1, userAgent, obj, d.Timeout(schema.TimeoutDelete))
-        if err != nil {
-            return fmt.Errorf("Error deleting TagTemplate Field %v: %s", name, err)
-        }
-
-        log.Printf("[DEBUG] Finished deleting TagTemplate Field %q: %#v", name, res)
 
         continue
     }
@@ -106,6 +83,25 @@ for name, change := range vals {
         url1, err := replaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields/"+name)
         if err != nil {
             return err
+        }
+
+        oldType := changeOldProp["type"].(map[string]interface{})
+        newType := changeNewProp["type"].(map[string]interface{})
+
+        if oldType["primitiveType"] != newType["primitiveType"] {
+            // As primitiveType can't be change, consider it as ForceNew which triggers delete old field and recreate new field
+
+           // delete changeOldProp
+            err_delete := deleteTagTemplateField(d, config, name, billingProject, userAgent)
+            if err_delete != nil {
+                return err_delete
+            }
+
+            // recreate changeNewProp
+            err_create := createTagTemplateField(d, config, changeNewProp, name, billingProject, userAgent)
+            if err_create != nil {
+                return err_create
+            }
         }
 
         res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url1, userAgent, changeNewProp, d.Timeout(schema.TimeoutDelete))

@@ -124,6 +124,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: 'templates/terraform/custom_import/data_catalog_tag_template.go.erb'
       pre_update: 'templates/terraform/pre_update/tagtemplate_fields.go.erb'
       post_update: 'templates/terraform/post_update/tagtemplate_fields.go.erb'
+      constants: 'templates/terraform/constants/tagtemplate_fields.go.erb'
   Tag: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{name}}"]
     id_format: "{{name}}"
