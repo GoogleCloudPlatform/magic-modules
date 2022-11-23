@@ -1355,4 +1355,186 @@ objects:
                         - !ruby/object:Api::Type::String
                           name: name
                           description: Name describing the field.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: condition
+                    description: |
+                      Only apply the transformation if the condition evaluates to true for the given RecordCondition. The conditions are allowed to reference fields that are not used in the actual transformation.
+                      Example Use Cases:
+                      - Apply a different bucket transformation to an age column if the zip code column for the same record is within a specific range.
+                      - Redact a field if the date of birth field is greater than 85.
+                    properties:
+                      - !ruby/object:Api::Type::NestedObject
+                        name: expressions
+                        description: An expression.
+                        properties:
+                          - !ruby/object:Api::Type::Enum
+                            name: logicalOperator
+                            description: The operator to apply to the result of conditions. Default and currently only supported value is AND
+                            default_value: :AND
+                            values:
+                              - :AND
+                          - !ruby/object:Api::Type::NestedObject
+                            name: conditions
+                            description: Conditions to apply to the expression.
+                            properties:
+                              - !ruby/object:Api::Type::Array
+                                name: conditions
+                                description: A collection of conditions.
+                                item_type: !ruby/object:Api::Type::NestedObject
+                                  properties:
+                                    - !ruby/object:Api::Type::NestedObject
+                                      name: field
+                                      description: Field within the record this condition is evaluated against.
+                                      required: true
+                                      properties:
+                                        - !ruby/object:Api::Type::String
+                                          name: name
+                                          description: Name describing the field.
+                                    - !ruby/object:Api::Type::Enum
+                                      name: operator
+                                      description: Operator used to compare the field or infoType to the value.
+                                      required: true
+                                      values:
+                                        - :EQUAL_TO
+                                        - :NOT_EQUAL_TO
+                                        - :GREATER_THAN
+                                        - :LESS_THAN
+                                        - :GREATER_THAN_OR_EQUALS
+                                        - :LESS_THAN_OR_EQUALS
+                                        - :EXISTS
+                                    - !ruby/object:Api::Type::NestedObject
+                                      name: value
+                                      description: Value to compare against. [Mandatory, except for EXISTS tests.]
+                                      # Note - union field, all properties are mutually exclusive
+                                      properties:
+                                        - !ruby/object:Api::Type::String
+                                          name: integerValue
+                                          description: integer (int64 format)
+                                          exactly_one_of:
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.string_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.boolean_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.timestamp_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.time_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.date_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
+                                        - !ruby/object:Api::Type::Double
+                                          name: floatValue
+                                          description: float
+                                          exactly_one_of:
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.string_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.boolean_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.timestamp_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.time_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.date_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
+                                        - !ruby/object:Api::Type::String
+                                          name: stringValue
+                                          description: string
+                                          exactly_one_of:
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.string_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.boolean_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.timestamp_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.time_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.date_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
+                                        - !ruby/object:Api::Type::Boolean
+                                          name: booleanValue
+                                          description: boolean
+                                          exactly_one_of:
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.string_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.boolean_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.timestamp_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.time_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.date_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
+                                        - !ruby/object:Api::Type::String
+                                          name: timestampValue
+                                          description: |
+                                            timestamp
+                                            A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                          exactly_one_of:
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.string_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.boolean_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.timestamp_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.time_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.date_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
+                                        - !ruby/object:Api::Type::NestedObject
+                                          name: timeValue
+                                          description: time of day
+                                          exactly_one_of:
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.string_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.boolean_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.timestamp_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.time_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.date_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
+                                          properties:
+                                            - !ruby/object:Api::Type::Integer
+                                              name: hours
+                                              description: |
+                                                Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                                            - !ruby/object:Api::Type::Integer
+                                              name: minutes
+                                              description: Minutes of hour of day. Must be from 0 to 59.
+                                            - !ruby/object:Api::Type::Integer
+                                              name: seconds
+                                              description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                            - !ruby/object:Api::Type::Integer
+                                              name: nanos
+                                              description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                        - !ruby/object:Api::Type::NestedObject
+                                          name: dateValue
+                                          description: date
+                                          exactly_one_of:
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.string_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.boolean_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.timestamp_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.time_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.date_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
+                                          properties:
+                                            - !ruby/object:Api::Type::Integer
+                                              name: year
+                                              description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                            - !ruby/object:Api::Type::Integer
+                                              name: month
+                                              description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                            - !ruby/object:Api::Type::Integer
+                                              name: day
+                                              description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                        - !ruby/object:Api::Type::Enum
+                                          name: dayOfWeekValue
+                                          description: day of week
+                                          exactly_one_of:
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.string_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.boolean_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.timestamp_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.time_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.date_value
+                                            - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
+                                          values:
+                                            - :MONDAY
+                                            - :TUESDAY
+                                            - :WEDNESDAY
+                                            - :THURSDAY
+                                            - :FRIDAY
+                                            - :SATURDAY
+                                            - :SUNDAY
 
