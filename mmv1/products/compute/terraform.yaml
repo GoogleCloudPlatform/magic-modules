@@ -954,10 +954,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: 'beta'
         primary_resource_id: "default"
         vars:
-          forwarding_rule_name: "website-forwarding-rule"
-          network_name: "website-net"
-          fw_name: "website-fw"
+          forwarding_rule_name: "psc-endpoint"
+          consumer_network_name: "consumer-net"
           ip_name: "website-ip"
+          producer_network_name: "producer-net"
+          producer_psc_network_name: "producer-psc-net"
+          service_attachment_name: "producer-service"
+          producer_forwarding_rule_name: "producer-forwarding-rule"
+          producer_backend_name: "producer-service-backend"
+          producer_healthcheck_name: "producer-service-health-check"
         ignore_read_extra:
           - "port_range"
           - "target"
