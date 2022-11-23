@@ -7500,9 +7500,7 @@ objects:
       # fingerprint ignored as it is an internal locking detail
       - !ruby/object:Api::Type::Integer
         name: 'id'
-        description: |
-          The unique identifier for the resource. This identifier is
-          defined by the server.
+        description: 'A unique identifier for this resource'
         output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'instanceGroup'
@@ -7548,7 +7546,7 @@ objects:
         description: |
           TargetPool resources to which instances in the instanceGroup field are
           added. The target pools automatically apply to all of the instances in
-          the managed instance group.'
+          the managed instance group.
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'targetPool'
           description: 'The targetPool to receive managed instances.'
