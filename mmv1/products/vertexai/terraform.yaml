@@ -98,6 +98,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       metadata.contentsDeltaUri: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
+      metadata.isCompleteOverwrite: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/vertex_ai_index.go.erb
   FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
