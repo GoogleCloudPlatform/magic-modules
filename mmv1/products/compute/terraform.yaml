@@ -291,7 +291,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           backend_service_name: "backend-service"
-          health_check_name: "bs-health-check"
+          health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_cache"
         primary_resource_id: "default"

@@ -6,7 +6,6 @@ resource "google_compute_backend_service" "<%= ctx[:primary_resource_id] %>" {
   connection_tracking_policy {
     tracking_mode                                = "PER_SESSION"
     connection_persistence_on_unhealthy_backends = "NEVER_PERSIST"
-    idle_timeout_sec                             = 60
   }
 }
 
