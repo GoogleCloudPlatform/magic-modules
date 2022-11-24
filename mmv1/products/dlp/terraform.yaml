@@ -45,6 +45,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       deidentifyConfig.recordTransformations.fieldTransformations.condition.expressions.conditions.conditions.value.dateValue.day: !ruby/object:Overrides::Terraform::PropertyOverride
           validation: !ruby/object:Provider::Terraform::Validation
             function: 'validation.IntBetween(0, 31)'
+      deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.timestampValue: !ruby/object:Overrides::Terraform::PropertyOverride
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validateRFC3339Date'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dlp_deidentify_template_basic"
