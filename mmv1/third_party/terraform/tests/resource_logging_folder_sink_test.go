@@ -262,6 +262,39 @@ func TestAccLoggingFolderSink_heredoc(t *testing.T) {
 	})
 }
 
+func TestAccLoggingFolderSink_updateUniqueWriter(t *testing.T) {
+	t.Parallel()
+
+	org := getTestOrgFromEnv(t)
+	sinkName := "tf-test-sink-" + randString(t, 10)
+	bqDatasetID := "tf_test_sink_" + randString(t, 10)
+	folderName := "tf-test-folder-" + randString(t, 10)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingFolderSink_uniqueWriter_before(sinkName, bqDatasetID, folderName, "organizations/"+org),
+			},
+			{
+				ResourceName:      "google_logging_folder_sink.uniquewriter",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingFolderSink_uniqueWriter_after(sinkName, bqDatasetID, folderName, "organizations/"+org),
+			},
+			{
+				ResourceName:      "google_logging_folder_sink.uniquewriter",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckLoggingFolderSinkDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
@@ -338,11 +371,12 @@ func testAccCheckLoggingFolderSink(sink *logging.LogSink, n string) resource.Tes
 func testAccLoggingFolderSink_basic(sinkName, bucketName, folderName, folderParent string) string {
 	return fmt.Sprintf(`
 resource "google_logging_folder_sink" "basic" {
-  name             = "%s"
-  folder           = element(split("/", google_folder.my-folder.name), 1)
-  destination      = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
-  filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
-  include_children = true
+  name                   = "%s"
+  folder                 = element(split("/", google_folder.my-folder.name), 1)
+  destination            = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  filter                 = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+  include_children       = true
+  unique_writer_identity = true
 }
 
 resource "google_storage_bucket" "log-bucket" {
@@ -514,6 +548,54 @@ resource "google_logging_folder_sink" "bigquery" {
 resource "google_bigquery_dataset" "logging_sink" {
   dataset_id  = "%s"
   description = "Log sink (generated during acc test of terraform-provider-google(-beta))."
+}
+
+resource "google_folder" "my-folder" {
+  display_name = "%s"
+  parent       = "%s"
+}`, sinkName, getTestProjectFromEnv(), getTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
+}
+
+func testAccLoggingFolderSink_uniqueWriter_before(sinkName, bqDatasetID, folderName, folderParent string) string {
+	return fmt.Sprintf(`
+resource "google_logging_folder_sink" "uniquewriter" {
+  name                   = "%s"
+  folder                 = "${element(split("/", google_folder.my-folder.name), 1)}"
+  destination            = "bigquery.googleapis.com/projects/%s/datasets/${google_bigquery_dataset.logging_sink.dataset_id}"
+  filter                 = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+  include_children       = true
+  unique_writer_identity = true
+
+  bigquery_options {
+    use_partitioned_tables = true
+  }
+}
+
+resource "google_bigquery_dataset" "logging_sink" {
+  dataset_id  = "%s"
+  description = "Log sink"
+}
+
+resource "google_folder" "my-folder" {
+  display_name = "%s"
+  parent       = "%s"
+}`, sinkName, getTestProjectFromEnv(), getTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
+}
+
+func testAccLoggingFolderSink_uniqueWriter_after(sinkName, bqDatasetID, folderName, folderParent string) string {
+	return fmt.Sprintf(`
+resource "google_logging_folder_sink" "uniquewriter" {
+  name                   = "%s"
+  folder                 = "${element(split("/", google_folder.my-folder.name), 1)}"
+  destination            = "bigquery.googleapis.com/projects/%s/datasets/${google_bigquery_dataset.logging_sink.dataset_id}"
+  filter                 = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
+  include_children       = true
+  unique_writer_identity = true
+}
+
+resource "google_bigquery_dataset" "logging_sink" {
+  dataset_id  = "%s"
+  description = "Log sink"
 }
 
 resource "google_folder" "my-folder" {
