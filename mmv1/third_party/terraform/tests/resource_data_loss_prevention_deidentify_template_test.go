@@ -39,39 +39,6 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	})
 }
 
-func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsUpdate(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"organization":  getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
-	}
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsStart(context),
-			},
-			{
-				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsUpdate(context),
-			},
-			{
-				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsStart(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
@@ -435,7 +402,41 @@ resource "google_kms_key_ring" "key_ring" {
 `, context)
 }
 
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsStart(context map[string]interface{}) string {
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"organization":  getTestOrgFromEnv(t),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_start(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_update(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_start(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
@@ -481,7 +482,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 `, context)
 }
 
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsUpdate(context map[string]interface{}) string {
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
@@ -514,6 +515,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
         primitive_transformation {
+          # update values inside replace_config
           replace_config {
             new_value {
               string_value = "born.after.shrek2@example.com"
