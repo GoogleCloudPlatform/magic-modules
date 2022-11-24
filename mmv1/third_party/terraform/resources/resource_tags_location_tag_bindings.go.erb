@@ -96,7 +96,7 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 	}
 
 	// Store the ID now
-	id, err := replaceVars(d, config, "tagBindings/{{name}}")
+	id, err := replaceVars(d, config, "{{location}}/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -129,7 +129,7 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 	}
 
 	// This may have caused the ID to update - update it if so.
-	id, err = replaceVars(d, config, "tagBindings/?parent={{parent}}&pageSize=300")
+	id, err = replaceVars(d, config, "{{location}}/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -262,23 +262,19 @@ func resourceTagsLocationTagBindingDelete(d *schema.ResourceData, meta interface
 
 func resourceTagsLocationTagBindingImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	
-	// current import_formats can't import fields with forward slashes in their value
-	if err := parseImportId([]string{
-		"tagBindings/(?P<name>[^/]+)",
-		"(?P<name>[^/]+)",
-	}, d, config); err != nil {
+	if err := parseImportId([]string{"(?P<location>[^/]+)/tagBindings/(?P<name>[^/]+)/tagValues/(?P<tag_value>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
-	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "tagBindings/{{name}}")
+	parent := d.Get("name").(string)
+	parentProper := strings.ReplaceAll(parent, "%2F", "/")
+	d.Set("parent", parentProper)
+	d.Set("name", fmt.Sprintf("tagBindings/%s/tagValues/%s", parent, d.Get("tag_value").(string)))
+	id, err := replaceVars(d, config, "{{location}}/tagBindings/{{name}}/tagValues/{{tag_value}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func flattenNestedTagsLocationTagBindingName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
