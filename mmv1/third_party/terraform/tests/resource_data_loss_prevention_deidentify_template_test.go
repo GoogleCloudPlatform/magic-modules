@@ -470,7 +470,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         primitive_transformation {
           replace_config {
             new_value {
-              string_value = "born.after.shrek@example.com
+              string_value = "born.after.shrek@example.com"
             }
           }
         }
@@ -516,7 +516,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         primitive_transformation {
           replace_config {
             new_value {
-              string_value = "born.after.shrek2@example.com
+              string_value = "born.after.shrek2@example.com"
             }
           }
         }
