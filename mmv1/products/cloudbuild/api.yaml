@@ -285,6 +285,11 @@ objects:
           - source_to_build
         properties:
           - !ruby/object:Api::Type::String
+            name: 'enterpriseConfigResourceName'
+            description: |
+                Optional. The resource name of the github enterprise config that should be applied to this installation.
+                For example: "projects/{$projectId}/githubEnterpriseConfigs/{$configId}".
+          - !ruby/object:Api::Type::String
             name: 'owner'
             description: |
                 Owner of the repository. For example: The owner for
