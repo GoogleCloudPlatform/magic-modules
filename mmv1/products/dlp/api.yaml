@@ -1409,7 +1409,7 @@ objects:
                                       properties:
                                         - !ruby/object:Api::Type::String
                                           name: integerValue
-                                          description: integer (int64 format)
+                                          description: An integer value (int64 format)
                                           exactly_one_of:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
@@ -1421,7 +1421,7 @@ objects:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
                                         - !ruby/object:Api::Type::Double
                                           name: floatValue
-                                          description: float
+                                          description: A float value.
                                           exactly_one_of:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
@@ -1433,7 +1433,7 @@ objects:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
                                         - !ruby/object:Api::Type::String
                                           name: stringValue
-                                          description: string
+                                          description: A string value.
                                           exactly_one_of:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
@@ -1445,7 +1445,7 @@ objects:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
                                         - !ruby/object:Api::Type::Boolean
                                           name: booleanValue
-                                          description: boolean
+                                          description: A boolean value.
                                           exactly_one_of:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
@@ -1458,7 +1458,6 @@ objects:
                                         - !ruby/object:Api::Type::String
                                           name: timestampValue
                                           description: |
-                                            timestamp
                                             A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
                                           exactly_one_of:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
@@ -1471,7 +1470,7 @@ objects:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.day_of_week_value
                                         - !ruby/object:Api::Type::NestedObject
                                           name: timeValue
-                                          description: time of day
+                                          description: Represents a time of day.
                                           exactly_one_of:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
@@ -1497,7 +1496,7 @@ objects:
                                               description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
                                         - !ruby/object:Api::Type::NestedObject
                                           name: dateValue
-                                          description: date
+                                          description: Represents a whole or partial calendar date.
                                           exactly_one_of:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
@@ -1519,7 +1518,7 @@ objects:
                                               description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
                                         - !ruby/object:Api::Type::Enum
                                           name: dayOfWeekValue
-                                          description: day of week
+                                          description: Represents a day of the week.
                                           exactly_one_of:
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.integer_value
                                             - deidentify_config.0.record_transformations.field_transformations.condition.expressions.conditions.conditions.value.float_value
@@ -1567,72 +1566,129 @@ objects:
                             required: true
                             description: |
                               Replace each input value with a given value.
-                            # Copied from L1012 in this file - should I add `exactly_one_of` to make them mutually exclusive?
+                            # Note - union field, all properties are mutually exclusive
                             properties:
-                              - !ruby/object:Api::Type::Integer
-                                name: 'integerValue'
-                                description: |
-                                  An integer value.
+                              - !ruby/object:Api::Type::String
+                                name: integerValue
+                                description: An integer value (int64 format)
+                                exactly_one_of:
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.integer_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.float_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.string_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.boolean_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.timestamp_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.time_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.date_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.day_of_week_value
                               - !ruby/object:Api::Type::Double
-                                name: 'floatValue'
-                                description: |
-                                  A float value.
+                                name: floatValue
+                                description: A float value.
+                                exactly_one_of:
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.integer_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.float_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.string_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.boolean_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.timestamp_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.time_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.date_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.day_of_week_value
                               - !ruby/object:Api::Type::String
-                                name: 'stringValue'
-                                description: |
-                                  A string value.
+                                name: stringValue
+                                description: A string value.
+                                exactly_one_of:
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.integer_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.float_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.string_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.boolean_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.timestamp_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.time_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.date_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.day_of_week_value
                               - !ruby/object:Api::Type::Boolean
-                                name: 'booleanValue'
-                                description: |
-                                  A boolean value.
+                                name: booleanValue
+                                description: A boolean value.
+                                exactly_one_of:
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.integer_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.float_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.string_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.boolean_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.timestamp_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.time_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.date_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.day_of_week_value
                               - !ruby/object:Api::Type::String
-                                name: 'timestampValue'
+                                name: timestampValue
                                 description: |
-                                  A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-                                  Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                  A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                exactly_one_of:
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.integer_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.float_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.string_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.boolean_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.timestamp_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.time_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.date_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.day_of_week_value
                               - !ruby/object:Api::Type::NestedObject
-                                name: 'timeValue'
-                                description: |
-                                  Represents a time of day.
+                                name: timeValue
+                                description: Represents a time of day.
+                                exactly_one_of:
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.integer_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.float_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.string_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.boolean_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.timestamp_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.time_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.date_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.day_of_week_value
                                 properties:
                                   - !ruby/object:Api::Type::Integer
-                                    name: 'hours'
+                                    name: hours
                                     description: |
-                                      Hours of day in 24 hour format. Should be from 0 to 23.
+                                      Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                                   - !ruby/object:Api::Type::Integer
-                                    name: 'minutes'
-                                    description: |
-                                      Minutes of hour of day. Must be from 0 to 59.
+                                    name: minutes
+                                    description: Minutes of hour of day. Must be from 0 to 59.
                                   - !ruby/object:Api::Type::Integer
-                                    name: 'seconds'
-                                    description: |
-                                      Seconds of minutes of the time. Must normally be from 0 to 59.
+                                    name: seconds
+                                    description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
                                   - !ruby/object:Api::Type::Integer
-                                    name: 'nanos'
-                                    description: |
-                                      Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                    name: nanos
+                                    description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
                               - !ruby/object:Api::Type::NestedObject
-                                name: 'dateValue'
-                                description: |
-                                  Represents a whole or partial calendar date.
+                                name: dateValue
+                                description: Represents a whole or partial calendar date.
+                                exactly_one_of:
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.integer_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.float_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.string_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.boolean_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.timestamp_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.time_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.date_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.day_of_week_value
                                 properties:
                                   - !ruby/object:Api::Type::Integer
-                                    name: 'year'
-                                    description: |
-                                      Year of date. Must be from 1 to 9999, or 0 if specifying a date without a year.
+                                    name: year
+                                    description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
                                   - !ruby/object:Api::Type::Integer
-                                    name: 'month'
-                                    description: |
-                                      Month of year. Must be from 1 to 12, or 0 if specifying a year without a month and day.
+                                    name: month
+                                    description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
                                   - !ruby/object:Api::Type::Integer
-                                    name: 'day'
-                                    description: |
-                                      Day of month. Must be from 1 to 31 and valid for the year and month, or 0 if specifying a
-                                      year by itself or a year and month where the day is not significant.
+                                    name: day
+                                    description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
                               - !ruby/object:Api::Type::Enum
-                                name: 'dayOfWeekValue'
-                                description: |
-                                  Represents a day of the week.
+                                name: dayOfWeekValue
+                                description: Represents a day of the week.
+                                exactly_one_of:
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.integer_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.float_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.string_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.boolean_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.timestamp_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.time_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.date_value
+                                  - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config.new_value.day_of_week_value
                                 values:
                                   - :MONDAY
                                   - :TUESDAY
