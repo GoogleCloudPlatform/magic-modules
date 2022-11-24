@@ -39,6 +39,39 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	})
 }
 
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"organization":  getTestOrgFromEnv(t),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsStart(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsUpdate(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsStart(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
@@ -398,6 +431,98 @@ resource "google_kms_crypto_key" "my_key" {
 resource "google_kms_key_ring" "key_ring" {
   name     = "tf-test-example-keyr%{random_suffix}"
   location = "global"
+}
+`, context)
+}
+
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsStart(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "basic" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    record_transformations {
+      field_transformations {
+        fields {
+          name = "details.pii.email"
+        }
+        condition {
+          expressions {
+            conditions {
+              conditions {
+                field {
+                  name = "details.pii.date_of_birth"
+                }
+                operator = "GREATER_THAN_OR_EQUALS"
+                value {
+                  date_value {
+                    year = 2001
+                    month = 6
+                    day = 29
+                  }
+                }
+              }
+            }
+          }
+        }
+        primitive_transformation {
+          replace_config {
+            new_value {
+              string_value = "born.after.shrek@example.com
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsUpdate(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "basic" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    record_transformations {
+      field_transformations {
+        fields {
+          name = "details.pii.email"
+        }
+        condition {
+          expressions {
+            conditions {
+              conditions {
+                field {
+                  name = "details.pii.date_of_birth"
+                }
+                operator = "GREATER_THAN_OR_EQUALS"
+                value {
+                  date_value {
+                    year = 2004
+                    month = 7
+                    day = 2
+                  }
+                }
+              }
+            }
+          }
+        }
+        primitive_transformation {
+          replace_config {
+            new_value {
+              string_value = "born.after.shrek2@example.com
+            }
+          }
+        }
+      }
+    }
+  }
 }
 `, context)
 }
