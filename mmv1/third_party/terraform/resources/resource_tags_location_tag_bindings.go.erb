@@ -275,6 +275,7 @@ func resourceTagsLocationTagBindingImport(d *schema.ResourceData, meta interface
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
+
 	return []*schema.ResourceData{d}, nil
 }
 
