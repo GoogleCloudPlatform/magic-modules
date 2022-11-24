@@ -1550,7 +1550,7 @@ objects:
                         description: Replace with a specified value.
                         exactly_one_of:
                           - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config
-                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.redact_config
+                          - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.redact_config
                           # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.character_mask_config
                           # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.crypto_replace_ffx_fpe_config
                           # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.fixed_size_bucketing_config
@@ -1641,3 +1641,63 @@ objects:
                                   - :FRIDAY
                                   - :SATURDAY
                                   - :SUNDAY
+                      - !ruby/object:Api::Type::NestedObject
+                        name: redactConfig
+                        description: Redact
+                        exactly_one_of:
+                          - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config
+                          - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.redact_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.character_mask_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.crypto_replace_ffx_fpe_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.fixed_size_bucketing_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.bucketing_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_with_info_type_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.time_part_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.crypto_hash_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.date_shift_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.crypto_deterministic_config
+                          # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_dictionary_config
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: 'maskingCharacter'
+                            description: |
+                              Character to use to mask the sensitive values—for example, * for an alphabetic string such as a name, or 0 for a numeric string
+                              such as ZIP code or credit card number. This string must have a length of 1. If not supplied, this value defaults to * for
+                              strings, and 0 for digits.
+                          - !ruby/object:Api::Type::Integer
+                            name: 'numberToMask'
+                            description: |
+                              Number of characters to mask. If not set, all matching chars will be masked. Skipped characters do not count towards this tally.
+                              If numberToMask is negative, this denotes inverse masking. Cloud DLP masks all but a number of characters. For example, suppose you have the following values:
+                              - maskingCharacter is *
+                              - numberToMask is -4
+                              - reverseOrder is false
+                              - CharsToIgnore includes -
+                              - Input string is 1234-5678-9012-3456
+                              
+                              The resulting de-identified string is ****-****-****-3456. Cloud DLP masks all but the last four characters. If reverseOrder is true, all but the first four characters are masked as 1234-****-****-****.
+                          - !ruby/object:Api::Type::Boolean
+                            name: 'reverseOrder'
+                            description: |
+                              Mask characters in reverse order. For example, if masking_character is 0, number_to_mask is 14, and reverse_order is `false`, then the
+                              input string `1234-5678-9012-3456` is masked as `00000000000000-3456`.
+                          - !ruby/object:Api::Type::Array
+                            name: 'charactersToIgnore'
+                            description: |
+                              Characters to skip when doing de-identification of a value. These will be left alone and skipped.
+                            item_type: !ruby/object:Api::Type::NestedObject
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: 'charactersToSkip'
+                                  description: |
+                                    Characters to not transform when masking.
+                                - !ruby/object:Api::Type::Enum
+                                  name: 'commonCharactersToIgnore'
+                                  description: |
+                                    Common characters to not transform when masking. Useful to avoid removing punctuation.
+                                  values:
+                                    - :NUMERIC
+                                    - :ALPHA_UPPER_CASE
+                                    - :ALPHA_LOWER_CASE
+                                    - :PUNCTUATION
+                                    - :WHITESPACE
