@@ -116,13 +116,13 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	tableId := d.Get("name").(string)
 	tblConf := bigtable.TableConf{TableID: tableId}
 
-	// DeletionProtection can be none, protectec or unprotected
+	// DeletionProtection can be none, protected or unprotected
 	// Check if deletion protection is given
 	if value, exists := d.GetOk("deletion_protection"); exists {
-		if value == bigtable.DeletionProtection.Protected {
-			tblConf.DeletionProtection = true
+		if value == true {
+			tblConf.DeletionProtection = bigtable.Protected
 		} else {
-			tblConf.DeletionProtection = false
+			tblConf.DeletionProtection = bigtable.Unprotected
 		}
 	}
 
@@ -205,14 +205,14 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting column_family: %s", err)
 	}
 
-	// DeletionProtection can be none, protectec or unprotected
+	// DeletionProtection can be none, protected or unprotected
 	// Check if table deletion protection has a value except for none
 	deletionProtection := table.DeletionProtection
-	if deletionProtection == bigtable.DeletionProtection.Protected {
+	if deletionProtection == bigtable.Protected {
 		if err := d.Set("deletion_protection", true); err != nil {
 			return fmt.Errorf("Error setting deletion_protection: %s", err)
 		}
-	} else if deletionProtection == bigtable.DeletionProtection.Unprotected {
+	} else if deletionProtection == bigtable.Unprotected {
 		if err := d.Set("deletion_protection", false); err != nil {
 			return fmt.Errorf("Error setting deletion_protection: %s", err)
 		}
@@ -273,12 +273,12 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 	// DeletionProtection can be none, protected or unprotected
 	// Check if deletion protection is given to update
 	if value, exists := d.GetOk("deletion_protection"); exists {
-		if value == bigtable.DeletionProtection.Protected {
-			if err := c.UpdateTableWithDeletionProtection(ctx, name, true); err != nil {
+		if value == true {
+			if err := c.UpdateTableWithDeletionProtection(ctx, name, bigtable.Protected); err != nil {
 				return fmt.Errorf("Error updating deletion protection in table %v: %s", name, err)
 			}
 		} else {
-			if err := c.UpdateTableWithDeletionProtection(ctx, name, false); err != nil {
+			if err := c.UpdateTableWithDeletionProtection(ctx, name, bigtable.Unprotected); err != nil {
 				return fmt.Errorf("Error updating deletion protection in table %v: %s", name, err)
 			}
 		}
