@@ -89,6 +89,5 @@ This resource provides the following
 TagBinding can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_tags_location_tag_binding.default tagBindings/{{name}}
-$ terraform import google_tags_location_tag_binding.default {{name}}
+$ terraform import google_tags_location_tag_binding.default {{location}}/{{name}}
 ```
