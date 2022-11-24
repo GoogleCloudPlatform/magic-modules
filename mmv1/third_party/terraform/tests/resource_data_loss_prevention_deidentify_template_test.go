@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateUpdate(t *testing.T) {
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,7 +20,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateUpdate(t *
 		CheckDestroy: testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateStart(context),
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsStart(context),
 			},
 			{
 				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
@@ -28,7 +28,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateUpdate(t *
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateUpdate(context),
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsUpdate(context),
 			},
 			{
 				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
@@ -39,7 +39,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateUpdate(t *
 	})
 }
 
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateStart(context map[string]interface{}) string {
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsStart(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
@@ -245,7 +245,7 @@ resource "google_kms_key_ring" "key_ring" {
 `, context)
 }
 
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplateUpdate(context map[string]interface{}) string {
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
