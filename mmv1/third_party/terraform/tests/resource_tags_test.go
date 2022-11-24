@@ -84,11 +84,6 @@ func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 			{
 				Config: testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context),
 			},
-			{
-				ResourceName:      "google_tags_location_tag_binding.binding",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
@@ -800,6 +795,11 @@ func testAccTagsLocationTagBinding_locationTagBindingbasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTagsLocationTagBinding_locationTagBindingBasicExample(context),
+			},
+			{
+				ResourceName:      "google_tags_location_tag_binding.binding",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
