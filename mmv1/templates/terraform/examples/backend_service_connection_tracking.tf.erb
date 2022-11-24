@@ -7,7 +7,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_backend_service" "<%= ctx[:primary_resource_id] %>" {
   provider      = google-beta
   name          = "<%= ctx[:vars]['backend_service_name'] %>"
-  health_checks = [google_compute_region_health_check.health_check.id]
+  health_checks = [google_compute_health_check.health_check.id]
   description   = "Hello World 1234"
   port_name     = "http"
   protocol      = "TCP"
