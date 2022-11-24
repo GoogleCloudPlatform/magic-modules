@@ -1,10 +1,13 @@
 baseURL = 'https://googlecloudplatform.github.io/magic-modules/'
 languageCode = 'en-us'
 title = 'Magic Modules'
-theme = ["github.com/alex-shpak/hugo-book"]
 
 enableGitInfo = true
 disableKinds = ['taxonomy', 'taxonomyTerm']
+
+[module]
+[[module.imports]]
+path = 'github.com/alex-shpak/hugo-book'
 
 [params]
 	BookTheme = 'light'
