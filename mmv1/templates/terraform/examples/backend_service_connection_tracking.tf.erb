@@ -1,11 +1,20 @@
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-11"
+  project  = "debian-cloud"
+}
+
 resource "google_compute_backend_service" "<%= ctx[:primary_resource_id] %>" {
-  provider                        = google-beta
-  name                            = "<%= ctx[:vars]['backend_service_name'] %>"
-  health_checks                   = [google_compute_health_check.health_check.id]
-  connection_draining_timeout_sec = 10
-  session_affinity                = "CLIENT_IP"
-  protocol                        = "TCP"
-  load_balancing_scheme           = "EXTERNAL"
+  provider      = google-beta
+  name          = "<%= ctx[:vars]['backend_service_name'] %>"
+  health_checks = [google_compute_region_health_check.health_check.id]
+  description   = "Hello World 1234"
+  port_name     = "http"
+  protocol      = "TCP"
+  backend {
+    group           = google_compute_instance_group_manager.foobar.instance_group
+    max_connections = 10
+  }
   connection_tracking_policy {
     tracking_mode                                = "PER_SESSION"
     connection_persistence_on_unhealthy_backends = "NEVER_PERSIST"
@@ -13,9 +22,37 @@ resource "google_compute_backend_service" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
+resource "google_compute_instance_group_manager" "foobar" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['instance_group_manager_name'] %>"
+  version {
+    instance_template = google_compute_instance_template.foobar.self_link
+    name              = "primary"
+  }
+  base_instance_name = "tf-test-foobar"
+  zone               = "us-central1-f"
+  target_size        = 1
+}
+
+resource "google_compute_instance_template" "foobar" {
+  provider     = google-beta
+  name         = "<%= ctx[:vars]['instance_template_name'] %>"
+  machine_type = "e2-medium"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
 resource "google_compute_health_check" "health_check" {
-  provider           = google-beta
-  name               = "<%= ctx[:vars]['health_check_name'] %>"
+  provider = google-beta
+  name     = "<%= ctx[:vars]['health_check_name'] %>"
 
   tcp_health_check {
     port = 22

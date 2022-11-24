@@ -292,6 +292,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           health_check_name: "bs-health-check"
+          instance_group_manager_name: "bs-instance-group-manager"
+          instance_template_name: "bs-instance-template"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_cache"
         primary_resource_id: "default"
