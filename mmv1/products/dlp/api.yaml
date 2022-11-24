@@ -1342,6 +1342,7 @@ objects:
                 description: Transform the record by applying various field transformations.
                 at_least_one_of:
                   - deidentify_config.0.record_transformations.0.field_transformations
+                  # Uncomment below when field(s) are implemented
                   # - deidentify_config.0.record_transformations.0.record_suppressions
                 properties:
                   - !ruby/object:Api::Type::Array
@@ -1541,6 +1542,7 @@ objects:
                     description: Apply the transformation to the entire field.
                     exactly_one_of:
                       - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation
+                      # Uncomment below when field(s) are implemented
                       # - deidentify_config.0.record_transformations.0.field_transformations.0.info_type_transformations
                     properties:
                       # Union field transformation can be only one of the following:
@@ -1550,6 +1552,7 @@ objects:
                         exactly_one_of:
                           - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config
                           - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.redact_config
+                          # Uncomment below when field(s) are implemented
                           # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.character_mask_config
                           # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.crypto_replace_ffx_fpe_config
                           # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.fixed_size_bucketing_config
@@ -1703,6 +1706,7 @@ objects:
                         exactly_one_of:
                           - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.replace_config
                           - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.redact_config
+                          # Uncomment below when field(s) are implemented
                           # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.character_mask_config
                           # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.crypto_replace_ffx_fpe_config
                           # - deidentify_config.0.record_transformations.0.field_transformations.0.primitive_transformation.fixed_size_bucketing_config
