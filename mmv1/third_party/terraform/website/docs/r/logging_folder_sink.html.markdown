@@ -75,6 +75,9 @@ The following arguments are supported:
 
 * `disabled` - (Optional) If set to True, then this sink is disabled and it does not export any log entries.
 
+* `unique_writer_identity` - (Optional) Whether or not to create a unique identity associated with this sink. If `true`,
+    then a unique service account is created and used for this sink. If you wish to publish logs across projects or utilize. Any requests that don't explicitly set 'uniqueWriterIdentity' to true will be rejected.
+
 * `include_children` - (Optional) Whether or not to include children folders in the sink export. If true, logs
     associated with child projects are also exported; otherwise only logs relating to the provided folder are included.
 
