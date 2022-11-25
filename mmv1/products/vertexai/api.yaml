@@ -799,3 +799,73 @@ objects:
               The disk utilization of the MetadataStore in bytes.
             output: true
 
+# Vertex AI Matching Engine Index Endpoint
+  - !ruby/object:Api::Resource
+    name: IndexEndpoint
+    base_url: projects/{{project}}/locations/{{region}}/indexEndpoints
+    create_url: projects/{{project}}/locations/{{region}}/indexEndpoints
+    self_link: projects/{{project}}/locations/{{region}}/indexEndpoints/{{name}}
+    update_verb: :PATCH
+    update_mask: true
+    create_verb: :POST
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints/
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the index endpoint. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The resource name of the Index.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: The description of the Index.
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: Used to perform consistent read-modify-write updates.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: The labels with user-defined metadata to organize your Indexes.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: network
+        description: |-
+          The full name of the Google Compute Engine [network](https://cloud.google.com//compute/docs/networks-and-firewalls#networks) to which the index endpoint should be peered.
+          Private services access must already be configured for the network. If left unspecified, the index endpoint is not peered with any network.
+          [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert): `projects/{project}/global/networks/{network}`.
+          Where `{project}` is a project number, as in `12345`, and `{network}` is network name.

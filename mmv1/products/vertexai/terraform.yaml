@@ -194,7 +194,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-
+  IndexEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_index_endpoint"
+        primary_resource_id: "index_endpoint"
+        vars:
+          address_name: "address-name"
+          network_name: "network-name"
+        test_vars_overrides:
+          network_name: 'BootstrapSharedTestNetwork(t, "vertex")'
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
