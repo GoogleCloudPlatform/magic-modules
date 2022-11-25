@@ -69,10 +69,10 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-* `id` - an identifier for the resource with format `tagBindings/{{name}}`
+* `id` - an identifier for the resource with format `{{location}}/{{name}}`
 
 * `name` -
-  The generated id for the TagBinding. This is a string of the form: `tagBindings/{full-resource-name}/{tag-value-name}`
+  The generated id for the TagBinding. This is a string of the form: `tagBindings/{parent}/{tag-value-name}`
 
 
 ## Timeouts
