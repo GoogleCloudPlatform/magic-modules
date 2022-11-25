@@ -27,8 +27,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "filestore_instance_full"
         primary_resource_id: "instance"
         vars:
-          backup_name: "tst-backup"
-          instance_name: "tst-instance"
+          backup_name: "tst-bkup"
+          instance_name: "tst-inst"
       - !ruby/object:Provider::Terraform::Examples
         name: "filestore_instance_enterprise"
         primary_resource_id: "instance"
@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "backup"
         vars:
           backup_name: "tf-fs-bkup"
-          instance_name: "tf-fs-instance"
+          instance_name: "tf-fs-inst"
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
     mutex: "filestore/{{project}}"
     error_retry_predicates: ["isNotFilestoreQuotaError"]
