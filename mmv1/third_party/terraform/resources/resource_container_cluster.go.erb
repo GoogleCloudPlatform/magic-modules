@@ -1713,6 +1713,23 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"gateway_api_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `Configuration for GKE Gateway API controller.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"channel": {
+							Type:         schema.TypeString,
+							Default:      "CHANNEL_UNSPECIFIED",
+							ValidateFunc: validation.StringInSlice([]string{"CHANNEL_UNSPECIFIED", "CHANNEL_DISABLED", "CHANNEL_EXPERIMENTAL", "CHANNEL_STANDARD"}, false),
+							Description:  `The Gateway API release channel to use for Gateway API.`,
+							Optional:     true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -1837,6 +1854,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			PrivateIpv6GoogleAccess:   d.Get("private_ipv6_google_access").(string),
 			EnableL4ilbSubsetting:     d.Get("enable_l4_ilb_subsetting").(bool),
 			DnsConfig:                 expandDnsConfig(d.Get("dns_config")),
+			GatewayApiConfig:          expandGatewayApiConfig(d.Get("gateway_api_config")),
 	    },
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
@@ -2339,6 +2357,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	if err := d.Set("dns_config", flattenDnsConfig(cluster.NetworkConfig.DnsConfig)); err != nil {
+		return err
+	}
+	if err := d.Set("gateway_api_config", flattenGatewayApiConfig(cluster.NetworkConfig.GatewayApiConfig)); err != nil {
 		return err
 	}
 	if err := d.Set("logging_config", flattenContainerClusterLoggingConfig(cluster.LoggingConfig)); err != nil {

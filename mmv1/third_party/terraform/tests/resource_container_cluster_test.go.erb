@@ -3330,6 +3330,28 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	domainName := fmt.Sprintf("tf-test-domain-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withGatewayApiConfig(clusterName, "CHANNEL_STANDARD"),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_gateway_api_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withTPUConfig(t *testing.T) {
 	t.Parallel()
@@ -6582,6 +6604,19 @@ resource "google_container_cluster" "with_dns_config" {
 	}
 }
 `, clusterName, clusterDns, clusterDnsDomain, clusterDnsScope)
+}
+
+func testAccContainerCluster_withGatewayApiConfig(clusterName string, gatewayApiChannel string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_gateway_api_config" {
+	name               = "%s"
+	location           = "us-central1-f"
+	initial_node_count = 1
+	gateway_api_config {
+		channel 	   = "%s"
+	}
+}
+`, clusterName, gatewayApiChannel)
 }
 
 <% unless version == 'ga' -%>
