@@ -178,7 +178,7 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic2(context map[strin
 
 	data "google_compute_instance_group_manager" "data_source" {
 		name = "%{igmName}"
-		zone = "us-central1"
+		zone = "us-central1-a"
 	}
 
 	resource "google_compute_target_pool" "igm-basic" {
