@@ -3334,7 +3334,6 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-	domainName := fmt.Sprintf("tf-test-domain-%s", randString(t, 10))
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -6612,8 +6611,11 @@ resource "google_container_cluster" "with_gateway_api_config" {
 	name               = "%s"
 	location           = "us-central1-f"
 	initial_node_count = 1
+  	release_channel {
+  	  channel = "RAPID"
+  	}
 	gateway_api_config {
-		channel 	   = "%s"
+		channel = "%s"
 	}
 }
 `, clusterName, gatewayApiChannel)
