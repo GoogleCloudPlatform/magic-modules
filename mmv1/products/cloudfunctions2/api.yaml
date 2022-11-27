@@ -338,7 +338,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'trigger'
-            description: 'The resource name of the Eventarc trigger.'
+            description: 'Output only. The resource name of the Eventarc trigger.'
             output: true
           - !ruby/object:Api::Type::String
             name: 'triggerRegion'

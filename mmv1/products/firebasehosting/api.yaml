@@ -1,0 +1,132 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: FirebaseHosting
+display_name: Firebase Hosting
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://firebasehosting.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Site'
+    min_version: beta
+    base_url: projects/{{project}}/sites
+    self_link: projects/{{project}}/sites/{{site_id}}
+    create_url: projects/{{project}}/sites?siteId={{site_id}}
+    update_verb: :PATCH
+    update_mask: true
+    description: 'A `Site` represents a Firebase Hosting site.'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://firebase.google.com/docs/hosting'
+      api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'site_id'
+        description: |
+          Required. Immutable. A globally unique identifier for the Hosting site. This identifier is
+          used to construct the Firebase-provisioned subdomains for the site, so it must also be a valid
+          domain name label.
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          Output only. The fully-qualified resource name of the Hosting site, in the
+          format: projects/PROJECT_IDENTIFIER/sites/SITE_ID PROJECT_IDENTIFIER: the
+          Firebase project's
+          [`ProjectNumber`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number) ***(recommended)*** or its
+          [`ProjectId`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
+          Learn more about using project identifiers in Google's
+          [AIP 2510 standard](https://google.aip.dev/cloud/2510).
+        output: true
+      - !ruby/object:Api::Type::String
+        name: appId
+        description: |
+          Optional. The [ID of a Web App](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id)
+          associated with the Hosting site.
+      - !ruby/object:Api::Type::String
+        name: defaultUrl
+        output: true
+        description: The default URL for the site in the form of https://{name}.web.app
+  - !ruby/object:Api::Resource
+    name: 'Channel'
+    min_version: beta
+    base_url: sites/{{site_id}}/channels
+    self_link: sites/{{site_id}}/channels/{{channel_id}}
+    create_url: sites/{{site_id}}/channels?channelId={{channel_id}}
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A `Channel` represents a stream of releases for a site. All sites have a default 
+      `live` channel that serves content to the Firebase-provided subdomains and any
+      connected custom domains.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://firebase.google.com/docs/hosting'
+      api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.channels'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: site_id
+        description: |
+          Required. The ID of the site in which to create this channel.
+        input: true
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: channel_id
+        description: |
+          Required. Immutable. A unique ID within the site that identifies the channel.
+        input: true
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        pattern: sites/{{site_id}}/channels/{{channel_id}}
+        description: |
+          The fully-qualified resource name for the channel, in the format:
+          sites/SITE_ID/channels/CHANNEL_ID
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: retainedReleaseCount
+        description: |
+          The number of previous releases to retain on the channel for rollback or other
+          purposes. Must be a number between 1-100. Defaults to 10 for new channels.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labels
+        description: Text labels used for extra metadata and/or filtering
+      - !ruby/object:Api::Type::Time
+        name: expireTime
+        conflicts:
+          - ttl
+        description: |
+          The time at which the channel will be automatically deleted. If null, the channel
+          will not be automatically deleted. This field is present in the output whether it's
+          set directly or via the `ttl` field.
+      - !ruby/object:Api::Type::String
+        name: ttl
+        conflicts:
+          - expireTime
+        input: true
+        description: |
+          Input only. A time-to-live for this channel. Sets `expire_time` to the provided
+          duration past the time of the request. A duration in seconds with up to nine fractional
+          digits, terminated by 's'. Example: "86400s" (one day).

@@ -252,6 +252,7 @@ func resourceStorageBucket() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"main_page_suffix": {
@@ -259,12 +260,18 @@ func resourceStorageBucket() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: []string{"website.0.not_found_page", "website.0.main_page_suffix"},
 							Description:  `Behaves as the bucket's directory index where missing objects are treated as potential directories.`,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return old != "" && new == ""
+							},
 						},
 						"not_found_page": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							AtLeastOneOf: []string{"website.0.main_page_suffix", "website.0.not_found_page"},
 							Description:  `The custom object to return when a requested resource is not found.`,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return  old != "" && new == ""
+							},
 						},
 					},
 				},
@@ -964,7 +971,7 @@ func expandBucketDataLocations(configured interface{}) []string {
 
 func expandBucketLogging(configured interface{}) *storage.BucketLogging {
 	loggings := configured.([]interface{})
-	if len(loggings) == 0 {
+	if len(loggings) == 0 || loggings[0] == nil {
 		return nil
 	}
 
@@ -1081,7 +1088,6 @@ func flattenBucketLifecycleRuleAction(action *storage.BucketLifecycleRuleAction)
 
 func flattenBucketLifecycleRuleCondition(condition *storage.BucketLifecycleRuleCondition) map[string]interface{} {
 	ruleCondition := map[string]interface{}{
-		"age":                        int(*condition.Age),
 		"created_before":             condition.CreatedBefore,
 		"matches_storage_class":      convertStringArrToInterface(condition.MatchesStorageClass),
 		"num_newer_versions":         int(condition.NumNewerVersions),
@@ -1091,6 +1097,9 @@ func flattenBucketLifecycleRuleCondition(condition *storage.BucketLifecycleRuleC
 		"noncurrent_time_before":     condition.NoncurrentTimeBefore,
 		"matches_prefix":             convertStringArrToInterface(condition.MatchesPrefix),
 		"matches_suffix":             convertStringArrToInterface(condition.MatchesSuffix),
+	}
+	if condition.Age != nil {
+		ruleCondition["age"] = int(*condition.Age)
 	}
 	if condition.IsLive == nil {
 		ruleCondition["with_state"] = "ANY"

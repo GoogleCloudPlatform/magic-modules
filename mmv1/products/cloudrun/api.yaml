@@ -659,6 +659,7 @@ objects:
                   exactly_one_of:
                     - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
                     - template.0.spec.0.containers.0.startup_probe.0.http_get
+                    - template.0.spec.0.containers.0.startup_probe.0.grpc
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
@@ -673,6 +674,7 @@ objects:
                   exactly_one_of:
                     - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
                     - template.0.spec.0.containers.0.startup_probe.0.http_get
+                    - template.0.spec.0.containers.0.startup_probe.0.grpc
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
@@ -698,6 +700,27 @@ objects:
                               The header field value.
                             default_value: ""
                             send_empty_value: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: grpc
+                  description: |-
+                    GRPC specifies an action involving a GRPC port.
+                  exactly_one_of:
+                    - template.0.spec.0.containers.0.startup_probe.0.tcp_socket
+                    - template.0.spec.0.containers.0.startup_probe.0.http_get
+                    - template.0.spec.0.containers.0.startup_probe.0.grpc
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Number must be in the range 1 to 65535.
+                    - !ruby/object:Api::Type::String
+                      name: service
+                      description: |-
+                        The name of the service to place in the gRPC HealthCheckRequest
+                        (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                        If this is not specified, the default behavior is defined by gRPC.
             - !ruby/object:Api::Type::NestedObject
               name: livenessProbe
               min_version: beta
@@ -735,6 +758,9 @@ objects:
                   name: httpGet
                   description: |-
                     HttpGet specifies the http request to perform.
+                  exactly_one_of:
+                    - template.0.spec.0.containers.0.liveness_probe.0.http_get
+                    - template.0.spec.0.containers.0.liveness_probe.0.grpc
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
@@ -760,6 +786,26 @@ objects:
                               The header field value.
                             default_value: ""
                             send_empty_value: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: grpc
+                  description: |-
+                    GRPC specifies an action involving a GRPC port.
+                  exactly_one_of:
+                    - template.0.spec.0.containers.0.liveness_probe.0.http_get
+                    - template.0.spec.0.containers.0.liveness_probe.0.grpc
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Number must be in the range 1 to 65535.
+                    - !ruby/object:Api::Type::String
+                      name: service
+                      description: |-
+                        The name of the service to place in the gRPC HealthCheckRequest
+                        (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                        If this is not specified, the default behavior is defined by gRPC.
 
         - !ruby/object:Api::Type::Integer
           name: containerConcurrency

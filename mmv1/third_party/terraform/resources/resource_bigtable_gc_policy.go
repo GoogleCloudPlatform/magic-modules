@@ -164,6 +164,15 @@ func resourceBigtableGCPolicy() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
+
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: `The deletion policy for the GC policy. Setting ABANDON allows the resource
+				to be abandoned rather than deleted. This is useful for GC policy as it cannot be deleted
+				in a replicated instance. Possible values are: "ABANDON".`,
+				ValidateFunc: validation.StringInSlice([]string{"ABANDON", ""}, false),
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -256,9 +265,12 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	columnFamily := d.Get("column_family").(string)
 	ti, err := c.TableInfo(ctx, name)
 	if err != nil {
-		log.Printf("[WARN] Removing %s because it's gone", name)
-		d.SetId("")
-		return nil
+		if isNotFoundGrpcError(err) {
+			log.Printf("[WARN] Removing the GC policy because the parent table %s is gone", name)
+			d.SetId("")
+			return nil
+		}
+		return err
 	}
 
 	for _, fi := range ti.FamilyInfos {
@@ -364,6 +376,14 @@ func gcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]int
 
 func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+
+	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
+		// Allows for the GC policy to be abandoned without deletion to avoid possible
+		// deletion failure in a replicated instance.
+		log.Printf("[WARN] The GC policy is abandoned")
+		return nil
+	}
+
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err

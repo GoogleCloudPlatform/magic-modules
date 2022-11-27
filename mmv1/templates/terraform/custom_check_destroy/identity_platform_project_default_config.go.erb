@@ -1,0 +1,39 @@
+config := googleProviderConfig(t)
+
+url, err := replaceVarsForTest(config, rs, "{{IdentityPlatformBasePath}}projects/{{project}}/config")
+if err != nil {
+    return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+    billingProject = config.BillingProject
+}
+
+res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+if err != nil {
+    return fmt.Errorf("something went wrong trying to get the IdentityPlatformProjectDefaultConfig at %s", url)
+}
+
+signIn := res["signIn"]
+if signIn == nil {
+    return nil
+}
+
+original := signIn.(map[string]interface{})
+if len(original) == 0 {
+    return nil
+}
+
+transformed := make(map[string]interface{})
+transformed["email"] =
+    flattenIdentityPlatformProjectDefaultConfigSignInEmail(original["email"], nil, nil)
+transformed["phone_number"] =
+    flattenIdentityPlatformProjectDefaultConfigSignInPhoneNumber(original["phoneNumber"], nil, nil)
+transformed["anonymous"] =
+    flattenIdentityPlatformProjectDefaultConfigSignInAnonymous(original["anonymous"], nil, nil)
+
+if transformed["email"] != nil || transformed["phone_number"] != nil || transformed["anonymous"] != nil {
+    return fmt.Errorf("IdentityPlatformProjectDefaultConfig still exists at %s", url)
+}
