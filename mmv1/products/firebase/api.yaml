@@ -68,12 +68,6 @@ objects:
         output: true
         description: |
           The user-assigned display name of the Project. This field may only be assigned on Update.
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: annotations
-        description: |
-          Set of user-defined annotations for the FirebaseProject. These annotations
-          are intended solely for developers and client-side tools Firebase services
-          will not mutate this annotation set.  This field may only be assigned on Update.
       - !ruby/object:Api::Type::NestedObject
         name: resources
         output: true
