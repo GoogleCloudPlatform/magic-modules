@@ -134,12 +134,12 @@ objects:
             required: true
             description: |
               The type of the repo, since it may not be explicit from the repo field (e.g from a URL). 
-              Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB, BITBUCKET
+              Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB, BITBUCKET_SERVER
             values:
                   - :UNKNOWN
                   - :CLOUD_SOURCE_REPOSITORIES
                   - :GITHUB
-                  - :BITBUCKET
+                  - :BITBUCKET_SERVER
           - !ruby/object:Api::Type::String
             name: 'revision'
             description: |
@@ -175,12 +175,12 @@ objects:
             required: true
             description: |
               The type of the repo, since it may not be explicit from the repo field (e.g from a URL).
-              Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB, BITBUCKET
+              Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB, BITBUCKET_SERVER
             values:
                   - :UNKNOWN
                   - :CLOUD_SOURCE_REPOSITORIES
                   - :GITHUB
-                  - :BITBUCKET
+                  - :BITBUCKET_SERVER
       - !ruby/object:Api::Type::Array
         name: 'ignoredFiles'
         item_type: Api::Type::String

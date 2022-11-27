@@ -36,3 +36,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "full"
         vars:
           alloydb_cluster_name: "alloydb-cluster-full"          
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{cluster}}/instances/{{instance_id}}"]
+    autogen_async: true
+    properties:
+      availabilityType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      machineConfig.cpuCount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      machineConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "alloydb_instance_basic"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          alloydb_cluster_name: "alloydb-cluster"
+          alloydb_instance_name: "alloydb-instance"
+        ignore_read_extra:
+          - "reconciling"
+          - "update_time"

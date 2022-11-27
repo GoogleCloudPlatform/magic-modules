@@ -35,6 +35,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "basic_cmek"
         vars:
           instance_name: "my-instance"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_fusion_instance_enterprise"
+        primary_resource_id: "enterprise_instance"
+        vars:
+          instance_name: "my-instance"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_update: templates/terraform/pre_update/datafusion_instance_update.go.erb
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true

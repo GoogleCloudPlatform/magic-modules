@@ -36,12 +36,34 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
         oics_vars_overrides:
           deletion_protection: "false"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_database_deletion_policy"
+        primary_resource_id: "database_deletion_policy"
+        vars:
+          database_name: "my-database"
+          database_instance_name: "my-database-instance"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
     properties:
       collation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       charset: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: 'caseDiffSuppress'
+    virtual_fields:
+      - !ruby/object:Api::Type::String
+        name: 'deletion_policy'
+        description: |
+          The deletion policy for the database. Setting ABANDON allows the resource 
+          to be abandoned rather than deleted. This is useful for Postgres, where databases cannot be 
+          deleted from the API if there are users other than cloudsqlsuperuser with access. Possible 
+          values are: "ABANDON".
+        default_value: "ABANDON"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/sql_database_deletion_policy.erb
   SourceRepresentationInstance: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

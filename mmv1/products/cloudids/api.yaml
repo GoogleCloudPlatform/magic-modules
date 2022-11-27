@@ -89,12 +89,12 @@ objects:
         description: |
           An optional description of the endpoint.
       - !ruby/object:Api::Type::String
-        name: 'endpoint_forwarding_rule'
+        name: 'endpointForwardingRule'
         output: true
         description: |
           URL of the endpoint's network address to which traffic is to be sent by Packet Mirroring.
       - !ruby/object:Api::Type::String
-        name: 'endpoint'
+        name: 'endpointIp'
         output: true
         description: |
           Internal IP address of the endpoint's network entry point.
