@@ -527,3 +527,127 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 `, context)
 }
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_Update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"organization":  getTestOrgFromEnv(t),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_start(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// As redact_config is an empty object in the HCL and cannot be updated,
+				// this update step tests ability to change the type of transformation from redact_config to replace_config
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_update(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_start(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "basic" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    record_transformations {
+      field_transformations {
+        fields {
+          name = "details.pii.email"
+        }
+        condition {
+          expressions {
+            conditions {
+              conditions {
+                field {
+                  name = "details.pii.date_of_birth"
+                }
+                operator = "GREATER_THAN_OR_EQUALS"
+                value {
+                  date_value {
+                    year = 2001
+                    month = 6
+                    day = 29
+                  }
+                }
+              }
+            }
+          }
+        }
+        primitive_transformation {
+          redact_config {}
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_update(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "basic" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    record_transformations {
+      field_transformations {
+        fields {
+          name = "details.pii.email"
+        }
+        condition {
+          expressions {
+            conditions {
+              conditions {
+                field {
+                  name = "details.pii.date_of_birth"
+                }
+                operator = "GREATER_THAN_OR_EQUALS"
+                value {
+                  date_value {
+                    year = 2001
+                    month = 6
+                    day = 29
+                  }
+                }
+              }
+            }
+          }
+        }
+        primitive_transformation {
+          # update by changing transformation type from redact_config => replace_config
+          replace_config {
+            new_value {
+              string_value = "born.after.shrek@example.com"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
