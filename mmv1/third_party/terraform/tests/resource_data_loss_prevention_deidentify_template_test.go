@@ -435,7 +435,6 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	})
 }
 
-
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_start(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
