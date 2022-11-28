@@ -497,12 +497,23 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         condition {
           expressions {
             conditions {
+              # update to add second condition
+              conditions {
+                field {
+                  name = "details.pii.gender"
+                }
+                operator = "EQUAL_TO"
+                value {
+                  string_value = "M"
+                }
+              }
               conditions {
                 field {
                   name = "details.pii.date_of_birth"
                 }
                 operator = "GREATER_THAN_OR_EQUALS"
                 value {
+                  # update date values
                   date_value {
                     year = 2004
                     month = 7
@@ -517,7 +528,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           # update values inside replace_config
           replace_config {
             new_value {
-              string_value = "born.after.shrek2@example.com"
+              string_value = "dude.born.after.shrek2@example.com"
             }
           }
         }
