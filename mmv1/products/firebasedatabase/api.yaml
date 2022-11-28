@@ -17,7 +17,7 @@ display_name: Firebase Realtime Database
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://firebase.googleapis.com/v1beta1/
+    base_url: https://firebase.googleapis.com/v1beta/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -61,7 +61,7 @@ objects:
         name: name
         description: |
           The fully-qualified resource name of the Firebase Database, in the
-          format: projects/PROJECT_IDENTIFIER/locations/REGION_IDENTIFIER/instances/DATABASE_ID PROJECT_IDENTIFIER: the
+          format: projects/PROJECT_IDENTIFIER/locations/REGION_IDENTIFIER/instances/INSTANCE_ID PROJECT_IDENTIFIER: the
           Firebase project's
           [`ProjectNumber`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number) ***(recommended)*** or its
           [`ProjectId`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).

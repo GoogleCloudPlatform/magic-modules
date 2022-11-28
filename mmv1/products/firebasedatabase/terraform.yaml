@@ -28,7 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: "beta"
         primary_resource_id: "secondary"
         vars:
-          database_id: "my-db"
+          instance_id: "my-db"
         test_env_vars:
           region: :REGION
           project_id: :PROJECT_NAME
