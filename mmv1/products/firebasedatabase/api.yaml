@@ -17,7 +17,7 @@ display_name: Firebase Realtime Database
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://firebase.googleapis.com/v1beta/
+    base_url: https://firebasedatabase.googleapis.com/v1beta/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
