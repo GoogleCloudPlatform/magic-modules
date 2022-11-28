@@ -156,6 +156,45 @@ func TestAccContainerNodePool_noName(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_withLoggingVariantUpdates(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	nodePool := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withLoggingVariant(cluster, nodePool, "DEFAULT"),
+			},
+			{
+				ResourceName:            "google_container_node_pool.with_logging_variant",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+			{
+				Config: testAccContainerNodePool_withLoggingVariant(cluster, nodePool, "MAX_THROUGHPUT"),
+			},
+			{
+				ResourceName:            "google_container_node_pool.with_logging_variant",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+			{
+				Config: testAccContainerNodePool_withLoggingVariant(cluster, nodePool, "DEFAULT"),
+			},
+			{
+				ResourceName:            "google_container_node_pool.with_logging_variant",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+		},
+	})
+}
+
 func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
@@ -447,7 +486,6 @@ func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 	t.Parallel()
 
@@ -478,7 +516,100 @@ func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+
+
+func TestAccContainerNodePool_withEnablePrivateNodesToggle(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withEnablePrivateNodesToggle(cluster, np, network, "true"),
+			},
+			{
+				ResourceName:            "google_container_node_pool.with_enable_private_nodes",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+			{
+				Config: testAccContainerNodePool_withEnablePrivateNodesToggle(cluster, np, network, "false"),
+			},
+			{
+				ResourceName:            "google_container_node_pool.with_enable_private_nodes",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+		},
+	})
+}
+
+
+func testAccContainerNodePool_withEnablePrivateNodesToggle(cluster, np, network, flag string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "container_network" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name                     = google_compute_network.container_network.name
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "10.0.36.0/24"
+  region                   = "us-central1"
+  private_ip_google_access = true
+
+  secondary_ip_range {
+    range_name    = "pod"
+    ip_cidr_range = "10.0.0.0/19"
+  }
+
+  secondary_ip_range {
+    range_name    = "svc"
+    ip_cidr_range = "10.0.32.0/22"
+  }
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = "1.23"
+  initial_node_count = 1
+
+  network    = google_compute_network.container_network.name
+  subnetwork = google_compute_subnetwork.container_subnetwork.name
+  ip_allocation_policy {
+    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
+  }
+}
+
+resource "google_container_node_pool" "with_enable_private_nodes" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  node_count = 1
+  network_config {
+    create_pod_range = false
+    enable_private_nodes = %s
+    pod_range = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+  }
+  node_config {
+	oauth_scopes = [
+	  "https://www.googleapis.com/auth/cloud-platform",
+	]
+  }
+}
+`, network, cluster, np, flag)
+}
 
 <% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
@@ -1267,6 +1398,26 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
+func testAccContainerNodePool_withLoggingVariant(cluster, np, loggingVariant string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_logging_variant" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_container_node_pool" "with_logging_variant" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.with_logging_variant.name
+  initial_node_count = 1
+  node_config {
+    logging_variant = "%s"
+  }
+}
+`,	cluster, np, loggingVariant)
+}
+
 func testAccContainerNodePool_basicWithClusterId(cluster, np string) string {
 	return fmt.Sprintf(`
 provider "google" {
@@ -1681,6 +1832,10 @@ resource "google_container_node_pool" "np_with_node_config" {
 	
     tags = ["ga"]
 
+	resource_labels = {
+      "key1" = "value"
+    }
+
     taint {
       key    = "taint_key"
       value  = "taint_value"
@@ -1726,6 +1881,11 @@ resource "google_container_node_pool" "np_with_node_config" {
     min_cpu_platform = "Intel Broadwell"
 
     tags = ["beta"]
+
+	resource_labels = {
+      "key1" = "value1"
+	  "key2" = "value2"
+    }
 
     taint {
       key    = "taint_key"
@@ -2081,7 +2241,6 @@ resource "google_container_node_pool" "with_linux_node_config" {
 <% end -%>
 
 
-<% unless  version == 'ga' -%>
 func testAccContainerNodePool_withNetworkConfig(cluster, np, network string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -2170,7 +2329,6 @@ resource "google_container_node_pool" "with_auto_pod_cidr" {
 
 `, network, cluster, np, np)
 }
-<% end -%>
 
 
 <% unless version.nil? || version == 'ga' -%>

@@ -1,0 +1,45 @@
+resource "google_compute_network_firewall_policy" "basic_network_firewall_policy" {
+  name = "{{policy}}"
+  project = "{{project}}"
+  description = "Sample global network firewall policy"
+}
+
+resource "google_compute_network_firewall_policy_rule" "primary" {
+ firewall_policy = google_compute_network_firewall_policy.basic_network_firewall_policy.name
+ action = "allow"
+ direction = "INGRESS"
+ priority = 1000
+ rule_name = "test-rule"
+ description = "This is a simple rule description" 
+match {
+ src_secure_tags {
+ name = "tagValues/${google_tags_tag_value.basic_value.name}"
+ }
+ src_ip_ranges = ["10.100.0.1/32"]
+layer4_configs {
+ip_protocol = "all"
+ }
+ }
+ target_service_accounts = ["{{test_service_account}}"]
+ enable_logging = true
+ disabled = false
+}
+resource "google_compute_network" "basic_network" {
+  name = "{{network}}"
+}
+resource "google_tags_tag_key" "basic_key" {
+  parent = "organizations/{{org_id}}"
+  short_name = "{{tagkey}}"
+  purpose = "GCE_FIREWALL"
+  purpose_data = {
+  network= "{{project}}/${google_compute_network.basic_network.name}"
+  }
+  description = "For keyname resources."
+}
+
+
+resource "google_tags_tag_value" "basic_value" {
+    parent = "tagKeys/${google_tags_tag_key.basic_key.name}"
+    short_name = "{{tagvalue}}"
+    description = "For valuename resources."
+}

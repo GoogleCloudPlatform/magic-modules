@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-	"strconv"
 	"regexp"
 	"strings"
 	"time"
@@ -28,16 +27,22 @@ import (
 var (
 	instanceGroupManagerURL = regexp.MustCompile(fmt.Sprintf("projects/(%s)/zones/([a-z0-9-]*)/instanceGroupManagers/([^/]*)", ProjectRegex))
 
-	networkConfig = &schema.Resource{
+	masterAuthorizedNetworksConfig = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cidr_blocks": {
 				Type: schema.TypeSet,
-				// Despite being the only entry in a nested block, this should be kept
-				// Optional. Expressing the parent with no entries and omitting the
+				// This should be kept Optional. Expressing the
+				// parent with no entries and omitting the
 				// parent entirely are semantically different.
 				Optional: true,
 				Elem:     cidrBlockConfig,
 				Description: `External networks that can access the Kubernetes cluster master through HTTPS.`,
+			},
+			"gcp_public_cidrs_access_enabled": {
+				Type: schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				Description: `Whether master is accessbile via Google Compute Engine Public IP addresses.`,
 			},
 		},
 	}
@@ -76,9 +81,24 @@ var (
 	<% end -%>
 	}
 
+	privateClusterConfigKeys = []string{
+		"private_cluster_config.0.enable_private_endpoint",
+		"private_cluster_config.0.enable_private_nodes",
+		"private_cluster_config.0.master_ipv4_cidr_block",
+		"private_cluster_config.0.private_endpoint_subnetwork",
+		"private_cluster_config.0.master_global_access_config",
+	}
+
 	forceNewClusterNodeConfigFields = []string{
 		"workload_metadata_config",
 	}
+
+	suppressDiffForAutopilot = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		if v, _ := d.Get("enable_autopilot").(bool); v {
+			return true
+		}
+		return false
+	})
 )
 
 // This uses the node pool nodeConfig schema but sets
@@ -94,7 +114,6 @@ func clusterSchemaNodeConfig() *schema.Schema {
 	return nodeConfigSch
 }
 
-<% unless version == 'ga' -%>
 // Defines default nodel pool settings for the entire cluster. These settings are
 // overridden if specified on the specific NodePool object.
 func clusterSchemaNodePoolDefaults() *schema.Schema {
@@ -112,16 +131,18 @@ func clusterSchemaNodePoolDefaults() *schema.Schema {
 					Description: `Subset of NodeConfig message that has defaults.`,
 					MaxItems:    1,
 					Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-									"gcfs_config": schemaGcfsConfig(false),
-							},
+						Schema: map[string]*schema.Schema{
+<% unless version == 'ga' -%>
+							"gcfs_config": schemaGcfsConfig(false),
+<% end -%>
+							"logging_variant": schemaLoggingVariant(),
+						},
 					},
 				},
 			},
 		},
 	}
 }
-<% end -%>
 
 func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
 	// This diff gets applied in the cloud console if you specify
@@ -445,18 +466,21 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: `Per-cluster configuration of Node Auto-Provisioning with Cluster Autoscaler to automatically adjust the size of the cluster and create/delete node pools based on the current needs of the cluster's workload. See the guide to using Node Auto-Provisioning for more details.`,
-				ConflictsWith: []string{"enable_autopilot"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
-							Type:        schema.TypeBool,
-							Required:    true,
+							Type:          schema.TypeBool,
+							Optional:      true,
+							Computed:      true,
+							ConflictsWith: []string{"enable_autopilot"},
 							Description: `Whether node auto-provisioning is enabled. Resource limits for cpu and memory must be defined to enable node auto-provisioning.`,
 						},
 						"resource_limits": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: `Global constraints for machine resources in the cluster. Configuring the cpu and memory types is required if node auto-provisioning is enabled. These limits will apply to node pool autoscaling in addition to node auto-provisioning.`,
+							Type:             schema.TypeList,
+							Optional:         true,
+							ConflictsWith:    []string{"enable_autopilot"},
+							DiffSuppressFunc: suppressDiffForAutopilot,
+							Description:      `Global constraints for machine resources in the cluster. Configuring the cpu and memory types is required if node auto-provisioning is enabled. These limits will apply to node pool autoscaling in addition to node auto-provisioning.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"resource_type": {
@@ -500,32 +524,37 @@ func resourceContainerCluster() *schema.Resource {
 										Description: `The Google Cloud Platform Service Account to be used by the node VMs.`,
 									},
 									"disk_size": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Default:     100,
-										Description: `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+										Type:             schema.TypeInt,
+										Optional:         true,
+										Default:          100,
+										Description:      `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+										DiffSuppressFunc: suppressDiffForAutopilot,
 										ValidateFunc: validation.IntAtLeast(10),
 									},
 									"disk_type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Default:     "pd-standard",
-										Description: `Type of the disk attached to each node.`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										Default:          "pd-standard",
+										Description:      `Type of the disk attached to each node.`,
+										DiffSuppressFunc: suppressDiffForAutopilot,
 										ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd", "pd-balanced"}, false),
 									},
 									"image_type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Default:     "COS_CONTAINERD",
-										Description: `The default image type used by NAP once a new node pool is being created.`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										Default:          "COS_CONTAINERD",
+										Description:      `The default image type used by NAP once a new node pool is being created.`,
+										DiffSuppressFunc: suppressDiffForAutopilot,
 										ValidateFunc: validation.StringInSlice([]string{"COS_CONTAINERD", "COS", "UBUNTU_CONTAINERD", "UBUNTU"}, false),
 									},
+									<% unless version == 'ga' -%>
 									"min_cpu_platform": {
 										Type:             schema.TypeString,
 										Optional:         true,
 										DiffSuppressFunc: emptyOrDefaultStringSuppress("automatic"),
 										Description:      `Minimum CPU platform to be used by this instance. The instance may be scheduled on the specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such as Intel Haswell.`,
 									},
+									<% end -%>
 									"boot_disk_kms_key": {
 										Type:        schema.TypeString,
 										Optional:    true,
@@ -557,91 +586,6 @@ func resourceContainerCluster() *schema.Resource {
 													AtLeastOneOf: []string{
 														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_secure_boot",
 														"cluster_autoscaling.0.auto_provisioning_defaults.0.shielded_instance_config.0.enable_integrity_monitoring",
-													},
-												},
-											},
-										},
-									},
-									"upgrade_settings": {
-										Type:             schema.TypeList,
-										Optional:         true,
-										Description:      `Specifies the upgrade settings for NAP created node pools`,
-										Computed:         true,
-										DiffSuppressFunc: UpgradeSettingsDiffSuppress,
-										MaxItems:         1,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"max_surge": {
-													Type:        schema.TypeInt,
-													Optional:    true,
-													Computed:    true,
-													Description: `The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process.`,
-												},
-												"max_unavailable": {
-													Type:        schema.TypeInt,
-													Optional:    true,
-													Computed:    true,
-													Description: `The maximum number of nodes that can be simultaneously unavailable during the upgrade process.`,
-												},
-												"strategy": {
-													Type:         schema.TypeString,
-													Optional:     true,
-													Computed:     true,
-													Description:  `Update strategy of the node pool.`,
-													ValidateFunc: validation.StringInSlice([]string{"NODE_POOL_UPDATE_STRATEGY_UNSPECIFIED", "BLUE_GREEN", "SURGE"}, false),
-												},
-												"blue_green_settings": {
-													Type:        schema.TypeList,
-													Optional:    true,
-													MaxItems:    1,
-													Description: `Settings for blue-green upgrade strategy.`,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"node_pool_soak_duration": {
-																Type:     schema.TypeString,
-																Optional: true,
-																Description: `Time needed after draining entire blue pool. After this period, blue pool will be cleaned up.
-
-																A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".`,
-															},
-															"standard_rollout_policy": {
-																Type:        schema.TypeList,
-																Optional:    true,
-																MaxItems:    1,
-																Description: `Standard policy for the blue-green upgrade.`,
-																Elem: &schema.Resource{
-																	Schema: map[string]*schema.Schema{
-																		"batch_percentage": {
-																			Type:         schema.TypeFloat,
-																			Optional:     true,
-																			ValidateFunc: validation.FloatBetween(0.0, 1.0),
-																			ExactlyOneOf: []string{
-																				"cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings.0.standard_rollout_policy.0.batch_percentage",
-																				"cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings.0.standard_rollout_policy.0.batch_node_count",
-																			},
-																			Description: `Percentage of the bool pool nodes to drain in a batch. The range of this field should be (0.0, 1.0].`,
-																		},
-																		"batch_node_count": {
-																			Type:     schema.TypeInt,
-																			Optional: true,
-																			ExactlyOneOf: []string{
-																				"cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings.0.standard_rollout_policy.0.batch_percentage",
-																				"cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings.0.standard_rollout_policy.0.batch_node_count",
-																			},
-																			Description: `Number of blue nodes to drain in a batch.`,
-																		},
-																		"batch_soak_duration": {
-																			Type:     schema.TypeString,
-																			Optional: true,
-																			Default:  "0s",
-																			Description: `Soak time after each batch gets drained.
-
-																			A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".`,
-																		},
-																	},
-																},
-															},
-														},
 													},
 												},
 											},
@@ -694,11 +638,12 @@ func resourceContainerCluster() *schema.Resource {
 						},
 						<% unless version == 'ga' -%>
 						"autoscaling_profile": {
-							Type:         schema.TypeString,
-							Default:      "BALANCED",
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"BALANCED", "OPTIMIZE_UTILIZATION"}, false),
-							Description:  `Configuration options for the Autoscaling profile feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability when deciding to remove nodes from a cluster. Can be BALANCED or OPTIMIZE_UTILIZATION. Defaults to BALANCED.`,
+							Type:             schema.TypeString,
+							Default:          "BALANCED",
+							Optional:         true,
+							DiffSuppressFunc: suppressDiffForAutopilot,
+							ValidateFunc:     validation.StringInSlice([]string{"BALANCED", "OPTIMIZE_UTILIZATION"}, false),
+							Description:      `Configuration options for the Autoscaling profile feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability when deciding to remove nodes from a cluster. Can be BALANCED or OPTIMIZE_UTILIZATION. Defaults to BALANCED.`,
 						},
 						<% end -%>
 					},
@@ -1163,8 +1108,9 @@ func resourceContainerCluster() *schema.Resource {
 			"master_authorized_networks_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
-				Elem:        networkConfig,
+				Elem:        masterAuthorizedNetworksConfig,
 				Description: `The desired configuration options for master authorized networks. Omit the nested cidr_blocks attribute to disallow external access (except the cluster node IPs, which GKE automatically whitelists).`,
 			},
 
@@ -1234,9 +1180,9 @@ func resourceContainerCluster() *schema.Resource {
 				ConflictsWith: []string{"enable_autopilot"},
 			},
 
-<% unless version == "ga" -%>
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
+<% unless version == "ga" -%>
 			"node_pool_auto_config": {
 				Type:             schema.TypeList,
 				Optional:         true,
@@ -1411,10 +1357,15 @@ func resourceContainerCluster() *schema.Resource {
 				Description:      `Configuration for private clusters, clusters with private nodes.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						// enable_private_endpoint is orthogonal to private_endpoint_subnetwork.
+						// User can create a private_cluster_config block without including
+						// either one of those two fields. Both fields are optional.
+						// At the same time, we use 'AtLeastOneOf' to prevent an empty block
+						// like 'private_cluster_config{}'
 						"enable_private_endpoint": {
 							Type:             schema.TypeBool,
-							Required:         true,
-							ForceNew:         true,
+							Optional:         true,
+							AtLeastOneOf:     privateClusterConfigKeys,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description:      `When true, the cluster's private endpoint is used as the cluster endpoint and access through the public endpoint is disabled. When false, either endpoint can be used. This field only applies to private clusters, when enable_private_nodes is true.`,
 						},
@@ -1422,6 +1373,7 @@ func resourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeBool,
 							Optional:         true,
 							ForceNew:         true,
+							AtLeastOneOf:     privateClusterConfigKeys,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description:      `Enables the private cluster feature, creating a private endpoint on the cluster. In a private cluster, nodes only have RFC 1918 private addresses and communicate with the master's private endpoint via private networking.`,
 						},
@@ -1430,29 +1382,39 @@ func resourceContainerCluster() *schema.Resource {
 							Computed:     true,
 							Optional:     true,
 							ForceNew:     true,
+							AtLeastOneOf: privateClusterConfigKeys,
 							ValidateFunc: orEmpty(validation.IsCIDRNetwork(28, 28)),
 							Description:  `The IP range in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. See Private Cluster Limitations for more details. This field only applies to private clusters, when enable_private_nodes is true.`,
 						},
 						"peering_name": {
-							Type:        schema.TypeString,
-							Computed:    true,
+							Type:         schema.TypeString,
+							Computed:     true,
 							Description: `The name of the peering between this cluster and the Google owned VPC.`,
 						},
 						"private_endpoint": {
-							Type:        schema.TypeString,
-							Computed:    true,
+							Type:         schema.TypeString,
+							Computed:     true,
 							Description: `The internal IP address of this cluster's master endpoint.`,
 						},
+						"private_endpoint_subnetwork": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: privateClusterConfigKeys,
+							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							Description: `Subnetwork in cluster's network where master's endpoint will be provisioned.`,
+						},
 						"public_endpoint": {
-							Type:        schema.TypeString,
-							Computed:    true,
+							Type:         schema.TypeString,
+							Computed:     true,
 							Description: `The external IP address of this cluster's master endpoint.`,
 						},
 						"master_global_access_config": {
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Optional: true,
-							Computed: true,
+							Type:         schema.TypeList,
+							MaxItems:     1,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: privateClusterConfigKeys,
 							Description: "Controls cluster master global access settings.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -1871,7 +1833,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		Name:                           clusterName,
 		InitialNodeCount:               int64(d.Get("initial_node_count").(int)),
 		MaintenancePolicy:              expandMaintenancePolicy(d, meta),
-		MasterAuthorizedNetworksConfig: expandMasterAuthorizedNetworksConfig(d.Get("master_authorized_networks_config")),
+		MasterAuthorizedNetworksConfig: expandMasterAuthorizedNetworksConfig(d.Get("master_authorized_networks_config"), d),
 		InitialClusterVersion:          d.Get("min_master_version").(string),
 		ClusterIpv4Cidr:                d.Get("cluster_ipv4_cidr").(string),
 		Description:                    d.Get("description").(string),
@@ -1987,11 +1949,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.NodeConfig = expandNodeConfig([]interface{}{})
 	}
 
-<% unless version == 'ga' -%>
         if v, ok := d.GetOk("node_pool_defaults"); ok {
                 cluster.NodePoolDefaults = expandNodePoolDefaults(v)
         }
-<% end -%>
 
 	if v, ok := d.GetOk("node_config"); ok {
 		cluster.NodeConfig = expandNodeConfig(v)
@@ -2426,11 +2386,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 <% end -%>
 
-<% unless version == 'ga' -%>
         if err := d.Set("node_pool_defaults", flattenNodePoolDefaults(cluster.NodePoolDefaults)); err != nil {
                 return err
         }
-<% end -%>
 
 	return nil
 }
@@ -2485,7 +2443,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		c := d.Get("master_authorized_networks_config")
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				DesiredMasterAuthorizedNetworksConfig: expandMasterAuthorizedNetworksConfig(c),
+				DesiredMasterAuthorizedNetworksConfig: expandMasterAuthorizedNetworksConfig(c, d),
 			},
 		}
 
@@ -2547,6 +2505,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), enabled)
+	}
+
+	if d.HasChange("private_cluster_config.0.enable_private_endpoint") {
+		enabled := d.Get("private_cluster_config.0.enable_private_endpoint").(bool)
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredEnablePrivateEndpoint: enabled,
+				ForceSendFields:              []string{"DesiredEnablePrivateEndpoint"},
+			},
+		}
+
+		updateF := updateFunc(req, "updating enable private endpoint")
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's enable private endpoint has been updated to %v", d.Id(), enabled)
 	}
 
         if d.HasChange("binary_authorization") {
@@ -3387,6 +3363,29 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s resource usage export config has been updated", d.Id())
 	}
 
+	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.logging_variant") {
+		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.logging_variant"); ok {
+			loggingVariant := v.(string)
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredNodePoolLoggingConfig: &container.NodePoolLoggingConfig{
+						VariantConfig: &container.LoggingVariantConfig{
+							Variant: loggingVariant,
+						},
+					},
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE cluster desired node pool logging configuration defaults.")
+			// Call update serially.
+			if err := lockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s node pool logging configuration defaults have been updated", d.Id())
+		}
+	}
+
 <% unless version == 'ga' -%>
         if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.gcfs_config") {
                 if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.gcfs_config"); ok {
@@ -3861,8 +3860,12 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 
 func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *container.ClusterAutoscaling {
 	l, ok := configured.([]interface{})
+	enableAutopilot := false
+	if v, ok := d.GetOk("enable_autopilot"); ok && v == true {
+		enableAutopilot = true
+	}
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
-		if v, ok := d.GetOk("enable_autopilot"); ok && v == true {
+		if enableAutopilot {
 			return nil
 		}
 		return &container.ClusterAutoscaling{
@@ -3913,13 +3916,12 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	config := l[0].(map[string]interface{})
 
 	npd := &container.AutoprovisioningNodePoolDefaults{
-		OauthScopes:    	convertStringArr(config["oauth_scopes"].([]interface{})),
-		ServiceAccount: 	config["service_account"].(string),
-		DiskSizeGb:     	int64(config["disk_size"].(int)),
-		DiskType:       	config["disk_type"].(string),
-		ImageType:      	config["image_type"].(string),
-		BootDiskKmsKey: 	config["boot_disk_kms_key"].(string),
-		UpgradeSettings:	expandUpgradeSettings(config["upgrade_settings"]),
+		OauthScopes:    convertStringArr(config["oauth_scopes"].([]interface{})),
+		ServiceAccount: config["service_account"].(string),
+		DiskSizeGb:     int64(config["disk_size"].(int)),
+		DiskType:       config["disk_type"].(string),
+		ImageType:      config["image_type"].(string),
+		BootDiskKmsKey: config["boot_disk_kms_key"].(string),
 		Management:		expandManagement(config["management"]),
 	}
 
@@ -3931,13 +3933,14 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 		}
 	}
 
+<% unless version == 'ga' -%>
 	cpu := config["min_cpu_platform"].(string)
 	// the only way to unset the field is to pass "automatic" as its value
 	if cpu == "" {
 		cpu = "automatic"
 	}
 	npd.MinCpuPlatform = cpu
-
+<% end -%>
 	return npd
 }
 
@@ -3972,54 +3975,6 @@ func expandUpgradeOptions(configured interface{}) *container.AutoUpgradeOptions 
 	return upgradeOptions
 }
 
-func expandUpgradeSettings(configured interface{}) *container.UpgradeSettings {
-	l, ok := configured.([]interface{})
-	if !ok || l == nil || len(l) == 0 || l[0] == nil {
-		return &container.UpgradeSettings{}
-	}
-	config := l[0].(map[string]interface{})
-
-	upgradeSettings := &container.UpgradeSettings{
-		MaxSurge:          int64(config["max_surge"].(int)),
-		MaxUnavailable:    int64(config["max_unavailable"].(int)),
-		Strategy:          config["strategy"].(string),
-		BlueGreenSettings: expandBlueGreenSettings(config["blue_green_settings"]),
-	}
-
-	return upgradeSettings
-}
-
-func expandBlueGreenSettings(configured interface{}) *container.BlueGreenSettings {
-	l, ok := configured.([]interface{})
-	if !ok || l == nil || len(l) == 0 || l[0] == nil {
-		return &container.BlueGreenSettings{}
-	}
-	config := l[0].(map[string]interface{})
-
-	blueGreenSettings := &container.BlueGreenSettings{
-		NodePoolSoakDuration:  config["node_pool_soak_duration"].(string),
-		StandardRolloutPolicy: expandStandardRolloutPolicy(config["standard_rollout_policy"]),
-	}
-
-	return blueGreenSettings
-}
-
-func expandStandardRolloutPolicy(configured interface{}) *container.StandardRolloutPolicy {
-	l, ok := configured.([]interface{})
-	if !ok || l == nil || len(l) == 0 || l[0] == nil {
-		return &container.StandardRolloutPolicy{}
-	}
-
-	config := l[0].(map[string]interface{})
-	standardRolloutPolicy := &container.StandardRolloutPolicy{
-		BatchPercentage:   config["batch_percentage"].(float64),
-		BatchNodeCount:    int64(config["batch_node_count"].(int)),
-		BatchSoakDuration: config["batch_soak_duration"].(string),
-	}
-
-	return standardRolloutPolicy
-}
-
 func expandAuthenticatorGroupsConfig(configured interface{}) *container.AuthenticatorGroupsConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
@@ -4033,6 +3988,7 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *container.Authenti
 	}
 	return result
 }
+
 
 func expandNotificationConfig(configured interface{}) *container.NotificationConfig {
 	l := configured.([]interface{})
@@ -4123,7 +4079,7 @@ func expandMasterAuth(configured interface{}) *container.MasterAuth {
 	return result
 }
 
-func expandMasterAuthorizedNetworksConfig(configured interface{}) *container.MasterAuthorizedNetworksConfig {
+func expandMasterAuthorizedNetworksConfig(configured interface{}, d *schema.ResourceData) *container.MasterAuthorizedNetworksConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
 		return &container.MasterAuthorizedNetworksConfig{
@@ -4144,6 +4100,10 @@ func expandMasterAuthorizedNetworksConfig(configured interface{}) *container.Mas
 					DisplayName: cidrBlock["display_name"].(string),
 				})
 			}
+		}
+		if v, ok := d.GetOkExists("master_authorized_networks_config.0.gcp_public_cidrs_access_enabled"); ok {
+			result.GcpPublicCidrsAccessEnabled = v.(bool)
+			result.ForceSendFields = []string{"GcpPublicCidrsAccessEnabled"}
 		}
 	}
 	return result
@@ -4172,11 +4132,12 @@ func expandPrivateClusterConfig(configured interface{}) *container.PrivateCluste
 	}
 	config := l[0].(map[string]interface{})
 	return &container.PrivateClusterConfig{
-		EnablePrivateEndpoint:    config["enable_private_endpoint"].(bool),
-		EnablePrivateNodes:       config["enable_private_nodes"].(bool),
-		MasterIpv4CidrBlock:      config["master_ipv4_cidr_block"].(string),
-		MasterGlobalAccessConfig: expandPrivateClusterConfigMasterGlobalAccessConfig(config["master_global_access_config"]),
-		ForceSendFields:          []string{"EnablePrivateEndpoint", "EnablePrivateNodes", "MasterIpv4CidrBlock", "MasterGlobalAccessConfig"},
+		EnablePrivateEndpoint:      config["enable_private_endpoint"].(bool),
+		EnablePrivateNodes:         config["enable_private_nodes"].(bool),
+		MasterIpv4CidrBlock:        config["master_ipv4_cidr_block"].(string),
+		MasterGlobalAccessConfig:   expandPrivateClusterConfigMasterGlobalAccessConfig(config["master_global_access_config"]),
+		PrivateEndpointSubnetwork:  config["private_endpoint_subnetwork"].(string),
+		ForceSendFields:            []string{"EnablePrivateEndpoint", "EnablePrivateNodes", "MasterIpv4CidrBlock", "MasterGlobalAccessConfig"},
 	}
 }
 
@@ -4453,12 +4414,18 @@ func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) *co
 	}
 
 	config := l[0].(map[string]interface{})
-	return &container.AuthenticatorGroupsConfig{
-		SecurityGroup: config["security_group"].(string),
+	result := &container.AuthenticatorGroupsConfig{}
+	if securityGroup, ok := config["security_group"]; ok {
+		if securityGroup == nil || securityGroup.(string) == "" {
+			result.Enabled = false
+		} else {
+			result.Enabled = true
+			result.SecurityGroup = securityGroup.(string)
+		}
 	}
+	return result
 }
 
-<% unless version == 'ga' -%>
 func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults {
         l, ok := configured.([]interface{})
         if !ok || l == nil || len(l) == 0 || l[0] == nil {
@@ -4478,13 +4445,12 @@ func flattenNodePoolDefaults(c *container.NodePoolDefaults) []map[string]interfa
 	}
 
 	result := make(map[string]interface{})
-	if c.NodeConfigDefaults != nil && c.NodeConfigDefaults.GcfsConfig != nil {
-			result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
+	if c.NodeConfigDefaults != nil {
+		result["node_config_defaults"] = flattenNodeConfigDefaults(c.NodeConfigDefaults)
 	}
 
 	return []map[string]interface{}{result}
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoConfig {
@@ -4726,6 +4692,7 @@ func flattenPrivateClusterConfig(c *container.PrivateClusterConfig) []map[string
 			"master_global_access_config": flattenPrivateClusterConfigMasterGlobalAccessConfig(c.MasterGlobalAccessConfig),
 			"peering_name":                c.PeeringName,
 			"private_endpoint":            c.PrivateEndpoint,
+			"private_endpoint_subnetwork": c.PrivateEndpointSubnetwork,
 			"public_endpoint":             c.PublicEndpoint,
 		},
 	}
@@ -4964,10 +4931,11 @@ func flattenAutoProvisioningDefaults(a *container.AutoprovisioningNodePoolDefaul
 	r["disk_size"] = a.DiskSizeGb
 	r["disk_type"] = a.DiskType
 	r["image_type"] = a.ImageType
+	<% unless version == 'ga' -%>
 	r["min_cpu_platform"] = a.MinCpuPlatform
+	<% end -%>
 	r["boot_disk_kms_key"] = a.BootDiskKmsKey
 	r["shielded_instance_config"] = flattenShieldedInstanceConfig(a.ShieldedInstanceConfig)
-	r["upgrade_settings"] = flattenUpgradeSettings(a.UpgradeSettings)
 	r["management"] = flattenManagement(a.Management)
 
 	return []map[string]interface{}{r}
@@ -4997,59 +4965,20 @@ func flattenUpgradeOptions(a *container.AutoUpgradeOptions) []map[string]interfa
 	return []map[string]interface{}{r}
 }
 
-func flattenUpgradeSettings(a *container.UpgradeSettings) []map[string]interface{} {
-	if a == nil {
-		return nil
-	}
-	r := make(map[string]interface{})
-	r["max_surge"] = a.MaxSurge
-	r["max_unavailable"] = a.MaxUnavailable
-	r["strategy"] = a.Strategy
-	r["blue_green_settings"] = flattenBlueGreenSettings(a.BlueGreenSettings)
-
-	return []map[string]interface{}{r}
-}
-
-func flattenBlueGreenSettings(a *container.BlueGreenSettings) []map[string]interface{} {
-	if a == nil {
-		return nil
-	}
-
-	r := make(map[string]interface{})
-	r["node_pool_soak_duration"] = a.NodePoolSoakDuration
-	r["standard_rollout_policy"] = flattenStandardRolloutPolicy(a.StandardRolloutPolicy)
-
-	return []map[string]interface{}{r}
-}
-
-func flattenStandardRolloutPolicy(a *container.StandardRolloutPolicy) []map[string]interface{} {
-	if a == nil {
-		return nil
-	}
-
-	r := make(map[string]interface{})
-	r["batch_percentage"] = a.BatchPercentage
-	r["batch_node_count"] = a.BatchNodeCount
-	r["batch_soak_duration"] = a.BatchSoakDuration
-
-	return []map[string]interface{}{r}
-}
-
 func flattenMasterAuthorizedNetworksConfig(c *container.MasterAuthorizedNetworksConfig) []map[string]interface{} {
 	if c == nil || !c.Enabled {
 		return nil
 	}
 	result := make(map[string]interface{})
-	if c.Enabled {
-		cidrBlocks := make([]interface{}, 0, len(c.CidrBlocks))
-		for _, v := range c.CidrBlocks {
-			cidrBlocks = append(cidrBlocks, map[string]interface{}{
-				"cidr_block":   v.CidrBlock,
-				"display_name": v.DisplayName,
-			})
-		}
-		result["cidr_blocks"] = schema.NewSet(schema.HashResource(cidrBlockConfig), cidrBlocks)
+	cidrBlocks := make([]interface{}, 0, len(c.CidrBlocks))
+	for _, v := range c.CidrBlocks {
+		cidrBlocks = append(cidrBlocks, map[string]interface{}{
+			"cidr_block":   v.CidrBlock,
+			"display_name": v.DisplayName,
+		})
 	}
+	result["cidr_blocks"] = schema.NewSet(schema.HashResource(cidrBlockConfig), cidrBlocks)
+	result["gcp_public_cidrs_access_enabled"] = c.GcpPublicCidrsAccessEnabled
 	return []map[string]interface{}{result}
 }
 
@@ -5328,12 +5257,15 @@ func containerClusterPrivateClusterConfigSuppress(k, old, new string, d *schema.
 	o, n = d.GetChange("private_cluster_config.0.enable_private_nodes")
 	suppressNodes := !o.(bool) && !n.(bool)
 
+	// Do not suppress diffs when private_endpoint_subnetwork is configured
+	_, hasSubnet := d.GetOk("private_cluster_config.0.private_endpoint_subnetwork")
+
 	if k == "private_cluster_config.0.enable_private_endpoint" {
-		return suppressEndpoint
+		return suppressEndpoint && !hasSubnet
 	} else if k == "private_cluster_config.0.enable_private_nodes" {
-		return suppressNodes
+		return suppressNodes && !hasSubnet
 	} else if k == "private_cluster_config.#" {
-		return suppressEndpoint && suppressNodes
+		return suppressEndpoint && suppressNodes && !hasSubnet
 	}
 	return false
 }
@@ -5445,31 +5377,3 @@ func validateNodePoolAutoConfig(cluster *container.Cluster) error {
 	return nil
 }
 <% end -%>
-
-func UpgradeSettingsDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
-	// the number of digits after decimal point may differ for soak_duration in config. ("3.5s" - "3.500s")
-	// suppress the difference if both floats are equal.
-	// max_surge and max_unavailable should not be _ideally_ specified with the strategy set to BLUE_GREEN,
-	// but in case it is specified, suppress it.
-
-	nodePoolSoakDuration := "cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings.0.node_pool_soak_duration"
-
-	o, n := r.GetChange("cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.strategy")
-
-	if o == "BLUE_GREEN" && n == "BLUE_GREEN" {
-		if k == nodePoolSoakDuration {
-			fs1, fs2 := r.GetChange(nodePoolSoakDuration)
-
-			f1, _ := strconv.ParseFloat(strings.Trim(fs1.(string), "s"), 32)
-			f2, _ := strconv.ParseFloat(strings.Trim(fs2.(string), "s"), 32)
-
-			return f1 == f2
-		}
-
-		return k == "cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.max_surge" ||
-			k == "cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.max_unavailable"
-
-	}
-
-	return false
-}

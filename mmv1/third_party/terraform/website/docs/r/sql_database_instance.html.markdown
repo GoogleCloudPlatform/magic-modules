@@ -238,6 +238,8 @@ The `settings` block supports:
 
 * `collation` - (Optional) The name of server instance collation.
 
+* `connector_enforcement` - (Optional) Specifies if connections must use Cloud SQL connectors.
+
 * `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
 
 * `disk_autoresize_limit` - (Optional) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
@@ -261,6 +263,14 @@ The optional `settings.active_directory_config` subblock supports:
 * `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
     Can only be used with SQL Server.
 
+The optional `settings.deny_maintenance_period` subblock supports:
+
+* `end_date` - (Required) "deny maintenance period" end date. If the year of the end date is empty, the year of the start date also must be empty. In this case, it means the no maintenance interval recurs every year. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01
+
+* `start_date` - (Required) "deny maintenance period" start date. If the year of the start date is empty, the year of the end date also must be empty. In this case, it means the deny maintenance period recurs every year. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01
+
+* `time` - (Required) Time in UTC when the "deny maintenance period" starts on startDate and ends on endDate. The time is in format: HH:mm:SS, i.e., 00:00:00
+
 The optional `settings.sql_server_audit_config` subblock supports:
 
 * `bucket` - (Required) The name of the destination bucket (e.g., gs://mybucket).
@@ -269,7 +279,7 @@ The optional `settings.sql_server_audit_config` subblock supports:
 
 * `retention_interval` - (Optional) How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". 
 
-* `timezone` - (Optional) The timezone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
+* `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
 
 The optional `settings.backup_configuration` subblock supports:
 
