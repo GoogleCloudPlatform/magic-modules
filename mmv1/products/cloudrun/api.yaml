@@ -570,7 +570,7 @@ objects:
                 properties:
                 - !ruby/object:Api::Type::String
                   name: name
-                  description: If specified, used to specify which protocol to use. Allowed values are "http1" and "h2c".
+                  description: If specified, used to specify which protocol to use. Allowed values are "http1" (HTTP/1) and "h2c" (HTTP/2 end-to-end)
                 - !ruby/object:Api::Type::String
                   name: protocol
                   description: Protocol for port. Must be "TCP". Defaults to "TCP".
