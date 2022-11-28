@@ -2019,6 +2019,7 @@ func TestAccDataprocCluster_withConfidentialInstanceConfig(t *testing.T) {
 
 func testAccDataprocCluster_withConfidentialInstanceConfig(rnd string) string {
 	return fmt.Sprintf(`
+	
 resource "google_dataproc_cluster" "basic" {
   name   = "dproc-cluster-test-%s"
   region = "us-central1"
