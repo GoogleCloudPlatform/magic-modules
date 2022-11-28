@@ -234,10 +234,6 @@ objects:
         description: |
           P4 service account for the customer project.
         output: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableRbac'
-        description: |
-          Option to enable granular role-based access control.
       - !ruby/object:Api::Type::NestedObject
         name: 'cryptoKeyConfig'
         description: |
