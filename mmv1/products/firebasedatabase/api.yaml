@@ -30,6 +30,7 @@ objects:
     min_version: beta
     base_url: projects/{{project}}/locations/{{region}}/instances/
     self_link: projects/{{project}}/locations/{{region}}/instances/{{instance_id}}
+    create_url: projects/{{project}}/locations/{{region}}?databaseId={{instance_id}}
     input: true
     description: |
       A Google Cloud Firebase Realtime Database instance.
@@ -48,30 +49,41 @@ objects:
         description: 'A reference to the region where the Firebase Realtime database resides.'
       - !ruby/object:Api::Type::String
         name: 'instance_id'
-        required: true
-        input: true
         description: |
           Required. Immutable. A globally unique identifier for the Firebase Database.
+        required: true
+        input: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: name
+        output: true
         description: |
-          Output only. The fully-qualified resource name of the Firebase Database, in the
+          The fully-qualified resource name of the Firebase Database, in the
           format: projects/PROJECT_IDENTIFIER/locations/REGION_IDENTIFIER/instances/DATABASE_ID PROJECT_IDENTIFIER: the
           Firebase project's
           [`ProjectNumber`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number) ***(recommended)*** or its
           [`ProjectId`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
           Learn more about using project identifiers in Google's
           [AIP 2510 standard](https://google.aip.dev/cloud/2510).
-        output: true
       - !ruby/object:Api::Type::String
-        name: region
+        name: databaseUrl
         output: true
-        description: |
-          The GCP region that this database is running in.
-      - !ruby/object:Api::Type::String
-        name: defaultUrl
-        output: true
-        description: The default URL for the site in the form of https://{name}.web.app
+        description: The database URL in the form of https://{instance-id}.firebasio.com or https://{instance-id}.{region}.firebasedatabase.app
+      - !ruby/object:Api::Type::Enum
+        name: type
+        input: true
+        description: The database type.
+        values:
+          - :DEFAULT_DATABASE
+          - :USER_DATABASE
+        default_value: :USER_DATABASE
+      - !ruby/object:Api::Type::Enum
+        name: state
+        description: The database state.
+        values:
+          - :ACTIVE
+          - :DISABLED
+        default_value: :ACTIVE
 
 

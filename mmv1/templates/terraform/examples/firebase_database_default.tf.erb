@@ -1,4 +1,4 @@
-resource "google_firebase_database" "default" {
+resource "google_firebase_database" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   project  = "<%= ctx[:test_env_vars]['project_id'] %>"
   region   = "<%= ctx[:vars]['region'] %>"
