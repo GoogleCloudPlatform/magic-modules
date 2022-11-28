@@ -59,6 +59,12 @@ properties:
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
+    name: coveredField
+    description: A non-existant field that has test coverage
+  - !ruby/object:Api::Type::String
+    name: uncoveredField
+    description: A non-existant field that has no test coverage
+  - !ruby/object:Api::Type::String
     name: displayName
     description: Required. The display name of the Endpoint. The name can be up to 128 characters long and can consist of any UTF-8 characters.
     required: true

@@ -64,6 +64,7 @@ func testAccVertexAIEndpoint_vertexAiEndpointNetwork(context map[string]interfac
 	return Nprintf(`
 resource "google_vertex_ai_endpoint" "endpoint" {
   name         = "%{endpoint_name}"
+  covered_field = "some-value"
   display_name = "sample-endpoint"
   description  = "A sample vertex endpoint"
   location     = "us-central1"
