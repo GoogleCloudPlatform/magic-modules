@@ -41,17 +41,17 @@ objects:
           'https://firebase.google.com/products/realtime-database'
       api: 'https://firebase.google.com/docs/reference/rest/database/database-management/rest'
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'region'
-        resource: 'Region'
-        imports: 'name'
-        description: 'A reference to the region where the Firebase Realtime database resides.'
-        required: true
       - !ruby/object:Api::Type::String
-        name: 'database_id'
+        name: 'region'
+        required: true
+        input: true
+        description: 'A reference to the region where the Firebase Realtime database resides.'
+      - !ruby/object:Api::Type::String
+        name: 'instance_id'
+        required: true
+        input: true
         description: |
           Required. Immutable. A globally unique identifier for the Firebase Database.
-        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -65,20 +65,13 @@ objects:
           [AIP 2510 standard](https://google.aip.dev/cloud/2510).
         output: true
       - !ruby/object:Api::Type::String
-        name: projectNumber
-        output: true
-        description: |
-          The number of the google project that firebase is enabled on.
-      - !ruby/object:Api::Type::String
         name: region
         output: true
         description: |
           The GCP region that this database is running in.
-
       - !ruby/object:Api::Type::String
-        name: region
+        name: defaultUrl
         output: true
-        description: |
-          The GCP region that this database is running in.
+        description: The default URL for the site in the form of https://{name}.web.app
 
 
