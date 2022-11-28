@@ -402,7 +402,7 @@ resource "google_kms_key_ring" "key_ring" {
 `, context)
 }
 
-func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsUpdate(t *testing.T) {
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_Update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
