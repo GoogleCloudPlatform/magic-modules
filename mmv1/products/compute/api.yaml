@@ -6561,6 +6561,14 @@ objects:
                     disks.source is required.  To create a disk with one of
                     the public operating system images, specify the image
                     by its family name.
+                - !ruby/object:Api::Type::KeyValuePairs
+                  name: 'resourceManagerTags'
+                  description: |
+                    A map of resource manager tags. Resource manager tag keys 
+                    and values have the same definition as resource manager tags. 
+                    Keys must be in the format `tagKeys/{tag_key_id}`, and values 
+                    are in the format `tagValues/456`. The field is ignored
+                    (both PUT & PATCH) when empty.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'sourceImageEncryptionKey'
                   description: |
@@ -6680,6 +6688,20 @@ objects:
           Labels to apply to this instance.  A list of key->value pairs.
         update_verb: :POST
         update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'params'
+        description: |
+          Stores additional params passed with the request, 
+          but not persisted as part of resource payload.
+        properties:
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'resourceManagerTags'
+            description: |
+              A map of resource manager tags. Resource manager tag keys 
+              and values have the same definition as resource manager tags. 
+              Keys must be in the format `tagKeys/{tag_key_id}`, and values 
+              are in the format `tagValues/456`. The field is ignored
+              (both PUT & PATCH) when empty.
       # TODO(nelsonjr): Implement updating metadata *after* resource is created.
 
       # Expose instance 'metadata' as a simple name/value pair hash. However the API
