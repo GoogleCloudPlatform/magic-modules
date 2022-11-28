@@ -1613,6 +1613,10 @@ objects:
                           name: redactConfig
                           description: Redact
                           properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
+                          # The fields below allow POST requests to include the "redactConfig" transformation in the payload
+                          # The trade-off is that POST requests specifying another transformation type will include will include "redactConfig" : null in the payload
+                          send_empty_value: true
+                          allow_empty_object: true
                         - !ruby/object:Api::Type::NestedObject
                           name: characterMaskConfig
                           description: Mask
