@@ -26,7 +26,7 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/firebasedatabase.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
-    name: 'Database'
+    name: 'Instance'
     min_version: beta
     base_url: projects/{{project}}/locations/{{region}}/instances/
     self_link: projects/{{project}}/locations/{{region}}/instances/{{instance_id}}
@@ -44,20 +44,21 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: 'region'
+        description: |
+          A reference to the region where the Firebase Realtime database resides.
         required: true
         input: true
-        description: 'A reference to the region where the Firebase Realtime database resides.'
+        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'instance_id'
         description: |
-          Required. Immutable. A globally unique identifier for the Firebase Database.
+          A globally unique identifier for the Firebase Database.
         required: true
         input: true
         url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: name
-        output: true
         description: |
           The fully-qualified resource name of the Firebase Database, in the
           format: projects/PROJECT_IDENTIFIER/locations/REGION_IDENTIFIER/instances/DATABASE_ID PROJECT_IDENTIFIER: the
@@ -66,24 +67,26 @@ objects:
           [`ProjectId`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
           Learn more about using project identifiers in Google's
           [AIP 2510 standard](https://google.aip.dev/cloud/2510).
+        output: true
       - !ruby/object:Api::Type::String
         name: databaseUrl
-        output: true
         description: The database URL in the form of https://{instance-id}.firebasio.com or https://{instance-id}.{region}.firebasedatabase.app
+        output: true
       - !ruby/object:Api::Type::Enum
         name: type
-        input: true
         description: The database type.
+        input: true
         values:
           - :DEFAULT_DATABASE
           - :USER_DATABASE
         default_value: :USER_DATABASE
-      - !ruby/object:Api::Type::Enum
-        name: state
-        description: The database state.
-        values:
-          - :ACTIVE
-          - :DISABLED
-        default_value: :ACTIVE
+     # TODO: add database state later
+     #- !ruby/object:Api::Type::Enum
+     #  name: state
+     #  description: The database state.
+     #  values:
+     #    - :ACTIVE
+     #    - :DISABLED
+     #  default_value: :ACTIVE
 
 

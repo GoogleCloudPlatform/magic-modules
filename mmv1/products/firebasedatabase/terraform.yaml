@@ -13,24 +13,24 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Database: !ruby/object:Overrides::Terraform::ResourceOverride
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ['projects/{{project}}/locations/{{region}}/instances/{{instance_id}}', '{{region}}/{{instance_id}}']
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_database_default"
         min_version: "beta"
         primary_resource_id: "default"
-        vars:
-          region: us-central1
         test_env_vars:
+          region: :REGION
           project_id: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_database_secondary"
         min_version: "beta"
         primary_resource_id: "secondary"
         vars:
-          region: us-central1
+          database_id: "my-db"
         test_env_vars:
+          region: :REGION
           project_id: :PROJECT_NAME
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
