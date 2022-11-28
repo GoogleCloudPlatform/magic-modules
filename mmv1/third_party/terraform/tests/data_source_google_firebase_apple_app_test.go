@@ -9,12 +9,12 @@ import (
 func TestAccDataSourceGoogleFirebaseAppleApp(t *testing.T) {
 	t.Parallel()
 
-        context := map[string]interface{}{
-                "project_id": getTestProjectFromEnv(),
-                "bundle_id":  "apple.app.12345",
-                "display_name":  "Display Name AppleApp DataSource",
+	context := map[string]interface{}{
+		"project_id":   getTestProjectFromEnv(),
+		"bundle_id":    "apple.app.12345",
+		"display_name": "Display Name AppleApp DataSource",
 		"app_store_id": 12345,
-		"team_id": 1234567890,
+		"team_id":      1234567890,
 	}
 
 	resourceName := "data.google_firebase_apple_app.my_app"
