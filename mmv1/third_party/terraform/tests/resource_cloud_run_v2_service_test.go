@@ -90,7 +90,6 @@ resource "google_cloud_run_v2_service" "default" {
   }
   traffic {
     type = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
-    percent = 100
     tag = "traffic-tag-1"
   }
 }

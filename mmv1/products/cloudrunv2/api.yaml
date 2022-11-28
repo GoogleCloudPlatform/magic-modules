@@ -1122,7 +1122,7 @@ objects:
                             name: "version"
                             description: |-
                               The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
-                          - !ruby/object:Api::Type::Integer
+                          - !ruby/object:Api::Type::String
                             name: "mode"
                             required: true
                             description: |-

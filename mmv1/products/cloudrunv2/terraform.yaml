@@ -167,4 +167,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       traffic.percent: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-
