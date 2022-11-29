@@ -1540,6 +1540,7 @@ objects:
                                               - :SUNDAY
                     - !ruby/object:Api::Type::NestedObject
                       name: primitiveTransformation
+                      required: true
                       description: Apply the transformation to the entire field.
                       properties:
                         - !ruby/object:Api::Type::NestedObject
