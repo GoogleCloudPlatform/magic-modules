@@ -17,14 +17,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ['projects/{{project}}/locations/{{region}}/instances/{{instance_id}}', '{{region}}/{{instance_id}}']
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "firebase_database_default"
+        name: "firebase_database_instance_default"
         min_version: "beta"
         primary_resource_id: "default"
         test_env_vars:
           region: :REGION
           project_id: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
-        name: "firebase_database_secondary"
+        name: "firebase_database_instance_secondary"
         min_version: "beta"
         primary_resource_id: "secondary"
         vars:
