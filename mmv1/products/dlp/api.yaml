@@ -1539,7 +1539,8 @@ objects:
                                     - :SUNDAY
                         - !ruby/object:Api::Type::NestedObject
                           name: redactConfig
-                          description: Redact
+                          description: |
+                            Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
                           properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
                           # The fields below allow POST requests to include the "redactConfig" transformation in the payload
                           # The trade-off is that POST requests specifying another transformation type will include will include "redactConfig" : null in the payload
@@ -1547,7 +1548,8 @@ objects:
                           allow_empty_object: true
                         - !ruby/object:Api::Type::NestedObject
                           name: characterMaskConfig
-                          description: Mask
+                          description: |
+                            Partially mask a string by replacing a given number of characters with a fixed character. Masking can start from the beginning or end of the string. This can be used on data of any type (numbers, longs, and so on) and when de-identifying structured data we'll attempt to preserve the original data's type. (This allows you to take a long like 123 and modify it to a string like **3.
                           properties:
                             - !ruby/object:Api::Type::String
                               name: 'maskingCharacter'
