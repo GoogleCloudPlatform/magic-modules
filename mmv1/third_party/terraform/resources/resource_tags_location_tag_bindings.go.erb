@@ -84,6 +84,7 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 	}
 
 	log.Printf("[DEBUG] Creating new LocationTagBinding: %#v", obj)
+	
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
