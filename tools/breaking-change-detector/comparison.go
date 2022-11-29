@@ -70,16 +70,22 @@ func compareResourceSchema(resourceName string, old, new map[string]*schema.Sche
 
 func compareField(resourceName, fieldName string, old, new *schema.Schema) []string {
 	messages := []string{}
-	rules := rules.FieldRules
+	fieldRules := rules.FieldRules
 
-	for _, rule := range rules {
-		isBreakage := rule.IsRuleBreak(old, new)
-		if isBreakage {
-			newMessage := rule.Message(*providerVersion, resourceName, fieldName)
-			messages = append(messages, newMessage)
+	for _, rule := range fieldRules {
+		breakageMessage := rule.IsRuleBreak(
+			old,
+			new,
+			rules.MessageContext{
+				Resource: resourceName,
+				Field:    fieldName,
+				Version:  *providerVersion,
+			},
+		)
+		if breakageMessage != "" {
+			messages = append(messages, breakageMessage)
 		}
 	}
-
 	return messages
 }
 

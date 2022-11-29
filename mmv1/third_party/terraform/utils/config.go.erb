@@ -208,7 +208,6 @@ type Config struct {
 	IAMBasePath string
 	CloudIoTBasePath string
 	ServiceNetworkingBasePath string
-	StorageTransferBasePath string
 	BigtableAdminBasePath string
 
 	// dcl
@@ -230,7 +229,6 @@ const IAMBasePathKey = "IAM"
 const IamCredentialsBasePathKey = "IamCredentials"
 const ResourceManagerV3BasePathKey = "ResourceManagerV3"
 const ServiceNetworkingBasePathKey = "ServiceNetworking"
-const StorageTransferBasePathKey = "StorageTransfer"
 const BigtableAdminBasePathKey = "BigtableAdmin"
 const ContainerAwsBasePathKey = "ContainerAws"
 const ContainerAzureBasePathKey = "ContainerAzure"
@@ -256,7 +254,6 @@ var DefaultBasePaths = map[string]string{
 	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
 	ResourceManagerV3BasePathKey : "https://cloudresourcemanager.googleapis.com/v3/",
 	ServiceNetworkingBasePathKey : "https://servicenetworking.googleapis.com/v1/",
-	StorageTransferBasePathKey : "https://storagetransfer.googleapis.com/v1/",
 	BigtableAdminBasePathKey : "https://bigtableadmin.googleapis.com/v2/",
 	ContainerAwsBasePathKey:  "https://{{location}}-gkemulticloud.googleapis.com/v1/",
 	ContainerAzureBasePathKey: "https://{{location}}-gkemulticloud.googleapis.com/v1/",
@@ -1056,6 +1053,5 @@ func ConfigureBasePaths(c *Config) {
 	c.IAMBasePath = DefaultBasePaths[IAMBasePathKey]
 	c.ServiceNetworkingBasePath = DefaultBasePaths[ServiceNetworkingBasePathKey]
 	c.BigQueryBasePath = DefaultBasePaths[BigQueryBasePathKey]
-	c.StorageTransferBasePath = DefaultBasePaths[StorageTransferBasePathKey]
 	c.BigtableAdminBasePath = DefaultBasePaths[BigtableAdminBasePathKey]
 }

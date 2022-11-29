@@ -97,3 +97,45 @@ func computeRouterNatIPsHash(v interface{}) int {
 	}
 	return schema.HashString(GetResourceNameFromSelfLink(val))
 }
+
+func computeRouterNatRulesHash(v interface{}) int {
+	obj := v.(map[string]interface{})
+	ruleNumber := obj["rule_number"].(int)
+
+	description := obj["description"]
+	descriptionHash := 0
+	if description != nil {
+		descriptionHash = schema.HashString(description.(string))
+	}
+
+	match := obj["match"].(string)
+
+	sourceNatActiveIpHash := 0
+	sourceNatDrainIpHash := 0
+	if obj["action"] != nil {
+		actions := obj["action"].([]interface{})
+		if len(actions) != 0 && actions[0] != nil {
+			action := actions[0].(map[string]interface{})
+
+			sourceNatActiveIps := action["source_nat_active_ips"]
+			if sourceNatActiveIps != nil {
+				sourceNatActiveIpSet := sourceNatActiveIps.(*schema.Set)
+				for _, sourceNatActiveIp := range sourceNatActiveIpSet.List() {
+					sourceNatActiveIpStr := fmt.Sprintf("source_nat_active_ips-%d", computeRouterNatIPsHash(sourceNatActiveIp.(string)))
+					sourceNatActiveIpHash += schema.HashString(sourceNatActiveIpStr)
+				}
+			}
+
+			soureNatDrainIps := action["source_nat_drain_ips"]
+			if soureNatDrainIps != nil {
+				soureNatDrainIpSet := soureNatDrainIps.(*schema.Set)
+				for _, soureNatDrainIp := range soureNatDrainIpSet.List() {
+					sourceNatDrainIpStr := fmt.Sprintf("source_nat_drain_ips-%d", computeRouterNatIPsHash(soureNatDrainIp.(string)))
+					sourceNatDrainIpHash += schema.HashString(sourceNatDrainIpStr)
+				}
+			}
+		}
+	}
+
+	return ruleNumber + descriptionHash + schema.HashString(match) + sourceNatActiveIpHash + sourceNatDrainIpHash
+}

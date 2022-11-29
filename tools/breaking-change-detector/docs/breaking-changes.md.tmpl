@@ -59,8 +59,9 @@ go into the four categories and rules therein.
 
 {{ range $r := $c.Rules -}}
 
-<h4 id="{{$r.Identifier}}"> {{ $r.Name }} </h4>
-{{ $r.Definition }}
+<h4 id="{{$r.Identifier}}"> {{ $r.Name }} {{if $r.Undetectable}}(Undetectable){{ end }} </h4>
+
+* {{ $r.Definition }}
 
 {{ end }}
 {{- end }}

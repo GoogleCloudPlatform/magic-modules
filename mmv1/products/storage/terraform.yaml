@@ -26,7 +26,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   BucketAccessControl: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       Bucket ACLs can be managed authoritatively using the
-      [`storage_bucket_acl`](https://www.terraform.io/docs/providers/google/r/storage_bucket_acl.html)
+      [`storage_bucket_acl`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_acl)
       resource. Do not use these two resources in conjunction to manage the same bucket.
 
       The BucketAccessControls resource manages the Access Control List

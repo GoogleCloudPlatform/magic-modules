@@ -27,6 +27,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dataset_id: "example_dataset"
           account_name: "bqowner"
       - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_with_max_time_travel_hours"
+        primary_resource_id: "dataset"
+        skip_docs: true
+        vars:
+          dataset_id: "example_dataset"
+          account_name: "bqowner"
+      - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_cmek"
         skip_test: true
         primary_resource_id: "dataset"
@@ -41,6 +48,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           private: "private"
           public: "public"
           account_name: "bqowner"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_authorized_routine"
+        primary_resource_id: "private"
+        vars:
+          private_dataset: "private_dataset"
+          public_dataset: "public_dataset"
+          public_routine: "public_routine"
+        test_env_vars:
+          service_account: :SERVICE_ACCT
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'delete_contents_on_destroy'
@@ -109,6 +125,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           private: "private"
           public: "public"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_access_authorized_routine"
+        skip_test: true  # not importable
+        primary_resource_type: "google_bigquery_dataset_access"
+        primary_resource_id: "authorized_routine"
+        vars:
+          private_dataset: "private_dataset"
+          public_dataset: "public_dataset"
+          public_routine: "public_routine"
     properties:
       datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true

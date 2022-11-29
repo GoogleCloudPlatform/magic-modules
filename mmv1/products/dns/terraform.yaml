@@ -54,6 +54,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_1_name: "network-1"
           network_2_name: "network-2"
       - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_private_gke"
+        primary_resource_id: "private-zone-gke"
+        vars:
+          zone_name: "private-zone"
+          network_1_name: "network-1"
+          cluster_1_name: "cluster-1"
+      - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_private_peering"
         primary_resource_id: "peering-zone"
         vars:
@@ -78,6 +85,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           A textual description field. Defaults to 'Managed by Terraform'.
         default_value: 'Managed by Terraform'
         required: false
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringIsNotEmpty'
       dnssecConfig.defaultKeySpecs: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       dnssecConfig.nonExistence: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -224,6 +233,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           response_policy_name: "example-response-policy"
           network_1_name: "network-1"
           network_2_name: "network-2"
+          cluster_1_name: "cluster-1"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -231,7 +241,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: templates/terraform/custom_expand/network_full_url.erb
         diff_suppress_func: 'compareSelfLinkOrResourceName'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_delete: templates/terraform/pre_delete/response_policy_detach_network.erb
+      pre_delete: templates/terraform/pre_delete/response_policy_detach_network_gke.erb
   ResponsePolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'
     import_format: ["projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}"]
@@ -243,6 +253,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           response_policy_name: "example-response-policy"
           network_1_name: "network-1"
           network_2_name: "network-2"
+          cluster_1_name: "cluster-1"
           response_policy_rule_name: "example-rule"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

@@ -13,6 +13,31 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Tensorboard: !ruby/object:Overrides::Terraform::ResourceOverride
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_tensorboard"
+        primary_resource_id: "tensorboard"
+        vars:
+          display_name: "terraform"
+        ignore_read_extra:
+          - "project"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_tensorboard_full"
+        primary_resource_id: "tensorboard"
+        vars:
+          display_name: "terraform"
+          kms_key_name: "kms-name"
+        test_vars_overrides:
+          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        ignore_read_extra:
+          - "project"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/vertex_ai_tensorboard_import.go.erb
   Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     id_format: '{{name}}'
@@ -30,6 +55,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  Endpoint: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_endpoint_network"
+        # Test is covered by handwritten test to include an update.
+        skip_test: true
+        primary_resource_id: "endpoint"
+        vars:
+          name: "vertex_ai_endpoint"
+          project: "vertex-ai"
+          endpoint_name: "endpoint-name"
+          address_name: "address-name"
+          kms_key_name: "kms-name"
+          network_name: "network-name"
+        test_vars_overrides:
+          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          network_name: 'BootstrapSharedTestNetwork(t, "vertex")'
+    properties:
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
   Featurestore: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false
     skip_sweeper: true
@@ -37,6 +82,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore"
         primary_resource_id: "featurestore"
+        primary_resource_name: "fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])"
         vars:
           name: "terraform"
           project: "appeng-flex"
@@ -62,6 +108,46 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'force_destroy'
         description: 'If set to true, any EntityTypes and Features for this Featurestore will also be deleted'
         default_value: false
+  Index: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_index"
+        primary_resource_id: "index"
+        vars:
+          display_name: "test-index"
+          bucket_name: "vertex-ai-index-test"
+        test_env_vars:
+          project: :PROJECT_NAME
+        ignore_read_extra:
+          - metadata.0.contents_delta_uri
+          - metadata.0.is_complete_overwrite
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_index_streaming"
+        primary_resource_id: "index"
+        vars:
+          display_name: "test-index"
+          bucket_name: "vertex-ai-index-test"
+        test_env_vars:
+          project: :PROJECT_NAME
+        ignore_read_extra:
+          - metadata.0.contents_delta_uri
+          - metadata.0.is_complete_overwrite
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      metadata.contentsDeltaUri: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
+      metadata.isCompleteOverwrite: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_update: templates/terraform/pre_update/vertex_ai_index.go.erb
   FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
     autogen_async: false
@@ -70,6 +156,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore_entitytype"
         primary_resource_id: "entity"
+        primary_resource_name: "fmt.Sprintf(\"projects/%s/locations/%s/featurestores/%s\", getTestProjectFromEnv(), getTestRegionFromEnv(), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])"
         vars:
           name: "terraform"
           project: "vertex-ai"
@@ -79,15 +166,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           billing_account: :BILLING_ACCT
         test_vars_overrides:
           kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_featurestore_entitytype_with_beta_fields"
+        primary_resource_id: "entity"
+        vars:
+          name: "terraform2"
+          project: "vertex-ai"
+          kms_key_name: "kms-name"
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
+        test_vars_overrides:
+          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        min_version: beta
     properties:
       etag: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      monitoringConfig.snapshotAnalysis.monitoringInterval: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
-      pre_update: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
       pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
+      custom_import: templates/terraform/custom_import/vertex_ai_featurestore_entitytype.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/vertex_ai_featurestore_entitytype.go.erb
+      encoder: templates/terraform/encoders/vertex_ai_featurestore_entitytype.go.erb
   FeaturestoreEntitytypeFeature:  !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%entitytype}}/features/{{name}}"]
     autogen_async: false
@@ -99,10 +203,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           name: "terraform"
           project: "vertex-ai"
           kms_key_name: "kms-name"
-        test_env_vars:
-          org_id: :ORG_ID
-          billing_account: :BILLING_ACCT
-        test_vars_overrides:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_featurestore_entitytype_feature_with_beta_fields"
+        primary_resource_id: "feature"
+        vars:
+          name: "terraform2"
+          project: "vertex-ai"
+          kms_key_name: "kms-name"
+        min_version: beta
     properties:
       etag: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -110,7 +218,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
-      pre_update: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
       pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
   MetadataStore: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: false

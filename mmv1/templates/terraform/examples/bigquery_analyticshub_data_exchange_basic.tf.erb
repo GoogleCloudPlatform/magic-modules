@@ -1,5 +1,4 @@
 resource "google_bigquery_analytics_hub_data_exchange" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   location         = "US"
   data_exchange_id = "<%= ctx[:vars]['data_exchange_id'] %>"
   display_name     = "<%= ctx[:vars]['data_exchange_id'] %>"

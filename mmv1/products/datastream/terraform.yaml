@@ -56,10 +56,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           connection_profile_id: "my-profile"
       - !ruby/object:Provider::Terraform::Examples
-        name: "datastream_connection_profile_bigquery"
+        name: "datastream_connection_profile_bigquery_private_connection"
         primary_resource_id: "default"
         vars:
+          private_connection_id: "my-connection"
           connection_profile_id: "my-profile"
+          network_name: "my-network"
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_connection_profile_full"
         primary_resource_id: "default"

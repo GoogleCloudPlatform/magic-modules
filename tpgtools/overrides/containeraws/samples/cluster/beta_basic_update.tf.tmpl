@@ -59,7 +59,7 @@ resource "google_container_aws_cluster" "primary" {
     }
 
     tags = {
-      owner = "{{test_service_account}}"
+       owner = "updated-{{test_service_account}}"
     }
 
     instance_placement {
@@ -92,5 +92,6 @@ resource "google_container_aws_cluster" "primary" {
       enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
     }
   }
+
 }
 

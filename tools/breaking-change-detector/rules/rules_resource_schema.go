@@ -17,9 +17,21 @@ type ResourceSchemaRule struct {
 	isRuleBreak func(old, new map[string]*schema.Schema) []string
 }
 
-// ResourceSchemaRule is a list of ResourceInventoryRule
+// ResourceSchemaRules is a list of ResourceInventoryRule
 // guarding against provider breaking changes
-var ResourceSchemaRules = []ResourceSchemaRule{resourceSchemaRule_RemovingAField}
+var ResourceSchemaRules = []ResourceSchemaRule{resourceSchemaRule_RemovingAField, resourceSchemaRule_ChangingResourceIDFormat, resourceSchemaRule_ChangingImportIDFormat}
+
+var resourceSchemaRule_ChangingResourceIDFormat = ResourceSchemaRule{
+	name:       "Changing resource ID format",
+	definition: "Terraform uses resource ID to read resource state from the api. Modification of the ID format will break the ability to parse the IDs from any deployments.",
+	identifier: "resource-id",
+}
+
+var resourceSchemaRule_ChangingImportIDFormat = ResourceSchemaRule{
+	name:       "Changing resource ID import format",
+	definition: "Automation external to our provider may rely on importing resources with a certain format. Removal or modification of existing formats will break this automation.",
+	identifier: "resource-import-format",
+}
 
 var resourceSchemaRule_RemovingAField = ResourceSchemaRule{
 	name:        "Removing or Renaming an field",
@@ -77,5 +89,14 @@ func (rs ResourceSchemaRule) Message(version, resource, field string) string {
 // IsRuleBreak - compares the field entries and returns
 // a list of fields violating the rule
 func (rs ResourceSchemaRule) IsRuleBreak(old, new map[string]*schema.Schema) []string {
+	if rs.isRuleBreak == nil {
+		return []string{}
+	}
 	return rs.isRuleBreak(old, new)
+}
+
+// Undetectable - informs if there are functions in place
+// to detect this rule.
+func (rs ResourceSchemaRule) Undetectable() bool {
+	return rs.isRuleBreak == nil
 }
