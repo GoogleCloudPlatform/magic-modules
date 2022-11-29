@@ -2131,3 +2131,75 @@ objects:
                                       required: true
                                       description: |
                                         The resource name of the KMS CryptoKey to use for unwrapping.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: dateShiftConfig
+                          description: |
+                            Shifts dates by random number of days, with option to be consistent for the same context. See https://cloud.google.com/dlp/docs/concepts-date-shifting to learn more.
+                          properties:
+                            - !ruby/object:Api::Type::Integer
+                              name: upperBoundDays
+                              required: true
+                              description: |
+                                Range of shift in days. Actual shift will be selected at random within this range (inclusive ends). Negative means shift to earlier in time. Must not be more than 365250 days (1000 years) each direction.
+
+                                For example, 3 means shift date to at most 3 days into the future.
+                            - !ruby/object:Api::Type::Integer
+                              name: lowerBoundDays
+                              required: true
+                              description: |
+                                For example, -5 means shift date to at most 5 days back in the past.
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'context'
+                              description: |
+                                Points to the field that contains the context, for example, an entity id.
+                                If set, must also set cryptoKey. If set, shift will be consistent for the given context.
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: 'name'
+                                  description: |
+                                    Name describing the field.
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'cryptoKey'
+                              description: |
+                                Causes the shift to be computed based on this key and the context. This results in the same shift for the same context and cryptoKey. If set, must also set context. Can only be applied to table items.
+                              properties:
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'transient'
+                                  description: |
+                                    Transient crypto key
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'name'
+                                      required: true
+                                      description: |
+                                        Name of the key. This is an arbitrary string used to differentiate different keys. A unique key is generated per name: two separate `TransientCryptoKey` protos share the same generated key if their names are the same. When the data crypto key is generated, this name is not used in any way (repeating the api call will result in a different key being generated).
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'unwrapped'
+                                  description: |
+                                    Unwrapped crypto key
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'key'
+                                      required: true
+                                      description: |
+                                        A 128/192/256 bit key.
+
+                                        A base64-encoded string.
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'kmsWrapped'
+                                  description: |
+                                    Kms wrapped key
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'wrappedKey'
+                                      required: true
+                                      description: |
+                                        The wrapped data crypto key.
+
+                                        A base64-encoded string.
+                                    - !ruby/object:Api::Type::String
+                                      name: 'cryptoKeyName'
+                                      required: true
+                                      description: |
+                                        The resource name of the KMS CryptoKey to use for unwrapping.
+
