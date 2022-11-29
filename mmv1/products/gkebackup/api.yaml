@@ -190,17 +190,17 @@ objects:
             description: |
               If True, include all namespaced resources.
             exactly_one_of:
-              - all_namespaces
-              - selected_namespaces
-              - selected_applications
+              - backupConfig.0.all_namespaces
+              - backupConfig.0.selected_namespaces
+              - backupConfig.0.selected_applications
           - !ruby/object:Api::Type::NestedObject
             name: selectedNamespaces
             description: |
               If set, include just the resources in the listed namespaces.
             exactly_one_of:
-              - all_namespaces
-              - selected_namespaces
-              - selected_applications
+              - backupConfig.0.all_namespaces
+              - backupConfig.0.selected_namespaces
+              - backupConfig.0.selected_applications
             properties:
               - !ruby/object:Api::Type::Array
                 name: namespaces
@@ -212,9 +212,9 @@ objects:
             description: |
               A list of namespaced Kubernetes Resources.
             exactly_one_of:
-              - all_namespaces
-              - selected_namespaces
-              - selected_applications
+              - backupConfig.0.all_namespaces
+              - backupConfig.0.selected_namespaces
+              - backupConfig.0.selected_applications
             properties:
               - !ruby/object:Api::Type::Array
                 name: namespacedNames
