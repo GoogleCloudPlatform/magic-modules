@@ -1,6 +1,7 @@
 package google
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -36,6 +37,14 @@ func TestDatastreamStreamCustomDiff(t *testing.T) {
 			wantError: true,
 		},
 		{
+			// Normally this transition is okay, but if the resource is "new"
+			// (for example being recreated) it's not.
+			isNew:     true,
+			old:       "RUNNING",
+			new:       "PAUSED",
+			wantError: true,
+		},
+		{
 			old:       "NOT_STARTED",
 			new:       "RUNNING",
 			wantError: false,
@@ -95,6 +104,32 @@ func TestDatastreamStreamCustomDiff(t *testing.T) {
 			new:       "MAINTENANCE",
 			wantError: true,
 		},
+	}
+	for _, tc := range cases {
+		name := "whatever"
+		tn := fmt.Sprintf("%s => %s", tc.old, tc.new)
+		if tc.isNew {
+			name = ""
+			tn = fmt.Sprintf("(new) %s => %s", tc.old, tc.new)
+		}
+		t.Run(tn, func(t *testing.T) {
+			diff := &ResourceDiffMock{
+				Before: map[string]interface{}{
+					"desired_state": tc.old,
+				},
+				After: map[string]interface{}{
+					"name":          name,
+					"desired_state": tc.new,
+				},
+			}
+			err := resourceDatastreamStreamCustomDiffFunc(diff)
+			if tc.wantError && err == nil {
+				t.Fatalf("want error, got nil")
+			}
+			if !tc.wantError && err != nil {
+				t.Fatalf("got unexpected error: %v", err)
+			}
+		})
 	}
 }
 

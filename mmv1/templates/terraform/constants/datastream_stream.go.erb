@@ -12,25 +12,35 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
-func resourceDatastreamStreamCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+func resourceDatastreamStreamCustomDiffFunc(diff TerraformResourceDiff) error {
 	if diff.HasChange("desired_state") {
-		oldState, newState := diff.GetChange("desired_state")
+		old, new := diff.GetChange("desired_state")
+		oldState := old.(string)
+		newState := new.(string)
 
 		if isNewResource(diff) {
-			if newState.(string) != "NOT_STARTED" && newState.(string) != "RUNNING" {
+			if newState != "NOT_STARTED" && newState != "RUNNING" {
 				return fmt.Errorf("`desired_state` can only be set to `NOT_STARTED` or `RUNNING` when creating a new Stream")
 			}
 		} else {
-			if newState.(string) == "NOT_STARTED" && oldState.(string) != newState.(string) {
+			if newState == "NOT_STARTED" && oldState != newState {
 				return fmt.Errorf("Field `desired_state` can only be set to `NOT_STARTED` when creating a new Stream")
 			}
 
-			if newState.(string) != "RUNNING" && newState.(string) != "PAUSED" {
+			if oldState == "NOT_STARTED" && newState != "RUNNING" {
+				return fmt.Errorf("Field `desired_state` can only be set to `RUNNING` from `NOT_STARTED`")
+			}
+
+			if newState != "RUNNING" && newState != "PAUSED" {
 				return fmt.Errorf("`desired_state` can only be set to `RUNNING` or `PAUSED` when updating a Stream")
 			}
 		}
 	}
 	return nil
+}
+func resourceDatastreamStreamCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// separate func to allow unit testing
+	return resourceDatastreamStreamCustomDiffFunc(diff)
 }
 
 <% unless compiler == "terraformvalidator-codegen" -%>

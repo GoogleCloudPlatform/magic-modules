@@ -126,6 +126,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_update: 'templates/terraform/pre_update/datastream_stream.go.erb'
       post_update: 'templates/terraform/post_update/datastream_stream.go.erb'
       encoder: 'templates/terraform/encoders/datastream_stream.go.erb'
+      resource_definition: 'templates/terraform/resource_definition/datastream_stream.go.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_basic"
