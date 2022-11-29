@@ -17,7 +17,7 @@ display_name: Anthos Attached clusters
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://gkemulticloud.googleapis.com/v1/
+    base_url: https://{{location}}-gkemulticloud.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -41,7 +41,7 @@ objects:
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
-        base_url: '{{op_id}}'
+        full_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/{{op_id}}'
         wait_ms: 1000
       result: !ruby/object:Api::OpAsync::Result
         path: 'response'
@@ -116,12 +116,6 @@ objects:
             description: |
               Human-friendly description of the error.
             item_type: Api::Type::String
-      - !ruby/object:Api::Type::String
-        name: etag
-        description: |
-          Allows clients to perform consistent read-modify-writes through
-          optimistic concurrency control. May be sent on update and delete requests
-          to ensure the client has an up-to-date value before proceeding.
       - !ruby/object:Api::Type::NestedObject
         name: fleet
         description: |

@@ -14,8 +14,8 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Terraform::ResourceOverride
-    # Generate the LRO handling code.
-    autogen_async: true
+    # Don't generate the LRO handling code because it doesn't account for regional services.
+    autogen_async: false
     id_format: "projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}"
     import_format: ["projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}"]
     examples:
@@ -31,15 +31,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "primary"
         vars:
           name: "basic"
-          jwks: context[\"random_suffix\"]
     properties:
       # The proto format of the authorization field is cumbersome to express in TF, so use a custom expander
       # and flattener to massage the data.
       authorization: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_authorization_user.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/containerattached_cluster_authorization_user.go.erb'
-      etag: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
       # Convenience expander to prepend "projects/" to fleet project numbers if not already present.
       # Custom diff to take this convenience into account.
       fleet.project: !ruby/object:Overrides::Terraform::PropertyOverride
