@@ -6736,8 +6736,8 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
 	min_master_version = "1.23.8-gke.1900"
   monitoring_config {
+	     enable_components = []
          managed_prometheus {
-				enable_components = []
                 enabled = true
          }
   }
