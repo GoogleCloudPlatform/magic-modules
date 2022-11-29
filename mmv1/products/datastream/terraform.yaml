@@ -130,6 +130,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_basic"
+        pull_external: true
         primary_resource_id: "default"
         skip_docs: true
         vars:
@@ -143,6 +144,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           destination_connection_profile_id: "destination-profile"
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_full"
+        pull_external: true
         primary_resource_id: "default"
         vars:
           stream_id: "my-stream"

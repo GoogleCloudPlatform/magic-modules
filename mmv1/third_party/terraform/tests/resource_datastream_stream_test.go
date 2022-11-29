@@ -143,6 +143,9 @@ func TestAccDatastreamStream_update(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
 		CheckDestroy: testAccCheckDatastreamStreamDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
