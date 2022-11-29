@@ -110,7 +110,7 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 			before: map[string]interface{}{
 				"data_source_id": "scheduled_query",
 				"params": map[string]interface{}{
-					"data_path_template": "gs://bq-bucket-temp/*.json",
+					"data_path_template": "gs://bq-bucket/*.json",
 					"query":              "SELECT 1 AS a",
 					"write_disposition":  "WRITE_APPEND",
 				},
@@ -118,7 +118,7 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 			after: map[string]interface{}{
 				"data_source_id": "scheduled_query",
 				"params": map[string]interface{}{
-					"data_path_template": "gs://bq-bucket-temp-new/*.json",
+					"data_path_template": "gs://bq-bucket-new/*.json",
 					"query":              "SELECT 1 AS a",
 					"write_disposition":  "WRITE_APPEND",
 				},
