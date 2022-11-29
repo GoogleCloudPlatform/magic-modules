@@ -37,7 +37,7 @@ resource "google_sql_database_instance" "instance" {
         }
     }
 
-    deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
+    deletion_protection  = <%= ctx[:vars]['deletion_protection'] %>
 }
 
 resource "google_sql_database" "db" {

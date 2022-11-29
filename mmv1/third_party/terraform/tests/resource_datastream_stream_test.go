@@ -241,7 +241,7 @@ resource "google_sql_database_instance" "instance" {
         }
     }
 
-    deletion_protection  = "true%{random_suffix}"
+    deletion_protection  = false
 }
 
 resource "google_sql_database" "db" {

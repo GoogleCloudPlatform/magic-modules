@@ -142,6 +142,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "true"
           bucket_id: "my-bucket"
           destination_connection_profile_id: "destination-profile"
+        test_vars_overrides:
+          deletion_protection: "false"
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_full"
         pull_external: true
@@ -155,6 +157,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "true"
           bucket_id: "my-bucket"
           destination_connection_profile_id: "destination-profile"
+        test_vars_overrides:
+          deletion_protection: "false"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
