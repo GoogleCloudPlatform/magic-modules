@@ -108,6 +108,46 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'force_destroy'
         description: 'If set to true, any EntityTypes and Features for this Featurestore will also be deleted'
         default_value: false
+  Index: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: false
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_index"
+        primary_resource_id: "index"
+        vars:
+          display_name: "test-index"
+          bucket_name: "vertex-ai-index-test"
+        test_env_vars:
+          project: :PROJECT_NAME
+        ignore_read_extra:
+          - metadata.0.contents_delta_uri
+          - metadata.0.is_complete_overwrite
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_index_streaming"
+        primary_resource_id: "index"
+        vars:
+          display_name: "test-index"
+          bucket_name: "vertex-ai-index-test"
+        test_env_vars:
+          project: :PROJECT_NAME
+        ignore_read_extra:
+          - metadata.0.contents_delta_uri
+          - metadata.0.is_complete_overwrite
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      metadata.contentsDeltaUri: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
+      metadata.isCompleteOverwrite: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_update: templates/terraform/pre_update/vertex_ai_index.go.erb
   FeaturestoreEntitytype: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%featurestore}}/entityTypes/{{name}}"]
     autogen_async: false
@@ -116,6 +156,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore_entitytype"
         primary_resource_id: "entity"
+        primary_resource_name: "fmt.Sprintf(\"projects/%s/locations/%s/featurestores/%s\", getTestProjectFromEnv(), getTestRegionFromEnv(), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])"
         vars:
           name: "terraform"
           project: "vertex-ai"
