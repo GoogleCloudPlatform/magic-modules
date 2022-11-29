@@ -57,6 +57,10 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/data-fusion/docs/'
       api: 'https://cloud.google.com/data-fusion/docs/reference/rest/v1beta1/projects.locations.instances'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      parent_resource_attribute: 'name'
+      method_name_separator: ':'
+      import_format: ["projects/{{project}}/locations/{{location}}/instances/{{name}}", "{{name}}"]         
     parameters:
       - !ruby/object:Api::Type::String
         name: 'region'
@@ -210,6 +214,26 @@ objects:
               project the network should specified in the form of projects/{host-project-id}/global/networks/{network}
             required: true
             input: true
+      - !ruby/object:Api::Type::String
+        name: 'zone'
+        description: |
+          Name of the zone in which the Data Fusion instance will be created. Only DEVELOPER instances use this field.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Display name for an instance.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'apiEndpoint'
+        description: |
+          Endpoint on which the REST APIs is accessible.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'p4ServiceAccount'
+        description: |
+          P4 service account for the customer project.
+        output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'cryptoKeyConfig'
         description: |
@@ -222,3 +246,19 @@ objects:
               The name of the key which is used to encrypt/decrypt customer data. For key in Cloud KMS, the key should be in the format of projects/*/locations/*/keyRings/*/cryptoKeys/*.
             required: true
             input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'eventPublishConfig'
+        description: |
+          Option to enable and pass metadata for event publishing.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: |
+              Option to enable Event Publishing.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'topic'
+            description: |
+              The resource name of the Pub/Sub topic. Format: projects/{projectId}/topics/{topic_id}
+            required: true
+            input: true            
