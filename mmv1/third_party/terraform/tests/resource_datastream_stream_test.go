@@ -6,6 +6,98 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+func TestDatastreamStreamCustomDiff(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		isNew     bool
+		old       string
+		new       string
+		wantError bool
+	}{
+		{
+			isNew:     true,
+			new:       "NOT_STARTED",
+			wantError: false,
+		},
+		{
+			isNew:     true,
+			new:       "RUNNING",
+			wantError: false,
+		},
+		{
+			isNew:     true,
+			new:       "PAUSED",
+			wantError: true,
+		},
+		{
+			isNew:     true,
+			new:       "MAINTENANCE",
+			wantError: true,
+		},
+		{
+			old:       "NOT_STARTED",
+			new:       "RUNNING",
+			wantError: false,
+		},
+		{
+			old:       "NOT_STARTED",
+			new:       "MAINTENANCE",
+			wantError: true,
+		},
+		{
+			old:       "NOT_STARTED",
+			new:       "PAUSED",
+			wantError: true,
+		},
+		{
+			old:       "NOT_STARTED",
+			new:       "NOT_STARTED",
+			wantError: false,
+		},
+		{
+			old:       "RUNNING",
+			new:       "PAUSED",
+			wantError: false,
+		},
+		{
+			old:       "RUNNING",
+			new:       "NOT_STARTED",
+			wantError: true,
+		},
+		{
+			old:       "RUNNING",
+			new:       "RUNNING",
+			wantError: false,
+		},
+		{
+			old:       "RUNNING",
+			new:       "MAINTENANCE",
+			wantError: true,
+		},
+		{
+			old:       "PAUSED",
+			new:       "PAUSED",
+			wantError: false,
+		},
+		{
+			old:       "PAUSED",
+			new:       "NOT_STARTED",
+			wantError: true,
+		},
+		{
+			old:       "PAUSED",
+			new:       "RUNNING",
+			wantError: false,
+		},
+		{
+			old:       "PAUSED",
+			new:       "MAINTENANCE",
+			wantError: true,
+		},
+	}
+}
+
 func TestAccDatastreamStream_update(t *testing.T) {
 	t.Parallel()
 
@@ -63,14 +155,14 @@ func TestAccDatastreamStream_update(t *testing.T) {
 }
 
 func testAccDatastreamStream_datastreamStreamBasicUpdate(context map[string]interface{}, desiredState string, preventDestroy bool) string {
-    context["lifecycle_block"] = ""
-    if preventDestroy {
-        context["lifecycle_block"] = `
+	context["lifecycle_block"] = ""
+	if preventDestroy {
+		context["lifecycle_block"] = `
         lifecycle {
             prevent_destroy = true
         }`
-    }
-    context["desired_state"] = desiredState
+	}
+	context["desired_state"] = desiredState
 	return Nprintf(`
 data "google_project" "project" {
 }
