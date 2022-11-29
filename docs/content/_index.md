@@ -1,5 +1,7 @@
 ---
-title: ""
+title: "Home"
+weight: 0
+type: "docs"
 date: 2022-11-14T09:50:49-08:00
 ---
 
@@ -95,6 +97,7 @@ To get started, you'll need:
   * If you're using a Mac with Homebrew installed, you can follow these
     instructions to set up Go: [YouTube video](https://www.youtube.com/watch?v=VQVyvulNnzs).
   * If you're using Cloud Shell, Go is already installed.
+  * Currently it's recommended to use Go 1.18, Go 1.19 changed the gofmt rules which causes some gofmt issue and our CIs are all on 1.18.X
 * Ruby 2.6.0
   * You can use [`rbenv`](https://github.com/rbenv/rbenv) to manage your Ruby version(s).
   * To install `rbenv`:
