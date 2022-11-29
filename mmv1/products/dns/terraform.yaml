@@ -15,7 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   ManagedZone: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: 'projects/{{project}}/managedZones/{{name}}'
-    import_format: ["projects/{{project}}/managedZones/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_quickstart"
