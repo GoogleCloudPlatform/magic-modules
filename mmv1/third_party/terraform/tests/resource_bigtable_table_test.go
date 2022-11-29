@@ -86,7 +86,7 @@ func TestAccBigtableTable_family(t *testing.T) {
 	})
 }
 
-func TestAccBigtableTable_deletionProtection(t *testing.T) {
+func TestAccBigtableTable_deletionProtection_enabled(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
@@ -100,7 +100,32 @@ func TestAccBigtableTable_deletionProtection(t *testing.T) {
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccBigtableTable_deletionProtection(instanceName, tableName),
+				Config: TestAccBigtableTable_deletionProtection(instanceName, tableName, true),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccBigtableTable_deletionProtection_disabled(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccBigtableTable_deletionProtection(instanceName, tableName, false),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -264,7 +289,7 @@ resource "google_bigtable_table" "table" {
 `, instanceName, instanceName, tableName, family)
 }
 
-func testAccBigtableTable_deletionProtection(instanceName, tableName string) string {
+func testAccBigtableTable_deletionProtection(instanceName, tableName string, deletionProtection bool) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
@@ -280,9 +305,9 @@ resource "google_bigtable_instance" "instance" {
 resource "google_bigtable_table" "table" {
   name          = "%s"
   instance_name = google_bigtable_instance.instance.name
-  deletion_protection = true
+  deletion_protection = "%b"
 }
-`, instanceName, instanceName, tableName)
+`, instanceName, instanceName, tableName, deletionProtection)
 }
 
 func testAccBigtableTable_familyMany(instanceName, tableName, family string) string {
