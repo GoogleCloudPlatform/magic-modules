@@ -2065,3 +2065,17 @@ objects:
                           # The trade-off is that POST requests specifying another transformation type will include will include "redactConfig" : null in the payload
                           send_empty_value: true
                           allow_empty_object: true
+                        - !ruby/object:Api::Type::NestedObject
+                          name: timePartConfig
+                          description: For use with Date, Timestamp, and TimeOfDay, extract or preserve a portion of the value.
+                          properties:
+                            - !ruby/object:Api::Type::Enum
+                              name: partToExtract
+                              description: The part of the time to keep.
+                              values:
+                                - :YEAR # [0-9999]
+                                - :MONTH # [1-12]
+                                - :DAY_OF_MONTH # [1-31]
+                                - :DAY_OF_WEEK # [1-7]
+                                - :WEEK_OF_YEAR # [1-53]
+                                - :HOUR_OF_DAY # [0-23]
