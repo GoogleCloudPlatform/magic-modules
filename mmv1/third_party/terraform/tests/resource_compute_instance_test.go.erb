@@ -243,8 +243,6 @@ func TestAccComputeInstance_basic_resourceManagerTags(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceTag(&instance, "tag-key"),
-                                        testAccCheckComputeInstanceTag(&instance, "tagKeys/123"),
-                                        testAccCheckComputeInstanceParamResourceManagerTag(&instance, "tagKeys/123", "tagValues/456"),
 					testAccCheckComputeInstanceMetadata(&instance, "baz", "bar"),
 					testAccCheckComputeInstanceDisk(&instance, instanceName, true, true),
 				),
@@ -3376,12 +3374,6 @@ resource "google_compute_instance" "foobar" {
 
   network_interface {
     network = "default"
-  }
-
-  params {
-    resource_manager_tags = {
-      "tagKeys/123" = "tagValues/456"
-    }		
   }
 
   metadata = {
