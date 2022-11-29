@@ -106,6 +106,25 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 			},
 			forcenew: false,
 		},
+		"changing_data_path_template_for_different_data_source_id": {
+			before: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"data_path_template": "gs://bq-bucket-temp/*.json",
+					"query":              "SELECT 1 AS a",
+					"write_disposition":  "WRITE_APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"data_path_template": "gs://bq-bucket-temp-new/*.json",
+					"query":              "SELECT 1 AS a",
+					"write_disposition":  "WRITE_APPEND",
+				},
+			},
+			forcenew: false,
+		},
 	}
 
 	for tn, tc := range cases {
