@@ -46,6 +46,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       machineConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
     examples:
