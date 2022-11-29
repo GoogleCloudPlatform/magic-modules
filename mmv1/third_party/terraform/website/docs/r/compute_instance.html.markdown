@@ -85,8 +85,6 @@ The following arguments are supported:
 
 * `network_interface` - (Required) Networks to attach to the instance. This can
     be specified multiple times. Structure is [documented below](#nested_network_interface).
-    
-* `params` - (Optional) Stores additional params passed with the request, but not persisted as part of resource payload.
 
 - - -
 
