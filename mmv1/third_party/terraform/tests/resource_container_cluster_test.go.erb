@@ -2474,7 +2474,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
-			<% unless version == "ga" -%>
+			<% if version == "beta" -%>
 			{
 				Config: testAccContainerCluster_withMonitoringConfigUpdated(clusterName),
 			},
@@ -6695,7 +6695,7 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
-<% unless version == "ga" -%>
+<% if version == "beta" -%>
 func testAccContainerCluster_withMonitoringConfigUpdated(name string) string {
        return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
