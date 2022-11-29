@@ -460,7 +460,6 @@ func testAccCheckDataflowJobRegionDestroyProducer(t *testing.T) func(s *terrafor
 			if rs.Type != "google_dataflow_job" {
 				continue
 			}
-
 			config := googleProviderConfig(t)
 			job, err := config.NewDataflowClient(config.userAgent).Projects.Locations.Jobs.Get(config.Project, "us-central1", rs.Primary.ID).Do()
 			if job != nil {
