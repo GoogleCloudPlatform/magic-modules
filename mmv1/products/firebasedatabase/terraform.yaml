@@ -17,9 +17,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ['projects/{{project}}/locations/{{region}}/instances/{{instance_id}}', '{{region}}/{{instance_id}}']
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "firebase_database_instance_secondary"
+        name: "firebase_database_instance_user"
         min_version: "beta"
-        primary_resource_id: "secondary"
+        primary_resource_id: "user"
         vars:
           instance_id: "my-db"
         test_env_vars:
