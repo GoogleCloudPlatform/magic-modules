@@ -4002,14 +4002,14 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	config := l[0].(map[string]interface{})
 
 	npd := &container.AutoprovisioningNodePoolDefaults{
-		OauthScopes:    	convertStringArr(config["oauth_scopes"].([]interface{})),
-		ServiceAccount: 	config["service_account"].(string),
-		DiskSizeGb:     	int64(config["disk_size"].(int)),
-		DiskType:       	config["disk_type"].(string),
-		ImageType:      	config["image_type"].(string),
-		BootDiskKmsKey: 	config["boot_disk_kms_key"].(string),
-		Management:		expandManagement(config["management"]),
-		UpgradeSettings:	expandUpgradeSettings(config["upgrade_settings"]),
+		OauthScopes:      convertStringArr(config["oauth_scopes"].([]interface{})),
+		ServiceAccount:   config["service_account"].(string),
+		DiskSizeGb:       int64(config["disk_size"].(int)),
+		DiskType:         config["disk_type"].(string),
+		ImageType:        config["image_type"].(string),
+		BootDiskKmsKey:   config["boot_disk_kms_key"].(string),
+		Management:       expandManagement(config["management"]),
+		UpgradeSettings:  expandUpgradeSettings(config["upgrade_settings"]),
 	}
 
 	if v, ok := config["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {

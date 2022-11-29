@@ -5381,86 +5381,86 @@ resource "google_container_cluster" "with_autoprovisioning" {
 }
 
 func testAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(clusterName string, maxSurge, maxUnavailable int, strategy string) string {
-	blueGreenSettings := ""
-	if strategy == "BLUE_GREEN" {
-		blueGreenSettings = `
-		blue_green_settings {
-			node_pool_soak_duration = "3.500s"
-			standard_rollout_policy {
-			  batch_percentage    = 0.5
-			  batch_soak_duration = "3.500s"
-			}
-		  }
-		`
-	}
+  blueGreenSettings := ""
+  if strategy == "BLUE_GREEN" {
+    blueGreenSettings = `
+      blue_green_settings {
+        node_pool_soak_duration = "3.500s"
+        standard_rollout_policy {
+        batch_percentage    = 0.5
+        batch_soak_duration = "3.500s"
+        }
+      }
+    `
+  }
 
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_autoprovisioning_upgrade_settings" {
-  name               = "%s"
-  location           = "us-central1-f"
-  initial_node_count = 1
+  return fmt.Sprintf(`
+    resource "google_container_cluster" "with_autoprovisioning_upgrade_settings" {
+      name               = "%s"
+      location           = "us-central1-f"
+      initial_node_count = 1
 
-  cluster_autoscaling {
-    enabled = true
+      cluster_autoscaling {
+        enabled = true
 
-	resource_limits {
-	  resource_type = "cpu"
-	  maximum       = 2
-	}
+        resource_limits {
+          resource_type = "cpu"
+          maximum       = 2
+        }
 
-	resource_limits {
-	  resource_type = "memory"
-	  maximum       = 2048
-	}
+        resource_limits {
+          resource_type = "memory"
+          maximum       = 2048
+        }
 
-    auto_provisioning_defaults {
-      upgrade_settings {
-        max_surge       = %d
-        max_unavailable = %d
-        strategy        = "%s"
-		%s
+        auto_provisioning_defaults {
+          upgrade_settings {
+            max_surge       = %d
+            max_unavailable = %d
+            strategy        = "%s"
+            %s
+          }
+        }
       }
     }
-  }
-}
-`, clusterName, maxSurge, maxUnavailable, strategy, blueGreenSettings)
+  `, clusterName, maxSurge, maxUnavailable, strategy, blueGreenSettings)
 }
 
 func testAccContainerCluster_autoprovisioningDefaultsUpgradeSettingsWithBlueGreenStrategy(clusterName string, duration, strategy string) string {
 	return fmt.Sprintf(`
-resource "google_container_cluster" "with_autoprovisioning_upgrade_settings" {
-  name               = "%s"
-  location           = "us-central1-f"
-  initial_node_count = 1
+      resource "google_container_cluster" "with_autoprovisioning_upgrade_settings" {
+        name               = "%s"
+        location           = "us-central1-f"
+        initial_node_count = 1
 
-  cluster_autoscaling {
-    enabled = true
+        cluster_autoscaling {
+          enabled = true
 
-	resource_limits {
-	  resource_type = "cpu"
-	  maximum       = 2
-	}
+          resource_limits {
+            resource_type = "cpu"
+            maximum       = 2
+          }
 
-	resource_limits {
-	  resource_type = "memory"
-	  maximum       = 2048
-	}
+          resource_limits {
+            resource_type = "memory"
+            maximum       = 2048
+          }
 
-    auto_provisioning_defaults {
-      upgrade_settings {
-        strategy        = "%s"
-		blue_green_settings {
-			node_pool_soak_duration = "%s"
-			standard_rollout_policy {
-			  batch_percentage    = 0.5
-			  batch_soak_duration = "%s"
-			}
-		}
+          auto_provisioning_defaults {
+            upgrade_settings {
+              strategy        = "%s"
+              blue_green_settings {
+                node_pool_soak_duration = "%s"
+                standard_rollout_policy {
+                  batch_percentage    = 0.5
+                  batch_soak_duration = "%s"
+                }
+              }
+            }
+          }
+        }
       }
-    }
-  }
-}
-`, clusterName, strategy, duration, duration)
+    `, clusterName, strategy, duration, duration)
 }
 
 func testAccContainerCluster_autoprovisioningDefaultsDiskSizeGb(cluster string, includeDiskSizeGb bool) string {
