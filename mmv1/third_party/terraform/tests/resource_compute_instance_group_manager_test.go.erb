@@ -384,17 +384,8 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"status"},
 			},
-			{
-				Config: testAccInstanceGroupManager_stateful(network, template, target, igm, hck),
-			},
-			{
-				ResourceName:            "google_compute_instance_group_manager.igm-basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
-			},
       {
-				Config: testAccInstanceGroupManager_stateful(network, template, target, igm, hck),
+				Config: testAccInstanceGroupManager_statefulUpdated(network, template, target, igm, hck),
 			},
 			{
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
@@ -1541,21 +1532,11 @@ resource "google_compute_instance_group_manager" "igm-basic" {
 <% unless version == "ga" -%>
   stateful_internal_ip {
     interface_name = "nic0"
-    delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
-  }
-
-  stateful_internal_ip {
-    interface_name = "nic1"
     delete_rule = "NEVER"
   }
 
   stateful_external_ip {
     interface_name = "nic0"
-    delete_rule = "NEVER"
-  }
-
-  stateful_external_ip {
-    interface_name = "nic1"
     delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
   }
 <% end -%>
