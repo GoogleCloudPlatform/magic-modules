@@ -508,6 +508,14 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/vertex-ai/docs'
       api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_type: featurestore
+      parent_resource_attribute: entitytype
+      import_format: ['{{%featurestore}}/entityTypes/{{name}}', '{{name}}']
+      example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore_entitytype.tf.erb'
+      min_version: beta
     async: !ruby/object:Api::OpAsync
       actions:
         - create
@@ -798,6 +806,198 @@ objects:
             description: |
               The disk utilization of the MetadataStore in bytes.
             output: true
+
+# Vertex AI Matching Engine Index
+  - !ruby/object:Api::Resource
+    name: Index
+    base_url: projects/{{project}}/locations/{{region}}/indexes
+    create_url: projects/{{project}}/locations/{{region}}/indexes
+    self_link: projects/{{project}}/locations/{{region}}/indexes/{{name}}
+    update_verb: :PATCH
+    update_mask: true
+    create_verb: :POST
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexes/
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      A representation of a collection of database items organized in a way that allows for approximate nearest neighbor (a.k.a ANN) algorithms search.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the Metadata Store. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The resource name of the Index.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: The description of the Index.
+      # Please take a look at the following links for the original definition:
+        # https://cloud.google.com/vertex-ai/docs/matching-engine/create-manage-index#create_index-drest
+        # https://cloud.google.com/vertex-ai/docs/matching-engine/configuring-indexes
+      - !ruby/object:Api::Type::NestedObject
+        name: 'metadata'
+        description: An additional information about the Index
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'contentsDeltaUri'
+            description: |-
+              Allows inserting, updating  or deleting the contents of the Matching Engine Index.
+              The string must be a valid Cloud Storage directory path. If this
+              field is set when calling IndexService.UpdateIndex, then no other
+              Index field can be also updated as part of the same call.
+              The expected structure and format of the files this URI points to is
+              described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
+          - !ruby/object:Api::Type::Boolean
+            name: 'isCompleteOverwrite'
+            description: |-
+              If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
+              then existing content of the Index will be replaced by the data from the contentsDeltaUri.
+            default_value: false
+          - !ruby/object:Api::Type::NestedObject
+            name: 'config'
+            input: true
+            description: The configuration of the Matching Engine Index.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'dimensions'
+                description: The number of dimensions of the input vectors.
+                required: true
+              - !ruby/object:Api::Type::Integer
+                name: 'approximateNeighborsCount'
+                description: |-
+                  The default number of neighbors to find via approximate search before exact reordering is
+                  performed. Exact reordering is a procedure where results returned by an
+                  approximate search algorithm are reordered via a more expensive distance computation.
+                  Required if tree-AH algorithm is used.
+              - !ruby/object:Api::Type::String
+                name: 'distanceMeasureType'
+                description: |-
+                  The distance measure used in nearest neighbor search. The value must be one of the followings:
+                  * SQUARED_L2_DISTANCE: Euclidean (L_2) Distance
+                  * L1_DISTANCE: Manhattan (L_1) Distance
+                  * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
+                  * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
+                default_value: "DOT_PRODUCT_DISTANCE"
+              - !ruby/object:Api::Type::String
+                name: 'featureNormType'
+                description: |-
+                  Type of normalization to be carried out on each vector. The value must be one of the followings: 
+                  * UNIT_L2_NORM: Unit L2 normalization type
+                  * NONE: No normalization type is specified.
+                default_value: "NONE"
+              - !ruby/object:Api::Type::NestedObject
+                name: 'algorithmConfig'
+                description: The configuration with regard to the algorithms used for efficient search.
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'treeAhConfig'
+                    exactly_one_of:
+                      - treeAhConfig
+                      - bruteForceConfig
+                    description: |-
+                      Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
+                      Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+                    properties:
+                      - !ruby/object:Api::Type::Integer
+                        name: 'leafNodeEmbeddingCount'
+                        description: Number of embeddings on each leaf node. The default value is 1000 if not set.
+                        default_value: 1000
+                      - !ruby/object:Api::Type::Integer
+                        name: 'leafNodesToSearchPercent'
+                        description: |-
+                          The default percentage of leaf nodes that any query may be searched. Must be in
+                          range 1-100, inclusive. The default value is 10 (means 10%) if not set.
+                        default_value: 10
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'bruteForceConfig'
+                    allow_empty_object: true
+                    send_empty_value: true
+                    properties: []
+                    exactly_one_of:
+                      - treeAhConfig
+                      - bruteForceConfig
+                    description: |-
+                      Configuration options for using brute force search, which simply implements the
+                      standard linear search in the database for each query.
+      - !ruby/object:Api::Type::String
+        name: 'metadataSchemaUri'
+        description: |-
+         Points to a YAML file stored on Google Cloud Storage describing additional information about the Index, that is specific to it. Unset if the Index does not have any additional information.
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'deployedIndexes'
+        output: true
+        description: The pointers to DeployedIndexes created from this Index. An Index can be only deleted if all its DeployedIndexes had been undeployed first.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::String
+            name: 'indexEndpoint'
+            output: true
+            description: A resource name of the IndexEndpoint.
+          - !ruby/object:Api::Type::String
+            name: 'deployedIndexId'
+            output: true
+            description: The ID of the DeployedIndex in the above IndexEndpoint.
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: Used to perform consistent read-modify-write updates.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: The labels with user-defined metadata to organize your Indexes.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'indexStats'
+        output: true
+        description: Stats of the index resource.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'vectorsCount'
+            output: true
+            description: The number of vectors in the Index.
+          - !ruby/object:Api::Type::Integer
+            name: 'shardsCount'
+            output: true
+            description: The number of shards in the Index.
+      - !ruby/object:Api::Type::String
+        name: 'indexUpdateMethod'
+        input: true
+        default_value: BATCH_UPDATE
+        description: |-
+          The update method to use with this Index. The value must be the followings. If not set, BATCH_UPDATE will be used by default.
+          * BATCH_UPDATE: user can call indexes.patch with files on Cloud Storage of datapoints to update.
+          * STREAM_UPDATE: user can call indexes.upsertDatapoints/DeleteDatapoints to update the Index and the updates will be applied in corresponding DeployedIndexes in nearly real-time.
 
 # Vertex AI Matching Engine Index Endpoint
   - !ruby/object:Api::Resource
