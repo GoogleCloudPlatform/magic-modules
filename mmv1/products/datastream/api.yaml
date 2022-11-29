@@ -445,7 +445,6 @@ objects:
             name: 'mysqlSourceConfig'
             allow_empty_object: true
             send_empty_value: true
-            required: true
             description: |
               MySQL data source configuration.
             properties:
