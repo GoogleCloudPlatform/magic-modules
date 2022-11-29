@@ -143,7 +143,7 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 			t.Errorf("failed, expected no error but received - %s for the condition %s", err, tn)
 		}
 		if d.IsForceNew != tc.forcenew {
-			t.Errorf("ForceNew not setup correctly for the condition-'%s', expected:%v;actual:%v", tn, tc.forcenew, d.IsForceNew)
+			t.Errorf("ForceNew not setup correctly for the condition-'%s', expected:%v; actual:%v", tn, tc.forcenew, d.IsForceNew)
 		}
 	}
 }
