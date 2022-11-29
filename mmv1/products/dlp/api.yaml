@@ -1859,3 +1859,201 @@ objects:
                                 So if lowerBound = 10, upperBound = 89, and bucketSize = 10, then the following buckets would be used: -10, 10-20, 20-30, 30-40, 40-50, 50-60, 60-70, 70-80, 80-89, 89+.
                                 Precision up to 2 decimals works.
                               required: true
+                        - !ruby/object:Api::Type::NestedObject
+                          name: bucketingConfig
+                          description: Bucketing
+                          properties:
+                            - !ruby/object:Api::Type::Array
+                              name: buckets
+                              description: |
+                                Set of buckets. Ranges must be non-overlapping.
+                                Bucket is represented as a range, along with replacement values.
+                              item_type: !ruby/object:Api::Type::NestedObject
+                                properties:
+                                  - !ruby/object:Api::Type::NestedObject
+                                    name: min
+                                    description: |
+                                      Lower bound of the range, inclusive. Type should be the same as max if used.
+                                    properties:
+                                      - !ruby/object:Api::Type::String
+                                        name: integerValue
+                                        description: An integer value (int64 format)
+                                      - !ruby/object:Api::Type::Double
+                                        name: floatValue
+                                        description: A float value.
+                                      - !ruby/object:Api::Type::String
+                                        name: stringValue
+                                        description: A string value.
+                                      - !ruby/object:Api::Type::Boolean
+                                        name: booleanValue
+                                        description: A boolean value.
+                                      - !ruby/object:Api::Type::String
+                                        name: timestampValue
+                                        description: |
+                                          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: timeValue
+                                        description: Represents a time of day.
+                                        properties:
+                                          - !ruby/object:Api::Type::Integer
+                                            name: hours
+                                            description: |
+                                              Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: minutes
+                                            description: Minutes of hour of day. Must be from 0 to 59.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: seconds
+                                            description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: nanos
+                                            description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: dateValue
+                                        description: Represents a whole or partial calendar date.
+                                        properties:
+                                          - !ruby/object:Api::Type::Integer
+                                            name: year
+                                            description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: month
+                                            description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: day
+                                            description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                      - !ruby/object:Api::Type::Enum
+                                        name: dayOfWeekValue
+                                        description: Represents a day of the week.
+                                        values:
+                                          - :MONDAY
+                                          - :TUESDAY
+                                          - :WEDNESDAY
+                                          - :THURSDAY
+                                          - :FRIDAY
+                                          - :SATURDAY
+                                          - :SUNDAY
+                                  - !ruby/object:Api::Type::NestedObject
+                                    name: max
+                                    description: |
+                                      Upper bound of the range, exclusive; type must match min.
+                                    properties:
+                                      - !ruby/object:Api::Type::String
+                                        name: integerValue
+                                        description: An integer value (int64 format)
+                                      - !ruby/object:Api::Type::Double
+                                        name: floatValue
+                                        description: A float value.
+                                      - !ruby/object:Api::Type::String
+                                        name: stringValue
+                                        description: A string value.
+                                      - !ruby/object:Api::Type::Boolean
+                                        name: booleanValue
+                                        description: A boolean value.
+                                      - !ruby/object:Api::Type::String
+                                        name: timestampValue
+                                        description: |
+                                          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: timeValue
+                                        description: Represents a time of day.
+                                        properties:
+                                          - !ruby/object:Api::Type::Integer
+                                            name: hours
+                                            description: |
+                                              Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: minutes
+                                            description: Minutes of hour of day. Must be from 0 to 59.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: seconds
+                                            description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: nanos
+                                            description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: dateValue
+                                        description: Represents a whole or partial calendar date.
+                                        properties:
+                                          - !ruby/object:Api::Type::Integer
+                                            name: year
+                                            description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: month
+                                            description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: day
+                                            description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                      - !ruby/object:Api::Type::Enum
+                                        name: dayOfWeekValue
+                                        description: Represents a day of the week.
+                                        values:
+                                          - :MONDAY
+                                          - :TUESDAY
+                                          - :WEDNESDAY
+                                          - :THURSDAY
+                                          - :FRIDAY
+                                          - :SATURDAY
+                                          - :SUNDAY
+                                  - !ruby/object:Api::Type::NestedObject
+                                    name: replacementValue
+                                    required: true
+                                    description: |
+                                      Replacement value for this bucket.                                  
+                                    properties:
+                                      - !ruby/object:Api::Type::String
+                                        name: integerValue
+                                        description: An integer value (int64 format)
+                                      - !ruby/object:Api::Type::Double
+                                        name: floatValue
+                                        description: A float value.
+                                      - !ruby/object:Api::Type::String
+                                        name: stringValue
+                                        description: A string value.
+                                      - !ruby/object:Api::Type::Boolean
+                                        name: booleanValue
+                                        description: A boolean value.
+                                      - !ruby/object:Api::Type::String
+                                        name: timestampValue
+                                        description: |
+                                          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: timeValue
+                                        description: Represents a time of day.
+                                        properties:
+                                          - !ruby/object:Api::Type::Integer
+                                            name: hours
+                                            description: |
+                                              Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: minutes
+                                            description: Minutes of hour of day. Must be from 0 to 59.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: seconds
+                                            description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: nanos
+                                            description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: dateValue
+                                        description: Represents a whole or partial calendar date.
+                                        properties:
+                                          - !ruby/object:Api::Type::Integer
+                                            name: year
+                                            description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: month
+                                            description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                          - !ruby/object:Api::Type::Integer
+                                            name: day
+                                            description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                      - !ruby/object:Api::Type::Enum
+                                        name: dayOfWeekValue
+                                        description: Represents a day of the week.
+                                        values:
+                                          - :MONDAY
+                                          - :TUESDAY
+                                          - :WEDNESDAY
+                                          - :THURSDAY
+                                          - :FRIDAY
+                                          - :SATURDAY
+                                          - :SUNDAY
