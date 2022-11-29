@@ -2079,3 +2079,55 @@ objects:
                                 - :DAY_OF_WEEK # [1-7]
                                 - :WEEK_OF_YEAR # [1-53]
                                 - :HOUR_OF_DAY # [0-23]
+                        - !ruby/object:Api::Type::NestedObject
+                          name: cryptoHashConfig
+                          description: |
+                            Pseudonymization method that generates surrogates via cryptographic hashing. Uses SHA-256. The key size must be either 32 or 64 bytes.
+                            Outputs a base64 encoded representation of the hashed output (for example, L7k0BHmF1ha5U3NfGykjro4xWi1MPVQPjhMAZbSV9mM=).
+                            Currently, only string and integer values can be hashed.
+                            See https://cloud.google.com/dlp/docs/pseudonymization to learn more.
+                          properties:
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'cryptoKey'
+                              description: |
+                                The key used by the encryption function.
+                              properties:
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'transient'
+                                  description: |
+                                    Transient crypto key
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'name'
+                                      required: true
+                                      description: |
+                                        Name of the key. This is an arbitrary string used to differentiate different keys. A unique key is generated per name: two separate `TransientCryptoKey` protos share the same generated key if their names are the same. When the data crypto key is generated, this name is not used in any way (repeating the api call will result in a different key being generated).
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'unwrapped'
+                                  description: |
+                                    Unwrapped crypto key
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'key'
+                                      required: true
+                                      description: |
+                                        A 128/192/256 bit key.
+
+                                        A base64-encoded string.
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'kmsWrapped'
+                                  description: |
+                                    Kms wrapped key
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'wrappedKey'
+                                      required: true
+                                      description: |
+                                        The wrapped data crypto key.
+
+                                        A base64-encoded string.
+                                    - !ruby/object:Api::Type::String
+                                      name: 'cryptoKeyName'
+                                      required: true
+                                      description: |
+                                        The resource name of the KMS CryptoKey to use for unwrapping.
