@@ -225,9 +225,7 @@ objects:
                           name: "limits"
                           description: |-
                             Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
-                        # API always returns `false` for Job,
-                        # discuss with the service team to fail validation if `true` is specified
-                        # omit the field until it's unblocked
+                        # omit the field, blocked by b/260599405
                         # - !ruby/object:Api::Type::Boolean
                         #   name: "cpuIdle"
                         #   description: |-
@@ -457,7 +455,7 @@ objects:
                                 name: "mode"
                                 required: true
                                 description: |-
-                                  nteger octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
+                                  Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
                     - !ruby/object:Api::Type::NestedObject
                       name: "cloudSqlInstance"
                       description: |-
@@ -578,7 +576,7 @@ objects:
               description: |-
                 type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
             - !ruby/object:Api::Type::String
-              name: "status"
+              name: "state"
               output: true
               description: |-
                 State of the condition.
