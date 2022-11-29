@@ -2202,4 +2202,96 @@ objects:
                                       required: true
                                       description: |
                                         The resource name of the KMS CryptoKey to use for unwrapping.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: cryptoDeterministicConfig
+                          description: |
+                            Pseudonymization method that generates deterministic encryption for the given input. Outputs a base64 encoded representation of the encrypted output. Uses AES-SIV based on the RFC [https://tools.ietf.org/html/rfc5297](https://tools.ietf.org/html/rfc5297).
+                          properties:
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'cryptoKey'
+                              description: |
+                                The key used by the encryption function. For deterministic encryption using AES-SIV, the provided key is internally expanded to 64 bytes prior to use.
+                              properties:
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'transient'
+                                  description: |
+                                    Transient crypto key
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'name'
+                                      required: true
+                                      description: |
+                                        Name of the key. This is an arbitrary string used to differentiate different keys. A unique key is generated per name: two separate `TransientCryptoKey` protos share the same generated key if their names are the same. When the data crypto key is generated, this name is not used in any way (repeating the api call will result in a different key being generated).
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'unwrapped'
+                                  description: |
+                                    Unwrapped crypto key
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'key'
+                                      required: true
+                                      description: |
+                                        A 128/192/256 bit key.
 
+                                        A base64-encoded string.
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'kmsWrapped'
+                                  description: |
+                                    Kms wrapped key
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: 'wrappedKey'
+                                      required: true
+                                      description: |
+                                        The wrapped data crypto key.
+
+                                        A base64-encoded string.
+                                    - !ruby/object:Api::Type::String
+                                      name: 'cryptoKeyName'
+                                      required: true
+                                      description: |
+                                        The resource name of the KMS CryptoKey to use for unwrapping.
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'surrogateInfoType'
+                              description: |
+                                The custom info type to annotate the surrogate with. This annotation will be applied to the surrogate by prefixing it with the name of the custom info type followed by the number of characters comprising the surrogate. The following scheme defines the format: {info type name}({surrogate character count}):{surrogate}
+
+                                For example, if the name of custom info type is 'MY\_TOKEN\_INFO\_TYPE' and the surrogate is 'abc', the full replacement value will be: 'MY\_TOKEN\_INFO\_TYPE(3):abc'
+
+                                This annotation identifies the surrogate when inspecting content using the custom info type 'Surrogate'. This facilitates reversal of the surrogate when it occurs in free text.
+
+                                Note: For record transformations where the entire cell in a table is being transformed, surrogates are not mandatory. Surrogates are used to denote the location of the token and are necessary for re-identification in free form text.
+
+                                In order for inspection to work properly, the name of this info type must not occur naturally anywhere in your data; otherwise, inspection may either
+
+                                *   reverse a surrogate that does not correspond to an actual identifier
+                                *   be unable to parse the surrogate and result in an error
+
+                                Therefore, choose your custom info type name carefully after considering what your data looks like. One way to select a name that has a high chance of yielding reliable detection is to include one or more unicode characters that are highly improbable to exist in your data. For example, assuming your data is entered from a regular ASCII keyboard, the symbol with the hex code point 29DD might be used like so: ⧝MY\_TOKEN\_TYPE.
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: 'name'
+                                  description: |
+                                    Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed at [https://cloud.google.com/dlp/docs/infotypes-reference](https://cloud.google.com/dlp/docs/infotypes-reference) when specifying a built-in type. When sending Cloud DLP results to Data Catalog, infoType names should conform to the pattern `[A-Za-z0-9$-_]{1,64}`.
+                                - !ruby/object:Api::Type::String
+                                  name: 'version'
+                                  description: |
+                                    Optional version name for this InfoType.
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'context'
+                              description: |
+                                A context may be used for higher security and maintaining referential integrity such that the same identifier in two different contexts will be given a distinct surrogate. The context is appended to plaintext value being encrypted. On decryption the provided context is validated against the value used during encryption. If a context was provided during encryption, same context must be provided during decryption as well.
+
+                                If the context is not set, plaintext would be used as is for encryption. If the context is set but:
+
+                                1. there is no record present when transforming a given value or
+                                2. the field is not present when transforming a given value,
+                                
+                                plaintext would be used as is for encryption.
+
+                                Note that case (1) is expected when an InfoTypeTransformation is applied to both structured and unstructured ContentItems.
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: 'name'
+                                  description: |
+                                    Name describing the field.
