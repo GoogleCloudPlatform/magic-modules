@@ -965,7 +965,6 @@ func resourceContainerCluster() *schema.Resource {
 <% end -%>
 							},
 						},
-<% unless version == "ga" -%>
 						"managed_prometheus": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -982,7 +981,6 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-<% end -%>
 					},
 				},
 			},
@@ -4381,14 +4379,12 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 			EnableComponents: convertStringArr(enable_components),
 		}
 	}
-<% unless version == 'ga' -%>
 	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
 		managed_prometheus := v.([]interface{})[0].(map[string]interface{})
 		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
 			Enabled: managed_prometheus["enabled"].(bool),
 		}
 	}
-<% end -%>
 	return mc
 }
 
@@ -5100,15 +5096,12 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 	if c.ComponentConfig != nil {
 		result["enable_components"] = c.ComponentConfig.EnableComponents
 	}
-<% unless version == 'ga' -%>
 	if c.ManagedPrometheusConfig != nil {
 		result["managed_prometheus"] = flattenManagedPrometheusConfig(c.ManagedPrometheusConfig)
 	}
-<% end -%>
 	return []map[string]interface{}{result}
 }
 
-<% unless version == 'ga' -%>
 func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
@@ -5116,7 +5109,6 @@ func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[
 		},
 	}
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]interface{} {
