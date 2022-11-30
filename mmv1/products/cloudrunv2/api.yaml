@@ -214,6 +214,7 @@ objects:
                                       The name of the secret in Cloud Secret Manager. Format: {secretName} if the secret is in the same project. projects/{project}/secrets/{secretName} if the secret is in a different project.
                                   - !ruby/object:Api::Type::String
                                     name: "version"
+                                    required: true
                                     description: |-
                                       The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version.
                     - !ruby/object:Api::Type::NestedObject
@@ -449,6 +450,7 @@ objects:
                                   The relative path of the secret in the container.
                               - !ruby/object:Api::Type::String
                                 name: "version"
+                                required: true
                                 description: |-
                                   The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
                               - !ruby/object:Api::Type::Integer

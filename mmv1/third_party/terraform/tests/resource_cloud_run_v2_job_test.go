@@ -61,9 +61,12 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
       template {
         timeout = "300s"
         service_account = google_service_account.service_account.email
+        execution_environment = "EXECUTION_ENVIRONMENT_GEN2"
         containers {
           name = "container-1"
           image = "us-docker.pkg.dev/cloudrun/container/hello"
+          args = ["https://cloud.google.com/run", "www.google.com"]
+          command = ["/bin/echo"]
           env {
             name = "SOURCE"
             value = "remote"
@@ -83,6 +86,7 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
             }
           }
         }
+        max_retries = 5
       }
     }
   }
@@ -118,9 +122,12 @@ resource "google_cloud_run_v2_job" "default" {
     template {
       timeout = "500s"
       service_account = google_service_account.service_account.email
+      execution_environment = "EXECUTION_ENVIRONMENT_GEN1"
       containers {
         name = "container-update"
         image = "us-docker.pkg.dev/cloudrun/container/hello"
+        args = ["https://cloud.google.com/run"]
+        command = ["printenv"]
         env {
           name = "SOURCE_UPDATE"
           value = "remote-update"
@@ -144,6 +151,7 @@ resource "google_cloud_run_v2_job" "default" {
         connector = google_vpc_access_connector.connector.id
         egress = "ALL_TRAFFIC"
       }
+      max_retries = 2
     }
   }
 }
@@ -197,6 +205,15 @@ func TestAccCloudRunV2Job_cloudrunv2JobProbesUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobUpdateWithTCPStartupProbeAndHTTPLivenessProbe(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_job.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
+				Config: testAccCloudRunV2Job_cloudrunv2JobUpdateWithHTTPStartupProbeAndTCPLivenessProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_job.default",
@@ -290,6 +307,52 @@ resource "google_cloud_run_v2_job" "default" {
             http_headers {
               name = "Some-Name"
             }
+          }
+        }
+      }
+    }
+  } 
+}
+`, context)
+}
+
+func testAccCloudRunV2Job_cloudrunv2JobUpdateWithHTTPStartupProbeAndTCPLivenessProbe(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloud_run_v2_job" "default" {
+  name     = "tf-test-cloudrun-job%{random_suffix}"
+  location = "us-central1"
+  launch_stage = "BETA"
+  
+  template{
+    template {
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+        ports {
+          container_port = 8080
+        }
+        startup_probe {
+          initial_delay_seconds = 2
+          period_seconds = 1
+          timeout_seconds = 5
+          failure_threshold = 2
+          http_get {
+            path = "/some-path"
+            http_headers {
+              name = "User-Agent"
+              value = "magic-modules"
+            }
+            http_headers {
+              name = "Some-Name"
+            }
+          }
+        }
+        liveness_probe {
+          initial_delay_seconds = 2
+          period_seconds = 1
+          timeout_seconds = 5
+          failure_threshold = 2
+          tcp_socket {
+            port = 8080
           }
         }
       }
