@@ -31,7 +31,6 @@ objects:
     base_url: projects/{{project}}/locations/{{region}}/instances/
     self_link: projects/{{project}}/locations/{{region}}/instances/{{instance_id}}
     create_url: projects/{{project}}/locations/{{region}}/instances?databaseId={{instance_id}}
-    input: true
     description: |
       A Google Cloud Firebase Realtime Database instance.
 
@@ -80,13 +79,12 @@ objects:
           - :DEFAULT_DATABASE
           - :USER_DATABASE
         default_value: :USER_DATABASE
-     # TODO: add database state later
-     #- !ruby/object:Api::Type::Enum
-     #  name: state
-     #  description: The database state.
-     #  values:
-     #    - :ACTIVE
-     #    - :DISABLED
-     #  default_value: :ACTIVE
+      - !ruby/object:Api::Type::Enum
+        name: state
+        description: The database state.
+        values:
+          - :ACTIVE
+          - :DISABLED
+        default_value: :ACTIVE
 
 

@@ -1,5 +1,6 @@
 # TODO(fredzqm): remove before sending PR for review
 set -x
+set -e
 
 OUTPUT_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
 make terraform VERSION=beta OUTPUT_PATH="$OUTPUT_PATH" PRODUCT=firebasedatabase
@@ -7,7 +8,7 @@ make terraform VERSION=beta OUTPUT_PATH="$OUTPUT_PATH" PRODUCT=firebasedatabase
 cd $OUTPUT_PATH
 git status
 
-export GOOGLE_PROJECT=fredzqm-staging
+export GOOGLE_PROJECT=fredzqm-staging-b
 export GOOGLE_REGION=us-central1
 export GOOGLE_ZONE=us-central1-c
 export GOOGLE_USE_DEFAULT_CREDENTIALS=True
