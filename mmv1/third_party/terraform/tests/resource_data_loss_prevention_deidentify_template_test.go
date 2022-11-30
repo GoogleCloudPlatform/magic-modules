@@ -402,7 +402,7 @@ resource "google_kms_key_ring" "key_ring" {
 `, context)
 }
 
-func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_Update(t *testing.T) {
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformationsUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -416,7 +416,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 		CheckDestroy: testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_start(context),
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_start(context),
 			},
 			{
 				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
@@ -424,7 +424,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_update(context),
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_update(context),
 			},
 			{
 				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
@@ -435,7 +435,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	})
 }
 
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_start(context map[string]interface{}) string {
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_start(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
@@ -475,13 +475,35 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "unconditionally-redacted-field"
+        }
+        primitive_transformation {
+          redact_config {}
+        }
+      }
+      field_transformations {
+        fields {
+          name = "unconditionally-char-masked-field"
+        }
+        primitive_transformation {
+          character_mask_config {
+            masking_character = "x"
+            number_to_mask = 8
+            characters_to_ignore {
+              characters_to_skip = "-"
+            }
+          }
+        }
+      }
     }
   }
 }
 `, context)
 }
 
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_replaceConfig_update(context map[string]interface{}) string {
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
@@ -533,254 +555,23 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
-    }
-  }
-}
-`, context)
-}
-
-func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_Update(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"organization":  getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
-	}
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_start(context),
-			},
-			{
-				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				// As redact_config is an empty object in the HCL and cannot be updated,
-				// this update step tests ability to change the type of transformation from redact_config to replace_config
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_update(context),
-			},
-			{
-				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_start(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_data_loss_prevention_deidentify_template" "basic" {
-  parent = "organizations/%{organization}"
-  description = "Description"
-  display_name = "Displayname"
-
-  deidentify_config {
-    record_transformations {
       field_transformations {
         fields {
-          name = "details.pii.email"
-        }
-        condition {
-          expressions {
-            conditions {
-              conditions {
-                field {
-                  name = "details.pii.date_of_birth"
-                }
-                operator = "GREATER_THAN_OR_EQUALS"
-                value {
-                  date_value {
-                    year = 2001
-                    month = 6
-                    day = 29
-                  }
-                }
-              }
-            }
-          }
+          name = "always-redacted-field"
         }
         primitive_transformation {
           redact_config {}
         }
       }
-    }
-  }
-}
-`, context)
-}
-
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_redactConfig_update(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_data_loss_prevention_deidentify_template" "basic" {
-  parent = "organizations/%{organization}"
-  description = "Description"
-  display_name = "Displayname"
-
-  deidentify_config {
-    record_transformations {
       field_transformations {
         fields {
-          name = "details.pii.email"
-        }
-        condition {
-          expressions {
-            conditions {
-              conditions {
-                field {
-                  name = "details.pii.date_of_birth"
-                }
-                operator = "GREATER_THAN_OR_EQUALS"
-                value {
-                  date_value {
-                    year = 2001
-                    month = 6
-                    day = 29
-                  }
-                }
-              }
-            }
-          }
-        }
-        primitive_transformation {
-          # update by changing transformation type from redact_config => replace_config
-          replace_config {
-            new_value {
-              string_value = "born.after.shrek@example.com"
-            }
-          }
-        }
-      }
-    }
-  }
-}
-`, context)
-}
-
-func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_characterMaskConfig_Update(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"organization":  getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
-	}
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_characterMaskConfig_start(context),
-			},
-			{
-				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_characterMaskConfig_update(context),
-			},
-			{
-				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_characterMaskConfig_start(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_data_loss_prevention_deidentify_template" "basic" {
-  parent = "organizations/%{organization}"
-  description = "Description"
-  display_name = "Displayname"
-
-  deidentify_config {
-    record_transformations {
-      field_transformations {
-        fields {
-          name = "details.pii.date_of_birth"
-        }
-        condition {
-          expressions {
-            conditions {
-              conditions {
-                field {
-                  name = "details.pii.date_of_birth"
-                }
-                operator = "GREATER_THAN_OR_EQUALS"
-                value {
-                  date_value {
-                    year = 2001
-                    month = 6
-                    day = 29
-                  }
-                }
-              }
-            }
-          }
+          name = "unconditionally-char-masked-field"
         }
         primitive_transformation {
           character_mask_config {
             masking_character = "x"
             number_to_mask = 8
-            characters_to_ignore {
-              characters_to_skip = "-"
-            }
-          }
-        }
-      }
-    }
-  }
-}
-`, context)
-}
-
-func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_characterMaskConfig_update(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_data_loss_prevention_deidentify_template" "basic" {
-  parent = "organizations/%{organization}"
-  description = "Description"
-  display_name = "Displayname"
-
-  deidentify_config {
-    record_transformations {
-      field_transformations {
-        fields {
-          name = "details.pii.date_of_birth"
-        }
-        condition {
-          expressions {
-            conditions {
-              conditions {
-                field {
-                  name = "details.pii.date_of_birth"
-                }
-                operator = "GREATER_THAN_OR_EQUALS"
-                value {
-                  date_value {
-                    year = 2001
-                    month = 6
-                    day = 29
-                  }
-                }
-              }
-            }
-          }
-        }
-        primitive_transformation {
-          character_mask_config {
-            masking_character = "x"
-            number_to_mask = 8
-            # update to delete old and add new characters_to_ignore blocks
+            # update to delete old characters_to_ignore block and add new ones
             characters_to_ignore {
               common_characters_to_ignore = "PUNCTUATION"
             }
