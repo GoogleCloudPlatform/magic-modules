@@ -42,4 +42,10 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `content` - (Computed) [Content-Language](https://tools.ietf.org/html/rfc7231#section-3.1.3.2) of the object content.
+* `content` - (Computed) Raw content of the object content, assumed by Terraform
+  to be UTF-8 encoded string. Files that do not contain UTF-8 text will have
+  invalid UTF-8 sequences in `content` replaced with the Unicode replacement
+  character.
+
+* `content_base64` - (Computed) Base64 encoded version of the object content.
+  Use this when dealing with binary data.

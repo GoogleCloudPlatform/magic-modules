@@ -1,6 +1,7 @@
 package google
 
 import (
+	"encoding/base64"
 	"fmt"
 	"testing"
 
@@ -21,6 +22,8 @@ func TestAccDataSourceStorageBucketObjectContent_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_storage_bucket_object_content.default", "content"),
 					resource.TestCheckResourceAttr("data.google_storage_bucket_object_content.default", "content", content),
+					resource.TestCheckResourceAttrSet("data.google_storage_bucket_object_content.default", "content_base64"),
+					resource.TestCheckResourceAttr("data.google_storage_bucket_object_content.default", "content_base64", base64.StdEncoding.EncodeToString([]byte(content))),
 				),
 			},
 		},
