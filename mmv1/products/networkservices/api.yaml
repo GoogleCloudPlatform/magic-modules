@@ -411,19 +411,12 @@ objects:
           - !ruby/object:Api::Type::Array
             name: 'redirectConditions'
             description: |
-              The set of redirect response codes that the CDN follows.
+              The set of redirect response codes that the CDN
+              follows. Values of
+              [RedirectConditions](https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheOrigins#redirectconditions)
+              are accepted.
             max_size: 5
-            item_type: !ruby/object:Api::Type::Enum
-              name: 'undefined'
-              description: |
-                This field only has a name and description because of MM
-                limitations. It should not appear in downstreams.
-              values:
-                - :MOVED_PERMANENTLY
-                - :FOUND
-                - :SEE_OTHER
-                - :TEMPORARY_REDIRECT
-                - :PERMANENT_REDIRECT
+            item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'EdgeCacheService'
     base_url: 'projects/{{project}}/locations/global/edgeCacheServices'
