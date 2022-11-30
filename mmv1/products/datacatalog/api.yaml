@@ -326,6 +326,10 @@ objects:
         name: displayName
         description: |
          The display name for this template.
+      - !ruby/object:Api::Type::Boolean
+        name: isPubliclyReadable
+        description: |
+          Indicates whether tags created with this template are public.
       - !ruby/object:Api::Type::Map
         name: fields
         description: |
