@@ -1097,7 +1097,6 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		MachineType:                d.Get("machine_type").(string),
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Disks:                      disks,
-		Params:                     params,
 		Metadata:                   metadata,
 		NetworkInterfaces:          networks,
 <% unless version == 'ga' -%>
@@ -1117,6 +1116,10 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 
 	if _, ok := d.GetOk("labels"); ok {
 		instanceProperties.Labels = expandLabels(d)
+	}
+
+	if _, ok := d.GetOk("params"); ok {
+		instanceProperties.Params = expandParams(d)
 	}
 
 	var itName string
@@ -1557,17 +1560,6 @@ func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interfac
 
 	d.SetId("")
 	return nil
-}
-
-func expandParams(d *schema.ResourceData) (*compute.InstanceParams, error) {
-	params := &compute.InstanceParams{
-	}
-
-	if _, ok := d.GetOk("params.0.resource_manager_tags"); ok {
-		params.ResourceManagerTags = expandStringMap(d, "params.0.resource_manager_tags")
-	}
-
-	return params, nil
 }
 
 // This wraps the general compute instance helper expandScheduling.
