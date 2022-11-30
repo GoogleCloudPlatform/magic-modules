@@ -159,6 +159,16 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Description: `A set of key/value label pairs to assign to disks,`,
 						},
 
+						"resource_manager_tags": {
+							Type:         schema.TypeMap,
+							Optional:     true,
+							ForceNew:     true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
+						},
+
 						"source_image": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -732,6 +742,27 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				Description: `The unique fingerprint of the tags.`,
 			},
 
+	                "params": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: `Stores additional params passed with the request, but not persisted as part of resource payload.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"resource_manager_tags": {
+							Type:         schema.TypeMap,
+							Optional:     true,
+							ForceNew:     true,
+                                                        Elem:         &schema.Schema{Type: schema.TypeString},
+                                                        Set:          schema.HashString,
+							Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
+						},
+					},
+				},
+			},
+
 			"labels": {
 				Type:        schema.TypeMap,
 				Optional:    true,
@@ -921,7 +952,7 @@ func buildDisks(d *schema.ResourceData, config *Config) ([]*compute.AttachedDisk
 
 		if v, ok := d.GetOk(prefix + ".source"); ok {
 			disk.Source = v.(string)
-			conflicts := []string{"disk_size_gb", "disk_name", "disk_type", "source_image", "labels"}
+			conflicts := []string{"disk_size_gb", "disk_name", "disk_type", "source_image", "labels", "resource_manager_tags"}
 			for _, conflict := range conflicts {
 				if _, ok := d.GetOk(prefix + "." + conflict); ok {
 					return nil, fmt.Errorf("Cannot use `source` with any of the fields in %s", conflicts)
@@ -953,6 +984,7 @@ func buildDisks(d *schema.ResourceData, config *Config) ([]*compute.AttachedDisk
 			}
 
 			disk.InitializeParams.Labels = expandStringMap(d, prefix+".labels")
+			disk.InitializeParams.ResourceManagerTags = expandStringMap(d, prefix+".resource_manager_tags")
 
 			if _, ok := d.GetOk(prefix + ".resource_policies"); ok {
 				// instance template only supports a resource name here (not uri)
@@ -1078,6 +1110,10 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 
 	if _, ok := d.GetOk("labels"); ok {
 		instanceProperties.Labels = expandLabels(d)
+	}
+
+	if _, ok := d.GetOk("params"); ok {
+		instanceProperties.Params = expandParams(d)
 	}
 
 	var itName string
@@ -1518,6 +1554,17 @@ func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interfac
 
 	d.SetId("")
 	return nil
+}
+
+func expandParams(d *schema.ResourceData) (*compute.InstanceParams, error) {
+	params := &compute.InstanceParams{
+	}
+
+	if _, ok := d.GetOk("params.0.resource_manager_tags"); ok {
+		params.ResourceManagerTags = expandStringMap(d, "params.0.resource_manager_tags")
+	}
+
+	return params, nil
 }
 
 // This wraps the general compute instance helper expandScheduling.
