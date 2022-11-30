@@ -40,7 +40,7 @@ objects:
       addition to the acl property, buckets contain bucketAccessControls, for
       use in fine-grained manipulation of an existing bucket's access controls.
 
-      A bucket is always owned by the project team owners group.
+      A bucket is always owned by the project team owners group
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude_validator: true
       allowed_iam_role: 'roles/storage.objectViewer'
