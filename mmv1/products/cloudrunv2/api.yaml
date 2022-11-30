@@ -67,6 +67,7 @@ objects:
         name: "name"
         required: true
         input: true
+        url_param_only: true
         description: |
           Name of the Job.
         pattern: projects/{{project}}/locations/{{location}}/jobs/{{name}}
@@ -226,11 +227,6 @@ objects:
                           name: "limits"
                           description: |-
                             Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
-                        # omit the field, blocked by b/260599405
-                        # - !ruby/object:Api::Type::Boolean
-                        #   name: "cpuIdle"
-                        #   description: |-
-                        #     Determines whether CPU should be throttled or not outside of requests.
                     - !ruby/object:Api::Type::Array
                       name: "ports"
                       description: |-
