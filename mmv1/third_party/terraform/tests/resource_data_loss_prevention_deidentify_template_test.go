@@ -506,8 +506,40 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "unconditionally-crypto-replace-ffx-fpe-field"
+        }
+        primitive_transformation {
+          crypto_replace_ffx_fpe_config {
+            context {
+              name = "someTweak"
+            }
+            crypto_key {
+              kms_wrapped {
+                wrapped_key     = "B64/WRAPPED/TOKENIZATION/KEY"
+                crypto_key_name = google_kms_crypto_key.my_key.id
+              }
+            }
+            radix = 10
+            surrogate_info_type {
+              name = "CUSTOM_INFO_TYPE"
+            }
+          }
+        }
+      }
     }
   }
+}
+
+resource "google_kms_crypto_key" "my_key" {
+  name     = "tf-test-example-k%{random_suffix}"
+  key_ring = google_kms_key_ring.key_ring.id
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  name     = "tf-test-example-keyr%{random_suffix}"
+  location = "global"
 }
 `, context)
 }
@@ -589,8 +621,39 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "details.pii.date_of_birth"
+        }
+        primitive_transformation {
+          crypto_replace_ffx_fpe_config {
+            common_alphabet = "UPPER_CASE_ALPHA_NUMERIC"
+            context {
+              name = "someTweak2"
+            }
+            crypto_key {
+              transient {
+                name = "beepf"
+              }
+            }
+            surrogate_info_type {
+              name = "CUSTOM_INFO_TYPE"
+            }
+          }
+        }
+      }
     }
   }
+}
+
+resource "google_kms_crypto_key" "my_key" {
+  name     = "tf-test-example-k%{random_suffix}"
+  key_ring = google_kms_key_ring.key_ring.id
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  name     = "tf-test-example-keyr%{random_suffix}"
+  location = "global"
 }
 `, context)
 }
