@@ -1,5 +1,5 @@
 resource "google_compute_autoscaler" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
+  provider = <%= ctx[:vars]['provider_name']%>
 
   name   = "<%= ctx[:vars]['autoscaler_name'] %>"
   zone   = "us-central1-f"
@@ -19,7 +19,7 @@ resource "google_compute_autoscaler" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_instance_template" "default" {
-  provider = google-beta
+  provider = <%= ctx[:vars]['provider_name']%>
 
   name           = "<%= ctx[:vars]['instance_template_name'] %>"
   machine_type   = "e2-medium"
@@ -45,13 +45,13 @@ resource "google_compute_instance_template" "default" {
 }
 
 resource "google_compute_target_pool" "default" {
-  provider = google-beta
+  provider = <%= ctx[:vars]['provider_name']%>
 
   name = "<%= ctx[:vars]['target_pool_name'] %>"
 }
 
 resource "google_compute_instance_group_manager" "default" {
-  provider = google-beta
+  provider = <%= ctx[:vars]['provider_name']%>
 
   name = "<%= ctx[:vars]['igm_name'] %>"
   zone = "us-central1-f"
@@ -66,7 +66,7 @@ resource "google_compute_instance_group_manager" "default" {
 }
 
 data "google_compute_image" "debian_9" {
-  provider = google-beta
+  provider = <%= ctx[:vars]['provider_name']%>
 
   family  = "debian-11"
   project = "debian-cloud"
@@ -75,4 +75,5 @@ data "google_compute_image" "debian_9" {
 provider "google-beta" {
   region = "us-central1"
   zone   = "us-central1-a"
+  <%= ctx[:vars]['provider_alias']%>
 }
