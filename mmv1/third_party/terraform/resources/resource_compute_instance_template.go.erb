@@ -1073,6 +1073,12 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
+
+	params, err := expandParams(d)
+	if err != nil {
+		return err
+	}
+
 <% unless version == 'ga' -%>
 	networkPerformanceConfig, err := expandNetworkPerformanceConfig(d, config)
 	if err != nil {
@@ -1091,6 +1097,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		MachineType:                d.Get("machine_type").(string),
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Disks:                      disks,
+		Params:                     params,
 		Metadata:                   metadata,
 		NetworkInterfaces:          networks,
 <% unless version == 'ga' -%>
@@ -1110,10 +1117,6 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 
 	if _, ok := d.GetOk("labels"); ok {
 		instanceProperties.Labels = expandLabels(d)
-	}
-
-	if _, ok := d.GetOk("params"); ok {
-		instanceProperties.Params = expandParams(d)
 	}
 
 	var itName string
