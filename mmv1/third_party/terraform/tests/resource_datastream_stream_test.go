@@ -138,6 +138,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
+		"deletion_protection": false,
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -241,7 +242,7 @@ resource "google_sql_database_instance" "instance" {
         }
     }
 
-    deletion_protection  = false
+    deletion_protection  = %{deletion_protection}
 }
 
 resource "google_sql_database" "db" {
