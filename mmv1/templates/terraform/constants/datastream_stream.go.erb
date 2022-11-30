@@ -24,7 +24,7 @@ func resourceDatastreamStreamCustomDiffFunc(diff TerraformResourceDiff) error {
 			}
 		} else {
 			if newState == "NOT_STARTED" && oldState != newState {
-				return fmt.Errorf("Field `desired_state` can only be set to `NOT_STARTED` when creating a new Stream")
+				return fmt.Errorf("Field `desired_state` cannot be changed to `NOT_STARTED` for an already-created Stream")
 			}
 
 			if oldState == "NOT_STARTED" && newState != "RUNNING" {
