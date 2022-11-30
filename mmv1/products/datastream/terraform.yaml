@@ -92,6 +92,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/private_connection.go.erb
       post_create: templates/terraform/post_create/private_connection.go.erb
+      post_import: templates/terraform/post_import/private_connection.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
