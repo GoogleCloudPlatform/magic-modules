@@ -58,6 +58,15 @@ resource "google_storage_bucket" "auto-expire" {
       type = "Delete"
     }
   }
+
+  lifecycle_rule {
+    condition {
+      age = 1
+    }
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+  }
 }
 ```
 
