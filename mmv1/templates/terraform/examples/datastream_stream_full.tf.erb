@@ -114,36 +114,34 @@ resource "google_datastream_stream" "<%= ctx[:primary_resource_id] %>" {
         mysql_source_config {
             include_objects {
                 mysql_databases {
-                    database {
-                        mysql_tables {
-                            table = "includedTable"
-                            mysql_columns {
-                                column = "includedColumn"
-                                data_type = "VARCHAR"
-                                length = 20
-                                collation = "utf8mb4"
-                                primary_key = false
-                                nullable = false
-                                ordinal_position = false
-                            }
+                    database = "my-database"
+                    mysql_tables {
+                        table = "includedTable"
+                        mysql_columns {
+                            column = "includedColumn"
+                            data_type = "VARCHAR"
+                            length = 20
+                            collation = "utf8mb4"
+                            primary_key = false
+                            nullable = false
+                            ordinal_position = false
                         }
                     }
                 }
             }
             exclude_objects {
                 mysql_databases {
-                    database {
-                        mysql_tables {
-                            table = "excludedTable"
-                            mysql_columns {
-                                column = "excludedColumn"
-                                data_type = "VARCHAR"
-                                length = 20
-                                collation = "utf8mb4"
-                                primary_key = false
-                                nullable = false
-                                ordinal_position = false
-                            }
+                    database = "my-database"
+                    mysql_tables {
+                        table = "excludedTable"
+                        mysql_columns {
+                            column = "excludedColumn"
+                            data_type = "VARCHAR"
+                            length = 20
+                            collation = "utf8mb4"
+                            primary_key = false
+                            nullable = false
+                            ordinal_position = false
                         }
                     }
                 }
@@ -167,18 +165,17 @@ resource "google_datastream_stream" "<%= ctx[:primary_resource_id] %>" {
     backfill_all {
         mysql_excluded_objects {
             mysql_databases {
-                database {
-                    mysql_tables {
-                        table = "excludedTable"
-                        mysql_columns {
-                            column = "excludedColumn"
-                            data_type = "VARCHAR"
-                            length = 20
-                            collation = "utf8mb4"
-                            primary_key = false
-                            nullable = false
-                            ordinal_position = false
-                        }
+                database = "my-database"
+                mysql_tables {
+                    table = "excludedTable"
+                    mysql_columns {
+                        column = "excludedColumn"
+                        data_type = "VARCHAR"
+                        length = 20
+                        collation = "utf8mb4"
+                        primary_key = false
+                        nullable = false
+                        ordinal_position = false
                     }
                 }
             }

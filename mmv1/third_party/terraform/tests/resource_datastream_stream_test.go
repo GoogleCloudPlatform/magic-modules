@@ -274,7 +274,7 @@ resource "google_datastream_connection_profile" "source_connection_profile_updat
 }
 
 resource "google_storage_bucket" "bucket" {
-  name                        = ""
+  name                        = "tf-test-my-bucket%{random_suffix}"
   location                    = "US"
   uniform_bucket_level_access = true
 }

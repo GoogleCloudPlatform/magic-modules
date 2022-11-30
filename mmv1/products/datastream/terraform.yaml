@@ -140,7 +140,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           source_connection_profile_id: "source-profile"
           database_instance_name: "my-instance"
           deletion_protection: "true"
-          bucket_id: "my-bucket"
+          bucket_name: "my-bucket"
           destination_connection_profile_id: "destination-profile"
         test_vars_overrides:
           deletion_protection: "false"
@@ -155,7 +155,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           source_connection_profile_id: "source-profile"
           database_instance_name: "my-instance"
           deletion_protection: "true"
-          bucket_id: "my-bucket"
+          bucket_name: "my-bucket"
           destination_connection_profile_id: "destination-profile"
         test_vars_overrides:
           deletion_protection: "false"
