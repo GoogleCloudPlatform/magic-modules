@@ -1,0 +1,68 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Site: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ['projects/{{project}}/sites/{{site_id}}', 'sites/{{site_id}}', '{{site_id}}']
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_site_basic"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          site_id: site-no-app
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_site_full"
+        min_version: "beta"
+        primary_resource_id: "full"
+        vars:
+          site_id: site-with-app
+        test_env_vars:
+          project_id: :PROJECT_NAME
+  Channel: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ['sites/{{site_id}}/channels/{{channel_id}}']
+    properties:
+      expireTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true # API computes value from ttl if not set directly
+      retainedReleaseCount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true # unlimited for "live" channel created with the site, and 10 for subsequent channels
+      ttl: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true # API doesn't return this value
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_channel_basic"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          site_id: site-with-channel
+          channel_id: channel-basic
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_channel_full"
+        min_version: "beta"
+        primary_resource_id: "full"
+        vars:
+          site_id: site-with-channel
+          channel_id: channel-full
+        test_env_vars:
+          project_id: :PROJECT_NAME
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

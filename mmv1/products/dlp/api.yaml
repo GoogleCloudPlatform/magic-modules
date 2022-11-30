@@ -288,6 +288,27 @@ objects:
                         required: true
                         description: |
                           The name of the table.
+                  - !ruby/object:Api::Type::Integer
+                    name: 'rowsLimit'
+                    description: |
+                      Max number of rows to scan. If the table has more rows than this value, the rest of the rows are omitted. 
+                      If not set, or if set to 0, all rows will be scanned. Only one of rowsLimit and rowsLimitPercent can be 
+                      specified. Cannot be used in conjunction with TimespanConfig.
+                  - !ruby/object:Api::Type::Integer
+                    name: 'rowsLimitPercent'
+                    description: |
+                      Max percentage of rows to scan. The rest are omitted. The number of rows scanned is rounded down. 
+                      Must be between 0 and 100, inclusively. Both 0 and 100 means no limit. Defaults to 0. Only one of 
+                      rowsLimit and rowsLimitPercent can be specified. Cannot be used in conjunction with TimespanConfig.
+                  - !ruby/object:Api::Type::Enum
+                    name: 'sampleMethod'
+                    description: |
+                      How to sample rows if not all rows are scanned. Meaningful only when used in conjunction with either 
+                      rowsLimit or rowsLimitPercent. If not specified, rows are scanned in the order BigQuery reads them.
+                    values: 
+                      - :TOP
+                      - :RANDOM_START
+                    default_value: :TOP
           - !ruby/object:Api::Type::Array
             name: 'actions'
             required: true
@@ -297,7 +318,9 @@ objects:
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'saveFindings'
-                  required: true
+                  exactly_one_of:
+                    - save_findings
+                    - pub_sub
                   description: |
                     Schedule for triggered jobs
                   properties:
@@ -345,6 +368,19 @@ objects:
                             - :DATASTORE_COLUMNS
                             - :BIG_QUERY_COLUMNS
                             - :ALL_COLUMNS
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'pubSub'
+                  exactly_one_of:
+                    - save_findings
+                    - pub_sub
+                  description: |
+                    Publish a message into a given Pub/Sub topic when the job completes.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'topic'
+                      required: true
+                      description: |
+                        Cloud Pub/Sub topic to send notifications to.
   - !ruby/object:Api::Resource
     name: 'InspectTemplate'
     create_url:  "{{parent}}/inspectTemplates"

@@ -76,13 +76,14 @@ objects:
         description: 'Set of label tags associated with the EdgeCache resource.'
       - !ruby/object:Api::Type::Array
         name: publicKeys
-        required: true
         description: |
           An ordered list of Ed25519 public keys to use for validating signed requests.
-          You must specify at least one (1) key, and may have up to three (3) keys.
+          You must specify `public_keys` or `validation_shared_keys` (or both). The keys in `public_keys` are checked first.
+          You may specify no more than one Google-managed public key.
+          If you specify `public_keys`, you must specify at least one (1) key and may specify up to three (3) keys.
 
           Ed25519 public keys are not secret, and only allow Google to validate a request was signed by your corresponding private key.
-          You should ensure that the private key is kept secret, and that only authorized users can add public keys to a keyset.
+          Ensure that the private key is kept secret, and that only authorized users can add public keys to a keyset.
         min_size: 1
         max_size: 3
         item_type: !ruby/object:Api::Type::NestedObject
@@ -96,10 +97,41 @@ objects:
                 which means the first character must be a letter, and all following characters must be a dash, underscore, letter or digit.
             - !ruby/object:Api::Type::String
               name: 'value'
-              required: true
               description: |
                 The base64-encoded value of the Ed25519 public key. The base64 encoding can be padded (44 bytes) or unpadded (43 bytes).
                 Representations or encodings of the public key other than this will be rejected with an error.
+            - !ruby/object:Api::Type::Boolean
+              name: 'managed'
+              description: |
+                Set to true to have the CDN automatically manage this public key value.
+        at_least_one_of:
+          - public_key
+          - validation_shared_keys
+      - !ruby/object:Api::Type::Array
+        name: 'validationSharedKeys'
+        description: |
+          An ordered list of shared keys to use for validating signed requests.
+          Shared keys are secret.  Ensure that only authorized users can add `validation_shared_keys` to a keyset.
+          You can rotate keys by appending (pushing) a new key to the list of `validation_shared_keys` and removing any superseded keys.
+          You must specify `public_keys` or `validation_shared_keys` (or both). The keys in `public_keys` are checked first.
+        min_size: 1
+        max_size: 3
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'secretVersion'
+              required: true
+              description: |
+                The name of the secret version in Secret Manager.
+                
+                The resource name of the secret version must be in the format `projects/*/secrets/*/versions/*` where the `*` values are replaced by the secrets themselves.
+                The secrets must be at least 16 bytes large.  The recommended secret size depends on the signature algorithm you are using.
+                * If you are using HMAC-SHA1, we suggest 20-byte secrets.
+                * If you are using HMAC-SHA256, we suggest 32-byte secrets.
+                See RFC 2104, Section 3 for more details on these recommendations.
+        at_least_one_of:
+          - public_key
+          - validation_shared_keys
   - !ruby/object:Api::Resource
     name: 'EdgeCacheOrigin'
     base_url: 'projects/{{project}}/locations/global/edgeCacheOrigins'
@@ -292,6 +324,28 @@ objects:
               - timeout.0.max_attempts_timeout
               - timeout.0.response_timeout
               - timeout.0.read_timeout
+      - !ruby/object:Api::Type::NestedObject
+        name: 'awsV4Authentication'
+        description: |
+          Enable AWS Signature Version 4 origin authentication.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'accessKeyId'
+            required: true
+            description: |
+              The access key ID your origin uses to identify the key.
+          - !ruby/object:Api::Type::String
+            name: 'secretAccessKeyVersion'
+            required: true
+            description: |
+              The Secret Manager secret version of the secret access key used by your origin.
+
+              This is the resource name of the secret version in the format `projects/*/secrets/*/versions/*` where the `*` values are replaced by the project, secret, and version you require.
+          - !ruby/object:Api::Type::String
+            name: 'originRegion'
+            required: true
+            description: |
+              The name of the AWS region that your origin is in.
   - !ruby/object:Api::Resource
     name: 'EdgeCacheService'
     base_url: 'projects/{{project}}/locations/global/edgeCacheServices'
@@ -814,10 +868,131 @@ objects:
                                 values:
                                   - :DISABLED
                                   - :REQUIRE_SIGNATURES
+                                  - :REQUIRE_TOKENS
                               - !ruby/object:Api::Type::String
                                 name: 'signedRequestKeyset' # resource ref, EdgeCacheKeyset?
                                 description: |
                                   The EdgeCacheKeyset containing the set of public keys used to validate signed requests at the edge.
+                              - !ruby/object:Api::Type::NestedObject
+                                name: 'signedTokenOptions'
+                                description: |
+                                  Additional options for signed tokens.
+
+                                  signedTokenOptions may only be specified when signedRequestMode is REQUIRE_TOKENS.
+                                properties:
+                                  - !ruby/object:Api::Type::String
+                                    name: 'tokenQueryParameter'
+                                    description: |
+                                      The query parameter in which to find the token.
+
+                                      The name must be 1-64 characters long and match the regular expression `[a-zA-Z]([a-zA-Z0-9_-])*` which means the first character must be a letter, and all following characters must be a dash, underscore, letter or digit.
+
+                                      Defaults to `edge-cache-token`.
+                                  - !ruby/object:Api::Type::Array
+                                    name: 'allowedSignatureAlgorithms'
+                                    description: |
+                                      The allowed signature algorithms to use.
+
+                                      Defaults to using only ED25519.
+
+                                      You may specify up to 3 signature algorithms to use.
+                                    max_size: 3
+                                    item_type: !ruby/object:Api::Type::Enum
+                                      name: 'allowedSignatureAlgorithm'
+                                      description: |
+                                        The signed request signature algorithm to use.
+                                      values:
+                                        - :ED25519
+                                        - :HMAC_SHA_256
+                                        - :HMAC_SHA1
+                              - !ruby/object:Api::Type::NestedObject
+                                name: 'addSignatures'
+                                description: |
+                                  Enable signature generation or propagation on this route.
+
+                                  This field may only be specified when signedRequestMode is set to REQUIRE_TOKENS.
+                                properties:
+                                  - !ruby/object:Api::Type::Array
+                                    name: actions
+                                    description: |
+                                      The actions to take to add signatures to responses.
+                                    required: true
+                                    max_size: 1
+                                    item_type: !ruby/object:Api::Type::Enum
+                                      name: action
+                                      description: |
+                                        The ways a signature can be manipulated in a response.
+                                      values:
+                                        - :GENERATE_COOKIE
+                                        - :GENERATE_TOKEN_HLS_COOKIELESS
+                                        - :PROPAGATE_TOKEN_HLS_COOKIELESS
+                                  - !ruby/object:Api::Type::String
+                                    name: 'keyset'
+                                    description: |
+                                      The keyset to use for signature generation.
+
+                                      The following are both valid paths to an EdgeCacheKeyset resource:
+
+                                        * `projects/project/locations/global/edgeCacheKeysets/yourKeyset`
+                                        * `yourKeyset`
+
+                                      This must be specified when the GENERATE_COOKIE or GENERATE_TOKEN_HLS_COOKIELESS actions are specified.  This field may not be specified otherwise.
+                                  - !ruby/object:Api::Type::String
+                                    name: tokenTtl
+                                    description: |
+                                      The duration the token is valid starting from the moment the token is first generated.
+                                      
+                                      Defaults to `86400s` (1 day).
+
+                                      The TTL must be >= 0 and <= 604,800 seconds (1 week).
+                                      
+                                      This field may only be specified when the GENERATE_COOKIE or GENERATE_TOKEN_HLS_COOKIELESS actions are specified.
+
+                                      A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+                                  - !ruby/object:Api::Type::String
+                                    name: 'tokenQueryParameter'
+                                    description: |
+                                      The query parameter in which to put the generated token.
+                                      
+                                      If not specified, defaults to `edge-cache-token`.
+
+                                      If specified, the name must be 1-64 characters long and match the regular expression `[a-zA-Z]([a-zA-Z0-9_-])*` which means the first character must be a letter, and all following characters must be a dash, underscore, letter or digit.
+
+                                      This field may only be set when the GENERATE_TOKEN_HLS_COOKIELESS or PROPAGATE_TOKEN_HLS_COOKIELESS actions are specified.
+                                  - !ruby/object:Api::Type::Array
+                                    name: 'copiedParameters'
+                                    description: |
+                                      The parameters to copy from the verified token to the generated token.
+
+                                      Only the following parameters may be copied:
+
+                                        * `PathGlobs`
+                                        * `paths`
+                                        * `acl`
+                                        * `URLPrefix`
+                                        * `IPRanges`
+                                        * `SessionID`
+                                        * `id`
+                                        * `Data`
+                                        * `data`
+                                        * `payload`
+                                        * `Headers`
+
+                                      You may specify up to 6 parameters to copy.  A given parameter is be copied only if the parameter exists in the verified token.  Parameter names are matched exactly as specified.  The order of the parameters does not matter.  Duplicates are not allowed.
+
+                                      This field may only be specified when the GENERATE_COOKIE or GENERATE_TOKEN_HLS_COOKIELESS actions are specified.
+                                    item_type: Api::Type::String
+                              - !ruby/object:Api::Type::String
+                                name: 'signedRequestMaximumExpirationTtl'
+                                description: |
+                                  Limit how far into the future the expiration time of a signed request may be.
+
+                                  When set, a signed request is rejected if its expiration time is later than now + signedRequestMaximumExpirationTtl, where now is the time at which the signed request is first handled by the CDN.
+
+                                  - The TTL must be > 0.
+                                  - Fractions of a second are not allowed.
+
+                                  By default, signedRequestMaximumExpirationTtl is not set and the expiration time of a signed request may be arbitrarily far into future.
                           - !ruby/object:Api::Type::NestedObject
                             name: urlRewrite
                             description: |

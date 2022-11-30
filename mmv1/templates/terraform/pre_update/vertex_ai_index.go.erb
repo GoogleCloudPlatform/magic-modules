@@ -1,0 +1,22 @@
+newUpdateMask := []string{}
+
+if d.HasChange("metadata.0.contents_delta_uri") {
+    // Use the current value of isCompleteOverwrite when updating contentsDeltaUri
+    newUpdateMask = append(newUpdateMask, "metadata.contentsDeltaUri")
+    newUpdateMask = append(newUpdateMask, "metadata.isCompleteOverwrite")
+}
+
+for _, mask := range updateMask {
+    // Use granular update masks instead of 'metadata' to avoid the following error:
+    // 'If `contents_delta_gcs_uri` is set as part of `index.metadata`, then no other Index fields can be also updated as part of the same update call.'
+    if mask == "metadata" {
+        continue
+    }
+    newUpdateMask = append(newUpdateMask, mask)
+}
+
+// Refreshing updateMask after adding extra schema entries
+url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
+if err != nil {
+    return err
+}

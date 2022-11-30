@@ -89,7 +89,7 @@ func newBigqueryDatasetIamAsset(
 
 func FetchBigqueryDatasetIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
-	if _, ok := d.GetOk("{{dataset_id}}"); !ok {
+	if _, ok := d.GetOk("dataset_id"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}
 
