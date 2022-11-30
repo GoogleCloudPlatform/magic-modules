@@ -25,6 +25,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           region: :REGION
           project_id: :PROJECT_NAME
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_update: templates/terraform/pre_update/firebase_database_instance_state.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
