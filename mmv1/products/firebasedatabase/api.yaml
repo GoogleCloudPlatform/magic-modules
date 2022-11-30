@@ -75,6 +75,7 @@ objects:
         name: type
         description: The database type.
         input: true
+        output: true
         values:
           - :DEFAULT_DATABASE
           - :USER_DATABASE
