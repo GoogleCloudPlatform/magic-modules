@@ -570,13 +570,13 @@ objects:
                 properties:
                 - !ruby/object:Api::Type::String
                   name: name
-                  description: If specified, used to specify which protocol to use. Allowed values are "http1" (HTTP/1) and "h2c" (HTTP/2 end-to-end)
+                  description: If specified, used to specify which protocol to use. Allowed values are "http1" (HTTP/1) and "h2c" (HTTP/2 end-to-end). Defaults to "http1".
                 - !ruby/object:Api::Type::String
                   name: protocol
                   description: Protocol for port. Must be "TCP". Defaults to "TCP".
                 - !ruby/object:Api::Type::Integer
                   name: containerPort
-                  description: Port number the container listens on. This must be a valid port number, 0 < x < 65536.
+                  description: Port number the container listens on. This must be a valid port number (between 1 and 65535). Defaults to "8080".
             - !ruby/object:Api::Type::NestedObject
               name: resources
               description: |-
