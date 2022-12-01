@@ -14,7 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Bucket: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ['projects/{{project}}/buckets/{{bucket_id}}']
+    import_format: ['projects/{{project}}/buckets/{{bucket_id}}','{{project}}/{{bucket_id}}']
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebasestorage_bucket_basic"
