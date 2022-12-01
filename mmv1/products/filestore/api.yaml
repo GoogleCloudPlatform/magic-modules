@@ -195,7 +195,6 @@ objects:
                       An integer representing the anonymous group id with a default value of 65534.
                       Anon_gid may only be set with squashMode of ROOT_SQUASH. An error will be returned
                       if this field is specified for other squashMode settings.
-              input: true
       - !ruby/object:Api::Type::Array
         name: 'networks'
         description: |
