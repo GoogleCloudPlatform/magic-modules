@@ -1,5 +1,7 @@
 ---
 title: "Add handwritten IAM resources"
+summary: "Handwritten IAM support is only recommended for resources that cannot be managed
+using [MMv1](/magic-modules/docs/how-to/add-mmv1-iam)."
 weight: 23
 ---
 

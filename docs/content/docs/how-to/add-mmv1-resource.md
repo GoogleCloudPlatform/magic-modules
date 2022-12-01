@@ -1,5 +1,9 @@
 ---
 title: "Add an MMv1 resource"
+summary: "Generated resources are created using the `mmv1` code generator, and are
+configured by editing definition files under the
+[`mmv1/products`](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products)
+path."
 weight: 10
 ---
 
