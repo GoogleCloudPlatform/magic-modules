@@ -251,14 +251,13 @@ func resourceStorageBucket() *schema.Resource {
 			"autoclass": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
 							Type:        schema.TypeBool,
 							Required:    true,
-							Description: `While set to true, utoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.`,
+							Description: `While set to true, autoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.`,
 						},
 					},
 				},

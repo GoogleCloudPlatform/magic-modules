@@ -416,14 +416,6 @@ objects:
             description: |
               While set to true, versioning is fully enabled for this bucket.
       - !ruby/object:Api::Type::NestedObject
-        name: 'autoclass'
-        description: "The bucket's autoclass configuration." 
-        properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'enabled'
-            description: |
-              While set to true, utoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.  
-      - !ruby/object:Api::Type::NestedObject
         name: 'website'
         description: |
           The bucket's website configuration, controlling how the service
