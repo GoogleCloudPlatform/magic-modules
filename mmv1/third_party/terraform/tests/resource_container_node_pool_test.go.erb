@@ -2803,7 +2803,7 @@ resource "google_container_node_pool" "np1" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
   upgrade_settings {
-    max_surge = 1
+    max_surge = 2
     max_unavailable = 1
   }
 }
@@ -2814,7 +2814,7 @@ resource "google_container_node_pool" "np2" {
 	cluster            = google_container_cluster.cluster.name
 	initial_node_count = 2
 	upgrade_settings {
-		max_surge = 1
+		max_surge = 2
 		max_unavailable = 1
 	  }
   }
