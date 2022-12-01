@@ -575,26 +575,6 @@ func checkGoogleIamPolicy(value string) error {
 	return nil
 }
 
-// Gets cluster hash from fully-qualified cluster name.
-func getClusterHash(clusterFQN string, project string, userAgent string, config *Config) (string, error) {
-	getClusterCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(clusterFQN)
-	if config.UserProjectOverride {
-		getClusterCall.Header().Add("X-Goog-User-Project", project)
-	}
-	res, err := getClusterCall.Do()
-	if err != nil {
-		return "", err
-	}
-	return res.Id, nil
-}
-
-// Gets nodepool-level lock key. Guarantees uniqueness by using
-// the cluster hash (globally unique) and nodepool name (unique
-// within a cluster).
-func nodePoolLockKey(clusterHash string, npName string) string {
-	return fmt.Sprintf("clusters/%s/nodePools/%s", clusterHash, npName)
-}
-
 // Retries an operation while the canonical error code is FAILED_PRECONDTION
 // which indicates there is an incompatible operation already running on the
 // cluster. This error can be safely retried until the incompatible operation
