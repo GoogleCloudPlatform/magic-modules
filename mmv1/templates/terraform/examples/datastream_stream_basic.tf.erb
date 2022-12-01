@@ -114,7 +114,9 @@ resource "google_datastream_stream" "<%= ctx[:primary_resource_id] %>" {
     }
     destination_config {
         destination_connection_profile = google_datastream_connection_profile.destination_connection_profile.id
-        gcs_destination_config {}
+        gcs_destination_config {
+            avro_file_format {}
+        }
     }
 
     backfill_none {
