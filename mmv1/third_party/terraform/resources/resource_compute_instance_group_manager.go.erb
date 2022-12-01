@@ -329,6 +329,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"stateful_internal_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -350,6 +351,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"stateful_external_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -1039,10 +1041,7 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ip") {
 		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
-		log.Printf("@@@@@@@@@@[DEBUG] oldInternalIps %s", oldInternalIps)
-		log.Printf("@@@@@@@@@@[DEBUG] newInternalIps %s", newInternalIps)
 		if len(newInternalIps.([]interface{})) == 0 {
-			return nil
 			preservedState.NullFields = append(preservedState.NullFields, "internalIPs")
 		} else {
 			preservedState.InternalIPs = expandStatefulIps(oldInternalIps.([]interface{}), newInternalIps.([]interface{}), preservedState, "InternalIPs.%s")
@@ -1051,10 +1050,7 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 	}
 	if d.HasChange("stateful_external_ip") {
 		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
-		log.Printf("@@@@@@@@@@[DEBUG] oldExternalIps %s", oldExternalIps)
-		log.Printf("@@@@@@@@@@[DEBUG] newExternalIps %s", newExternalIps)
 		if len(newExternalIps.([]interface{})) == 0 {
-			return nil
 			preservedState.NullFields = append(preservedState.NullFields, "externalIPs")
 		} else {
 			preservedState.ExternalIPs = expandStatefulIps(oldExternalIps.([]interface{}), newExternalIps.([]interface{}), preservedState, "ExternalIPs.%s")
@@ -1092,7 +1088,6 @@ func expandStatefulIps(old []interface{}, new []interface{}, preservedState *com
 			}
 		}
 	}
-	log.Printf("@@@@@@@@@@[DEBUG] statefulIpsMap %s", statefulIpsMap)
 	return statefulIpsMap
 }
 <% end -%>
