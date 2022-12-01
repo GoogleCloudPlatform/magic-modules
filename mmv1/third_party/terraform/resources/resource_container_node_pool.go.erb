@@ -389,9 +389,19 @@ func (nodePoolInformation *NodePoolInformation) parent() string {
 	)
 }
 
-func (nodePoolInformation *NodePoolInformation) lockKey() string {
+func (nodePoolInformation *NodePoolInformation) clusterLockKey() string {
 	return containerClusterMutexKey(nodePoolInformation.project,
 		nodePoolInformation.location, nodePoolInformation.cluster)
+}
+
+func (nodePoolInformation *NodePoolInformation) nodePoolLockKey(nodePoolName string) string {
+	return fmt.Sprintf(
+		"projects/%s/locations/%s/clusters/%s/nodePools/%s",
+		nodePoolInformation.project,
+		nodePoolInformation.location,
+		nodePoolInformation.cluster,
+		nodePoolName,
+	)
 }
 
 func extractNodePoolInformation(d *schema.ResourceData, config *Config) (*NodePoolInformation, error) {
@@ -441,18 +451,13 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	clusterHash, err := getClusterHash(nodePoolInfo.parent(), nodePoolInfo.project, userAgent, config)
-	if err != nil {
-			return err
-	}
-
 	// Acquire read-lock on cluster.
-	clusterLockKey := nodePoolInfo.lockKey()
+	clusterLockKey := nodePoolInfo.clusterLockKey()
 	mutexKV.RLock(clusterLockKey)
 	defer mutexKV.RUnlock(clusterLockKey)
 
 	// Acquire write-lock on nodepool.
-	npLockKey := nodePoolLockKey(clusterHash, nodePool.Name)
+	npLockKey := nodePoolInfo.nodePoolLockKey(nodePool.Name)
 	mutexKV.Lock(npLockKey)
 	defer mutexKV.Unlock(npLockKey)
 
@@ -672,18 +677,13 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	clusterHash, err := getClusterHash(nodePoolInfo.parent(), nodePoolInfo.project, userAgent, config)
-	if err != nil {
-		return err
-	}
-
 	// Acquire read-lock on cluster.
-	clusterLockKey := nodePoolInfo.lockKey()
+	clusterLockKey := nodePoolInfo.clusterLockKey()
 	mutexKV.RLock(clusterLockKey)
 	defer mutexKV.RUnlock(clusterLockKey)
 
 	// Acquire write-lock on nodepool.
-	npLockKey := nodePoolLockKey(clusterHash, name)
+	npLockKey := nodePoolInfo.nodePoolLockKey(name)
 	mutexKV.Lock(npLockKey)
 	defer mutexKV.Unlock(npLockKey)
 
@@ -1127,18 +1127,13 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		return err
 	}
 
-	clusterHash, err := getClusterHash(nodePoolInfo.parent(), nodePoolInfo.project, userAgent, config)
-	if err != nil {
-			return err
-	}
-
 	// Acquire read-lock on cluster.
-	clusterLockKey := nodePoolInfo.lockKey()
+	clusterLockKey := nodePoolInfo.clusterLockKey()
 	mutexKV.RLock(clusterLockKey)
 	defer mutexKV.RUnlock(clusterLockKey)
 
 	// Nodepool write-lock will be acquired when update function is called.
-	npLockKey := nodePoolLockKey(clusterHash, name)
+	npLockKey := nodePoolInfo.nodePoolLockKey(name)
 
 	if d.HasChange(prefix + "autoscaling") {
 		update := &container.ClusterUpdate{

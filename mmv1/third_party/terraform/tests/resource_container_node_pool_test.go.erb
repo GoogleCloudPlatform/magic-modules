@@ -2767,9 +2767,6 @@ resource "google_container_node_pool" "np" {
 
 func testAccContainerNodePool_concurrentCreate(cluster, np1, np2 string) string {
 	return fmt.Sprintf(`
-provider "google" {
-  user_project_override = true
-}
 resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
@@ -2794,9 +2791,6 @@ resource "google_container_node_pool" "np2" {
 
 func testAccContainerNodePool_concurrentUpdate(cluster, np1, np2 string) string {
 	return fmt.Sprintf(`
-provider "google" {
-  user_project_override = true
-}
 resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
