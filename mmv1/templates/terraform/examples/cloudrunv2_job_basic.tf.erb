@@ -1,0 +1,13 @@
+resource "google_cloud_run_v2_job" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_job_name'] %>"
+  location = "us-central1"
+  launch_stage = "BETA"
+
+  template {
+    template {
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+      }
+    }
+  }
+}
