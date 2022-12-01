@@ -76,7 +76,7 @@ rm -rf ~/.terraform.d/plugins/registry.terraform.io/hashicorp/
 
 ## Download production providers
 
-When in this mode, Terraform will be unable to pull providers from the registry using `terraform init`, even if a version constraint requires them. However, providers downloaded to the discovery directory may be used by `init`. To download providers to the discovery directory, run `terraform providers mirror ~/.terraform.d/plugins` from your configuration's directory prior to running `terraform init`.
+When in this mode, Terraform will be unable to pull the `google` and `google-beta` providers from the registry using `terraform init`, even if a version constraint requires them. However, providers downloaded to the discovery directory may be used by `init`. To download providers to the discovery directory, run `terraform providers mirror ~/.terraform.d/plugins` from your configuration's directory prior to running `terraform init`.
 
 ## More information
 
