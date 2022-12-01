@@ -1,7 +1,0 @@
-resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
-  name       = "<%= ctx[:vars]['bucket_name'] %>"
-  location   = "US"
-  autoclass  {
-    enabled  = true
-  }
-}
