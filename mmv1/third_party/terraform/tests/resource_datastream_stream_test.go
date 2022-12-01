@@ -137,7 +137,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix":       randString(t, 10),
 		"deletion_protection": false,
 	}
 
