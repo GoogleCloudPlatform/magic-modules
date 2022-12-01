@@ -674,9 +674,8 @@ func resourceDataprocCluster() *schema.Resource {
 												},
 												"values": {
 													Type:         schema.TypeSet,
-													Elem:        &schema.Schema{Type: schema.TypeString},
+													Elem:         &schema.Schema{Type: schema.TypeString},
 													Optional:     true,
-													Default:      false,
 													AtLeastOneOf: reservationAffinityKeys,
 													ForceNew:     true,
 													Description:  `Corresponds to the label values of reservation resource.`,
