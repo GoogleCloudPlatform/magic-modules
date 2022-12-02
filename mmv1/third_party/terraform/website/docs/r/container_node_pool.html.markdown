@@ -148,8 +148,9 @@ cluster.
 * `node_config` - (Optional) Parameters used in creating the node pool. See
     [google_container_cluster](container_cluster.html#nested_node_config) for schema.
 
-* `network_config` - (Optional) The network configuration of the pool. See
-    [google_container_cluster](container_cluster.html) for schema.
+* `network_config` - (Optional) The network configuration of the pool. Such as
+    configuration for [Adding Pod IP address ranges](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-pod-cidr)) to the node pool. Or enabling private nodes. Structure is
+    [documented below](#nested_network_config)
 
 * `node_count` - (Optional) The number of nodes per instance group. This field can be used to
     update the number of nodes per instance group but should not be used alongside `autoscaling`.
@@ -157,8 +158,7 @@ cluster.
 * `project` - (Optional) The ID of the project in which to create the node pool. If blank,
     the provider-configured project will be used.
 
-* `upgrade_settings` (Optional) Specify node upgrade settings to change how many nodes GKE attempts to
-    upgrade at once. The number of nodes upgraded simultaneously is the sum of `max_surge` and `max_unavailable`.
+* `upgrade_settings` (Optional) Specify node upgrade settings to change how GKE upgrades nodes.
     The maximum number of nodes upgraded simultaneously is limited to 20. Structure is [documented below](#nested_upgrade_settings).
 
 * `version` - (Optional) The Kubernetes version for the nodes in this pool. Note that if this field
@@ -199,17 +199,42 @@ cluster.
 
 * `auto_upgrade` - (Optional) Whether the nodes will be automatically upgraded.
 
+<a name="nested_network_config"></a>The `network_config` block supports:
+
+* `create_pod_range` - (Optional) Whether to create a new range for pod IPs in this node pool. Defaults are provided for `pod_range` and `pod_ipv4_cidr_block` if they are not specified.
+
+* `enable_private_nodes` - (Optional) Whether nodes have internal IP addresses only.
+
+* `pod_ipv4_cidr_block` - (Optional) The IP address range for pod IPs in this node pool. Only applicable if createPodRange is true. Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14) to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) to pick a specific range to use.
+
+* `pod_range` - (Optional) The ID of the secondary range for pod IPs. If `create_pod_range` is true, this ID is used for the new range. If `create_pod_range` is false, uses an existing secondary range with this ID.
+
 <a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
 
-* `max_surge` - (Required) The number of additional nodes that can be added to the node pool during
+* `max_surge` - (Optional) The number of additional nodes that can be added to the node pool during
     an upgrade. Increasing `max_surge` raises the number of nodes that can be upgraded simultaneously.
     Can be set to 0 or greater.
 
-* `max_unavailable` - (Required) The number of nodes that can be simultaneously unavailable during
+* `max_unavailable` - (Optional) The number of nodes that can be simultaneously unavailable during
     an upgrade. Increasing `max_unavailable` raises the number of nodes that can be upgraded in
     parallel. Can be set to 0 or greater.
 
 `max_surge` and `max_unavailable` must not be negative and at least one of them must be greater than zero.
+
+* `strategy` - (Default `SURGE`) The upgrade stragey to be used for upgrading the nodes.
+
+* `blue_green_settings` - (Optional) The settings to adjust [blue green upgrades](https://cloud.google.com/kubernetes-engine/docs/concepts/node-pool-upgrade-strategies#blue-green-upgrade-strategy).
+    Structure is [documented below](#nested_blue_green_settings)
+
+<a name="nested_blue_green_settings"></a>The `blue_green_settings` block supports:
+
+* `standard_rollout_policy` - (Required) Specifies the standard policy settings for blue-green upgrades.
+    * `batch_percentage` - (Optional) Percentage of the blue pool nodes to drain in a batch.
+    * `batch_node_count` - (Optional) Number of blue nodes to drain in a batch.
+    * `batch_soak_duration` - (Optionial) Soak time after each batch gets drained.
+
+* `node_pool_soak_duration` - (Optional) Time needed after draining the entire blue pool.
+    After this period, the blue pool will be cleaned up.
 
 <a name="nested_placement_policy"></a>The `placement_policy` block supports:
 

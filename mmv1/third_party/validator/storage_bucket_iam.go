@@ -92,7 +92,7 @@ func newStorageBucketIamAsset(
 
 func FetchStorageBucketIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
-	if _, ok := d.GetOk("{{bucket}}"); !ok {
+	if _, ok := d.GetOk("bucket"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}
 

@@ -122,6 +122,7 @@ func resource<%= resource_name -%>() *schema.Resource {
             <% unless field.default_value.nil? -%>
               Default:  <%= go_literal(field.default_value) -%>,
             <% end -%>
+              Description: `<%= field.description.strip.gsub("`", "'") -%>`,
             },
 <%        end -%>
 <%      end -%>
@@ -160,7 +161,7 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 <% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
-<%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
+<%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project && object.async&.allow?('create') -%>
     var project string
 <% end -%>
     config := meta.(*Config)
@@ -577,7 +578,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <% if updatable?(object, object.root_properties) -%>
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
-<%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
+<%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project && object.async&.allow?('update') -%>
     var project string
 <% end -%>
     config := meta.(*Config)
@@ -839,7 +840,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <% end # if updatable? -%>
 
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
-<%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project -%>
+<%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project && object.async&.allow?('delete')  -%>
     var project string
 <% end -%>
 <% if object.skip_delete -%>

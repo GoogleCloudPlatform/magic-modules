@@ -1,0 +1,22 @@
+config := meta.(*Config)
+if err := parseImportId([]string{
+	"(?P<featurestore>.+)/entityTypes/(?P<name>[^/]+)",
+}, d, config); err != nil {
+	return nil, err
+}
+
+// Replace import id for the resource id
+id, err := replaceVars(d, config, "{{featurestore}}/entityTypes/{{name}}")
+if err != nil {
+	return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+featurestore := d.Get("featurestore").(string)
+
+re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featurestores/(.+)$")
+if parts := re.FindStringSubmatch(featurestore); parts != nil {
+	d.Set("region", parts[2])
+}
+
+return []*schema.ResourceData{d}, nil

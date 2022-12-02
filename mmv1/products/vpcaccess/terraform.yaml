@@ -24,7 +24,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "vpc_access_connector_shared_vpc"
         primary_resource_id: "connector"
-        min_version: beta
         vars:
           name: "vpc-con"
     custom_code: !ruby/object:Provider::Terraform::CustomCode

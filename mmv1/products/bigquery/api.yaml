@@ -41,6 +41,9 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Dataset name'
+      - !ruby/object:Api::Type::String
+        name: 'maxTimeTravelHours'
+        description: 'Defines the time travel window in hours. The value can be from 48 to 168 hours (2 to 7 days).'
       - !ruby/object:Api::Type::Array
         name: 'access'
         description: 'An array of objects that define dataset access for one or more entities.'
@@ -137,6 +140,30 @@ objects:
                     Which resources in the dataset this entry applies to. Currently, only views are supported,
                     but additional target types may be added in the future. Possible values: VIEWS
                   item_type: Api::Type::String
+                  required: true
+            - !ruby/object:Api::Type::NestedObject
+              name: 'routine'
+              description: |
+                A routine from a different dataset to grant access to. Queries
+                executed against that routine will have read access to tables in
+                this dataset. The role field is not required when this field is
+                set. If that routine is updated by any user, access to the routine
+                needs to be granted again via an update operation.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'datasetId'
+                  description: The ID of the dataset containing this table.
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: 'projectId'
+                  description: The ID of the project containing this table.
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: 'routineId'
+                  description: |
+                    The ID of the routine. The ID must contain only letters (a-z,
+                    A-Z), numbers (0-9), or underscores (_). The maximum length
+                    is 256 characters.
                   required: true
       - !ruby/object:Api::Type::Integer
         name: 'creationTime'
@@ -275,6 +302,7 @@ objects:
       - iamMember
       - view
       - dataset
+      - routine
     description: |
       Gives dataset access for a single entity. This resource is intended to be used in cases where
       it is not possible to compile a full list of access blocks to include in a
@@ -317,6 +345,7 @@ objects:
           - iam_member
           - view
           - dataset
+          - routine
       - !ruby/object:Api::Type::String
         name: 'groupByEmail'
         description: An email address of a Google Group to grant access to.
@@ -328,6 +357,7 @@ objects:
           - iam_member
           - view
           - dataset
+          - routine
       - !ruby/object:Api::Type::String
         name: 'domain'
         description: |
@@ -341,6 +371,7 @@ objects:
           - iam_member
           - view
           - dataset
+          - routine
       - !ruby/object:Api::Type::String
         name: 'specialGroup'
         description: |
@@ -365,6 +396,7 @@ objects:
           - iam_member
           - view
           - dataset
+          - routine
       - !ruby/object:Api::Type::String
         name: 'iamMember'
         description: |
@@ -378,6 +410,7 @@ objects:
           - iam_member
           - view
           - dataset
+          - routine
       - !ruby/object:Api::Type::NestedObject
         name: 'view'
         description: |
@@ -394,6 +427,7 @@ objects:
           - iam_member
           - view
           - dataset
+          - routine
         properties:
           - !ruby/object:Api::Type::String
             name: 'datasetId'
@@ -422,6 +456,7 @@ objects:
           - iam_member
           - view
           - dataset
+          - routine
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'dataset'
@@ -443,6 +478,39 @@ objects:
               Which resources in the dataset this entry applies to. Currently, only views are supported,
               but additional target types may be added in the future. Possible values: VIEWS
             item_type: Api::Type::String
+            required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'routine'
+        description: |
+          A routine from a different dataset to grant access to. Queries
+          executed against that routine will have read access to tables in
+          this dataset. The role field is not required when this field is
+          set. If that routine is updated by any user, access to the routine
+          needs to be granted again via an update operation.
+        exactly_one_of:
+          - user_by_email
+          - group_by_email
+          - domain
+          - special_group
+          - iam_member
+          - view
+          - dataset
+          - routine
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'datasetId'
+            description: The ID of the dataset containing this table.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'projectId'
+            description: The ID of the project containing this table.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'routineId'
+            description: |
+              The ID of the routine. The ID must contain only letters (a-z,
+              A-Z), numbers (0-9), or underscores (_). The maximum length
+              is 256 characters.
             required: true
   - !ruby/object:Api::Resource
     name: 'Job'

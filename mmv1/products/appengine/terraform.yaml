@@ -123,6 +123,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           Environment variables available to the application.  As these are not returned
           in the API request, Terraform will not detect any changes made outside of the Terraform config.
         ignore_read: true
+      serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       network.subnetworkName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'subnetwork'
       betaSettings: !ruby/object:Overrides::Terraform::PropertyOverride
