@@ -2764,7 +2764,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
-
 func testAccContainerNodePool_concurrentCreate(cluster, np1, np2 string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
@@ -2778,6 +2777,7 @@ resource "google_container_node_pool" "np1" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
+  version 			 = "1.24.5-gke.600"
 }
 
 resource "google_container_node_pool" "np2" {
@@ -2785,6 +2785,7 @@ resource "google_container_node_pool" "np2" {
 	location           = "us-central1-a"
 	cluster            = google_container_cluster.cluster.name
 	initial_node_count = 2
+	version 		   = "1.24.5-gke.600"
   }
 `, cluster, np1, np2)
 }
@@ -2802,10 +2803,7 @@ resource "google_container_node_pool" "np1" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
-  upgrade_settings {
-    max_surge = 2
-    max_unavailable = 1
-  }
+  version 		     = "1.24.7-gke.900"
 }
 
 resource "google_container_node_pool" "np2" {
@@ -2813,12 +2811,7 @@ resource "google_container_node_pool" "np2" {
 	location           = "us-central1-a"
 	cluster            = google_container_cluster.cluster.name
 	initial_node_count = 2
-	upgrade_settings {
-		max_surge = 2
-		max_unavailable = 1
-	  }
+	version 		   = "1.24.7-gke.900"
   }
 `, cluster, np1, np2)
 }
-
-
