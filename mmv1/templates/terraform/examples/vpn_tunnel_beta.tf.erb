@@ -1,5 +1,5 @@
 resource "google_compute_vpn_tunnel" "tunnel1" {
-  provider      = google-beta
+  provider      = <%= ctx[:vars]['provider_name']%>
   name          = "<%= ctx[:vars]['vpn_tunnel_name'] %>"
   peer_ip       = "15.0.0.120"
   shared_secret = "a secret message"
@@ -18,23 +18,23 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
 }
 
 resource "google_compute_vpn_gateway" "target_gateway" {
-  provider = google-beta
+  provider = <%= ctx[:vars]['provider_name']%>
   name     = "<%= ctx[:vars]['target_vpn_gateway_name'] %>"
   network  = google_compute_network.network1.id
 }
 
 resource "google_compute_network" "network1" {
-  provider = google-beta
+  provider = <%= ctx[:vars]['provider_name']%>
   name     = "<%= ctx[:vars]['network_name'] %>"
 }
 
 resource "google_compute_address" "vpn_static_ip" {
-  provider = google-beta
+  provider = <%= ctx[:vars]['provider_name']%>
   name     = "<%= ctx[:vars]['address_name'] %>"
 }
 
 resource "google_compute_forwarding_rule" "fr_esp" {
-  provider    = google-beta
+  provider    = <%= ctx[:vars]['provider_name']%>
   name        = "<%= ctx[:vars]['esp_forwarding_rule_name'] %>"
   ip_protocol = "ESP"
   ip_address  = google_compute_address.vpn_static_ip.address
@@ -42,7 +42,7 @@ resource "google_compute_forwarding_rule" "fr_esp" {
 }
 
 resource "google_compute_forwarding_rule" "fr_udp500" {
-  provider    = google-beta
+  provider    = <%= ctx[:vars]['provider_name']%>
   name        = "<%= ctx[:vars]['udp500_forwarding_rule_name'] %>"
   ip_protocol = "UDP"
   port_range  = "500"
@@ -51,7 +51,7 @@ resource "google_compute_forwarding_rule" "fr_udp500" {
 }
 
 resource "google_compute_forwarding_rule" "fr_udp4500" {
-  provider    = google-beta
+  provider    = <%= ctx[:vars]['provider_name']%>
   name        = "<%= ctx[:vars]['udp4500_forwarding_rule_name'] %>"
   ip_protocol = "UDP"
   port_range  = "4500"
@@ -60,7 +60,7 @@ resource "google_compute_forwarding_rule" "fr_udp4500" {
 }
 
 resource "google_compute_route" "route1" {
-  provider   = google-beta
+  provider   = <%= ctx[:vars]['provider_name']%>
   name       = "<%= ctx[:vars]['route_name'] %>"
   network    = google_compute_network.network1.name
   dest_range = "15.0.0.0/24"
@@ -72,4 +72,5 @@ resource "google_compute_route" "route1" {
 provider "google-beta" {
   region = "us-central1"
   zone   = "us-central1-a"
+  <%= ctx[:vars]['provider_alias']%>
 }

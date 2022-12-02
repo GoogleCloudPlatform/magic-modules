@@ -1,9 +1,10 @@
 ---
-title: "Identify MMv1 vs handwritten content"
+title: "Identify MMv1 vs handwritten resources"
+summary: "Check the header in the Go source to determine what type of resource it is. If there is no header, it is likely handwritten."
 weight: 1
 ---
 
-# Identify MMv1 vs handwritten content
+# Identify MMv1 vs handwritten resources
 
 ## MMv1
 

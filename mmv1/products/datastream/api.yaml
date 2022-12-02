@@ -351,6 +351,31 @@ objects:
         name: 'displayName'
         required: true
         description: Display name.
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          State of the PrivateConnection.
+        output: true
+        values:
+        - :CREATING
+        - :CREATED
+        - :FAILED
+        - :DELETING
+        - :FAILED_TO_DELETE
+      - !ruby/object:Api::Type::NestedObject
+        name: 'error'
+        output: true
+        description: |
+          The PrivateConnection error in case of failure.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'message'
+            description: |
+              A message containing more information about the error that occurred.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'details'
+            description: |
+              A list of messages that carry the error details.
       - !ruby/object:Api::Type::NestedObject
         name: 'vpcPeeringConfig'
         required: true
