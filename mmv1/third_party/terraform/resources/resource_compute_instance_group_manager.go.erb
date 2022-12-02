@@ -329,7 +329,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"stateful_internal_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -351,7 +350,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"stateful_external_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -836,15 +834,13 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	}
 	<% end -%>
 
-	isStatefulPolicyExpanded := false
-	//Add validation for isStatefulPolicyExpanded here to avoid variable declared but not used in GA
-	if d.HasChange("stateful_disk") && !isStatefulPolicyExpanded {
+	<% unless version == "ga" -%>
+	if d.HasChange("stateful_internal_ips") || d.HasChange("stateful_external_ips") || d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
-		isStatefulPolicyExpanded = true
 	}
-	<% unless version == "ga" -%>
-	if d.HasChange("stateful_internal_ips") || d.HasChange("stateful_external_ips") && !isStatefulPolicyExpanded {
+	<% else -%>
+	if d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 	}
@@ -1036,38 +1032,34 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 		disks[data["device_name"].(string)] = disk
 	}
 	preservedState.Disks = disks
-	var change bool
-	change = false
 	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ip") {
-		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
+		newInternalIps := d.Get("stateful_internal_ip")
 		if len(newInternalIps.([]interface{})) == 0 {
-			preservedState.NullFields = append(preservedState.NullFields, "internalIPs")
+			preservedState.ForceSendFields = append(preservedState.ForceSendFields, "InternalIPs")
 		} else {
-			preservedState.InternalIPs = expandStatefulIps(oldInternalIps.([]interface{}), newInternalIps.([]interface{}), preservedState, "InternalIPs.%s")
+			preservedState.InternalIPs = expandStatefulIps(newInternalIps.([]interface{}), preservedState, "InternalIPs.%s")
 		}
-		change = true
 	}
 	if d.HasChange("stateful_external_ip") {
-		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
+		newExternalIps := d.Get("stateful_external_ip")
 		if len(newExternalIps.([]interface{})) == 0 {
-			preservedState.NullFields = append(preservedState.NullFields, "externalIPs")
+			preservedState.ForceSendFields = append(preservedState.ForceSendFields, "ExternalIPs")
 		} else {
-			preservedState.ExternalIPs = expandStatefulIps(oldExternalIps.([]interface{}), newExternalIps.([]interface{}), preservedState, "ExternalIPs.%s")
+			preservedState.ExternalIPs = expandStatefulIps(newExternalIps.([]interface{}), preservedState, "ExternalIPs.%s")
 		}
-		change = true
 	}
+
 	<% end -%>
-	if len(disks) > 0 || change {
-		statefulPolicy := &compute.StatefulPolicy{PreservedState: preservedState}
-		statefulPolicy.ForceSendFields = append(statefulPolicy.ForceSendFields, "PreservedState")
-		return statefulPolicy
-	}
-	return nil
+	preservedState.ForceSendFields = append(preservedState.ForceSendFields, "Disks")
+	statefulPolicy := &compute.StatefulPolicy{PreservedState: preservedState}
+	statefulPolicy.ForceSendFields = append(statefulPolicy.ForceSendFields, "PreservedState")
+
+	return statefulPolicy
 }
 
 <% unless version == "ga" -%>
-func expandStatefulIps(old []interface{}, new []interface{}, preservedState *compute.StatefulPolicyPreservedState, prefix string) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
+func expandStatefulIps(new []interface{}, preservedState *compute.StatefulPolicyPreservedState, prefix string) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
 	statefulIpsMap :=	make(map[string]compute.StatefulPolicyPreservedStateNetworkIp)
 
 	for _, raw := range new {
@@ -1078,16 +1070,6 @@ func expandStatefulIps(old []interface{}, new []interface{}, preservedState *com
 		statefulIpsMap[data["interface_name"].(string)] = networkIp
 	}
 
-	if len(statefulIpsMap) > 0 {
-		for _, raw := range old {
-			data := raw.(map[string]interface{})
-			k := data["interface_name"].(string)
-			if _, exist := statefulIpsMap[k]; !exist {
-				statefulIpsMap[k] = compute.StatefulPolicyPreservedStateNetworkIp{}
-				preservedState.NullFields = append(preservedState.NullFields, fmt.Sprintf(prefix, k))
-			}
-		}
-	}
 	return statefulIpsMap
 }
 <% end -%>
