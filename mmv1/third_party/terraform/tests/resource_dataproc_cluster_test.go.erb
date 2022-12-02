@@ -372,6 +372,30 @@ func TestAccDataprocCluster_withMetadataAndTags(t *testing.T) {
 	})
 }
 
+func TestAccDataprocCluster_withReservationAffinity(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := randString(t, 10)
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withReservationAffinity(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
+
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.reservation_affinity.consume_reservation_type", "ANY_RESERVATION"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.reservation_affinity.key", "name"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.reservation_affinity.values.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_singleNodeCluster(t *testing.T) {
 	t.Parallel()
 
@@ -1323,6 +1347,25 @@ resource "google_dataproc_cluster" "basic" {
         baz = "qux"
       }
       tags = ["my-tag", "your-tag", "our-tag", "their-tag"]
+    }
+  }
+}
+`, rnd)
+}
+
+func testAccDataprocCluster_withReservationAffinity(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "basic" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      reservation_affinity = {
+        consume_reservation_type = "ANY_RESERVATION"
+        key = "name"
+        values = ["my-label"]
+      }
     }
   }
 }
