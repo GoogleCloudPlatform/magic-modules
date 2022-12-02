@@ -659,7 +659,7 @@ objects:
       guides:
         'Provisioning NAT IPs':
           'https://cloud.google.com/apigee/docs/api-platform/security/nat-provisioning'
-      api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses'      
+      api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses'
   - !ruby/object:Api::Resource
     name: 'SharedFlow'
     base_url: 'organizations/{{org_id}}/sharedflows/{{name}}'
@@ -695,32 +695,25 @@ objects:
         required: true
         input: true
         url_param_only: true
-      # - !ruby/object:Api::Type::String
-      #   name: 'sharedFlowName'
-      #   description: |
-      #     ID of the shared flow.
-      #   required: true
-      #   input: true
-      #   url_param_only: true
     properties:
-    - !ruby/object:Api::Type::NestedObject
-          name: 'metaData'
-          description: |
-            Metadata describing the shared flow.
-          output: true
-          properties:
-            - !ruby/object:Api::Type::String
-              name: 'createdAt'
-              description: |
-                Time at which the API proxy was created, in milliseconds since epoch.
-            - !ruby/object:Api::Type::String
-              name: 'lastModifiedAt'
-              description: |
-                Time at which the API proxy was most recently modified, in milliseconds since epoch.
-            - !ruby/object:Api::Type::String
-              name: 'subType'
-              description: |
-                The type of entity described
+      - !ruby/object:Api::Type::NestedObject
+        name: 'metaData'
+        description: |
+          Metadata describing the shared flow.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'createdAt'
+            description: |
+              Time at which the API proxy was created, in milliseconds since epoch.
+          - !ruby/object:Api::Type::String
+            name: 'lastModifiedAt'
+            description: |
+              Time at which the API proxy was most recently modified, in milliseconds since epoch.
+          - !ruby/object:Api::Type::String
+            name: 'subType'
+            description: |
+              The type of entity described
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -731,7 +724,6 @@ objects:
         description: |
           A list of revisions of this shared flow.
         output: true
-        required: true
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'latestRevisionId'
