@@ -21,13 +21,18 @@ func TestAccDataSourceGoogleFirebaseAppleApp(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: testAccProvidersOiCS,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleFirebaseAppleApp(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState(resourceName,
-						"google_firebase_apple_app.my_app"),
+					checkDataSourceStateMatchesResourceStateWithIgnores(
+						resourceName,
+						"google_firebase_apple_app.my_app",
+						map[string]struct{}{
+							"deletion_policy": {},
+						},
+					),
 				),
 			},
 		},
@@ -46,6 +51,7 @@ resource "google_firebase_apple_app" "my_app" {
 }
 
 data "google_firebase_apple_app" "my_app" {
+  provider = google-beta
   app_id = google_firebase_apple_app.my_app.app_id
 }
 `, context)

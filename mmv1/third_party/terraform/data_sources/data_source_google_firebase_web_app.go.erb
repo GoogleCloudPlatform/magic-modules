@@ -12,7 +12,7 @@ func dataSourceGoogleFirebaseWebApp() *schema.Resource {
 	dsSchema := datasourceSchemaFromResourceSchema(resourceFirebaseWebApp().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "app_id")
+        addRequiredFieldsToSchema(dsSchema, "app_id")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleFirebaseWebAppRead,
