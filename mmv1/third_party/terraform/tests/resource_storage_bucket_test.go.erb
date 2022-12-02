@@ -77,13 +77,6 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportStateId:           fmt.Sprintf("%s/%s", getTestProjectFromEnv(), bucketName),
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
 		},
 	})
 }
