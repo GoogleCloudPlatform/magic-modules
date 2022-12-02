@@ -1361,7 +1361,7 @@ resource "google_dataproc_cluster" "basic" {
 
   cluster_config {
     gce_cluster_config {
-      reservation_affinity = {
+      reservation_affinity {
         consume_reservation_type = "ANY_RESERVATION"
         key = "name"
         values = ["my-label"]
