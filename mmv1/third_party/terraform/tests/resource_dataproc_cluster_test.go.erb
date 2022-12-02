@@ -388,8 +388,6 @@ func TestAccDataprocCluster_withReservationAffinity(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
 
 					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.reservation_affinity.consume_reservation_type", "ANY_RESERVATION"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.reservation_affinity.key", "name"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.reservation_affinity.values.#", "1"),
 				),
 			},
 		},
@@ -1363,8 +1361,6 @@ resource "google_dataproc_cluster" "basic" {
     gce_cluster_config {
       reservation_affinity {
         consume_reservation_type = "ANY_RESERVATION"
-        key = "name"
-        values = ["my-label"]
       }
     }
   }
