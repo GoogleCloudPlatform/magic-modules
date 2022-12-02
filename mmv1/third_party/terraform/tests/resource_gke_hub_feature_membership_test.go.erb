@@ -573,6 +573,204 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 `, context)
 }
 
+func TestAccGkeHubFeatureMembership_gkehubFeatureAcmOci(t *testing.T) {
+  // Multiple fine-grained resources cause VCR to fail
+  skipIfVcr(t)
+  t.Parallel()
+
+  context := map[string]interface{}{
+    "random_suffix":   randString(t, 10),
+    "org_id":          getTestOrgFromEnv(t),
+    "billing_account": getTestBillingAccountFromEnv(t),
+  }
+
+  vcrTest(t, resource.TestCase{
+    PreCheck:  func() { testAccPreCheck(t) },
+    Providers: testAccProvidersOiCS,
+    CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccGkeHubFeatureMembership_gkehubFeatureAcmOciStart(context),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+        ),
+      },
+      {
+        ResourceName:      "google_gke_hub_feature_membership.feature_member",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGkeHubFeatureMembership_gkehubFeatureAcmOciUpdate(context),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+        ),
+      },
+      {
+        ResourceName:      "google_gke_hub_feature_membership.feature_member",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccGkeHubFeatureMembership_gkehubFeatureAcmOciRemoveFields(context),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckGkeHubFeatureMembershipPresent(t, fmt.Sprintf("tf-test-gkehub%s", context["random_suffix"]), "global", "configmanagement", fmt.Sprintf("tf-test1%s", context["random_suffix"])),
+        ),
+      },
+      {
+        ResourceName:      "google_gke_hub_feature_membership.feature_member",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
+}
+
+func testAccGkeHubFeatureMembership_gkehubFeatureAcmOciStart(context map[string]interface{}) string {
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + Nprintf(`
+resource "google_gke_hub_feature" "feature" {
+  project = google_project.project.project_id
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+  depends_on = [google_project_service.container, google_project_service.gkehub]
+}
+
+resource "google_service_account" "feature_sa" {
+  project = google_project.project.project_id
+  account_id = "feature-sa"
+  provider = google-beta
+}
+
+resource "google_gke_hub_feature_membership" "feature_member_1" {
+  project = google_project.project.project_id
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  configmanagement {
+    version = "1.12.0"
+    config_sync {
+      source_format = "unstructured"
+      oci {
+        sync_repo = "us-central1-docker.pkg.dev/sample-project/config-repo/config-sync-gke:latest"
+        policy_dir = "config-connector"
+        sync_wait_secs = "20"
+        secret_type = "gcpserviceaccount"
+        gcp_service_account_email = google_service_account.feature_sa.email
+      }
+      prevent_drift = true
+    }
+    policy_controller {
+      enabled = true
+      audit_interval_seconds = "100"
+      exemptable_namespaces = ["onetwothree", "fourfive"]
+      template_library_installed = true
+      referential_rules_enabled = true
+      log_denies_enabled = true
+    }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGkeHubFeatureMembership_gkehubFeatureAcmOciUpdate(context map[string]interface{}) string {
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + Nprintf(`
+resource "google_gke_hub_feature" "feature" {
+  project = google_project.project.project_id
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+  depends_on = [google_project_service.container, google_project_service.gkehub]
+}
+
+resource "google_service_account" "feature_sa" {
+  project = google_project.project.project_id
+  account_id = "feature-sa"
+  provider = google-beta
+}
+
+resource "google_gke_hub_feature_membership" "feature_member_1" {
+  project = google_project.project.project_id
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  configmanagement {
+    version = "1.12.0"
+    config_sync {
+      source_format = "hierarchy"
+      oci {
+        sync_repo = "us-central1-docker.pkg.dev/sample-project/config-repo/config-sync-gke:latest"
+        policy_dir = "config-sync"
+        sync_wait_secs = "15"
+        secret_type = "gcenode"
+        gcp_service_account_email = google_service_account.feature_sa.email
+      }
+      prevent_drift = true
+    }
+    policy_controller {
+      enabled = true
+      audit_interval_seconds = "100"
+      exemptable_namespaces = ["onetwothree", "fourfive"]
+      template_library_installed = true
+      referential_rules_enabled = true
+      log_denies_enabled = true
+    }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccGkeHubFeatureMembership_gkehubFeatureAcmOciRemoveFields(context map[string]interface{}) string {
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + Nprintf(`
+resource "google_gke_hub_feature" "feature" {
+  project = google_project.project.project_id
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+  depends_on = [google_project_service.container, google_project_service.gkehub]
+}
+
+resource "google_service_account" "feature_sa" {
+  project = google_project.project.project_id
+  account_id = "feature-sa"
+  provider = google-beta
+}
+
+resource "google_gke_hub_feature_membership" "feature_member_1" {
+  project = google_project.project.project_id
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  configmanagement {
+    version = "1.12.0"
+    policy_controller {
+      enabled = true
+      audit_interval_seconds = "100"
+      exemptable_namespaces = ["onetwothree", "fourfive"]
+      template_library_installed = true
+      referential_rules_enabled = true
+      log_denies_enabled = true
+    }
+  }
+  provider = google-beta
+}
+`, context)
+}
+
 func TestAccGkeHubFeatureMembership_gkehubFeatureMesh(t *testing.T) {
 	// VCR fails to handle batched project services
 	skipIfVcr(t)
