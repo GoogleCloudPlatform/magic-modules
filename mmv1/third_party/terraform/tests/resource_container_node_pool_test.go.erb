@@ -2777,7 +2777,6 @@ resource "google_container_node_pool" "np1" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
-  version 			 = "1.24.5-gke.600"
 }
 
 resource "google_container_node_pool" "np2" {
@@ -2785,7 +2784,6 @@ resource "google_container_node_pool" "np2" {
 	location           = "us-central1-a"
 	cluster            = google_container_cluster.cluster.name
 	initial_node_count = 2
-	version 		   = "1.24.5-gke.600"
   }
 `, cluster, np1, np2)
 }
@@ -2803,7 +2801,7 @@ resource "google_container_node_pool" "np1" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
-  version 		     = "1.24.7-gke.900"
+  version 		     = "1.23.13-gke.900"
 }
 
 resource "google_container_node_pool" "np2" {
@@ -2811,7 +2809,7 @@ resource "google_container_node_pool" "np2" {
 	location           = "us-central1-a"
 	cluster            = google_container_cluster.cluster.name
 	initial_node_count = 2
-	version 		   = "1.24.7-gke.900"
+	version 		   = "1.23.13-gke.900"
   }
 `, cluster, np1, np2)
 }
