@@ -42,7 +42,6 @@ func TestAccDataSourceGoogleFirebaseAppleApp(t *testing.T) {
 func testAccDataSourceGoogleFirebaseAppleApp(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_firebase_apple_app" "my_app" {
-  provider = google-beta
   project = "%{project_id}"
   bundle_id = "%{bundle_id}"
   display_name = "%{display_name}"
@@ -51,7 +50,6 @@ resource "google_firebase_apple_app" "my_app" {
 }
 
 data "google_firebase_apple_app" "my_app" {
-  provider = google-beta
   app_id = google_firebase_apple_app.my_app.app_id
 }
 `, context)
