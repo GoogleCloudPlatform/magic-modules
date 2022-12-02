@@ -1,12 +1,12 @@
 ---
 title: "Update a handwritten resource"
+summary: "The Google providers for Terraform have a large number of handwritten go files, primarily for resources written before Magic Modules was used with them. Most handwritten files are expected to stay handwritten indefinitely, although conversion to a generator may be possible for a limited subset of them."
 weight: 20
 ---
 
 # Update a handwritten resource
 
 The Google providers for Terraform have a large number of handwritten go files, primarily for resources written before Magic Modules was used with them. Most handwritten files are expected to stay handwritten indefinitely, although conversion to a generator may be possible for a limited subset of them.
-
 
 We no longer accept new handwritten resources except in rare cases. However, understanding
 how to edit and add to existing resources may be important for implementing new fields
