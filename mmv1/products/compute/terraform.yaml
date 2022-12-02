@@ -1382,11 +1382,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "my-instance"
         primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"])"
-      - !ruby/object:Provider::Terraform::Examples
-        name: "instance_with_atm_tags"
-        primary_resource_id: "static"
-        vars:
-          vm_name: "vm-instance-with-atm-tags"
   InstanceGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   InstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
