@@ -1100,9 +1100,8 @@ by Dataproc`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"metrics": {
-										Type:         schema.TypeList,
+										Type:         schema.TypeSet,
 										Required:     true,
-										MinItems:     1,
 										Description:  "Metrics sources to enable.",
 										Elem:         metricsSchema(),
 									},
