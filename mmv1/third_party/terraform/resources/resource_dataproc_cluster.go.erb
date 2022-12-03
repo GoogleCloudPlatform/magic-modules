@@ -1090,6 +1090,7 @@ by Dataproc`,
 								},
 							},
 						},
+<% if version == "ga" -%>
 						"dataproc_metric_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1109,6 +1110,7 @@ by Dataproc`,
 								},
 							},
 						},
+<% end -%>
 					},
 				},
 			},
@@ -1117,6 +1119,7 @@ by Dataproc`,
 	}
 }
 
+<% if version == "ga" -%>
 // We need to pull accelerators' schema out so we can use it to make a set hash func
 func metricsSchema() *schema.Resource {
 	return  &schema.Resource{
@@ -1140,6 +1143,7 @@ func metricsSchema() *schema.Resource {
 		},
 	}
 }
+<% end -%>
 
 func instanceConfigSchema(parent string) *schema.Schema {
 	var instanceConfigKeys = []string{
