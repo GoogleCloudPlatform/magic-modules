@@ -1104,7 +1104,6 @@ by Dataproc`,
 										Required:     true,
 										MinItems:     1,
 										Description:  "Metrics sources to enable.",
-										AtLeastOneOf: dataprocMetricConfigKeys,
 										Elem:         metricsSchema(),
 									},
 								},
@@ -1126,7 +1125,6 @@ func metricsSchema() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"metric_source": {
 				Type:         schema.TypeString,
-				AtLeastOneOf: metricKeys,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"METRIC_SOURCE_UNSPECIFIED ", "MONITORING_AGENT_DEFAULTS", "HDFS", "SPARK", "YARN", "SPARK_HISTORY_SERVER", "HIVESERVER2"}, false),
