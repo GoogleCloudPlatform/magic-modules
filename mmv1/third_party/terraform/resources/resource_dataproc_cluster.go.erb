@@ -1121,7 +1121,7 @@ func metricsSchema() *schema.Resource {
 				Type:         schema.TypeString,
 				AtLeastOneOf: metricKeys,
 				ForceNew:     true,
-				Required:    true,
+				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"METRIC_SOURCE_UNSPECIFIED ", "MONITORING_AGENT_DEFAULTS", "HDFS", "SPARK", "YARN", "SPARK_HISTORY_SERVER", "HIVESERVER2"}, false),
 				Description:  `A source for the collection of Dataproc OSS metrics (see [available OSS metrics] (https://cloud.google.com//dataproc/docs/guides/monitoring#available_oss_metrics)).`,
 			},
@@ -1131,10 +1131,10 @@ func metricsSchema() *schema.Resource {
 				Optional:     true,
 				AtLeastOneOf: metricKeys,
 				ForceNew:     true,
-				Description:  `Specify one or more [available OSS metrics] (https://cloud.google.com/dataproc/docs/guides/monitoring#available_oss_metrics) to collect for the metric course (for the `SPARK` metric source, any [Spark metric] (https://spark.apache.org/docs/latest/monitoring.html#metrics) can be specified).`,
+				Description:  `Specify one or more [available OSS metrics] (https://cloud.google.com/dataproc/docs/guides/monitoring#available_oss_metrics) to collect for the metric course.`,
 			},
 		},
-	},
+	}
 }
 
 func instanceConfigSchema(parent string) *schema.Schema {
@@ -1811,11 +1811,11 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 func expandDataprocMetricConfig(cfg map[string]interface{}) *dataproc.DataprocMetricConfig {
 	conf := &dataproc.DataprocMetricConfig{}
 	metricsConfigs := cfg["metrics"].(*schema.Set).List()
-	metricsSet := make([]*dataproc.DataprocMetricConfig.Metric, 0, len(metricsConfigs))
+	metricsSet := make([]*dataproc.Metric, 0, len(metricsConfigs))
 
 	for _, raw := range metricsConfigs {
 		data := raw.(map[string]interface{})
-		metric := dataproc.DataprocMetricConfig.Metric{
+		metric := dataproc.Metric{
 			MetricSource: data["metric_source"].(string),
 			MetricOverrides: convertStringSet(data["metric_overrides"].(*schema.Set)),
 		}
