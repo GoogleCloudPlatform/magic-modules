@@ -1118,7 +1118,7 @@ by Dataproc`,
 }
 
 <% if version == "ga" -%>
-// We need to pull accelerators' schema out so we can use it to make a set hash func
+// We need to pull metrics' schema out so we can use it to make a set hash func
 func metricsSchema() *schema.Resource {
 	return  &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -1133,7 +1133,6 @@ func metricsSchema() *schema.Resource {
 				Type:         schema.TypeSet,
 				Elem:         &schema.Schema{Type: schema.TypeString},
 				Optional:     true,
-				AtLeastOneOf: metricKeys,
 				ForceNew:     true,
 				Description:  `Specify one or more [available OSS metrics] (https://cloud.google.com/dataproc/docs/guides/monitoring#available_oss_metrics) to collect for the metric course.`,
 			},
