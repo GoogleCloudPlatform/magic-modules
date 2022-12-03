@@ -330,6 +330,7 @@ func testGoogleStorageBucketsAclBasic1Update(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name = "%s"
+  location = "US"
 }
 
 resource "google_storage_bucket_acl" "acl" {
