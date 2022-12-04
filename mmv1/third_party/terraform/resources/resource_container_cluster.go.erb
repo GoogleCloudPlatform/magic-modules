@@ -1723,7 +1723,7 @@ func resourceContainerCluster() *schema.Resource {
 						"channel": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"CHANNEL_UNSPECIFIED", "CHANNEL_DISABLED", "CHANNEL_EXPERIMENTAL", "CHANNEL_STANDARD"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"CHANNEL_DISABLED", "CHANNEL_STANDARD"}, false),
 							Description:  `The Gateway API release channel to use for Gateway API.`,
 						},
 					},

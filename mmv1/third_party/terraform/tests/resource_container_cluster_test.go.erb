@@ -3339,7 +3339,7 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withGatewayApiConfig(clusterName, "CHANNEL_STANDARD"),
+				Config: testAccContainerCluster_withGatewayApiConfig(clusterName, "CHANNEL_DISABLED"),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -3348,7 +3348,7 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
-				Config: testAccContainerCluster_withGatewayApiConfig(clusterName, "CHANNEL_EXPERIMENTAL"),
+				Config: testAccContainerCluster_withGatewayApiConfig(clusterName, "CHANNEL_STANDARD"),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -3370,7 +3370,7 @@ func TestAccContainerCluster_withInvalidGatewayApiConfigChannel(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withGatewayApiConfig(clusterName, "CANARY"),
-				ExpectError: regexp.MustCompile(`expected gateway_api_config\.0\.channel to be one of \[CHANNEL_UNSPECIFIED CHANNEL_DISABLED CHANNEL_EXPERIMENTAL CHANNEL_STANDARD\], got CANARY`),
+				ExpectError: regexp.MustCompile(`expected gateway_api_config\.0\.channel to be one of \[CHANNEL_DISABLED CHANNEL_STANDARD\], got CANARY`),
 			},
 		},
 	})
