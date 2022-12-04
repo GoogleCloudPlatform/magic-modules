@@ -1396,7 +1396,7 @@ resource "google_dataproc_cluster" "basic" {
 }
 
 <% if version == "ga" -%>
-func TestAccDataprocCluster_withDataprocMetricConfig(rnd string) string {
+func testAccDataprocCluster_withDataprocMetricConfig(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
