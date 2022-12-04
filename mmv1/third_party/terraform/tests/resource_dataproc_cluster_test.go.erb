@@ -394,6 +394,7 @@ func TestAccDataprocCluster_withReservationAffinity(t *testing.T) {
 	})
 }
 
+<% if version == "ga" -%>
 func TestAccDataprocCluster_withDataprocMetricConfig(t *testing.T) {
 	t.Parallel()
 
@@ -418,6 +419,7 @@ func TestAccDataprocCluster_withDataprocMetricConfig(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccDataprocCluster_singleNodeCluster(t *testing.T) {
 	t.Parallel()
@@ -1393,6 +1395,7 @@ resource "google_dataproc_cluster" "basic" {
 `, rnd)
 }
 
+<% if version == "ga" -%>
 func TestAccDataprocCluster_withDataprocMetricConfig(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
@@ -1415,6 +1418,7 @@ resource "google_dataproc_cluster" "basic" {
 }
 `, rnd)
 }
+<% end -%>
 
 func testAccDataprocCluster_singleNodeCluster(rnd string) string {
 	return fmt.Sprintf(`
