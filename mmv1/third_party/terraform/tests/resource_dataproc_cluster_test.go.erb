@@ -1449,6 +1449,7 @@ resource "google_dataproc_cluster" "basic" {
 
   cluster_config {
     gce_cluster_config {
+      zone_uri = "us-central1-f"
       node_group_affinity {
         node_group_uri = "node-group-1"
       }
