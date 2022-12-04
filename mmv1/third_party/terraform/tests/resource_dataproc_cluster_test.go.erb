@@ -406,7 +406,7 @@ func TestAccDataprocCluster_withDataprocMetricConfig(t *testing.T) {
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccDataprocCluster_withDataprocMetricConfig(rnd),
+				Config: testAccDataprocCluster_withDataprocMetricConfig(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
 
