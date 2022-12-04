@@ -1722,10 +1722,9 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"channel": {
 							Type:         schema.TypeString,
-							Default:      "CHANNEL_UNSPECIFIED",
+							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"CHANNEL_UNSPECIFIED", "CHANNEL_DISABLED", "CHANNEL_EXPERIMENTAL", "CHANNEL_STANDARD"}, false),
 							Description:  `The Gateway API release channel to use for Gateway API.`,
-							Optional:     true,
 						},
 					},
 				},
@@ -3333,6 +3332,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			return err
 		}
 		log.Printf("[INFO] GKE cluster %s resource usage export config has been updated", d.Id())
+	}
+
+	if d.HasChange("gateway_api_config") {
+		if gac, ok := d.GetOk("gateway_api_config"); ok {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredGatewayApiConfig: expandGatewayApiConfig(gac),
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE Gateway API")
+			// Call update serially.
+			if err := lockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s Gateway API has been updated", d.Id())
+		}
 	}
 
 	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.logging_variant") {

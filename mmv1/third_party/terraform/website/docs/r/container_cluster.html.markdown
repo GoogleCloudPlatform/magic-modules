@@ -1116,7 +1116,7 @@ and all pods running on the nodes. Specified as a map from the key, such as
 
 <a name="nested_gateway_api_config"></a>The `gateway_api_config` block supports:
 
-* `channel` - (Optional) Which in-cluster DNS provider should be used. `CHANNEL_UNSPECIFIED` (default) or `CHANNEL_DISABLED` or `CHANNEL_EXPERIMENTAL` or `CHANNEL_STANDARD`.
+* `channel` - (Required) Which Gateway Api channel should be used. `CHANNEL_UNSPECIFIED` or `CHANNEL_DISABLED` or `CHANNEL_EXPERIMENTAL` or `CHANNEL_STANDARD`.
 
 ## Attributes Reference
 
