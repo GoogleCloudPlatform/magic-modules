@@ -372,6 +372,14 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `endpoint_config` (Optional) The config settings for port access on the cluster.
    Structure [defined below](#nested_endpoint_config).
 
+* `dataproc_metric_config` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
+
+    * `metrics` - (Required) Metrics sources to enable.
+
+        * `metric_source` - (Required) A source for the collection of Dataproc OSS metrics (see [available OSS metrics](https://cloud.google.com//dataproc/docs/guides/monitoring#available_oss_metrics)).
+
+        * `metric_overrides` - (Optional) One or more [available OSS metrics] (https://cloud.google.com/dataproc/docs/guides/monitoring#available_oss_metrics) to collect for the metric course.
+
 * `metastore_config` (Optional) The config setting for metastore service with the cluster.
    Structure [defined below](#nested_metastore_config).
 - - -
@@ -428,7 +436,17 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `metadata` - (Optional) A map of the Compute Engine metadata entries to add to all instances
    (see [Project and instance metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#project_and_instance_metadata)).
 
-* `reservation_affinity` - (Optional) Reservation Affinity for consuming Zonal reservation
+* `reservation_affinity` - (Optional) Reservation Affinity for consuming Zonal reservation.
+
+    * `consume_reservation_type` - (Optional) Type of reservation to consume. Restricted to one of `NO_RESERVATION`, `ANY_RESERVATION`, or `SPECIFIC_RESERVATION`.
+
+    * `key` - (Optional) Corresponds to the label key of reservation resource.
+
+    * `values` - (Optional) Corresponds to one or more label values of reservation resource.
+
+* `node_group_affinity` - (Optional) Node Group Affinity for sole-tenant clusters.
+
+    * `node_group_uri` - (Required) The URI of a sole-tenant [node group resource](https://cloud.google.com/compute/docs/reference/rest/v1/nodeGroups) that the cluster will be created on.
 
 * `shielded_instance_config` (Optional) Shielded Instance Config for clusters using [Compute Engine Shielded VMs](https://cloud.google.com/security/shielded-cloud/shielded-vm).
 
