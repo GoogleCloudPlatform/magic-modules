@@ -226,7 +226,9 @@ The following arguments are supported:
   (Optional) Structure is [documented below](#nested_git).
 
 * `oci` -
-  (Optional) Structure is [documented below](#nested_oci).
+  (Optional) Supported from ACM versions 1.12.0 onwards. Structure is [documented below](#nested_oci).
+  
+  Use either `git` or `oci` config option.
 
 * `prevent_drift` -
   (Optional)
