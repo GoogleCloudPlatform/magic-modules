@@ -1,0 +1,238 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: GKEBackup
+display_name: Backup for GKE
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://gkebackup.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Backup for GKE API
+    url: https://console.cloud.google.com/apis/library/gkebackup.googleapis.com
+objects:
+  - !ruby/object:Api::Resource
+    min_version: beta
+    name: 'BackupPlan'
+    base_url: "projects/{{project}}/locations/{{location}}/backupPlans"
+    create_url: projects/{{project}}/locations/{{location}}/backupPlans?backupPlanId={{name}}
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Represents a Backup Plan instance.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke'
+      api: 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.backupPlans'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        url_param_only: true
+        required: true
+        input: true
+        description: |
+          The region of the Backup Plan.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        required: true
+        input: true
+        description: |
+          The full name of the BackupPlan Resource.
+      - !ruby/object:Api::Type::String
+        name: uid
+        output: true
+        description: |
+          Server generated, unique identifier of UUID format.
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          User specified descriptive string for this BackupPlan.
+      - !ruby/object:Api::Type::String
+        name: 'cluster'
+        required: true
+        input: true
+        description: |
+          The source cluster from which Backups will be created via this BackupPlan.
+      - !ruby/object:Api::Type::NestedObject
+        name: retentionPolicy
+        description: RetentionPolicy governs lifecycle of Backups created under this plan.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: backupDeleteLockDays
+            description: |
+              Minimum age for a Backup created via this BackupPlan (in days).
+              Must be an integer value between 0-90 (inclusive).
+              A Backup created under this BackupPlan will not be deletable
+              until it reaches Backup's (create time + backup_delete_lock_days).
+              Updating this field of a BackupPlan does not affect existing Backups.
+              Backups created after a successful update will inherit this new value.
+          - !ruby/object:Api::Type::Integer
+            name: backupRetainDays
+            description: |
+              The default maximum age of a Backup created via this BackupPlan.
+              This field MUST be an integer value >= 0 and <= 365. If specified,
+              a Backup created under this BackupPlan will be automatically deleted
+              after its age reaches (createTime + backupRetainDays).
+              If not specified, Backups created under this BackupPlan will NOT be
+              subject to automatic deletion. Updating this field does NOT affect
+              existing Backups under it. Backups created AFTER a successful update
+              will automatically pick up the new value.
+              NOTE: backupRetainDays must be >= backupDeleteLockDays.
+              If cronSchedule is defined, then this must be <= 360 * the creation interval.]
+          - !ruby/object:Api::Type::Boolean
+            name: locked
+            description: |
+              This flag denotes whether the retention policy of this BackupPlan is locked.
+              If set to True, no further update is allowed on this policy, including
+              the locked field itself.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labels
+        description: |
+          Description: A set of custom labels supplied by the user.
+          A list of key->value pairs.
+          Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      - !ruby/object:Api::Type::NestedObject
+        name: backupSchedule
+        description: Defines a schedule for automatic Backup creation via this BackupPlan.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: cronSchedule
+            description: |
+              A standard cron string that defines a repeating schedule for
+              creating Backups via this BackupPlan.
+              If this is defined, then backupRetainDays must also be defined.
+          - !ruby/object:Api::Type::Boolean
+              name: paused
+              description: |
+                This flag denotes whether automatic Backup creation is paused for this BackupPlan.
+      - !ruby/object:Api::Type::String
+        name: etag
+        output: true
+        description: |
+          etag is used for optimistic concurrency control as a way to help prevent simultaneous
+          updates of a backup plan from overwriting each other. It is strongly suggested that
+          systems make use of the 'etag' in the read-modify-write cycle to perform BackupPlan updates
+          in order to avoid race conditions: An etag is returned in the response to backupPlans.get,
+          and systems are expected to put that etag in the request to backupPlans.patch or
+          backupPlans.delete to ensure that their change will be applied to the same version of the resource.
+      - !ruby/object:Api::Type::Boolean
+        name: deactivated
+        description: |
+         This flag indicates whether this BackupPlan has been deactivated.
+         Setting this field to True locks the BackupPlan such that no further updates will be allowed
+         (except deletes), including the deactivated field itself. It also prevents any new Backups
+         from being created via this BackupPlan (including scheduled Backups).
+      - !ruby/object:Api::Type::NestedObject
+        name: backupConfig
+        description: |
+          Defines the configuration of Backups created via this BackupPlan.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: includeVolumeData
+            description: |
+              This flag specifies whether volume data should be backed up when PVCs are
+              included in the scope of a Backup.
+          - !ruby/object:Api::Type::Boolean
+            name: includeSecrets
+            description: |
+              This flag specifies whether Kubernetes Secret resources should be included
+              when they fall into the scope of Backups.
+          - !ruby/object:Api::Type::NestedObject
+            name: encryptionKey
+            description: |
+              This defines a customer managed encryption key that will be used to encrypt the "config"
+              portion (the Kubernetes resources) of Backups created via this plan.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: gcpKmsEncryptionKey
+                required: true
+                description: |
+                  Google Cloud KMS encryption key. Format: projects/*/locations/*/keyRings/*/cryptoKeys/*
+          - !ruby/object:Api::Type::Boolean
+            name: allNamespaces
+            description: |
+              If True, include all namespaced resources.
+            exactly_one_of:
+              - backupConfig.0.allNamespaces
+              - backupConfig.0.selectedNamespaces
+              - backupConfig.0.selectedApplications
+          - !ruby/object:Api::Type::NestedObject
+            name: selectedNamespaces
+            description: |
+              If set, include just the resources in the listed namespaces.
+            exactly_one_of:
+              - backupConfig.0.allNamespaces
+              - backupConfig.0.selectedNamespaces
+              - backupConfig.0.selectedApplications
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: namespaces
+                required: true
+                description: |
+                  A list of Kubernetes Namespaces.
+                item_type: Api::Type::String
+          - !ruby/object:Api::Type::NestedObject
+            name: selectedApplications
+            description: |
+              A list of namespaced Kubernetes Resources.
+            exactly_one_of:
+              - backupConfig.0.allNamespaces
+              - backupConfig.0.selectedNamespaces
+              - backupConfig.0.selectedApplications
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: namespacedNames
+                required: true
+                description: |
+                  A list of namespaced Kubernetes resources.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: namespace
+                      required: true
+                      description: |
+                        The namespace of a Kubernetes Resource.
+                    - !ruby/object:Api::Type::String
+                      name: name
+                      required: true
+                      description: |
+                        The name of a Kubernetes Resource.
+      - !ruby/object:Api::Type::Integer
+        name: protectedPodCount
+        output: true
+        description: |
+          The number of Kubernetes Pods backed up in the last successful Backup created via this BackupPlan.
+          
