@@ -22,7 +22,7 @@ import (
 
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
-	reservationAffinityKey = 'compute.googleapis.com/reservation-name'
+	reservationAffinityKey = "compute.googleapis.com/reservation-name"
 
 <% if version == "ga" -%>
 	virtualClusterConfigKeys = []string{
@@ -1090,7 +1090,7 @@ by Dataproc`,
 									"metrics": {
 										Type:         schema.TypeSet,
 										Required:     true,
-										Description:  "Metrics sources to enable.",
+										Description:  `Metrics sources to enable.`,
 										Elem:         metricsSchema(),
 									},
 								},
@@ -2467,7 +2467,7 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 		gceConfig["reservation"] = gcc.ReservationAffinity.Values
 	}
 	if gcc.NodeGroupAffinity != nil {
-		gceConfig["node_group"] = gcc.NodeGroupAffinity.NodeGroupUri,
+		gceConfig["node_group"] = gcc.NodeGroupAffinity.NodeGroupUri
 	}
 
 	return []map[string]interface{}{gceConfig}
