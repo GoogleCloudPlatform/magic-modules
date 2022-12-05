@@ -19,7 +19,7 @@ resource "google_gke_backup_backup_plan" "autopilot" {
   provider = google-beta
   name = "<%= ctx[:vars]['name'] %>"
   cluster = google_container_cluster.primary.id
-  region = "us-central1"
+  location = "us-central1"
   backup_config {
     include_volume_data = true
     include_secrets = true

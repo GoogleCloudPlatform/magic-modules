@@ -22,8 +22,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         primary_resource_id: "basic"
         vars:
-          name: "basicplan"
-          cluster_name: "basiccluster"
+          name: "tf-test-basicplan"
+          cluster_name: "tf-test-basiccluster"
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
@@ -31,16 +31,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         primary_resource_id: "autopilot"
         vars:
-          name: "autopilotplan"
-          cluster_name: "autopilotcluster"
+          name: "tf-test-autopilotplan"
+          cluster_name: "tf-test-autopilotcluster"
       - !ruby/object:Provider::Terraform::Examples
         name: "gkebackup_backupplan_cmek"
         min_version: beta
         primary_resource_id: "cmek"
         vars:
-          name: "cmekplan"
-          cluster_name: "cmekcluster"
-          key_name: "backupkey"
+          name: "tf-test-cmekplan"
+          cluster_name: "tf-test-cmekcluster"
+          key_name: "tf-test-backupkey"
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
@@ -48,8 +48,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         primary_resource_id: "full"
         vars:
-          name: "fullplan"
-          cluster_name: "fullcluster"
+          name: "tf-test-fullplan"
+          cluster_name: "tf-test-fullcluster"
         test_env_vars:
           project: :PROJECT_NAME
     skip_sweeper: true

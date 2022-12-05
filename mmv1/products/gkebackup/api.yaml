@@ -45,8 +45,8 @@ objects:
   - !ruby/object:Api::Resource
     min_version: beta
     name: 'BackupPlan'
-    base_url: "projects/{{project}}/locations/{{region}}/backupPlans"
-    create_url: projects/{{project}}/locations/{{region}}/backupPlans?backup_plan_id={{name}}
+    base_url: "projects/{{project}}/locations/{{location}}/backupPlans"
+    create_url: projects/{{project}}/locations/{{location}}/backupPlans?backup_plan_id={{name}}
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -58,7 +58,7 @@ objects:
       api: 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.backupPlans'
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'region'
+        name: 'location'
         url_param_only: true
         required: true
         input: true
@@ -183,6 +183,7 @@ objects:
             properties:
               - !ruby/object:Api::Type::String
                 name: gcpKmsEncryptionKey
+                required: true
                 description: |
                   Google Cloud KMS encryption key. Format: projects/*/locations/*/keyRings/*/cryptoKeys/*
           - !ruby/object:Api::Type::Boolean
@@ -190,17 +191,17 @@ objects:
             description: |
               If True, include all namespaced resources.
             exactly_one_of:
-              - backupConfig.0.all_namespaces
-              - backupConfig.0.selected_namespaces
-              - backupConfig.0.selected_applications
+              - backupConfig.0.allNamespaces
+              - backupConfig.0.selectedNamespaces
+              - backupConfig.0.selectedApplications
           - !ruby/object:Api::Type::NestedObject
             name: selectedNamespaces
             description: |
               If set, include just the resources in the listed namespaces.
             exactly_one_of:
-              - backupConfig.0.all_namespaces
-              - backupConfig.0.selected_namespaces
-              - backupConfig.0.selected_applications
+              - backupConfig.0.allNamespaces
+              - backupConfig.0.selectedNamespaces
+              - backupConfig.0.selectedApplications
             properties:
               - !ruby/object:Api::Type::Array
                 name: namespaces
@@ -212,9 +213,9 @@ objects:
             description: |
               A list of namespaced Kubernetes Resources.
             exactly_one_of:
-              - backupConfig.0.all_namespaces
-              - backupConfig.0.selected_namespaces
-              - backupConfig.0.selected_applications
+              - backupConfig.0.allNamespaces
+              - backupConfig.0.selectedNamespaces
+              - backupConfig.0.selectedApplications
             properties:
               - !ruby/object:Api::Type::Array
                 name: namespacedNames
