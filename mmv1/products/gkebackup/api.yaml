@@ -77,11 +77,6 @@ objects:
         description: |
           Server generated, unique identifier of UUID format.
       - !ruby/object:Api::Type::String
-        name: createTime
-        output: true
-        description: |
-          The timestamp when this BackupPlan resource was last updated.
-      - !ruby/object:Api::Type::String
         name: description
         description: |
           User specified descriptive string for this BackupPlan.
