@@ -68,17 +68,6 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic1(context map[strin
           name = "primary"
         }
 
-        <% unless version == 'ga' -%>
-        all_instances_config {
-          metadata = {
-            metadata_key = "metadata_value"
-          }
-          labels = {
-            label_key = "label_value"
-          }
-        }
-        <% end -%>
-
         target_pools = [google_compute_target_pool.igm-basic.id]
         target_size  = 2
 
@@ -154,17 +143,6 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic2(context map[strin
           instance_template  = google_compute_instance_template.igm-basic.id
           name = "primary"
         }
-
-        <% unless version == 'ga' -%>
-        all_instances_config {
-          metadata = {
-            metadata_key = "metadata_value"
-          }
-          labels = {
-            label_key = "label_value"
-          }
-        }
-        <% end -%>
 
         target_pools = [google_compute_target_pool.igm-basic.id]
         target_size  = 2
