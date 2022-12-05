@@ -664,7 +664,7 @@ func resourceDataprocCluster() *schema.Resource {
 										AtLeastOneOf: gceClusterConfigKeys,
 										ForceNew:     true,
 										Description:  `The name of the reservation.`,
-									}
+									},
 
 									"reservation_affinity": {
 										Type:         schema.TypeString,
