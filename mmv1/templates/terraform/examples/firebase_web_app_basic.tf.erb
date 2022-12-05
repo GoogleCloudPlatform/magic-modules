@@ -15,6 +15,7 @@ resource "google_firebase_web_app" "<%= ctx[:primary_resource_id] %>" {
 	provider = google-beta
 	project = google_project.default.project_id
 	display_name = "<%= ctx[:vars]['display_name'] %>"
+	deletion_policy = "DELETE"
 
 	depends_on = [google_firebase_project.default]
 }

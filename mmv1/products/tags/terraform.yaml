@@ -28,6 +28,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringLenBetween(0, 256)'
+      purposeData: !ruby/object:Overrides::Terraform::PropertyOverride
+        # This property expects input like: network = "<project-id>/<vpc-name or vpc-id>" or selfLinkWithId (selfLink is not supported)
+        # However, the API response stored in Terraform state looks like: network = "https://www.googleapis.com/compute/v1/projects/<project-id>/global/networks/<vpc-id>"
+        # This results in persistent diffs, so we surpress them by using ignore_read. The API will reject incorrect references to non-existent or inaccessible VPCs.
+        # Since this property is configured as 'input: true', any modifications to this property will result in a forced replacement of the resource.
+        ignore_read: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "tag_key_basic"

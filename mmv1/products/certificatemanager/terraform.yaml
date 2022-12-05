@@ -30,7 +30,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/locations/global/certificates/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "certificate_manager_certificate_basic"
+        name: "certificate_manager_google_managed_certificate"
         primary_resource_id: "default"
         vars:
           dns_auth_name: "dns-auth"
@@ -40,6 +40,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cert_name: "dns-cert"
         ignore_read_extra:
           - "managed.0.dns_authorizations"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "certificate_manager_self_managed_certificate"
+        primary_resource_id: "default"
+        vars:
+          cert_name: "self-managed-cert"
     properties:
       managed.dnsAuthorizations: !ruby/object:Overrides::Terraform::PropertyOverride
         # We don't support ignore_read on nested fields
@@ -49,6 +55,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       selfManaged.privateKeyPem: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+      selfManaged: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+        ignore_read: true
       scope: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode

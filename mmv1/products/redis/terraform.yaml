@@ -43,6 +43,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           network_name: 'BootstrapSharedTestNetwork(t, "redis-full")'
       - !ruby/object:Provider::Terraform::Examples
+        name: "redis_instance_full_with_persistence_config"
+        primary_resource_id: "cache-persis"
+        vars:
+          instance_name: "ha-memory-cache-persis"
+          network_name: "redis-test-network"
+        test_vars_overrides:
+          network_name: 'BootstrapSharedTestNetwork(t, "redis-mrr")'
+      - !ruby/object:Provider::Terraform::Examples
         name: "redis_instance_private_service"
         # Temporary for servicenetworking problems
         skip_vcr: true
@@ -71,6 +79,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           network_name: 'BootstrapSharedTestNetwork(t, "redis-cmek")'
     properties:
+      persistenceConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistenceConfig.persistenceMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistenceConfig.rdbSnapshotStartTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       alternativeLocationId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       authorizedNetwork: !ruby/object:Overrides::Terraform::PropertyOverride

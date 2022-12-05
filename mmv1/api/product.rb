@@ -58,10 +58,6 @@ module Api
 
     attr_reader :async
 
-    # A flag that signals when a product should be intended for testing and documentation
-    # generation only.
-    attr_reader :cgc_only
-
     def validate
       super
       set_variables @objects, :__product
@@ -74,7 +70,6 @@ module Api
       check :async, type: Api::Async
 
       check :versions, type: Array, item_type: Api::Product::Version, required: true
-      check :cgc_only, type: :boolean, default: false
     end
 
     # ====================

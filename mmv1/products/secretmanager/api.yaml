@@ -208,6 +208,11 @@ objects:
           The resource name of the SecretVersion. Format:
           `projects/{{project}}/secrets/{{secret_id}}/versions/{{version}}`
       - !ruby/object:Api::Type::String
+        name: version
+        output: true
+        description: |
+          The version of the Secret.
+      - !ruby/object:Api::Type::String
         name: createTime
         output: true
         description: |

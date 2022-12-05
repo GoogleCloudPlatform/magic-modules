@@ -36,7 +36,7 @@ module Provider
             'elements' => (python_type(prop.item_type) \
               if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
             'aliases' => prop.aliases,
-            'options' => (if prop.nested_properties?
+            'options' => (if !prop.nested_properties.nil? && !prop.nested_properties.empty?
                             prop.nested_properties.reject(&:output)
                                                   .map { |x| python_dict_for_property(x) }
                                                   .reduce({}, :merge)

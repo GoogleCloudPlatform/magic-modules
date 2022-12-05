@@ -33,7 +33,3 @@ else
             $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
     fi
 fi
-
-# Download additional ruby code.
-bundle install
-

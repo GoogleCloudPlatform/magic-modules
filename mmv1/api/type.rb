@@ -319,11 +319,7 @@ module Api
 
     # Returns nested properties for this property.
     def nested_properties
-      []
-    end
-
-    def nested_properties?
-      !nested_properties.empty?
+      nil
     end
 
     def removed?

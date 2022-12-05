@@ -34,7 +34,7 @@ objects:
     base_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities
     create_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities?certificateAuthorityId={{certificate_authority_id}}
     self_link: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}
-    delete_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}?ignoreActiveCertificates={{ignore_active_certificates_on_deletion}}
+    delete_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}?ignoreActiveCertificates={{ignore_active_certificates_on_deletion}}&skipGracePeriod={{skip_grace_period}}
     update_verb: :PATCH
     update_mask: true
     async: !ruby/object:Api::OpAsync
@@ -71,6 +71,15 @@ objects:
         url_param_only: true
         description: |
           This field allows the CA to be deleted even if the CA has active certs. Active certs include both unrevoked and unexpired certs.
+          Use with care. Defaults to `false`.
+      - !ruby/object:Api::Type::Boolean
+        name: 'skip_grace_period'
+        default_value: false
+        url_param_only: true
+        description: |
+          If this flag is set, the Certificate Authority will be deleted as soon as
+          possible without a 30-day grace period where undeletion would have been
+          allowed. If you proceed, there will be no way to recover this CA.
           Use with care. Defaults to `false`.
       - !ruby/object:Api::Type::String
         name: location

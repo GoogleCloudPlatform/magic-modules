@@ -1,0 +1,6 @@
+resource "google_firebase_apple_app" "default" {
+  provider = google-beta
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+  display_name = "<%= ctx[:vars]['display_name'] %>"
+  bundle_id = "<%= ctx[:vars]['bundle_id'] %>"
+}

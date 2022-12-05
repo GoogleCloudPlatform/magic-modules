@@ -379,7 +379,7 @@ objects:
               name: 'name'
               required: true
               description: |
-                The relative resource name of the metastore that is being federated.
+                The relative resource name of the metastore that is being federated. The formats of the relative resource names for the currently supported metastores are listed below: Dataplex: projects/{projectId}/locations/{location}/lakes/{lake_id} BigQuery: projects/{projectId} Dataproc Metastore: projects/{projectId}/locations/{location}/services/{serviceId}
             - !ruby/object:Api::Type::Enum
               name: 'metastoreType'
               required: true
@@ -387,4 +387,5 @@ objects:
                 The type of the backend metastore.
               values:
                 - :METASTORE_TYPE_UNSPECIFIED
-                - :DATAPROC_METASTORE 
+                - :DATAPROC_METASTORE
+                - :BIGQUERY

@@ -15,6 +15,7 @@
 *~
 *#
 *.swp
+*.bak
 
 # Python
 *.pyc
