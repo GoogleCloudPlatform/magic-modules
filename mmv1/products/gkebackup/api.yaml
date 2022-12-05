@@ -46,7 +46,7 @@ objects:
     min_version: beta
     name: 'BackupPlan'
     base_url: "projects/{{project}}/locations/{{location}}/backupPlans"
-    create_url: projects/{{project}}/locations/{{location}}/backupPlans?backup_plan_id={{name}}
+    create_url: projects/{{project}}/locations/{{location}}/backupPlans?backupPlanId={{name}}
     update_verb: :PATCH
     update_mask: true
     description: |
