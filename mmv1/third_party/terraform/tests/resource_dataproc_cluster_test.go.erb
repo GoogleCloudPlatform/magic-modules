@@ -421,7 +421,7 @@ func TestAccDataprocCluster_withDataprocMetricConfig(t *testing.T) {
 }
 <% end -%>
 
-func TestAccDataprocCluster_withNodeGroupAffinity(t *testing.T) {
+func TestAccDataprocCluster_withNodeGroup(t *testing.T) {
 	t.Parallel()
 
 	var cluster dataproc.Cluster
@@ -432,10 +432,10 @@ func TestAccDataprocCluster_withNodeGroupAffinity(t *testing.T) {
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withNodeGroupAffinity(rnd),
+				Config: testAccDataprocCluster_withNodeGroup(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.node_group_affinity.0.node_group_uri", ""),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.node_group", ""),
 				),
 			},
 		},
@@ -1441,7 +1441,7 @@ resource "google_dataproc_cluster" "basic" {
 }
 <% end -%>
 
-func testAccDataprocCluster_withNodeGroupAffinity(rnd string) string {
+func testAccDataprocCluster_withNodeGroup(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
@@ -1450,9 +1450,7 @@ resource "google_dataproc_cluster" "basic" {
   cluster_config {
     gce_cluster_config {
       zone = "us-central1-f"
-      node_group_affinity {
-        node_group_uri = ""
-      }
+      node_group = ""
     }
   }
 }
