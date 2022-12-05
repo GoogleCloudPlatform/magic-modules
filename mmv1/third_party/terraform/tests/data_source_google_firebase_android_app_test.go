@@ -1,5 +1,6 @@
+<% autogen_exception -%>
 package google
-
+<% unless version == 'ga' -%>
 import (
 	"testing"
 
@@ -50,3 +51,4 @@ data "google_firebase_android_app" "my_app" {
 }
 `, context)
 }
+<% end -%>
