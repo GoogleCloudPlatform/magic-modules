@@ -205,6 +205,7 @@ objects:
             properties:
               - !ruby/object:Api::Type::Array
                 name: namespaces
+                required: true
                 description: |
                   A list of Kubernetes Namespaces.
                 item_type: Api::Type::String
@@ -219,16 +220,19 @@ objects:
             properties:
               - !ruby/object:Api::Type::Array
                 name: namespacedNames
+                required: true
                 description: |
                   A list of namespaced Kubernetes resources.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
                       name: namespace
+                      required: true
                       description: |
                         The namespace of a Kubernetes Resource.
                     - !ruby/object:Api::Type::String
                       name: name
+                      required: true
                       description: |
                         The name of a Kubernetes Resource.
       - !ruby/object:Api::Type::Integer
