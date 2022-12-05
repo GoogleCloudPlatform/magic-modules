@@ -40,7 +40,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "cmek-plan"
           cluster_name: "cmek-cluster"
-          key_name: "backupkey"
+          key_name: "backup-key"
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
