@@ -435,7 +435,7 @@ func TestAccDataprocCluster_withNodeGroupAffinity(t *testing.T) {
 				Config: testAccDataprocCluster_withNodeGroupAffinity(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.node_group_affinity.0.node_group_uri", "default"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.zone", "us-central1-f"),
 				),
 			},
 		},
@@ -1411,6 +1411,7 @@ resource "google_dataproc_cluster" "basic" {
       reservation_affinity {      
         consume_reservation_type = "SPECIFIC_RESERVATION"
         key = "compute.googleapis.com/reservation-name"
+        values = ["default"]
       }
     }
   }
@@ -1452,9 +1453,6 @@ resource "google_dataproc_cluster" "basic" {
   cluster_config {
     gce_cluster_config {
       zone = "us-central1-f"
-      node_group_affinity {
-        node_group_uri = "default"
-      }
     }
   }
 }
