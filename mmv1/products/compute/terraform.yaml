@@ -91,6 +91,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_template_name: "my-instance-template"
           target_pool_name: "my-target-pool"
           igm_name: "my-igm"
+          # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+          # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
+          provider_name: "google-beta"
+          provider_alias: ""
+        test_vars_overrides:
+          provider_name: '"google-beta.us-central1"'
+          provider_alias: '"alias  = \"us-central1\""'
+        oics_vars_overrides:
+          provider_name: "google-beta"
+          provider_alias: ""
       - !ruby/object:Provider::Terraform::Examples
         name: "autoscaler_basic"
         primary_resource_id: "foobar"
@@ -945,6 +955,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "website-net"
           fw_name: "website-fw"
           ip_name: "website-ip"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_vpc_psc"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "psc-endpoint"
+          consumer_network_name: "consumer-net"
+          ip_name: "website-ip"
+          producer_network_name: "producer-net"
+          producer_psc_network_name: "producer-psc-net"
+          service_attachment_name: "producer-service"
+          producer_forwarding_rule_name: "producer-forwarding-rule"
+          producer_backend_name: "producer-service-backend"
+          producer_healthcheck_name: "producer-service-health-check"
         ignore_read_extra:
           - "port_range"
           - "target"
@@ -3607,6 +3635,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           udp500_forwarding_rule_name: "fr-udp500"
           udp4500_forwarding_rule_name: "fr-udp4500"
           route_name: "route1"
+          # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+          # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
+          provider_name: "google-beta"
+          provider_alias: ""
+        test_vars_overrides:
+          provider_name: '"google-beta.us-central1"'
+          provider_alias: '"alias  = \"us-central1\""'
+        oics_vars_overrides:
+          provider_name: "google-beta"
+          provider_alias: ""
     properties:
       targetVpnGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         resource: 'VpnGateway'

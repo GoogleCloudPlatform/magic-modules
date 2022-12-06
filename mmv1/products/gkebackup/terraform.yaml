@@ -1,0 +1,79 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  BackupPlan: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "gkebackup_backupplan_basic"
+        min_version: beta
+        primary_resource_id: "basic"
+        vars:
+          name: "basic-plan"
+          cluster_name: "basic-cluster"
+        test_env_vars:
+          project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "gkebackup_backupplan_autopilot"
+        min_version: beta
+        primary_resource_id: "autopilot"
+        vars:
+          name: "autopilot-plan"
+          cluster_name: "autopilot-cluster"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "gkebackup_backupplan_cmek"
+        min_version: beta
+        primary_resource_id: "cmek"
+        vars:
+          name: "cmek-plan"
+          cluster_name: "cmek-cluster"
+          key_name: "backup-key"
+        test_env_vars:
+          project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "gkebackup_backupplan_full"
+        min_version: beta
+        primary_resource_id: "full"
+        vars:
+          name: "full-plan"
+          cluster_name: "full-cluster"
+        test_env_vars:
+          project: :PROJECT_NAME
+    skip_sweeper: true
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      retentionPolicy.backupDeleteLockDays: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retentionPolicy.backupRetainDays: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retentionPolicy.locked: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backupSchedule.paused: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      deactivated: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backupConfig.includeVolumeData: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      backupConfig.includeSecrets: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
