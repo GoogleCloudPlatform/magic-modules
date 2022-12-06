@@ -580,8 +580,10 @@ objects:
       import_format: ["{{%policy_tag}}"]
       base_url: "{{%policy_tag}}"
     parameters:
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: taxonomy
+        resource: 'Taxonomy'
+        imports: 'name'
         url_param_only: true
         required: true
         input: true
@@ -608,8 +610,10 @@ objects:
           newlines, carriage returns and page breaks; and be at most 2000 bytes long when
           encoded in UTF-8. If not set, defaults to an empty description.
           If not set, defaults to an empty description.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: "parentPolicyTag"
+        resource: 'PolicyTag'
+        imports: 'name'
         description: |
           Resource name of this policy tag's parent policy tag.
           If empty, it means this policy tag is a top level policy tag.
