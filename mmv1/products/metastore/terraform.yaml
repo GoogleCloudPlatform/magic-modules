@@ -59,7 +59,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         primary_resource_id: "metadata"
         vars:
-          metastore_service_name: "metastore-metadata"          
+          metastore_service_name: "metastore-metadata"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_private_service_connect"
+        skip_test: true
+        primary_resource_id: default
+        vars:
+          metastore_service_name: "metastore-srv"
+          network_name: "my-network"
+          subnet_name: "my-subnetwork"
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
