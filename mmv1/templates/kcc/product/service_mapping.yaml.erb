@@ -115,17 +115,24 @@ spec:
             group: resourcemanager.cnrm.cloud.google.com
 <%  end -%>
 <%-
+    references_in_parameters = object.parameters.select { |p| p.is_a?(Api::Type::ResourceRef) }.reject { |p| p.name == 'region' || p.name == 'zone' }
     references = object.all_user_properties.select { |p| p.is_a?(Api::Type::ResourceRef) }.reject { |p| p.name == 'region' || p.name == 'zone' }
     unless references.empty?
 -%>
 <%  if hierarchical_reference.length != 2 -%>
       resourceReferences:
 <%  end -%>
-<%-   references.each do |property| -%>
-        - key: <%= property.name.camelize(:lower) %>Ref
-          tfField: <%= property.name %>
-          kind: <%= "#{product.name}#{property.resource}" %>
-          required: <%= property.required ? "true" : "false" %>
+<%-   references.each do |reference| -%>
+        - key: <%= reference.name.camelize(:lower) %>Ref
+          tfField: <%= reference.name.underscore %>
+          gvk:
+            kind: <%= "#{product.name}#{reference.resource}" %>
+            version: v1beta1
+            group: <%= product.name.downcase %>.cnrm.cloud.google.com
+          targetField: <%= reference.imports %>
+<%        if references_in_parameters.any? {|r| r.name == reference.name } -%>
+          parent: true
+<%        end -%>
 <%  end -%>
 <%  end -%>
 <%  end -%>
