@@ -436,11 +436,13 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `metadata` - (Optional) A map of the Compute Engine metadata entries to add to all instances
    (see [Project and instance metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#project_and_instance_metadata)).
 
-* `reservation` - (Optional) The name of the reservation, required when --reservation-affinity=specific.
-
 * `reservation_affinity` - (Optional) Reservation Affinity for consuming Zonal reservation.
+    * `consume_reservation_type` - (Optional) Metrics sources to enable.
+    * `key` - (Optional) Corresponds to the label key of reservation resource.
+    * `values` - (Optional) Corresponds to the label values of reservation resource.
 
-* `node-group` - (Optional) The name of the sole-tenant node group to create the cluster on.
+* `node_group_affinity` - (Optional) The name of the sole-tenant node group to create the cluster on.
+    * `node_group_uri` - (Required) The URI of a sole-tenant node group resource that the cluster will be created on.
 
 * `shielded_instance_config` (Optional) Shielded Instance Config for clusters using [Compute Engine Shielded VMs](https://cloud.google.com/security/shielded-cloud/shielded-vm).
 
