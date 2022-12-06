@@ -806,7 +806,6 @@ objects:
             description: |
               The disk utilization of the MetadataStore in bytes.
             output: true
-
 # Vertex AI Matching Engine Index
   - !ruby/object:Api::Resource
     name: Index
