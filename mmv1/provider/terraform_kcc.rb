@@ -31,14 +31,17 @@ module Provider
     # product version.
     def generate_resource(pwd, data, _generate_code, _generate_docs)
       kind = data.product.name + data.name
-      # TODO: support skip_test tests in a separate output subfolder.
+      # skip_test examples and examples with test_env_vars should also be
+      # included. Whether and how to generate Config Connector examples will be
+      # handled separately.
       examples = data.object.examples
-                     .reject(&:skip_test)
-                     .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
                      .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 
       examples.each do |example|
-        target_folder = File.join('samples', data.product.name + "-" + kind + '-' + example.name)
+        folder_name = data.product.name + "-" + kind + '-' + example.name
+        folder_name += '-skipped' if example.skip_test
+        target_folder = File.join('samples', folder_name)
+
         FileUtils.mkpath target_folder
         data.example = example
         data.generate(
