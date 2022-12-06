@@ -22,7 +22,6 @@ import (
 
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
-	reservationAffinityKey = "compute.googleapis.com/reservation-name"
 
 <% if version == "ga" -%>
 	virtualClusterConfigKeys = []string{
@@ -64,15 +63,20 @@ var (
 		"cluster_config.0.gce_cluster_config.0.internal_ip_only",
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config",
 		"cluster_config.0.gce_cluster_config.0.metadata",
-		"cluster_config.0.gce_cluster_config.0.reservation",
 		"cluster_config.0.gce_cluster_config.0.reservation_affinity",
-		"cluster_config.0.gce_cluster_config.0.node_group",
+		"cluster_config.0.gce_cluster_config.0.node_group_affinity",
 	}
 
 	schieldedInstanceConfigKeys = []string{
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_secure_boot",
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_vtpm",
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_integrity_monitoring",
+	}
+
+	reservationAffinityKeys = []string{
+		"cluster_config.0.gce_cluster_config.0.reservation_affinity.0.consume_reservation_type",
+		"cluster_config.0.gce_cluster_config.0.reservation_affinity.0.key",
+		"cluster_config.0.gce_cluster_config.0.reservation_affinity.0.values",
 	}
 
 	preemptibleWorkerDiskConfigKeys = []string{
@@ -657,32 +661,59 @@ func resourceDataprocCluster() *schema.Resource {
 										},
 									},
 
-									"reservation": {
-										Type:         schema.TypeSet,
-										Elem:         &schema.Schema{Type: schema.TypeString},
-										Optional:     true,
-										AtLeastOneOf: gceClusterConfigKeys,
-										Computed:     true,
-										ForceNew:     true,
-										Description:  `The name of the reservation.`,
-									},
-
 									"reservation_affinity": {
-										Type:         schema.TypeString,
+										Type:         schema.TypeList,
 										Optional:     true,
 										AtLeastOneOf: gceClusterConfigKeys,
 										Computed:     true,
-										ForceNew:         true,
-										Description:  `Type of reservation to consume.`,
+										MaxItems:     1,
+										Description:  `Reservation Affinity for consuming Zonal reservation.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"consume_reservation_type": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													AtLeastOneOf: reservationAffinityKeys,
+													ForceNew:     true,
+													ValidateFunc: validation.StringInSlice([]string{"NO_RESERVATION", "ANY_RESERVATION", "SPECIFIC_RESERVATION"}, false),
+													Description:  `Type of reservation to consume.`,
+												},
+												"key": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													AtLeastOneOf: reservationAffinityKeys,
+													ForceNew:     true,
+													Description:  `Corresponds to the label key of reservation resource.`,
+												},
+												"values": {
+													Type:         schema.TypeList,
+													Elem:         &schema.Schema{Type: schema.TypeString},
+													Optional:     true,
+													AtLeastOneOf: reservationAffinityKeys,
+													ForceNew:     true,
+													Description:  `Corresponds to the label values of reservation resource.`,
+												},
+											},
+										},
 									},
 
-									"node_group": {
-										Type:         schema.TypeString,
+									"node_group_affinity": {
+										Type:         schema.TypeList,
 										Optional:     true,
 										AtLeastOneOf: gceClusterConfigKeys,
 										Computed:     true,
-										ForceNew:         true,
+										MaxItems:     1,
 										Description:  `Node Group Affinity for sole-tenant clusters.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"node_group_uri": {
+													Type:         schema.TypeString,
+													ForceNew:     true,
+													Required:     true,
+													Description:  `The URI of a sole-tenant that the cluster will be created on.`,
+												},
+											},
+										},
 									},
 								},
 							},
@@ -726,7 +757,7 @@ func resourceDataprocCluster() *schema.Resource {
 											"cluster_config.0.preemptible_worker_config.0.disk_config",
 										},
 										ForceNew:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE", "SPOT"}, false),
 										Default:      "PREEMPTIBLE",
 									},
 
@@ -1089,7 +1120,7 @@ by Dataproc`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"metrics": {
-										Type:         schema.TypeSet,
+										Type:         schema.TypeList,
 										Required:     true,
 										Description:  `Metrics sources to enable.`,
 										Elem:         metricsSchema(),
@@ -1115,11 +1146,11 @@ func metricsSchema() *schema.Resource {
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"METRIC_SOURCE_UNSPECIFIED ", "MONITORING_AGENT_DEFAULTS", "HDFS", "SPARK", "YARN", "SPARK_HISTORY_SERVER", "HIVESERVER2"}, false),
+				ValidateFunc: validation.StringInSlice([]string{MONITORING_AGENT_DEFAULTS", "HDFS", "SPARK", "YARN", "SPARK_HISTORY_SERVER", "HIVESERVER2"}, false),
 				Description:  `A source for the collection of Dataproc OSS metrics (see [available OSS metrics] (https://cloud.google.com//dataproc/docs/guides/monitoring#available_oss_metrics)).`,
 			},
 			"metric_overrides": {
-				Type:         schema.TypeSet,
+				Type:         schema.TypeList,
 				Elem:         &schema.Schema{Type: schema.TypeString},
 				Optional:     true,
 				ForceNew:     true,
@@ -1671,29 +1702,25 @@ func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.G
 		}
 	}
 	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.reservation_affinity"); ok {
+		cfgRa := v.([]interface{})[0].(map[string]interface{})
 		conf.ReservationAffinity = &dataproc.ReservationAffinity{}
-		ra := v.(string)
-		var consumeReservationType string
-
-		if ra == "none" {
-			consumeReservationType = "NO_RESERVATION"
-		} else if ra == "specific" {
-			if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.reservation"); ok {
-				consumeReservationType = "SPECIFIC_RESERVATION"
-				conf.ReservationAffinity.Values = convertStringSet(v.(*schema.Set))
-				conf.ReservationAffinity.Key = reservationAffinityKey
-			} else {
-				return nil, fmt.Errorf("reservation required when --reservation-affinity=specific")
-			}
-		} else {
-			consumeReservationType = "ANY_RESERVATION"
+		if v, ok := cfgRa["consume_reservation_type"]; ok {
+			conf.ReservationAffinity.ConsumeReservationType = v.(string)
 		}
-		conf.ReservationAffinity.ConsumeReservationType = consumeReservationType
+		if v, ok := cfgRa["key"]; ok {
+			conf.ReservationAffinity.Key = v.(string)
+		}
+		if v, ok := cfgRa["values"]; ok {
+			conf.ReservationAffinity.Values = convertStringSet(v.(*schema.Set))
+		}
 	}
-	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.node_group"); ok {
+	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.node_group_affinity"); ok {
+		cfgNga := v.([]interface{})[0].(map[string]interface{})
 		conf.NodeGroupAffinity = &dataproc.NodeGroupAffinity{}
-		conf.NodeGroupAffinity.NodeGroupUri = v.(string)
-	} 
+		if v, ok := cfgNga["node_group_uri"]; ok {
+			conf.NodeGroupAffinity.NodeGroupUri = v.(string)
+		}
+	}
 	return conf, nil
 }
 
@@ -2464,11 +2491,20 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 		}
 	}
 	if gcc.ReservationAffinity != nil {
-		gceConfig["reservation_affinity"] = gcc.ReservationAffinity.ConsumeReservationType
-		gceConfig["reservation"] = gcc.ReservationAffinity.Values
+		gceConfig["reservation_affinity"] = []map[string]interface{}{
+			{
+				"consume_reservation_type":    gcc.ReservationAffinity.ConsumeReservationType,
+				"key":                         gcc.ReservationAffinity.Key,
+				"values":                      gcc.ReservationAffinity.Values,
+			},
+		}
 	}
 	if gcc.NodeGroupAffinity != nil {
-		gceConfig["node_group"] = gcc.NodeGroupAffinity.NodeGroupUri
+		gceConfig["node_group_affinity"] = []map[string]interface{}{
+			{
+				"node_group_uri":    gcc.NodeGroupAffinity.NodeGroupUri,
+			},
+		}
 	}
 
 	return []map[string]interface{}{gceConfig}
