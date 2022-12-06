@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -11,11 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-<% if version == "ga" -%>
-	"google.golang.org/api/compute/v1"
-<% else -%>
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
 )
 
 func resourceComputeInstanceGroupManager() *schema.Resource {
@@ -263,14 +258,12 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 							Description:   `The maximum number of instances(calculated as percentage) that can be unavailable during the update process. Conflicts with max_unavailable_fixed.`,
 						},
 
-<% unless version == "ga" -%>
 						"min_ready_sec": {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							Description:  `Minimum number of seconds to wait for after a newly created instance becomes available. This value must be from range [0, 3600].`,
 							ValidateFunc: validation.IntBetween(0, 3600),
 						},
-<% end -%>
 						"replacement_method": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -281,32 +274,30 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-			<% unless version == "ga" -%>
 			"all_instances_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,
 				Description: `Specifies configuration that overrides the instance template configuration for the group.`,
 				Elem: &schema.Resource{
-      		Schema: map[string]*schema.Schema{
-      			"metadata": {
-      				Type:        schema.TypeMap,
-      				Optional:    true,
-      				Elem:        &schema.Schema{Type: schema.TypeString},
-      				Set:         schema.HashString,
-      				Description: `The metadata key-value pairs that you want to patch onto the instance. For more information, see Project and instance metadata,`,
-     				},
-      			"labels": {
-      				Type:        schema.TypeMap,
-      				Optional:    true,
-      				Elem:        &schema.Schema{Type: schema.TypeString},
-      				Set:         schema.HashString,
-      				Description: `The label key-value pairs that you want to patch onto the instance,`,
-      			},
+					Schema: map[string]*schema.Schema{
+						"metadata": {
+							Type:        schema.TypeMap,
+							Optional:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Set:         schema.HashString,
+							Description: `The metadata key-value pairs that you want to patch onto the instance. For more information, see Project and instance metadata,`,
+						},
+						"labels": {
+							Type:        schema.TypeMap,
+							Optional:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Set:         schema.HashString,
+							Description: `The label key-value pairs that you want to patch onto the instance,`,
+						},
 					},
 				},
 			},
-			<% end -%>
 			"wait_for_instances": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -314,18 +305,13 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Description: `Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.`,
 			},
 			"wait_for_instances_status": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "STABLE",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "STABLE",
 				ValidateFunc: validation.StringInSlice([]string{"STABLE", "UPDATED"}, false),
 
-				<% if version == "ga" -%>
-				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective as well as all instances to be stable before returning.`,
-				<% else -%>
 				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective and all instances configs to be effective as well as all instances to be stable before returning.`,
-				<% end -%>
 			},
-			<% unless version == "ga" -%>
 			"stateful_internal_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -368,7 +354,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-			<% end -%>
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -421,22 +406,20 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 								},
 							},
 						},
-						<% unless version == "ga" -%>
 						"all_instances_config": {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Description: `Status of all-instances configuration on the group.`,
 							Elem: &schema.Resource{
-      					Schema: map[string]*schema.Schema{
-      						"effective": {
-      							Type:        schema.TypeBool,
-      							Computed:    true,
-      							Description: `A bit indicating whether this configuration has been applied to all managed instances in the group.`,
-      						},
-      					},
-      				},
+								Schema: map[string]*schema.Schema{
+									"effective": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: `A bit indicating whether this configuration has been applied to all managed instances in the group.`,
+									},
+								},
+							},
 						},
-						<% end -%>
 						"stateful": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -528,9 +511,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		AutoHealingPolicies:         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:                    expandVersions(d.Get("version").([]interface{})),
 		UpdatePolicy:                expandUpdatePolicy(d.Get("update_policy").([]interface{})),
-    <% unless version == "ga" -%>
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
-		<% end -%>
 		StatefulPolicy:              expandStatefulPolicy(d),
 
 		// Force send TargetSize to allow a value of 0.
@@ -723,14 +704,12 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
-	<% unless version == "ga" -%>
 	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_internal_ip in state: %s", err.Error())
 	}
 	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_external_ip in state: %s", err.Error())
 	}
-	<% end -%>
 	if err := d.Set("fingerprint", manager.Fingerprint); err != nil {
 		return fmt.Errorf("Error setting fingerprint: %s", err)
 	}
@@ -750,13 +729,11 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("update_policy", flattenUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
-	<% unless version == "ga" -%>
 	if manager.AllInstancesConfig != nil {
 		if err = d.Set("all_instances_config", flattenAllInstancesConfig(manager.AllInstancesConfig)); err != nil {
 			return fmt.Errorf("Error setting all_instances_config in state: %s", err.Error())
 		}
 	}
-	<% end -%>
 	if err = d.Set("status", flattenStatus(manager.Status)); err != nil {
 		return fmt.Errorf("Error setting status in state: %s", err.Error())
 	}
@@ -822,7 +799,6 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		change = true
 	}
 
-	<% unless version == "ga" -%>
 	if d.HasChange("all_instances_config") {
 		oldAic, newAic := d.GetChange("all_instances_config")
 		if newAic == nil || len(newAic.([]interface{})) == 0 {
@@ -832,19 +808,11 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		}
 		change = true
 	}
-	<% end -%>
 
-	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ips") || d.HasChange("stateful_external_ips") || d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 	}
-	<% else -%>
-	if d.HasChange("stateful_disk") {
-		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
-		change = true
-	}
-	<% end -%>
 
 	if d.HasChange("list_managed_instances_results") {
 		updatedManager.ListManagedInstancesResults = d.Get("list_managed_instances_results").(string)
@@ -989,11 +957,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 func computeIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) error {
 	waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
 	conf := resource.StateChangeConf{
-		<% if version == "ga" -%>
-		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target"},
-		<% else -%>
 		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
-		<% end -%>
 		Target:  []string{"created"},
 		Refresh: waitForInstancesRefreshFunc(getManager, waitForUpdates, d, meta),
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -1020,8 +984,7 @@ func expandAutoHealingPolicies(configured []interface{}) []*compute.InstanceGrou
 }
 
 func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
-	preservedState := &compute.StatefulPolicyPreservedState{
-	}
+	preservedState := &compute.StatefulPolicyPreservedState{}
 	stateful_disks := d.Get("stateful_disk").(*schema.Set).List()
 	disks := make(map[string]compute.StatefulPolicyPreservedStateDiskDevice)
 	for _, raw := range stateful_disks {
@@ -1032,25 +995,31 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 		disks[data["device_name"].(string)] = disk
 	}
 	preservedState.Disks = disks
-	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ip") {
-		newInternalIps := d.Get("stateful_internal_ip")
+		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
+		preservedState.InternalIPs = expandStatefulIps(oldInternalIps.([]interface{}), newInternalIps.([]interface{}), preservedState, "InternalIPs.%s")
 		if len(newInternalIps.([]interface{})) == 0 {
-			preservedState.ForceSendFields = append(preservedState.ForceSendFields, "InternalIPs")
-		} else {
-			preservedState.InternalIPs = expandStatefulIps(newInternalIps.([]interface{}), preservedState, "InternalIPs.%s")
+			log.Printf("@@@@@@@@@ %s", preservedState.InternalIPs)
+			//preservedState.ForceSendFields = append(preservedState.ForceSendFields, "InternalIPs")
+			for _, raw := range oldInternalIps.([]interface{}) {
+				data := raw.(map[string]interface{})
+				networkIp := data["interface_name"].(string)
+				if _, exist := preservedState.InternalIPs[networkIp]; !exist {
+					preservedState.InternalIPs[networkIp] = compute.StatefulPolicyPreservedStateNetworkIp{}
+				}
+			}
+
 		}
 	}
 	if d.HasChange("stateful_external_ip") {
-		newExternalIps := d.Get("stateful_external_ip")
+		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
+		preservedState.ExternalIPs = expandStatefulIps(oldExternalIps.([]interface{}), newExternalIps.([]interface{}), preservedState, "ExternalIPs.%s")
 		if len(newExternalIps.([]interface{})) == 0 {
+			preservedState.NullFields = append(preservedState.NullFields, "ExternalIPs")
 			preservedState.ForceSendFields = append(preservedState.ForceSendFields, "ExternalIPs")
-		} else {
-			preservedState.ExternalIPs = expandStatefulIps(newExternalIps.([]interface{}), preservedState, "ExternalIPs.%s")
 		}
 	}
 
-	<% end -%>
 	preservedState.ForceSendFields = append(preservedState.ForceSendFields, "Disks")
 	statefulPolicy := &compute.StatefulPolicy{PreservedState: preservedState}
 	statefulPolicy.ForceSendFields = append(statefulPolicy.ForceSendFields, "PreservedState")
@@ -1058,9 +1027,8 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 	return statefulPolicy
 }
 
-<% unless version == "ga" -%>
-func expandStatefulIps(new []interface{}, preservedState *compute.StatefulPolicyPreservedState, prefix string) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
-	statefulIpsMap :=	make(map[string]compute.StatefulPolicyPreservedStateNetworkIp)
+func expandStatefulIps(old []interface{}, new []interface{}, preservedState *compute.StatefulPolicyPreservedState, prefix string) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
+	statefulIpsMap := make(map[string]compute.StatefulPolicyPreservedStateNetworkIp)
 
 	for _, raw := range new {
 		data := raw.(map[string]interface{})
@@ -1072,7 +1040,6 @@ func expandStatefulIps(new []interface{}, preservedState *compute.StatefulPolicy
 
 	return statefulIpsMap
 }
-<% end -%>
 
 func expandVersions(configured []interface{}) []*compute.InstanceGroupManagerVersion {
 	versions := make([]*compute.InstanceGroupManagerVersion, 0, len(configured))
@@ -1122,10 +1089,8 @@ func expandUpdatePolicy(configured []interface{}) *compute.InstanceGroupManagerU
 		}
 		updatePolicy.Type = data["type"].(string)
 		updatePolicy.ReplacementMethod = data["replacement_method"].(string)
-<% unless version == "ga" -%>
 		updatePolicy.MinReadySec = int64(data["min_ready_sec"].(int))
 		updatePolicy.ForceSendFields = []string{"MinReadySec"}
-<% end -%>
 
 		// percent and fixed values are conflicting
 		// when the percent values are set, the fixed values will be ignored
@@ -1188,7 +1153,6 @@ func flattenStatefulPolicy(statefulPolicy *compute.StatefulPolicy) []map[string]
 	}
 	return result
 }
-<% unless version == "ga" -%>
 func flattenStatefulPolicyStatefulInternalIps(statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
 	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.InternalIPs == nil {
 		return make([]map[string]interface{}, 0, 0)
@@ -1197,7 +1161,7 @@ func flattenStatefulPolicyStatefulInternalIps(statefulPolicy *compute.StatefulPo
 	for interfaceName, internalIp := range statefulPolicy.PreservedState.InternalIPs {
 		data := map[string]interface{}{
 			"interface_name": interfaceName,
-			"delete_rule": internalIp.AutoDelete,
+			"delete_rule":    internalIp.AutoDelete,
 		}
 
 		result = append(result, data)
@@ -1213,14 +1177,13 @@ func flattenStatefulPolicyStatefulExternalIps(statefulPolicy *compute.StatefulPo
 	for interfaceName, externalIp := range statefulPolicy.PreservedState.ExternalIPs {
 		data := map[string]interface{}{
 			"interface_name": interfaceName,
-			"delete_rule": externalIp.AutoDelete,
+			"delete_rule":    externalIp.AutoDelete,
 		}
 
 		result = append(result, data)
 	}
 	return result
 }
-<% end -%>
 func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
 	results := []map[string]interface{}{}
 	if updatePolicy != nil {
@@ -1239,9 +1202,7 @@ func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy)
 			up["max_unavailable_fixed"] = 0
 			up["max_unavailable_percent"] = 0
 		}
-<% unless version == "ga" -%>
 		up["min_ready_sec"] = updatePolicy.MinReadySec
-<% end -%>
 		up["minimal_action"] = updatePolicy.MinimalAction
 		up["most_disruptive_allowed_action"] = updatePolicy.MostDisruptiveAllowedAction
 		up["type"] = updatePolicy.Type
@@ -1251,7 +1212,6 @@ func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy)
 	return results
 }
 
-<% unless version == "ga" -%>
 func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.InstanceGroupManagerAllInstancesConfig {
 	var properties *compute.InstancePropertiesPatch
 	for _, raw := range new {
@@ -1270,12 +1230,12 @@ func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.Ins
 	if properties != nil {
 		for _, raw := range old {
 			data := raw.(map[string]interface{})
-			for k, _ := range data["metadata"].(map[string]interface{}) {
+			for k := range data["metadata"].(map[string]interface{}) {
 				if _, exist := properties.Metadata[k]; !exist {
 					properties.NullFields = append(properties.NullFields, fmt.Sprintf("Metadata.%s", k))
 				}
 			}
-			for k, _ := range data["labels"].(map[string]interface{}) {
+			for k := range data["labels"].(map[string]interface{}) {
 				if _, exist := properties.Labels[k]; !exist {
 					properties.NullFields = append(properties.NullFields, fmt.Sprintf("Labels.%s", k))
 				}
@@ -1292,7 +1252,7 @@ func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.Ins
 }
 
 func flattenAllInstancesConfig(allInstancesConfig *compute.InstanceGroupManagerAllInstancesConfig) []map[string]interface{} {
-  results := []map[string]interface{}{}
+	results := []map[string]interface{}{}
 	props := map[string]interface{}{}
 	if len(allInstancesConfig.Properties.Metadata) > 0 {
 		props["metadata"] = allInstancesConfig.Properties.Metadata
@@ -1301,9 +1261,8 @@ func flattenAllInstancesConfig(allInstancesConfig *compute.InstanceGroupManagerA
 		props["labels"] = allInstancesConfig.Properties.Labels
 	}
 	results = append(results, props)
-  return results
+	return results
 }
-<% end -%>
 
 func flattenStatus(status *compute.InstanceGroupManagerStatus) []map[string]interface{} {
 	results := []map[string]interface{}{}
@@ -1312,11 +1271,9 @@ func flattenStatus(status *compute.InstanceGroupManagerStatus) []map[string]inte
 		"stateful":       flattenStatusStateful(status.Stateful),
 		"version_target": flattenStatusVersionTarget(status.VersionTarget),
 	}
-	<% unless version == "ga" -%>
 	if status.AllInstancesConfig != nil {
 		data["all_instances_config"] = flattenStatusAllInstancesConfig(status.AllInstancesConfig)
 	}
-	<% end -%>
 	results = append(results, data)
 	return results
 }
@@ -1349,7 +1306,6 @@ func flattenStatusVersionTarget(versionTarget *compute.InstanceGroupManagerStatu
 	return results
 }
 
-<% unless version == "ga" -%>
 func flattenStatusAllInstancesConfig(allInstancesConfig *compute.InstanceGroupManagerStatusAllInstancesConfig) []map[string]interface{} {
 	results := []map[string]interface{}{}
 	data := map[string]interface{}{
@@ -1358,7 +1314,6 @@ func flattenStatusAllInstancesConfig(allInstancesConfig *compute.InstanceGroupMa
 	results = append(results, data)
 	return results
 }
-<% end -%>
 
 func resourceInstanceGroupManagerStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	if err := d.Set("wait_for_instances", false); err != nil {
