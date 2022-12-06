@@ -36,6 +36,10 @@ objects:
     update_mask: true
     description: |
       A managed metastore service that serves metadata queries.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/dataproc-metastore/docs/overview'
+      api: 'https://cloud.google.com/dataproc-metastore/docs/reference/rest/v1/projects.locations.services'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       parent_resource_attribute: service_id
       exclude: false
@@ -243,6 +247,33 @@ objects:
                   description: |
                     A mapping of Hive metastore configuration key-value pairs to apply to the auxiliary Hive metastore (configured in hive-site.xml) in addition to the primary version's overrides.
                     If keys are present in both the auxiliary version's overrides and the primary version's overrides, the value from the auxiliary version's overrides takes precedence.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'networkConfig'
+        input: true
+        description: |
+          The configuration specifying the network settings for the Dataproc Metastore service.
+        properties:
+        - !ruby/object:Api::Type::Array
+          name: 'consumers'
+          description: |
+            The consumer-side network configuration for the Dataproc Metastore instance.
+          required: true
+          input: true
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+            - !ruby/object:Api::Type::String
+              name: 'endpointUri'
+              description: |
+                The URI of the endpoint used to access the metastore service.
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'subnetwork'
+              required: true
+              description: |
+                The subnetwork of the customer project from which an IP address is reserved and used as the Dataproc Metastore service's endpoint.
+                It is accessible to hosts in the subnet and to all hosts in a subnet in the same region and same network.
+                There must be at least one IP address available in the subnet's primary range. The subnet is specified in the following form:
+                `projects/{projectNumber}/regions/{region_id}/subnetworks/{subnetwork_id}
       - !ruby/object:Api::Type::Enum
         name: 'databaseType'
         input: true
