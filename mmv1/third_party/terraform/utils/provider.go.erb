@@ -269,7 +269,8 @@ func Provider() *schema.Provider {
 			"google_kms_secret":                                dataSourceGoogleKmsSecret(),
 			"google_kms_secret_ciphertext":                     dataSourceGoogleKmsSecretCiphertext(),
 			<% unless version == 'ga' -%>
-			"google_kms_secret_asymmetric":                     dataSourceGoogleKmsSecretAsymmetric(),
+                        "google_kms_secret_asymmetric":                     dataSourceGoogleKmsSecretAsymmetric(),
+                        "google_firebase_android_app":                      dataSourceGoogleFirebaseAndroidApp(),
 			"google_firebase_web_app":                          dataSourceGoogleFirebaseWebApp(),
 			"google_firebase_web_app_config":                   dataSourceGoogleFirebaseWebappConfig(),
 			<% end -%>
