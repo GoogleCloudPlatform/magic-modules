@@ -119,7 +119,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	tableId := d.Get("name").(string)
 	tblConf := bigtable.TableConf{TableID: tableId}
 
-	// DeletionProtection can be none, protected or unprotected
+	// DeletionProtection can be protected or unprotected
 	// Check if deletion protection is given
 	deletionProtection := d.Get("deletion_protection")
 	if deletionProtection == "PROTECTED" {
@@ -207,8 +207,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting column_family: %s", err)
 	}
 
-	// DeletionProtection can be none, protected or unprotected
-	// Check if table deletion protection has a value except for none
+	// DeletionProtection can be protected or unprotected
 	deletionProtection := table.DeletionProtection
 	if deletionProtection == bigtable.Protected {
 		if err := d.Set("deletion_protection", "PROTECTED"); err != nil {
@@ -272,7 +271,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// DeletionProtection can be none, protected or unprotected
+	// DeletionProtection can be protected or unprotected
 	// Check if deletion protection is given and also needs to be updated
 	if d.HasChange("deletion_protection") {
 		deletionProtection := d.Get("deletion_protection")
