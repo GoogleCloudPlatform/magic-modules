@@ -686,7 +686,7 @@ func resourceDataprocCluster() *schema.Resource {
 													Description:  `Corresponds to the label key of reservation resource.`,
 												},
 												"values": {
-													Type:         schema.TypeSet,
+													Type:         schema.TypeList,
 													Elem:         &schema.Schema{Type: schema.TypeString},
 													Optional:     true,
 													AtLeastOneOf: reservationAffinityKeys,
@@ -1711,7 +1711,7 @@ func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.G
 			conf.ReservationAffinity.Key = v.(string)
 		}
 		if v, ok := cfgRa["values"]; ok {
-			conf.ReservationAffinity.Values = convertStringSet(v.(*schema.Set))
+			conf.ReservationAffinity.Values = v.([]interface{})
 		}
 	}
 	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.node_group_affinity"); ok {
@@ -1851,7 +1851,7 @@ func expandDataprocMetricConfig(cfg map[string]interface{}) *dataproc.DataprocMe
 		data := raw.(map[string]interface{})
 		metric := dataproc.Metric{
 			MetricSource: data["metric_source"].(string),
-			MetricOverrides: convertStringSet(data["metric_overrides"].(*schema.Set)),
+			MetricOverrides: data["metric_overrides"].([]interface{}),
 		}
 		metricsSet = append(metricsSet, &metric)
 	}
