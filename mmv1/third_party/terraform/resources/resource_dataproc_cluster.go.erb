@@ -686,7 +686,7 @@ func resourceDataprocCluster() *schema.Resource {
 													Description:  `Corresponds to the label key of reservation resource.`,
 												},
 												"values": {
-													Type:         schema.TypeList,
+													Type:         schema.TypeSet,
 													Elem:         &schema.Schema{Type: schema.TypeString},
 													Optional:     true,
 													AtLeastOneOf: reservationAffinityKeys,
@@ -1844,7 +1844,7 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 <% if version == "ga" -%>
 func expandDataprocMetricConfig(cfg map[string]interface{}) *dataproc.DataprocMetricConfig {
 	conf := &dataproc.DataprocMetricConfig{}
-	metricsConfigs := cfg["metrics"].(*schema.Set).List()
+	metricsConfigs := cfg["metrics"].([]interface{})
 	metricsSet := make([]*dataproc.Metric, 0, len(metricsConfigs))
 
 	for _, raw := range metricsConfigs {
