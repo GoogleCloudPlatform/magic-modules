@@ -1035,6 +1035,7 @@ objects:
         url_param_only: true
         input: true
     properties:
+      # Intentionally deployedIndexes[] is not included because it's an output-only field and another terraform resource will manage a deployed index.
       - !ruby/object:Api::Type::String
         name: 'name'
         description: The resource name of the Index.
