@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -93,6 +94,7 @@ func TestAccBigtableTable_deletionProtection_enabled(t *testing.T) {
 
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -100,12 +102,57 @@ func TestAccBigtableTable_deletionProtection_enabled(t *testing.T) {
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccBigtableTable_deletionProtection(instanceName, tableName, true),
+				Config: testAccBigtableTable_deletionProtection(instanceName, tableName, "PROTECTED"),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config:      testAccBigtableTable_destroyTable(instanceName),
+				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
+			},
+			{
+				Config: testAccBigtableTable_family(instanceName, tableName, family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config:      testAccBigtableTable(instanceName, tableName),
+				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"column_family"},
+			},
+			{
+				Config: testAccBigtableTable_deletionProtection_family(instanceName, tableName, "UNPROTECTED", family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable_destroyTable(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
 			},
 		},
 	})
@@ -118,6 +165,7 @@ func TestAccBigtableTable_deletionProtection_disabled(t *testing.T) {
 
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -125,12 +173,53 @@ func TestAccBigtableTable_deletionProtection_disabled(t *testing.T) {
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccBigtableTable_deletionProtection(instanceName, tableName, false),
+				Config: testAccBigtableTable_deletionProtection(instanceName, tableName, "UNPROTECTED"),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable_family(instanceName, tableName, family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable(instanceName, tableName),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable_deletionProtection(instanceName, tableName, "PROTECTED"),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable_deletionProtection(instanceName, tableName, "UNPROTECTED"),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable_destroyTable(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
 			},
 		},
 	})
@@ -289,7 +378,7 @@ resource "google_bigtable_table" "table" {
 `, instanceName, instanceName, tableName, family)
 }
 
-func testAccBigtableTable_deletionProtection(instanceName, tableName string, deletionProtection bool) string {
+func testAccBigtableTable_deletionProtection(instanceName, tableName, deletionProtection string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
@@ -300,12 +389,13 @@ resource "google_bigtable_instance" "instance" {
   }
 
   instance_type = "DEVELOPMENT"
+  deletion_protection = false
 }
 
 resource "google_bigtable_table" "table" {
   name          = "%s"
   instance_name = google_bigtable_instance.instance.name
-  deletion_protection = "%b"
+  deletion_protection = "%s"
 }
 `, instanceName, instanceName, tableName, deletionProtection)
 }
@@ -370,4 +460,46 @@ resource "google_bigtable_table" "table" {
   }
 }
 `, instanceName, instanceName, tableName, family, family, family)
+}
+
+func testAccBigtableTable_deletionProtection_family(instanceName, tableName, deletionProtection, family string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+  deletion_protection = "%s"
+
+  column_family {
+    family = "%s"
+  }
+}
+`, instanceName, instanceName, tableName, deletionProtection, family)
+}
+
+func testAccBigtableTable_destroyTable(instanceName string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+`, instanceName, instanceName)
 }
