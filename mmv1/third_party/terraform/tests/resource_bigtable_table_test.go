@@ -87,7 +87,7 @@ func TestAccBigtableTable_family(t *testing.T) {
 	})
 }
 
-func TestAccBigtableTable_deletionProtection_enabled(t *testing.T) {
+func TestAccBigtableTable_deletion_protection_enabled(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
@@ -101,14 +101,16 @@ func TestAccBigtableTable_deletionProtection_enabled(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
+			// creating a table with deletion protection equals to protected
 			{
-				Config: testAccBigtableTable_deletionProtection(instanceName, tableName, "PROTECTED"),
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "PROTECTED"),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// it is not possible to delete the table because of deletion protection equals to protected
 			{
 				Config:      testAccBigtableTable_destroyTable(instanceName),
 				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
@@ -119,6 +121,7 @@ func TestAccBigtableTable_deletionProtection_enabled(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
 			},
+			// adding a column family to the table
 			{
 				Config: testAccBigtableTable_family(instanceName, tableName, family),
 			},
@@ -127,6 +130,7 @@ func TestAccBigtableTable_deletionProtection_enabled(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// it is not possible to delete column families in the table with deletion protection equals to protected
 			{
 				Config:      testAccBigtableTable(instanceName, tableName),
 				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
@@ -137,14 +141,16 @@ func TestAccBigtableTable_deletionProtection_enabled(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"column_family"},
 			},
+			// changing deletion protection field to unprotected without changing the column families
 			{
-				Config: testAccBigtableTable_deletionProtection_family(instanceName, tableName, "UNPROTECTED", family),
+				Config: testAccBigtableTable_deletion_protection_family(instanceName, tableName, "UNPROTECTED", family),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// destroying the table is possible when deletion protection is equals to unprotected
 			{
 				Config: testAccBigtableTable_destroyTable(instanceName),
 			},
@@ -158,7 +164,7 @@ func TestAccBigtableTable_deletionProtection_enabled(t *testing.T) {
 	})
 }
 
-func TestAccBigtableTable_deletionProtection_disabled(t *testing.T) {
+func TestAccBigtableTable_deletion_protection_disabled(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
@@ -172,14 +178,16 @@ func TestAccBigtableTable_deletionProtection_disabled(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
+			// creating a table with deletion protection equals to unprotected
 			{
-				Config: testAccBigtableTable_deletionProtection(instanceName, tableName, "UNPROTECTED"),
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED"),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// adding a column family to the table
 			{
 				Config: testAccBigtableTable_family(instanceName, tableName, family),
 			},
@@ -188,6 +196,7 @@ func TestAccBigtableTable_deletionProtection_disabled(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// removing the column family is possible because the deletion protection field is unprotected
 			{
 				Config: testAccBigtableTable(instanceName, tableName),
 			},
@@ -196,22 +205,25 @@ func TestAccBigtableTable_deletionProtection_disabled(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// changing the deletion protection field to protected
 			{
-				Config: testAccBigtableTable_deletionProtection(instanceName, tableName, "PROTECTED"),
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "PROTECTED"),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// changing the deletion protection field to unprotected
 			{
-				Config: testAccBigtableTable_deletionProtection(instanceName, tableName, "UNPROTECTED"),
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED"),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// destroying the table is possible when deletion protection is equals to unprotected
 			{
 				Config: testAccBigtableTable_destroyTable(instanceName),
 			},
@@ -378,7 +390,7 @@ resource "google_bigtable_table" "table" {
 `, instanceName, instanceName, tableName, family)
 }
 
-func testAccBigtableTable_deletionProtection(instanceName, tableName, deletionProtection string) string {
+func testAccBigtableTable_deletion_protection(instanceName, tableName, deletionProtection string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
@@ -462,7 +474,7 @@ resource "google_bigtable_table" "table" {
 `, instanceName, instanceName, tableName, family, family, family)
 }
 
-func testAccBigtableTable_deletionProtection_family(instanceName, tableName, deletionProtection, family string) string {
+func testAccBigtableTable_deletion_protection_family(instanceName, tableName, deletionProtection, family string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
