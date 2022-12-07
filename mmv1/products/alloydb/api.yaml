@@ -254,9 +254,9 @@ objects:
         base_url: "{{op_id}}"
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 10
-          update_minutes: 10
-          delete_minutes: 10
+          insert_minutes: 20
+          update_minutes: 20
+          delete_minutes: 20
       result: !ruby/object:Api::OpAsync::Result
         path: "response"
       status: !ruby/object:Api::OpAsync::Status
@@ -370,5 +370,4 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: "cpuCount"
-            input: true
             description: "The number of CPU's in the VM instance."
