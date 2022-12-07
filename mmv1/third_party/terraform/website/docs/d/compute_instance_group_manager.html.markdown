@@ -40,16 +40,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following arguments are exported:
-
-* `id` - an identifier for the resource with format `projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}`
-
-* `fingerprint` - The fingerprint of the instance group manager.
-
-* `instance_group` - The full URL of the instance group created by the manager.
-
-* `description` - Textual description of the instance group manager.
-
-* `self_link` - The URI of the resource.
-
-* `status` - The status of this managed instance group.
+See [google_compute_instance_group_manager](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#argument-reference) resource for details of all the available attributes.
