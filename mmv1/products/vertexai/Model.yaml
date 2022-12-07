@@ -10,22 +10,42 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation':
       'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
+async: !ruby/object:Api::OpAsync
+  actions:
+    - create
+    - delete
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: True
+    allowed:
+      - True
+      - False
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
 description: "A trained machine learning Model."
 id_format: 'projects/{{project}}/locations/{{location}}/models/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vertex_ai_model"
+    skip_test: true
     primary_resource_id: "model"
     vars:
       name: "vertex_ai_model"
       project: "vertex-ai"
       model_name: "model-name"
       kms_key_name: "kms-name"
-    test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/vertex_model.go.erb
   encoder: templates/terraform/encoders/vertex_model.go.erb
+  update_encoder: templates/terraform/encoders/vertex_model_update.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: location
