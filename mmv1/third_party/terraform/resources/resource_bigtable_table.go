@@ -78,6 +78,7 @@ func resourceBigtableTable() *schema.Resource {
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 
+			// If not provided, deletion protection will be set to the API default value
 			"deletion_protection": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -121,6 +122,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	// DeletionProtection can be protected or unprotected
 	// Check if deletion protection is given
+	// If not given, tblConf.DeletionProtection will be set to the API default value
 	deletionProtection := d.Get("deletion_protection")
 	if deletionProtection == "PROTECTED" {
 		tblConf.DeletionProtection = bigtable.Protected
@@ -217,6 +219,8 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		if err := d.Set("deletion_protection", "UNPROTECTED"); err != nil {
 			return fmt.Errorf("Error setting deletion_protection: %s", err)
 		}
+	} else {
+		return fmt.Errorf("Error setting deletion_protection, it should be either PROTECTED or UNPROTECTED")
 	}
 	return nil
 }
