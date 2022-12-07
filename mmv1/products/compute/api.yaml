@@ -5733,11 +5733,10 @@ objects:
                       name: 'sourceImage'
                       description: |
                         The source image to create this disk. When creating a
-                        new instance, one of initializeParams.sourceImage,
-                        initializeParams.sourceSnapshot, or disks.source is
-                        required.  To create a disk with one of the public
-                        operating system images, specify the image by its
-                        family name.
+                        new instance, one of initializeParams.sourceImage or
+                        disks.source is required.  To create a disk with one of
+                        the public operating system images, specify the image
+                        by its family name.
                     - !ruby/object:Api::Type::NestedObject
                       name: 'sourceImageEncryptionKey'
                       description: |
@@ -5751,104 +5750,18 @@ objects:
                         images are encrypted with your own keys.
                       properties:
                         - !ruby/object:Api::Type::String
-                          name: 'sha256'
-                          description: |
-                            The RFC 4648 base64 encoded SHA-256 hash of the
-                            customer-supplied encryption key that protects this
-                            resource.
-                          output: true
-                        - !ruby/object:Api::Type::String
-                          name: 'kmsKeyServiceAccount'
-                          description: |
-                            The service account being used for the encryption
-                            request for the given KMS key. If absent, the
-                            Compute Engine default service account is used.
-                        - !ruby/object:Api::Type::String
                           name: 'rawKey'
                           description: |
                             Specifies a 256-bit customer-supplied encryption
                             key, encoded in RFC 4648 base64 to either encrypt
                             or decrypt this resource.
                         - !ruby/object:Api::Type::String
-                          name: 'rsaEncryptedKey'
-                          description: |
-                            Specifies an RFC 4648 base64 encoded, RSA-wrapped
-                            2048-bit customer-supplied encryption key to either
-                            encrypt or decrypt this resource. You can provide
-                            either the rawKey or the rsaEncryptedKey.
-
-                            The key must meet the following requirements before
-                            you can provide it to Compute Engine:
-
-                            1. The key is wrapped using a RSA public key
-                            certificate provided by Google.
-
-                            2. After being wrapped, the key must be encoded in
-                            RFC 4648 base64 encoding.
-
-                            Get the RSA public key certificate provided by Google at:
-                            https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
-                        - !ruby/object:Api::Type::String
-                          name: 'kmsKeyName'
-                          description: |
-                            The name of the encryption key that is stored in
-                            Google Cloud KMS.
-                    - !ruby/object:Api::Type::String
-                      name: 'sourceSnapshot'
-                      description: |
-                        The source snapshot to create this disk. When creating
-                        a new instance, one of initializeParams.sourceSnapshot,
-                        initializeParams.sourceImage, or disks.source is
-                        required except for local SSD.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'sourceSnapshotEncryptionKey'
-                      description: |
-                        The customer-supplied encryption key of the source snapshot.
-                      properties:
-                        - !ruby/object:Api::Type::String
                           name: 'sha256'
                           description: |
                             The RFC 4648 base64 encoded SHA-256 hash of the
                             customer-supplied encryption key that protects this
                             resource.
                           output: true
-                        - !ruby/object:Api::Type::String
-                          name: 'kmsKeyServiceAccount'
-                          description: |
-                            The service account being used for the encryption
-                            request for the given KMS key. If absent, the
-                            Compute Engine default service account is used.
-                        - !ruby/object:Api::Type::String
-                          name: 'rawKey'
-                          description: |
-                            Specifies a 256-bit customer-supplied encryption
-                            key, encoded in RFC 4648 base64 to either encrypt or
-                            decrypt this resource. You can provide either the
-                            rawKey or the rsaEncryptedKey.
-                        - !ruby/object:Api::Type::String
-                          name: 'rsaEncryptedKey'
-                          description: |
-                            Specifies an RFC 4648 base64 encoded, RSA-wrapped
-                            2048-bit customer-supplied encryption key to either
-                            encrypt or decrypt this resource. You can provide
-                            either the rawKey or the rsaEncryptedKey.
-
-                            The key must meet the following requirements before
-                            you can provide it to Compute Engine:
-
-                            1. The key is wrapped using a RSA public key
-                            certificate provided by Google.
-
-                            2. After being wrapped, the key must be encoded in
-                            RFC 4648 base64 encoding.
-
-                            Get the RSA public key certificate provided by Google at:
-                            https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
-                        - !ruby/object:Api::Type::String
-                          name: 'kmsKeyName'
-                          description: |
-                            The name of the encryption key that is stored in
-                            Google Cloud KMS.
                 - !ruby/object:Api::Type::Enum
                   name: 'interface'
                   description: |
@@ -5879,9 +5792,7 @@ objects:
                   imports: 'name'
                   description: |
                     Reference to a disk. When creating a new instance,
-                    one of initializeParams.sourceImage,
-                    initializeParams.sourceSnapshot, or disks.source is
-                    required.
+                    one of initializeParams.sourceImage or disks.source is required.
 
                     If desired, you can also attach existing non-root
                     persistent disks using this property. This field is only
