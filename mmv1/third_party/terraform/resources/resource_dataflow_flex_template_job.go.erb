@@ -59,6 +59,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Type:             schema.TypeMap,
 				Optional:         true,
 				DiffSuppressFunc: resourceDataflowJobLabelDiffSuppress,
+				Description:      `User labels to be specified for the job. Keys and values should follow the restrictions specified in the labeling restrictions page. NOTE: Google-provided Dataflow templates often provide default labels that begin with goog-dataflow-provided. Unless explicitly set in config, these labels will be ignored to prevent diffs on re-apply.`,
 			},
 
 			"parameters": {
@@ -83,12 +84,115 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Computed: true,
 			},
 
-     "skip_wait_on_job_termination": {
+			"num_workers": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				// ForceNew applies to both stream and batch jobs
+				ForceNew:    true,
+				Description: `The initial number of Google Compute Engine instances for the job.`,
+			},
+
+			"max_workers": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				// ForceNew applies to both stream and batch jobs
+				ForceNew:    true,
+				Description: `The maximum number of Google Compute Engine instances to be made available to your pipeline during execution, from 1 to 1000.`,
+			},
+
+			"service_account_email": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The Service Account email used to create the job.`,
+			},
+
+			"temp_location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The Cloud Storage path to use for temporary files. Must be a valid Cloud Storage URL, beginning with gs://.`,
+			},
+
+			"staging_location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The Cloud Storage path to use for staging files. Must be a valid Cloud Storage URL, beginning with gs://.`,
+			},
+
+			"sdk_container_image": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The Cloud Storage path to use for temporary files. Must be a valid Cloud Storage URL, beginning with gs://.`,
+			},
+
+			"network": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				Description:      `The network to which VMs will be assigned. If it is not provided, "default" will be used.`,
+			},
+
+			"subnetwork": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				Description:      `The subnetwork to which VMs will be assigned. Should be of the form "regions/REGION/subnetworks/SUBNETWORK".`,
+			},
+
+			"machine_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The machine type to use for the job.`,
+			},
+
+			"kms_key_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The name for the Cloud KMS key for the job. Key format is: projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY`,
+			},
+
+			"ip_configuration": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  `The configuration for VM IPs. Options are "WORKER_IP_PUBLIC" or "WORKER_IP_PRIVATE".`,
+				ValidateFunc: validation.StringInSlice([]string{"WORKER_IP_PUBLIC", "WORKER_IP_PRIVATE", ""}, false),
+			},
+
+			"additional_experiments": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Computed:    true,
+				Description: `List of experiments that should be used by the job. An example value is ["enable_stackdriver_agent_metrics"].`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+
+			"enable_streaming_engine": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: `Indicates if the job should use the streaming engine feature.`,
+			},
+
+			"autoscaling_algorithm": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The algorithm to use for autoscaling`,
+			},
+	
+			"launcher_machine_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The machine type to use for launching the job. The default is n1-standard-1.`,
+			},
+
+	"skip_wait_on_job_termination": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
 				Description: `If true, treat DRAINING and CANCELLING as terminal job states and do not wait for further changes before removing from terraform state and moving on. WARNING: this will lead to job name conflicts if you do not ensure that the job names are different, e.g. by embedding a release ID or by using a random_id.`,
 			},
+
 		},
 		UseJSONNumber: true,
 	}
@@ -112,14 +216,33 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
+	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
+
 	request := dataflow.LaunchFlexTemplateRequest{
+
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           expandStringMap(d, "parameters"),
 			Environment: &dataflow.FlexTemplateRuntimeEnvironment{
-				AdditionalUserLabels: expandStringMap(d, "labels"),
+				AdditionalUserLabels:  expandStringMap(d, "labels"),
+				AutoscalingAlgorithm:  d.Get("autoscaling_algorithm").(string),
+				NumWorkers:            int64(d.Get("num_workers").(int)),
+				MaxWorkers:            int64(d.Get("max_workers").(int)),
+				Network:               d.Get("network").(string),
+				ServiceAccountEmail:   d.Get("service_account_email").(string),
+				Subnetwork:            d.Get("subnetwork").(string),
+				TempLocation:          d.Get("temp_location").(string),
+				StagingLocation:       d.Get("staging_location").(string),
+				MachineType:           d.Get("machine_type").(string),
+				KmsKeyName:            d.Get("kms_key_name").(string),
+				IpConfiguration:       d.Get("ip_configuration").(string),
+				EnableStreamingEngine: d.Get("enable_streaming_engine").(bool),
+				AdditionalExperiments: additionalExperiments,
+				SdkContainerImage:     d.Get("ip_configuration").(string),
+				LauncherMachineType:   d.Get("machine_type").(string),
 			},
+
 		},
 	}
 
@@ -258,13 +381,30 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error waiting for job with job ID %q to be running: %s", d.Id(), err)
 	}
 
+	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
+	
 	request := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           expandStringMap(d, "parameters"),
 			Environment: &dataflow.FlexTemplateRuntimeEnvironment{
-				AdditionalUserLabels: expandStringMap(d, "labels"),
+				AdditionalUserLabels:  expandStringMap(d, "labels"),
+				AutoscalingAlgorithm:  d.Get("autoscaling_algorithm").(string),
+				NumWorkers:            int64(d.Get("num_workers").(int)),
+				MaxWorkers:            int64(d.Get("max_workers").(int)),
+				Network:               d.Get("network").(string),
+				ServiceAccountEmail:   d.Get("service_account_email").(string),
+				Subnetwork:            d.Get("subnetwork").(string),
+				TempLocation:          d.Get("temp_gcs_location").(string),
+				StagingLocation:       d.Get("staging_gcs_location").(string),
+				MachineType:           d.Get("machine_type").(string),
+				KmsKeyName:            d.Get("kms_key_name").(string),
+				IpConfiguration:       d.Get("ip_configuration").(string),
+				EnableStreamingEngine: d.Get("enable_streaming_engine").(bool),
+				AdditionalExperiments: additionalExperiments,
+				SdkContainerImage:     d.Get("ip_configuration").(string),
+				LauncherMachineType:   d.Get("machine_type").(string),
 			},
 			Update:               true,
 		},
