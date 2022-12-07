@@ -17,16 +17,35 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ['projects/{{project}}/locations/{{region}}/instances/{{instance_id}}', '{{region}}/{{instance_id}}']
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "firebase_database_instance_user"
+        name: "firebase_database_instance"
         min_version: "beta"
-        primary_resource_id: "user"
+        primary_resource_id: "basic"
         vars:
-          instance_id: "my-db"
+          instance_id: "active-db"
         test_env_vars:
-          region: :REGION
           project_id: :PROJECT_NAME
+          region: :REGION
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_database_instance_disabled"
+        min_version: "beta"
+        primary_resource_id: "full"
+        vars:
+          instance_id: "disabled-db"
+        test_env_vars:
+          project_id: :PROJECT_NAME
+          region: :REGION
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_database_instance_default"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          project_id: "default-db-test"
+        test_env_vars:
+          org_id: :ORG_ID
+          region: :REGION
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/firebase_database_instance_state.go.erb
+      custom_delete: templates/terraform/custom_import/self_link_as_name.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

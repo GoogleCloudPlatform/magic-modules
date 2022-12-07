@@ -31,7 +31,7 @@ objects:
     base_url: projects/{{project}}/locations/{{region}}/instances/
     self_link: projects/{{project}}/locations/{{region}}/instances/{{instance_id}}
     create_url: projects/{{project}}/locations/{{region}}/instances?databaseId={{instance_id}}
-    delete_url: projects/{{project}}/locations/{{region}}/instances/{{instance_id}}?immediate=true
+    delete_url: projects/{{project}}/locations/{{region}}/instances/{{instance_id}}
     description: |
       A Google Cloud Firebase Realtime Database instance.
 
