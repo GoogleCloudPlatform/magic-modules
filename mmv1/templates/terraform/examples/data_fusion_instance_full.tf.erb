@@ -21,7 +21,6 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
   version = "6.7.0"
   accelerators {
       accelerator_type = "ACCELERATOR_TYPE_UNSPECIFIED"
-      state = "STATE_UNSPECIFIED"
   }
   dataproc_service_account = data.google_app_engine_default_service_account.default.email
   accelerators {
