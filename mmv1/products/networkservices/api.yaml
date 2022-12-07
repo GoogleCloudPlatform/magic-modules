@@ -346,6 +346,77 @@ objects:
             required: true
             description: |
               The name of the AWS region that your origin is in.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'originOverrideAction'
+        description: |
+          The override actions, including url rewrites and header
+          additions, for requests that use this origin.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'urlRewrite'
+            description: |
+              The URL rewrite configuration for request that are
+              handled by this origin.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'hostRewrite'
+                description: |
+                  Prior to forwarding the request to the selected
+                  origin, the request's host header is replaced with
+                  contents of the hostRewrite.
+
+                  This value must be between 1 and 255 characters.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'headerAction'
+            description: |
+              The header actions, including adding and removing
+              headers, for request handled by this origin.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: requestHeadersToAdd
+                description: |
+                  Describes a header to add.
+
+                  You may add a maximum of 5 request headers.
+                min_size: 1
+                max_size: 5
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'headerName'
+                      required: true
+                      description: |
+                        The name of the header to add.
+                    - !ruby/object:Api::Type::String
+                      name: 'headerValue'
+                      required: true
+                      description: |
+                        The value of the header to add.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'replace'
+                      description: |
+                        Whether to replace all existing headers with the same name.
+
+                        By default, added header values are appended
+                        to the response or request headers with the
+                        same field names. The added values are
+                        separated by commas.
+
+                        To overwrite existing values, set `replace` to `true`.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'originRedirect'
+        description: |
+          Follow redirects from this origin.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'redirectConditions'
+            description: |
+              The set of redirect response codes that the CDN
+              follows. Values of
+              [RedirectConditions](https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheOrigins#redirectconditions)
+              are accepted.
+            max_size: 5
+            item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'EdgeCacheService'
     base_url: 'projects/{{project}}/locations/global/edgeCacheServices'
