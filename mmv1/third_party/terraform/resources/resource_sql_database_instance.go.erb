@@ -154,7 +154,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"domain": {
 										Type:        schema.TypeString,
-										Required:    true,
+										Optional:    true,
 										Description: `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
 									},
 								},
@@ -193,7 +193,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"bucket": {
 										Type:         schema.TypeString,
-										Required:     true,
+										Optional:     true,
 										Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
 									},
 									"retention_interval": {
