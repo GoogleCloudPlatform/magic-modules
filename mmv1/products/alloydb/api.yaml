@@ -433,6 +433,7 @@ objects:
         name: "clusterName"
         description: "The full resource name of the backup source cluster (e.g., projects/{project}/locations/{location}/clusters/{clusterId})."
         required: true
+        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: "labels"
         description: "User-defined labels for the alloydb backup."
@@ -455,6 +456,7 @@ objects:
         name: "description"
         description: |
           User-provided description of the backup.
+        input: true
       - !ruby/object:Api::Type::Boolean
         name: "reconciling"
         output: true
