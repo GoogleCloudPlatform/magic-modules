@@ -2044,9 +2044,11 @@ resource "google_dataproc_cluster" "basic" {
 		  local_ssd_interface = "NVME"
 		}
 	  }
+	  
 	  preemptible_worker_config {
 		num_instances = 0
 	  }
+
 	  software_config {
 		image_version = "2.0-ubuntu18"
 		override_properties = {
