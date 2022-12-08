@@ -16,8 +16,13 @@ if err != nil {
   return err // RTDB only supports soft-delete.
 }
 
-if v := res["state"]; v == "DELETED" {
-  return nil
+dbState := res["state"]
+if dbState == "DELETED" {
+  return nil // USER_DATABASE soft deleted.
+}
+dbType := res["type"]
+if dbState == "DISABLED" && dbType == "DEFAULT_DATABASE" {
+  return nil // DEFAULT_DATABASE is left in a DISABLED state because it cannot be deleted.
 }
 
 return fmt.Errorf("FirebaseDatabaseInstance %s got state=%s, want DELETED", url, s)

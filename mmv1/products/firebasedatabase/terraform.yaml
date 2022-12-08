@@ -28,7 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_database_instance_disabled"
         min_version: "beta"
-        primary_resource_id: "disabled"
+        primary_resource_id: "full"
         vars:
           instance_id: "disabled-db"
         test_env_vars:
