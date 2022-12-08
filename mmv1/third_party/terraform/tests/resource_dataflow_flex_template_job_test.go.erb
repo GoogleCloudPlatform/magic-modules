@@ -323,7 +323,7 @@ func testAccDataflowFlexTemplateJobHasNetwork(t *testing.T, res, expected string
 	}
 }
 
-func testAccDataflowFlexTemplateJobHasSubnetwork(t *testing.T, res, expected string) resource.TestCheckFunc {
+func testAccDataflowFlexTemplateJobHasSubNetwork(t *testing.T, res, expected string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		instanceTmpl, err := testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t, s, res)
 		if err != nil {
