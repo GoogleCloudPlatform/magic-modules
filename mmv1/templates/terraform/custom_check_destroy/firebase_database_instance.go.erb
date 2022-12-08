@@ -12,10 +12,12 @@ if config.BillingProject != "" {
 }
 
 res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
-if err == nil {
-    return fmt.Errorf("FirebaseDatabaseInstance still exists at %s", url)
+if err != nil {
+  return err // RTDB only supports soft-delete.
 }
 
-if s := res["state"]; s != "DELETED" {
-	return fmt.Errorf("FirebaseDatabaseInstance %s got state=%s, want DELETED", url, s)
+if v := res["state"]; v == "DELETED" {
+  return nil
 }
+
+return fmt.Errorf("FirebaseDatabaseInstance %s got state=%s, want DELETED", url, s)
