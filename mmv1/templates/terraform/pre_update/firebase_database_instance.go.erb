@@ -29,7 +29,8 @@ if d.HasChange("desired_state") {
       return fmt.Errorf("Unsupported value in field `desired_state`: %v", p)
     }
   }
-  return nil // firebasedatabase does not update UpdateDatabaseInstance endpoint now.
+  // firebasedatabase does not update UpdateDatabaseInstance endpoint now.
+  return nil
 }
 // end of customized code
 
