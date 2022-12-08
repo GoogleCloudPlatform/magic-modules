@@ -80,6 +80,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=$local_path/sa_key.json
 echo "checking terraform version"
 terraform version
 
+
 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
 test_exit_code=$?
@@ -172,18 +173,10 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   # RECORDING mode
   export VCR_MODE=RECORDING
   FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}')
-  test_exit_code=0
-  for failed_test in $FAILED_TESTS
-  do
-      TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run="${failed_test}$" -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > testlog/recording_build/${failed_test}_recording_test.log & pids+=($!)
-  done
+  # test_exit_code=0
+  parallel TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run="{}$" -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" ">" testlog/recording_build/{}_recording_test.log ::: $FAILED_TESTS
 
-  # Check if any process fails 
-  for pid in ${pids[*]}; do
-    if ! wait $pid; then
-        test_exit_code=1
-    fi
-  done
+  test_exit_code=$?
 
   # Concatenate recording build logs to one file
   # Note: build logs are different from debug logs
