@@ -28,12 +28,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_database_instance_disabled"
         min_version: "beta"
-        primary_resource_id: "full"
+        primary_resource_id: "disabled"
         vars:
           instance_id: "disabled-db"
         test_env_vars:
           project_id: :PROJECT_NAME
           region: :REGION
+        ignore_read_extra:
+          - "desired_state"
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_database_instance_default"
         min_version: "beta"
@@ -53,11 +55,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: :ACTIVE
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/firebase_database_instance.go.erb'
-      decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
+      decoder: templates/terraform/decoders/firebase_database_instance.go.erb
       post_create: templates/terraform/post_create/firebase_database_instance.go.erb
       pre_update: templates/terraform/pre_update/firebase_database_instance.go.erb
       pre_delete: templates/terraform/pre_delete/firebase_database_instance.go.erb
-      post_import: templates/terraform/post_import/firebase_database_instance.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/firebase_database_instance.go.erb
 
 # This is for copying files over

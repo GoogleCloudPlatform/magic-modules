@@ -17,5 +17,5 @@ if err == nil {
 }
 
 if s := res["state"]; s != "DELETED" {
-	return fmt.Errorf("CertificateAuthority %s got %s, want DELETED", url, s)
+	return fmt.Errorf("FirebaseDatabaseInstance %s got state=%s, want DELETED", url, s)
 }
