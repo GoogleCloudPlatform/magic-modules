@@ -53,7 +53,25 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
 			},
+			{ // must be idempotent
+				Config: testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context, "DISABLED"),
+			},
 			{
+				ResourceName:            "google_firebase_database_instance.updated",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
+			},
+			{
+				Config: testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context, "ACTIVE"),
+			},
+			{
+				ResourceName:            "google_firebase_database_instance.updated",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
+			},
+			{ // must be idempotent
 				Config: testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context, "ACTIVE"),
 			},
 			{
