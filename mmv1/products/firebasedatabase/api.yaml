@@ -87,5 +87,4 @@ objects:
         values:
           - :ACTIVE
           - :DISABLED
-        default_value: :ACTIVE
 
