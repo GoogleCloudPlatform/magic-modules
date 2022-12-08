@@ -100,11 +100,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       destinationConfig.gcsDestinationConfig.fileRotationInterval: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       destinationConfig.destinationConnectionProfile: !ruby/object:Overrides::Terraform::PropertyOverride
-        # API currently returns an id that uses a number instead of a project id
-        ignore_read: true
+        diff_suppress_func: "projectNumberDiffSuppress"
       sourceConfig.sourceConnectionProfile: !ruby/object:Overrides::Terraform::PropertyOverride
-        # API currently returns an id that uses a number instead of a project id
-        ignore_read: true
+        diff_suppress_func: "projectNumberDiffSuppress"
       sourceConfig.mysqlSourceConfig.maxConcurrentCdcTasks: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         validation: !ruby/object:Provider::Terraform::Validation
