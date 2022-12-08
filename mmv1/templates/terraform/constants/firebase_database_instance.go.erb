@@ -6,9 +6,9 @@ func enableRTDB(config *Config, d *schema.ResourceData, project string, billingP
 
 	res, err := sendRequest(config, "POST", billingProject, url, userAgent, nil)
 	if err != nil {
-		return fmt.Errorf("Error reenabling Instance %q: %s", d.Id(), err)
+		return fmt.Errorf("Error reenabling firebase_database_instance %q: %s", d.Id(), err)
 	} else {
-		log.Printf("[DEBUG] Finished reenabling Instance %q: %#v", d.Id(), res)
+		log.Printf("[DEBUG] Finished reenabling firebase_database_instance %q: %#v", d.Id(), res)
 	}
 	return nil
 }
@@ -21,9 +21,9 @@ func disableRTDB(config *Config, d *schema.ResourceData, project string, billing
 
 	res, err := sendRequest(config, "POST", billingProject, url, userAgent, nil)
 	if err != nil {
-		return fmt.Errorf("Error disabling Instance %q: %s", d.Id(), err)
+		return fmt.Errorf("Error disabling firebase_database_instance %q: %s", d.Id(), err)
 	} else {
-		log.Printf("[DEBUG] Finished disabling Instance %q: %#v", d.Id(), res)
+		log.Printf("[DEBUG] Finished disabling firebase_database_instance %q: %#v", d.Id(), res)
 	}
 	return nil
 }

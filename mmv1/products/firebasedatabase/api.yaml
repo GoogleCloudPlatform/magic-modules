@@ -31,11 +31,7 @@ objects:
     base_url: projects/{{project}}/locations/{{region}}/instances/
     self_link: projects/{{project}}/locations/{{region}}/instances/{{instance_id}}
     create_url: projects/{{project}}/locations/{{region}}/instances?databaseId={{instance_id}}
-    delete_url: projects/{{project}}/locations/{{region}}/instances/{{instance_id}}
-    description: |
-      A Google Cloud Firebase Realtime Database instance.
-
-      Once Firebase has been added to a Google Project it cannot be removed.
+    description: A Firebase Realtime Database instance.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -52,7 +48,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'instance_id'
         description: |
-          A globally unique identifier for the Firebase Realtime Database.
+          The globally unique identifier of the Firebase Realtime Database instance. 
+          Instance IDs cannot be reused after deletion.
         required: true
         input: true
         url_param_only: true
@@ -61,21 +58,23 @@ objects:
         name: name
         description: |
           The fully-qualified resource name of the Firebase Realtime Database, in the
-          format: projects/PROJECT_IDENTIFIER/locations/REGION_IDENTIFIER/instances/INSTANCE_ID PROJECT_IDENTIFIER: the
-          Firebase project's
-          [`ProjectNumber`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
-          Learn more about using project identifiers in Google's
-          [AIP 2510 standard](https://google.aip.dev/cloud/2510).
+          format: projects/PROJECT_NUMBER/locations/REGION_IDENTIFIER/instances/INSTANCE_ID
+          PROJECT_NUMBER: The Firebase project's [`ProjectNumber`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
+          Learn more about using project identifiers in Google's [AIP 2510 standard](https://google.aip.dev/cloud/2510).
         output: true
       - !ruby/object:Api::Type::String
         name: database_url
         description: |
-          The database URL in the form of https://{instance-id}.firebasio.com for us-central1 databases
+          The database URL in the form of https://{instance-id}.firebasio.com for us-central1 instances
           or https://{instance-id}.{region}.firebasedatabase.app in other regions.
         output: true
       - !ruby/object:Api::Type::Enum
         name: type
-        description: The database type.
+        description: |
+          The database type.
+          Each project can create one default Firebase Realtime Database, which cannot be deleted once created.
+          Creating user Databases is only available for projects on the Blaze plan.
+          Projects can be upgraded using the Cloud Billing API https://cloud.google.com/billing/reference/rest/v1/projects/updateBillingInfo.
         input: true
         values:
           - :DEFAULT_DATABASE
@@ -83,7 +82,8 @@ objects:
         default_value: :USER_DATABASE
       - !ruby/object:Api::Type::Enum
         name: state
-        description: The current database state.
+        description: |
+          The current database state. Set desired_state to disable or reenable the database.
         output: true
         values:
           - :ACTIVE

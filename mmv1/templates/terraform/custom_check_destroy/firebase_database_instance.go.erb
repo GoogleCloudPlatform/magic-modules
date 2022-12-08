@@ -25,4 +25,4 @@ if dbState == "DISABLED" && dbType == "DEFAULT_DATABASE" {
   return nil // DEFAULT_DATABASE is left in a DISABLED state because it cannot be deleted.
 }
 
-return fmt.Errorf("FirebaseDatabaseInstance %s got state=%s, want DELETED", url, s)
+return fmt.Errorf("firebase_database_instance %s got state=%s, want DELETED", url, s)
