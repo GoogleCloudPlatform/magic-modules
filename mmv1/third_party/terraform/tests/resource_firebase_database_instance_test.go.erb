@@ -39,7 +39,7 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 				Config: testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context, "ACTIVE"),
 			},
 			{
-				ResourceName:            "google_firebase_database_instance.default",
+				ResourceName:            "google_firebase_database_instance.updated",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
@@ -48,7 +48,7 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 				Config: testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context, "DISABLED"),
 			},
 			{
-				ResourceName:            "google_firebase_database_instance.default",
+				ResourceName:            "google_firebase_database_instance.updated",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
@@ -57,7 +57,7 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 				Config: testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context, "ACTIVE"),
 			},
 			{
-				ResourceName:            "google_firebase_database_instance.default",
+				ResourceName:            "google_firebase_database_instance.updated",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
