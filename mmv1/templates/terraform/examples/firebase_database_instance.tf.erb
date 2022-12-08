@@ -7,7 +7,7 @@ resource "google_firebase_database_instance" "<%= ctx[:primary_resource_id] %>" 
 
 resource "google_project_service" "firebase_database" {
   provider = google-beta
-  project  = google_firebase_project.default.project
+  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
   service  = "firebasedatabase.googleapis.com"
   disable_on_destroy = false
 }
