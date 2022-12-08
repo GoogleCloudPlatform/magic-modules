@@ -518,6 +518,7 @@ func TestAccDataprocCluster_nonPreemptibleSecondary(t *testing.T) {
 	})
 }
 
+<% if version == "ga" -%>
 func TestAccDataprocCluster_spotSecondary(t *testing.T) {
 	t.Parallel()
 
@@ -531,13 +532,14 @@ func TestAccDataprocCluster_spotSecondary(t *testing.T) {
 			{
 				Config: testAccDataprocCluster_spotSecondary(rnd),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.non_preemptible_secondary", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.non_preemptible_secondary", "cluster_config.0.preemptible_worker_config.0.preemptibility", "SPOT"),
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.spot_secondary", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_secondary", "cluster_config.0.preemptible_worker_config.0.preemptibility", "SPOT"),
 				),
 			},
 		},
 	})
 }
+<% end -%>
 
 func TestAccDataprocCluster_withStagingBucket(t *testing.T) {
 	t.Parallel()
@@ -1654,9 +1656,10 @@ resource "google_dataproc_cluster" "non_preemptible_secondary" {
 	`, rnd)
 }
 
+<% if version == "ga" -%>
 func testAccDataprocCluster_spotSecondary(rnd string) string {
 	return fmt.Sprintf(`
-resource "google_dataproc_cluster" "non_preemptible_secondary" {
+resource "google_dataproc_cluster" "spot_secondary" {
   name   = "tf-test-dproc-%s"
   region = "us-central1"
 
@@ -1688,6 +1691,7 @@ resource "google_dataproc_cluster" "non_preemptible_secondary" {
 }
 	`, rnd)
 }
+<% end -%>
 
 func testAccDataprocCluster_withStagingBucketOnly(bucketName string) string {
 	return fmt.Sprintf(`
