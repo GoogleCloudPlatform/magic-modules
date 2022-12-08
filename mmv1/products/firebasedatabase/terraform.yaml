@@ -46,18 +46,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     virtual_fields:
       - !ruby/object:Api::Type::Enum
         name: desired_state
-        description: The database state.
+        description: The intended database state.
         values:
           - :ACTIVE
           - :DISABLED
         default_value: :ACTIVE
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: 'templates/terraform/constants/firebase_database_instance.go.erb'
       decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
-      post_create: templates/terraform/post_create/firebase_database_instance_state.go.erb
-      pre_update: templates/terraform/pre_update/firebase_database_instance_state.go.erb
-      pre_delete: templates/terraform/pre_delete/firebase_database_instance_state.go.erb
-      test_check_destroy: templates/terraform/custom_check_destroy/firebase_database_instance_state.go.erb
-      
+      post_create: templates/terraform/post_create/firebase_database_instance.go.erb
+      pre_update: templates/terraform/pre_update/firebase_database_instance.go.erb
+      pre_delete: templates/terraform/pre_delete/firebase_database_instance.go.erb
+      post_import: templates/terraform/post_import/firebase_database_instance.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/firebase_database_instance.go.erb
+
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
