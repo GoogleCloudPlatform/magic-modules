@@ -4,5 +4,5 @@ resource "google_firebase_database_instance" "<%= ctx[:primary_resource_id] %>" 
   region   = "<%= ctx[:test_env_vars]['region'] %>"
   instance_id = "<%= ctx[:vars]['instance_id'] %>"
   type     = "USER_DATABASE"
-  desired_state    = "DISABLED"
+  desired_state   = "DISABLED"
 }

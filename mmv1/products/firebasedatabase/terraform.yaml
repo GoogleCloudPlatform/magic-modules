@@ -41,7 +41,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: "beta"
         primary_resource_id: "default"
         vars:
-          project_id: "rtdb"
+          project_id: "rtdb-project"
         test_env_vars:
           org_id: :ORG_ID
           region: :REGION
