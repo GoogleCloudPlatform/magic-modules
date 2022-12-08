@@ -3,7 +3,7 @@ set -x
 set -e
 
 OUTPUT_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-make terraform VERSION=beta OUTPUT_PATH="$OUTPUT_PATH" PRODUCT=firebase
+#make terraform VERSION=beta OUTPUT_PATH="$OUTPUT_PATH" PRODUCT=firebase
 make terraform VERSION=beta OUTPUT_PATH="$OUTPUT_PATH" PRODUCT=firebasedatabase
 
 cd $OUTPUT_PATH
@@ -16,6 +16,7 @@ export GOOGLE_USE_DEFAULT_CREDENTIALS=True
 export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=terraform-tester@fredzqm-staging.iam.gserviceaccount.com
 # https://pantheon.corp.google.com/iam-admin/settings?folder=261046259366
 export GOOGLE_ORG=261046259366
+export GOOGLE_BILLING_ACCOUNT=261046259366
 
 #export TF_LOG=TRACE
 make testacc TEST=./google-beta TESTARGS='-run=TestAccFirebaseDatabaseInstance' | tee tests.log

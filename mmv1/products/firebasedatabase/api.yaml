@@ -80,12 +80,7 @@ objects:
           - :DEFAULT_DATABASE
           - :USER_DATABASE
         default_value: :USER_DATABASE
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: state
-        description: The database state.
-        values:
-          - :ACTIVE
-          - :DISABLED
-          - :DELETED
-        default_value: :ACTIVE
-
+        description: The current database state.
+        output: true

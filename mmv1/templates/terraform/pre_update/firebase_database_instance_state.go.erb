@@ -14,67 +14,24 @@
 -%>
 
 // start of customized code
-if state, ok := obj["state"]; ok {
-  changedSomething := false
-  changeDB := func(method, url, debugAction string) error {
-    log.Printf("[DEBUG] %s Instance %q", debugAction, d.Id())
-    res, err := sendRequestWithTimeout(config, method, billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutDelete))
-    if err != nil {
-      return fmt.Errorf("Error %s Instance %q: %s", debugAction, d.Id(), err)
-    }
-    log.Printf("[DEBUG] Finished %s Instance %q: %#v", debugAction, d.Id(), res)
-    changedSomething = true
-    return nil
-  }
 
-  prevState, _ := d.GetOkExists("state") // must be present, since obj["state"] was set
-  switch prevState {
-    case "ACTIVE":
-      switch state {
-        case "DISABLED":
-          if err := changeDB("POST", url + ":disable", "disabling"); err != nil {
-            return err
-          }
-        case "DELETED":
-          if err := changeDB("POST", url + ":disable", "disabling"); err != nil {
-            return err
-          }
-          if err := changeDB("DELETE", url, "deleting"); err != nil {
-            return err
-          }
-      }
-    case "DISABLED":
-      switch state {
-        case "ACTIVE":
-          if err := changeDB("POST", url + ":reenable", "reenabling"); err != nil {
-            return err
-          }
-        case "DELETED":
-          if err := changeDB("DELETE", url, "deleting"); err != nil {
-            return err
-          }
-      }
-    case "DELETED":
-      switch state {
-        case "ACTIVE":
-          if err := changeDB("POST", url + ":undelete", "undeleting"); err != nil {
-            return err
-          }
-          if err := changeDB("POST", url + ":reenable", "reenabling"); err != nil {
-            return err
-          }
-        case "DISABLED":
-          if err := changeDB("POST", url + ":undelete", "undeleting"); err != nil {
-            return err
-          }
-      }
-  }
-  if !changedSomething {
-    return fmt.Errorf("Error performing firebasedatabase_instance.state transition from %q to %q", prevState, state)
-  }
-  // Today, only state is mutable in firebasedatabase_instance.
-  // If more fields are added, we can delete(obj, "state") and reuse terraform's generated codes.
-  return resourceFirebaseDatabaseInstanceRead(d, meta)
+log.Printf("[DEBUG] checking desired_state")
+if d.HasChange("desired_state") {
+	if p, ok := d.GetOk("desired_state"); ok && p.(string) != d.Get("state").(string) {
+		switch p.(string) {
+		case "ACTIVE":
+			if err := enableRTDB(config, d, project, billingProject, userAgent); err != nil {
+        return err
+			}
+		case "DISABLED":
+			if err := disableRTDB(config, d, project, billingProject, userAgent); err != nil {
+        return err
+			}
+		default:
+			return fmt.Errorf("Unsupported value in field `desired_state`: %v", p)
+		}
+	}
 }
+
 // end of customized code
 

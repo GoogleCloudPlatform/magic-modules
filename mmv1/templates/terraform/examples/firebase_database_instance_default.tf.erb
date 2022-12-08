@@ -2,7 +2,8 @@ resource "google_project" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   project_id = "<%= ctx[:vars]['project_id'] %>"
   name       = "<%= ctx[:vars]['project_id'] %>"
-  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+  <%# org_id     = "<%= ctx[:test_env_vars]['org_id'] %>" %>
+  folder_id     = "261046259366"
 }
 
 resource "google_firebase_project" "<%= ctx[:primary_resource_id] %>" {
