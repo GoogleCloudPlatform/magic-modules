@@ -13,7 +13,7 @@ resource "google_firebase_project" "<%= ctx[:primary_resource_id] %>" {
   project  = google_project.default.project_id
 }
 
-resource "google_project_service" "service" {
+resource "google_project_service" "firebase_database" {
   provider = google-beta
   project  = google_firebase_project.default.project
   service  = "firebasedatabase.googleapis.com"
