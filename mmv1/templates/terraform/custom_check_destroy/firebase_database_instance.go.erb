@@ -1,0 +1,21 @@
+config := googleProviderConfig(t)
+
+url, err := replaceVarsForTest(config, rs, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}")
+if err != nil {
+    return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+    billingProject = config.BillingProject
+}
+
+res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+if err == nil {
+    return fmt.Errorf("FirebaseDatabaseInstance still exists at %s", url)
+}
+
+if s := res["state"]; s != "DELETED" {
+	return fmt.Errorf("CertificateAuthority %s got %s, want DELETED", url, s)
+}
