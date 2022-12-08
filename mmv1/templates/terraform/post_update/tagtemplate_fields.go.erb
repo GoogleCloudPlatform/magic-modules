@@ -89,9 +89,17 @@ for name, change := range vals {
         newType := changeNewProp["type"].(map[string]interface{})
 
         if oldType["primitiveType"] != newType["primitiveType"] {
-            // As primitiveType can't be change, consider it as ForceNew which triggers delete old field and recreate new field
+            // As primitiveType can't be changed, it is considered as ForceNew which triggers the deletion of old field and recreation of a new field
+            // Before that, we need to check that is_required is True for the newType or not, as we don't have support to add new required field in the existing TagTemplate,
+            // So in such cases, we can simply return the error
 
-           // delete changeOldProp
+            // Reason for checking the isRequired in changeNewProp -
+            // Because this changeNewProp check should be ignored when the user wants to update the primitive type and make it optional rather than keeping it required.
+            if changeNewProp["isRequired"] != nil && changeNewProp["isRequired"].(bool) {
+                return fmt.Errorf("Updating the primitive type for a required field on an existing tag template is not supported as TagTemplateField %q is required", name)
+            }
+
+            // delete changeOldProp
             err_delete := deleteTagTemplateField(d, config, name, billingProject, userAgent)
             if err_delete != nil {
                 return err_delete
@@ -102,7 +110,10 @@ for name, change := range vals {
             if err_create != nil {
                 return err_create
             }
-        }
+
+            log.Printf("[DEBUG] Finished updating TagTemplate Field %q", name)
+            return resourceDataCatalogTagTemplateRead(d, meta)
+		}
 
         res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url1, userAgent, changeNewProp, d.Timeout(schema.TimeoutDelete))
         if err != nil {
