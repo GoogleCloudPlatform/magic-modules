@@ -20,4 +20,5 @@ export GOOGLE_ORG=641623452985
 
 #export TF_LOG=TRACE
 make testacc TEST=./google-beta TESTARGS='-run=TestAccFirebaseDatabaseInstance' | tee tests.log
+make testacc TEST=./google-beta TESTARGS='-sweep=us-central1 -sweep-run=FirebaseDatabaseInstance' > output.log
 
