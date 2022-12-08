@@ -113,7 +113,7 @@ for name, change := range vals {
 
             log.Printf("[DEBUG] Finished updating TagTemplate Field %q", name)
             return resourceDataCatalogTagTemplateRead(d, meta)
-		}
+        }
 
         res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url1, userAgent, changeNewProp, d.Timeout(schema.TimeoutDelete))
         if err != nil {
