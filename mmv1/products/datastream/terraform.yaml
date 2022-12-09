@@ -97,6 +97,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
     import_format: ["projects/{{project}}/locations/{{location}}/streams/{{stream_id}}"]
     properties:
+      destinationConfig.gcsDestinationConfig.fileRotationMb: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       destinationConfig.gcsDestinationConfig.fileRotationInterval: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       destinationConfig.destinationConnectionProfile: !ruby/object:Overrides::Terraform::PropertyOverride
