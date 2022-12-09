@@ -109,6 +109,9 @@ resource "google_datastream_stream" "<%= ctx[:primary_resource_id] %>" {
     desired_state = "NOT_STARTED"
     location = "us-central1"
     display_name = "my stream"
+    labels = {
+        key = "value"
+    }
     source_config {
         source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
         mysql_source_config {

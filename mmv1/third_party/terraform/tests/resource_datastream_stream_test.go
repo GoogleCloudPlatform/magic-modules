@@ -315,7 +315,7 @@ resource "google_datastream_stream" "default" {
     display_name = "my stream update"
     desired_state = "%{desired_state}"
 
-    labels {
+    labels = {
     	key = "updated"
     }
 
