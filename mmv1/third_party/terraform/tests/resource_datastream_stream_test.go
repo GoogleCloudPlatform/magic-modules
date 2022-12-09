@@ -304,7 +304,7 @@ resource "google_datastream_connection_profile" "destination_connection_profile_
     connection_profile_id = "tf-test-destination-profile-update%{random_suffix}"
 
     gcs_profile {
-        bucket    = ""
+        bucket    = google_storage_bucket.bucket.name
         root_path = "/path"
     }
 }

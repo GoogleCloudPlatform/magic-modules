@@ -99,7 +99,7 @@ resource "google_datastream_connection_profile" "destination_connection_profile"
     connection_profile_id = "<%= ctx[:vars]['destination_connection_profile_id'] %>"
 
     gcs_profile {
-        bucket    = "<%= ctx[:vars]['bucket_name'] %>"
+        bucket    = google_storage_bucket.bucket.name
         root_path = "/path"
     }
 }
