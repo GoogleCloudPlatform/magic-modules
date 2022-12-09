@@ -175,7 +175,7 @@ resource "google_logging_metric" "logging_metric" {
   filter      = "%s"
 
   metric_descriptor {
-  	metric_kind = "DELTA"
+    metric_kind = "DELTA"
     unit        = "1"
     value_type  = "INT64"
   }
