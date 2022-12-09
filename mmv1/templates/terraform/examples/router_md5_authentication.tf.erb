@@ -1,0 +1,78 @@
+resource "google_compute_router" "default" {
+    name                        = "<%= ctx[:vars]['router_name'] %>"
+    network                     = google_compute_network.default.name
+    region                      = google_compute_subnetwork.default.region
+    encrypted_interconnect_router = true
+    bgp {
+        asn                     = 64514
+    }
+
+    md5_authentication_keys {
+        name                    = "<%= ctx[:vars]['md5_name1'] %>"
+        key                     = "key value for md5 entry 1"
+    }
+
+    md5_authentication_keys {
+        name                    = "<%= ctx[:vars]['md5_name2'] %>"
+        key                     = "key value for md5 entry 2"
+    }
+}
+
+resource "google_compute_router_peer" "<%= ctx[:primary_resource_id] %>" {
+    name                            = "<%= ctx[:vars]['peer_name'] %>"
+    router                          = google_compute_router.default.name
+    region                          = google_compute_router.default.region
+    ip_address                      = "169.254.3.1"
+    peer_ip_address                 = "169.254.3.2"
+    peer_asn                        = 65515
+    advertised_route_priority       = 100
+    interface                       = google_compute_router_interface.default.name
+    md5_authentication_key_name     = "key1"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "<%= ctx[:vars]['network_name'] %>"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "<%= ctx[:vars]['subnetwork_name'] %>"
+  network       = google_compute_network.default.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_vpn_tunnel" "default" {
+  name                              = "<%= ctx[:vars]['vpn_tunnel_name'] %>"
+  region                            = google_compute_subnetwork.default.region
+  vpn_gateway                       = google_compute_ha_vpn_gateway.default.id
+  peer_external_gateway             = google_compute_external_vpn_gateway.default.id
+  peer_external_gateway_interface   = 0
+  shared_secret                     = "unguessable"
+  router                            = google_compute_router.default.name
+  vpn_gateway_interface             = 0
+}
+
+resource "google_compute_router_interface" "default" {
+  name                      = "<%= ctx[:vars]['interface_name'] %>"
+  router                    = google_compute_router.default.name
+  region                    = google_compute_router.default.region
+  ip_range                  = "169.254.3.1/30"
+  vpn_tunnel                = google_compute_vpn_tunnel.default.name
+}
+
+resource "google_compute_external_vpn_gateway" "default" {
+  name                      = "<%= ctx[:vars]['vpn_gateway_name'] %>"
+  redundancy_type           = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  description               = "An externally managed VPN gateway"
+  interface {
+    id          = 0
+    ip_address  = "8.8.8.8"
+  }
+}
+
+resource "google_compute_ha_vpn_gateway" "default" {
+  name    = "<%= ctx[:vars]['ha_vpn_gateway_name'] %>"
+  network = google_compute_network.default.self_link
+  region  = google_compute_subnetwork.default.region
+}
