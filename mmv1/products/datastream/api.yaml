@@ -397,6 +397,8 @@ objects:
     base_url: "projects/{{project}}/locations/{{location}}/streams"
     create_url: "projects/{{project}}/locations/{{location}}/streams?streamId={{stream_id}}"
     self_link: "projects/{{project}}/locations/{{location}}/streams/{{stream_id}}"
+    update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/datastream/docs/create-a-stream'
