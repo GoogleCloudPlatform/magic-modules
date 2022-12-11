@@ -20,6 +20,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "dns_managed_zone_quickstart"
         primary_resource_id: "default"
         skip_docs: true
+        skip_vcr: true
         vars:
           dns_compute_instance: "dns-compute-instance"
           allow_http_traffic: "allow-http-traffic"

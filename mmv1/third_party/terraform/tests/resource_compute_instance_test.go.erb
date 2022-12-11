@@ -1042,6 +1042,7 @@ func TestAccComputeInstance_advancedMachineFeatures(t *testing.T) {
 }
 
 func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	var instanceName = fmt.Sprintf("tf-test-soletenant-%s", randString(t, 10))
