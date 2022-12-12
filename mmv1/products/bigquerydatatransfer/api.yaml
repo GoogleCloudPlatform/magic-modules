@@ -103,6 +103,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'disableAutoScheduling'
+            send_empty_value: true
             description: |
               If true, automatic scheduling of data transfer runs for this
               configuration will be disabled. The runs can be started on ad-hoc

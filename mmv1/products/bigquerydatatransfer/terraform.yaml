@@ -37,6 +37,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           to a different credential configuration in the config will require an apply to update state.
       sensitiveParams.secretAccessKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+      # api does not send schedule_options.disable_auto_scheduling back when it is set to false b/262259565
+      scheduleOptions: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrUnsetBlockDiffSuppress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       resource_definition: templates/terraform/resource_definition/bigquery_data_transfer.go.erb
       constants: templates/terraform/constants/bigquery_data_transfer.go.erb
