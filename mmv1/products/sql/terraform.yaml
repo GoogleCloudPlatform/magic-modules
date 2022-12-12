@@ -39,6 +39,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "sql_database_deletion_policy"
         primary_resource_id: "database_deletion_policy"
+        ignore_read_extra:
+          - "deletion_policy"
         vars:
           database_name: "my-database"
           database_instance_name: "my-database-instance"
