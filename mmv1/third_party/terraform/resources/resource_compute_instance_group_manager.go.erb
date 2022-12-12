@@ -835,7 +835,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	<% end -%>
 
 	<% unless version == "ga" -%>
-	if d.HasChange("stateful_internal_ips") || d.HasChange("stateful_external_ips") || d.HasChange("stateful_disk") {
+	if d.HasChange("stateful_internal_ip") || d.HasChange("stateful_external_ip") || d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 	}
@@ -1034,8 +1034,11 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 	preservedState.Disks = disks
 	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ip") {
-		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
-		preservedState.InternalIPs = expandStatefulIps(oldInternalIps, newInternalIps.([]interface{}), preservedState, "InternalIPs.%s")
+		internalIps := d.Get("stateful_internal_ip")
+		preservedState.InternalIPs = expandStatefulIps(internalIps.([]interface{}))
+		/*
+		The code below is used for deletion. To uncomment if the API supports "{}" for deletion.
+
 		if len(newInternalIps.([]interface{})) == 0 {
 			for _, raw := range oldInternalIps.([]interface{}) {
 				data := raw.(map[string]interface{})
@@ -1045,18 +1048,14 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 				}
 			}
 		} 
+		*/
 	}
 	if d.HasChange("stateful_external_ip") {
-		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
-		preservedState.ExternalIPs = expandStatefulIps(newExternalIps.([]interface{}), preservedState, "ExternalIPs.%s")
-		if len(newExternalIps.([]interface{})) == 0 {
-			preservedState.NullFields = append(preservedState.NullFields, "ExternalIPs")
-			preservedState.ForceSendFields = append(preservedState.ForceSendFields, "ExternalIPs")
-		} 
+		externalIps := d.Get("stateful_external_ip")
+		preservedState.ExternalIPs = expandStatefulIps(externalIps.([]interface{}))
 	}
 
 	<% end -%>
-	preservedState.ForceSendFields = append(preservedState.ForceSendFields, "Disks")
 	statefulPolicy := &compute.StatefulPolicy{PreservedState: preservedState}
 	statefulPolicy.ForceSendFields = append(statefulPolicy.ForceSendFields, "PreservedState")
 
@@ -1064,10 +1063,10 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 }
 
 <% unless version == "ga" -%>
-func expandStatefulIps(old []interface{}, new []interface{}, preservedState *compute.StatefulPolicyPreservedState, prefix string) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
+func expandStatefulIps(statefulIP []interface{}) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
 	statefulIpsMap :=	make(map[string]compute.StatefulPolicyPreservedStateNetworkIp)
 
-	for _, raw := range new {
+	for _, raw := range statefulIP {
 		data := raw.(map[string]interface{})
 		networkIp := compute.StatefulPolicyPreservedStateNetworkIp{
 			AutoDelete: data["delete_rule"].(string),

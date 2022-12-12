@@ -361,7 +361,6 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			<% unless version == "ga" -%>
 			"stateful_internal_ip": {
 				Type:        schema.TypeList,
-				Computed:    true,
 				Optional:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
@@ -383,7 +382,6 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			},
 			"stateful_external_ip": {
 				Type:        schema.TypeList,
-				Computed:    true,
 				Optional:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
@@ -797,15 +795,13 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		change = true
 	}
 	
-	isStatefulPolicyExpanded := false
-	//Add validation for isStatefulPolicyExpanded here to avoid variable declared but not used in GA
-	if d.HasChange("stateful_disk") && !isStatefulPolicyExpanded {
+	<% unless version == "ga" -%>
+	if d.HasChange("stateful_internal_ip") || d.HasChange("stateful_external_ip") || d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
-		isStatefulPolicyExpanded = true
 	}
-	<% unless version == "ga" -%>
-	if d.HasChange("stateful_internal_ips") || d.HasChange("stateful_external_ips") && !isStatefulPolicyExpanded {
+	<% else -%>
+	if d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 	}
