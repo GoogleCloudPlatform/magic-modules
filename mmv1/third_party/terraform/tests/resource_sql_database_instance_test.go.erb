@@ -347,7 +347,7 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 			resource.TestStep{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_replica, databaseID, databaseID, databaseID, "true"),
-				ExpectError: regexp.MustCompile("Error, failed to create instance tf-lw-\\d+-2: googleapi: Error 400: Invalid request: Invalid flag for instance role: Backups cannot be enabled for read replica instance.., invalid"),
+				ExpectError: regexp.MustCompile("Error, failed to create instance tf-test-\\d+-2: googleapi: Error 400: Invalid request: Invalid flag for instance role: Backups cannot be enabled for read replica instance.., invalid"),
 			},
 			resource.TestStep{
 				Config: fmt.Sprintf(
@@ -1888,7 +1888,7 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_replica = `
 resource "google_sql_database_instance" "instance_master" {
-  name                = "tf-lw-%d"
+  name                = "tf-test-%d"
   database_version    = "MYSQL_5_7"
   region              = "us-central1"
   deletion_protection = false
@@ -1905,7 +1905,7 @@ resource "google_sql_database_instance" "instance_master" {
 }
 
 resource "google_sql_database_instance" "replica1" {
-  name                = "tf-lw-%d-1"
+  name                = "tf-test-%d-1"
   database_version    = "MYSQL_5_7"
   region              = "us-central1"
   deletion_protection = false
@@ -1931,7 +1931,7 @@ resource "google_sql_database_instance" "replica1" {
 }
 
 resource "google_sql_database_instance" "replica2" {
-  name                = "tf-lw-%d-2"
+  name                = "tf-test-%d-2"
   database_version    = "MYSQL_5_7"
   region              = "us-central1"
   deletion_protection = false
@@ -1958,7 +1958,7 @@ resource "google_sql_database_instance" "replica2" {
 
 var testGoogleSqlDatabaseInstance_slave = `
 resource "google_sql_database_instance" "instance_master" {
-  name                = "tf-lw-%d"
+  name                = "tf-test-%d"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
@@ -1974,7 +1974,7 @@ resource "google_sql_database_instance" "instance_master" {
 }
 
 resource "google_sql_database_instance" "instance_slave" {
-  name                = "tf-lw-%d"
+  name                = "tf-test-%d"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
@@ -1989,7 +1989,7 @@ resource "google_sql_database_instance" "instance_slave" {
 
 var testGoogleSqlDatabaseInstance_highAvailability = `
 resource "google_sql_database_instance" "instance" {
-  name                = "tf-lw-%d"
+  name                = "tf-test-%d"
   region              = "us-central1"
   database_version    = "POSTGRES_9_6"
   deletion_protection = false
@@ -2009,7 +2009,7 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_diskspecs = `
 resource "google_sql_database_instance" "instance" {
-  name                = "tf-lw-%d"
+  name                = "tf-test-%d"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
@@ -2026,7 +2026,7 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_maintenance = `
 resource "google_sql_database_instance" "instance" {
-  name                = "tf-lw-%d"
+  name                = "tf-test-%d"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
@@ -2045,7 +2045,7 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_authNets_step1 = `
 resource "google_sql_database_instance" "instance" {
-  name                = "tf-lw-%d"
+  name                = "tf-test-%d"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
@@ -2065,7 +2065,7 @@ resource "google_sql_database_instance" "instance" {
 
 var testGoogleSqlDatabaseInstance_authNets_step2 = `
 resource "google_sql_database_instance" "instance" {
-  name                = "tf-lw-%d"
+  name                = "tf-test-%d"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
   deletion_protection = false
