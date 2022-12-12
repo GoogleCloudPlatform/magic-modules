@@ -440,6 +440,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'sourceConnectionProfile'
+            input: true
             required: true
             description: |
               Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
@@ -609,6 +610,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'destinationConnectionProfile'
+            input: true
             required: true
             description: |
               Destination connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}

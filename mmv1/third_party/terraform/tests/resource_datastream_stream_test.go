@@ -262,10 +262,10 @@ resource "google_sql_user" "user" {
     password = random_password.pwd.result
 }
 
-resource "google_datastream_connection_profile" "source_connection_profile_updated" {
+resource "google_datastream_connection_profile" "source_connection_profile" {
     display_name          = "Source connection profile"
     location              = "us-central1"
-    connection_profile_id = "tf-test-source-profile-update%{random_suffix}"
+    connection_profile_id = "tf-test-source-profile%{random_suffix}"
 
     mysql_profile {
         hostname = google_sql_database_instance.instance.public_ip_address
@@ -298,10 +298,10 @@ resource "google_storage_bucket_iam_member" "reader" {
     member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com"
 }
 
-resource "google_datastream_connection_profile" "destination_connection_profile_updated" {
+resource "google_datastream_connection_profile" "destination_connection_profile" {
     display_name          = "Connection profile"
     location              = "us-central1"
-    connection_profile_id = "tf-test-destination-profile-update%{random_suffix}"
+    connection_profile_id = "tf-test-destination-profile%{random_suffix}"
 
     gcs_profile {
         bucket    = google_storage_bucket.bucket.name
@@ -320,12 +320,12 @@ resource "google_datastream_stream" "default" {
     }
 
     source_config {
-        source_connection_profile = google_datastream_connection_profile.source_connection_profile_updated.id
+        source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
 
         mysql_source_config {}
     }
     destination_config {
-        destination_connection_profile = google_datastream_connection_profile.destination_connection_profile_updated.id
+        destination_connection_profile = google_datastream_connection_profile.destination_connection_profile.id
         gcs_destination_config {
             path = "mydata"
             file_rotation_mb = 200
