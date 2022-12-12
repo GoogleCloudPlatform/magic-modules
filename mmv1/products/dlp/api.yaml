@@ -377,10 +377,16 @@ objects:
                         Cloud Pub/Sub topic to send notifications to.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'publishSummaryToCscc'
+                  allow_empty_object: true
+                  send_empty_value: true
+                  properties: [ ]
                   description: |
                     Publish the result summary of a DlpJob to the Cloud Security Command Center.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'publishFindingsToCloudDataCatalog'
+                  allow_empty_object: true
+                  send_empty_value: true
+                  properties: [ ]
                   description: |
                     Publish findings of a DlpJob to Data Catalog.
   - !ruby/object:Api::Resource
