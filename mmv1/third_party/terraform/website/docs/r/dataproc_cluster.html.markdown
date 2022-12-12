@@ -438,7 +438,7 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
 * `reservation_affinity` - (Optional) Reservation Affinity for consuming Zonal reservation.
     * `consume_reservation_type` - (Optional) Metrics sources to enable.
-    * `key` - (Optional) Corresponds to the label keys of reservation resource.
+    * `key` - (Optional) Corresponds to the label key of reservation resource.
     * `values` - (Optional) Corresponds to the label values of reservation resource.
 
 * `node_group_affinity` - (Optional) The name of the sole-tenant node group to create the cluster on.
