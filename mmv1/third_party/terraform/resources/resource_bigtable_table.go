@@ -78,14 +78,13 @@ func resourceBigtableTable() *schema.Resource {
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 
-			// If not provided, currently deletion protection will be set to false in the API
 			"deletion_protection": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"PROTECTED", "UNPROTECTED"}, false),
 				Elem:         &schema.Schema{Type: schema.TypeString},
-				Description:  `A field to make the table protected against data loss i.e. when set to PROTECTED, deleting the table, the column families in the table, and the instance containing the table would be prohibited.`,
+				Description:  `A field to make the table protected against data loss i.e. when set to PROTECTED, deleting the table, the column families in the table, and the instance containing the table would be prohibited. If not provided, currently deletion protection will be set to false as it is the API default value.`,
 			},
 		},
 		UseJSONNumber: true,
