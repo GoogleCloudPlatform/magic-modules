@@ -87,7 +87,7 @@ func TestAccBigtableTable_family(t *testing.T) {
 	})
 }
 
-func TestAccBigtableTable_deletion_protection_enabled(t *testing.T) {
+func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
@@ -101,9 +101,9 @@ func TestAccBigtableTable_deletion_protection_enabled(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// creating a table with deletion protection equals to protected
+			// creating a table with a column family and deletion protection equals to protected
 			{
-				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "PROTECTED"),
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "PROTECTED", family),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -114,6 +114,10 @@ func TestAccBigtableTable_deletion_protection_enabled(t *testing.T) {
 			{
 				Config:      testAccBigtableTable_destroyTable(instanceName),
 				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableTableExists(
+						t, "google_bigtable_table.table"),
+				),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -121,19 +125,14 @@ func TestAccBigtableTable_deletion_protection_enabled(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
 			},
-			// adding a column family to the table
-			{
-				Config: testAccBigtableTable_family(instanceName, tableName, family),
-			},
-			{
-				ResourceName:      "google_bigtable_table.table",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 			// it is not possible to delete column families in the table with deletion protection equals to protected
 			{
 				Config:      testAccBigtableTable(instanceName, tableName),
 				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableColumnFamilyExists(
+						t, "google_bigtable_table.table"),
+				),
 			},
 			{
 				ResourceName:            "google_bigtable_table.table",
@@ -143,7 +142,7 @@ func TestAccBigtableTable_deletion_protection_enabled(t *testing.T) {
 			},
 			// changing deletion protection field to unprotected without changing the column families
 			{
-				Config: testAccBigtableTable_deletion_protection_family(instanceName, tableName, "UNPROTECTED", family),
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED", family),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -164,7 +163,7 @@ func TestAccBigtableTable_deletion_protection_enabled(t *testing.T) {
 	})
 }
 
-func TestAccBigtableTable_deletion_protection_disabled(t *testing.T) {
+func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
@@ -178,18 +177,9 @@ func TestAccBigtableTable_deletion_protection_disabled(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// creating a table with deletion protection equals to unprotected
+			// creating a table with a column family and deletion protection equals to unprotected
 			{
-				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED"),
-			},
-			{
-				ResourceName:      "google_bigtable_table.table",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// adding a column family to the table
-			{
-				Config: testAccBigtableTable_family(instanceName, tableName, family),
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED", family),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -207,31 +197,32 @@ func TestAccBigtableTable_deletion_protection_disabled(t *testing.T) {
 			},
 			// changing the deletion protection field to protected
 			{
-				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "PROTECTED"),
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "PROTECTED", family),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// changing the deletion protection field to unprotected
+			// it is not possible to delete the table because of deletion protection equals to protected
 			{
-				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED"),
-			},
-			{
-				ResourceName:      "google_bigtable_table.table",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// destroying the table is possible when deletion protection is equals to unprotected
-			{
-				Config: testAccBigtableTable_destroyTable(instanceName),
+				Config:      testAccBigtableTable_destroyTable(instanceName),
+				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
+			},
+			// changing the deletion protection field to unprotected
+			{
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED", family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -324,6 +315,62 @@ func testAccCheckBigtableTableDestroyProducer(t *testing.T) func(s *terraform.St
 	}
 }
 
+func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space string) resource.TestCheckFunc {
+	var ctx = context.Background()
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[table_name_space]
+		if !ok {
+			return fmt.Errorf("Table not found: %s", table_name_space)
+		}
+
+		config := googleProviderConfig(t)
+		c, err := config.BigTableClientFactory(config.userAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		if err != nil {
+			return fmt.Errorf("Error starting admin client. %s", err)
+		}
+
+		defer c.Close()
+
+		_, err = c.TableInfo(ctx, rs.Primary.Attributes["name"])
+		if err != nil {
+			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
+		}
+
+		// We expect a single local column family in the table.
+		_, ok = rs.Primary.Attributes["column_family.0.family"]
+		if !ok {
+			return fmt.Errorf("Error retrieving the local family")
+		}
+
+		return nil
+	}
+}
+
+func testAccBigtableTableExists(t *testing.T, table_name_space string) resource.TestCheckFunc {
+	var ctx = context.Background()
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[table_name_space]
+		if !ok {
+			return fmt.Errorf("Table not found: %s", table_name_space)
+		}
+
+		config := googleProviderConfig(t)
+		c, err := config.BigTableClientFactory(config.userAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		if err != nil {
+			return fmt.Errorf("Error starting admin client. %s", err)
+		}
+
+		defer c.Close()
+
+		_, err = c.TableInfo(ctx, rs.Primary.Attributes["name"])
+		if err != nil {
+			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
+		}
+
+		return nil
+	}
+}
+
 func testAccBigtableTable(instanceName, tableName string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
@@ -390,7 +437,7 @@ resource "google_bigtable_table" "table" {
 `, instanceName, instanceName, tableName, family)
 }
 
-func testAccBigtableTable_deletion_protection(instanceName, tableName, deletionProtection string) string {
+func testAccBigtableTable_deletion_protection(instanceName, tableName, deletionProtection, family string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
@@ -408,8 +455,12 @@ resource "google_bigtable_table" "table" {
   name          = "%s"
   instance_name = google_bigtable_instance.instance.name
   deletion_protection = "%s"
+
+  column_family {
+    family = "%s"
+  }
 }
-`, instanceName, instanceName, tableName, deletionProtection)
+`, instanceName, instanceName, tableName, deletionProtection, family)
 }
 
 func testAccBigtableTable_familyMany(instanceName, tableName, family string) string {
@@ -472,32 +523,6 @@ resource "google_bigtable_table" "table" {
   }
 }
 `, instanceName, instanceName, tableName, family, family, family)
-}
-
-func testAccBigtableTable_deletion_protection_family(instanceName, tableName, deletionProtection, family string) string {
-	return fmt.Sprintf(`
-resource "google_bigtable_instance" "instance" {
-  name = "%s"
-
-  cluster {
-    cluster_id = "%s"
-    zone       = "us-central1-b"
-  }
-
-  instance_type = "DEVELOPMENT"
-  deletion_protection = false
-}
-
-resource "google_bigtable_table" "table" {
-  name          = "%s"
-  instance_name = google_bigtable_instance.instance.name
-  deletion_protection = "%s"
-
-  column_family {
-    family = "%s"
-  }
-}
-`, instanceName, instanceName, tableName, deletionProtection, family)
 }
 
 func testAccBigtableTable_destroyTable(instanceName string) string {
