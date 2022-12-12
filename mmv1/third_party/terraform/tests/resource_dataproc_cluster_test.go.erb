@@ -383,7 +383,13 @@ func TestAccDataprocCluster_withReservationAffinity(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataprocCluster_withReservationAffinity(rnd),
-				ExpectError: regexp.MustCompile("Specified reservations \\[default\\] do not exist"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
+
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.reservation_affinity.0.consume_reservation_type", "SPECIFIC_RESERVATION"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.reservation_affinity.0.key", "compute.googleapis.com/reservation-name"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.reservation_affinity.0.values.#", "1"),
+				),
 			},
 		},
 	})
@@ -1415,6 +1421,20 @@ resource "google_dataproc_cluster" "basic" {
 
 func testAccDataprocCluster_withReservationAffinity(rnd string) string {
 	return fmt.Sprintf(`
+
+resource "google_compute_reservation" "reservation" {
+  name = "default"
+  zone = "us-central1-f"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type = "n1-standard-1"
+    }
+  }
+  specific_reservation_required = true
+}
+
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
   region = "us-central1"
