@@ -13,6 +13,51 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Database: !ruby/object:Overrides::Terraform::ResourceOverride
+    skip_delete: True
+    autogen_async: True
+    id_format: "projects/{{project}}/databases/{{name}}"
+    import_format:
+      - "projects/{{project}}/databases/{{name}}"
+      - "{{project}}/{{name}}"
+      - "{{name}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firestore_database_default"
+        primary_resource_id: "default_database"
+        test_env_vars:
+          org_id: :ORG_ID
+        ignore_read_extra:
+          - project
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firestore_database_full_nondefault"
+        primary_resource_id: "database"
+        test_env_vars:
+          org_id: :ORG_ID
+        ignore_read_extra:
+          - project
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firestore_database_datastore_mode_default"
+        primary_resource_id: "datastore_mode_default_database"
+        test_env_vars:
+          org_id: :ORG_ID
+        ignore_read_extra:
+          - project
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firestore_database_datastore_mode"
+        primary_resource_id: "datastore_mode_database"
+        test_env_vars:
+          org_id: :ORG_ID
+        ignore_read_extra:
+          - project
+    properties:
+      concurrencyMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: True
+      delete_protection_state: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/firestore_database.go.erb
+      encoder: templates/terraform/encoders/firestore_database.go.erb
   Index: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     # This resource is a child resource

@@ -1,0 +1,7 @@
+project, err := getProject(d, meta.(*Config))
+if err != nil {
+	return nil, err
+}
+obj["name"] = fmt.Sprintf("projects/%s/databases/%s", project, obj["name"])
+
+return obj, nil
