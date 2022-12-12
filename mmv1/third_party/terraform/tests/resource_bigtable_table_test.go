@@ -110,39 +110,23 @@ func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// it is not possible to delete the table because of deletion protection equals to protected
-			{
-				Config:      testAccBigtableTable_destroyTable(instanceName),
-				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccBigtableTableExists(
-						t, "google_bigtable_table.table"),
-				),
-			},
-			{
-				ResourceName:            "google_bigtable_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
-			},
 			// it is not possible to delete column families in the table with deletion protection equals to protected
 			{
 				Config:      testAccBigtableTable(instanceName, tableName),
 				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccBigtableColumnFamilyExists(
-						t, "google_bigtable_table.table"),
-				),
 			},
+			// it is not possible to delete the table because of deletion protection equals to protected
 			{
-				ResourceName:            "google_bigtable_table.table",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"column_family"},
+				Config:      testAccBigtableTable_destroyTable(instanceName),
+				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
 			},
 			// changing deletion protection field to unprotected without changing the column families
+			// Checking if the table and the column family exists
 			{
 				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED", family),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableColumnFamilyExists(t, "google_bigtable_table.table"),
+				),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -208,12 +192,6 @@ func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 			{
 				Config:      testAccBigtableTable_destroyTable(instanceName),
 				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
-			},
-			{
-				ResourceName:            "google_bigtable_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
 			},
 			// changing the deletion protection field to unprotected
 			{
@@ -331,41 +309,16 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space string) re
 
 		defer c.Close()
 
-		_, err = c.TableInfo(ctx, rs.Primary.Attributes["name"])
+		table, err := c.TableInfo(ctx, rs.Primary.Attributes["name"])
 		if err != nil {
 			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
 		}
-
-		// We expect a single local column family in the table.
-		_, ok = rs.Primary.Attributes["column_family.0.family"]
-		if !ok {
-			return fmt.Errorf("Error retrieving the local family")
+		for _, data := range flattenColumnFamily(table.Families) {
+			if data["family"] != family {
+				return fmt.Errorf("Error checking column family. Could not find column family %s in %s.", family, rs.Primary.Attributes["name"])
+			}
 		}
-
 		return nil
-	}
-}
-
-func testAccBigtableTableExists(t *testing.T, table_name_space string) resource.TestCheckFunc {
-	var ctx = context.Background()
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[table_name_space]
-		if !ok {
-			return fmt.Errorf("Table not found: %s", table_name_space)
-		}
-
-		config := googleProviderConfig(t)
-		c, err := config.BigTableClientFactory(config.userAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
-		if err != nil {
-			return fmt.Errorf("Error starting admin client. %s", err)
-		}
-
-		defer c.Close()
-
-		_, err = c.TableInfo(ctx, rs.Primary.Attributes["name"])
-		if err != nil {
-			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
-		}
 
 		return nil
 	}
