@@ -84,6 +84,12 @@ var (
 		"settings.0.insights_config.0.record_client_address",
 		"settings.0.insights_config.0.query_plans_per_minute",
   }
+
+	sqlServerAuditConfigurationKeys = []string{
+		"settings.0.sql_server_audit_config.0.bucket",
+		"settings.0.sql_server_audit_config.0.retention_interval",
+		"settings.0.sql_server_audit_config.0.upload_interval",
+  }
 )
 
 func resourceSqlDatabaseInstance() *schema.Resource {
@@ -194,16 +200,19 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 									"bucket": {
 										Type:         schema.TypeString,
 										Optional:     true,
+										AtLeastOneOf: sqlServerAuditConfigurationKeys,
 										Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
 									},
 									"retention_interval": {
 										Type:         schema.TypeString,
 										Optional:     true,
+										AtLeastOneOf: sqlServerAuditConfigurationKeys,
 										Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"..`,
 									},
 									"upload_interval": {
 										Type:         schema.TypeString,
 										Optional:     true,
+										AtLeastOneOf: sqlServerAuditConfigurationKeys,
 										Description:  `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
 		 							},
 								},
@@ -1269,10 +1278,9 @@ func expandBackupRetentionSettings(configured interface{}) *sqladmin.BackupReten
 
 func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDirectoryConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-
 	config := l[0].(map[string]interface{})
 	return &sqladmin.SqlActiveDirectoryConfig{
 		Domain: config["domain"].(string),

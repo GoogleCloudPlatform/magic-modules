@@ -264,7 +264,7 @@ The optional `settings.database_flags` sublist supports:
 
 The optional `settings.active_directory_config` subblock supports:
 
-* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
+* `domain` - (Optional) The domain name for the active directory (e.g., mydomain.com).
     Can only be used with SQL Server.
 
 The optional `settings.deny_maintenance_period` subblock supports:
@@ -277,7 +277,7 @@ The optional `settings.deny_maintenance_period` subblock supports:
 
 The optional `settings.sql_server_audit_config` subblock supports:
 
-* `bucket` - (Required) The name of the destination bucket (e.g., gs://mybucket).
+* `bucket` - (Optional) The name of the destination bucket (e.g., gs://mybucket).
 
 * `upload_interval` - (Optional) How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
 
