@@ -84,7 +84,7 @@ func resourceBigtableTable() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"PROTECTED", "UNPROTECTED"}, false),
 				Elem:         &schema.Schema{Type: schema.TypeString},
-				Description:  `A field to make the table protected against data loss i.e. when set to PROTECTED, deleting the table, the column families in the table, and the instance containing the table would be prohibited. If not provided, currently deletion protection will be set to false as it is the API default value.`,
+				Description:  `A field to make the table protected against data loss i.e. when set to PROTECTED, deleting the table, the column families in the table, and the instance containing the table would be prohibited. If not provided, currently deletion protection will be set to UNPROTECTED as it is the API default value.`,
 			},
 		},
 		UseJSONNumber: true,
