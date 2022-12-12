@@ -394,6 +394,19 @@ objects:
 
           Note that subscribers may still receive multiple copies of a message when `enable_exactly_once_delivery`
           is true if the message was published multiple times by a publisher client. These copies are considered distinct by Pub/Sub and have distinct messageId values
+      - !ruby/object:Api::Type::String
+        name: 'topicMessageRetentionDuration'
+        output: true
+        description: |
+          Indicates the minimum duration for which a message is retained after it is published to the subscription's topic.
+          If this field is set, messages published to the subscription's topic in the last topicMessageRetentionDuration are always available to subscribers.
+          See the messageRetentionDuration field in Topic. This field is set only in responses from the server; it is ignored if it is set in any requests.
+          A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+      - !ruby/object:Api::Type::String
+        name: 'state'
+        output: true
+        description: |
+          An output-only field indicating whether or not the subscription can receive messages.
   - !ruby/object:Api::Resource
     name: 'Schema'
     input: true
