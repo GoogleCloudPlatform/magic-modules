@@ -78,7 +78,7 @@ func resourceBigtableTable() *schema.Resource {
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 
-			// If not provided, deletion protection will be set to the API default value
+			// If not provided, currently deletion protection will be set to false in the API
 			"deletion_protection": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -120,9 +120,8 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	tableId := d.Get("name").(string)
 	tblConf := bigtable.TableConf{TableID: tableId}
 
-	// DeletionProtection can be protected or unprotected
 	// Check if deletion protection is given
-	// If not given, tblConf.DeletionProtection will be set to the API default value
+	// If not given, currently tblConf.DeletionProtection will be set to false in the API
 	deletionProtection := d.Get("deletion_protection")
 	if deletionProtection == "PROTECTED" {
 		tblConf.DeletionProtection = bigtable.Protected
@@ -209,7 +208,6 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting column_family: %s", err)
 	}
 
-	// DeletionProtection can be protected or unprotected
 	deletionProtection := table.DeletionProtection
 	if deletionProtection == bigtable.Protected {
 		if err := d.Set("deletion_protection", "PROTECTED"); err != nil {
@@ -263,7 +261,6 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// Remove column families that are in old but not in new
-	// Error while deleting column families, might be because of enabled deletion protection bit
 	for _, old := range oSet.Difference(nSet).List() {
 		column := old.(map[string]interface{})
 
@@ -275,8 +272,6 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// DeletionProtection can be protected or unprotected
-	// Check if deletion protection is given and also needs to be updated
 	if d.HasChange("deletion_protection") {
 		deletionProtection := d.Get("deletion_protection")
 		if deletionProtection == "PROTECTED" {
