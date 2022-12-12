@@ -193,7 +193,7 @@ func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 				Config:      testAccBigtableTable_destroyTable(instanceName),
 				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
 			},
-			// changing the deletion protection field to unprotected
+			// changing the deletion protection field to unprotected so that the sources can properly be destroyed
 			{
 				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED", family),
 			},
