@@ -15802,6 +15802,9 @@ objects:
           If not specified IPV4_ONLY will be used.
       - !ruby/object:Api::Type::Enum
         name: 'ipv6AccessType'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        fingerprint_name: 'fingerprint'
         values:
           - :EXTERNAL
           - :INTERNAL

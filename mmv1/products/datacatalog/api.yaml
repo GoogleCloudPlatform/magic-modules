@@ -282,7 +282,6 @@ objects:
     create_url: projects/{{project}}/locations/{{region}}/tagTemplates?tagTemplateId={{tag_template_id}}
     delete_url: "{{name}}?force={{force_delete}}"
     update_verb: :PATCH
-    update_mask: true
     description: |
       A tag template defines a tag, which can have one or more typed fields.
       The template is used to create and attach the tag to GCP resources.
@@ -331,7 +330,6 @@ objects:
         description: |
           Map of tag template field IDs to the settings for the field. This map is an exhaustive list of the allowed fields. This map must contain at least one field and at most 500 fields.
         required: true
-        input: true  # TODO: update logic
         key_name: field_id
         value_type: !ruby/object:Api::Type::NestedObject
           name: field
