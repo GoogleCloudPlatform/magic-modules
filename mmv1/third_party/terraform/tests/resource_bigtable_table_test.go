@@ -121,11 +121,11 @@ func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 				ExpectError: regexp.MustCompile(".*deletion protection field is set to true.*"),
 			},
 			// changing deletion protection field to unprotected without changing the column families
-			// Checking if the table and the column family exists
+			// checking if the table and the column family exists
 			{
 				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED", family),
 				Check: resource.ComposeTestCheckFunc(
-					testAccBigtableColumnFamilyExists(t, "google_bigtable_table.table"),
+					testAccBigtableColumnFamilyExists(t, "google_bigtable_table.table", family),
 				),
 			},
 			{
@@ -293,7 +293,7 @@ func testAccCheckBigtableTableDestroyProducer(t *testing.T) func(s *terraform.St
 	}
 }
 
-func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space string) resource.TestCheckFunc {
+func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family string) resource.TestCheckFunc {
 	var ctx = context.Background()
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[table_name_space]
@@ -318,7 +318,6 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space string) re
 				return fmt.Errorf("Error checking column family. Could not find column family %s in %s.", family, rs.Primary.Attributes["name"])
 			}
 		}
-		return nil
 
 		return nil
 	}
