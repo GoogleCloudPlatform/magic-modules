@@ -839,7 +839,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: region
-        description: The region of the Metadata Store. eg us-central1
+        description: The region of the index. eg us-central1
         url_param_only: true
         input: true
     properties:

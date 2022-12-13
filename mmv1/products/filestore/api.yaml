@@ -144,6 +144,13 @@ objects:
                 File share capacity in GiB. This must be at least 1024 GiB
                 for the standard tier, or 2560 GiB for the premium tier.
               required: true
+            - !ruby/object:Api::Type::String
+              name: 'sourceBackup'
+              output: true
+              description: |
+                The resource name of the backup, in the format
+                projects/{projectId}/locations/{locationId}/backups/{backupId},
+                that this file share has been restored from.
             - !ruby/object:Api::Type::Array
               name: 'nfsExportOptions'
               description: |
@@ -326,4 +333,111 @@ objects:
         name: 'filesystemUsedBytes'
         description: |
           The amount of bytes needed to allocate a full copy of the snapshot content.
+        output: true
+  - !ruby/object:Api::Resource
+    name: 'Backup'
+    create_url: projects/{{project}}/locations/{{location}}/backups?backupId={{name}}
+    self_link: projects/{{project}}/locations/{{location}}/backups/{{name}}
+    base_url: projects/{{project}}/locations/{{location}}/backups
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Google Cloud Filestore backup.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/filestore/docs/backups'
+        'Creating Backups':
+          'https://cloud.google.com/filestore/docs/create-backups'
+      api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.backups'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
+        input: true
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name of the backup. The name must be unique within the specified instance.
+
+          The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{location}}/backups/{{backupId}}
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          A description of the backup with 2048 characters or less. Requests with longer descriptions will be rejected.
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          The backup state.
+        values:
+          - :STATE_UNSPECIFIED
+          - :FINALIZING
+          - :CREATING
+          - :READY
+          - :DELETING
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: |
+          The time when the snapshot was created in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Resource labels to represent user-provided metadata.
+      - !ruby/object:Api::Type::String
+        name: 'capacityGb'
+        description: |
+          The amount of bytes needed to allocate a full copy of the snapshot content.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'storageBytes'
+        description: |
+          The size of the storage used by the backup. As backups share storage, this number is expected to change with backup creation/deletion.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'sourceInstance'
+        description: |
+          The resource name of the source Cloud Filestore instance, in the format projects/{projectId}/locations/{locationId}/instances/{instanceId}, used to create this backup.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'sourceFileShare'
+        description: |
+          Name of the file share in the source Cloud Filestore instance that the backup is created from.
+        input: true
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'sourceInstanceTier'
+        description: |
+          The service tier of the source Cloud Filestore instance that this backup is created from.
+        values:
+          - :STANDARD
+          - :PREMIUM
+          - :BASIC_HDD
+          - :BASIC_SSD
+          - :HIGH_SCALE_SSD
+          - :ENTERPRISE
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'downloadBytes'
+        description: |
+          Amount of bytes that will be downloaded if the backup is restored.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        description: |
+          KMS key name used for data encryption.
         output: true

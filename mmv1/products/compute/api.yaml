@@ -4036,6 +4036,9 @@ objects:
           and internal TCP/UDP load balancers.
           EXTERNAL_MANAGED is used for regional external HTTP(S) load balancers.
           INTERNAL_MANAGED is used for internal HTTP(S) load balancers.
+
+          ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Note: This field must be set to ""
+          if the target is an URI of a service attachment.
         values:
           - :EXTERNAL
           - :EXTERNAL_MANAGED
@@ -15799,6 +15802,9 @@ objects:
           If not specified IPV4_ONLY will be used.
       - !ruby/object:Api::Type::Enum
         name: 'ipv6AccessType'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        fingerprint_name: 'fingerprint'
         values:
           - :EXTERNAL
           - :INTERNAL

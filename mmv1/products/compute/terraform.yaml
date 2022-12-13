@@ -959,6 +959,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "port_range"
           - "target"
           - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_vpc_psc"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "psc-endpoint"
+          consumer_network_name: "consumer-net"
+          ip_name: "website-ip"
+          producer_network_name: "producer-net"
+          producer_psc_network_name: "producer-psc-net"
+          service_attachment_name: "producer-service"
+          producer_forwarding_rule_name: "producer-forwarding-rule"
+          producer_backend_name: "producer-service-backend"
+          producer_healthcheck_name: "producer-service-health-check"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:

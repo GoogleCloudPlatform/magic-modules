@@ -52,6 +52,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/filestore.erb
       pre_create: templates/terraform/pre_create/filestore_instance.go.erb
+  Backup: !ruby/object:Overrides::Terraform::ResourceOverride
+    mutex: "filestore/{{project}}"
+    error_retry_predicates: ["isNotFilestoreQuotaError"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "filestore_backup_basic"
+        primary_resource_id: "backup"
+        vars:
+          backup_name: "tf-fs-bkup"
+          instance_name: "tf-fs-inst"
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
     mutex: "filestore/{{project}}"
     error_retry_predicates: ["isNotFilestoreQuotaError"]
