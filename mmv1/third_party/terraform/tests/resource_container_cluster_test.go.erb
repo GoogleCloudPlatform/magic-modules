@@ -3731,6 +3731,9 @@ resource "google_container_cluster" "primary" {
     gce_persistent_disk_csi_driver_config {
       enabled = false
     }
+	gke_backup_agent_config {
+	  enabled = false
+	}
 <% unless version == 'ga' -%>
     istio_config {
       disabled = true
@@ -3740,9 +3743,6 @@ resource "google_container_cluster" "primary" {
 	  enabled = false
 	}
 	config_connector_config {
-	  enabled = false
-	}
-    gke_backup_agent_config {
 	  enabled = false
 	}
 <% end -%>
@@ -3792,6 +3792,9 @@ resource "google_container_cluster" "primary" {
     gce_persistent_disk_csi_driver_config {
       enabled = true
     }
+	gke_backup_agent_config {
+	  enabled = true
+	}
 <% unless version == 'ga' -%>
     istio_config {
       disabled = false
@@ -3801,9 +3804,6 @@ resource "google_container_cluster" "primary" {
 	  enabled = true
 	}
 	config_connector_config {
-	  enabled = true
-	}
-	gke_backup_agent_config {
 	  enabled = true
 	}
 <% end -%>
