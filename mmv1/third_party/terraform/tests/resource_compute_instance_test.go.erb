@@ -239,15 +239,8 @@ func TestAccComputeInstance_basic_resourceManagerTags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic_resourceManagerTags(instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceTag(&instance, "tag-key"),
-					testAccCheckComputeInstanceMetadata(&instance, "baz", "bar"),
-					testAccCheckComputeInstanceDisk(&instance, instanceName, true, true),
-				),
-				computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3375,7 +3368,7 @@ resource "google_compute_instance" "foobar" {
   }
 
   metadata = {
-    baz = "bar"
+    foo = "bar"
   }
 }
 `, instance)
