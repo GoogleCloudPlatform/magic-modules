@@ -1513,7 +1513,7 @@ resource "google_compute_node_group" "nodes" {
   name = "test-nodegroup"
   zone = "us-central1-f"
 
-  size          = 1
+  size          = 3
   node_template = google_compute_node_template.nodetmpl.self_link
 }
 
