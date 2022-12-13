@@ -438,7 +438,7 @@ func TestAccDataprocCluster_withNodeGroupAffinity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
 
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.node_group_affinity.0.node_group_uri", "test-nodegroup"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.node_group_affinity.0.node_group_uri", "https://www.googleapis.com/compute/v1/projects/ci-test-project-188019/zones/us-central1-f/nodeGroups/test-nodegroup"),
 				),
 			},
 		},
