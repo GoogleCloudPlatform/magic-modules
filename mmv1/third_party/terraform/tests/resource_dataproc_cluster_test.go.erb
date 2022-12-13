@@ -375,6 +375,7 @@ func TestAccDataprocCluster_withMetadataAndTags(t *testing.T) {
 func TestAccDataprocCluster_withReservationAffinity(t *testing.T) {
 	t.Parallel()
 
+	var cluster dataproc.Cluster
 	rnd := randString(t, 10)
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
