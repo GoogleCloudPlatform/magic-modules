@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_fhir_store_notification_config"
         primary_resource_id: "default"
-        vars: 
+        vars:
           dataset_name: "example-dataset"
           fhir_store_name: "example-fhir-store"
           pubsub_topic: "fhir-notifications"

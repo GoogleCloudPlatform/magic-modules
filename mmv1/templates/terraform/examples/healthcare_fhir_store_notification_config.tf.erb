@@ -12,7 +12,7 @@ resource "google_healthcare_fhir_store" "default" {
     label1 = "labelvalue1"
   }
 
-  notification_configs {
+  notification_config<% unless defined? version && version == "ga" %>s<% end %> {
     pubsub_topic = "${google_pubsub_topic.topic.id}" 
     send_full_resource = true
   }
