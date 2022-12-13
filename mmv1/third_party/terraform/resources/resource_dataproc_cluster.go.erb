@@ -711,6 +711,7 @@ func resourceDataprocCluster() *schema.Resource {
 													ForceNew:     true,
 													Required:     true,
 													Description:  `The URI of a sole-tenant that the cluster will be created on.`,
+													DiffSuppressFunc: compareSelfLinkOrResourceName,
 												},
 											},
 										},
