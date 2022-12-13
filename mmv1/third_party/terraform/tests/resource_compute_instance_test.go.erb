@@ -226,7 +226,7 @@ func TestAccComputeInstance_basic5(t *testing.T) {
 	})
 }
 
-func TestAccComputeInstance_basic_resourceManagerTags(t *testing.T) {
+func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	var instanceName = fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -237,7 +237,7 @@ func TestAccComputeInstance_basic_resourceManagerTags(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_basic_resourceManagerTags(instanceName),
+				Config: testAccComputeInstance_resourceManagerTags(instanceName),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
@@ -3320,7 +3320,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-func testAccComputeInstance_basic_resourceManagerTags(instance string) string {
+func testAccComputeInstance_resourceManagerTags(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
