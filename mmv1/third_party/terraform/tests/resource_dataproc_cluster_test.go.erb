@@ -1460,7 +1460,7 @@ resource "google_dataproc_cluster" "basic" {
       reservation_affinity {      
         consume_reservation_type = "SPECIFIC_RESERVATION"
         key = "compute.googleapis.com/reservation-name"
-        values = ["default"]
+        values = [google_compute_reservation.reservation.name]
       }
     }
   }
@@ -1525,7 +1525,7 @@ resource "google_dataproc_cluster" "basic" {
     gce_cluster_config {
       zone = "us-central1-f"
       node_group_affinity {
-        node_group_uri = "test-nodegroup"
+        node_group_uri = google_compute_node_group.nodes.name
       }
     }
   }
