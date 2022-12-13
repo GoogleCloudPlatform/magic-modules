@@ -239,6 +239,10 @@ func TestAccComputeInstance_basic_resourceManagerTags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic_resourceManagerTags(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
