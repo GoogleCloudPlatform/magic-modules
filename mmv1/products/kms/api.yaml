@@ -43,6 +43,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        test: 'Just to fail build'
         description: |
           The resource name for the KeyRing.
         required: true
