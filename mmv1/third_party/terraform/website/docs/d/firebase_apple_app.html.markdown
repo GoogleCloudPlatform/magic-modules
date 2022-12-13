@@ -20,7 +20,7 @@ The following arguments are supported:
 
 * `app_id` -
   (Required)
-  The app_ip of name of the Firebase iosApp.
+  The app_id of name of the Firebase iosApp.
 
 
 - - -
