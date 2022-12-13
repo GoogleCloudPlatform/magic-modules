@@ -554,7 +554,6 @@ func resourceComputeInstance() *schema.Resource {
 				MaxItems:    1,
 				Optional:    true,
 				ForceNew:    true,
-				Computed:    true,
 				Description: `Stores additional params passed with the request, but not persisted as part of resource payload.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
