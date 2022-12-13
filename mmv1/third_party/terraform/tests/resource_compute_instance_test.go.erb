@@ -246,6 +246,7 @@ func TestAccComputeInstance_basic_resourceManagerTags(t *testing.T) {
 					testAccCheckComputeInstanceMetadata(&instance, "baz", "bar"),
 					testAccCheckComputeInstanceDisk(&instance, instanceName, true, true),
 				),
+				computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			},
 		},
 	})
