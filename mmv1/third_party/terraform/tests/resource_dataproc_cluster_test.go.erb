@@ -1722,28 +1722,28 @@ resource "google_dataproc_cluster" "spot_secondary" {
 
   cluster_config {
     master_config {
-	  num_instances = "1"
-	  machine_type  = "e2-medium"
-	  disk_config {
-		boot_disk_size_gb = 35
-	  }
-	}
+      num_instances = "1"
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
 
-	worker_config {
-	  num_instances = "2"
-	  machine_type  = "e2-medium"
-	  disk_config {
-		boot_disk_size_gb = 35
-	  }
-	}
+    worker_config {
+      num_instances = "2"
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
 
-	preemptible_worker_config {
-	  num_instances = "1"
-	  preemptibility = "SPOT"
-	  disk_config {
-		boot_disk_size_gb = 35
-	  }
-	}
+    preemptible_worker_config {
+      num_instances = "1"
+      preemptibility = "SPOT"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
   }
 }
 	`, rnd)
