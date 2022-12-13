@@ -229,7 +229,6 @@ func TestAccComputeInstance_basic5(t *testing.T) {
 func TestAccComputeInstance_basic_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
-	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
@@ -239,10 +238,6 @@ func TestAccComputeInstance_basic_resourceManagerTags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic_resourceManagerTags(instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
@@ -2893,28 +2888,6 @@ func testAccCheckComputeInstanceLabel(instance *compute.Instance, key string, va
 		}
 		if v != value {
 			return fmt.Errorf("Expected value '%s' but found value '%s' for label '%s' on instance %s", value, v, key, instance.Name)
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckComputeInstanceParamResourceManagerTag(instance *compute.Instance, key string, value string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		if instance.Params == nil {
-			return fmt.Errorf("no params found on instance %s", instance.Name)
-		}
-
-		if instance.Params.ResourceManagerTags == nil {
-			return fmt.Errorf("no resourceManagerTags found on instance %s", instance.Name)
-		}
-
-		v, ok := instance.Params.ResourceManagerTags[key]
-		if !ok {
-			return fmt.Errorf("No resourceManagerTags found with key %s on instance %s", key, instance.Name)
-		}
-		if v != value {
-			return fmt.Errorf("Expected value '%s' but found value '%s' for resourceManagerTags '%s' on instance %s", value, v, key, instance.Name)
 		}
 
 		return nil
