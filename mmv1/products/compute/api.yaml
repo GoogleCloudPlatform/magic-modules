@@ -1435,7 +1435,7 @@ objects:
            For internal load balancing, a URL to a HealthCheck resource must be specified instead.
       - !ruby/object:Api::Type::Integer
         name: 'id'
-        description: 'The unique identifier for the resource.'
+        description: 'The unique identifier for the resource. This identifier is defined by the server.'
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'iap'
@@ -3742,9 +3742,6 @@ objects:
           traffic that has destination IP address in these ranges. These ranges
           must be expressed in CIDR format. Only IPv4 is supported.
         item_type: Api::Type::String
-        conflicts:
-          - source_ranges
-          - source_tags
       - !ruby/object:Api::Type::Enum
         name: 'direction'
         description: |
@@ -3840,8 +3837,6 @@ objects:
           connection does not need to match both properties for the firewall to
           apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
           `source_tags` or `source_service_accounts` is required.
-        conflicts:
-          - destination_ranges
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3879,7 +3874,6 @@ objects:
         item_type: Api::Type::String
         conflicts:
           - source_service_accounts
-          - destination_ranges
           - target_service_accounts
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
