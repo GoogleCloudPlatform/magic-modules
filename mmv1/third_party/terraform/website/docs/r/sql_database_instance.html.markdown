@@ -264,7 +264,7 @@ The optional `settings.database_flags` sublist supports:
 
 The optional `settings.active_directory_config` subblock supports:
 
-* `domain` - (Optional) The domain name for the active directory (e.g., mydomain.com).
+* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
     Can only be used with SQL Server.
 
 The optional `settings.deny_maintenance_period` subblock supports:

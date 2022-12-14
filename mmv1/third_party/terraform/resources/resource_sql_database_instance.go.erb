@@ -160,7 +160,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"domain": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Required:    true,
 										Description: `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
 									},
 								},
@@ -1278,9 +1278,10 @@ func expandBackupRetentionSettings(configured interface{}) *sqladmin.BackupReten
 
 func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDirectoryConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
+	if len(l) == 0 {
 		return nil
 	}
+
 	config := l[0].(map[string]interface{})
 	return &sqladmin.SqlActiveDirectoryConfig{
 		Domain: config["domain"].(string),

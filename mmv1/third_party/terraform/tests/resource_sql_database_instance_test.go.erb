@@ -1154,30 +1154,6 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 	})
 }
 
-func TestAccSqlDatabaseInstance_ActiveDirectoryEmptyConfig(t *testing.T) {
-	t.Parallel()
-	rootPassword := randString(t, 15)
-	sqlServerDatabaseName := "tf-test-" + randString(t, 10)
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testGoogleSqlServerDatabaseInstance_ActiveDirectoryEmptyConfig(sqlServerDatabaseName, rootPassword),
-			},
-			{
-				ResourceName:      "google_sql_database_instance.instance",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection", "active_directory_config"},
-			},
-		},
-	})
-}
-
-
 func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t* testing.T){
 	t.Parallel()
 	databaseName := "tf-test-" + randString(t,10)
@@ -1468,37 +1444,6 @@ resource "google_sql_database_instance" "instance-with-ad" {
     }
   }
 }`, networkName, addressRangeName, databaseName, rootPassword, adDomainName)
-}
-
-func testGoogleSqlServerDatabaseInstance_ActiveDirectoryEmptyConfig(databaseName, rootPassword string) string {
-	return fmt.Sprintf(`
-	resource "google_sql_database_instance" "instance" {
-		name                = "%s"
-		database_version    = "SQLSERVER_2019_STANDARD"
-		root_password       = "%s"
-		deletion_protection = false
-		settings {
-			tier = "db-custom-1-3840"
-			active_directory_config {}
-		}
-	}`, databaseName, rootPassword)
-}
-
-func testGoogleMySqlDatabaseInstance_ActiveDirectoryEmptyConfig(databaseName string) string {
-	return fmt.Sprintf(`
-		resource "google_sql_database_instance" "instance" {
-		name                = "%s"
-		database_version    = "MYSQL_5_7"
-		region              = "us-central1"
-		deletion_protection = false
-
-		settings {
-			tier = "db-f1-micro"
-			active_directory_config {
-				domain = "testdomain.com"
-			}
-		}
-	}`, databaseName)
 }
 
 func testGoogleSqlDatabaseInstance_DenyMaintenancePeriodConfig(databaseName, endDate, startDate, time string) string {
