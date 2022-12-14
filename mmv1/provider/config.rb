@@ -28,6 +28,9 @@ module Provider
     # Some tool-specific names may be in use, and they won't all match;
     # For Terraform, some products use the API client name w/o spaces and
     # others use spaces. Eg: "app_engine" vs "appengine".
+    # Note: This should not be used for vanity names for new products.
+    # This was added for services with a mix of handwritten and generated
+    # resources.
     attr_reader :legacy_name
 
     # Some product names do not match their [golang] client name

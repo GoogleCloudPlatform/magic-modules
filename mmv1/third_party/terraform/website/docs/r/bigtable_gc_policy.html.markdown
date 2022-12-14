@@ -11,6 +11,14 @@ Creates a Google Cloud Bigtable GC Policy inside a family. For more information 
 [the official documentation](https://cloud.google.com/bigtable/) and
 [API](https://cloud.google.com/bigtable/docs/go/reference).
 
+-> **Warning**: We don't recommend having multiple GC policies for the same column
+family as it may result in unexpected behavior.
+
+-> **Note**: GC policies associated with a replicated table cannot be destroyed directly.
+Destroying a GC policy is translated into never perform garbage collection, this is
+considered relaxing from pure age-based or version-based GC policy, hence not allowed.
+The workaround is unreplicating the instance first by updating the instance to have one
+cluster.
 
 ## Example Usage
 
@@ -37,10 +45,18 @@ resource "google_bigtable_gc_policy" "policy" {
   instance_name = google_bigtable_instance.instance.name
   table         = google_bigtable_table.table.name
   column_family = "name"
+  deletion_policy = "ABANDON"
 
-  max_age {
-    duration = "168h"
+
+  gc_rules = <<EOF
+  {
+    "rules": [
+      {
+        "max_age": "168h"
+      }
+    ]
   }
+  EOF
 }
 ```
 
@@ -51,22 +67,25 @@ resource "google_bigtable_gc_policy" "policy" {
   instance_name = google_bigtable_instance.instance.name
   table         = google_bigtable_table.table.name
   column_family = "name"
+  deletion_policy = "ABANDON"
 
-  mode = "UNION"
-
-  max_age {
-    duration = "168h" # 7 days
+  gc_rules = <<EOF
+  {
+    "mode": "union",
+    "rules": [
+      {
+        "max_age": "168h"
+      },
+      {
+        "max_version": 10
+      }
+    ]
   }
-
-  max_version {
-    number = 10
-  }
+  EOF
 }
 ```
 
-For complex, nested policies, an optional `gc_rules` field are supported. This field
-conflicts with `mode`, `max_age` and `max_version`. This field is a serialized JSON
-string. Example:
+An example of more complex GC policy:
 ```hcl
 resource "google_bigtable_instance" "instance" {
   name = "instance_name"
@@ -93,29 +112,29 @@ resource "google_bigtable_gc_policy" "policy" {
   instance_name = google_bigtable_instance.instance.id
   table         = google_bigtable_table.table.name
   column_family = "cf1"
+  deletion_policy = "ABANDON"
 
   gc_rules = <<EOF
-{
-  "mode": "union",
-  "rules": [
-    {
-      "max_age": "10h"
-    },
-    {
-      "mode": "intersection",
-      "rules": [
-        {
-          "max_age": "2h"
-        },
-        {
-          "max_version": 2
-        }
-      ]
-    }
-  ]
-}
-EOF
-
+  {
+    "mode": "union",
+    "rules": [
+      {
+        "max_age": "10h"
+      },
+      {
+        "mode": "intersection",
+        "rules": [
+          {
+            "max_age": "2h"
+          },
+          {
+            "max_version": 2
+          }
+        ]
+      }
+    ]
+  }
+  EOF
 }
 ```
 This is equivalent to running the following `cbt` command:
@@ -142,6 +161,11 @@ The following arguments are supported:
 * `max_version` - (Optional) GC policy that applies to all versions of a cell except for the most recent.
 
 * `gc_rules` - (Optional) Serialized JSON object to represent a more complex GC policy. Conflicts with `mode`, `max_age` and `max_version`. Conflicts with `mode`, `max_age` and `max_version`.
+
+* `deletion_policy` - (Optional) The deletion policy for the GC policy.
+    Setting ABANDON allows the resource to be abandoned rather than deleted. This is useful for GC policy as it cannot be deleted in a replicated instance.
+
+    Possible values are: `ABANDON`.
 
 -----
 

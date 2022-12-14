@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: DocumentAI
-display_name: Essential Contacts
+display_name: Document AI
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

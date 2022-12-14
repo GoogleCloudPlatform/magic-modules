@@ -379,6 +379,31 @@ objects:
                         resource is a recursive structure; when the depth is 2, the CodeSystem table will have a column called
                         concept.concept but not concept.concept.concept. If not specified or set to 0, the server will use the default
                         value 2. The maximum depth allowed is 5.
+      - !ruby/object:Api::Type::Array
+        name: notificationConfigs
+        description: |-
+          A list of notifcation configs that configure the notification for every resource mutation in this FHIR store.
+        min_version: beta
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String 
+              name: pubsubTopic
+              required: true 
+              description: |
+                The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
+                PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
+                It is guaranteed to be unique within the topic. PubsubMessage.PublishTime is the time at which the message
+                was published. Notifications are only sent if the topic is non-empty. Topic names must be scoped to a
+                project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
+                Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
+            - !ruby/object:Api::Type::Boolean
+              name: sendFullResource
+              description: |
+                Whether to send full FHIR resource to this Pub/Sub topic for Create and Update operation.
+                Note that setting this to true does not guarantee that all resources will be sent in the format of 
+                full FHIR resource. When a resource change is too large or during heavy traffic, only the resource name will be
+                sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether 
+                it needs to fetch the full resource as a separate operation.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a FHIR store':

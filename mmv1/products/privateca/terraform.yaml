@@ -38,6 +38,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "deletion_protection"
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_authority_subordinate"
+        # This example ultimately generates a random id making replaying impossible at
+        # https://github.com/hashicorp/terraform-provider-google-beta/blob/22bfbbcf2250054e622743c4a35a872e43ed5aed/google-beta/privateca_ca_utils.go#L147
+        skip_vcr: true
         primary_resource_id: "default"
         vars:
           certificate_authority_id: "my-certificate-authority"

@@ -3,7 +3,7 @@
 package google
 
 import (
-<% unless object.skip_delete || object.cgc_only -%>
+<% unless object.skip_delete -%>
 <%   unless object.custom_code.test_check_destroy -%>
   "fmt"
 <%   end -%>
@@ -12,7 +12,7 @@ import (
   "testing"
 
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-<% unless object.skip_delete || object.cgc_only -%>
+<% unless object.skip_delete -%>
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 <% end -%>
 )
@@ -77,7 +77,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"time": {},
 		},
 		<% end -%>
-		<% unless object.skip_delete || object.cgc_only -%>
+		<% unless object.skip_delete -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>DestroyProducer(t),
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -103,7 +103,7 @@ func testAcc<%= test_slug -%>(context map[string]interface{}) string {
 }
 <%- end %>
 
-<% unless object.skip_delete || object.cgc_only -%>
+<% unless object.skip_delete -%>
 func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {

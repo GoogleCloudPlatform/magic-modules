@@ -171,14 +171,36 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: certificatePem
-            required: true
+            exactly_one_of:
+              - self_managed.0.certificate_pem
+              - self_managed.0.pem_certificate
+            deprecation_message: "Deprecated in favor of `pem_certificate`"
+            description: |
+              **Deprecated** The certificate chain in PEM-encoded form.
+
+              Leaf certificate comes first, followed by intermediate ones if any.
+          - !ruby/object:Api::Type::String
+            name: privateKeyPem
+            exactly_one_of:
+              - self_managed.0.private_key_pem
+              - self_managed.0.pem_private_key
+            deprecation_message: "Deprecated in favor of `pem_private_key`"
+            description: |
+              **Deprecated** The private key of the leaf certificate in PEM-encoded form.
+          - !ruby/object:Api::Type::String
+            name: pemCertificate
+            exactly_one_of:
+              - self_managed.0.certificate_pem
+              - self_managed.0.pem_certificate
             description: |
               The certificate chain in PEM-encoded form.
 
               Leaf certificate comes first, followed by intermediate ones if any.
           - !ruby/object:Api::Type::String
-            name: privateKeyPem
-            required: true
+            name: pemPrivateKey
+            exactly_one_of:
+              - self_managed.0.private_key_pem
+              - self_managed.0.pem_private_key
             description: |
               The private key of the leaf certificate in PEM-encoded form.
       - !ruby/object:Api::Type::NestedObject

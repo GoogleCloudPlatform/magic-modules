@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func TestvalidateGCEName(t *testing.T) {
+func TestValidateGCEName(t *testing.T) {
 	x := []StringValidationTestCase{
 		// No errors
 		{TestName: "basic", Value: "foobar"},
@@ -266,6 +266,29 @@ func TestValidateProjectID(t *testing.T) {
 	}
 
 	es := testStringValidationCases(x, validateProjectID())
+	if len(es) > 0 {
+		t.Errorf("Failed to validate project ID's: %v", es)
+	}
+}
+
+func TestValidateDSProjectID(t *testing.T) {
+	x := []StringValidationTestCase{
+		// No errors
+		{TestName: "basic", Value: "foobar"},
+		{TestName: "with numbers", Value: "foobar123"},
+		{TestName: "short", Value: "foofoo"},
+		{TestName: "long", Value: "foobarfoobarfoobarfoobarfoobar"},
+		{TestName: "has projects", Value: "projects/foo-bar"},
+		{TestName: "has multiple projects", Value: "projects/projects/foobar"},
+		{TestName: "has a hyphen", Value: "foo-bar"},
+
+		// With errors
+		{TestName: "empty", Value: "", ExpectError: true},
+		{TestName: "has an uppercase letter", Value: "foo-Bar", ExpectError: true},
+		{TestName: "has a final hyphen", Value: "foo-bar-", ExpectError: true},
+	}
+
+	es := testStringValidationCases(x, validateDSProjectID())
 	if len(es) > 0 {
 		t.Errorf("Failed to validate project ID's: %v", es)
 	}

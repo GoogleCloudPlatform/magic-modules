@@ -4,7 +4,7 @@
 <%= lines(build_nested_property_documentation(prop, pwd)) -%>
 <% end -%>
 <%
-  elsif property.nested_properties?
+  elsif !property.nested_properties.nil? && !property.nested_properties.empty?
 -%>
 <a name="nested_<%= property.name.underscore -%>"></a>The `<%= property.name.underscore -%>` block <%= if property.output then "contains" else "supports" end -%>:
 <%- if property.is_a?(Api::Type::Map) %>

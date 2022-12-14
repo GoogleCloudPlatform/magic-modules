@@ -184,6 +184,8 @@ includes an up-to-date reference of supported versions.
     created. This is done because after a name is used, it cannot be reused for
     up to [one week](https://cloud.google.com/sql/docs/delete-instance).
 
+* `maintenance_version`  - (Optional) The current software version on the instance. This attribute can not be set during creation. Refer to `available_maintenance_versions` attribute to see what `maintenance_version` are available for upgrade. When this attribute gets updated, it will cause an instance restart. Setting a `maintenance_version` value that is older than the current one on the instance will be ignored.
+
 * `master_instance_name` - (Optional) The name of the existing instance that will
     act as the master in the replication setup. Note, this requires the master to
     have `binary_log_enabled` set, as well as existing backups.
@@ -206,7 +208,8 @@ includes an up-to-date reference of supported versions.
     That service account needs the `Cloud KMS > Cloud KMS CryptoKey Encrypter/Decrypter` role on your
     key - please see [this step](https://cloud.google.com/sql/docs/mysql/configure-cmek#grantkey).
 
-* `deletion_protection` - (Optional, Default: `true`) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a `terraform destroy` or `terraform apply` command that deletes the instance will fail.
+* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
+in Terraform state, a `terraform destroy` or `terraform apply` command that deletes the instance will fail. Defaults to `true`.
     
   ~> **NOTE:** This flag only protects instances from deletion within Terraform. To protect your instances from accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform), use the API flag `settings.deletion_protection_enabled`.
 
@@ -228,24 +231,26 @@ The `settings` block supports:
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
-* `availability_type` - (Optional, Default: `ZONAL`) The availability type of the Cloud SQL
+* `availability_type` - (Optional) The availability type of the Cloud SQL
   instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For all instances, ensure that
   `settings.backup_configuration.enabled` is set to `true`.
   For MySQL instances, ensure that `settings.backup_configuration.binary_log_enabled` is set to `true`.
   For Postgres instances, ensure that `settings.backup_configuration.point_in_time_recovery_enabled`
-  is set to `true`.
+  is set to `true`. Defaults to `ZONAL`.
 
 * `collation` - (Optional) The name of server instance collation.
 
-* `deletion_protection_enabled` - (Optional, Default: `false`) Enables protection of an instance from accidental deletion protection across all surfaces (API, gcloud, Cloud Console and Terraform).
+* `connector_enforcement` - (Optional) Specifies if connections must use Cloud SQL connectors.
 
-* `disk_autoresize` - (Optional, Default: `true`) Enables auto-resizing of the storage size. Set to false if you want to set `disk_size`.
+* `deletion_protection_enabled` - (Optional) Enables protection of an instance from accidental deletion protection across all surfaces (API, gcloud, Cloud Console and Terraform). Defaults to `false`.
 
-* `disk_autoresize_limit` - (Optional, Default: `0`) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
+* `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
 
-* `disk_size` - (Optional, Default: `10`) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. If you want to set this field, set `disk_autoresize` to false.
+* `disk_autoresize_limit` - (Optional) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
 
-* `disk_type` - (Optional, Default: `PD_SSD`) The type of data disk: PD_SSD or PD_HDD.
+* `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB.
+
+* `disk_type` - (Optional) The type of data disk: PD_SSD or PD_HDD. Defaults to `PD_SSD`.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
 
@@ -262,6 +267,14 @@ The optional `settings.active_directory_config` subblock supports:
 * `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
     Can only be used with SQL Server.
 
+The optional `settings.deny_maintenance_period` subblock supports:
+
+* `end_date` - (Required) "deny maintenance period" end date. If the year of the end date is empty, the year of the start date also must be empty. In this case, it means the no maintenance interval recurs every year. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01
+
+* `start_date` - (Required) "deny maintenance period" start date. If the year of the start date is empty, the year of the end date also must be empty. In this case, it means the deny maintenance period recurs every year. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01
+
+* `time` - (Required) Time in UTC when the "deny maintenance period" starts on startDate and ends on endDate. The time is in format: HH:mm:SS, i.e., 00:00:00
+
 The optional `settings.sql_server_audit_config` subblock supports:
 
 * `bucket` - (Required) The name of the destination bucket (e.g., gs://mybucket).
@@ -269,6 +282,8 @@ The optional `settings.sql_server_audit_config` subblock supports:
 * `upload_interval` - (Optional) How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
 
 * `retention_interval` - (Optional) How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". 
+
+* `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
 
 The optional `settings.backup_configuration` subblock supports:
 
@@ -352,6 +367,8 @@ The optional `settings.insights_config` subblock for instances declares [Query I
 
 * `record_client_address` - True if Query Insights will record client address when enabled.
 
+* `query_plans_per_minute` - Number of query execution plans captured by Insights per minute for all queries combined. Between 0 and 20. Default to 5.
+
 The optional `settings.password_validation_policy` subblock for instances declares [Password Validation Policy](https://cloud.google.com/sql/docs/postgres/built-in-authentication) configuration. It contains:
 
 * `min_length` - Specifies the minimum number of characters that the password must have.
@@ -378,8 +395,8 @@ to work, cannot be updated, and supports:
 * `client_key` - (Optional) PEM representation of the replica's private key. The
     corresponding public key in encoded in the `client_certificate`.
 
-* `connect_retry_interval` - (Optional, Default: 60) The number of seconds
-    between connect retries.
+* `connect_retry_interval` - (Optional) The number of seconds
+    between connect retries. MySQL's default is 60 seconds.
 
 * `dump_file_path` - (Optional) Path to a SQL file in GCS from which replica
     instances are created. Format is `gs://bucket/filename`.
@@ -451,6 +468,8 @@ instance.
 * `first_ip_address` - The first IPv4 address of any type assigned. This is to
 support accessing the [first address in the list in a terraform output](https://github.com/hashicorp/terraform-provider-google/issues/912)
 when the resource is configured with a `count`.
+
+* `available_maintenance_versions`  - The list of all maintenance versions applicable on the instance.
 
 * `public_ip_address` - The first public (`PRIMARY`) IPv4 address assigned. This is
 a workaround for an [issue fixed in Terraform 0.12](https://github.com/hashicorp/terraform/issues/17048)

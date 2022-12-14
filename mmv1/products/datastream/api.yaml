@@ -87,6 +87,7 @@ objects:
           - oracle_profile
           - gcs_profile
           - mysql_profile
+          - bigquery_profile
           - postgresql_profile
         description: |
           Oracle database profile.
@@ -125,6 +126,7 @@ objects:
           - oracle_profile
           - gcs_profile
           - mysql_profile
+          - bigquery_profile
           - postgresql_profile
         description: |
           Cloud Storage bucket profile.
@@ -144,6 +146,7 @@ objects:
           - oracle_profile
           - gcs_profile
           - mysql_profile
+          - bigquery_profile
           - postgresql_profile
         description: |
           MySQL database profile.
@@ -211,11 +214,25 @@ objects:
                 description: |
                   Indicates whether the clientKey field is set.
       - !ruby/object:Api::Type::NestedObject
+        name: 'bigqueryProfile'
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - oracle_profile
+          - gcs_profile
+          - mysql_profile
+          - bigquery_profile
+          - postgresql_profile
+        description: |
+          BigQuery warehouse profile.
+        properties: []
+      - !ruby/object:Api::Type::NestedObject
         name: 'postgresqlProfile'
         exactly_one_of:
           - oracle_profile
           - gcs_profile
           - mysql_profile
+          - bigquery_profile
           - postgresql_profile
         description: |
           PostgreSQL database profile.
@@ -249,6 +266,8 @@ objects:
         name: 'forwardSshConnectivity'
         description: |
           Forward SSH tunnel connectivity.
+        conflicts:
+          - private_connectivity
         properties:
           - !ruby/object:Api::Type::String
             name: 'hostname'
@@ -271,11 +290,107 @@ objects:
             description: |
               SSH password.
             conflicts:
-              - forward_ssh_connectivity.private_key
+              - forward_ssh_connectivity.0.private_key
           - !ruby/object:Api::Type::String
             name: 'privateKey'
             input: true
             description: |
               SSH private key.
             conflicts:
-              - forward_ssh_connectivity.private_key
+              - forward_ssh_connectivity.0.password
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateConnectivity'
+        description: |
+          Private connectivity.
+        conflicts:
+          - forward_ssh_connectivity
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'privateConnection'
+            required: true
+            description: |
+              A reference to a private connection resource. Format: `projects/{project}/locations/{location}/privateConnections/{name}`
+  - !ruby/object:Api::Resource
+    name: 'PrivateConnection'
+    base_url: "projects/{{project}}/locations/{{location}}/privateConnections"
+    create_url: "projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}"
+    self_link: "projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}"
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/datastream/docs/create-a-private-connectivity-configuration'
+      api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.privateConnections'
+    description: |
+      The PrivateConnection resource is used to establish private connectivity between Datastream and a customer's network.
+
+
+    input: true
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: privateConnectionId
+        description: |-
+          The private connectivity identifier.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The name of the location this repository is located in.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: The resource's name.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: Labels.
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: Display name.
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          State of the PrivateConnection.
+        output: true
+        values:
+        - :CREATING
+        - :CREATED
+        - :FAILED
+        - :DELETING
+        - :FAILED_TO_DELETE
+      - !ruby/object:Api::Type::NestedObject
+        name: 'error'
+        output: true
+        description: |
+          The PrivateConnection error in case of failure.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'message'
+            description: |
+              A message containing more information about the error that occurred.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'details'
+            description: |
+              A list of messages that carry the error details.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'vpcPeeringConfig'
+        required: true
+        description: |
+          The VPC Peering configuration is used to create VPC peering
+          between Datastream and the consumer's VPC.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'vpc'
+            required: true
+            description: |
+              Fully qualified name of the VPC that Datastream will peer to.
+              Format: projects/{project}/global/{networks}/{name}
+          - !ruby/object:Api::Type::String
+            name: 'subnet'
+            required: true
+            description: |
+              A free subnet for peering. (CIDR of /29)

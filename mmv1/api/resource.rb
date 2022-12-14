@@ -216,7 +216,7 @@ module Api
     def all_nested_properties(props)
       nested = props
       props.each do |prop|
-        if !prop.flatten_object && prop.nested_properties?
+        if !prop.flatten_object && !prop.nested_properties.nil?
           nested += all_nested_properties(prop.nested_properties)
         end
       end
@@ -449,7 +449,7 @@ module Api
           rrefs.concat(resourcerefs_for_properties(p.resource_ref
                                                     .required_properties,
                                                    original_obj))
-        elsif p.nested_properties?
+        elsif !p.nested_properties.nil?
           rrefs.concat(resourcerefs_for_properties(p.nested_properties, original_obj))
         elsif p.is_a? Api::Type::Array
           if p.item_type.is_a? Api::Type::ResourceRef

@@ -34,9 +34,9 @@ function clone_repo() {
         GH_REPO=docs-examples
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
     elif [ "$REPO" == "tf-cloud-docs" ]; then
-        UPSTREAM_OWNER=terraform-google-modules
-        GH_REPO=terraform-docs-samples
-        LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/terraform-docs-samples
+        # backwards-compatability
+        echo "$REPO is no longer available."
+        exit 0
     else
         echo "Unrecognized repo $REPO"
         exit 1
@@ -147,9 +147,6 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
     bundle exec compiler -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
-elif [ "$REPO" == "tf-cloud-docs" ]; then
-    # use terraform generator with cloud docs override
-    bundle exec compiler -a -e terraform -f cloud_docs -o $LOCAL_PATH -v $VERSION
 else
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
@@ -160,6 +157,11 @@ else
         fi
         pushd ../
         make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
+        pushd ./tools/breaking-change-detector
+        set +e
+        go run . -docs -providerFolder="${LOCAL_PATH}/.github/"
+        set -e
+        popd
         popd
     fi
 fi

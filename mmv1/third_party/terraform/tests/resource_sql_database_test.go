@@ -10,14 +10,48 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
+func TestCaseDiffDashSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"PD_HDD": {
+			Old:                "PD_HDD",
+			New:                "pd-hdd",
+			ExpectDiffSuppress: true,
+		},
+		"PD_SSD": {
+			Old:                "PD_SSD",
+			New:                "pd-ssd",
+			ExpectDiffSuppress: true,
+		},
+		"pd-hdd": {
+			Old:                "pd-hdd",
+			New:                "PD_HDD",
+			ExpectDiffSuppress: false,
+		},
+		"pd-ssd": {
+			Old:                "pd-ssd",
+			New:                "PD_SSD",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if caseDiffDashSuppress(tn, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
 func TestAccSqlDatabase_basic(t *testing.T) {
 	t.Parallel()
 
 	var database sqladmin.Database
 
 	resourceName := "google_sql_database.database"
-	instanceName := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
-	dbName := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
+	instanceName := fmt.Sprintf("tf-test-%d", randInt(t))
+	dbName := fmt.Sprintf("tf-test-%d", randInt(t))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -72,8 +106,8 @@ func TestAccSqlDatabase_update(t *testing.T) {
 
 	var database sqladmin.Database
 
-	instance_name := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
-	database_name := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
+	instance_name := fmt.Sprintf("tf-test-%d", randInt(t))
+	database_name := fmt.Sprintf("tf-test-%d", randInt(t))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

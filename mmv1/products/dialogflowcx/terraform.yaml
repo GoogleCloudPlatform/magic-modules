@@ -89,6 +89,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       eventHandlers: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   Version: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_resource: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 40
       update_minutes: 40
@@ -107,7 +108,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     skip_sweeper: true
     id_format: "{{parent}}/versions/{{name}}"
     import_format: ["{{parent}}/versions/{{name}}"]
-    autogen_async: true
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -168,6 +168,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringLenBetween(0, 64)'
   Environment: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_resource: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 40
       update_minutes: 40
@@ -186,7 +187,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     skip_sweeper: true
     id_format: "{{parent}}/environments/{{name}}"
     import_format: ["{{parent}}/environments/{{name}}"]
-    autogen_async: true
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb

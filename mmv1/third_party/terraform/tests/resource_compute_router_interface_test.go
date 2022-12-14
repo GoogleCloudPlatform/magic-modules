@@ -36,6 +36,29 @@ func TestAccComputeRouterInterface_basic(t *testing.T) {
 	})
 }
 
+func TestAccComputeRouterInterface_redundant(t *testing.T) {
+	t.Parallel()
+
+	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterInterfaceRedundant(routerName),
+				Check: testAccCheckComputeRouterInterfaceExists(
+					t, "google_compute_router_interface.foobar_int2"),
+			},
+			{
+				ResourceName:      "google_compute_router_interface.foobar_int2",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeRouterInterface_withTunnel(t *testing.T) {
 	t.Parallel()
 
@@ -47,6 +70,29 @@ func TestAccComputeRouterInterface_withTunnel(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRouterInterfaceWithTunnel(routerName),
+				Check: testAccCheckComputeRouterInterfaceExists(
+					t, "google_compute_router_interface.foobar"),
+			},
+			{
+				ResourceName:      "google_compute_router_interface.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRouterInterface_withPrivateIpAddress(t *testing.T) {
+	t.Parallel()
+
+	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterInterfaceWithPrivateIpAddress(routerName),
 				Check: testAccCheckComputeRouterInterfaceExists(
 					t, "google_compute_router_interface.foobar"),
 			},
@@ -249,6 +295,45 @@ resource "google_compute_router_interface" "foobar" {
 `, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
 }
 
+func testAccComputeRouterInterfaceRedundant(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name = "%s-net"
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "%s-subnet"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_router_interface" "foobar_int1" {
+  name     = "%s-int1"
+  router   = google_compute_router.foobar.name
+  region   = google_compute_router.foobar.region
+  ip_range = "169.254.3.1/30"
+}
+
+resource "google_compute_router_interface" "foobar_int2" {
+  name                = "%s-int2"
+  router              = google_compute_router.foobar.name
+  region              = google_compute_router.foobar.region
+  ip_range            = "169.254.4.1/30"
+  redundant_interface = google_compute_router_interface.foobar_int1.name
+}
+`, routerName, routerName, routerName, routerName, routerName)
+}
+
 func testAccComputeRouterInterfaceKeepRouter(routerName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -328,41 +413,25 @@ resource "google_compute_address" "foobar" {
   region = google_compute_subnetwork.foobar.region
 }
 
-resource "google_compute_vpn_gateway" "foobar" {
+resource "google_compute_ha_vpn_gateway" "foobar" {
   name    = "%s-gateway"
   network = google_compute_network.foobar.self_link
   region  = google_compute_subnetwork.foobar.region
 }
 
-resource "google_compute_forwarding_rule" "foobar_esp" {
-  name        = "%s-fr1"
-  region      = google_compute_vpn_gateway.foobar.region
-  ip_protocol = "ESP"
-  ip_address  = google_compute_address.foobar.address
-  target      = google_compute_vpn_gateway.foobar.self_link
-}
-
-resource "google_compute_forwarding_rule" "foobar_udp500" {
-  name        = "%s-fr2"
-  region      = google_compute_forwarding_rule.foobar_esp.region
-  ip_protocol = "UDP"
-  port_range  = "500-500"
-  ip_address  = google_compute_address.foobar.address
-  target      = google_compute_vpn_gateway.foobar.self_link
-}
-
-resource "google_compute_forwarding_rule" "foobar_udp4500" {
-  name        = "%s-fr3"
-  region      = google_compute_forwarding_rule.foobar_udp500.region
-  ip_protocol = "UDP"
-  port_range  = "4500-4500"
-  ip_address  = google_compute_address.foobar.address
-  target      = google_compute_vpn_gateway.foobar.self_link
+resource "google_compute_external_vpn_gateway" "external_gateway" {
+  name            = "%s-external-gateway"
+  redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  description     = "An externally managed VPN gateway"
+  interface {
+    id         = 0
+    ip_address = "8.8.8.8"
+  }
 }
 
 resource "google_compute_router" "foobar" {
   name    = "%s"
-  region  = google_compute_forwarding_rule.foobar_udp500.region
+  region  = google_compute_subnetwork.foobar.region
   network = google_compute_network.foobar.self_link
   bgp {
     asn = 64514
@@ -371,11 +440,13 @@ resource "google_compute_router" "foobar" {
 
 resource "google_compute_vpn_tunnel" "foobar" {
   name               = "%s"
-  region             = google_compute_forwarding_rule.foobar_udp4500.region
-  target_vpn_gateway = google_compute_vpn_gateway.foobar.self_link
+  region             = google_compute_subnetwork.foobar.region
+  vpn_gateway = google_compute_ha_vpn_gateway.foobar.self_link
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 0  
   shared_secret      = "unguessable"
-  peer_ip            = "8.8.8.8"
   router             = google_compute_router.foobar.name
+  vpn_gateway_interface           = 0  
 }
 
 resource "google_compute_router_interface" "foobar" {
@@ -385,5 +456,44 @@ resource "google_compute_router_interface" "foobar" {
   ip_range   = "169.254.3.1/30"
   vpn_tunnel = google_compute_vpn_tunnel.foobar.name
 }
-`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
+`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
+}
+
+func testAccComputeRouterInterfaceWithPrivateIpAddress(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name = "tf-test-%s"
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "tf-test-router-interface-subnetwork-%s"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_address" "foobar" {
+  name  			 = "%s-addr"
+  region 			 = google_compute_subnetwork.foobar.region
+  subnetwork   = google_compute_subnetwork.foobar.id
+  address_type = "INTERNAL"
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_router_interface" "foobar" {
+  name               = "%s"
+  router             = google_compute_router.foobar.name
+  region             = google_compute_router.foobar.region
+  subnetwork         = google_compute_subnetwork.foobar.self_link
+  private_ip_address = google_compute_address.foobar.address
+}
+`, routerName, routerName, routerName, routerName, routerName)
 }

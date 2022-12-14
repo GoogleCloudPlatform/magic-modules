@@ -26,6 +26,8 @@ func <%= namespace_property_from_object(property, object) -%>Schema() *schema.Re
 }
 <% end %>
 
+<% if !property.nested_properties.nil? -%>
 <% property.nested_properties.each do |prop| -%>
 <%= lines(build_subresource_schema(prop, object, pwd), 1) -%>
+<% end -%>
 <% end -%>

@@ -30,7 +30,7 @@ module Provider
 
     # Create a directory of examples per resource
     def generate_resource(pwd, data, _generate_code, generate_docs)
-      return unless generate_docs && !data.object.cgc_only
+      return unless generate_docs
 
       examples = data.object.examples
                      .reject(&:skip_test)

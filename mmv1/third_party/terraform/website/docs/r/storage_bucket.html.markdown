@@ -58,13 +58,37 @@ resource "google_storage_bucket" "auto-expire" {
       type = "Delete"
     }
   }
+
+  lifecycle_rule {
+    condition {
+      age = 1
+    }
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+  }
 }
 ```
+
+## Example Usage - Enabling public access prevention
+
+```hcl
+resource "google_storage_bucket" "auto-expire" {
+  name          = "no-public-access-bucket"
+  location      = "US"
+  force_destroy = true
+
+  public_access_prevention = "enforced"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the bucket.
+
+* `location` - (Required) The [GCS location](https://cloud.google.com/storage/docs/bucket-locations).
 
 - - -
 
@@ -72,12 +96,12 @@ The following arguments are supported:
     boolean option will delete all contained objects. If you try to delete a
     bucket that contains objects, Terraform will fail that run.
 
-* `location` - (Required) The [GCS location](https://cloud.google.com/storage/docs/bucket-locations)
-
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
 * `storage_class` - (Optional, Default: 'STANDARD') The [Storage Class](https://cloud.google.com/storage/docs/storage-classes) of the new bucket. Supported values include: `STANDARD`, `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`, `ARCHIVE`.
+
+* `autoclass` - (Optional) The bucket's [Autoclass](https://cloud.google.com/storage/docs/autoclass) configuration.  Structure is [documented below](#nested_autoclass).
 
 * `lifecycle_rule` - (Optional) The bucket's [Lifecycle Rules](https://cloud.google.com/storage/docs/lifecycle#configuration) configuration. Multiple blocks of this type are permitted. Structure is [documented below](#nested_lifecycle_rule).
 
@@ -101,6 +125,10 @@ The following arguments are supported:
 
 * `uniform_bucket_level_access` - (Optional, Default: false) Enables [Uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access) access to a bucket.
 
+* `public_access_prevention` - (Optional) Prevents public access to a bucket. Acceptable values are "inherited" or "enforced". If "inherited", the bucket uses [public access prevention](https://cloud.google.com/storage/docs/public-access-prevention). only if the bucket is subject to the public access prevention organization policy constraint. Defaults to "inherited".
+
+* `custom_placement_config` - (Optional) The bucket's custom location configuration, which specifies the individual regions that comprise a dual-region bucket. If the bucket is designated a single or multi-region, the parameters are empty. Structure is [documented below](#nested_custom_placement_config).
+
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
 * `action` - (Required) The Lifecycle Rule's action configuration. A single block of this type is supported. Structure is [documented below](#nested_action).
@@ -109,7 +137,7 @@ The following arguments are supported:
 
 <a name="nested_action"></a>The `action` block supports:
 
-* `type` - The type of the action of this Lifecycle Rule. Supported values include: `Delete` and `SetStorageClass`.
+* `type` - The type of the action of this Lifecycle Rule. Supported values include: `Delete`, `SetStorageClass` and `AbortIncompleteMultipartUpload`.
 
 * `storage_class` - (Required if action type is `SetStorageClass`) The target [Storage Class](https://cloud.google.com/storage/docs/storage-classes) of objects affected by this Lifecycle Rule. Supported values include: `STANDARD`, `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`, `ARCHIVE`.
 
@@ -136,6 +164,10 @@ The following arguments are supported:
 * `days_since_noncurrent_time` - (Optional) Relevant only for versioned objects. Number of days elapsed since the noncurrent timestamp of an object.
 
 * `noncurrent_time_before` - (Optional) Relevant only for versioned objects. The date in RFC 3339 (e.g. `2017-06-13`) when the object became nonconcurrent.
+
+<a name="nested_autoclass"></a>The `autoclass` block supports:
+
+* `enabled` - (Required) While set to `true`, autoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.
 
 <a name="nested_versioning"></a>The `versioning` block supports:
 
@@ -188,6 +220,10 @@ The following arguments are supported:
   This data source calls an API which creates the account if required, ensuring your Terraform applies cleanly and repeatedly irrespective of the
   state of the project.
   You should take care for race conditions when the same Terraform manages IAM policy on the Cloud KMS crypto key. See the data source page for more details.
+
+<a name="nested_custom_placement_config"></a>The `custom_placement_config` block supports:
+
+* `data_locations` - (Required) The list of individual regions that comprise a dual-region bucket. See [Cloud Storage bucket locations](https://cloud.google.com/storage/docs/dual-regions#availability) for a list of acceptable regions. **Note**: If any of the data_locations changes, it will [recreate the bucket](https://cloud.google.com/storage/docs/locations#key-concepts).
 
 ## Attributes Reference
 

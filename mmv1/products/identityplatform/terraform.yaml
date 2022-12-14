@@ -13,6 +13,21 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Config: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/config", "projects/{{project}}", "{{project}}"]
+    skip_delete: true
+    skip_sweeper: true
+    examples: 
+      - !ruby/object:Provider::Terraform::Examples
+        name: "identity_platform_config_basic"
+        primary_resource_id: "default"
+        vars:
+          instance_name: "memory-cache"
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_acct: :BILLING_ACCT
+        # Resource creation race
+        skip_vcr: true
   DefaultSupportedIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}"]
     examples:
@@ -92,6 +107,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "identity_platform_tenant_basic"
         primary_resource_id: "tenant"
+  ProjectDefaultConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    create_verb: :PATCH
+    delete_verb: :PATCH
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      test_check_destroy: templates/terraform/custom_check_destroy/identity_platform_project_default_config.go.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true
+        in the provider configuration. Otherwise the ACM API will return a 403 error.
+        Your account must have the `serviceusage.services.use` permission on the
+        `billing_project` you defined.
+    id_format: "{{project}}"
+    examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "identity_platform_project_default_config"
+      primary_resource_id: "default"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

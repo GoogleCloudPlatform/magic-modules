@@ -1,0 +1,17 @@
+- type: CUSTOM_RESOURCE_NAME
+  details:
+    title: region_network_firewall_policy
+  location: region
+- type: EXCLUDE
+  field: location
+  location: global
+- type: EXCLUDE
+  field: region
+- type: CUSTOM_NAME
+  details:
+    name: region
+  field: location
+- type: CUSTOM_ID
+  details:
+    id: projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}
+  location: region
