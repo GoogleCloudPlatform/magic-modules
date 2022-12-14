@@ -411,7 +411,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       iap.oauth2ClientSecretSha256: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
+        name: 'generated_id'
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
