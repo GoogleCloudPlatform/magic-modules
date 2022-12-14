@@ -3117,6 +3117,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
+      privateIpGoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       privateIpv6GoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
