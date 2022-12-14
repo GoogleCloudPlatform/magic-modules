@@ -27,7 +27,7 @@ resource "google_kms_key_ring" "keyring" {
 
 data "google_iam_policy" "admin" {
   binding {
-    role = "roles/cloudkms.admin"
+    role = "roles/editor"
 
     members = [
       "user:jane@example.com",
@@ -51,7 +51,7 @@ resource "google_kms_key_ring" "keyring" {
 
 data "google_iam_policy" "admin" {
   binding {
-    role = "roles/cloudkms.admin"
+    role = "roles/editor"
 
     members = [
       "user:jane@example.com",
