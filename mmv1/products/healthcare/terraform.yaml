@@ -61,6 +61,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bq_dataset_name: "bq_example_dataset"
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_fhir_store_notification_config"
+        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
