@@ -24,6 +24,11 @@ apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Firebase Realtime Database API
     url: https://console.cloud.google.com/apis/library/firebasedatabase.googleapis.com/
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation':
+      'https://firebase.google.com/products/realtime-database'
+  api: 'https://firebase.google.com/docs/reference/rest/database/database-management/rest'
 objects:
   - !ruby/object:Api::Resource
     name: 'Instance'
@@ -32,11 +37,6 @@ objects:
     self_link: projects/{{project}}/locations/{{region}}/instances/{{instance_id}}
     create_url: projects/{{project}}/locations/{{region}}/instances?databaseId={{instance_id}}
     description: A Firebase Realtime Database instance.
-    references: !ruby/object:Api::Resource::ReferenceLinks
-      guides:
-        'Official Documentation':
-          'https://firebase.google.com/products/realtime-database'
-      api: 'https://firebase.google.com/docs/reference/rest/database/database-management/rest'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'region'
@@ -83,7 +83,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: state
         description: |
-          The current database state. Set desired_state to disable or reenable the database.
+          The current database state. Set desired_state to :DISABLED to disable the database and :ACTIVE to reenable the database
         output: true
         values:
           - :ACTIVE
