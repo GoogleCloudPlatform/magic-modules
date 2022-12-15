@@ -444,7 +444,7 @@ The following arguments are supported:
     encryption request for the given KMS key. If absent, the Compute Engine
     default service account is used.
 
-* `kms_key_self_link` - (Optional) The self link of the encryption key that is
+* `kms_key_self_link` - (Required) The self link of the encryption key that is
     stored in Google Cloud KMS.
 
 <a name="nested_source_snapshot_encryption_key"></a>The `source_snapshot_encryption_key` block supports:
@@ -453,7 +453,7 @@ The following arguments are supported:
     encryption request for the given KMS key. If absent, the Compute Engine
     default service account is used.
 
-* `kms_key_self_link` - (Optional) The self link of the encryption key that is
+* `kms_key_self_link` - (Required) The self link of the encryption key that is
     stored in Google Cloud KMS.
 
 <a name="nested_disk_encryption_key"></a>The `disk_encryption_key` block supports:
