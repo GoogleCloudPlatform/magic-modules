@@ -1521,12 +1521,12 @@ resource "google_compute_instance_group_manager" "igm-basic" {
 <% unless version == "ga" -%>
   stateful_internal_ip {
     interface_name = "nic0"
-    delete_rule = "NEVER"
+    delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
   }
 
   stateful_external_ip {
     interface_name = "nic0"
-    delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
+    delete_rule = "NEVER"
   }
 <% end -%>
 }
