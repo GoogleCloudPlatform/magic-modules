@@ -82,7 +82,6 @@ objects:
         description: |
           URL of the region where the regional address resides.
           This field is not applicable to global addresses.
-        required: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'address'
