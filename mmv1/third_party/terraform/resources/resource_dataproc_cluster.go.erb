@@ -1740,7 +1740,6 @@ func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.G
 		conf.ConfidentialInstanceConfig = &dataproc.ConfidentialInstanceConfig{}
 		if v, ok := cfgCic["enable_confidential_compute"]; ok {
 			conf.ConfidentialInstanceConfig.EnableConfidentialCompute = v.(bool)
-			}
 		}
 	}
 	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.reservation_affinity"); ok {
