@@ -41,10 +41,6 @@ objects:
     create_url: projects/{{project}}/locations/{{region}}/appConnectors?app_connector_id={{name}}
     update_verb: :PATCH
     update_mask: true
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      parent_resource_attribute: name
-      method_name_separator: ':'
-      fetch_iam_policy_verb: :GET
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -128,10 +124,6 @@ objects:
     create_url: projects/{{project}}/locations/{{region}}/appGateways?app_gateway_id={{name}}
     # This resources is not updatable
     input: true
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      parent_resource_attribute: name
-      method_name_separator: ':'
-      fetch_iam_policy_verb: :GET
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -236,10 +228,6 @@ objects:
     create_url: projects/{{project}}/locations/{{region}}/appConnections?app_connection_id={{name}}
     update_verb: :PATCH
     update_mask: true
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      parent_resource_attribute: name
-      method_name_separator: ':'
-      fetch_iam_policy_verb: :GET
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
