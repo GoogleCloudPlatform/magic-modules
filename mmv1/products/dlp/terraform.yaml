@@ -48,6 +48,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.timestampValue: !ruby/object:Overrides::Terraform::PropertyOverride
           validation: !ruby/object:Provider::Terraform::Validation
             function: 'validateRFC3339Date'
+      deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.timeValue.hours: !ruby/object:Overrides::Terraform::PropertyOverride
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validation.IntBetween(0, 24)' # "An API may choose to allow the value "24:00:00" for scenarios like business closing time."
+      deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.timeValue.minutes: !ruby/object:Overrides::Terraform::PropertyOverride
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validation.IntBetween(0, 59)'
+      deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.timeValue.seconds: !ruby/object:Overrides::Terraform::PropertyOverride
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validation.IntBetween(0, 60)' # "An API may allow the value 60 if it allows leap-seconds."
+      deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.timeValue.nanos: !ruby/object:Overrides::Terraform::PropertyOverride
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validation.IntBetween(0, 999999999)'
+      deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.dateValue.year: !ruby/object:Overrides::Terraform::PropertyOverride
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validation.IntBetween(1, 9999)'
+      deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.dateValue.month: !ruby/object:Overrides::Terraform::PropertyOverride
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validation.IntBetween(0, 12)'
+      deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.dateValue.day: !ruby/object:Overrides::Terraform::PropertyOverride
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validation.IntBetween(0, 31)'
+      deidentifyConfig.recordTransformations.fieldTransformations.primitiveTransformation.replaceConfig.newValue.timestampValue: !ruby/object:Overrides::Terraform::PropertyOverride
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validateRFC3339Date'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dlp_deidentify_template_basic"
