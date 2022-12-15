@@ -604,6 +604,36 @@ func resourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
+									<% unless version == "ga" -%>
+									"triggerer": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: `Configuration for resources used by Airflow triggerers.`,
+										MaxItems:    1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `CPU request and limit for a single Airflow triggerer replica.`,
+												},
+												"memory_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Memory (GB) request and limit for a single Airflow triggerer replica.`,
+												},
+												"count": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													ValidateFunc: validation.IntAtLeast(0),
+													Description:  `The number of triggerers.`,
+												},
+											},
+										},
+									},
+									<% end -%>
 									"web_server": {
 										Type:        schema.TypeList,
 										Optional:    true,
@@ -1244,10 +1274,16 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 
 	  transformed := make(map[string]interface{})
     transformedScheduler := make(map[string]interface{})
+		<% unless version == "ga" -%>
+    transformedTriggerer := make(map[string]interface{})
+		<% end -%>
     transformedWebServer := make(map[string]interface{})
     transformedWorker := make(map[string]interface{})
 
     wlCfgScheduler := workloadsConfig.Scheduler
+		<% unless version == "ga" -%>
+    wlCfgTriggerer := workloadsConfig.Triggerer
+		<% end -%>
     wlCfgWebServer := workloadsConfig.WebServer
     wlCfgWorker := workloadsConfig.Worker
 
@@ -1259,6 +1295,16 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
       transformedScheduler["storage_gb"] = wlCfgScheduler.StorageGb
       transformedScheduler["count"] = wlCfgScheduler.Count
     }
+
+		<% unless version == "ga" -%>
+		if wlCfgTriggerer == nil {
+			transformedTriggerer = nil
+		} else {
+			transformedTriggerer["cpu"] = wlCfgTriggerer.Cpu
+			transformedTriggerer["memory_gb"] = wlCfgTriggerer.MemoryGb
+			transformedTriggerer["count"] = wlCfgTriggerer.Count
+		}
+		<% end -%>
 
     if wlCfgWebServer == nil {
       transformedWebServer = nil
@@ -1279,6 +1325,11 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
     }
 
     transformed["scheduler"] = []interface{}{transformedScheduler}
+		<% unless version == "ga" -%>
+		if transformedTriggerer != nil {
+			transformed["triggerer"] = []interface{}{transformedTriggerer}
+		}
+		<% end -%>
     transformed["web_server"] = []interface{}{transformedWebServer}
     transformed["worker"] = []interface{}{transformedWorker}
 
@@ -1619,6 +1670,19 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 			transformed.Scheduler = transformedScheduler
 		}
 	}
+
+	<% unless version == "ga" -%>
+	if v, ok := original["triggerer"]; ok {
+		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+			transformedTriggerer := &composer.TriggererResource{}
+			originalTriggererRaw := v.([]interface{})[0].(map[string]interface{})
+			transformedTriggerer.Count = int64(originalTriggererRaw["count"].(int))
+			transformedTriggerer.Cpu = originalTriggererRaw["cpu"].(float64)
+			transformedTriggerer.MemoryGb = originalTriggererRaw["memory_gb"].(float64)
+			transformed.Triggerer = transformedTriggerer
+		}
+	}
+	<% end -%>
 
 	if v, ok := original["web_server"]; ok {
 		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
