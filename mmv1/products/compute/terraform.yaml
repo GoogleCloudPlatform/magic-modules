@@ -411,7 +411,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       iap.oauth2ClientSecretSha256: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
+        name: 'generated_id'
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2676,6 +2676,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       enableDynamicPortAllocation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       rules: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: computeRouterNatRulesHash
@@ -3116,6 +3117,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
+      privateIpGoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       privateIpv6GoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
