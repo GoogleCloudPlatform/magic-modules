@@ -1014,6 +1014,7 @@ objects:
                               required: true
                               description: |
                                 Replace each input value with a given value.
+                                The `new_value` block must only contain one argument. For example when replacing the contents of a string-type field, only `string_value` should be set.
                               properties:
                                 - !ruby/object:Api::Type::Integer
                                   name: 'integerValue'
@@ -1406,7 +1407,10 @@ objects:
                                           - :EXISTS
                                       - !ruby/object:Api::Type::NestedObject
                                         name: value
-                                        description: Value to compare against. [Mandatory, except for EXISTS tests.]
+                                        description: |
+                                          Value to compare against.
+                                          The `value` block must only contain one argument. For example when a condition is evaluated against a string-type field, only `string_value` should be set.
+                                          This argument is mandatory, except for conditions using the `EXISTS` operator.
                                         properties:
                                           - !ruby/object:Api::Type::String
                                             name: integerValue
@@ -1479,6 +1483,7 @@ objects:
                               required: true
                               description: |
                                 Replace each input value with a given value.
+                                The `new_value` block must only contain one argument. For example when replacing the contents of a string-type field, only `string_value` should be set.
                               properties:
                                 - !ruby/object:Api::Type::String
                                   name: integerValue
@@ -1542,8 +1547,8 @@ objects:
                           description: |
                             Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
                           properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
-                          # The fields below allow POST requests to include the "redactConfig" transformation in the payload
-                          # The trade-off is that POST requests specifying another transformation type will include will include "redactConfig" : null in the payload
+                          # The fields below are necessary to include the "redactConfig" transformation in the payload
+                          # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                           send_empty_value: true
                           allow_empty_object: true
                         - !ruby/object:Api::Type::NestedObject
@@ -1562,10 +1567,10 @@ objects:
                               description: |
                                 Number of characters to mask. If not set, all matching chars will be masked. Skipped characters do not count towards this tally.
                                 If numberToMask is negative, this denotes inverse masking. Cloud DLP masks all but a number of characters. For example, suppose you have the following values:
-                                - maskingCharacter is *
-                                - numberToMask is -4
-                                - reverseOrder is false
-                                - CharsToIgnore includes -
+                                - `masking_character` is *
+                                - `number_to_mask` is -4
+                                - `reverse_order` is false
+                                - `characters_to_ignore` includes -
                                 - Input string is 1234-5678-9012-3456
                                 
                                 The resulting de-identified string is ****-****-****-3456. Cloud DLP masks all but the last four characters. If reverseOrder is true, all but the first four characters are masked as 1234-****-****-****.
