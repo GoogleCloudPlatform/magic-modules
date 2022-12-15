@@ -623,7 +623,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
       }
       field_transformations {
         fields {
-          name = "details.pii.date_of_birth"
+          name = "unconditionally-crypto-replace-ffx-fpe-field"
         }
         primitive_transformation {
           crypto_replace_ffx_fpe_config {
@@ -633,7 +633,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             crypto_key {
               transient {
-                name = "beepf"
+                name = "beep" # Copy-pasting from existing test that uses this field
               }
             }
             surrogate_info_type {
