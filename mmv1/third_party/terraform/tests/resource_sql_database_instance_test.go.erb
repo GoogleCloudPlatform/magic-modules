@@ -1201,7 +1201,7 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketName, uploadInterval, retentionInterval, false /*omitBucketField*/),
+				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketName, uploadInterval, retentionInterval),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -1210,7 +1210,7 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketNameUpdate, uploadIntervalUpdate, retentionIntervalUpdate, false /*omitBucketField*/),
+				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketNameUpdate, uploadIntervalUpdate, retentionIntervalUpdate),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -1218,9 +1218,24 @@ func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
 			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_SqlServerAuditOptionalBucket(t *testing.T) {
+	t.Parallel()
+	databaseName := "tf-test-" + randString(t, 10)
+	rootPassword := randString(t, 15)
+	uploadInterval := "900s"
+	retentionInterval := "86400s"
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
 			{
-			  // No bucket field in sql_server_audit_config.
-				Config: testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketName, uploadInterval, retentionInterval, true /*omitBucketField*/),
+				Config: testGoogleSqlDatabaseInstance_SqlServerAuditOptionalBucket(databaseName, rootPassword, uploadInterval, retentionInterval),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -1465,13 +1480,7 @@ resource "google_sql_database_instance" "instance" {
 }`, databaseName, endDate, startDate, time)
 }
 
-func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketName, uploadInterval, retentionInterval string, omitBucketField bool) string {
-	auditConfig := fmt.Sprintf(`retention_interval = "%s"
-                upload_interval = "%s"
-               `, retentionInterval, uploadInterval)
-	if !omitBucketField {
-		auditConfig += fmt.Sprintf(`bucket = "gs://%s"`, bucketName)
-	}
+func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(networkName, addressName, databaseName, rootPassword, bucketName, uploadInterval, retentionInterval string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "gs-bucket" {
   name                      	= "%s"
@@ -1511,11 +1520,32 @@ resource "google_sql_database_instance" "instance" {
       private_network    = data.google_compute_network.servicenet.self_link
     }
     sql_server_audit_config {
-      %s
+      bucket = "gs://%s"
+      retention_interval = "%s"
+      upload_interval = "%s"
     }
   }
 }
-`, bucketName, networkName, addressName, databaseName, rootPassword, auditConfig)
+`, bucketName, networkName, addressName, databaseName, rootPassword, bucketName, retentionInterval, uploadInterval)
+}
+
+func testGoogleSqlDatabaseInstance_SqlServerAuditOptionalBucket(databaseName, rootPassword, uploadInterval, retentionInterval string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-central1"
+  database_version = "SQLSERVER_2017_STANDARD"
+  root_password    = "%s"
+  deletion_protection = false
+  settings {
+    tier = "db-custom-1-3840"
+    sql_server_audit_config {
+      retention_interval = "%s"
+      upload_interval = "%s"
+    }
+  }
+}
+`, databaseName, rootPassword, retentionInterval, uploadInterval)
 }
 
 func testGoogleSqlDatabaseInstance_Timezone(networkName, addressName, databaseName, rootPassword, timezone string) string {
