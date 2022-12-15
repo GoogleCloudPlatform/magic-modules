@@ -453,6 +453,15 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             conditions {
               conditions {
                 field {
+                  name = "details.pii.country_code"
+                }
+                operator = "EQUAL_TO"
+                value {
+                  string_value = "US"
+                }
+              }
+              conditions {
+                field {
                   name = "details.pii.date_of_birth"
                 }
                 operator = "GREATER_THAN_OR_EQUALS"
@@ -519,7 +528,8 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         condition {
           expressions {
             conditions {
-              # update to add second condition
+              # update to remove condition checking the details.pii.country_code field
+              # update to add a new condition
               conditions {
                 field {
                   name = "details.pii.gender"
@@ -555,14 +565,9 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
-      field_transformations {
-        fields {
-          name = "always-redacted-field"
-        }
-        primitive_transformation {
-          redact_config {}
-        }
-      }
+
+      # update to remove field_transformations block using redact_config
+
       field_transformations {
         fields {
           name = "unconditionally-char-masked-field"
