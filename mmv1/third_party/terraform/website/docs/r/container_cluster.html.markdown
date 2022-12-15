@@ -255,9 +255,6 @@ region are guaranteed to support the same version.
     manages the default node pool, which isn't recommended to be used with
     Terraform. Structure is [documented below](#nested_node_config).
 
-* `network_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
-   [Adding Pod IP address ranges](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-pod-cidr)) to the node pool. Structure is [documented below](#nested_network_config)
-
 * `node_pool` - (Optional) List of node pools associated with this cluster.
     See [google_container_node_pool](container_node_pool.html) for schema.
     **Warning:** node pools defined inside a cluster can't be changed (or added/removed) after
@@ -358,6 +355,9 @@ subnetwork in which the cluster's instances are launched.
 * `dns_config` - (Optional)
   Configuration for [Using Cloud DNS for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/cloud-dns). Structure is [documented below](#nested_dns_config).
 
+* `gateway_api_config` - (Optional)
+  Configuration for [GKE Gateway API controller](https://cloud.google.com/kubernetes-engine/docs/concepts/gateway-api). Structure is [documented below](#nested_gateway_api_config).
+
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -406,14 +406,15 @@ subnetwork in which the cluster's instances are launched.
 * `gce_persistent_disk_csi_driver_config` - (Optional).
     Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enabled.
 
+*  `gke_backup_agent_config` -  (Optional).
+    The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
+
 * `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
 
 *  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
-*  `gke_backup_agent_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
-    The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -530,6 +531,32 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 This block also contains several computed attributes, documented below.
 
+* `upgrade_settings` - (Optional) Specifies the upgrade settings for NAP created node pools. Structure is [documented below](#nested_upgrade_settings).
+
+<a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
+
+* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN or SURGE. The default is value is SURGE.
+
+* `max_surge` - (Optional) The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
+
+* `max_unavailable` - (Optional) The maximum number of nodes that can be simultaneously unavailable during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
+
+* `blue_green_settings` - (Optional) Settings for blue-green upgrade strategy. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_blue_green_settings).
+
+<a name="nested_blue_green_settings"></a>The `blue_green_settings` block supports:
+
+* `node_pool_soak_duration` - (Optional) Time needed after draining entire blue pool. After this period, blue pool will be cleaned up. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+
+* `standard_rollout_policy`: (Optional) Standard policy for the blue-green upgrade. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_standard_rollout_policy).
+
+<a name="nested_standard_rollout_policy"></a>The `standard_rollout_policy` block supports:
+
+* `batch_percentage`: (Optional) Percentage of the bool pool nodes to drain in a batch. The range of this field should be (0.0, 1.0). Only one of the batch_percentage or batch_node_count can be specified.
+
+* `batch_node_count` - (Optional) Number of blue nodes to drain in a batch. Only one of the batch_percentage or batch_node_count can be specified.
+
+* `batch_soak_duration` - (Optional) Soak time after each batch gets drained. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".`.
+
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
 * `security_group` - (Required) The name of the RBAC security group for use with Google security groups in Kubernetes RBAC. Group name must be in format `gke-security-groups@yourdomain.com`.
@@ -543,7 +570,7 @@ This block also contains several computed attributes, documented below.
 
 *  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, and `SCHEDULER`. In beta provider, `WORKLOADS` is supported on top of those 4 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
 
-*  `managed_prometheus` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
+*  `managed_prometheus` - (Optional) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
@@ -681,6 +708,9 @@ This block also contains several computed attributes, documented below.
 * `cidr_blocks` - (Optional) External networks that can access the
     Kubernetes cluster master through HTTPS.
 
+* `gcp_public_cidrs_access_enabled` - (Optional) Whether Kubernetes master is
+    accessible via Google Compute Engine Public IPs.
+
 The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `cidr_block` - (Optional) External network that can access Kubernetes master through HTTPS.
@@ -749,6 +779,9 @@ gvnic {
 
 * `labels` - (Optional) The Kubernetes labels (key/value pairs) to be applied to each node. The kubernetes.io/ and k8s.io/ prefixes are
     reserved by Kubernetes Core components and cannot be specified.
+
+* `resource_labels` - (Optional) The GCP labels (key/value pairs) to be applied to each node. Refer [here](https://cloud.google.com/kubernetes-engine/docs/how-to/creating-managing-labels)
+    for how these labels are applied to clusters, node pools and nodes.
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
@@ -837,14 +870,6 @@ linux_node_config {
 ```
 
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
-
-<a name="nested_network_config"></a>The `network_config` block supports:
-
-* `create_pod_range` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Whether to create a new range for pod IPs in this node pool. Defaults are provided for `pod_range` and `pod_ipv4_cidr_block` if they are not specified.
-
-* `pod_ipv4_cidr_block` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The IP address range for pod IPs in this node pool. Only applicable if createPodRange is true. Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14) to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) to pick a specific range to use.
-
-* `pod_range` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The ID of the secondary range for pod IPs. If `create_pod_range` is true, this ID is used for the new range. If `create_pod_range` is false, uses an existing secondary range with this ID.
 
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
@@ -975,6 +1000,8 @@ In addition, the `private_cluster_config` allows access to the following read-on
 
 * `private_endpoint` - The internal IP address of this cluster's master endpoint.
 
+* `private_endpoint_subnetwork` - Subnetwork in cluster's network where master's endpoint will be provisioned.
+
 * `public_endpoint` - The external IP address of this cluster's master endpoint.
 
 !> The Google provider is unable to validate certain configurations of
@@ -1067,7 +1094,7 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 
 * `mode` (Required) How to expose the node metadata to the workload running on the node.
     Accepted values are:
-    * UNSPECIFIED: Not Set
+    * MODE_UNSPECIFIED: Not Set
     * GCE_METADATA: Expose all Compute Engine metadata to pods.
     * GKE_METADATA: Run the GKE Metadata Server on this node. The GKE Metadata Server exposes a metadata API to workloads that is compatible with the V1 Compute Metadata APIs exposed by the Compute Engine and App Engine Metadata Servers. This feature can only be enabled if [workload identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) is enabled at the cluster level.
 
@@ -1107,6 +1134,10 @@ and all pods running on the nodes. Specified as a map from the key, such as
 * `cluster_dns_scope` - (Optional) The scope of access to cluster DNS records. `DNS_SCOPE_UNSPECIFIED` (default) or `CLUSTER_SCOPE` or `VPC_SCOPE`.
 
 * `cluster_dns_domain` - (Optional) The suffix used for all cluster service records.
+
+<a name="nested_gateway_api_config"></a>The `gateway_api_config` block supports:
+
+* `channel` - (Required) Which Gateway Api channel should be used. `CHANNEL_DISABLED` or `CHANNEL_STANDARD`.
 
 ## Attributes Reference
 
@@ -1181,4 +1212,4 @@ For example, the following fields will show diffs if set in config:
 
 ## User Project Overrides
 
-This resource supports [User Project Overrides](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#user_project_override).
+This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/googleapi"
@@ -519,6 +520,9 @@ func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
 	}
+	if res["email"] == nil {
+		return "", fmt.Errorf("error retrieving email from userinfo. email was nil in the response.")
+	}
 	return res["email"].(string), nil
 }
 
@@ -569,4 +573,20 @@ func checkGoogleIamPolicy(value string) error {
 		return fmt.Errorf("found an empty description field (should be omitted) in google_iam_policy data source: %s", value)
 	}
 	return nil
+}
+
+// Retries an operation while the canonical error code is FAILED_PRECONDTION
+// which indicates there is an incompatible operation already running on the
+// cluster. This error can be safely retried until the incompatible operation
+// completes, and the newly requested operation can begin.
+func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f func() error) error {
+	return resource.Retry(timeout, func() *resource.RetryError {
+		if err := lockedCall(lockKey, f); err != nil {
+			if isFailedPreconditionError(err) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
 }

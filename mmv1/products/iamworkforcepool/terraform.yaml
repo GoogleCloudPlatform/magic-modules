@@ -42,6 +42,53 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       workforcePoolId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateWorkforcePoolId'
+  WorkforcePoolProvider: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    import_format: ["locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_provider_saml_basic"
+        min_version: beta
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+          provider_id: "example-prvdr"
+        test_env_vars:
+          org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_provider_saml_full"
+        min_version: beta
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+          provider_id: "example-prvdr"
+        test_env_vars:
+          org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_provider_oidc_basic"
+        min_version: beta
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+          provider_id: "example-prvdr"
+        test_env_vars:
+          org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_provider_oidc_full"
+        min_version: beta
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+          provider_id: "example-prvdr"
+        test_env_vars:
+          org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/iam_workforce_pool_provider.go.erb
+      decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
+    properties:
+      providerId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateWorkforcePoolProviderId'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
