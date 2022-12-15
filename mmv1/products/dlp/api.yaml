@@ -1716,7 +1716,7 @@ objects:
                           description: |
                             Buckets values based on fixed size ranges. The Bucketing transformation can provide all of this functionality, but requires more configuration. This message is provided as a convenience to the user for simple bucketing strategies.
 
-                            The transformed value will be a hyphenated string of {lowerBound}-{upperBound}. For example, if lowerBound = 10 and upperBound = 20, all values that are within this bucket will be replaced with "10-20".
+                            The transformed value will be a hyphenated string of {lower_bound}-{upper_bound}. For example, if lower_bound = 10 and upper_bound = 20, all values that are within this bucket will be replaced with "10-20".
 
                             This can be used on data of type: double, long.
 
@@ -1728,7 +1728,7 @@ objects:
                               name: lowerBound
                               description: |
                                 Lower bound value of buckets.
-                                All values less than lowerBound are grouped together into a single bucket; for example if lowerBound = 10, then all values less than 10 are replaced with the value "-10".
+                                All values less than lower_bound are grouped together into a single bucket; for example if lower_bound = 10, then all values less than 10 are replaced with the value "-10".
                               properties:
                                 - !ruby/object:Api::Type::String
                                   name: integerValue
@@ -1792,7 +1792,7 @@ objects:
                               name: upperBound
                               description: |
                                 Upper bound value of buckets.
-                                All values greater than upperBound are grouped together into a single bucket; for example if upperBound = 89, then all values greater than 89 are replaced with the value "89+".
+                                All values greater than upper_bound are grouped together into a single bucket; for example if upper_bound = 89, then all values greater than 89 are replaced with the value "89+".
                               required: true
                               properties:
                                 - !ruby/object:Api::Type::String
@@ -1856,7 +1856,7 @@ objects:
                               name: bucketSize
                               description: |
                                 Size of each bucket (except for minimum and maximum buckets).
-                                So if lowerBound = 10, upperBound = 89, and bucketSize = 10, then the following buckets would be used: -10, 10-20, 20-30, 30-40, 40-50, 50-60, 60-70, 70-80, 80-89, 89+.
+                                So if lower_bound = 10, upper_bound = 89, and bucketSize = 10, then the following buckets would be used: -10, 10-20, 20-30, 30-40, 40-50, 50-60, 60-70, 70-80, 80-89, 89+.
                                 Precision up to 2 decimals works.
                               required: true
                         - !ruby/object:Api::Type::NestedObject
@@ -2061,8 +2061,8 @@ objects:
                           name: replaceWithInfoTypeConfig
                           description: Replace each matching finding with the name of the infoType.
                           properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#replacewithinfotypeconfig
-                          # The fields below allow POST requests to include the "redactConfig" transformation in the payload
-                          # The trade-off is that POST requests specifying another transformation type will include will include "redactConfig" : null in the payload
+                          # The fields below are necessary to include the "redactConfig" transformation in the payload
+                          # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
                           send_empty_value: true
                           allow_empty_object: true
                         - !ruby/object:Api::Type::NestedObject
