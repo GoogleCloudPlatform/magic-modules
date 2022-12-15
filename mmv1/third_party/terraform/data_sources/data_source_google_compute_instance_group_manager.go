@@ -49,5 +49,12 @@ func dataSourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta inte
 		return errors.New("Must provide either `self_link` or `zone/name`")
 	}
 
-	return resourceComputeInstanceGroupManagerRead(d, meta)
+	rsRead := resourceComputeInstanceGroupManagerRead(d, meta)
+	if rsRead != nil {
+		return rsRead
+	} else if rsRead["id"] == "" {
+		return errors.New("Resource not found, the `id` cannot equal \"\"")
+	} else {
+		return errors.New("Resource not found")
+	}
 }
