@@ -63,8 +63,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           app_connection_name: "my-app-connection"
       - !ruby/object:Provider::Terraform::Examples
         name: "beyondcorp_app_connection_full"
-        # skip the test until gateway delete issue is resolved
-        skip_test: true
         primary_resource_id: "app_connection"
         primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_connection%s\", context[\"random_suffix\"])"
         vars:

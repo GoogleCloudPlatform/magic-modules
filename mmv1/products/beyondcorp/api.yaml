@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Beyondcorp
-display_name: Google BeyondCorp
+display_name: BeyondCorp
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
