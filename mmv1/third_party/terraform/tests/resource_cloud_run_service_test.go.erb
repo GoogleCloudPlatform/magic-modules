@@ -333,6 +333,24 @@ resource "google_cloud_run_service" "default" {
             }
           }
         }
+        env {
+          name = "SECRET_ENV_VAR1"
+          value_from {
+            secret_key_ref {
+              name = %s
+              key = "1"
+            }
+          }
+        }
+        env {
+          name = "SECRET_ENV_VAR2"
+          value_from {
+            secret_key_ref {
+              name = %s
+              key = "1"
+            }
+          }
+        }
       }
     }
   }
@@ -357,7 +375,7 @@ resource "google_cloud_run_service" "default" {
 
   depends_on = [google_secret_manager_secret_version.secret1-version-data, google_secret_manager_secret_version.secret2-version-data]
 }
-`, secretName1, secretName2, name, secretRef, project)
+`, secretName1, secretName2, name, secretRef, secretRef, secretRef, project)
 }
 
 <% unless version == 'ga' -%>
