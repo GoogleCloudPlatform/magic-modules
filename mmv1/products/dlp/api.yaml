@@ -1003,6 +1003,7 @@ objects:
                       required: true
                       description: |
                         Primitive transformation to apply to the infoType.
+                        The `primitive_transformation` block must only contain one argument, corresponding to the type of transformation.
                       properties:
                         - !ruby/object:Api::Type::NestedObject
                           name: 'replaceConfig'
@@ -1472,7 +1473,9 @@ objects:
                     - !ruby/object:Api::Type::NestedObject
                       name: primitiveTransformation
                       required: true
-                      description: Apply the transformation to the entire field.
+                      description: |
+                        Apply the transformation to the entire field.
+                        The `primitive_transformation` block must only contain one argument, corresponding to the type of transformation.
                       properties:
                         - !ruby/object:Api::Type::NestedObject
                           name: replaceConfig
