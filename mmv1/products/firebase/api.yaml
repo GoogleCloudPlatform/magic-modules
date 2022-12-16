@@ -54,7 +54,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects'
     properties:
       - !ruby/object:Api::Type::String
         name: projectNumber
@@ -89,7 +89,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.defaultLocation/finalize'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.defaultLocation/finalize'
     properties:
       - !ruby/object:Api::Type::String
         name: locationId
@@ -112,7 +112,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.webApps'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps'
     async: !ruby/object:Api::OpAsync
       actions: ["create", "delete"]
       operation: !ruby/object:Api::OpAsync::Operation
@@ -170,7 +170,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/docs/android/setup'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.androidApps'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.androidApps'
     async: !ruby/object:Api::OpAsync
       actions: ["create", "delete"]
       operation: !ruby/object:Api::OpAsync::Operation
@@ -238,7 +238,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/docs/ios/setup'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.iosApps'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.iosApps'
     async: !ruby/object:Api::OpAsync
       actions: ["create", "delete"]
       operation: !ruby/object:Api::OpAsync::Operation
