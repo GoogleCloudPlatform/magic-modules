@@ -100,6 +100,36 @@ func TestAccDataSourceSqlDatabaseInstanceList_regionFilter(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceSqlDatabaseInstanceList_tierFilter(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceSqlDatabaseInstanceList_tierFilter(context),
+				Check: resource.ComposeTestCheckFunc(
+					checkListDataSourceStateMatchesResourceStateWithIgnoresForAppliedFilter(
+						"data.google_sql_database_instance_list.qa",
+						"google_sql_database_instance.main",
+						"google_sql_database_instance.main2",
+						map[string]struct{}{
+							"deletion_protection": {},
+							"id":                  {},
+						},
+					),
+				),
+			},
+		},
+	})
+}
+
 func testAccDataSourceSqlDatabaseInstanceList_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_sql_database_instance" "main" {
@@ -200,7 +230,7 @@ resource "google_sql_database_instance" "main" {
 resource "google_sql_database_instance" "main2" {
 	name             = "tf-test-instance-2-%{random_suffix}"
 	database_version = "MYSQL_8_0"
-	region           = "us-central2"
+	region           = "us-east1"
   
 	settings {
 	  # Second-generation instance tiers are based on the machine
@@ -213,7 +243,49 @@ resource "google_sql_database_instance" "main2" {
 
 
 data "google_sql_database_instance_list" "qa" {
-	region = "us-central2"
+	region = "us-east1"
+	depends_on = [
+		google_sql_database_instance.main2,
+		google_sql_database_instance.main
+	]
+}
+`, context)
+}
+
+func testAccDataSourceSqlDatabaseInstanceList_tierFilter(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_sql_database_instance" "main" {
+  name             = "tf-test-instance-%{random_suffix}"
+  database_version = "POSTGRES_14"
+  region           = "us-central1"
+
+  settings {
+    # Second-generation instance tiers are based on the machine
+    # type. See argument reference below.
+    tier = "db-f1-micro"
+  }
+
+  deletion_protection = false
+}
+
+resource "google_sql_database_instance" "main2" {
+	name             = "tf-test-instance-2-%{random_suffix}"
+	database_version = "MYSQL_8_0"
+	region           = "us-central1"
+  
+	settings {
+	  # Second-generation instance tiers are based on the machine
+	  # type. See argument reference below.
+	  tier = "db-custom-2-13312"
+	}
+  
+	deletion_protection = false
+  }
+
+
+data "google_sql_database_instance_list" "qa" {
+	region = "us-central1"
+	tier = "db-custom-2-13312"
 	depends_on = [
 		google_sql_database_instance.main2,
 		google_sql_database_instance.main
