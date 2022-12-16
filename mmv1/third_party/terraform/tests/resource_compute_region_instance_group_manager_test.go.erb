@@ -374,7 +374,7 @@ func TestAccRegionInstanceGroupManager_stateful(t *testing.T) {
 
 	template := fmt.Sprintf("tf-test-rigm-%s", randString(t, 10))
 	igm := fmt.Sprintf("tf-test-rigm-%s", randString(t, 10))
-  network := fmt.Sprintf("tf-test-igm-%s", randString(t, 10))
+ 	network := fmt.Sprintf("tf-test-igm-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
