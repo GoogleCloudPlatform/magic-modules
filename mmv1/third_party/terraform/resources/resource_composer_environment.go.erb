@@ -66,6 +66,19 @@ var (
 		"config.0.master_authorized_networks_config",
 	}
 
+	workloadsConfigKeys = []string{
+		"config.0.workloads_config.0.scheduler",
+		"config.0.workloads_config.0.triggerer",
+		"config.0.workloads_config.0.web_server",
+		"config.0.workloads_config.0.worker",
+	}
+
+	triggererConfigKeys = []string{
+		"config.0.workloads_config.0.triggerer.0.cpu",
+		"config.0.workloads_config.0.triggerer.0.memory_gb",
+		"config.0.workloads_config.0.triggerer.0.count",
+	}
+
 	composerPrivateEnvironmentConfig = []string{
 		"config.0.private_environment_config.0.enable_private_endpoint",
 		"config.0.private_environment_config.0.master_ipv4_cidr_block",
@@ -568,6 +581,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"scheduler": {
 										Type:        schema.TypeList,
 										Optional:    true,
+										AtLeastOneOf: workloadsConfigKeys,
 										ForceNew:    false,
 										Description: `Configuration for resources used by Airflow schedulers.`,
 										MaxItems:     1,
@@ -608,6 +622,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"triggerer": {
 										Type:        schema.TypeList,
 										Optional:    true,
+										AtLeastOneOf: workloadsConfigKeys,
 										Description: `Configuration for resources used by Airflow triggerers.`,
 										MaxItems:    1,
 										Elem: &schema.Resource{
@@ -615,18 +630,21 @@ func resourceComposerEnvironment() *schema.Resource {
 												"cpu": {
 													Type:         schema.TypeFloat,
 													Optional:     true,
+													AtLeastOneOf: triggererConfigKeys,
 													ValidateFunc: validation.FloatAtLeast(0),
 													Description:  `CPU request and limit for a single Airflow triggerer replica.`,
 												},
 												"memory_gb": {
 													Type:         schema.TypeFloat,
 													Optional:     true,
+													AtLeastOneOf: triggererConfigKeys,
 													ValidateFunc: validation.FloatAtLeast(0),
 													Description:  `Memory (GB) request and limit for a single Airflow triggerer replica.`,
 												},
 												"count": {
 													Type:         schema.TypeInt,
 													Optional:     true,
+													AtLeastOneOf: triggererConfigKeys,
 													ValidateFunc: validation.IntAtLeast(0),
 													Description:  `The number of triggerers.`,
 												},
@@ -637,6 +655,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"web_server": {
 										Type:        schema.TypeList,
 										Optional:    true,
+										AtLeastOneOf: workloadsConfigKeys,
 										ForceNew:    false,
 										Description: `Configuration for resources used by Airflow web server.`,
 										MaxItems:     1,
@@ -669,6 +688,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"worker": {
 										Type:        schema.TypeList,
 										Optional:    true,
+										AtLeastOneOf: workloadsConfigKeys,
 										ForceNew:    false,
 										Description: `Configuration for resources used by Airflow workers.`,
 										MaxItems:     1,

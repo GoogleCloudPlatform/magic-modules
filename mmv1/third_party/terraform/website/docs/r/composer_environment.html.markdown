@@ -883,6 +883,11 @@ The `workloads_config` block supports:
   (Optional)
   Configuration for resources used by Airflow schedulers.
 
+* `triggerer` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
+  Configuration for resources used by Airflow triggerer.
+
 * `web_server` -
   (Optional)
   Configuration for resources used by Airflow web server.
@@ -890,10 +895,6 @@ The `workloads_config` block supports:
 * `worker` -
   (Optional)
   Configuration for resources used by Airflow workers.
-
-* `triggerer` -
-  (Optional)
-  Configuration for resources used by Airflow triggerer.
 
 The `scheduler` block supports:
 
@@ -912,6 +913,20 @@ The `scheduler` block supports:
 * `count` -
   (Optional)
   The number of schedulers.
+
+The `triggerer` block supports:
+
+* `cpu` -
+  (Optional)
+  The number of CPUs for a single Airflow triggerer.
+
+* `memory_gb` -
+  (Optional)
+  The amount of memory (GB) for a single Airflow triggerer.
+
+* `count` -
+  (Optional)
+  The number of Airflow triggerers.
 
 The `web_server` block supports:
 
@@ -951,20 +966,6 @@ The `worker` block supports:
   The maximum number of Airflow workers that the environment can run. The number of workers in the
   environment does not go above this number, even if a higher number of workers is required to
   handle the load.
-
-The `triggerer` block supports:
-
-* `cpu` -
-  (Optional)
-  The number of CPUs for a single Airflow triggerer.
-
-* `memory_gb` -
-  (Optional)
-  The amount of memory (GB) for a single Airflow triggerer.
-
-* `count` -
-  (Optional)
-  The number of Airflow triggerers.
 
 ## Attributes Reference
 
