@@ -18,6 +18,8 @@ Four different resources help you manage your IAM policy for a project. Each of 
 
 ~> **Note:** `google_project_iam_binding` resources **can be** used in conjunction with `google_project_iam_member` resources **only if** they do not grant privilege to the same role.
 
+~> **Note:** It is recommended to use `google_project_iam_member` resource instead of `google_project_iam_binding` resource. `google_project_iam_binding` updates the IAM policy to grant a role **only** to a list of members i.e. existing members for that particular role are **replaced** with the list of members defined in `google_project_iam_binding`.
+
 ~> **Note:** The underlying API method `projects.setIamPolicy` has a lot of constraints which are documented [here](https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy). In addition to these constraints, 
    IAM Conditions cannot be used with Basic Roles such as Owner. Violating these constraints will result in the API returning 400 error code so please review these if you encounter errors with this resource.
 
@@ -152,6 +154,8 @@ resource "google_project_iam_audit_config" "project" {
 ## Argument Reference
 
 The following arguments are supported:
+
+~> **Note:** For `member/members` argument, `google_project_iam_binding` expects `members` field while `google_project_iam_member` expects `member` field.
 
 * `member/members` - (Required except for google\_project\_iam\_audit\_config) Identities that will be granted the privilege in `role`.
   Each entry can have one of the following values:
