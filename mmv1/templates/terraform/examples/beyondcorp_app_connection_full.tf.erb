@@ -4,10 +4,10 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_beyondcorp_app_gateway" "app_gateway" {
-	name = "tf-test-my-app-gateway%{random_suffix}"
+  name = "tf-test-my-app-gateway%{random_suffix}"
   region = "us-east1"
-	type = "TCP_PROXY"
-	host_type = "GCP_REGIONAL_MIG"
+  type = "TCP_PROXY"
+  host_type = "GCP_REGIONAL_MIG"
 }
 
 resource "google_beyondcorp_app_connector" "app_connector" {
