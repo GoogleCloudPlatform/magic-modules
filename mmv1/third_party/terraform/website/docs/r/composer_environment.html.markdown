@@ -891,6 +891,10 @@ The `workloads_config` block supports:
   (Optional)
   Configuration for resources used by Airflow workers.
 
+* `triggerer` -
+  (Optional)
+  Configuration for resources used by Airflow triggerer.
+
 The `scheduler` block supports:
 
 * `cpu` -
@@ -947,6 +951,20 @@ The `worker` block supports:
   The maximum number of Airflow workers that the environment can run. The number of workers in the
   environment does not go above this number, even if a higher number of workers is required to
   handle the load.
+
+The `triggerer` block supports:
+
+* `cpu` -
+  (Optional)
+  The number of CPUs for a single Airflow triggerer.
+
+* `memory_gb` -
+  (Optional)
+  The amount of memory (GB) for a single Airflow triggerer.
+
+* `count` -
+  (Optional)
+  The number of Airflow triggerers.
 
 ## Attributes Reference
 
