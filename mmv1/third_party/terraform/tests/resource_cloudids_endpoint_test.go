@@ -29,6 +29,50 @@ func TestAccCloudIdsEndpoint_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				ResourceName:      "google_compute_global_address.service_range",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_service_networking_connection.private_service_connection",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testCloudIds_updateThreatExceptions(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_ids_endpoint.endpoint", "threat_exceptions.#", "2"),
+					resource.TestCheckResourceAttr("google_cloud_ids_endpoint.endpoint", "threat_exceptions.0", "92006"),
+					resource.TestCheckResourceAttr("google_cloud_ids_endpoint.endpoint", "threat_exceptions.1", "83227"),
+				),
+			},
+			{
+				ResourceName:      "google_cloud_ids_endpoint.endpoint",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_compute_global_address.service_range",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_service_networking_connection.private_service_connection",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testCloudIds_clearThreatExceptions(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_ids_endpoint.endpoint", "threat_exceptions.#", "0"),
+				),
+			},
+			{
+				ResourceName:      "google_cloud_ids_endpoint.endpoint",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -39,7 +83,7 @@ resource "google_compute_network" "default" {
 	name = "tf-test-my-network%{random_suffix}"
 }
 resource "google_compute_global_address" "service_range" {
-	name          = "address"
+	name          = "address-%{random_suffix}"
 	purpose       = "VPC_PEERING"
 	address_type  = "INTERNAL"
 	prefix_length = 16
@@ -52,11 +96,68 @@ resource "google_service_networking_connection" "private_service_connection" {
 }
   
 resource "google_cloud_ids_endpoint" "endpoint" {
-	name     = "cloud-ids-test-%{random_suffix}"
-	location = "us-central1-f"
-	network  = google_compute_network.default.id
-	severity = "INFORMATIONAL"
-	depends_on = [google_service_networking_connection.private_service_connection]
+	name        = "cloud-ids-test-%{random_suffix}"
+	location    = "us-central1-f"
+	network     = google_compute_network.default.id
+	severity    = "INFORMATIONAL"
+	depends_on  = [google_service_networking_connection.private_service_connection]
+}
+`, context)
+}
+
+func testCloudIds_updateThreatExceptions(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_network" "default" {
+	name = "tf-test-my-network%{random_suffix}"
+}
+resource "google_compute_global_address" "service_range" {
+	name          = "address-%{random_suffix}"
+	purpose       = "VPC_PEERING"
+	address_type  = "INTERNAL"
+	prefix_length = 16
+	network       = google_compute_network.default.id
+}
+resource "google_service_networking_connection" "private_service_connection" {
+	network                 = google_compute_network.default.id
+	service                 = "servicenetworking.googleapis.com"
+	reserved_peering_ranges = [google_compute_global_address.service_range.name]
+}
+  
+resource "google_cloud_ids_endpoint" "endpoint" {
+	name              = "cloud-ids-test-%{random_suffix}"
+	location          = "us-central1-f"
+	network           = google_compute_network.default.id
+	severity          = "INFORMATIONAL"
+	threat_exceptions = ["92006", "83227"]
+	depends_on        = [google_service_networking_connection.private_service_connection]
+}
+`, context)
+}
+
+func testCloudIds_clearThreatExceptions(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_network" "default" {
+	name = "tf-test-my-network%{random_suffix}"
+}
+resource "google_compute_global_address" "service_range" {
+	name          = "address-%{random_suffix}"
+	purpose       = "VPC_PEERING"
+	address_type  = "INTERNAL"
+	prefix_length = 16
+	network       = google_compute_network.default.id
+}
+resource "google_service_networking_connection" "private_service_connection" {
+	network                 = google_compute_network.default.id
+	service                 = "servicenetworking.googleapis.com"
+	reserved_peering_ranges = [google_compute_global_address.service_range.name]
+}
+  
+resource "google_cloud_ids_endpoint" "endpoint" {
+	name              = "cloud-ids-test-%{random_suffix}"
+	location          = "us-central1-f"
+	network           = google_compute_network.default.id
+	severity          = "INFORMATIONAL"
+	depends_on        = [google_service_networking_connection.private_service_connection]
 }
 `, context)
 }
