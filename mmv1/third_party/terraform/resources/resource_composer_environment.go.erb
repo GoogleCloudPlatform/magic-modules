@@ -75,14 +75,6 @@ var (
 		"config.0.workloads_config.0.worker",
 	}
 
-	<% unless version == "ga" -%>
-	triggererConfigKeys = []string{
-		"config.0.workloads_config.0.triggerer.0.cpu",
-		"config.0.workloads_config.0.triggerer.0.memory_gb",
-		"config.0.workloads_config.0.triggerer.0.count",
-	}
-	<% end -%>
-
 	composerPrivateEnvironmentConfig = []string{
 		"config.0.private_environment_config.0.enable_private_endpoint",
 		"config.0.private_environment_config.0.master_ipv4_cidr_block",
@@ -634,21 +626,18 @@ func resourceComposerEnvironment() *schema.Resource {
 												"cpu": {
 													Type:         schema.TypeFloat,
 													Required:     true,
-													AtLeastOneOf: triggererConfigKeys,
 													ValidateFunc: validation.FloatAtLeast(0),
 													Description:  `CPU request and limit for a single Airflow triggerer replica.`,
 												},
 												"memory_gb": {
 													Type:         schema.TypeFloat,
 													Required:     true,
-													AtLeastOneOf: triggererConfigKeys,
 													ValidateFunc: validation.FloatAtLeast(0),
 													Description:  `Memory (GB) request and limit for a single Airflow triggerer replica.`,
 												},
 												"count": {
 													Type:         schema.TypeInt,
 													Required:     true,
-													AtLeastOneOf: triggererConfigKeys,
 													ValidateFunc: validation.IntAtLeast(0),
 													Description:  `The number of triggerers.`,
 												},
