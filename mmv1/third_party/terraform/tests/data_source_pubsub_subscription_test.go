@@ -57,8 +57,8 @@ resource "google_pubsub_topic" "foo" {
 }
 
 resource "google_pubsub_subscription" "foo" {
-	name     = "tf-test-pubsub-subscription-%{random_suffix}"
-	topic    = google_pubsub_topic.foo.name
+  name     = "tf-test-pubsub-subscription-%{random_suffix}"
+  topic    = google_pubsub_topic.foo.name
 }
 
 data "google_pubsub_subscription" "foo" {
@@ -75,8 +75,8 @@ resource "google_pubsub_topic" "foo" {
 }
 
 resource "google_pubsub_subscription" "foo" {
-	name     = "tf-test-pubsub-subscription-%{random_suffix}"
-	topic    = google_pubsub_topic.foo.name
+  name     = "tf-test-pubsub-subscription-%{random_suffix}"
+  topic    = google_pubsub_topic.foo.name
 }
 
 data "google_pubsub_subscription" "foo" {
