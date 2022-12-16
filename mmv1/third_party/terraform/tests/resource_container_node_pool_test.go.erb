@@ -3,9 +3,7 @@ package google
 
 import (
 	"fmt"
-<% unless version.nil? || version == 'ga' -%>
 	"regexp"
-<% end -%>
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -392,7 +390,6 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 	t.Parallel()
 
@@ -484,7 +481,6 @@ func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 	t.Parallel()
@@ -2219,7 +2215,6 @@ resource "google_container_node_pool" "with_sandbox_config" {
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, period string, quota bool) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -2297,7 +2292,6 @@ resource "google_container_node_pool" "with_linux_node_config" {
 }
 `, cluster, np, maxBacklog, soMaxConn, tcpMem, tcpMem, twReuse)
 }
-<% end -%>
 
 
 func testAccContainerNodePool_withNetworkConfig(cluster, np, network string) string {
