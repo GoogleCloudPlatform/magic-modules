@@ -355,6 +355,9 @@ subnetwork in which the cluster's instances are launched.
 * `dns_config` - (Optional)
   Configuration for [Using Cloud DNS for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/cloud-dns). Structure is [documented below](#nested_dns_config).
 
+* `gateway_api_config` - (Optional)
+  Configuration for [GKE Gateway API controller](https://cloud.google.com/kubernetes-engine/docs/concepts/gateway-api). Structure is [documented below](#nested_gateway_api_config).
+
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -403,14 +406,15 @@ subnetwork in which the cluster's instances are launched.
 * `gce_persistent_disk_csi_driver_config` - (Optional).
     Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enabled.
 
+*  `gke_backup_agent_config` -  (Optional).
+    The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
+
 * `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
 
 *  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
-*  `gke_backup_agent_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
-    The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -526,6 +530,32 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 * `auto_repair` - (Optional) Specifies whether the node auto-repair is enabled for the node pool. If enabled, the nodes in this node pool will be monitored and, if they fail health checks too many times, an automatic repair action will be triggered.
 
 This block also contains several computed attributes, documented below.
+
+* `upgrade_settings` - (Optional) Specifies the upgrade settings for NAP created node pools. Structure is [documented below](#nested_upgrade_settings).
+
+<a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
+
+* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN or SURGE. The default is value is SURGE.
+
+* `max_surge` - (Optional) The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
+
+* `max_unavailable` - (Optional) The maximum number of nodes that can be simultaneously unavailable during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
+
+* `blue_green_settings` - (Optional) Settings for blue-green upgrade strategy. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_blue_green_settings).
+
+<a name="nested_blue_green_settings"></a>The `blue_green_settings` block supports:
+
+* `node_pool_soak_duration` - (Optional) Time needed after draining entire blue pool. After this period, blue pool will be cleaned up. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+
+* `standard_rollout_policy`: (Optional) Standard policy for the blue-green upgrade. To be specified when strategy is set to BLUE_GREEN. Structure is [documented below](#nested_standard_rollout_policy).
+
+<a name="nested_standard_rollout_policy"></a>The `standard_rollout_policy` block supports:
+
+* `batch_percentage`: (Optional) Percentage of the bool pool nodes to drain in a batch. The range of this field should be (0.0, 1.0). Only one of the batch_percentage or batch_node_count can be specified.
+
+* `batch_node_count` - (Optional) Number of blue nodes to drain in a batch. Only one of the batch_percentage or batch_node_count can be specified.
+
+* `batch_soak_duration` - (Optional) Soak time after each batch gets drained. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".`.
 
 <a name="nested_authenticator_groups_config"></a>The `authenticator_groups_config` block supports:
 
@@ -1104,6 +1134,10 @@ and all pods running on the nodes. Specified as a map from the key, such as
 * `cluster_dns_scope` - (Optional) The scope of access to cluster DNS records. `DNS_SCOPE_UNSPECIFIED` (default) or `CLUSTER_SCOPE` or `VPC_SCOPE`.
 
 * `cluster_dns_domain` - (Optional) The suffix used for all cluster service records.
+
+<a name="nested_gateway_api_config"></a>The `gateway_api_config` block supports:
+
+* `channel` - (Required) Which Gateway Api channel should be used. `CHANNEL_DISABLED` or `CHANNEL_STANDARD`.
 
 ## Attributes Reference
 
