@@ -327,8 +327,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       delete_minutes: 30
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_nat_address.go.erb
-  SharedFlow: !ruby/object:Overrides::Terraform::ResourceOverride
-    autogen_async: true
+  # SharedFlow: !ruby/object:Overrides::Terraform::ResourceOverride
+  #   autogen_async: true
     # import_format: ["{{org_id}}/sharedflows/{{name}}", "{{org_id}}/{{name}}"]
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
