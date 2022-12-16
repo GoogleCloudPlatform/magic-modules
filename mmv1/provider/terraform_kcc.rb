@@ -15,9 +15,7 @@ require 'provider/terraform'
 require 'provider/terraform/import'
 
 module Provider
-  # Magic Modules Provider for KCC ServiceMappings and other related templates.
-  # Instead of generating KCC directly, this provider generates a KCC-compatible
-  # library to be consumed by KCC.
+  # Magic Modules Provider for KCC ServiceMappings and TF samples.
   class TerraformKCC < Provider::Terraform
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
@@ -25,14 +23,13 @@ module Provider
       compile_product_files(output_folder)
     end
 
-    # Create a directory of samples per resource
-    # Filter out samples that have no test and don't necessarily run, use
-    # externally injected values (env vars), and that don't match the current
+    # Create a directory of sample per test case.
+    # Filter out samples that have no test and that don't match the current
     # product version.
     def generate_resource(pwd, data, _generate_code, _generate_docs)
       kind = data.product.name + data.name
       # skip_test examples and examples with test_env_vars should also be
-      # included. Whether and how to generate Config Connector examples will be
+      # included. Whether and how to convert them into KCC examples will be
       # handled separately.
       examples = data.object.examples
                      .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
@@ -81,14 +78,12 @@ module Provider
 
     def copy_common_files(output_folder, generate_code, generate_docs) end
 
-    # A strict mapping from K8S name -> Terraform resource "name" doesn't make
-    # sense for some resources but we can approximate this well enough for most
-    # of them. This is often the `name` field, but it could be named something
-    # else.
-    # If {{name}} is part of a resource id, it should be the last import format.
-    # Otherwise, {{value}} or values/{{value}} are also valid. If the final id
-    # has multiple terms, we can reject it (by returning nil) as we can't create
-    # a 1:1 mapping from K8S resource name : Terraform field.
+    # Generate the metadata mapping name based on the last import format. It's
+    # usually the field name in the placeholder in the last section of the last
+    # import format.
+    # E.g. "{{name}}" -> "name";
+    # "projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}" ->
+    # "bucket_id".
     def guess_metadata_mapping_name(object)
       # Split the last import format by '/' and take the last part. Then use
       # the regex to verify if it is a value field in the format of {{value}}.
@@ -99,7 +94,6 @@ module Provider
       last_import_part.first.gsub('{{', '').gsub('}}', '') if last_import_part.length == 1
     end
 
-    # TODO: Incrementally cover all the server generated ID cases.
     def is_server_generated_name(name, object)
       has_computed_name_configured = object.custom_code.post_create == 'templates/terraform/post_create/set_computed_name.erb' if object.custom_code.post_create
       camel_case_name = name.camelize(:lower)
@@ -164,27 +158,5 @@ module Provider
       return hierarchical_reference
     end
 
-    def format_id_template(id_template, object)
-      # transform from buckets/{{bucket}} to {{bucket}}
-      id_template_parts = id_template.scan(/{{[[:word:]]+}}/)
-      id_template_parts -= ['{{project}}', '{{region}}']
-      id_template_formatted = id_template_parts.join('/')
-
-      # transform refs from {{bucket}} to {{bucketRef.name}} form
-      prop_names = id_template.scan(/{{[[:word:]]+}}/).map { |p| p.gsub('{{', '').gsub('}}', '') }
-      # probably won't catch overridden names
-      object.all_properties
-            .reject { |p| p.name == 'zone' } # exclude special fields
-            .select { |p| p.is_a?(Api::Type::ResourceRef) } # select resource refs
-            .select { |p| prop_names.include?(p.name.camelize(:lower)) } # canonical name
-            .each do |prop|
-        id_template_formatted = id_template_formatted
-                                .gsub(
-                                  "{{#{prop.name.camelize(:lower)}}}",
-                                  "{{#{prop.name}Ref.name}}"
-                                )
-      end
-      id_template_formatted
-    end
   end
 end
