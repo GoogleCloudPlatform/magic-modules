@@ -554,6 +554,9 @@ objects:
         url_param_only: true
         pattern: '{featurestore}}/entityTypes/{{name}}'
       - !ruby/object:Api::Type::String
+        name: 'description'
+        description: Optional. Description of the EntityType.
+      - !ruby/object:Api::Type::String
         name: 'etag'
         description: Used to perform consistent read-modify-write updates.
         output: true
