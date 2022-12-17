@@ -20,7 +20,7 @@ if d.Get("state").(string) == "ACTIVE" {
   }
 }
 if d.Get("type").(string) == "DEFAULT_DATABASE" {
-	log.Printf("[DEBUG] Default Firebase Database Instance %q cannot be deleted, left disabled", d.Id())
+	log.Printf("[WARN] Default Firebase Database Instance %q cannot be deleted, left disabled", d.Id())
 	return nil
 }
 // end of customized code
