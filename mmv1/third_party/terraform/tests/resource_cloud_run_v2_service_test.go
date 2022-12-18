@@ -52,7 +52,7 @@ resource "google_cloud_run_v2_service" "default" {
   }
   client = "client-1"
   client_version = "client-version-1"
-  
+
   template {
     labels = {
       label-1 = "value-1"
@@ -117,7 +117,7 @@ resource "google_cloud_run_v2_service" "default" {
   }
   client = "client-update"
   client_version = "client-version-update"
-  
+
   template {
     labels = {
       label-1 = "value-update"
@@ -249,6 +249,33 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceProbesUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
+			{
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
+				Config: estAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbeAndStartupProbe(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
 		},
 	})
 }
@@ -258,7 +285,7 @@ func testAccCloudRunV2Service_cloudrunv2ServiceWithEmptyTCPStartupProbeAndHTTPLi
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
-  
+
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -282,7 +309,7 @@ func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithTCPStartupProbeAndHTTPL
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
-  
+
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -325,7 +352,7 @@ func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithHTTPStartupProbeAndTCPL
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
-  
+
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -368,7 +395,7 @@ func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithEmptyHTTPStartupProbe(c
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
-  
+
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -386,7 +413,7 @@ func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithHTTPStartupProbe(contex
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
-  
+
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -406,4 +433,113 @@ resource "google_cloud_run_v2_service" "default" {
   }
 }
 `, context)
+}
+
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(name, project string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
+  }
+
+  template {
+    containers {
+      image = "gcr.io/cloudrun/hello"
+      liveness_probe {
+        grpc {}
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, name, project)
+}
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(name, project string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
+  }
+
+  template {
+    containers {
+      image = "gcr.io/cloudrun/hello"
+      liveness_probe {
+        grpc {
+          port = 8080
+          service = "health"
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, name, project)
+}
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbeAndStartupProbe(name, project string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
+  }
+
+  template {
+    containers {
+      image = "gcr.io/cloudrun/hello"
+      liveness_probe {
+        grpc {
+          port = 8080
+          service = "health"
+        }
+      }
+      startup_probe {
+        grpc {
+          port = 8080
+          service = "startup"
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, name, project)
 }
