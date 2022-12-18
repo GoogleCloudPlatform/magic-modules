@@ -351,6 +351,11 @@ objects:
                 description: |
                     Whether the mysqld should default to 'REQUIRE X509' for
                     users connecting over IP.
+              - !ruby/object:Api::Type::Boolean
+                name: 'enablePrivatePathForGoogleCloudServices'
+                description: |
+                  Whether Google Cloud services such as BigQuery are allowed to
+                  access data in this Cloud SQL instance over a private IP connection.
           - !ruby/object:Api::Type::String
             name: 'tier'
             description: |
