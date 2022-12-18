@@ -121,7 +121,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 ```
 
-## Example Usage - Serivce Mesh
+## Example Usage - Service Mesh
 
 ```hcl
 resource "google_container_cluster" "cluster" {
@@ -154,7 +154,6 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   membership = google_gke_hub_membership.membership.membership_id
   mesh {
     management = "MANAGEMENT_AUTOMATIC"
-    control_plane = "AUTOMATIC"
   }
   provider = google-beta
 }
@@ -347,10 +346,6 @@ The following arguments are supported:
 * `management` -
   (Optional)
   Whether to automatically manage Service Mesh. Can either be `MANAGEMENT_AUTOMATIC` or `MANAGEMENT_MANUAL`.
-
-* `control_plane` -
-  (Optional)
-  Whether to automatically manage Service Mesh Control Plane. Can either be `AUTOMATIC` or `MANUAL`.
 
 ## Attributes Reference
 

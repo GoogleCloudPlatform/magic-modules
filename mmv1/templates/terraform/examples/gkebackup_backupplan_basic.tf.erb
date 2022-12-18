@@ -1,0 +1,26 @@
+resource "google_container_cluster" "primary" {
+  provider = google-beta
+  name               = "<%= ctx[:vars]['cluster_name'] %>"
+  location           = "us-central1"
+  initial_node_count = 1
+  workload_identity_config {
+    workload_pool = "<%= ctx[:test_env_vars]['project'] %>.svc.id.goog"
+  }
+  addons_config {
+    gke_backup_agent_config {
+      enabled = true
+    }
+  }
+}
+
+resource "google_gke_backup_backup_plan" "basic" {
+  provider = google-beta
+  name = "<%= ctx[:vars]['name'] %>"
+  cluster = google_container_cluster.primary.id
+  location = "us-central1"
+  backup_config {
+    include_volume_data = true
+    include_secrets = true
+    all_namespaces = true
+  }
+}
