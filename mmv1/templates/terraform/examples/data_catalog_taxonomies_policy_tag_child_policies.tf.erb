@@ -21,7 +21,6 @@ resource "google_data_catalog_policy_tag" "child_policy2" {
 }
 
 resource "google_data_catalog_taxonomy" "my_taxonomy" {
-  region = "us"
   display_name =  "<%= ctx[:vars]['taxonomy_display_name'] %>"
   description = "A collection of policy tags"
   activated_policy_types = ["FINE_GRAINED_ACCESS_CONTROL"]
