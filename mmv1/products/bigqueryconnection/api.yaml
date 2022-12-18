@@ -194,7 +194,7 @@ objects:
             description: If parallelism should be used when reading from Cloud Spanner
           - !ruby/object:Api::Type::Boolean
             name: 'useServerlessAnalytics'
-            description: If the serverless analytics service should be used to read data from Cloud Spanner. useParallelism must be set when using serverless analytics.
+            description: If the serverless analytics service should be used to read data from Cloud Spanner. useParallelism must be set when using serverless analytics
       - !ruby/object:Api::Type::NestedObject
         name: cloudResource
         description: Container for connection properties for delegation of access to GCP resources.
