@@ -28,13 +28,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "alloydb_cluster_basic"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           alloydb_cluster_name: "alloydb-cluster"
       - !ruby/object:Provider::Terraform::Examples
         name: "alloydb_cluster_full"
-        min_version: beta
         primary_resource_id: "full"
         vars:
           alloydb_cluster_name: "alloydb-cluster-full"          
@@ -55,7 +53,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "alloydb_instance_basic"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           alloydb_cluster_name: "alloydb-cluster"
@@ -72,7 +69,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "alloydb_backup_basic"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           alloydb_backup_id: "alloydb-backup"
@@ -87,7 +83,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "alloydb_backup_full"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           alloydb_backup_id: "alloydb-backup"
