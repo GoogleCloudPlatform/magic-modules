@@ -889,6 +889,33 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *
 	})
 }
 
+func TestAccSqlDatabaseInstance_withPrivateNetwork_withEnablePrivatePathForGoogleCloudServices(t *testing.T) {
+	// Service Networking
+	skipIfVcr(t)
+	t.Parallel()
+
+	databaseName := "tf-test-" + randString(t, 10)
+	addressName := "tf-test-" + randString(t, 10)
+	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private-enable-private-path")
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withEnablePrivatePathForGoogleCloudServices(databaseName, networkName, addressName),
+			},
+			{
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 	// Sqladmin client
 	skipIfVcr(t)
