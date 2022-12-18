@@ -504,7 +504,6 @@ objects:
     name: Taxonomy
     base_url: projects/{{project}}/locations/{{region}}/taxonomies
     self_link: "{{name}}"
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -563,7 +562,6 @@ objects:
     name: PolicyTag
     base_url: "{{taxonomy}}/policyTags"
     self_link: "{{name}}"
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     description: |
