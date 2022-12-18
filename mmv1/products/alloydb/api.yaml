@@ -19,6 +19,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://alloydb.googleapis.com/v1beta/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://alloydb.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-identity
 apis_required:
@@ -33,12 +36,11 @@ objects:
     create_url: "projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}"
     update_verb: :PATCH
     update_mask: true
-    min_version: beta
     description: "A managed alloydb cluster."
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         "AlloyDB": "https://cloud.google.com/alloydb/docs/"
-      api: "https://cloud.google.com/alloydb/docs/reference/rest/v1beta/projects.locations.clusters/create"
+      api: "https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters/create"
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: "name"
@@ -242,12 +244,11 @@ objects:
     base_url: "{{cluster}}/instances?instanceId={{instance_id}}"
     update_verb: :PATCH
     update_mask: true
-    min_version: beta
     description: "A managed alloydb cluster instance."
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         "AlloyDB": "https://cloud.google.com/alloydb/docs/"
-      api: "https://cloud.google.com/alloydb/docs/reference/rest/v1beta/projects.locations.clusters.instances/create"
+      api: "https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.instances/create"
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: "name"
@@ -378,12 +379,11 @@ objects:
     create_url: "projects/{{project}}/locations/{{location}}/backups?backupId={{backup_id}}"
     update_verb: :PATCH
     update_mask: true
-    min_version: beta
     description: "An AlloyDB Backup."
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         "AlloyDB": "https://cloud.google.com/alloydb/docs/"
-      api: "https://cloud.google.com/alloydb/docs/reference/rest/v1beta/projects.locations.backups/create"
+      api: "https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups/create"
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: "name"
