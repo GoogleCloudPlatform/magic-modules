@@ -37,4 +37,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_compute_snapshot](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/cloudbuild_trigger#project) resource for details of the available attributes.
+See [google_cloudbuild_trigger](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/cloudbuild_trigger#project) resource for details of the available attributes.
