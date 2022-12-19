@@ -585,6 +585,39 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "unconditionally-crypto-hash-field"
+        }
+        primitive_transformation {
+          crypto_hash_config {
+            crypto_key {
+              transient {
+                name = "beep" # Copy-pasting from existing test that uses this field
+              }
+            }
+          }
+        }
+      }
+      field_transformations {
+        fields {
+          name = "unconditionally-date-shift-field"
+        }
+        primitive_transformation {
+          date_shift_config {
+            upper_bound_days = 30
+            lower_bound_days = -30
+            context {
+              name = "unconditionally-date-shift-field"
+            }
+            crypto_key {
+              transient {
+                name = "beep"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -766,6 +799,42 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         primitive_transformation {
           time_part_config {
             part_to_extract = "MONTH"
+          }
+        }
+      }
+      field_transformations {
+        fields {
+          name = "unconditionally-crypto-hash-field"
+        }
+        primitive_transformation {
+          crypto_hash_config {
+            crypto_key {
+              transient {
+                # update value
+                name = "beepy-beep-updated"
+              }
+            }
+          }
+        }
+      }
+      field_transformations {
+        fields {
+          name = "unconditionally-date-shift-field"
+        }
+        primitive_transformation {
+          date_shift_config {
+            # update values
+            upper_bound_days = 60
+            lower_bound_days = -60
+            context {
+              name = "unconditionally-date-shift-field"
+            }
+            crypto_key {
+              transient {
+                # update value
+                name = "beepy-beep-updated"
+              }
+            }
           }
         }
       }
