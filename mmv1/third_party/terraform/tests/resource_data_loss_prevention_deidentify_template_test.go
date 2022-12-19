@@ -638,6 +638,22 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "unconditionally-replace-dictionary-field"
+        }
+        primitive_transformation {
+          replace_dictionary_config {
+            word_list {
+              words = [
+                "foo",
+                "bar",
+                "baz",
+              ]
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -880,6 +896,25 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "unconditionally-replace-dictionary-field"
+        }
+        primitive_transformation {
+          replace_dictionary_config {
+            word_list {
+              words = [
+                # update list - deletion and addition
+                "foo",
+                "baz",
+                "fizz",
+                "buzz",
+              ]
+            }
+          }
+        }
+      }
+
     }
   }
 }
