@@ -680,7 +680,11 @@ func resourceDataprocCluster() *schema.Resource {
 											"cluster_config.0.preemptible_worker_config.0.disk_config",
 										},
 										ForceNew:     true,
+										<% if version == "ga" -%>
+										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE", "SPOT"}, false),
+										<% else -%>
 										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE"}, false),
+										<% end -%>
 										Default:      "PREEMPTIBLE",
 									},
 
