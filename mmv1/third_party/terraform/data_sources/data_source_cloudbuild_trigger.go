@@ -32,8 +32,10 @@ func dataSourceGoogleCloudBuildTriggerRead(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
+
 	id = strings.ReplaceAll(id, "/locations//", "/")
 	id = strings.ReplaceAll(id, "/locations/global/", "/")
+
 	d.SetId(id)
 	return resourceCloudBuildTriggerRead(d, meta)
 }
