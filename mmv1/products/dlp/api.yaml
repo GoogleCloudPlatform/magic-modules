@@ -1569,7 +1569,7 @@ objects:
                               name: 'numberToMask'
                               description: |
                                 Number of characters to mask. If not set, all matching chars will be masked. Skipped characters do not count towards this tally.
-                                If numberToMask is negative, this denotes inverse masking. Cloud DLP masks all but a number of characters. For example, suppose you have the following values:
+                                If number_to_mask is negative, this denotes inverse masking. Cloud DLP masks all but a number of characters. For example, suppose you have the following values:
                                 - `masking_character` is *
                                 - `number_to_mask` is -4
                                 - `reverse_order` is false
