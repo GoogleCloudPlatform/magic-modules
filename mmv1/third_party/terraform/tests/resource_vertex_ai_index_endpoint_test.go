@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccVertexAIIndexEndpoint_vertexAiIndexEndpointExample(t *testing.T) {
+func TestAccVertexAIIndexEndpoint_updated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
