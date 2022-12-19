@@ -68,6 +68,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           metastore_service_name: "metastore-srv"
           network_name: "my-network"
           subnet_name: "my-subnetwork"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_telemetry"
+        min_version: beta
+        skip_docs: true
+        primary_resource_id: "telemetry"
+        vars:
+          metastore_service_name: "telemetry"          
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
