@@ -8,7 +8,8 @@ import (
 
 func dataSourceresourceCloudBuildTrigger() *schema.Resource {
 	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudBuildTrigger().Schema)
-	addRequiredFieldsToSchema(dsSchema, "project", "trigger_id")
+	addRequiredFieldsToSchema(dsSchema, "trigger_id")
+	addOptionalFieldsToSchema(dsSchema, "project")
 	dsSchema["location"] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
@@ -30,6 +31,8 @@ func dataSourceGoogleCloudBuildTriggerRead(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
+	id = strings.ReplaceAll(id, "/locations//", "/")
+	id = strings.ReplaceAll(id, "/locations/global/", "/")
 	d.SetId(id)
 	return resourceCloudBuildTriggerRead(d, meta)
 }
