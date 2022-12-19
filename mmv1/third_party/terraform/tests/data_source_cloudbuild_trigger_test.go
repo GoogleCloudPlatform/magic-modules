@@ -97,4 +97,3 @@ data "google_cloudbuild_trigger" "foo" {
 }`, context)
 
 }
-
