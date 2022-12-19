@@ -1,0 +1,12 @@
+resource "google_storage_bucket" "default" {
+  provider                    = google-beta
+  name                        = "<%= ctx[:vars]['bucket_id'] %>"
+  location                    = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_firebase_storage_bucket" "default" {
+  provider  = google-beta
+  project   = "<%= ctx[:test_env_vars]['project_id'] %>"
+  bucket_id = google_storage_bucket.default.id
+}

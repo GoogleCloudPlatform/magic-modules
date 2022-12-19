@@ -190,6 +190,7 @@ objects:
         path: 'error'
         message: 'message'
     parameters:
+      # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
       - !ruby/object:Api::Type::String
         name: 'deletion_policy'
         description: |
@@ -257,6 +258,7 @@ objects:
         path: 'error'
         message: 'message'
     parameters:
+      # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
       - !ruby/object:Api::Type::String
         name: 'deletion_policy'
         description: |

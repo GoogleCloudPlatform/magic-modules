@@ -1,5 +1,8 @@
 ---
 title: "How To"
-weight: 10
-isSection: true
+weight: 20
 ---
+
+# How To
+
+{{< section >}}

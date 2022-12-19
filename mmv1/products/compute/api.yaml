@@ -1435,7 +1435,7 @@ objects:
            For internal load balancing, a URL to a HealthCheck resource must be specified instead.
       - !ruby/object:Api::Type::Integer
         name: 'id'
-        description: 'The unique identifier for the resource.'
+        description: 'The unique identifier for the resource. This identifier is defined by the server.'
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'iap'
@@ -3742,9 +3742,6 @@ objects:
           traffic that has destination IP address in these ranges. These ranges
           must be expressed in CIDR format. Only IPv4 is supported.
         item_type: Api::Type::String
-        conflicts:
-          - source_ranges
-          - source_tags
       - !ruby/object:Api::Type::Enum
         name: 'direction'
         description: |
@@ -3840,8 +3837,6 @@ objects:
           connection does not need to match both properties for the firewall to
           apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
           `source_tags` or `source_service_accounts` is required.
-        conflicts:
-          - destination_ranges
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3879,7 +3874,6 @@ objects:
         item_type: Api::Type::String
         conflicts:
           - source_service_accounts
-          - destination_ranges
           - target_service_accounts
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
@@ -4036,6 +4030,9 @@ objects:
           and internal TCP/UDP load balancers.
           EXTERNAL_MANAGED is used for regional external HTTP(S) load balancers.
           INTERNAL_MANAGED is used for internal HTTP(S) load balancers.
+
+          ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Note: This field must be set to ""
+          if the target is an URI of a service attachment.
         values:
           - :EXTERNAL
           - :EXTERNAL_MANAGED
@@ -6261,9 +6258,14 @@ objects:
           - !ruby/object:Api::Type::String
             # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
             name: 'kmsKeyName'
-            min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account being used for the encryption request for the
+              given KMS key. If absent, the Compute Engine default service
+              account is used.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: Labels to apply to this Image.
@@ -14566,8 +14568,19 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotEncryptionKey'
         description: |
-          The customer-supplied encryption key of the snapshot. Required if the
-          source snapshot is protected by a customer-supplied encryption key.
+          Encrypts the snapshot using a customer-supplied encryption key.
+
+          After you encrypt a snapshot using a customer-supplied key, you must
+          provide the same key if you use the snapshot later. For example, you
+          must provide the encryption key when you create a disk from the
+          encrypted snapshot in a future request.
+
+          Customer-supplied encryption keys do not protect access to metadata of
+          the snapshot.
+
+          If you do not provide an encryption key when creating the snapshot,
+          then the snapshot will be encrypted using an automatically generated
+          key and you do not need to provide a key to use the snapshot later.
         properties:
           - !ruby/object:Api::Type::String
             name: 'rawKey'
@@ -15799,6 +15812,9 @@ objects:
           If not specified IPV4_ONLY will be used.
       - !ruby/object:Api::Type::Enum
         name: 'ipv6AccessType'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        fingerprint_name: 'fingerprint'
         values:
           - :EXTERNAL
           - :INTERNAL
