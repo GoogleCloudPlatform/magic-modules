@@ -1729,6 +1729,7 @@ objects:
                               description: |
                                 Lower bound value of buckets.
                                 All values less than lower_bound are grouped together into a single bucket; for example if lower_bound = 10, then all values less than 10 are replaced with the value "-10".
+                                The `lower_bound` block must only contain one argument. See the `fixed_size_bucketing_config` block description for more information about choosing a data type.
                               properties:
                                 - !ruby/object:Api::Type::String
                                   name: integerValue
@@ -1793,6 +1794,7 @@ objects:
                               description: |
                                 Upper bound value of buckets.
                                 All values greater than upper_bound are grouped together into a single bucket; for example if upper_bound = 89, then all values greater than 89 are replaced with the value "89+".
+                                The `upper_bound` block must only contain one argument. See the `fixed_size_bucketing_config` block description for more information about choosing a data type.
                               required: true
                               properties:
                                 - !ruby/object:Api::Type::String
@@ -1861,7 +1863,11 @@ objects:
                               required: true
                         - !ruby/object:Api::Type::NestedObject
                           name: bucketingConfig
-                          description: Bucketing
+                          description: |
+                            Generalization function that buckets values based on ranges. The ranges and replacement values are dynamically provided by the user for custom behavior, such as 1-30 -> LOW 31-65 -> MEDIUM 66-100 -> HIGH
+                            This can be used on data of type: number, long, string, timestamp.
+                            If the provided value type differs from the type of data being transformed, we will first attempt converting the type of the data to be transformed to match the type of the bound before comparing.
+                            See https://cloud.google.com/dlp/docs/concepts-bucketing to learn more.
                           properties:
                             - !ruby/object:Api::Type::Array
                               name: buckets
