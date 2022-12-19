@@ -11,7 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
+---
+!ruby/object:Api::Product
 name: Firestore
 versions:
   - !ruby/object:Api::Product::Version
@@ -152,8 +153,7 @@ objects:
         output: true
         description: |
           A relative path to the collection this document exists within
-      - !ruby/object:Api::Type::String
-        # This is a string instead of a NestedObject because fields can be deeply nested
+      - !ruby/object:Api::Type::String # This is a string instead of a NestedObject because fields can be deeply nested
         name: fields
         required: true
         description: |
@@ -166,3 +166,75 @@ objects:
         name: 'updateTime'
         description: 'Last update timestamp in RFC3339 format.'
         output: true
+  - !ruby/object:Api::Resource
+    name: 'Database'
+    base_url: projects/{{project}}/databases/{{database}}
+    create_url: projects/{{project}}/databases/{{database}}/create
+    create_verb: :POST
+    self_link: '{{name}}'
+    description: Creates a database.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://firebase.google.com/docs/firestore/quickstart'
+      api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: parent
+        input: true
+        required: true
+        url_param_only: true
+        description: |
+          Required. A parent name of the form projects/{project_id}
+      - !ruby/object:Api::Type::String
+        name: 'databaseId'
+        default_value: '(default)'
+        input: true
+        url_param_only: true
+        description: |
+          Required. The ID to use for the database, which will become the final component of the database's resource name.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        output: true
+        description: |
+          The resource name of the Database. Format: projects/{project}/databases/{database}
+      - !ruby/object:Api::Type::String
+        name: locationId
+        output: true
+        description: |
+          The location of the database. Available databases are listed at 
+          https://cloud.google.com/firestore/docs/locations.
+      - !ruby/object:Api::Type::Enum
+        name: type
+        description: |
+          The type of the database. See https://cloud.google.com/datastore/docs/firestore-or-datastore for information about how to choose.
+        default_value: :FIRESTORE_NATIVE
+        values:
+          - :FIRESTORE_NATIVE
+          - :DATASTORE_MODE
+          - :DATABASE_TYPE_UNSPECIFIED
+      - !ruby/object:Api::Type::Enum
+        name: concurrencyMode
+        description: |
+          The concurrency control mode to use for this database.
+        default_value: :PESSIMISTIC
+        values:
+          - :CONCURRENCY_MODE_UNSPECIFIED
+          - :OPTIMISTIC
+          - :PESSIMISTIC
+          - :OPTIMISTIC_WITH_ENTITY_GROUPS
+      - !ruby/object:Api::Type::Enum
+        name: appEngineIntegrationMode
+        description: |
+          The App Engine integration mode to use for this database.
+        values:
+          - :APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED
+          - :ENABLED
+          - :DISABLED
+      - !ruby/object:Api::Type::String
+        name: keyPrefix
+        output: true
+        description: |
+          Output only. The keyPrefix for this database. 
+          This keyPrefix is used, in combination with the project id ("~") to construct the application id 
+          that is returned from the Cloud Datastore APIs in Google App Engine first generation runtimes.

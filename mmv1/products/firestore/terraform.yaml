@@ -79,6 +79,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringIsJSON'
+  Database: !ruby/object:Overrides::Terraform::ResourceOverride
+    # import_format: ["{{name}}"]
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        This resource creates a Firestore Database on a project that already has
+        Firestore enabled.
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firestore_database"
+        primary_resource_id: "(default)"
+        test_env_vars:
+          project_id: :FIRESTORE_PROJECT_NAME
+        vars:
+          database_id: "(default)"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

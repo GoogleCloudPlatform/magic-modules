@@ -1,0 +1,12 @@
+resource "google_firestore_document" "<%= ctx[:primary_resource_id] %>" {
+  parent      = "projects/<%= ctx[:test_env_vars]['project_id'] %>"
+  database_id = "<%= ctx[:vars]['database_id'] %>"
+}
+
+resource "google_firestore_document" "<%= ctx[:primary_resource_id] %>" {
+  parent      = "projects/<%= ctx[:test_env_vars]['project_id'] %>"
+  database_id = "<%= ctx[:vars]['database_id'] %>"
+  type        = "FIRESTORE_NATIVE"
+  concurrency_mode = "PESSIMISTIC"
+  app_engine_integration_mode = "DISABLED"
+}
