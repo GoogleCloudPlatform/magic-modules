@@ -51,10 +51,10 @@ else
     fi
 fi
 
-count_in_path "go" "   go not found. See https://golang.org/doc/install for information on installing it."
+count_in_path "go"
 if [ $found -eq 0 ]; then
     exitcode=1
-    warn "yel"
+    warn "yel" "   go not found. See https://golang.org/doc/install for information on installing it."
 else
     warn "grn" "   found!"
 fi
