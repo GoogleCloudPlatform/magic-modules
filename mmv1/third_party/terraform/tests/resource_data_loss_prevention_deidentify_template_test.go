@@ -618,6 +618,26 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "unconditionally-crypto-deterministic-field"
+        }
+        primitive_transformation {
+          crypto_deterministic_config {
+            crypto_key {
+              transient {
+                name = "beep"
+              }
+            }
+            surrogate_info_type {
+              name = "CREDIT_CARD_NUMBER"
+            }
+            context {
+              name = "unconditionally-crypto-deterministic-field"
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -834,6 +854,28 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
                 # update value
                 name = "beepy-beep-updated"
               }
+            }
+          }
+        }
+      }
+      field_transformations {
+        fields {
+          name = "unconditionally-crypto-deterministic-field"
+        }
+        primitive_transformation {
+          crypto_deterministic_config {
+            crypto_key {
+              transient {
+                # update value
+                name = "beepy-beep-updated"
+              }
+            }
+            surrogate_info_type {
+              # update info type
+              name = "CREDIT_CARD_TRACK_NUMBER"
+            }
+            context {
+              name = "unconditionally-crypto-deterministic-field"
             }
           }
         }
