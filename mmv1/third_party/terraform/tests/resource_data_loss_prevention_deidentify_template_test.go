@@ -575,6 +575,16 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "unconditionally-time-part-field"
+        }
+        primitive_transformation {
+          time_part_config {
+            part_to_extract = "YEAR"
+          }
+        }
+      }
     }
   }
 }
@@ -746,6 +756,16 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
                 string_value = "PM"
               }
             }
+          }
+        }
+      }
+      field_transformations {
+        fields {
+          name = "unconditionally-time-part-field"
+        }
+        primitive_transformation {
+          time_part_config {
+            part_to_extract = "MONTH"
           }
         }
       }
