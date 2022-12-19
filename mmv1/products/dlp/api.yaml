@@ -2064,14 +2064,6 @@ objects:
                                           - :SATURDAY
                                           - :SUNDAY
                         - !ruby/object:Api::Type::NestedObject
-                          name: replaceWithInfoTypeConfig
-                          description: Replace each matching finding with the name of the infoType.
-                          properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#replacewithinfotypeconfig
-                          # The fields below are necessary to include the "redactConfig" transformation in the payload
-                          # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
-                          send_empty_value: true
-                          allow_empty_object: true
-                        - !ruby/object:Api::Type::NestedObject
                           name: timePartConfig
                           description: For use with Date, Timestamp, and TimeOfDay, extract or preserve a portion of the value.
                           properties:
