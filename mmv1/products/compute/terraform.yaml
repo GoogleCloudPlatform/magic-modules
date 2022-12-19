@@ -411,7 +411,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       iap.oauth2ClientSecretSha256: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
+        name: 'generated_id'
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1371,8 +1371,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       guestOsFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         is_set: true
-      imageEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
+      imageEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      imageEncryptionKey.sha256: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      imageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.erb'
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: 'kmsKeySelfLink'
+        description: |
+          The self link of the encryption key that is stored in Google Cloud
+          KMS.
       licenses: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       rawDisk.sha1Checksum: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2676,6 +2685,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       enableDynamicPortAllocation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       rules: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: computeRouterNatRulesHash
@@ -3116,6 +3126,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
+      privateIpGoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       privateIpv6GoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
