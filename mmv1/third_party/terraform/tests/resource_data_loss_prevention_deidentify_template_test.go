@@ -528,6 +528,22 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "unconditionally-fixed-size-bucketing-field"
+        }
+        primitive_transformation {
+          fixed_size_bucketing_config {
+            lower_bound {
+              integer_value = 0
+            }
+            upper_bound {
+              integer_value = 100
+            } 
+            bucket_size = 10
+          }
+        }
+      }
     }
   }
 }
@@ -639,6 +655,23 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
             }
+          }
+        }
+      }
+      field_transformations {
+        fields {
+          name = "unconditionally-fixed-size-bucketing-field"
+        }
+        primitive_transformation {
+          # update values
+          fixed_size_bucketing_config {
+            lower_bound {
+              integer_value = 0
+            }
+            upper_bound {
+              integer_value = 200
+            } 
+            bucket_size = 20
           }
         }
       }
