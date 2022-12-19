@@ -544,6 +544,37 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+      field_transformations {
+        fields {
+          name = "unconditionally-bucketing-field"
+        }
+        primitive_transformation {
+          bucketing_config {
+            buckets {
+              min {
+                string_value = "00:00:00"
+              }
+              max {
+                string_value = "11:59:59"
+              }
+              replacement_value {
+                string_value = "AM"
+              }
+            }
+            buckets {
+              min {
+                string_value = "12:00:00"
+              }
+              max {
+                string_value = "23:59:59"
+              }
+              replacement_value {
+                string_value = "PM"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -672,6 +703,49 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
               integer_value = 200
             } 
             bucket_size = 20
+          }
+        }
+      }
+      field_transformations {
+        fields {
+          name = "unconditionally-bucketing-field"
+        }
+        primitive_transformation {
+          bucketing_config {
+            buckets {
+              min {
+                string_value = "00:00:00"
+              }
+              max {
+                string_value = "11:59:59"
+              }
+              replacement_value {
+                string_value = "AM"
+              }
+            }
+            # Add new bucket
+            buckets {
+              min {
+                string_value = "12:00:00"
+              }
+              max {
+                string_value = "13:59:59"
+              }
+              replacement_value {
+                string_value = "Lunchtime"
+              }
+            }
+            buckets {
+              min {
+                string_value = "14:00:00"
+              }
+              max {
+                string_value = "23:59:59"
+              }
+              replacement_value {
+                string_value = "PM"
+              }
+            }
           }
         }
       }
