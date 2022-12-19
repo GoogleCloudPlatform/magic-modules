@@ -201,6 +201,7 @@ func Provider() *schema.Provider {
 			"google_client_config":                             dataSourceGoogleClientConfig(),
 			"google_client_openid_userinfo":                    dataSourceGoogleClientOpenIDUserinfo(),
 			"google_cloudfunctions_function":                   dataSourceGoogleCloudFunctionsFunction(),
+			"google_cloudbuild_trigger":                        dataSourceresourceCloudBuildTrigger(),
 			"google_cloudfunctions2_function":                  dataSourceGoogleCloudFunctions2Function(),
 			<% unless version == 'ga' -%>
 			"google_cloud_asset_resources_search_all":          dataSourceGoogleCloudAssetResourcesSearchAll(),
