@@ -1,37 +1,5 @@
-# +-------------------------------------------------+-----------------------------------------------------+
-# |                                   magic-modules - build commands                                      |
-# +-------------------------------------------------+-----------------------------------------------------+
-# | make                                            | make build                                          |
-# |                                                 |                                                     |
-# |  runs make build                                |  builds the terraform provider with                 |
-# |                                                 |  both mmv1 and tpgtools                             |
-# +-------------------------------------------------+-----------------------------------------------------+
-# | make upgrade-dcl                                | make validate_environment:                          |
-# |                                                 |                                                     |
-# |   a command to upgrade the version of the dcl   |   a prestep to make build to ensure that the        |
-# |   used within the terraform provider and        |   build environment is suitable for a build. This   |
-# |   tpgtools.                                     |   command is fallible... see the                    |
-# |                                                 |   troubleshooting page(TODO) for more help          |
-# +-------------------------------------------------+-----------------------------------------------------+
-# |                                   magic modules - parameters                                          |
-# +-------------------------------------------------------------------------------------------------------+
-# | OUTPUT_PATH (required) - the location of the provider you are unioning generation into. Note          |
-# |   that magic-modules templates files and then unions these generated files with your local provider   |
-# |   thus its always recommended you ensure magic-modules and your local provider are up to date.        |
-# +-------------------------------------------------------------------------------------------------------+
-# | VERSION (required) - the version of the provider you are building into.                               |
-# |   valid values are 'ga' and 'beta'.                                                                   |
-# +-------------------------------------------------------------------------------------------------------+
-# | ENGINE - modifies make build to build either tpgtools or mmv1.                                        |
-# |   valid values are 'mmv1' or `tpgtools`. Note that running make build with ENGINE set to `tpgtools`   |
-# |   will build any prerequisit files from mmv1 required for tpgtools.                                   |
-# +-------------------------------------------------------------------------------------------------------+
-# | PRODUCT - specifies the product to build. Equivalent to the folder name within                        |
-# |   `/mmv1/products` or `/tpgtools/api`. Useful to scope the build to your changes.                     |
-# |   Note that mmv1 files in `mmv1/third_party/terraform` on run of make build are always built when     |
-# |   building through mmv1. So if you've only modified files here you can set the PRODUCT to one that    |
-# |   doesn't exist to skip the generation of all, non-handwritten, code.                                 |
-# +-------------------------------------------------------------------------------------------------------+
+# See https://googlecloudplatform.github.io/magic-modules/docs/getting-started/generate-providers/
+# for a guide on provider generation.
 
 default: build
 
