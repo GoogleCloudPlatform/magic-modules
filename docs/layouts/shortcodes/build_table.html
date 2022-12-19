@@ -1,0 +1,36 @@
+<table>
+  <thead>
+    <tr>
+      <th colspan="2">magic-modules - build commands</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>make<br><br> runs make build</td>
+      <td>make build<br><br> builds the terraform provider with<br> both mmv1 and tpgtools<br></td>
+    </tr>
+    <tr>
+      <td>make mmv1<br><br>  builds the terraform provider with the mmv1 <br>  engine relevant to all provider files within <br>  the mmv1 folder. Copies all generated files<br>  as a merge with the provider in OUTPUT_PATH.</td>
+      <td>make tpgtools<br><br>  builds the terraform provider with the tpgtools<br>  engine. Copies all generated files as <br>  a merge with the provider in OUTPUT_PATH. <br>  Note: some tpgtools files take dependency on <br>  mmv1 generation.</td>
+    </tr>
+    <tr>
+      <td>make validator<br><br>  builds terraform validator with the<br>  mmv1 engine</td>
+      <td>make serialize<br><br>  a tpgtools prestep to generate DCL* to HCL schema<br>  templates for resource creation.</td>
+    </tr>
+    <tr>
+      <td>make upgrade-dcl<br><br>  a command to upgrade the version of the dcl<br>  used within the terraform provider and<br>  tpgtools.</td>
+      <td>make validate_environment<br><br>  a prestep to make build to ensure that the <br>  build environment is suitable for a build. This<br>  command is fallible... see troubleshooting page<br>  for more help.</td>
+    </tr>
+    <tr>
+      <td colspan="2">magic-modules -&nbsp;&nbsp;build parameters parameters</td>
+    </tr>
+    <tr>
+      <td>OUTPUT_PATH (required) - the location of the provider you are unioning generation into. Note<br>  that magic-modules templates files and then unions these generated files with your local provider<br>  thus its always recommended you ensure magic-modules and your local provider are up to date.</td>
+      <td>VERSION (required) - the version of the provider you are building into.<br>&nbsp;&nbsp;valid values are 'ga' and 'beta'.</td>
+    </tr>
+    <tr>
+      <td>ENGINE - modifies make build to build either tpgtools or mmv1 <br>  valid values are 'mmv1' or `tpgtools`. <br>  Note that running make build with ENGINE set to `tpgtools` will build any prerequisite <br>  mmv1 files required for tpgtools.</td>
+      <td>PRODUCT - specifies the product to build. Equivalent to the folder name within <br>  `/mmv1/products` or `/tpgtools/api`. Useful to scope the build to your changes. <br>  Note that mmv1 files in `mmv1/third_party/terraform` on run of make build are <br>  always built when building through mmv1. <br>  So if you've only modified files here you can set the PRODUCT to one that <br>  doesn't exist to skip the generation of all, non-handwritten, code.</td>
+    </tr>
+  </tbody>
+  </table>

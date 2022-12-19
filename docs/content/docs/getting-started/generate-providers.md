@@ -3,6 +3,10 @@ title: Generate the providers
 weight: 20
 ---
 
+# Build command guide
+
+{{< build_table >}}
+
 # Generate the providers
 
 You can compile the Terraform provider you're working on by running the following

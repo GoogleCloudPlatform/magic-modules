@@ -2,6 +2,7 @@
 # Performs basic checks for tools required by Magic Modules.
 
 set -e
+exitcode=0
 
 if [ -t 1 ]; then
     red=$'\e[1;31m'
@@ -31,8 +32,10 @@ count_in_path() {
     found=$(which -a "${1}" | uniq | wc -l)
 }
 
+
 count_in_path "rbenv"
 if [ $found -eq 0 ]; then
+    exitcode=1
     warn "yel" "   rbenv not found. See https://github.com/rbenv/rbenv for information on installing it."
 else
     warn "grn" "   found!"
@@ -41,21 +44,24 @@ else
 
     count_in_path "bundler"
     if [ $found -eq 0 ]; then
+        exitcode=1
         warn "yel" "   bundler not found. Run 'gem install bundler' to install it it."
     else
         warn "grn" "   found!"
     fi
 fi
 
-count_in_path "go"
+count_in_path "go" "   go not found. See https://golang.org/doc/install for information on installing it."
 if [ $found -eq 0 ]; then
-    warn "yel" "   go not found. See https://golang.org/doc/install for information on installing it."
+    exitcode=1
+    warn "yel"
 else
     warn "grn" "   found!"
 fi
 
 count_in_path "goimports"
 if [ $found -eq 0 ]; then
+    exitcode=1
     warn "yel" "   goimports not found. Run 'go install golang.org/x/tools/cmd/goimports@latest' to install it."
 else
     warn "grn" "   found!"
@@ -63,6 +69,7 @@ fi
 
 count_in_path "git"
 if [ $found -eq 0 ]; then
+    exitcode=1
     warn "yel" "   git not found. See https://git-scm.com/book/en/v2/Getting-Started-Installing-Git"
     warn "yel" "   for information on installing it."
 else
@@ -72,7 +79,10 @@ fi
 
 count_in_path "make"
 if [ $found -eq 0 ]; then
+    exitcode=1
     warn "yel" "   make not found. See https://www.gnu.org/software/make/ for information on downloading it."
 else
     warn "grn" "   found!"
 fi
+
+exit $exitcode

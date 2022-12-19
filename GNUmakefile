@@ -126,8 +126,10 @@ upgrade-dcl:
 
 
 validate_environment:
-	@[ -x "$(shell command -v goimports)" ] || (echo "goimports is not installed.. please run go install golang.org/x/tools/cmd/goimports or go install golang.org/x/tools/cmd/goimports@latest" && exit 1);
-	@[ -d "${OUTPUT_PATH}" ] || (echo "Env variable OUTPUT_PATH should be set to a provider directory... directory '${OUTPUT_PATH}' does not exist" && exit 1);
+# only print doctor script to console if there was a depenecy failure detected.
+	@./scripts/doctor 2>&1 > /dev/null || ./scripts/doctor
+	@[ -d "${OUTPUT_PATH}" ] || (printf " \e[1;31mdirectory '${OUTPUT_PATH}' does not exist - ENV variable \033[0mOUTPUT_PATH\e[1;31m should be set to a provider directory... \033[0m \n" && exit 1);
+	@[ -d "${VERSION}" ] || (printf " \e[1;31mversion '${VERSION}' does not exist - ENV variable \033[0mVERSION\e[1;31m should be set to ga or beta \033[0m \n" && exit 1);
 
 
 .PHONY: mmv1 tpgtools
