@@ -1880,6 +1880,7 @@ objects:
                                     name: min
                                     description: |
                                       Lower bound of the range, inclusive. Type should be the same as max if used.
+                                      The `min` block must only contain one argument. See the `bucketing_config` block description for more information about choosing a data type.
                                     properties:
                                       - !ruby/object:Api::Type::String
                                         name: integerValue
@@ -1942,6 +1943,7 @@ objects:
                                     name: max
                                     description: |
                                       Upper bound of the range, exclusive; type must match min.
+                                      The `max` block must only contain one argument. See the `bucketing_config` block description for more information about choosing a data type.
                                     properties:
                                       - !ruby/object:Api::Type::String
                                         name: integerValue
@@ -2004,7 +2006,8 @@ objects:
                                     name: replacementValue
                                     required: true
                                     description: |
-                                      Replacement value for this bucket.                                  
+                                      Replacement value for this bucket.
+                                      The `replacement_value` block must only contain one argument.
                                     properties:
                                       - !ruby/object:Api::Type::String
                                         name: integerValue
