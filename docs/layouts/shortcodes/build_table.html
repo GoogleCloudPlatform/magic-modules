@@ -1,36 +1,42 @@
-<table>
+<style type="text/css">
+  .tg  {border-collapse:collapse;border-spacing:0;}
+  .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+    overflow:hidden;padding:10px 5px;word-break:normal;}
+  .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+    font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+  .tg .tg-c3ow{border-color:black;text-align:center;vertical-align:top}
+  .tg .tg-0pky{border-color:black;text-align:left;vertical-align:top}
+  .tg .tg-dgl5{border-color:black;background-color:#FFF;text-align:left;vertical-align:top}
+  </style>
+  <table class="tg">
   <thead>
     <tr>
-      <th colspan="2">magic-modules - build commands</th>
+      <th class="tg-c3ow" colspan="2"><span style="font-weight:bold">magic-modules - build commands</span></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>make<br><br> runs make build</td>
-      <td>make build<br><br> builds the terraform provider with<br> both mmv1 and tpgtools<br></td>
+      <td class="tg-0pky"><span style="font-weight:bold">make</span><br>runs make build</td>
+      <td class="tg-0pky"><span style="font-weight:bold">make build</span><br>  Builds the terraform provider with both mmv1 and tpgtools. Copies all generated files as a merge with the provider in OUTPUT_PATH.</td>
     </tr>
     <tr>
-      <td>make mmv1<br><br>  builds the terraform provider with the mmv1 <br>  engine relevant to all provider files within <br>  the mmv1 folder. Copies all generated files<br>  as a merge with the provider in OUTPUT_PATH.</td>
-      <td>make tpgtools<br><br>  builds the terraform provider with the tpgtools<br>  engine. Copies all generated files as <br>  a merge with the provider in OUTPUT_PATH. <br>  Note: some tpgtools files take dependency on <br>  mmv1 generation.</td>
+      <td class="tg-0pky"><span style="font-weight:bold">make upgrade-dcl</span><br> A command to upgrade the version of the dcl. Used within the terraform provider and tpgtools.</td>
+      <td class="tg-0pky"><span style="font-weight:bold">make validate_environment</span><br> A prestep to make build to ensure that the build environment is suitable for a build.</td>
     </tr>
     <tr>
-      <td>make validator<br><br>  builds terraform validator with the<br>  mmv1 engine</td>
-      <td>make serialize<br><br>  a tpgtools prestep to generate DCL* to HCL schema<br>  templates for resource creation.</td>
+      <td class="tg-c3ow" colspan="2"><span style="font-weight:bold">magic-modules - build parameters</span></td>
     </tr>
     <tr>
-      <td>make upgrade-dcl<br><br>  a command to upgrade the version of the dcl<br>  used within the terraform provider and<br>  tpgtools.</td>
-      <td>make validate_environment<br><br>  a prestep to make build to ensure that the <br>  build environment is suitable for a build. This<br>  command is fallible... see troubleshooting page<br>  for more help.</td>
+      <td class="tg-0pky" colspan="2"><span style="font-weight:bold">OUTPUT_PATH </span>(required) - the location of the provider you are unioning generation into. Note: magic-modules uses templates files and then unions the generated files with your local provider.. Thus its always recommended you ensure magic-modules and your local provider are up to date.</td>
     </tr>
     <tr>
-      <td colspan="2">magic-modules -&nbsp;&nbsp;build parameters parameters</td>
+      <td class="tg-dgl5" colspan="2"><span style="font-weight:bold">VERSION</span> (required) - the version of the provider you are building into. <br/> Valid values are 'ga' and 'beta'.</td>
     </tr>
     <tr>
-      <td>OUTPUT_PATH (required) - the location of the provider you are unioning generation into. Note<br>  that magic-modules templates files and then unions these generated files with your local provider<br>  thus its always recommended you ensure magic-modules and your local provider are up to date.</td>
-      <td>VERSION (required) - the version of the provider you are building into.<br>&nbsp;&nbsp;valid values are 'ga' and 'beta'.</td>
+      <td class="tg-0pky" colspan="2"><span style="font-weight:bold">ENGINE</span> - modifies make build to build either tpgtools or mmv1 valid values are <span style="color:#905;background-color:#DDD">'mmv1'</span> or <span style="color:#905;background-color:#DDD">`tpgtools`</span>. <br>  Note that running make build with ENGINE set to <span style="color:#905;background-color:#DDD">`tpgtools`</span> will build any prerequisite <br>  mmv1 files required for tpgtools.</td>
     </tr>
     <tr>
-      <td>ENGINE - modifies make build to build either tpgtools or mmv1 <br>  valid values are 'mmv1' or `tpgtools`. <br>  Note that running make build with ENGINE set to `tpgtools` will build any prerequisite <br>  mmv1 files required for tpgtools.</td>
-      <td>PRODUCT - specifies the product to build. Equivalent to the folder name within <br>  `/mmv1/products` or `/tpgtools/api`. Useful to scope the build to your changes. <br>  Note that mmv1 files in `mmv1/third_party/terraform` on run of make build are <br>  always built when building through mmv1. <br>  So if you've only modified files here you can set the PRODUCT to one that <br>  doesn't exist to skip the generation of all, non-handwritten, code.</td>
+      <td class="tg-dgl5" colspan="2"><span style="font-weight:bold;font-style:normal">PRODUCT</span> - specifies the product to build. Equivalent to the folder name within <span style="color:#905;background-color:#DDD">`/mmv1/products`</span> or <span style="color:#905;background-color:#DDD">`/tpgtools/api`</span>. Useful to scope the build to your changes. Note: mmv1 files in <span style="color:#905;background-color:#DDD">`mmv1/third_party/terraform`</span> on run of make build are always built when building through mmv1. So if you've only modified files in this directory you can set the PRODUCT to a non-existant one to skip the generation of non-handwritten, code.</td>
     </tr>
   </tbody>
   </table>

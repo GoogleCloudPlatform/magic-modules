@@ -1,13 +1,11 @@
 ---
-title: Generate the providers
+title: Generating the provider(s)
 weight: 20
 ---
 
-# Build command guide
+# Generating the provider(s)
 
-{{< build_table >}}
-
-# Generate the providers
+## Generate the providers
 
 You can compile the Terraform provider you're working on by running the following
 commands from the root directory of the repository. OUTPUT_PATH should be set to
@@ -35,6 +33,10 @@ to reduce the generation time.
 # Only generate common files, including all third_party code
 make terraform VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=foo
 ```
+
+## Build command guide
+
+{{< build_table >}}
 
 ## Cleaning up old files
 
