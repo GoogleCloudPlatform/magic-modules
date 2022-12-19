@@ -22,7 +22,15 @@ func TestAccDataSourceVertexAIIndex_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceVertexAIIndex_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_vertex_ai_index.foo", "google_vertex_ai_index.index"),
+					checkDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_vertex_ai_index.foo",
+						"google_vertex_ai_index.index",
+						// The projects.locations.indexes.get doesn't return the following fields
+						map[string]struct{}{
+							"metadata.0.contents_delta_uri":    {},
+							"metadata.0.is_complete_overwrite": {},
+						},
+					),
 				),
 			},
 		},
