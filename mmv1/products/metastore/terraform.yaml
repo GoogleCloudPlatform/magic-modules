@@ -75,6 +75,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       tier: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      telemetryConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true        
       hiveMetastoreConfig.configOverrides: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: "dataprocMetastoreServiceOverrideSuppress"

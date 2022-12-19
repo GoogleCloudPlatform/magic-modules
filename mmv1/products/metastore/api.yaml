@@ -313,7 +313,20 @@ objects:
                 name: 'enabled'
                 required: true
                 description: |
-                  Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.      
+                  Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'telemetryConfig'
+        description: |
+          The configuration specifying telemetry settings for the Dataproc Metastore service. If unspecified defaults to JSON.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'logFormat'
+            default_value: :JSON
+            description: |
+              The output format of the Dataproc Metastore service's logs.
+            values:
+              - :LEGACY
+              - :JSON              
   - !ruby/object:Api::Resource
     name: 'Federation'
     min_version: beta
