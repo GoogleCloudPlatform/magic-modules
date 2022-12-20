@@ -87,9 +87,7 @@ func DataprocClusterIdParseFunc(d *schema.ResourceData, config *Config) error {
 }
 
 func (u *DataprocClusterIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-<% if version == "ga" -%>
 	req := &dataproc.GetIamPolicyRequest{}
-<% end -%>
 
 	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
 	if err != nil {

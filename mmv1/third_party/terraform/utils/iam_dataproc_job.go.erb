@@ -87,9 +87,7 @@ func DataprocJobIdParseFunc(d *schema.ResourceData, config *Config) error {
 }
 
 func (u *DataprocJobIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-<% if version == "ga" -%>
 	req := &dataproc.GetIamPolicyRequest{}
-<% end -%>
 
 	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
 	if err != nil {
@@ -97,7 +95,7 @@ func (u *DataprocJobIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Po
 	}
 
 <%# GetIamPolicy signature changes between beta and GA clients %>
-	p, err := u.Config.NewDataprocClient(userAgent).Projects.Regions.Jobs.GetIamPolicy(u.GetResourceId()<% if version == "ga" -%>, req<% end -%>).Do()
+	p, err := u.Config.NewDataprocClient(userAgent).Projects.Regions.Jobs.GetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
