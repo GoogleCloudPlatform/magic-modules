@@ -1,8 +1,6 @@
 <% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
-
 import (
     "fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -294,4 +292,3 @@ resource "google_iam_workforce_pool" "my_pool" {
 }
 `, context)
 }
-<% end -%>
