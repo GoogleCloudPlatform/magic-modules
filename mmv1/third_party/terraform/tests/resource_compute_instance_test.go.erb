@@ -1810,7 +1810,8 @@ func TestAccComputeInstance_updateRunning_desiredStatusRunning_allowStoppingForU
 	})
 }
 
-const errorAllowStoppingMsg = "please set allow_stopping_for_update"
+const errorAllowStoppingMsgAPI = "please set allow_stopping_for_update"
+const errorAllowStoppingMsg = "allow_stopping_for_update is false hence updating machine_type isn't possible."
 
 func TestAccComputeInstance_updateRunning_desiredStatusNotSet_notAllowStoppingForUpdate(t *testing.T) {
 	t.Parallel()
