@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -118,4 +117,3 @@ resource "google_gke_backup_backup_plan" "backupplan" {
 }
 `, context)
 }
-<% end -%>
