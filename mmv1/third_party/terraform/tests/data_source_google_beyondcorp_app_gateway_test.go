@@ -103,9 +103,9 @@ resource "google_beyondcorp_app_gateway" "foo" {
 }
 
 data "google_beyondcorp_app_gateway" "foo" {
-  name     = google_beyondcorp_app_gateway.foo.name
-  project  = google_beyondcorp_app_gateway.foo.project
-  region   = google_beyondcorp_app_gateway.foo.region
+	name    = google_beyondcorp_app_gateway.foo.name
+	project = google_beyondcorp_app_gateway.foo.project
+	region  = google_beyondcorp_app_gateway.foo.region
 }
 `, context)
 }
@@ -113,14 +113,14 @@ data "google_beyondcorp_app_gateway" "foo" {
 func testAccDataSourceGoogleBeyondcorpAppGateway_optionalProject(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_beyondcorp_app_gateway" "foo" {
-	name = "tf-test-appgateway-%{random_suffix}"
-	type = "TCP_PROXY"
+	name      = "tf-test-appgateway-%{random_suffix}"
+	type      = "TCP_PROXY"
 	host_type = "GCP_REGIONAL_MIG"
 }
 
 data "google_beyondcorp_app_gateway" "foo" {
-	name     = google_beyondcorp_app_gateway.foo.name
-	region   = google_beyondcorp_app_gateway.foo.region
+	name   = google_beyondcorp_app_gateway.foo.name
+	region = google_beyondcorp_app_gateway.foo.region
 }
 `, context)
 }
@@ -128,14 +128,14 @@ data "google_beyondcorp_app_gateway" "foo" {
 func testAccDataSourceGoogleBeyondcorpAppGateway_optionalRegion(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_beyondcorp_app_gateway" "foo" {
-	name = "tf-test-appgateway-%{random_suffix}"
-	type = "TCP_PROXY"
+	name      = "tf-test-appgateway-%{random_suffix}"
+	type      = "TCP_PROXY"
 	host_type = "GCP_REGIONAL_MIG"
 }
 
 data "google_beyondcorp_app_gateway" "foo" {
-	name     = google_beyondcorp_app_gateway.foo.name
-	project  = google_beyondcorp_app_gateway.foo.project
+	name    = google_beyondcorp_app_gateway.foo.name
+	project = google_beyondcorp_app_gateway.foo.project
 }
 `, context)
 }
@@ -143,13 +143,13 @@ data "google_beyondcorp_app_gateway" "foo" {
 func testAccDataSourceGoogleBeyondcorpAppGateway_optionalProjectRegion(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_beyondcorp_app_gateway" "foo" {
-	name = "tf-test-appgateway-%{random_suffix}"
-	type = "TCP_PROXY"
+	name      = "tf-test-appgateway-%{random_suffix}"
+	type      = "TCP_PROXY"
 	host_type = "GCP_REGIONAL_MIG"
 }
 
 data "google_beyondcorp_app_gateway" "foo" {
-	name     = google_beyondcorp_app_gateway.foo.name
+	name = google_beyondcorp_app_gateway.foo.name
 }
 `, context)
 }

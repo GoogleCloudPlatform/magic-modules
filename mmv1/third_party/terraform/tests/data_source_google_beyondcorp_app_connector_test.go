@@ -102,18 +102,18 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_beyondcorp_app_connector" "foo" {
-  	name     = "tf-test-appconnector-%{random_suffix}"
+ 	name = "tf-test-appconnector-%{random_suffix}"
 	principal_info {
-	service_account {
-		email = google_service_account.service_account.email
-	}
+		service_account {
+			email = google_service_account.service_account.email
+		}
 	}
 }
 
 data "google_beyondcorp_app_connector" "foo" {
-  name     = google_beyondcorp_app_connector.foo.name
-  project  = google_beyondcorp_app_connector.foo.project
-  region   = google_beyondcorp_app_connector.foo.region
+	name    = google_beyondcorp_app_connector.foo.name
+	project = google_beyondcorp_app_connector.foo.project
+	region  = google_beyondcorp_app_connector.foo.region
 }
 `, context)
 }
@@ -126,17 +126,17 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_beyondcorp_app_connector" "foo" {
-		name     = "tf-test-appconnector-%{random_suffix}"
+	name = "tf-test-appconnector-%{random_suffix}"
 	principal_info {
-	service_account {
-		email = google_service_account.service_account.email
-	}
+		service_account {
+			email = google_service_account.service_account.email
+		}
 	}
 }
 
 data "google_beyondcorp_app_connector" "foo" {
-  name     = google_beyondcorp_app_connector.foo.name
-  region   = google_beyondcorp_app_connector.foo.region
+	name   = google_beyondcorp_app_connector.foo.name
+	region = google_beyondcorp_app_connector.foo.region
 }
 `, context)
 }
@@ -149,17 +149,17 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_beyondcorp_app_connector" "foo" {
-		name     = "tf-test-appconnector-%{random_suffix}"
+	name = "tf-test-appconnector-%{random_suffix}"
 	principal_info {
-	service_account {
-		email = google_service_account.service_account.email
-	}
+		service_account {
+			email = google_service_account.service_account.email
+		}
 	}
 }
 
 data "google_beyondcorp_app_connector" "foo" {
-  name     = google_beyondcorp_app_connector.foo.name
-  project  = google_beyondcorp_app_connector.foo.project
+	name    = google_beyondcorp_app_connector.foo.name
+	project = google_beyondcorp_app_connector.foo.project
 }
 `, context)
 }
@@ -172,16 +172,16 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_beyondcorp_app_connector" "foo" {
-		name     = "tf-test-appconnector-%{random_suffix}"
+	name = "tf-test-appconnector-%{random_suffix}"
 	principal_info {
-	service_account {
-		email = google_service_account.service_account.email
-	}
+		service_account {
+			email = google_service_account.service_account.email
+		}
 	}
 }
 
 data "google_beyondcorp_app_connector" "foo" {
-  name     = google_beyondcorp_app_connector.foo.name
+	name = google_beyondcorp_app_connector.foo.name
 }
 `, context)
 }
