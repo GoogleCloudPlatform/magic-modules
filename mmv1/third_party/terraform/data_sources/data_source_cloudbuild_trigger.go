@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceresourceCloudBuildTrigger() *schema.Resource {
+func dataSourceGoogleCloudBuildTrigger() *schema.Resource {
 
 	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudBuildTrigger().Schema)
 
