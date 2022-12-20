@@ -69,7 +69,8 @@ resource "google_cloudbuild_trigger" "test-trigger" {
 
 data "google_cloudbuild_trigger" "foo" {
 	trigger_id = google_cloudbuild_trigger.test-trigger.trigger_id
-}`, context)
+}`
+,context)
 
 }
 
@@ -94,6 +95,7 @@ resource "google_cloudbuild_trigger" "test-trigger" {
 data "google_cloudbuild_trigger" "foo" {
 	location = google_cloudbuild_trigger.test-trigger.location
 	trigger_id = google_cloudbuild_trigger.test-trigger.trigger_id
-}`, context)
+}`
+,context)
 
 }
