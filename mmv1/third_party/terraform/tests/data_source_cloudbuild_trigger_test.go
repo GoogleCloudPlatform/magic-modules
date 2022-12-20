@@ -52,7 +52,7 @@ func TestAccDataSourceGoogleCloudBuildTrigger_withLocation(t *testing.T) {
 
 func testAccDataSourceGoogleCloudBuildTrigger_basic(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_cloudbuild_trigger" "test-trigger" {
+resource "google_cloudbuild_trigger" "test-trigger-1" {
 	name        = "manual-build%{random_suffix}"
 	trigger_template {
 		branch_name = "main"
@@ -68,15 +68,14 @@ resource "google_cloudbuild_trigger" "test-trigger" {
 }
 
 data "google_cloudbuild_trigger" "foo" {
-	trigger_id = google_cloudbuild_trigger.test-trigger.trigger_id
-}`
-,context)
+	trigger_id = google_cloudbuild_trigger.test-trigger-1.trigger_id
+}`, context)
 
 }
 
 func testAccDataSourceGoogleCloudBuildTrigger_withLocation(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_cloudbuild_trigger" "test-trigger" {
+resource "google_cloudbuild_trigger" "test-trigger-2" {
 	location = "us-central1"
 	name        = "manual-build%{random_suffix}"
 	trigger_template {
@@ -94,8 +93,7 @@ resource "google_cloudbuild_trigger" "test-trigger" {
 
 data "google_cloudbuild_trigger" "foo" {
 	location = google_cloudbuild_trigger.test-trigger.location
-	trigger_id = google_cloudbuild_trigger.test-trigger.trigger_id
-}`
-,context)
+	trigger_id = google_cloudbuild_trigger.test-trigger-2.trigger_id
+}`, context)
 
 }
