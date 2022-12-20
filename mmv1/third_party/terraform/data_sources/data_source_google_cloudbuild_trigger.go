@@ -18,10 +18,10 @@ func dataSourceGoogleCloudBuildTrigger() *schema.Resource {
 		Type:     schema.TypeString,
 		Optional: true,
 		ForceNew: true,
-		Description: `The [Cloud Build location](https://cloud.google.com/build/docs/locations) for the trigger.
-	If not specified, "global" is used.`,
+		Description: `The [Cloud Build location](https://cloud.google.com/build/docs/locations) for the trigger.If not specified, "global" is used.`,
 		Default: "global",
 	}
+
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudBuildTriggerRead,
 		Schema: dsSchema,
