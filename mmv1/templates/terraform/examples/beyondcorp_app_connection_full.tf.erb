@@ -5,14 +5,12 @@ resource "google_service_account" "service_account" {
 
 resource "google_beyondcorp_app_gateway" "app_gateway" {
   name = "tf-test-my-app-gateway%{random_suffix}"
-  region = "us-east1"
   type = "TCP_PROXY"
   host_type = "GCP_REGIONAL_MIG"
 }
 
 resource "google_beyondcorp_app_connector" "app_connector" {
   name = "<%= ctx[:vars]['app_connector_name'] %>"
-  region = "us-east1"
   principal_info {
     service_account {
      email = google_service_account.service_account.email
@@ -23,7 +21,6 @@ resource "google_beyondcorp_app_connector" "app_connector" {
 resource "google_beyondcorp_app_connection" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['app_connection_name'] %>"
   type = "TCP_PROXY"
-  region = "us-east1"
   display_name = "<%= ctx[:vars]['display_name'] %>"
   application_endpoint {
     host = "foo-host"

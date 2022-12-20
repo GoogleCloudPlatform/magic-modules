@@ -271,26 +271,13 @@ objects:
         name: 'labels'
         description: |
           Resource labels to represent user provided metadata.
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'type'
         description: |
-          The type of network connectivity used by the AppConnection.
-        values:
-          - :TYPE_UNSPECIFIED
-          - :TCP_PROXY
-        default_value: :TYPE_UNSPECIFIED
-      - !ruby/object:Api::Type::Enum
-        name: 'state'
-        output: true
-        description: |
-           Represents the different states of a AppConnection.
-        values:
-          - :STATE_UNSPECIFIED
-          - :CREATING
-          - :CREATED
-          - :UPDATING
-          - :DELETING
-          - :DOWN
+          The type of network connectivity used by the AppConnection. Refer to
+          https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#type
+          for a list of possible values.
+        input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'applicationEndpoint'
         description: |
@@ -322,13 +309,12 @@ objects:
             description: |
               AppGateway name in following format: projects/{project_id}/locations/{locationId}/appgateways/{gateway_id}.
             required: true
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: 'type'
             description: |
-              The type of hosting used by the gateway.
-            values:
-              - :TYPE_UNSPECIFIED
-              - :GCP_REGIONAL_MIG
+              The type of hosting used by the gateway. Refer to
+              https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#Type_1
+              for a list of possible values.
           - !ruby/object:Api::Type::String
             name: 'uri'
             description: |
