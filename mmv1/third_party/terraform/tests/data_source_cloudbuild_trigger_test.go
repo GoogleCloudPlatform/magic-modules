@@ -21,7 +21,7 @@ func TestAccDataSourceGoogleCloudBuildTrigger_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleCloudBuildTrigger_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_cloudbuild_trigger.foo", "google_cloudbuild_trigger.test-trigger"),
+					checkDataSourceStateMatchesResourceState("data.google_cloudbuild_trigger.foo", "google_cloudbuild_trigger.test-trigger-1"),
 				),
 			},
 		},
@@ -43,7 +43,7 @@ func TestAccDataSourceGoogleCloudBuildTrigger_withLocation(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleCloudBuildTrigger_withLocation(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_cloudbuild_trigger.foo", "google_cloudbuild_trigger.test-trigger"),
+					checkDataSourceStateMatchesResourceState("data.google_cloudbuild_trigger.foo", "google_cloudbuild_trigger.test-trigger-2"),
 				),
 			},
 		},
@@ -92,7 +92,7 @@ resource "google_cloudbuild_trigger" "test-trigger-2" {
 }
 
 data "google_cloudbuild_trigger" "foo" {
-	location = google_cloudbuild_trigger.test-trigger.location
+	location = google_cloudbuild_trigger.test-trigger-2.location
 	trigger_id = google_cloudbuild_trigger.test-trigger-2.trigger_id
 }`, context)
 
