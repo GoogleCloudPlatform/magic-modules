@@ -94,7 +94,6 @@ var (
 		"cluster_config.0.lifecycle_config",
 		"cluster_config.0.endpoint_config",
 	}
-
 )
 
 const resourceDataprocGoogleProvidedLabelPrefix = "labels.goog-dataproc"
@@ -630,25 +629,25 @@ func resourceDataprocCluster() *schema.Resource {
 											},
 										},
 									},
-									"confidential_instance_config": {
-										Type:         schema.TypeList,
+								},
+							},
+						},
+						"confidential_instance_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: gceClusterConfigKeys,
+							Computed:     true,
+							MaxItems:     1,
+							Description:  `Confidential Instance Config for clusters using Confidential VMs.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enable_confidential_compute": {
+										Type:         schema.TypeBool,
 										Optional:     true,
-										AtLeastOneOf: gceClusterConfigKeys,
-										Computed:     true,
-										MaxItems:     1,
-										Description:  `Confidential Instance Config for clusters using Confidential VMs.`,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"enable_confidential_compute": {
-													Type:         schema.TypeBool,
-													Optional:     true,
-													ForceNew:     true,
-													Description:  `Defines whether the instance should have confidential compute enabled.`,
-												},
-											},
-										},
+										ForceNew:     true,
+										Description:  `Defines whether the instance should have confidential compute enabled.`,
 									},
-
+								},
 							},
 						},
 
@@ -690,7 +689,7 @@ func resourceDataprocCluster() *schema.Resource {
 											"cluster_config.0.preemptible_worker_config.0.disk_config",
 										},
 										ForceNew:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE", "SPOT"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE"}, false),
 										Default:      "PREEMPTIBLE",
 									},
 
@@ -1731,7 +1730,6 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 	return conf
 }
 
-
 func expandMetastoreConfig(cfg map[string]interface{}) *dataproc.MetastoreConfig {
 	conf := &dataproc.MetastoreConfig{}
 	if v, ok := cfg["dataproc_metastore_service"]; ok {
@@ -2253,7 +2251,6 @@ func flattenEndpointConfig(d *schema.ResourceData, ec *dataproc.EndpointConfig) 
 	return []map[string]interface{}{data}
 }
 
-
 func flattenMetastoreConfig(d *schema.ResourceData, ec *dataproc.MetastoreConfig) []map[string]interface{} {
 	if ec == nil {
 		return nil
@@ -2329,7 +2326,6 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 			},
 		}
 	}
-
 	if gcc.ConfidentialInstanceConfig != nil {
 		gceConfig["confidential_instance_config"] = []map[string]interface{}{
 			{
