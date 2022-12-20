@@ -153,6 +153,7 @@ resource "google_compute_machine_image" "foobar" {
   provider        = google-beta
   name            = "%s"
   source_instance = google_compute_instance.vm.self_link
+  storage_locations = ["us-central1"]
 }
 
 resource "google_compute_instance_from_machine_image" "foobar" {
