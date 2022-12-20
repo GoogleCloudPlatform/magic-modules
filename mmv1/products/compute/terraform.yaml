@@ -1371,8 +1371,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       guestOsFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         is_set: true
-      imageEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
+      imageEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      imageEncryptionKey.sha256: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      imageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.erb'
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: 'kmsKeySelfLink'
+        description: |
+          The self link of the encryption key that is stored in Google Cloud
+          KMS.
       licenses: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       rawDisk.sha1Checksum: !ruby/object:Overrides::Terraform::PropertyOverride
