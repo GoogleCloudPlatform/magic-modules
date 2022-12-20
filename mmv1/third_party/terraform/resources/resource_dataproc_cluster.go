@@ -86,7 +86,6 @@ var (
 		"cluster_config.0.software_config.0.optional_components",
 	}
 
-<% if version == "ga" -%>
 	dataprocMetricConfigKeys = []string{
 		"cluster_config.0.dataproc_metric_config.0.metrics",
 	}
@@ -95,7 +94,6 @@ var (
 		"cluster_config.0.dataproc_metric_config.0.metrics.0.metric_source",
 		"cluster_config.0.dataproc_metric_config.0.metrics.0.metric_overrides",
 	}
-<% end -%>
 
 	clusterConfigKeys = []string{
 		"cluster_config.0.staging_bucket",
@@ -112,9 +110,7 @@ var (
 		"cluster_config.0.metastore_config",
 		"cluster_config.0.lifecycle_config",
 		"cluster_config.0.endpoint_config",
-<% if version == "ga" -%>
 		"cluster_config.0.dataproc_metric_config",
-<% end -%>
 	}
 )
 
@@ -663,7 +659,6 @@ func resourceDataprocCluster() *schema.Resource {
 												"enable_confidential_compute": {
 													Type:         schema.TypeBool,
 													Optional:     true,
-													AtLeastOneOf: schieldedInstanceConfigKeys,
 													ForceNew:     true,
 													Description:  `Defines whether the instance should have confidential compute enabled.`,
 												},
@@ -768,11 +763,7 @@ func resourceDataprocCluster() *schema.Resource {
 											"cluster_config.0.preemptible_worker_config.0.disk_config",
 										},
 										ForceNew:     true,
-										<% if version == "ga" -%>
 										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE", "SPOT"}, false),
-										<% else -%>
-										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE"}, false),
-										<% end -%>
 										Default:      "PREEMPTIBLE",
 									},
 
@@ -1133,7 +1124,6 @@ by Dataproc`,
 								},
 							},
 						},
-<% if version == "ga" -%>
 						"dataproc_metric_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1151,7 +1141,6 @@ by Dataproc`,
 								},
 							},
 						},
-<% end -%>
 					},
 				},
 			},
@@ -1160,7 +1149,6 @@ by Dataproc`,
 	}
 }
 
-<% if version == "ga" -%>
 // We need to pull metrics' schema out so we can use it to make a set hash func
 func metricsSchema() *schema.Resource {
 	return  &schema.Resource{
@@ -1182,7 +1170,6 @@ func metricsSchema() *schema.Resource {
 		},
 	}
 }
-<% end -%>
 
 func instanceConfigSchema(parent string) *schema.Schema {
 	var instanceConfigKeys = []string{
@@ -1651,11 +1638,9 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 		conf.EndpointConfig = expandEndpointConfig(cfg)
 	}
 
-<% if version == "ga" -%>
 	if cfg, ok := configOptions(d, "cluster_config.0.dataproc_metric_config"); ok {
 		conf.DataprocMetricConfig = expandDataprocMetricConfig(cfg)
 	}
-<% end -%>
 
 	if cfg, ok := configOptions(d, "cluster_config.0.master_config"); ok {
 		log.Println("[INFO] got master_config")
@@ -1882,7 +1867,6 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 	return conf
 }
 
-<% if version == "ga" -%>
 func expandDataprocMetricConfig(cfg map[string]interface{}) *dataproc.DataprocMetricConfig {
 	conf := &dataproc.DataprocMetricConfig{}
 	metricsConfigs := cfg["metrics"].([]interface{})
@@ -1899,7 +1883,6 @@ func expandDataprocMetricConfig(cfg map[string]interface{}) *dataproc.DataprocMe
 	conf.Metrics = metricsSet
 	return conf
 }
-<% end -%>
 
 func expandMetastoreConfig(cfg map[string]interface{}) *dataproc.MetastoreConfig {
 	conf := &dataproc.MetastoreConfig{}
@@ -2316,9 +2299,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		"metastore_config":          flattenMetastoreConfig(d, cfg.MetastoreConfig),
 		"lifecycle_config":          flattenLifecycleConfig(d, cfg.LifecycleConfig),
 		"endpoint_config":           flattenEndpointConfig(d, cfg.EndpointConfig),
-<% if version == "ga" -%>
 		"dataproc_metric_config":    flattenDataprocMetricConfig(d, cfg.DataprocMetricConfig),
-<% end -%>
 	}
 
 	if len(cfg.InitializationActions) > 0 {
@@ -2425,7 +2406,6 @@ func flattenEndpointConfig(d *schema.ResourceData, ec *dataproc.EndpointConfig) 
 	return []map[string]interface{}{data}
 }
 
-<% if version == "ga" -%>
 func flattenDataprocMetricConfig(d *schema.ResourceData, dmc *dataproc.DataprocMetricConfig) []map[string]interface{} {
 	if dmc == nil {
 		return nil
@@ -2445,7 +2425,6 @@ func flattenDataprocMetricConfig(d *schema.ResourceData, dmc *dataproc.DataprocM
 
 	return []map[string]interface{}{data}
 }
-<% end -%>
 
 func flattenMetastoreConfig(d *schema.ResourceData, ec *dataproc.MetastoreConfig) []map[string]interface{} {
 	if ec == nil {
