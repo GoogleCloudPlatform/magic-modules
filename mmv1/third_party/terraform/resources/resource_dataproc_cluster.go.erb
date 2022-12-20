@@ -104,6 +104,7 @@ var (
 		"cluster_config.0.endpoint_config",
 		"cluster_config.0.dataproc_metric_config",
 	}
+
 )
 
 const resourceDataprocGoogleProvidedLabelPrefix = "labels.goog-dataproc"
@@ -658,62 +659,6 @@ func resourceDataprocCluster() *schema.Resource {
 										},
 									},
 
-									"reservation_affinity": {
-										Type:         schema.TypeList,
-										Optional:     true,
-										AtLeastOneOf: gceClusterConfigKeys,
-										Computed:     true,
-										MaxItems:     1,
-										Description:  `Reservation Affinity for consuming Zonal reservation.`,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"consume_reservation_type": {
-													Type:         schema.TypeString,
-													Optional:     true,
-													AtLeastOneOf: reservationAffinityKeys,
-													ForceNew:     true,
-													ValidateFunc: validation.StringInSlice([]string{"NO_RESERVATION", "ANY_RESERVATION", "SPECIFIC_RESERVATION"}, false),
-													Description:  `Type of reservation to consume.`,
-												},
-												"key": {
-													Type:         schema.TypeString,
-													Optional:     true,
-													AtLeastOneOf: reservationAffinityKeys,
-													ForceNew:     true,
-													Description:  `Corresponds to the label key of reservation resource.`,
-												},
-												"values": {
-													Type:         schema.TypeSet,
-													Elem:         &schema.Schema{Type: schema.TypeString},
-													Optional:     true,
-													AtLeastOneOf: reservationAffinityKeys,
-													ForceNew:     true,
-													Description:  `Corresponds to the label values of reservation resource.`,
-												},
-											},
-										},
-									},
-
-									"node_group_affinity": {
-										Type:         schema.TypeList,
-										Optional:     true,
-										AtLeastOneOf: gceClusterConfigKeys,
-										Computed:     true,
-										MaxItems:     1,
-										Description:  `Node Group Affinity for sole-tenant clusters.`,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"node_group_uri": {
-													Type:         schema.TypeString,
-													ForceNew:     true,
-													Required:     true,
-													Description:  `The URI of a sole-tenant that the cluster will be created on.`,
-													DiffSuppressFunc: compareSelfLinkOrResourceName,
-												},
-											},
-										},
-									},
-								},
 							},
 						},
 
@@ -1717,26 +1662,6 @@ func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.G
 		conf.ConfidentialInstanceConfig = &dataproc.ConfidentialInstanceConfig{}
 		if v, ok := cfgCic["enable_confidential_compute"]; ok {
 			conf.ConfidentialInstanceConfig.EnableConfidentialCompute = v.(bool)
-		}
-	}
-	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.reservation_affinity"); ok {
-		cfgRa := v.([]interface{})[0].(map[string]interface{})
-		conf.ReservationAffinity = &dataproc.ReservationAffinity{}
-		if v, ok := cfgRa["consume_reservation_type"]; ok {
-			conf.ReservationAffinity.ConsumeReservationType = v.(string)
-		}
-		if v, ok := cfgRa["key"]; ok {
-			conf.ReservationAffinity.Key = v.(string)
-		}
-		if v, ok := cfgRa["values"]; ok {
-			conf.ReservationAffinity.Values = convertStringSet(v.(*schema.Set))
-		}
-	}
-	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.node_group_affinity"); ok {
-		cfgNga := v.([]interface{})[0].(map[string]interface{})
-		conf.NodeGroupAffinity = &dataproc.NodeGroupAffinity{}
-		if v, ok := cfgNga["node_group_uri"]; ok {
-			conf.NodeGroupAffinity.NodeGroupUri = v.(string)
 		}
 	}
 	return conf, nil
