@@ -14760,6 +14760,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'expireTime'
+        output: true
+        description: 'Expire time of the certificate in RFC3339 text format.'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
