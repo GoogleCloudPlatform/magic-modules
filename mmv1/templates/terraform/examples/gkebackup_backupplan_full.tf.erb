@@ -1,5 +1,4 @@
 resource "google_container_cluster" "primary" {
-  provider = google-beta
   name               = "<%= ctx[:vars]['cluster_name'] %>"
   location           = "us-central1"
   initial_node_count = 1
@@ -14,7 +13,6 @@ resource "google_container_cluster" "primary" {
 }
 
 resource "google_gke_backup_backup_plan" "full" {
-  provider = google-beta
   name = "<%= ctx[:vars]['name'] %>"
   cluster = google_container_cluster.primary.id
   location = "us-central1"
