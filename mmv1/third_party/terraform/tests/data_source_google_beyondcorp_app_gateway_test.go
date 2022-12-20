@@ -97,8 +97,8 @@ func TestAccDataSourceGoogleBeyondcorpAppGateway_optionalProjectRegion(t *testin
 func testAccDataSourceGoogleBeyondcorpAppGateway_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_beyondcorp_app_gateway" "foo" {
-	name = "tf-test-appgateway-%{random_suffix}"
-	type = "TCP_PROXY"
+	name      = "tf-test-appgateway-%{random_suffix}"
+	type      = "TCP_PROXY"
 	host_type = "GCP_REGIONAL_MIG"
 }
 
