@@ -86,7 +86,7 @@ objects:
           The system-generated UID of the resource.
       - !ruby/object:Api::Type::KeyValuePairs
         name: "labels"
-        description: "User-defined labels for the alloydb cluster."
+        description: "Client-specified labels that are applied to the resource and that are also propagated to the underlying Compute Engine resources."
       - !ruby/object:Api::Type::String
         name: "network"
         required: true
@@ -113,3 +113,44 @@ objects:
         description: |
           Whether this resource is in degraded mode, in which case it may require user action to restore full functionality. 
           Details can be found in the conditions field.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "annotations"
+        description: "Client-specified annotations. This is distinct from labels."
+      - !ruby/object:Api::Type::String
+        name: "etag"
+        description: |
+          Checksum computed by the server. 
+          May be sent on update and delete requests to ensure that the client has an up-to-date value before proceeding.
+      - !ruby/object:Api::Type::Time
+        name: "createTime"
+        description: |
+          Time the Instance was created in UTC.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: "updateTime"
+        description: |
+          Time the Instance was updated in UTC.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: "deleteTime"
+        description: |
+          Time the Instance was deleted in UTC.
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: "conditions"
+        description: |-
+          Output only. Status conditions describing the current resource state.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: "code"
+              output: true
+              description: |-
+                The status code, which should be an enum value of google.rpc.Code.
+            - !ruby/object:Api::Type::String
+              name: "message"
+              output: true
+              description: |-
+                Human readable message indicating details about the current status.
+            # TODO: Add `details`
