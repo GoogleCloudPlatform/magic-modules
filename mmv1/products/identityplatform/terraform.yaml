@@ -17,7 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/config", "projects/{{project}}", "{{project}}"]
     skip_delete: true
     skip_sweeper: true
-    examples: 
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "identity_platform_config_basic"
         primary_resource_id: "default"
@@ -28,6 +28,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           billing_acct: :BILLING_ACCT
         # Resource creation race
         skip_vcr: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
   DefaultSupportedIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}"]
     examples:
