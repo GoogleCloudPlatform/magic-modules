@@ -506,6 +506,7 @@ objects:
                                         https://dev.mysql.com/doc/refman/8.0/en/data-types.html
                                     - !ruby/object:Api::Type::Integer
                                       name: 'length'
+                                      output: true
                                       description: |
                                         Column length.
                                     - !ruby/object:Api::Type::String
@@ -578,6 +579,7 @@ objects:
                                         https://dev.mysql.com/doc/refman/8.0/en/data-types.html
                                     - !ruby/object:Api::Type::Integer
                                       name: 'length'
+                                      output: true
                                       description: |
                                         Column length.
                                     - !ruby/object:Api::Type::String
@@ -788,6 +790,7 @@ objects:
                                     https://dev.mysql.com/doc/refman/8.0/en/data-types.html
                                 - !ruby/object:Api::Type::Integer
                                   name: 'length'
+                                  output: true
                                   description: |
                                     Column length.
                                 - !ruby/object:Api::Type::String
