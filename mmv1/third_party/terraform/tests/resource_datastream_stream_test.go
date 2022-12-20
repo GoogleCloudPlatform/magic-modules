@@ -151,39 +151,43 @@ func TestAccDatastreamStream_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicExample(context),
+				Check: resource.TestCheckResourceAttr("google_datastream_stream.default", "state", "NOT_STARTED"),
 			},
 			{
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location"},
+				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", true),
+				Check: resource.TestCheckResourceAttr("google_datastream_stream.default", "state", "RUNNING"),
 			},
 			{
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location"},
+				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "PAUSED", true),
+				Check: resource.TestCheckResourceAttr("google_datastream_stream.default", "state", "PAUSED"),
 			},
 			{
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location"},
+				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", true),
+				Check: resource.TestCheckResourceAttr("google_datastream_stream.default", "state", "RUNNING"),
 			},
 			{
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location"},
+				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state"},
 			},
 			{
 				// Disable prevent_destroy
