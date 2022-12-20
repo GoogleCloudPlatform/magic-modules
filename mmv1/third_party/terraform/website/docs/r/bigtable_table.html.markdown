@@ -50,7 +50,7 @@ resource "google_bigtable_table" "table" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the table.
+* `name` - (Required) The unique name of the table. It has to be 1-50 characters and must only contain hyphens, underscores, periods, letters and numbers.
 
 * `instance_name` - (Required) The name of the Bigtable instance.
 
