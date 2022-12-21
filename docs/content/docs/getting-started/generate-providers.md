@@ -3,7 +3,7 @@ title: Generate the provider
 weight: 20
 ---
 
-# Generating the provider(s)
+## Generating the provider(s)
 
 
 You can compile the Terraform provider you're working on by running the following

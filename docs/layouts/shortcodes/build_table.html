@@ -16,18 +16,13 @@
   </thead>
   <tbody>
     <tr>
-      <td class="tg-0pky"><span style="font-weight:bold">make</span><br>runs make build</td>
-      <td class="tg-0pky"><span style="font-weight:bold">make build</span><br>  Builds the terraform provider with both mmv1 and tpgtools. Copies all generated files as a merge with the provider in OUTPUT_PATH.</td>
-    </tr>
-    <tr>
-      <td class="tg-0pky"><span style="font-weight:bold">make upgrade-dcl</span><br> A command to upgrade the version of the dcl. Used within the terraform provider and tpgtools.</td>
-      <td class="tg-0pky"><span style="font-weight:bold">make validate_environment</span><br> A prestep to make build to ensure that the build environment is suitable for a build.</td>
+      <td class="tg-0pky" colspan="2"><span style="font-weight:bold">make provider</span><br>Builds the terraform provider with both mmv1 and tpgtools. <br>Copies all generated files as a merge with the provider in OUTPUT_PATH.</td>
     </tr>
     <tr>
       <td class="tg-c3ow" colspan="2"><span style="font-weight:bold">magic-modules - build parameters</span></td>
     </tr>
     <tr>
-      <td class="tg-0pky" colspan="2"><span style="font-weight:bold">OUTPUT_PATH </span>(required) - the location of the provider you are unioning generation into. Note: magic-modules uses templates files and then unions the generated files with your local provider.. Thus its always recommended you ensure magic-modules and your local provider are up to date.</td>
+      <td class="tg-0pky" colspan="2"><span style="font-weight:bold">OUTPUT_PATH </span>(required) - the location of the provider you are unioning generation into.</td>
     </tr>
     <tr>
       <td class="tg-dgl5" colspan="2"><span style="font-weight:bold">VERSION</span> (required) - the version of the provider you are building into. <br/> Valid values are 'ga' and 'beta'.</td>

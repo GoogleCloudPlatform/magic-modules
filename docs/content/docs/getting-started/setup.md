@@ -85,7 +85,7 @@ To get started, you'll need:
 Now, you can verify you're ready with:
 
 ```bash
-./scripts/doctor
+make doctor
 ```
 
 <details><summary>Expected output:</summary>
