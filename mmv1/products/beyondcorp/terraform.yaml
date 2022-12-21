@@ -47,6 +47,29 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           app_gateway_name: "my-app-gateway"
           display_name: "some display name"
+  AppConnection: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    properties:
+      gateway: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "beyondcorp_app_connection_basic"
+        primary_resource_id: "app_connection"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_connection%s\", context[\"random_suffix\"])"
+        vars:
+          account_id: "my-account"
+          app_connector_name: "my-app-connector"
+          app_connection_name: "my-app-connection"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "beyondcorp_app_connection_full"
+        primary_resource_id: "app_connection"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_connection%s\", context[\"random_suffix\"])"
+        vars:
+          account_id: "my-account"
+          app_connector_name: "my-app-connector"
+          app_connection_name: "my-app-connection"
+          display_name: "some display name"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
