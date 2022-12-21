@@ -12,6 +12,10 @@ resource "google_workstations_workstation_cluster" "<%= ctx[:primary_resource_id
   labels = {
     "label" = "key"
   }
+
+  annotations = {
+    label-one = "value-one"
+  }
 }
 
 data "google_project" "project" {
