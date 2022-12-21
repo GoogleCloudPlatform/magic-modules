@@ -5,7 +5,6 @@ weight: 20
 
 # Generating the provider(s)
 
-## Generate the providers
 
 You can compile the Terraform provider you're working on by running the following
 commands from the root directory of the repository. OUTPUT_PATH should be set to
