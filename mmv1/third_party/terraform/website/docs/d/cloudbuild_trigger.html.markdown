@@ -31,7 +31,7 @@ The following arguments are supported:
 
 * `trigger_id` - (Required) The unique identifier for the trigger..
     
-* `location` - (Optional) The Cloud Build location for the trigger. If not specified, "global" is used.
+* `location` - (Required) The Cloud Build location for the trigger.
 
 - - -
 
