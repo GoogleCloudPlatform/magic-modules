@@ -11,18 +11,9 @@ func dataSourceGoogleCloudBuildTrigger() *schema.Resource {
 
 	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudBuildTrigger().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "trigger_id")
+	addRequiredFieldsToSchema(dsSchema, "trigger_id", "location")
 	addOptionalFieldsToSchema(dsSchema, "project")
 
-	//adding location field explicitly in schema because it requires to set default value for it.
-	dsSchema["location"] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-		ForceNew: true,
-		Description: `The [Cloud Build location](https://cloud.google.com/build/docs/locations) for the trigger.
-	If not specified, "global" is used.`,
-		Default: "global",
-	}
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudBuildTriggerRead,
 		Schema: dsSchema,
@@ -38,7 +29,6 @@ func dataSourceGoogleCloudBuildTriggerRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 
-	id = strings.ReplaceAll(id, "/locations//", "/")
 	id = strings.ReplaceAll(id, "/locations/global/", "/")
 
 	d.SetId(id)
