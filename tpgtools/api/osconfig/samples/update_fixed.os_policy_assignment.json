@@ -1,7 +1,7 @@
 {
   "name": "{{assignment}}",
   "project": "{{project}}",
-  "location": "{{zone}}",
+  "location": "us-central1-f",
   "description": "An updated test os policy assignment",
   "osPolicies": [
     {
