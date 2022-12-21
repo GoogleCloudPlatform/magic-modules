@@ -46,7 +46,21 @@ func testAccOsConfigOsPolicyAssignment_PercentOsPolicyAssignment(context map[str
 	return Nprintf(`
 resource "google_os_config_os_policy_assignment" "primary" {
   instance_filter {
-    all = true
+    all = false
+    exclusion_labels {
+      labels = {
+        label-two = "value-two"
+      }
+    }
+    inclusion_labels {
+      labels = {
+        label-one = "value-one"
+      }
+    }
+    inventories {
+      os_short_name = "centos"
+      os_version    = "8.*"
+    }
   }
 
   location = "europe-west1-a"
