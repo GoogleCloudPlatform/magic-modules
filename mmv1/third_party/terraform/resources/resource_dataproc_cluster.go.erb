@@ -13,17 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-<% if version == "ga" -%>
 	"google.golang.org/api/dataproc/v1"
-<% else -%>
-	dataproc "google.golang.org/api/dataproc/v1beta2"
-<% end -%>
 )
 
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
 
-<% if version == "ga" -%>
 	virtualClusterConfigKeys = []string{
 		"virtual_cluster_config.0.staging_bucket",
 		"virtual_cluster_config.0.auxiliary_services_config",
@@ -51,7 +46,6 @@ var (
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.gke_cluster_target",
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target",
 	}
-<% end -%>
 
 	gceClusterConfigKeys = []string{
 		"cluster_config.0.gce_cluster_config.0.zone",
@@ -117,7 +111,6 @@ func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceDat
 	return false
 }
 
-<% if version == "ga" -%>
 const resourceDataprocGoogleProvidedDPGKEPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.dpgke"
 const resourceDataprocGoogleProvidedSparkPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.spark"
 
@@ -134,7 +127,6 @@ func resourceDataprocPropertyDiffSuppress(k, old, new string, d *schema.Resource
 	// For other keys, don't suppress diff.
 	return false
 }
-<% end -%>
 
 func resourceDataprocCluster() *schema.Resource {
 	return &schema.Resource{
@@ -211,7 +203,6 @@ func resourceDataprocCluster() *schema.Resource {
 				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
 			},
 
-<% if version == "ga" -%>
 			"virtual_cluster_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -473,7 +464,6 @@ func resourceDataprocCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"cluster_config": {
 				Type:        schema.TypeList,
@@ -1206,15 +1196,11 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		ProjectId:   project,
 	}
 
-<% if version == "ga" -%>
 	if _, ok := d.GetOk("virtual_cluster_config"); ok {
 		cluster.VirtualClusterConfig, err = expandVirtualClusterConfig(d, config)
 	} else {
 		cluster.Config, err = expandClusterConfig(d, config)
 	}
-<% else -%>
-	cluster.Config, err = expandClusterConfig(d, config)
-<% end -%>
 
 	if err != nil {
 		return err
@@ -1253,7 +1239,6 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 	return resourceDataprocClusterRead(d, meta)
 }
 
-<% if version == "ga" -%>
 func expandVirtualClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.VirtualClusterConfig, error) {
 	conf := &dataproc.VirtualClusterConfig{}
 
@@ -1435,7 +1420,6 @@ func expandGkeNodePoolAutoscalingConfig(cfg map[string]interface{}) *dataproc.Gk
 	}
 	return conf
 }
-<% end -%>
 
 func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.ClusterConfig, error) {
 	conf := &dataproc.ClusterConfig{
@@ -1946,7 +1930,6 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 
 	var cfg []map[string]interface{}
 
-<% if version == "ga" -%>
 	if cluster.Config != nil {
 		cfg, err = flattenClusterConfig(d, cluster.Config)
 
@@ -1968,22 +1951,9 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
-<% else -%>
-	cfg, err = flattenClusterConfig(d, cluster.Config)
-
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("cluster_config", cfg)
-	if err != nil {
-		return err
-	}
-<% end -%>
 	return nil
 }
 
-<% if version == "ga" -%>
 func flattenVirtualClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) ([]map[string]interface{}, error) {
 	data := map[string]interface{}{
 		"staging_bucket":            d.Get("virtual_cluster_config.0.staging_bucket"),
@@ -2099,7 +2069,6 @@ func flattenKubernetesSoftwareConfig(d *schema.ResourceData, cfg *dataproc.Kuber
 
 	return []map[string]interface{}{data}
 }
-<% end -%>
 
 func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) ([]map[string]interface{}, error) {
 
