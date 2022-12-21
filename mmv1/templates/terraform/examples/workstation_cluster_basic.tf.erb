@@ -1,0 +1,24 @@
+resource "google_workstations_workstation_cluster" "<%= ctx[:primary_resource_id] %>" {
+  provider   = google-beta
+  cluster_id = "<%= ctx[:vars]['workstation_cluster_name'] %>"
+  location   = "us-central1"
+  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  subnetwork = "projects/${data.google_project.project.number}/global/subnetworks/${google_compute_subnetwork.default.name}"
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_network" "default" {
+  provider = google-beta
+  name = "<%= ctx[:vars]['workstation_cluster_name'] %>"
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider = google-beta
+  name = "<%= ctx[:vars]['workstation_cluster_name'] %>"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+}
