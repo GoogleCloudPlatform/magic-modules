@@ -20,7 +20,7 @@
                   "gpgKeys": ["RPM-GPG-KEY-CentOS-Debug-7"]
                 }
               }
-            },
+            }
           ]
         }
       ]

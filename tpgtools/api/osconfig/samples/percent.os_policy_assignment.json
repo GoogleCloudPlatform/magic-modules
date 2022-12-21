@@ -21,7 +21,7 @@
                   "gpgKey": ".gnupg/pubring.kbx"
                 }
               }
-            },
+            }
           ]
         }
       ]
