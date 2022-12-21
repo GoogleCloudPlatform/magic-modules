@@ -11,7 +11,7 @@ Creates a job on Dataflow, which is an implementation of Apache Beam running on 
 the official documentation for
 [Beam](https://beam.apache.org) and [Dataflow](https://cloud.google.com/dataflow/).
 
-## Example Usage 
+## Example Usage
 
 ```hcl
 resource "google_dataflow_job" "big_data_job" {
