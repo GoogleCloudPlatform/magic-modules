@@ -50,4 +50,5 @@ data "google_cloudbuild_trigger" "foo" {
 	location = google_cloudbuild_trigger.test-trigger.location
 	trigger_id = google_cloudbuild_trigger.test-trigger.trigger_id
 }`, context)
+
 }
