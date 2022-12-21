@@ -629,23 +629,23 @@ func resourceDataprocCluster() *schema.Resource {
 											},
 										},
 									},
-								},
-							},
-						},
-						"confidential_instance_config": {
-							Type:         schema.TypeList,
-							Optional:     true,
-							AtLeastOneOf: gceClusterConfigKeys,
-							Computed:     true,
-							MaxItems:     1,
-							Description:  `Confidential Instance Config for clusters using Confidential VMs.`,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"enable_confidential_compute": {
-										Type:         schema.TypeBool,
+									"confidential_instance_config": {
+										Type:         schema.TypeList,
 										Optional:     true,
-										ForceNew:     true,
-										Description:  `Defines whether the instance should have confidential compute enabled.`,
+										AtLeastOneOf: gceClusterConfigKeys,
+										Computed:     true,
+										MaxItems:     1,
+										Description:  `Confidential Instance Config for clusters using Confidential VMs.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enable_confidential_compute": {
+													Type:         schema.TypeBool,
+													Optional:     true,
+													ForceNew:     true,
+													Description:  `Defines whether the instance should have confidential compute enabled.`,
+												},
+											},
+										},
 									},
 								},
 							},
