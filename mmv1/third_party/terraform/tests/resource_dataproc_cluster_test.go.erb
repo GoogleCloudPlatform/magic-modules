@@ -216,6 +216,7 @@ func TestAccDataprocCluster_basic(t *testing.T) {
 	})
 }
 
+<% if version == "ga" -%>
 func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 	t.Parallel()
 
@@ -252,6 +253,7 @@ func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 	t.Parallel()
@@ -1129,6 +1131,7 @@ resource "google_dataproc_cluster" "basic" {
 `, rnd)
 }
 
+<% if version == "ga" -%>
 func testAccDataprocVirtualCluster_basic(projectID string, rnd string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -1187,6 +1190,7 @@ resource "google_dataproc_cluster" "virtual_cluster" {
   }
 `, projectID, rnd, projectID, rnd, rnd, rnd, rnd, rnd, rnd)
 }
+<% end -%>
 
 func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster, roles ...string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
