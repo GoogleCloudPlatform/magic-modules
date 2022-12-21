@@ -29,11 +29,11 @@
           ]
         }
       ],
-      "allowNoResourceGroupMatch": false
+      "allowNoResourceGroupMatch": true
     }
   ],
   "instanceFilter": {
-    "all": false,
+    "all": true,
     "inclusionLabels": [
       {
         "labels": {

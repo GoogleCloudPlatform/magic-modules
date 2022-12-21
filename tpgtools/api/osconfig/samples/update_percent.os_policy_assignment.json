@@ -27,19 +27,12 @@
     }
   ],
   "instanceFilter": {
-    "all": false,
+    "all": true,
     "osShortNames": ["centos"],
     "inclusionLabels": [
       {
         "labels": {
           "label-one": "value-one"
-        }
-      }
-    ],
-    "exclusionLabels": [
-      {
-        "labels": {
-          "label-two": "value-two"
         }
       }
     ]

@@ -25,17 +25,6 @@
                   "name": "firefox"
                 }
               }
-            },
-            {
-              "id": "new-deb1",
-              "pkg": {
-                "desiredState": "REMOVED",
-                "deb": {
-                  "source": {
-                    "localPath": "$HOME/new-package.deb"
-                  }
-                }
-              }
             }
           ]
         }
@@ -44,7 +33,7 @@
     }
   ],
   "instanceFilter": {
-    "all": false,
+    "all": true,
     "inclusionLabels": [],
     "exclusionLabels": [],
     "inventories": [
