@@ -97,18 +97,6 @@ objects:
                 description: |
                   Email address of the service account.
                 required: true
-      - !ruby/object:Api::Type::Enum
-        name: 'state'
-        output: true
-        description: |
-           Represents the different states of a AppConnector.
-        values:
-          - :STATE_UNSPECIFIED
-          - :CREATING
-          - :CREATED
-          - :UPDATING
-          - :DELETING
-          - :DOWN
   - !ruby/object:Api::Resource
     name: 'AppGateway'
     description: |
@@ -158,22 +146,18 @@ objects:
           The region of the AppGateway.
         input: true
         url_param_only: true
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'type'
         description: |
-          The type of network connectivity used by the AppGateway.
-        values:
-          - :TYPE_UNSPECIFIED
-          - :TCP_PROXY
-        default_value: :TYPE_UNSPECIFIED
-      - !ruby/object:Api::Type::Enum
+          The type of network connectivity used by the AppGateway. Refer to
+          https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appGateways#type
+          for a list of possible values.
+      - !ruby/object:Api::Type::String
         name: 'hostType'
         description: |
-          The type of hosting used by the AppGateway.
-        values:
-          - :HOST_TYPE_UNSPECIFIED
-          - :GCP_REGIONAL_MIG
-        default_value: :HOST_TYPE_UNSPECIFIED
+          The type of hosting used by the AppGateway. Refer to
+          https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appGateways#hosttype
+          for a list of possible values. 
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
@@ -182,18 +166,6 @@ objects:
         name: 'labels'
         description: |
           Resource labels to represent user provided metadata.
-      - !ruby/object:Api::Type::Enum
-        name: 'state'
-        output: true
-        description: |
-          Represents the different states of a AppGateway.
-        values:
-          - :STATE_UNSPECIFIED
-          - :CREATING
-          - :CREATED
-          - :UPDATING
-          - :DELETING
-          - :DOWN
       - !ruby/object:Api::Type::String
         name: 'uri'
         output: true
