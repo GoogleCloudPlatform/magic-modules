@@ -457,7 +457,6 @@ func TestAccDataprocCluster_nonPreemptibleSecondary(t *testing.T) {
 	})
 }
 
-<% if version == "ga" -%>
 func TestAccDataprocCluster_spotSecondary(t *testing.T) {
 	t.Parallel()
 
@@ -478,7 +477,6 @@ func TestAccDataprocCluster_spotSecondary(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccDataprocCluster_withStagingBucket(t *testing.T) {
 	t.Parallel()
@@ -1532,7 +1530,6 @@ resource "google_dataproc_cluster" "non_preemptible_secondary" {
 	`, rnd)
 }
 
-<% if version == "ga" -%>
 func testAccDataprocCluster_spotSecondary(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "spot_secondary" {
@@ -1567,7 +1564,6 @@ resource "google_dataproc_cluster" "spot_secondary" {
 }
 	`, rnd)
 }
-<% end -%>
 
 func testAccDataprocCluster_withStagingBucketOnly(bucketName string) string {
 	return fmt.Sprintf(`
