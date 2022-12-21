@@ -99,7 +99,7 @@ objects:
         required: true
         input: true
         description: |
-          Immutable. Name of the Compute Engine subnetwork in which instances associated with this cluster will be created. 
+          Name of the Compute Engine subnetwork in which instances associated with this cluster will be created. 
           Must be part of the subnetwork specified for this cluster.
       - !ruby/object:Api::Type::String
         name: "displayName"
@@ -116,6 +116,7 @@ objects:
         description: |
           Whether this resource is in degraded mode, in which case it may require user action to restore full functionality. 
           Details can be found in the conditions field.
+        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: "annotations"
         description: "Client-specified annotations. This is distinct from labels."
@@ -181,7 +182,11 @@ objects:
               output: true
               description: |-
                 Human readable message indicating details about the current status.
-            # TODO: Add `details`
+            - !ruby/object:Api::Type::Array
+              name: 'details'
+              description: |
+                A list of messages that carry the error details.
+              item_type: Api::Type::KeyValuePairs
   - !ruby/object:Api::Resource
     name: "WorkstationConfig"
     self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workStationCluster_id}}/workstationConfigs/{{workStationConfig_id}}"
@@ -475,8 +480,11 @@ objects:
               output: true
               description: |-
                 Human readable message indicating details about the current status.
-            # TODO: Add `details`
-
+            - !ruby/object:Api::Type::Array
+              name: 'details'
+              description: |
+                A list of messages that carry the error details.
+              item_type: Api::Type::KeyValuePairs
   - !ruby/object:Api::Resource
     name: "Workstation"
     self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workStationCluster_id}}/workstationConfigs/{{workStationConfig_id}}/workstations/{{workstation_id}}"
