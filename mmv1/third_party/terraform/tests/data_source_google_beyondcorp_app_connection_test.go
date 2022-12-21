@@ -1,8 +1,9 @@
 package google
 
 import (
-	"testing"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"testing"
 )
 
 func TestAccDataSourceGoogleBeyondcorpAppConnection_basic(t *testing.T) {
