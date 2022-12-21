@@ -1,5 +1,5 @@
 ---
-title: Generating the provider(s)
+title: Generate the provider
 weight: 20
 ---
 
