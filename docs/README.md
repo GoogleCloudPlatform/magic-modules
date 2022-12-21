@@ -7,5 +7,5 @@ To view locally:
 3. Visit http://localhost:1313/magic-modules/ to view the docs
 
 
-If you are having deployment issues.. try to reset your hugo module cache.
+If you are having deployment issues, try to reset your hugo module cache.
 * `hugo mod clean`
