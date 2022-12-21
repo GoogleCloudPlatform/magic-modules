@@ -254,6 +254,7 @@ objects:
         description: |
           Whether this resource is in degraded mode, in which case it may require user action to restore full functionality. 
           Details can be found in the conditions field.
+        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: "labels"
         description: "Client-specified labels that are applied to the resource and that are also propagated to the underlying Compute Engine resources."
@@ -304,22 +305,18 @@ objects:
             properties:
               - !ruby/object:Api::Type::String
                 name: "machineType"
-                output: true
                 description: |-
                   The name of a Compute Engine machine type.
               - !ruby/object:Api::Type::String
                 name: "serviceAccount"
-                output: true
                 description: |-
                   Email address of the service account that will be used on VM instances used to support this config. This service account must have permission to pull the specified container image. If not set, VMs will run without a service account, in which case the image must be publicly accessible.
               - !ruby/object:Api::Type::Integer
                 name: "poolSize"
-                output: true
                 description: |-
                   Number of instances to pool for faster workstation startup.
               - !ruby/object:Api::Type::Integer
                 name: "bootDiskSizeGb"
-                output: true
                 description: |-
                   Size of the boot disk in GB.
               - !ruby/object:Api::Type::Array
@@ -372,7 +369,6 @@ objects:
                         Type of the disk to use.
                     - !ruby/object:Api::Type::Integer
                       name: "sizeGb"
-                      output: true
                       description: |-
                         Size of the disk in GB. Must be empty if sourceSnapshot is set.
                     - !ruby/object:Api::Type::Enum
@@ -413,7 +409,6 @@ objects:
                     Type of the disk to use.
                 - !ruby/object:Api::Type::Integer
                   name: "sizeGb"
-                  output: true
                   description: |-
                     Size of the disk in GB. Must be empty if sourceSnapshot is set.
                 - !ruby/object:Api::Type::Enum
