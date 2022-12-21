@@ -1,7 +1,7 @@
 {
   "name": "{{assignment}}",
   "project": "{{project}}",
-  "location": "us-central1-f",
+  "location": "europe-west1-a",
   "description": "A test os policy assignment",
   "osPolicies": [
     {
@@ -37,6 +37,6 @@
     "disruptionBudget": {
       "percent": 100
     },
-    "minWaitDuration": "3.5s"
+    "minWaitDuration": "3s"
   }
 }
