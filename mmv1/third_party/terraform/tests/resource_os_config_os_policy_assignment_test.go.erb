@@ -1,0 +1,102 @@
+// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This file is managed by Magic Modules (https://github.com/GoogleCloudPlatform/magic-modules)
+//     and is based on the DCL (https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
+//     Changes will need to be made to the DCL or Magic Modules instead of here.
+//
+//     We are not currently able to accept contributions to this file. If changes
+//     are required, please file an issue at https://github.com/hashicorp/terraform-provider-google/issues/new/choose
+//
+// ----------------------------------------------------------------------------
+
+package google
+
+import (
+	"context"
+	"fmt"
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	osconfig "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/osconfig<%= dcl_version(version) -%>"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"strings"
+	"testing"
+)
+
+func TestAccOsConfigOsPolicyAssignment_policyBasic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_name":  getTestProjectFromEnv(),
+		"zone":          getTestZoneFromEnv(),
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckOsConfigOsPolicyAssignmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOsConfigOsPolicyAssignment_basic(context),
+			},
+			{
+				ResourceName:            "google_os_config_os_policy_assignment.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"rollout.0.min_wait_duration"},
+			},
+		},
+	})
+}
+
+func testAccOsConfigOsPolicyAssignment_basic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_os_config_os_policy_assignment" "primary" {
+  instance_filter {
+    all = false
+  }
+
+  location = "%{zone}"
+  name     = "tf-test-assignment%{random_suffix}"
+
+  os_policies {
+    id   = "policy"
+    mode = "VALIDATION"
+
+    resource_groups {
+      resources {
+        id = "apt"
+
+        pkg {
+          desired_state = "INSTALLED"
+
+          apt {
+            name = "bazel"
+          }
+        }
+      }
+    }
+
+    allow_no_resource_group_match = true
+    description                   = "A test os policy"
+  }
+
+  rollout {
+    disruption_budget {
+      fixed = 100
+    }
+
+    min_wait_duration = "3.5s"
+  }
+
+  description = "A test os policy assignment"
+  project     = "%{project_name}"
+}
+
+
+`, context)
+}
