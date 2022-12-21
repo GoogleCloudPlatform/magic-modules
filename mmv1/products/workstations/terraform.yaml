@@ -24,3 +24,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           workstation_cluster_name: "workstation-cluster"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_cluster_private"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster-private"
