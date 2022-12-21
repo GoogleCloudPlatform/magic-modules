@@ -1,0 +1,12 @@
+resource "google_firestore_database" "<%= ctx[:primary_resource_id] %>" {
+  parent      = "projects/<%= ctx[:test_env_vars]['project_id'] %>"
+  database_id = "<%= ctx[:vars]['database_id'] %>"
+  name = "<%= ctx[:vars]['name'] %>"
+  type = "<%= ctx[:vars]['type'] %>"
+  location_id = "<%= ctx[:vars]['location_id'] %>"
+  concurrency_mode = "<%= ctx[:vars]['concurrency_mode'] %>"
+  app_engine_integration_mode = "DISABLED"
+  updateMask = "concurrencyMode"
+}
+
+

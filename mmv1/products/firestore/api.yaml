@@ -187,28 +187,33 @@ objects:
           Required. A parent name of the form projects/{project_id}
       - !ruby/object:Api::Type::String
         name: 'databaseId'
-        default_value: '(default)'
+        required: true
         input: true
         url_param_only: true
         description: |
           Required. The ID to use for the database, which will become the final component of the database's resource name.
+          This value should be 4-63 characters. Valid characters are /[a-z][0-9]-/ with first character a letter and the last a letter or a number. 
+          Must not be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+          "(default)" database id is also valid.
     properties:
       - !ruby/object:Api::Type::String
         name: name
-        output: true
+        input: true
+        required: true
         description: |
           The resource name of the Database. Format: projects/{project}/databases/{database}
       - !ruby/object:Api::Type::String
         name: locationId
-        output: true
+        required: true
         description: |
           The location of the database. Available databases are listed at 
           https://cloud.google.com/firestore/docs/locations.
       - !ruby/object:Api::Type::Enum
         name: type
+        input: true
+        required: true
         description: |
           The type of the database. See https://cloud.google.com/datastore/docs/firestore-or-datastore for information about how to choose.
-        default_value: :FIRESTORE_NATIVE
         values:
           - :FIRESTORE_NATIVE
           - :DATASTORE_MODE
@@ -217,7 +222,6 @@ objects:
         name: concurrencyMode
         description: |
           The concurrency control mode to use for this database.
-        default_value: :PESSIMISTIC
         values:
           - :CONCURRENCY_MODE_UNSPECIFIED
           - :OPTIMISTIC
@@ -238,3 +242,9 @@ objects:
           Output only. The keyPrefix for this database. 
           This keyPrefix is used, in combination with the project id ("~") to construct the application id 
           that is returned from the Cloud Datastore APIs in Google App Engine first generation runtimes.
+      - !ruby/object:Api::Type::String
+        name: updateMask
+        description: |
+          The list of fields to be updated.
+          This is a comma-separated list of fully qualified names of fields. 
+          Example: "concurrencyMode".
