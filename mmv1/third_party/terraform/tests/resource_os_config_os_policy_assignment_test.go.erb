@@ -102,7 +102,39 @@ resource "google_os_config_os_policy_assignment" "primary" {
           }
         }
       }
+      inventory_filters {
+        os_short_name = "centos"
+        os_version    = "8.*"
+      }
+
+      resources {
+        id = "exec1"
+        exec {
+          validate {
+            interpreter = "SHELL"
+            args        = ["arg1"]
+            file {
+              local_path = "$HOME/script.sh"
+            }
+            output_file_path = "$HOME/out"
+          }
+          enforce {
+            interpreter = "SHELL"
+            args        = ["arg1"]
+            file {
+              allow_insecure = true
+              remote {
+                uri             = "https://www.example.com/script.sh"
+                sha256_checksum = "c7938fed83afdccbb0e86a2a2e4cad7d5035012ca3214b4a61268393635c3063"
+              }
+            }
+            output_file_path = "$HOME/out"
+          }
+        }
+      }
     }
+    allow_no_resource_group_match = false
+    description                   = "A test os policy"
   }
 
   rollout {
