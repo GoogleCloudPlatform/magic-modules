@@ -19,7 +19,7 @@ updateDdls := []string{}
 
 //Only new ddl statments to be add to update call
 for i := len(oldDdls); i < len(newDdls); i++ {
-	if newDdls != nil {
+	if newDdls[i] != nil {
 		updateDdls = append(updateDdls, newDdls[i].(string))
 	}
 }
