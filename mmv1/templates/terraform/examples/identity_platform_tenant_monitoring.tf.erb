@@ -1,0 +1,10 @@
+resource "google_identity_platform_tenant" "<%= ctx[:primary_resource_id] %>" {
+  display_name          = "tenant"
+  allow_password_signup = true
+
+  monitoring {
+    request_logging {
+      enabled = true
+    }
+  }
+}

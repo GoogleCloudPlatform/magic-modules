@@ -109,6 +109,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "identity_platform_tenant_basic"
         primary_resource_id: "tenant"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "identity_platform_tenant_monitoring"
+        primary_resource_id: "tenant"
   ProjectDefaultConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     create_verb: :PATCH
     delete_verb: :PATCH
