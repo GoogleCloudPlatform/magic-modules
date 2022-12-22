@@ -1776,6 +1776,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           group_name: "soletenant-group"
           template_name: "soletenant-tmpl"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_group_share_settings"
+        primary_resource_id: "nodes"
+        vars:
+          group_name: "soletenant-group"
+          template_name: "soletenant-tmpl"
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -1796,6 +1802,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       autoscalingPolicy.maxNodes: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      shareSettings: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        ignore_read: true
+      shareSettings.shareType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      shareSettings.projectMap: !ruby/object:Overrides::Terraform::PropertyOverride
+        key_description: |
+          The project ID.
+      shareSettings.projectMap.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          The project id/number, should be same as the key of this project config in the project map.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/pre_create/compute_node_group_url_replace.go.erb
   NodeTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
