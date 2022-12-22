@@ -236,10 +236,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		pp := expandPasswordPolicy(v)
 		user.PasswordPolicy = pp
 	}
-	err = validateUserType(typ, host, password)
-	if err != nil {
-		return err
-	}
+
 	mutexKV.Lock(instanceMutexKey(project, instance))
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
 	var op *sqladmin.Operation
@@ -411,11 +408,6 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		password := d.Get("password").(string)
 		host := d.Get("host").(string)
 
-		err = validateUserType(d.Get("type").(string), host, password)
-		if err != nil {
-			return err
-		}
-
 		user := &sqladmin.User{
 			Name:     name,
 			Instance: instance,
@@ -528,17 +520,4 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-// Prevents user setting password or host for CLOUD_IAM_USER and CLOUD_IAM_SERVICE_ACCOUNT user types.
-func validateUserType(typ, host, password string) error {
-	if typ == "CLOUD_IAM_USER" || typ == "CLOUD_IAM_SERVICE_ACCOUNT" {
-		if host != "" && len(host) > 0 {
-			return fmt.Errorf("Host field should be set only for MySQL BUILT_IN users")
-		}
-		if password != "" && len(password) > 0 {
-			return fmt.Errorf("Password field should be set only for BUILT_IN users")
-		}
-	}
-	return nil
 }
