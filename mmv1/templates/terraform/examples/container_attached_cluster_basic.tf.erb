@@ -3,6 +3,8 @@ data "google_project" "project" {
 
 resource "google_container_attached_cluster" "primary" {
   name     = "<%= ctx[:vars]['name'] %>"
+  location = "us-west1"
+  project = data.google_project.project.project_id
   description = "Test cluster"
   distribution = "aks"
   oidc_config {
@@ -12,6 +14,4 @@ resource "google_container_attached_cluster" "primary" {
   fleet {
       project = data.google_project.project.number
   }
-  project = data.google_project.project.project_id
-  location = "us-west1"
 }

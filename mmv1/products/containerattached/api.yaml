@@ -32,7 +32,7 @@ objects:
     update_mask: true
     delete_verb: :DELETE
     description: |
-      An Anthos attached cluster.
+      An Anthos cluster running on customer owned infrastructure.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'API reference': 'https://cloud.google.com/anthos/clusters/docs/multi-cloud/reference/rest/v1/projects.locations.attachedClusters'
@@ -56,90 +56,6 @@ objects:
         path: 'error/errors'
         message: 'message'
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: annotations
-        description: |
-          Optional. Annotations on the cluster. This field has the same
-          restrictions as Kubernetes annotations. The total size of all keys and
-          values combined is limited to 256k. Key can have 2 segments: prefix (optional)
-          and name (required), separated by a slash (/). Prefix must be a DNS subdomain.
-          Name must be 63 characters or less, begin and end with alphanumerics,
-          with dashes (-), underscores (_), dots (.), and alphanumerics between.
-      - !ruby/object:Api::Type::NestedObject
-        name: authorization
-        description: |
-          Configuration related to the cluster RBAC settings.
-        properties:
-          - !ruby/object:Api::Type::Array
-            name: admin_users
-            description: |
-              Users that can perform operations as a cluster admin. A managed
-              ClusterRoleBinding will be created to grant the `cluster-admin` ClusterRole
-              to the users. Up to ten admin users can be provided.
-
-              For more info on RBAC, see
-              https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
-            item_type: Api::Type::String
-      - !ruby/object:Api::Type::String
-        name: clusterRegion
-        description: |
-          Output only. The region where this cluster runs.
-
-          For EKS clusters, this is an AWS region. For AKS clusters,
-          this is an Azure region.
-        output: true
-      - !ruby/object:Api::Type::String
-        name: createTime
-        description: |
-          Output only. The time at which this cluster was created.
-        output: true
-      - !ruby/object:Api::Type::String
-        name: description
-        description: |
-          A human readable description of this attached cluster. Cannot be longer
-          than 255 UTF-8 encoded bytes.
-      - !ruby/object:Api::Type::String
-        name: distribution
-        description: |
-          The Kubernetes distribution of the underlying attached cluster. Supported values:
-          "eks", "aks".
-        required: true
-        input: true
-      - !ruby/object:Api::Type::NestedObject
-        name: errors
-        description: |
-          A set of errors found in the cluster.
-        output: true
-        properties:
-          - !ruby/object:Api::Type::Array
-            name: message
-            description: |
-              Human-friendly description of the error.
-            item_type: Api::Type::String
-      - !ruby/object:Api::Type::NestedObject
-        name: fleet
-        description: |
-          Fleet configuration.
-        required: true
-        properties:
-          - !ruby/object:Api::Type::String
-            name: membership
-            description: |
-              The name of the managed Hub Membership resource associated to this
-              cluster. Membership names are formatted as
-              projects/<project-number>/locations/global/membership/<cluster-id>.
-            output: true
-          - !ruby/object:Api::Type::String
-            name: project
-            description: |
-              The number of the Fleet host project where this cluster will be registered.
-            required: true
-            input: true
-      - !ruby/object:Api::Type::String
-        name: kubernetesVersion
-        description: |
-          The Kubernetes version of the cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: location
         description: |
@@ -147,57 +63,17 @@ objects:
         input: true
         required: true
         url_param_only: true
-      - !ruby/object:Api::Type::NestedObject
-        name: loggingConfig
-        description: |
-          Logging configuration.
-        send_empty_value: true
-        allow_empty_object: true
-        properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: componentConfig
-            description: |
-              The configuration of the logging components
-            send_empty_value: true
-            allow_empty_object: true
-            properties:
-            - !ruby/object:Api::Type::Array
-              name: enableComponents
-              description: |
-                The components to be enabled.
-              send_empty_value: true
-              allow_empty_object: true
-              item_type: !ruby/object:Api::Type::Enum
-                name: 'component'
-                description: |
-                  The components of the logging configuration.
-                values:
-                  - :COMPONENT_UNSPECIFIED
-                  - :SYSTEM_COMPONENTS
-                  - :WORKLOADS
-                default_value: :COMPONENT_UNSPECIFIED
-      - !ruby/object:Api::Type::NestedObject
-        name: monitoringConfig
-        description: |
-          Monitoring configuration.
-        allow_empty_object: true
-        properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: managedPrometheusConfig
-            description: |
-              Enable Google Cloud Managed Service for Prometheus in the cluster.
-            allow_empty_object: true
-            properties:
-            - !ruby/object:Api::Type::Boolean
-              name: enabled
-              description: |
-                Enable Managed Collection.
       - !ruby/object:Api::Type::String
         name: name
         description: |
           The name of this resource.
         required: true
         input: true
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          A human readable description of this attached cluster. Cannot be longer
+          than 255 UTF-8 encoded bytes.
       - !ruby/object:Api::Type::NestedObject
         name: oidcConfig
         description: |
@@ -230,11 +106,40 @@ objects:
         description: |
           The platform version for the cluster (e.g. `1.23.0-gke.1`).
         required: true
-      - !ruby/object:Api::Type::Boolean
-        name: reconciling
+      - !ruby/object:Api::Type::String
+        name: distribution
         description: |
-          If set, there are currently changes in flight to the cluster.
+          The Kubernetes distribution of the underlying attached cluster. Supported values:
+          "eks", "aks".
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: clusterRegion
+        description: |
+          Output only. The region where this cluster runs.
+
+          For EKS clusters, this is an AWS region. For AKS clusters,
+          this is an Azure region.
         output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: fleet
+        description: |
+          Fleet configuration.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: membership
+            description: |
+              The name of the managed Hub Membership resource associated to this
+              cluster. Membership names are formatted as
+              projects/<project-number>/locations/global/membership/<cluster-id>.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: project
+            description: |
+              The number of the Fleet host project where this cluster will be registered.
+            required: true
+            input: true
       - !ruby/object:Api::Type::String
         name: state
         description: |
@@ -247,11 +152,35 @@ objects:
         description: |
           A globally unique identifier for the cluster.
         output: true
+      - !ruby/object:Api::Type::Boolean
+        name: reconciling
+        description: |
+          If set, there are currently changes in flight to the cluster.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: createTime
+        description: |
+          Output only. The time at which this cluster was created.
+        output: true
       - !ruby/object:Api::Type::String
         name: updateTime
         description: |
           The time at which this cluster was last updated.
         output: true
+      - !ruby/object:Api::Type::String
+        name: kubernetesVersion
+        description: |
+          The Kubernetes version of the cluster.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: annotations
+        description: |
+          Optional. Annotations on the cluster. This field has the same
+          restrictions as Kubernetes annotations. The total size of all keys and
+          values combined is limited to 256k. Key can have 2 segments: prefix (optional)
+          and name (required), separated by a slash (/). Prefix must be a DNS subdomain.
+          Name must be 63 characters or less, begin and end with alphanumerics,
+          with dashes (-), underscores (_), dots (.), and alphanumerics between.
       - !ruby/object:Api::Type::NestedObject
         name: workloadIdentityConfig
         description: |
@@ -271,3 +200,74 @@ objects:
             name: workloadPool
             description: |
               The Workload Identity Pool associated to the cluster.
+      - !ruby/object:Api::Type::NestedObject
+        name: loggingConfig
+        description: |
+          Logging configuration.
+        send_empty_value: true
+        allow_empty_object: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: componentConfig
+            description: |
+              The configuration of the logging components
+            send_empty_value: true
+            allow_empty_object: true
+            properties:
+            - !ruby/object:Api::Type::Array
+              name: enableComponents
+              description: |
+                The components to be enabled.
+              send_empty_value: true
+              allow_empty_object: true
+              item_type: !ruby/object:Api::Type::Enum
+                name: 'component'
+                description: |
+                  The components of the logging configuration.
+                values:
+                  - :SYSTEM_COMPONENTS
+                  - :WORKLOADS
+      - !ruby/object:Api::Type::NestedObject
+        name: errors
+        description: |
+          A set of errors found in the cluster.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: message
+            description: |
+              Human-friendly description of the error.
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: authorization
+        description: |
+          Configuration related to the cluster RBAC settings.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: adminUsers
+            description: |
+              Users that can perform operations as a cluster admin. A managed
+              ClusterRoleBinding will be created to grant the `cluster-admin` ClusterRole
+              to the users. Up to ten admin users can be provided.
+
+              For more info on RBAC, see
+              https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: monitoringConfig
+        description: |
+          Monitoring configuration.
+        allow_empty_object: true
+        send_empty_value: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: managedPrometheusConfig
+            description: |
+              Enable Google Cloud Managed Service for Prometheus in the cluster.
+            allow_empty_object: true
+            send_empty_value: true
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: enabled
+              description: |
+                Enable Managed Collection.

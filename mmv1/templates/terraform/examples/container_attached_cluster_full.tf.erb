@@ -3,6 +3,8 @@ data "google_project" "project" {
 
 resource "google_container_attached_cluster" "primary" {
   name     = "<%= ctx[:vars]['name'] %>"
+  project = data.google_project.project.project_id
+  location = "us-west1"
   description = "Test cluster"
   distribution = "aks"
   annotations = {
@@ -20,7 +22,7 @@ resource "google_container_attached_cluster" "primary" {
       project = data.google_project.project.number
   }
   logging_config {
-	  component_config {
+    component_config {
       enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
     }
   }
@@ -29,6 +31,4 @@ resource "google_container_attached_cluster" "primary" {
       enabled = true
     }
   }
-  project = data.google_project.project.project_id
-  location = "us-west1"
 }
