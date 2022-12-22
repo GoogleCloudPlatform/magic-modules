@@ -26,7 +26,7 @@ func TestAccDataSourceSqlDatabaseInstances_basic(t *testing.T) {
 				Config: testAccDataSourceSqlDatabaseInstances_basic(context),
 				Check: resource.ComposeTestCheckFunc(
 					checkListDataSourceStateMatchesResourceStateWithIgnores(
-						"data.google_sql_database_instance_list.qa",
+						"data.google_sql_database_instances.qa",
 						"google_sql_database_instance.main",
 						"google_sql_database_instance.main2",
 						map[string]struct{}{
@@ -56,7 +56,7 @@ func TestAccDataSourceSqlDatabaseInstances_databaseVersionFilter(t *testing.T) {
 				Config: testAccDataSourceSqlDatabaseInstances_databaseVersionFilter(context),
 				Check: resource.ComposeTestCheckFunc(
 					checkListDataSourceStateMatchesResourceStateWithIgnoresForAppliedFilter(
-						"data.google_sql_database_instance_list.qa",
+						"data.google_sql_database_instances.qa",
 						"google_sql_database_instance.main",
 						"google_sql_database_instance.main2",
 						map[string]struct{}{
@@ -86,7 +86,7 @@ func TestAccDataSourceSqlDatabaseInstances_regionFilter(t *testing.T) {
 				Config: testAccDataSourceSqlDatabaseInstances_regionFilter(context),
 				Check: resource.ComposeTestCheckFunc(
 					checkListDataSourceStateMatchesResourceStateWithIgnoresForAppliedFilter(
-						"data.google_sql_database_instance_list.qa",
+						"data.google_sql_database_instances.qa",
 						"google_sql_database_instance.main",
 						"google_sql_database_instance.main2",
 						map[string]struct{}{
@@ -116,7 +116,7 @@ func TestAccDataSourceSqlDatabaseInstances_tierFilter(t *testing.T) {
 				Config: testAccDataSourceSqlDatabaseInstances_tierFilter(context),
 				Check: resource.ComposeTestCheckFunc(
 					checkListDataSourceStateMatchesResourceStateWithIgnoresForAppliedFilter(
-						"data.google_sql_database_instance_list.qa",
+						"data.google_sql_database_instances.qa",
 						"google_sql_database_instance.main",
 						"google_sql_database_instance.main2",
 						map[string]struct{}{
@@ -161,7 +161,7 @@ resource "google_sql_database_instance" "main2" {
   }
 
 
-data "google_sql_database_instance_list" "qa" {
+data "google_sql_database_instances" "qa" {
 	depends_on = [
 		google_sql_database_instance.main2,
 		google_sql_database_instance.main
@@ -201,7 +201,7 @@ resource "google_sql_database_instance" "main2" {
   }
 
 
-data "google_sql_database_instance_list" "qa" {
+data "google_sql_database_instances" "qa" {
 	database_version = "MYSQL_8_0"
 	depends_on = [
 		google_sql_database_instance.main2,
@@ -242,7 +242,7 @@ resource "google_sql_database_instance" "main2" {
   }
 
 
-data "google_sql_database_instance_list" "qa" {
+data "google_sql_database_instances" "qa" {
 	region = "us-east1"
 	depends_on = [
 		google_sql_database_instance.main2,
@@ -283,7 +283,7 @@ resource "google_sql_database_instance" "main2" {
   }
 
 
-data "google_sql_database_instance_list" "qa" {
+data "google_sql_database_instances" "qa" {
 	region = "us-central1"
 	tier = "db-custom-2-13312"
 	depends_on = [
