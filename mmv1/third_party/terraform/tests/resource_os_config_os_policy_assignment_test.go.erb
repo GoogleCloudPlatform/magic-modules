@@ -13,15 +13,15 @@ import (
 	"testing"
 )
 
-func TestAccOsConfigOsPolicyAssignment_PercentOsPolicyAssignment(t *testing.T) {
-	// Tests fail due to long rollout times
-	skipIfVcr(t)
+func TestAccOsConfigOsPolicyAssignment_basicOsPolicyAssignment(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"project_name":  getTestProjectFromEnv(),
 		"zone":          getTestZoneFromEnv(),
 		"random_suffix": randString(t, 10),
+		"org_id":        getTestOrgFromEnv(t),
+		"billing_act":   getTestBillingAccountFromEnv(t),
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -44,6 +44,24 @@ func TestAccOsConfigOsPolicyAssignment_PercentOsPolicyAssignment(t *testing.T) {
 
 func testAccOsConfigOsPolicyAssignment_PercentOsPolicyAssignment(context map[string]interface{}) string {
 	return Nprintf(`
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_act}"
+}
+
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "osconfig" {
+  project = google_project.project.project_id
+  service = "osconfig.googleapis.com"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_os_config_os_policy_assignment" "primary" {
   instance_filter {
     all = false
@@ -63,7 +81,7 @@ resource "google_os_config_os_policy_assignment" "primary" {
     }
   }
 
-  location = "europe-west1-a"
+  location = "%{zone}"
   name     = "tf-test-assignment%{random_suffix}"
 
   os_policies {
@@ -96,7 +114,8 @@ resource "google_os_config_os_policy_assignment" "primary" {
   }
 
   description = "A test os policy assignment"
-  project     = "%{project_name}"
+  project     = google_project.project.project_id
+  depends_on = [google_project_service.compute, google_project_service.osconfig]
 }
 
 
