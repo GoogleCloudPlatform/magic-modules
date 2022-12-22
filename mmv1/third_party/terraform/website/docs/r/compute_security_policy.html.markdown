@@ -320,9 +320,7 @@ The following arguments are supported:
 
 * `layer_7_ddos_defense_config` - (Optional) Configuration for [Google Cloud Armor Adaptive Protection Layer 7 DDoS Defense](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_layer_7_ddos_defense_config).
 
-<% unless version == 'ga' -%>
 * `auto_deploy_config` - (Optional) Configuration for [Automatically deploy Adaptive Protection suggested rules](https://cloud.google.com/armor/docs/adaptive-protection-auto-deploy?hl=en). 
-<% end -%>
 
 <a name="nested_layer_7_ddos_defense_config"></a>The `layer_7_ddos_defense_config` block supports:
 
@@ -330,7 +328,6 @@ The following arguments are supported:
 
 * `rule_visibility` - (Optional) Rule visibility can be one of the following: STANDARD - opaque rules. (default) PREMIUM - transparent rules.
 
-<% unless version == 'ga' -%>
 <a name="auto_deploy_config"></a>The `auto_deploy_config` block supports:
 
 * `load_threshold` - (Optional) Identifies new attackers only when the load to the backend service that is under attack exceeds this threshold.
@@ -340,7 +337,6 @@ The following arguments are supported:
 * `impacted_baseline_threshold` - (Optional) Rules are only automatically deployed when the estimated impact to baseline traffic from the suggested mitigation is below this threshold.
 
 * `expiration_sec` - (Optional) Google Cloud Armor stops applying the action in the automatically deployed rule to an identified attacker after this duration. The rule continues to operate against new requests.
-<% end -%>
 
 <a name="nested_recaptcha_options_config"></a>The `recaptcha_options_config` block supports:
 
