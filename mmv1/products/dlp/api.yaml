@@ -309,6 +309,11 @@ objects:
                       - :TOP
                       - :RANDOM_START
                     default_value: :TOP
+                  - !ruby/object:Api::Type::String
+                    name: 'identifyingFields'
+                    description: |
+                      Specifies the BigQuery fields that will be returned with findings (each field is expected to be comma separated).
+                      If not specified, no identifying fields will be returned for findings.
           - !ruby/object:Api::Type::Array
             name: 'actions'
             required: true
