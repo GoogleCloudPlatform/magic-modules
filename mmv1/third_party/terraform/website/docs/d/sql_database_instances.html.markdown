@@ -22,7 +22,7 @@ data "google_sql_database_instances" "qa" {
 
 The following arguments are supported:
 
-* `project` - (optional) The ID of the project in which the resource belongs. If not provided, the current project is used.
+* `project` - (optional) The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
 
 * `database_version` - (optional) To filter out the Cloud SQL instances which are of the specified database version.
 
