@@ -126,6 +126,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     - !ruby/object:Provider::Terraform::Examples
       name: "identity_platform_project_default_config"
       primary_resource_id: "default"
+      # skip tests for this resource until we ensure other settings will not be cleared
+      # see https://github.com/hashicorp/terraform-provider-google/issues/13327
+      skip_test: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
