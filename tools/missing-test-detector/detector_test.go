@@ -19,7 +19,7 @@ func TestDetectMissingTest(t *testing.T) {
 	}{
 		{
 			resourceName: "google_vertex_ai_endpoint",
-			changedFields: allFields(&schema.Resource{
+			changedFields: changedFields(nil, &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"display_name": {
 						Type:        schema.TypeString,
@@ -267,7 +267,7 @@ func TestDetectMissingTest(t *testing.T) {
 		},
 		{
 			resourceName:  "google_compute_instance",
-			changedFields: allFields(provider.ResourceMap()["google_compute_instance"], nil),
+			changedFields: changedFields(nil, provider.ResourceMap()["google_compute_instance"], nil),
 			expectedUntestedFields: []string{
 				"attached_disk.device_name",
 				"attached_disk.kms_key_self_link",

@@ -24,10 +24,7 @@ func TestResourceMapChanges(t *testing.T) {
 				"google_service_one_resource_one": {},
 				"google_service_one_resource_two": {},
 			},
-			expectedChangedFields: map[string][]string{
-				"google_service_one_resource_one": {},
-				"google_service_one_resource_two": {},
-			},
+			expectedChangedFields: map[string][]string{},
 		},
 		{
 			oldResourceMap: map[string]*schema.Resource{
