@@ -109,10 +109,8 @@ func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}
 		pageInstances := flattenDatasourceGoogleDatabaseInstancesList(instances.Items, project)
 		databaseInstances = append(databaseInstances, pageInstances...)
 
-		pToken := instances.NextPageToken
-		if pToken != "" {
-			pageToken = pToken
-		} else {
+		pageToken = instances.NextPageToken
+		if pageToken == "" {
 			break
 		}
 	}
