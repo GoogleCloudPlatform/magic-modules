@@ -3380,9 +3380,9 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'rsaEncryptedKey'
             description: |
-              Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit customer-supplied 
-              encryption key to either encrypt or decrypt this resource. 
-              You can provide either the rawKey or the rsaEncryptedKey.
+              Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit 
+              customer-supplied encryption key to either encrypt or decrypt 
+              this resource. You can provide either the rawKey or the rsaEncryptedKey.
           - !ruby/object:Api::Type::String
             name: 'sha256'
             description: |
