@@ -62,15 +62,15 @@ objects:
         description: |
           Configuration related to monitoring project activity.
         properties:
-          !ruby/object:Api::Type::NestedObject
-          name: requestLogging 
-          description: |
-            Configuration for logging requests made to this project to Stackdriver Logging.
-          properties:
-          - !ruby/object:Api::Type::Boolean
-            name: enabled
+          - !ruby/object:Api::Type::NestedObject
+            name: requestLogging
             description: |
-              Whether logging is enabled for this project or not.
+              Configuration for logging requests made to this project to Stackdriver Logging.
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: enabled
+              description: |
+                Whether logging is enabled for this project or not.
   - !ruby/object:Api::Resource
     name: 'DefaultSupportedIdpConfig'
     base_url: 'projects/{{project}}/defaultSupportedIdpConfigs'
@@ -518,15 +518,15 @@ objects:
         description: |
           Configuration related to monitoring project activity.
         properties:
-          !ruby/object:Api::Type::NestedObject
-          name: requestLogging 
-          description: |
-            Configuration for logging requests made to this project to Stackdriver Logging.
-          properties:
-          - !ruby/object:Api::Type::Boolean
-            name: enabled
+          - !ruby/object:Api::Type::NestedObject
+            name: requestLogging 
             description: |
-              Whether logging is enabled for this project or not.
+              Configuration for logging requests made to this project to Stackdriver Logging.
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: enabled
+              description: |
+                Whether logging is enabled for this project or not.
       - !ruby/object:Api::Type::Boolean
         name: 'disableAuth'
         description: |
