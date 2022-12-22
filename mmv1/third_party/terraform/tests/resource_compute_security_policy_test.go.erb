@@ -234,7 +234,6 @@ func TestAccComputeSecurityPolicy_withAdaptiveProtection(t *testing.T) {
 func TestAccComputeSecurityPolicy_withAdaptiveProtectionAutoDeployConfig(t *testing.T) {
 	t.Parallel()
 
-	fmt.Println("Running test with auto deploy config")
 	spName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
