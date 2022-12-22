@@ -2830,3 +2830,75 @@ resource "google_container_node_pool" "np2" {
   }
 `, cluster, np1, np2)
 }
+
+func testAccContainerNodePool_withDefaultTaintSuppress(cluster, np string, add_custom_taint bool) string {
+	custom_taint := ""
+	if add_custom_taint {
+		custom_taint = `
+taint {
+	key = "custom_taint"
+	value = "test"
+	effect = "NO_SCHEDULE"
+}`
+	}
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+}
+
+resource "google_container_node_pool" "with_default_gpu_taint" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    machine_type = "n1-standard-1"
+    image_type = "COS_CONTAINERD"
+
+    taint {
+      key    = "nvidia.com/gpu"
+      value  = "present"
+      effect = "NO_SCHEDULE"
+    }
+
+	%s
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, np, custom_taint)
+}
+
+func TestAccContainerNodePool_withDefaultTaintSuppress(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withDefaultTaintSuppress(cluster, np, false),
+			},
+			{
+				Config: testAccContainerNodePool_withDefaultTaintSuppress(cluster, np, true),
+			},
+			{
+				Config: testAccContainerNodePool_withDefaultTaintSuppress(cluster, np, false),
+			},
+		},
+	})
+}
