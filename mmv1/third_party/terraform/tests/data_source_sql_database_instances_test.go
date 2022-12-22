@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccDataSourceSqlDatabaseInstanceList_basic(t *testing.T) {
+func TestAccDataSourceSqlDatabaseInstances_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -23,7 +23,7 @@ func TestAccDataSourceSqlDatabaseInstanceList_basic(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceSqlDatabaseInstanceList_basic(context),
+				Config: testAccDataSourceSqlDatabaseInstances_basic(context),
 				Check: resource.ComposeTestCheckFunc(
 					checkListDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_sql_database_instance_list.qa",
@@ -40,7 +40,7 @@ func TestAccDataSourceSqlDatabaseInstanceList_basic(t *testing.T) {
 	})
 }
 
-func TestAccDataSourceSqlDatabaseInstanceList_databaseVersionFilter(t *testing.T) {
+func TestAccDataSourceSqlDatabaseInstances_databaseVersionFilter(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -53,7 +53,7 @@ func TestAccDataSourceSqlDatabaseInstanceList_databaseVersionFilter(t *testing.T
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceSqlDatabaseInstanceList_databaseVersionFilter(context),
+				Config: testAccDataSourceSqlDatabaseInstances_databaseVersionFilter(context),
 				Check: resource.ComposeTestCheckFunc(
 					checkListDataSourceStateMatchesResourceStateWithIgnoresForAppliedFilter(
 						"data.google_sql_database_instance_list.qa",
@@ -70,7 +70,7 @@ func TestAccDataSourceSqlDatabaseInstanceList_databaseVersionFilter(t *testing.T
 	})
 }
 
-func TestAccDataSourceSqlDatabaseInstanceList_regionFilter(t *testing.T) {
+func TestAccDataSourceSqlDatabaseInstances_regionFilter(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -83,7 +83,7 @@ func TestAccDataSourceSqlDatabaseInstanceList_regionFilter(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceSqlDatabaseInstanceList_regionFilter(context),
+				Config: testAccDataSourceSqlDatabaseInstances_regionFilter(context),
 				Check: resource.ComposeTestCheckFunc(
 					checkListDataSourceStateMatchesResourceStateWithIgnoresForAppliedFilter(
 						"data.google_sql_database_instance_list.qa",
@@ -100,7 +100,7 @@ func TestAccDataSourceSqlDatabaseInstanceList_regionFilter(t *testing.T) {
 	})
 }
 
-func TestAccDataSourceSqlDatabaseInstanceList_tierFilter(t *testing.T) {
+func TestAccDataSourceSqlDatabaseInstances_tierFilter(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -113,7 +113,7 @@ func TestAccDataSourceSqlDatabaseInstanceList_tierFilter(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceSqlDatabaseInstanceList_tierFilter(context),
+				Config: testAccDataSourceSqlDatabaseInstances_tierFilter(context),
 				Check: resource.ComposeTestCheckFunc(
 					checkListDataSourceStateMatchesResourceStateWithIgnoresForAppliedFilter(
 						"data.google_sql_database_instance_list.qa",
@@ -130,7 +130,7 @@ func TestAccDataSourceSqlDatabaseInstanceList_tierFilter(t *testing.T) {
 	})
 }
 
-func testAccDataSourceSqlDatabaseInstanceList_basic(context map[string]interface{}) string {
+func testAccDataSourceSqlDatabaseInstances_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_sql_database_instance" "main" {
   name             = "tf-test-instance-%{random_suffix}"
@@ -170,7 +170,7 @@ data "google_sql_database_instance_list" "qa" {
 `, context)
 }
 
-func testAccDataSourceSqlDatabaseInstanceList_databaseVersionFilter(context map[string]interface{}) string {
+func testAccDataSourceSqlDatabaseInstances_databaseVersionFilter(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_sql_database_instance" "main" {
   name             = "tf-test-instance-%{random_suffix}"
@@ -211,7 +211,7 @@ data "google_sql_database_instance_list" "qa" {
 `, context)
 }
 
-func testAccDataSourceSqlDatabaseInstanceList_regionFilter(context map[string]interface{}) string {
+func testAccDataSourceSqlDatabaseInstances_regionFilter(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_sql_database_instance" "main" {
   name             = "tf-test-instance-%{random_suffix}"
@@ -252,7 +252,7 @@ data "google_sql_database_instance_list" "qa" {
 `, context)
 }
 
-func testAccDataSourceSqlDatabaseInstanceList_tierFilter(context map[string]interface{}) string {
+func testAccDataSourceSqlDatabaseInstances_tierFilter(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_sql_database_instance" "main" {
   name             = "tf-test-instance-%{random_suffix}"

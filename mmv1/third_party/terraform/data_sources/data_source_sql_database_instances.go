@@ -8,10 +8,10 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-func dataSourceSqlDatabaseInstanceList() *schema.Resource {
+func dataSourceSqlDatabaseInstances() *schema.Resource {
 
 	return &schema.Resource{
-		Read: dataSourceSqlDatabaseInstanceListRead,
+		Read: dataSourceSqlDatabaseInstancesRead,
 
 		Schema: map[string]*schema.Schema{
 			"project": {
@@ -39,7 +39,7 @@ func dataSourceSqlDatabaseInstanceList() *schema.Resource {
 				Optional:    true,
 				Description: `To filter out the database instances based on the machine type.`,
 			},
-			"status": {
+			"state": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: `To filter out the database instances based on the current state of the database instance, valid values include : "SQL_INSTANCE_STATE_UNSPECIFIED", "RUNNABLE", "SUSPENDED", "PENDING_DELETE", "PENDING_CREATE", "MAINTENANCE" and "FAILED".`,
@@ -55,7 +55,7 @@ func dataSourceSqlDatabaseInstanceList() *schema.Resource {
 	}
 }
 
-func dataSourceSqlDatabaseInstanceListRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -88,7 +88,7 @@ func dataSourceSqlDatabaseInstanceListRead(d *schema.ResourceData, meta interfac
 		}
 		filter += fmt.Sprintf("settings.tier:%s", v.(string))
 	}
-	if v, ok := d.GetOk("status"); ok {
+	if v, ok := d.GetOk("state"); ok {
 		if filter != "" {
 			filter += " AND "
 		}
@@ -121,7 +121,7 @@ func dataSourceSqlDatabaseInstanceListRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error retrieving instances: %s", err)
 	}
 
-	d.SetId(fmt.Sprintf("database_instance_list_ds/%s/%s/%s/%s/%s/%s", project, d.Get("database_version").(string), d.Get("region").(string), d.Get("zone").(string), d.Get("tier").(string), d.Get("status").(string)))
+	d.SetId(fmt.Sprintf("database_instances_ds/%s/%s/%s/%s/%s/%s", project, d.Get("database_version").(string), d.Get("region").(string), d.Get("zone").(string), d.Get("tier").(string), d.Get("state").(string)))
 
 	return nil
 }
