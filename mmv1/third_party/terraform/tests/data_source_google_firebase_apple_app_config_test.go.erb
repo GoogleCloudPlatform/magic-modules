@@ -41,7 +41,7 @@ resource "google_firebase_apple_app" "my_app_config" {
 }
 
 data "google_firebase_apple_app_config" "my_app_config" {
-  apple_app_id = google_firebase_apple_app.my_app_config.app_id
+  app_id = google_firebase_apple_app.my_app_config.app_id
 }
 `, context)
 }

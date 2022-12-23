@@ -12,7 +12,7 @@ func dataSourceGoogleFirebaseAppleAppConfig() *schema.Resource {
 		Read: dataSourceGoogleFirebaseAppleAppConfigRead,
 
 		Schema: map[string]*schema.Schema{
-			"apple_app_id": {
+			"app_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: `The id of the Firebase iOS App.`,
@@ -49,9 +49,9 @@ func dataSourceGoogleFirebaseAppleAppConfigRead(d *schema.ResourceData, meta int
 		return err
 	}
 
-	id := fmt.Sprintf("projects/%s/iosApps/%s", project, d.Get("apple_app_id").(string))
+	id := fmt.Sprintf("projects/%s/iosApps/%s", project, d.Get("app_id").(string))
 
-	url, err := replaceVars(d, config, "{{FirebaseBasePath}}projects/{{project}}/iosApps/{{apple_app_id}}/config")
+	url, err := replaceVars(d, config, "{{FirebaseBasePath}}projects/{{project}}/iosApps/{{app_id}}/config")
 	if err != nil {
 		return err
 	}

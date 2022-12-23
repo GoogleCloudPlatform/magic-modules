@@ -2,12 +2,12 @@
 subcategory: "Firebase"
 page_title: "Google: google_firebase_apple_app_config"
 description: |-
-  A Google Cloud Firebase iOS application configuration
+  A Google Cloud Firebase Apple application configuration
 ---
 
 # google\_firebase\_apple\_app\_config
 
-A Google Cloud Firebase iOS application configuration
+A Google Cloud Firebase Apple application configuration
 
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
@@ -22,7 +22,7 @@ To get more information about iosApp, see:
 ## Argument Reference
 The following arguments are supported:
 
-* `apple_app_id` - (Required) The id of the Firebase iOS App.
+* `app_id` - (Required) The id of the Firebase iOS App.
 
 - - -
 
