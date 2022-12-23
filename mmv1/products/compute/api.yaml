@@ -7650,6 +7650,21 @@ objects:
         description: |
           Maximum Transmission Unit (MTU), in bytes, of packets passing through
           this interconnect attachment. Currently, only 1440 and 1500 are allowed. If not specified, the value will default to 1440.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Labels to apply to this address.  A list of key->value pairs.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/interconnects/{{name}}/setLabels'
+        min_version: beta
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/global/interconnects/{{name}}/setLabels'
+        update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'bandwidth'
         description: |

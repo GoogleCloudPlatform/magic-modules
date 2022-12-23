@@ -1458,6 +1458,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: false
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
