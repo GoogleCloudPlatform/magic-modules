@@ -80,40 +80,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringIsJSON'
   Database: !ruby/object:Overrides::Terraform::ResourceOverride
-    # import_format: ["{{name}}"]
+    import_format: ["{{name}}"]
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         This resource creates a Firestore Database on a project that already has
         Firestore enabled.
-    properties:
-      concurrencyMode: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      appEngineIntegrationMode: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firestore_database_basic"
         primary_resource_id: "default"
         test_env_vars:
-          project_id: :FIRESTORE_PROJECT_NAME
-        vars:
-          database_id: "(default)"
-          name: "projects/my_project_name/databases/my_database_id"
-          location_id: "us-east1"
-          type: "FIRESTORE_NATIVE"
+          project: GOOGLE_PROJECT
       - !ruby/object:Provider::Terraform::Examples
         name: "firestore_database_full"
         primary_resource_id: "default"
         test_env_vars:
-          project_id: :FIRESTORE_PROJECT_NAME
-        vars:
-          database_id: "(default)"
-          name: "projects/project_id/databases/database_id"
-          location_id: "us-west1"
-          type: "FIRESTORE_NATIVE"
-          concurrencyMode: "OPTIMISTIC"
-          appEngineIntegrationMode: "DISABLED"
-
+          project: GOOGLE_PROJECT
+    properties:
+      concurrencyMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      appEngineIntegrationMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

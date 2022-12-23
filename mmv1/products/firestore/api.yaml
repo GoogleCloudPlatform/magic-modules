@@ -168,8 +168,8 @@ objects:
         output: true
   - !ruby/object:Api::Resource
     name: 'Database'
-    base_url: projects/{{project}}/databases/{{database}}
-    create_url: projects/{{project}}/databases/{{database}}/create
+    base_url: projects/{{project}}/databases
+    create_url: projects/{{project}}/databases
     create_verb: :POST
     self_link: '{{name}}'
     description: Creates a database.
@@ -242,9 +242,3 @@ objects:
           Output only. The keyPrefix for this database. 
           This keyPrefix is used, in combination with the project id ("~") to construct the application id 
           that is returned from the Cloud Datastore APIs in Google App Engine first generation runtimes.
-      - !ruby/object:Api::Type::String
-        name: updateMask
-        description: |
-          The list of fields to be updated.
-          This is a comma-separated list of fully qualified names of fields. 
-          Example: "concurrencyMode".
