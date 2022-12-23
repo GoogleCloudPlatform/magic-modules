@@ -43,7 +43,7 @@ resource "google_project_service" "foo" {
 
 data "google_project_service" "foo" {
   project = google_project.acceptance.project_id
-  service = google_project_service.foo
+  service = google_project_service.foo.service
 }
 `, pid, name, org, services[0])
 }
