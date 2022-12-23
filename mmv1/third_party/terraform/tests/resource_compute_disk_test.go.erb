@@ -1068,9 +1068,9 @@ func TestAccComputeDisk_encryptionWithRSAEncryptedKey(t *testing.T) {
 				Config: testAccComputeDisk_encryptionWithRSAEncryptedKey(diskName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeDiskExists(
-						t, "google_compute_disk.foobar", getTestProjectFromEnv(), &disk),
+						t, "google_compute_disk.foobar-1", getTestProjectFromEnv(), &disk),
 					testAccCheckEncryptionKey(
-						t, "google_compute_disk.foobar", &disk),
+						t, "google_compute_disk.foobar-1", &disk),
 				),
 			},
 		},
@@ -1084,7 +1084,7 @@ data "google_compute_image" "my_image" {
   project = "debian-cloud"
 }
 
-resource "google_compute_disk" "foobar" {
+resource "google_compute_disk" "foobar-1" {
   name  = "%s"
   image = data.google_compute_image.my_image.self_link
   size  = 50
