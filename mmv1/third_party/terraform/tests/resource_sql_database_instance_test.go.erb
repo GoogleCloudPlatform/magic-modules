@@ -73,6 +73,9 @@ func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testGoogleSqlDatabaseInstance_basic2,
+				Check: resource.ComposeTestCheckFunc(
+					checkInstanceTypeIsPresent("google_sql_database_instance.instance"),
+				),
 			},
 			resource.TestStep{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -2671,4 +2674,19 @@ data "google_sql_backup_run" "backup" {
 	most_recent = true
 }
 `, context)
+}
+
+func checkInstanceTypeIsPresent(resourceName string) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("can't find %s in state", resourceName)
+		}
+		rsAttr := rs.Primary.Attributes
+		_, ok = rsAttr["instance_type"]; 
+		if !ok {
+			return fmt.Errorf("Instance type is not computed for %s", resourceName)
+		}
+		return nil
+	}
 }
