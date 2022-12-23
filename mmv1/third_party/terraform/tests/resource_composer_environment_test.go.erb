@@ -1778,8 +1778,8 @@ resource "google_composer_environment" "test" {
         }
 				<% unless version == "ga" -%>
 				triggerer {
-					cpu         = 1.5
-					memory_gb   = 3.0
+					cpu         = 2.25
+					memory_gb   = 4
 					count   		= 1
 				}
 				<% end -%>
