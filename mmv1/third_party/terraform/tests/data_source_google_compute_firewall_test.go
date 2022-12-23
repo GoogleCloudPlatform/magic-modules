@@ -53,6 +53,7 @@ resource "google_compute_network" "default" {
 data "google_compute_firewall" "foo" {
 	name = google_compute_firewall.default.name
 	project = google_compute_firewall.default.project
-}`, context)
+}`
+, context)
 
 }

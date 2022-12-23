@@ -7,7 +7,9 @@ import (
 )
 
 func dataSourceGoogleComputeFirewall() *schema.Resource {
+
 	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeFirewall().Schema)
+	
 	addRequiredFieldsToSchema(dsSchema, "name", "project")
 
 	return &schema.Resource{
@@ -23,6 +25,7 @@ func dataSourceGoogleCloudFirewallRead(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
+
 	d.SetId(id)
 	return resourceComputeFirewallRead(d, meta)
 }
