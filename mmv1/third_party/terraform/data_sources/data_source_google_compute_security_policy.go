@@ -11,12 +11,12 @@ func dataSourceGoogleComputeSecurityPolicy() *schema.Resource {
 	addRequiredFieldsToSchema(dsSchema, "name", "project")
 
 	return &schema.Resource{
-		Read:   dataSourceComputeecurityPolicyRead,
+		Read:   dataSourceComputSecurityPolicyRead,
 		Schema: dsSchema,
 	}
 }
 
-func dataSourceComputeecurityPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceComputSecurityPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
 	project, err := getProject(d, config)

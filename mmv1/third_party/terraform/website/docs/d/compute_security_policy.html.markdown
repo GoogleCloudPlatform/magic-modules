@@ -7,7 +7,7 @@ description: |-
 
 # google\_compute\_security\_policy
 
-To get more information about Snapshot, see:
+To get more information about Google Compute Security Policy, see:
 
 * [API documentation](https://cloud.google.com/compute/docs/reference/rest/beta/securityPolicies)
 * How-to Guides
