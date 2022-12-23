@@ -3,10 +3,13 @@ resource "google_project" "default" {
   name       = "tf-test%{random_suffix}"
   org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
   billing_account =  "<%= ctx[:test_env_vars]['billing_acct'] -%>"
+  labels = {
+    firebase = "enabled"
+  }
 }
 
 resource "google_project_service" "identitytoolkit" {
-  project = google_project.project.project_id
+  project = google_project.default.project_id
   service = "identitytoolkit.googleapis.com"
 }
 

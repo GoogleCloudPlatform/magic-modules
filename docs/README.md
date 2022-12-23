@@ -1,4 +1,4 @@
-Documentation is generated using [Hugo](https://gohugo.io/).
+The docsite is generated using [Hugo](https://gohugo.io/) and hosted using Github Pages. Magic Modules documentation should adhere to the [Google developer documentation style guide](https://developers.google.com/style/).
 
 To view locally:
 
