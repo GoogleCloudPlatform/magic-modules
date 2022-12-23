@@ -98,10 +98,16 @@ func machineTypeIfAllowStoppingForUpdateFalseFunc(diff TerraformResourceDiff) er
 	old, new := diff.GetChange("machine_type")
 	if old.(string) != new.(string) && old.(string) != "" {
 		allowUpdate := diff.Get("allow_stopping_for_update")
-		desiredStatus := diff.Get("desired_status")
+		oldStatus, newStatus := diff.GetChange("desired_status")
 		if !(allowUpdate.(bool)) {
-			if (desiredStatus != "TERMINATED"){
-			  return fmt.Errorf("allow_stopping_for_update is %v hence updating machine_type isn't possible.", allowUpdate)
+			if oldStatus == "" {
+				if newStatus != "TERMINATED" {
+					return fmt.Errorf("allow_stopping_for_update is %v hence updating machine_type isn't possible.", newStatus)
+				}
+			} else {
+				if oldStatus != "TERMINATED" {
+					return fmt.Errorf("allow_stopping_for_update is %v hence updating machine_type isn't possible.", oldStatus)
+				}
 			}
 		}
 	}
