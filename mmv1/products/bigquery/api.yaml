@@ -1701,7 +1701,7 @@ objects:
           The language of the routine.
         values:
           - :SQL
-          - :JAVASCRIPT
+          - :JS
       - !ruby/object:Api::Type::Array
         name: 'arguments'
         description: Input/output argument of a function or a stored procedure.
@@ -1762,7 +1762,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'importedLibraries'
         description: |
-          Optional. If language = "JAVASCRIPT", this field stores the path of the
+          Optional. If language = "JS", this field stores the path of the
           imported JAVASCRIPT libraries.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
