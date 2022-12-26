@@ -17,8 +17,8 @@ To get more information about Google Compute Firewall, see:
 
 ```hcl
 data "google_compute_firewall" "foo" {
-	name = "firewall-name"
-	project = "my-project"
+  name = "firewall-name"
+  project = "my-project"
 }
 
 ```
