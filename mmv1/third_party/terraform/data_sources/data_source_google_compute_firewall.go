@@ -9,7 +9,7 @@ import (
 func dataSourceGoogleComputeFirewall() *schema.Resource {
 
 	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeFirewall().Schema)
-	
+
 	addRequiredFieldsToSchema(dsSchema, "name", "project")
 
 	return &schema.Resource{
