@@ -998,70 +998,70 @@ objects:
           * BATCH_UPDATE: user can call indexes.patch with files on Cloud Storage of datapoints to update.
           * STREAM_UPDATE: user can call indexes.upsertDatapoints/DeleteDatapoints to update the Index and the updates will be applied in corresponding DeployedIndexes in nearly real-time.
 # Vertex AI Metadata Store Metadata Schemas
-- !ruby/object:Api::Resource
-  name: MetadataSchema
-  base_url: projects/{{project}}/locations/{{region}}/metadataSchemas
-  self_link: 'projects/{{project}}/locations/{{region}}/metadataSchemas/{{name}}'
-  create_link: projects/{{project}}/locations/{{region}}/metadataSchemas?metadataSchemaId={{name}}
-  min_version: beta
-  input: true
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Official Documentation':
-        'https://cloud.google.com/vertex-ai/docs'
-    api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.metadataStores.metadataSchemas'
-  async: !ruby/object:Api::OpAsync
-    operation: !ruby/object:Api::OpAsync::Operation
-      path: 'name'
-      base_url: '{{op_id}}'
-      wait_ms: 1000
-    result: !ruby/object:Api::OpAsync::Result
-      path: 'response'
-      resource_inside_response: true
-    status: !ruby/object:Api::OpAsync::Status
-      path: 'done'
-      complete: True
-      allowed:
-        - True
-        - False
-    error: !ruby/object:Api::OpAsync::Error
-      path: 'error'
-      message: 'message'
-  description: |-
-    Instance of a general MetadataSchema.
-  parameters:
-    - !ruby/object:Api::Type::String
-      name: region
-      description: The region of the Metadata Store. eg us-central1
-      url_param_only: true
-      input: true
-  properties:
-    - !ruby/object:Api::Type::String
-      name: 'name'
-      output: true
-      description: The resource name of the MetadataSchema.
-    - !ruby/object:Api::Type::String
-      name: 'description'
-      input: true
-      description: Description of the Metadata Schema
-    - !ruby/object:Api::Type::String
-      name: 'schemaVersion'
-      input: true
-      description: |
-        The version of the MetadataSchema. The version's format must match the following regular expression: ^[0-9]+[.][0-9]+[.][0-9]+$, which would allow to order/compare different versions. Example: 1.0.0, 1.0.1, etc.
-    - !ruby/object:Api::Type::String
-      name: 'schema'
-      required: true
-      input: true
-      description: |
-        The raw YAML string representation of the MetadataSchema. The combination of [MetadataSchema.version] and the schema name given by title in [MetadataSchema.schema] must be unique within a MetadataStore. The schema is defined as an OpenAPI 3.0.2
-    - !ruby/object:Api::Type::Enum
-      name: 'schemaType'
-      description: |
-        The type of the MetadataSchema. This is a property that identifies which metadata types will use the MetadataSchema.
-      input: true
-      values:
-        - :METADATA_SCHEMA_TYPE_UNSPECIFIED
-        - :ARTIFACT_TYPE
-        - :EXECUTION_TYPE
-        - :CONTEXT_TYPE
+  - !ruby/object:Api::Resource
+    name: MetadataSchema
+    base_url: projects/{{project}}/locations/{{region}}/metadataSchemas
+    self_link: 'projects/{{project}}/locations/{{region}}/metadataSchemas/{{name}}'
+    create_link: projects/{{project}}/locations/{{region}}/metadataSchemas?metadataSchemaId={{name}}
+    min_version: beta
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.metadataStores.metadataSchemas'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      Instance of a general MetadataSchema.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the Metadata Store. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: The resource name of the MetadataSchema.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        input: true
+        description: Description of the Metadata Schema
+      - !ruby/object:Api::Type::String
+        name: 'schemaVersion'
+        input: true
+        description: |
+          The version of the MetadataSchema. The version's format must match the following regular expression: ^[0-9]+[.][0-9]+[.][0-9]+$, which would allow to order/compare different versions. Example: 1.0.0, 1.0.1, etc.
+      - !ruby/object:Api::Type::String
+        name: 'schema'
+        required: true
+        input: true
+        description: |
+          The raw YAML string representation of the MetadataSchema. The combination of [MetadataSchema.version] and the schema name given by title in [MetadataSchema.schema] must be unique within a MetadataStore. The schema is defined as an OpenAPI 3.0.2
+      - !ruby/object:Api::Type::Enum
+        name: 'schemaType'
+        description: |
+          The type of the MetadataSchema. This is a property that identifies which metadata types will use the MetadataSchema.
+        input: true
+        values:
+          - :METADATA_SCHEMA_TYPE_UNSPECIFIED
+          - :ARTIFACT_TYPE
+          - :EXECUTION_TYPE
+          - :CONTEXT_TYPE
