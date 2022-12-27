@@ -974,8 +974,10 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'infoTypeTransformations'
-            required: true
-            description: Specifies free-text based transformations to be applied to the dataset.
+            description: Treat the dataset as free-form text and apply the same free text transformation everywhere
+            exactly_one_of:
+              - deidentify_config.0.info_type_transformations
+              - deidentify_config.0.record_transformations
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'transformations'
@@ -1001,6 +1003,7 @@ objects:
                       required: true
                       description: |
                         Primitive transformation to apply to the infoType.
+                        The `primitive_transformation` block must only contain one argument, corresponding to the type of transformation.
                       properties:
                         - !ruby/object:Api::Type::NestedObject
                           name: 'replaceConfig'
@@ -1012,6 +1015,7 @@ objects:
                               required: true
                               description: |
                                 Replace each input value with a given value.
+                                The `new_value` block must only contain one argument. For example when replacing the contents of a string-type field, only `string_value` should be set.
                               properties:
                                 - !ruby/object:Api::Type::Integer
                                   name: 'integerValue'
@@ -1328,4 +1332,384 @@ objects:
                               name: 'radix'
                               description: |
                                 The native way to select the alphabet. Must be in the range \[2, 95\].
-
+          - !ruby/object:Api::Type::NestedObject
+            name: 'recordTransformations'
+            description: Treat the dataset as structured. Transformations can be applied to specific locations within structured datasets, such as transforming a column within a table.
+            exactly_one_of:
+              - deidentify_config.0.info_type_transformations
+              - deidentify_config.0.record_transformations
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'fieldTransformations'
+                description: Transform the record by applying various field transformations.
+                at_least_one_of:
+                  - deidentify_config.0.record_transformations.0.field_transformations
+                  - deidentify_config.0.record_transformations.0.record_suppressions
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: fields
+                      description : |
+                        Input field(s) to apply the transformation to. When you have columns that reference their position within a list, omit the index from the FieldId.
+                        FieldId name matching ignores the index. For example, instead of "contact.nums[0].type", use "contact.nums.type".
+                      required: true
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: name
+                            description: Name describing the field.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: condition
+                      description: |
+                        Only apply the transformation if the condition evaluates to true for the given RecordCondition. The conditions are allowed to reference fields that are not used in the actual transformation.
+                        Example Use Cases:
+                        - Apply a different bucket transformation to an age column if the zip code column for the same record is within a specific range.
+                        - Redact a field if the date of birth field is greater than 85.
+                      properties:
+                        - !ruby/object:Api::Type::NestedObject
+                          name: expressions
+                          description: An expression.
+                          properties:
+                            - !ruby/object:Api::Type::Enum
+                              name: logicalOperator
+                              description: The operator to apply to the result of conditions. Default and currently only supported value is AND
+                              default_value: :AND
+                              values:
+                                - :AND
+                            - !ruby/object:Api::Type::NestedObject
+                              name: conditions
+                              description: Conditions to apply to the expression.
+                              properties:
+                                - !ruby/object:Api::Type::Array
+                                  name: conditions
+                                  description: A collection of conditions.
+                                  item_type: !ruby/object:Api::Type::NestedObject
+                                    properties:
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: field
+                                        description: Field within the record this condition is evaluated against.
+                                        required: true
+                                        properties:
+                                          - !ruby/object:Api::Type::String
+                                            name: name
+                                            description: Name describing the field.
+                                      - !ruby/object:Api::Type::Enum
+                                        name: operator
+                                        description: Operator used to compare the field or infoType to the value.
+                                        required: true
+                                        values:
+                                          - :EQUAL_TO
+                                          - :NOT_EQUAL_TO
+                                          - :GREATER_THAN
+                                          - :LESS_THAN
+                                          - :GREATER_THAN_OR_EQUALS
+                                          - :LESS_THAN_OR_EQUALS
+                                          - :EXISTS
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: value
+                                        description: |
+                                          Value to compare against.
+                                          The `value` block must only contain one argument. For example when a condition is evaluated against a string-type field, only `string_value` should be set.
+                                          This argument is mandatory, except for conditions using the `EXISTS` operator.
+                                        properties:
+                                          - !ruby/object:Api::Type::String
+                                            name: integerValue
+                                            description: An integer value (int64 format)
+                                          - !ruby/object:Api::Type::Double
+                                            name: floatValue
+                                            description: A float value.
+                                          - !ruby/object:Api::Type::String
+                                            name: stringValue
+                                            description: A string value.
+                                          - !ruby/object:Api::Type::Boolean
+                                            name: booleanValue
+                                            description: A boolean value.
+                                          - !ruby/object:Api::Type::String
+                                            name: timestampValue
+                                            description: |
+                                              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                          - !ruby/object:Api::Type::NestedObject
+                                            name: timeValue
+                                            description: Represents a time of day.
+                                            properties:
+                                              - !ruby/object:Api::Type::Integer
+                                                name: hours
+                                                description: |
+                                                  Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: minutes
+                                                description: Minutes of hour of day. Must be from 0 to 59.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: seconds
+                                                description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: nanos
+                                                description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                          - !ruby/object:Api::Type::NestedObject
+                                            name: dateValue
+                                            description: Represents a whole or partial calendar date.
+                                            properties:
+                                              - !ruby/object:Api::Type::Integer
+                                                name: year
+                                                description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: month
+                                                description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: day
+                                                description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                          - !ruby/object:Api::Type::Enum
+                                            name: dayOfWeekValue
+                                            description: Represents a day of the week.
+                                            values:
+                                              - :MONDAY
+                                              - :TUESDAY
+                                              - :WEDNESDAY
+                                              - :THURSDAY
+                                              - :FRIDAY
+                                              - :SATURDAY
+                                              - :SUNDAY
+                    - !ruby/object:Api::Type::NestedObject
+                      name: primitiveTransformation
+                      required: true
+                      description: |
+                        Apply the transformation to the entire field.
+                        The `primitive_transformation` block must only contain one argument, corresponding to the type of transformation.
+                      properties:
+                        - !ruby/object:Api::Type::NestedObject
+                          name: replaceConfig
+                          description: Replace with a specified value.
+                          properties:
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'newValue'
+                              required: true
+                              description: |
+                                Replace each input value with a given value.
+                                The `new_value` block must only contain one argument. For example when replacing the contents of a string-type field, only `string_value` should be set.
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: integerValue
+                                  description: An integer value (int64 format)
+                                - !ruby/object:Api::Type::Double
+                                  name: floatValue
+                                  description: A float value.
+                                - !ruby/object:Api::Type::String
+                                  name: stringValue
+                                  description: A string value.
+                                - !ruby/object:Api::Type::Boolean
+                                  name: booleanValue
+                                  description: A boolean value.
+                                - !ruby/object:Api::Type::String
+                                  name: timestampValue
+                                  description: |
+                                    A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: timeValue
+                                  description: Represents a time of day.
+                                  properties:
+                                    - !ruby/object:Api::Type::Integer
+                                      name: hours
+                                      description: |
+                                        Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: minutes
+                                      description: Minutes of hour of day. Must be from 0 to 59.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: seconds
+                                      description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: nanos
+                                      description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: dateValue
+                                  description: Represents a whole or partial calendar date.
+                                  properties:
+                                    - !ruby/object:Api::Type::Integer
+                                      name: year
+                                      description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: month
+                                      description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                    - !ruby/object:Api::Type::Integer
+                                      name: day
+                                      description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                - !ruby/object:Api::Type::Enum
+                                  name: dayOfWeekValue
+                                  description: Represents a day of the week.
+                                  values:
+                                    - :MONDAY
+                                    - :TUESDAY
+                                    - :WEDNESDAY
+                                    - :THURSDAY
+                                    - :FRIDAY
+                                    - :SATURDAY
+                                    - :SUNDAY
+                        - !ruby/object:Api::Type::NestedObject
+                          name: redactConfig
+                          description: |
+                            Redact a given value. For example, if used with an InfoTypeTransformation transforming PHONE_NUMBER, and input 'My phone number is 206-555-0123', the output would be 'My phone number is '.
+                          properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#redactconfig
+                          # The fields below are necessary to include the "redactConfig" transformation in the payload
+                          # A side-effect is null values when the field is unused, see: https://github.com/hashicorp/terraform-provider-google/issues/13201
+                          send_empty_value: true
+                          allow_empty_object: true
+                        - !ruby/object:Api::Type::NestedObject
+                          name: characterMaskConfig
+                          description: |
+                            Partially mask a string by replacing a given number of characters with a fixed character. Masking can start from the beginning or end of the string. This can be used on data of any type (numbers, longs, and so on) and when de-identifying structured data we'll attempt to preserve the original data's type. (This allows you to take a long like 123 and modify it to a string like **3).
+                          properties:
+                            - !ruby/object:Api::Type::String
+                              name: 'maskingCharacter'
+                              description: |
+                                Character to use to mask the sensitive values—for example, * for an alphabetic string such as a name, or 0 for a numeric string
+                                such as ZIP code or credit card number. This string must have a length of 1. If not supplied, this value defaults to * for
+                                strings, and 0 for digits.
+                            - !ruby/object:Api::Type::Integer
+                              name: 'numberToMask'
+                              description: |
+                                Number of characters to mask. If not set, all matching chars will be masked. Skipped characters do not count towards this tally.
+                                If number_to_mask is negative, this denotes inverse masking. Cloud DLP masks all but a number of characters. For example, suppose you have the following values:
+                                - `masking_character` is *
+                                - `number_to_mask` is -4
+                                - `reverse_order` is false
+                                - `characters_to_ignore` includes -
+                                - Input string is 1234-5678-9012-3456
+                                
+                                The resulting de-identified string is ****-****-****-3456. Cloud DLP masks all but the last four characters. If reverseOrder is true, all but the first four characters are masked as 1234-****-****-****.
+                            - !ruby/object:Api::Type::Boolean
+                              name: 'reverseOrder'
+                              description: |
+                                Mask characters in reverse order. For example, if masking_character is 0, number_to_mask is 14, and reverse_order is `false`, then the
+                                input string `1234-5678-9012-3456` is masked as `00000000000000-3456`.
+                            - !ruby/object:Api::Type::Array
+                              name: 'charactersToIgnore'
+                              description: |
+                                Characters to skip when doing de-identification of a value. These will be left alone and skipped.
+                              item_type: !ruby/object:Api::Type::NestedObject
+                                properties:
+                                  - !ruby/object:Api::Type::String
+                                    name: 'charactersToSkip'
+                                    description: |
+                                      Characters to not transform when masking.
+                                  - !ruby/object:Api::Type::Enum
+                                    name: 'commonCharactersToIgnore'
+                                    description: |
+                                      Common characters to not transform when masking. Useful to avoid removing punctuation.
+                                    values:
+                                      - :NUMERIC
+                                      - :ALPHA_UPPER_CASE
+                                      - :ALPHA_LOWER_CASE
+                                      - :PUNCTUATION
+                                      - :WHITESPACE
+              - !ruby/object:Api::Type::Array
+                name: 'recordSuppressions'
+                description: Configuration defining which records get suppressed entirely. Records that match any suppression rule are omitted from the output.
+                at_least_one_of:
+                  - deidentify_config.0.record_transformations.0.field_transformations
+                  - deidentify_config.0.record_transformations.0.record_suppressions
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: condition
+                      description: A condition that when it evaluates to true will result in the record being evaluated to be suppressed from the transformed content.
+                      properties:
+                        - !ruby/object:Api::Type::NestedObject
+                          name: expressions
+                          description: An expression, consisting of an operator and conditions.
+                          properties:
+                            - !ruby/object:Api::Type::Enum
+                              name: logicalOperator
+                              description: The operator to apply to the result of conditions. Default and currently only supported value is AND.
+                              default_value: :AND
+                              values:
+                                - :AND
+                            - !ruby/object:Api::Type::NestedObject
+                              name: conditions
+                              description: Conditions to apply to the expression.
+                              properties:
+                                - !ruby/object:Api::Type::Array
+                                  name: conditions
+                                  description: A collection of conditions.
+                                  item_type: !ruby/object:Api::Type::NestedObject
+                                    properties:
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: field
+                                        description: Field within the record this condition is evaluated against.
+                                        required: true
+                                        properties:
+                                          - !ruby/object:Api::Type::String
+                                            name: name
+                                            description: Name describing the field.
+                                      - !ruby/object:Api::Type::Enum
+                                        name: operator
+                                        description: Operator used to compare the field or infoType to the value.
+                                        required: true
+                                        values:
+                                          - :EQUAL_TO
+                                          - :NOT_EQUAL_TO
+                                          - :GREATER_THAN
+                                          - :LESS_THAN
+                                          - :GREATER_THAN_OR_EQUALS
+                                          - :LESS_THAN_OR_EQUALS
+                                          - :EXISTS
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: value
+                                        description: Value to compare against. [Mandatory, except for EXISTS tests.]
+                                        properties:
+                                          - !ruby/object:Api::Type::String
+                                            name: integerValue
+                                            description: An integer value (int64 format)
+                                          - !ruby/object:Api::Type::Double
+                                            name: floatValue
+                                            description: A float value.
+                                          - !ruby/object:Api::Type::String
+                                            name: stringValue
+                                            description: A string value.
+                                          - !ruby/object:Api::Type::Boolean
+                                            name: booleanValue
+                                            description: A boolean value.
+                                          - !ruby/object:Api::Type::String
+                                            name: timestampValue
+                                            description: |
+                                              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                          - !ruby/object:Api::Type::NestedObject
+                                            name: timeValue
+                                            description: Represents a time of day.
+                                            properties:
+                                              - !ruby/object:Api::Type::Integer
+                                                name: hours
+                                                description: |
+                                                  Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: minutes
+                                                description: Minutes of hour of day. Must be from 0 to 59.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: seconds
+                                                description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: nanos
+                                                description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                          - !ruby/object:Api::Type::NestedObject
+                                            name: dateValue
+                                            description: Represents a whole or partial calendar date.
+                                            properties:
+                                              - !ruby/object:Api::Type::Integer
+                                                name: year
+                                                description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: month
+                                                description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: day
+                                                description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                          - !ruby/object:Api::Type::Enum
+                                            name: dayOfWeekValue
+                                            description: Represents a day of the week.
+                                            values:
+                                              - :MONDAY
+                                              - :TUESDAY
+                                              - :WEDNESDAY
+                                              - :THURSDAY
+                                              - :FRIDAY
+                                              - :SATURDAY
+                                              - :SUNDAY

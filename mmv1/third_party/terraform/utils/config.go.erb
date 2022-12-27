@@ -53,11 +53,7 @@ import (
 	container "google.golang.org/api/container/v1beta1"
 <% end -%>
 	dataflow "google.golang.org/api/dataflow/v1b3"
-<% unless version == 'ga' -%>
-	dataproc "google.golang.org/api/dataproc/v1beta2"
-<% else -%>
 	"google.golang.org/api/dataproc/v1"
-<% end -%>
 	"google.golang.org/api/dns/v1"
 	healthcare "google.golang.org/api/healthcare/v1"
 	"google.golang.org/api/iam/v1"

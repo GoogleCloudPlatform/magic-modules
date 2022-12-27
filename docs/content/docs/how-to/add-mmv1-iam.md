@@ -1,5 +1,7 @@
 ---
 title: "Add MMv1 IAM resources"
+summary: "For resources implemented through the MMv1 engine, the majority of configuration
+for IAM support can be inferred based on the preexisting YAML specification file."
 weight: 11
 ---
 

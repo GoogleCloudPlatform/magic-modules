@@ -5,7 +5,7 @@ RUN ssh-keyscan github.com >> /known_hosts
 RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
 
 RUN apt-get update
-RUN apt-get install -y git jq unzip
+RUN apt-get install -y git jq unzip parallel
 
 RUN curl -sSL https://sdk.cloud.google.com | bash
 ENV PATH $PATH:/root/google-cloud-sdk/bin

@@ -89,3 +89,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           private_connection_id: "my-connection"
           network_name: "my-network"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/private_connection.go.erb
+      post_create: templates/terraform/post_create/private_connection.go.erb
+      post_import: templates/terraform/post_import/private_connection.go.erb
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+  <%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
