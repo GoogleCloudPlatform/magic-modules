@@ -1763,7 +1763,7 @@ objects:
         name: 'importedLibraries'
         description: |
           Optional. If language = "JS", this field stores the path of the
-          imported JAVASCRIPT libraries.
+          imported JS libraries.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'definitionBody'
