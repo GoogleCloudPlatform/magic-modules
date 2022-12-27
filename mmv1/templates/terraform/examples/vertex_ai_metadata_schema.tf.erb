@@ -1,0 +1,19 @@
+resource "google_vertex_ai_metadata_schema" "schema"{
+  name = "<%= ctx[:vars]['name'] %>"
+  description = "Schema to test the terraform module"
+  schema = |
+      title: system.Model
+      type: object
+      properties:
+        framework:
+          type: string
+          description: "The framework type, for example 'TensorFlow' or 'Scikit-Learn'."
+        framework_version:
+          type: string
+          description: "The framework version, for example '1.15' or '2.1'"
+        payload_format:
+          type: string
+          description: "The format of the Model payload, for example 'SavedModel' or 'TFLite'"
+  schemaVersion = "0.0.1"
+  schemaType = "ARTIFACT_TYPE"
+}
