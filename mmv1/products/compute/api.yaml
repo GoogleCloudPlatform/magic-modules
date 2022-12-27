@@ -8977,6 +8977,7 @@ objects:
           IPv4 special-use ranges are always exported to peers and 
           are not controlled by this field.
         default_value: true
+        input: true
       - !ruby/object:Api::Type::Boolean
         name: 'importSubnetRoutesWithPublicIp'
         description: |
@@ -8984,6 +8985,7 @@ objects:
           The default value is false. IPv4 special-use ranges are always 
           imported from peers and are not controlled by this field.
         default_value: false
+        input: true
   - !ruby/object:Api::Resource
     name: 'NodeTemplate'
     kind: 'compute#nodeTemplate'
