@@ -1002,7 +1002,6 @@ objects:
     name: MetadataSchema
     base_url: projects/{{project}}/locations/{{region}}/metadataSchemas
     self_link: 'projects/{{project}}/locations/{{region}}/metadataSchemas/{{name}}'
-    create_link: projects/{{project}}/locations/{{region}}/metadataSchemas?metadataSchemaId={{name}}
     min_version: beta
     input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
