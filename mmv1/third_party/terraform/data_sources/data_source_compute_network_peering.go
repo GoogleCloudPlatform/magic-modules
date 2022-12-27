@@ -16,24 +16,6 @@ func dataSourceComputeNetworkPeering() *schema.Resource {
 
 	dsSchema["name"].ValidateFunc = validateRegexp(regexGCEName)
 	dsSchema["network"].ValidateFunc = validateRegexp(peerNetworkLinkRegex)
-
-	dsSchema["network"].DiffSuppressFunc = func(_, old, new string, _ *schema.ResourceData) bool {
-		oldStripped, err := getRelativePath(old)
-		if err != nil {
-			return false
-		}
-
-		newStripped, err := getRelativePath(new)
-		if err != nil {
-			return false
-		}
-
-		if oldStripped == newStripped {
-			return true
-		}
-
-		return false
-	}
 	return &schema.Resource{
 		Read:   dataSourceComputeNetworkPeeringRead,
 		Schema: dsSchema,
