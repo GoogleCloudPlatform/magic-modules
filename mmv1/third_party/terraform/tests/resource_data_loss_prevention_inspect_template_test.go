@@ -51,7 +51,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 			name = "EMAIL_ADDRESS"
 		}
 		info_types {
-			name = "PERSON_NAME"
+			name    = "PERSON_NAME"
 			version = "latest"
 		}
 		info_types {
@@ -158,7 +158,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 
 	inspect_config {
 		info_types {
-			name = "PERSON_NAME"
+			name    = "PERSON_NAME"
 			version = "stable"
 		}
 		info_types {
