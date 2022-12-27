@@ -19,7 +19,7 @@ resource "google_container_attached_cluster" "primary" {
   }
   platform_version = "1.24.0-gke.1"
   fleet {
-      project = data.google_project.project.number
+    project = "projects/${data.google_project.project.number}"
   }
   logging_config {
     component_config {

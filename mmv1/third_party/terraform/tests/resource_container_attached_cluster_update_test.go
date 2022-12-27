@@ -1,52 +1,63 @@
 package google
 
 import (
-  "testing"
+	"testing"
 
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccContainerAttachedCluster_update(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": randString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
 
-  vcrTest(t, resource.TestCase{
-    PreCheck:     func() { testAccPreCheck(t) },
-    Providers:    testAccProviders,
-    CheckDestroy: testAccCheckContainerAttachedClusterDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccContainerAttachedCluster_containerAttachedCluster_full(context),
-      },
-      {
-        ResourceName:            "google_container_attached_cluster.primary",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"location"},
-      },
-      {
-        Config: testAccContainerAttachedCluster_containerAttachedCluster_update(context),
-      },
-      {
-        ResourceName:            "google_container_attached_cluster.primary",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"location"},
-      },
-    },
-  })
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerAttachedClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerAttachedCluster_containerAttachedCluster_full(context),
+			},
+			{
+				ResourceName:            "google_container_attached_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccContainerAttachedCluster_containerAttachedCluster_update(context),
+			},
+			{
+				ResourceName:            "google_container_attached_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccContainerAttachedCluster_containerAttachedCluster_destroy(context),
+			},
+			{
+				ResourceName:            "google_container_attached_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
 }
 
 func testAccContainerAttachedCluster_containerAttachedCluster_full(context map[string]interface{}) string {
-  return Nprintf(`
+	return Nprintf(`
 data "google_project" "project" {
 }
 
 resource "google_container_attached_cluster" "primary" {
   name     = "update%{random_suffix}"
+  project = data.google_project.project.project_id
+  location = "us-west1"
   description = "Test cluster"
   distribution = "aks"
   annotations = {
@@ -61,7 +72,7 @@ resource "google_container_attached_cluster" "primary" {
   }
   platform_version = "1.24.0-gke.1"
   fleet {
-      project = data.google_project.project.number
+      project = "projects/${data.google_project.project.number}"
   }
   logging_config {
     component_config {
@@ -73,19 +84,19 @@ resource "google_container_attached_cluster" "primary" {
       enabled = true
     }
   }
-  project = data.google_project.project.project_id
-  location = "us-west1"
 }
 `, context)
 }
 
 func testAccContainerAttachedCluster_containerAttachedCluster_update(context map[string]interface{}) string {
-  return Nprintf(`
+	return Nprintf(`
 data "google_project" "project" {
 }
 
 resource "google_container_attached_cluster" "primary" {
   name     = "update%{random_suffix}"
+  project = data.google_project.project.project_id
+  location = "us-west1"
   description = "Test cluster updated"
   distribution = "aks"
   annotations = {
@@ -101,13 +112,49 @@ resource "google_container_attached_cluster" "primary" {
   }
   platform_version = "1.24.0-gke.1"
   fleet {
-      project = data.google_project.project.number
+    project = "projects/${data.google_project.project.number}"
   }
   monitoring_config {
     managed_prometheus_config {}
   }
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+`, context)
+}
+
+// Duplicate of testAccContainerAttachedCluster_containerAttachedCluster_update without lifecycle.prevent_destroy set
+// so the test can clean up the resource after the update.
+func testAccContainerAttachedCluster_containerAttachedCluster_destroy(context map[string]interface{}) string {
+	return Nprintf(`
+data "google_project" "project" {
+}
+
+resource "google_container_attached_cluster" "primary" {
+  name     = "update%{random_suffix}"
   project = data.google_project.project.project_id
   location = "us-west1"
+  description = "Test cluster updated"
+  distribution = "aks"
+  annotations = {
+    label-one = "value-one"
+  label-two = "value-two"
+  }
+  authorization {
+    admin_users = [ "user2@example.com", "user3@example.com"]
+  }
+  oidc_config {
+      issuer_url = "https://oidc.issuer.url"
+      jwks = base64encode("{\"keys\":[{\"use\":\"sig\",\"kty\":\"RSA\",\"kid\":\"testid\",\"alg\":\"RS256\",\"n\":\"somedata\",\"e\":\"AQAB\"}]}")
+  }
+  platform_version = "1.24.0-gke.1"
+  fleet {
+    project = "projects/${data.google_project.project.number}"
+  }
+  monitoring_config {
+    managed_prometheus_config {}
+  }
 }
 `, context)
 }

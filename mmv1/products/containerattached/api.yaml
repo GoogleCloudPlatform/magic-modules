@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: ContainerAttached
-display_name: Anthos Attached clusters
+display_name: ContainerAttached
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -227,17 +227,20 @@ objects:
                 values:
                   - :SYSTEM_COMPONENTS
                   - :WORKLOADS
-      - !ruby/object:Api::Type::NestedObject
+      - !ruby/object:Api::Type::Array
         name: errors
         description: |
           A set of errors found in the cluster.
         output: true
-        properties:
-          - !ruby/object:Api::Type::Array
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: attachedClusterError
+          description: |
+            Describes errors found on attached clusters.
+          properties:
+          - !ruby/object:Api::Type::String
             name: message
             description: |
               Human-friendly description of the error.
-            item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: authorization
         description: |
@@ -258,14 +261,12 @@ objects:
         description: |
           Monitoring configuration.
         allow_empty_object: true
-        send_empty_value: true
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: managedPrometheusConfig
             description: |
               Enable Google Cloud Managed Service for Prometheus in the cluster.
             allow_empty_object: true
-            send_empty_value: true
             properties:
             - !ruby/object:Api::Type::Boolean
               name: enabled

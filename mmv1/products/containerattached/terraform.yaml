@@ -37,11 +37,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       authorization: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_authorization_user.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/containerattached_cluster_authorization_user.go.erb'
-      # Convenience expander to prepend "projects/" to fleet project numbers if not already present.
-      # Custom diff to take this convenience into account.
       fleet.project: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: suppressAttachedClustersFleetProjectDiff
-        custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_fleet_project.go.erb'
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^projects/[0-9]+$'
       # If the user doesn't specify a loggingConfig, the server will supply a default value. Instead of
       # letting that happen and allowing the config and state to get mismatched, just manually send an
       # empty object if the user doesn't set anything and require the user to explicitly set the field if a
