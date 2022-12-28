@@ -1392,6 +1392,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("scratch_disk", scratchDisks); err != nil {
 		return fmt.Errorf("Error setting scratch_disk: %s", err)
 	}
+<% unless version == 'ga' -%>
 	// Add extra check on Scheduling to prevent STOP instance setting MaxRunDuration.
 	// When Instance being stopped, GCE will wipe out the MaxRunDuration field. 
 	// And Terraform has no visiblity on this field after then. Given the infrastructure
@@ -1400,6 +1401,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if instance.Scheduling.MaxRunDuration != nil && instance.Scheduling.InstanceTerminationAction == "STOP" {
 		return fmt.Errorf("Can not set MaxRunDuration on instance with STOP InstanceTerminationAction, it is not supported by terraform.")
 	}
+<% end -%>
 	if err := d.Set("scheduling", flattenScheduling(instance.Scheduling)); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
 	}

@@ -133,6 +133,9 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 <% unless version == 'ga' -%>
 	if v, ok := original["max_run_duration"]; ok {
 		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
+		if scheduling.InstanceTerminationAction == "STOP" && transformedMaxRunDuration != nil {
+			return nil, fmt.Errorf("Can not set MaxRunDuration on instance with STOP InstanceTerminationAction, it is not supported by terraform.")
+		}
 		if err != nil {
 			return nil, err
 		}
