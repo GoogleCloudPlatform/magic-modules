@@ -10,7 +10,8 @@ func dataSourceGoogleComputeFirewall() *schema.Resource {
 
 	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeFirewall().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "name", "project")
+	addRequiredFieldsToSchema(dsSchema, "name")
+	addOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudFirewallRead,
