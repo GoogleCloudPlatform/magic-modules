@@ -57,45 +57,7 @@ func dataSourceSqlDatabases() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"project": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: `Project ID of the project that contains the instance.`,
-						},
-						"instance": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: `The name of the Cloud SQL database instance in which the database belongs.`,
-						},
-						"name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: `The name of the database.`,
-						},
-						"charset": {
-							Type:     schema.TypeString,
-							Computed: true,
-							Description: `The charset value. See MySQL's
-						[Supported Character Sets and Collations](https://dev.mysql.com/doc/refman/5.7/en/charset-charsets.html)
-						and Postgres' [Character Set Support](https://www.postgresql.org/docs/9.6/static/multibyte.html)
-						for more details and supported values. Postgres databases only support
-						a value of 'UTF8' at creation time.`,
-						},
-						"collation": {
-							Type:     schema.TypeString,
-							Computed: true,
-							Description: `The collation value. See MySQL's
-						[Supported Character Sets and Collations](https://dev.mysql.com/doc/refman/5.7/en/charset-charsets.html)
-						and Postgres' [Collation Support](https://www.postgresql.org/docs/9.6/static/collation.html)
-						for more details and supported values. Postgres databases only support
-						a value of 'en_US.UTF8' at creation time.`,
-						},
-						"self_link": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
+					Schema: datasourceSchemaFromResourceSchema(resourceSQLDatabase().Schema),
 				},
 			},
 		},
@@ -134,7 +96,8 @@ func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("databases", flattenDatabases(filteredDatabases)); err != nil {
 		return fmt.Errorf("Error setting databases: %s", err)
 	}
-	d.SetId(fmt.Sprintf("projects/%s/instances/%s/101", project, d.Get("instance").(string)))
+
+	d.SetId(setId(d, project))
 	return nil
 }
 
@@ -230,4 +193,26 @@ func regexMatch(filter map[string]interface{}, field string, include bool) (bool
 		}
 	}
 	return include, nil
+}
+
+func setId(d *schema.ResourceData, project string) string {
+	id := fmt.Sprintf("projects/%s/instances/%s", project, d.Get("instance").(string))
+	if v, ok := d.GetOk("filters"); ok {
+		for i, f := range v.([]interface{}) {
+			filter := f.(map[string]interface{})
+			id = fmt.Sprintf("%s/%d/%s", id, i, filter["name"])
+			if fv, ok := filter["values"]; ok {
+				for j, val := range fv.([]interface{}) {
+					id = fmt.Sprintf("%s/%d/%s", id, j, val.(string))
+				}
+			}
+			if fev, ok := filter["exclude_values"]; ok {
+				for j, val := range fev.([]interface{}) {
+					id = fmt.Sprintf("%s/%d/%s", id, j, val.(string))
+				}
+			}
+
+		}
+	}
+	return id
 }

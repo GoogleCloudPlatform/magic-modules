@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccDataSourceSqlDatabaseInstances_basic(t *testing.T) {
+func TestAccDataSourceSqlDatabases_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,7 +20,7 @@ func TestAccDataSourceSqlDatabaseInstances_basic(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		CheckDestroy: testAccSqlDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceSqlDatabases_basic(context),
@@ -40,7 +40,7 @@ func TestAccDataSourceSqlDatabaseInstances_basic(t *testing.T) {
 	})
 }
 
-func TestAccDataSourceSqlDatabaseInstances_nameFilter(t *testing.T) {
+func TestAccDataSourceSqlDatabases_nameFilter(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -50,7 +50,7 @@ func TestAccDataSourceSqlDatabaseInstances_nameFilter(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		CheckDestroy: testAccSqlDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceSqlDatabases_nameFilter(context),
@@ -70,7 +70,7 @@ func TestAccDataSourceSqlDatabaseInstances_nameFilter(t *testing.T) {
 	})
 }
 
-func TestAccDataSourceSqlDatabaseInstances_nameAndCharsetFilter(t *testing.T) {
+func TestAccDataSourceSqlDatabases_nameAndCharsetFilter(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -80,7 +80,7 @@ func TestAccDataSourceSqlDatabaseInstances_nameAndCharsetFilter(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		CheckDestroy: testAccSqlDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceSqlDatabases_nameAndCharsetFilter(context),
