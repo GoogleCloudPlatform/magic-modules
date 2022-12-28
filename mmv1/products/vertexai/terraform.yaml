@@ -242,7 +242,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_metadata_schema"
-        skip_test: true
         primary_resource_id: "schema"
         vars:
           name: "test-schema"
