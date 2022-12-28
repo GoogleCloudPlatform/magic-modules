@@ -16969,6 +16969,9 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: 'Labels for the external VPN gateway resource.'
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
