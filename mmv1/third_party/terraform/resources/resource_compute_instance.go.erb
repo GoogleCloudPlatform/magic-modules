@@ -1392,7 +1392,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("scratch_disk", scratchDisks); err != nil {
 		return fmt.Errorf("Error setting scratch_disk: %s", err)
 	}
-	// Add extra check on Scheduling to prevent STOP instance getting MaxRunDuration.
+	// Add extra check on Scheduling to prevent STOP instance setting MaxRunDuration.
 	// When Instance being stopped, GCE will wipe out the MaxRunDuration field. 
 	// And Terraform has no visiblity on this field after then. Given the infrastructure
 	// constraint, MaxRunDuration will only be supported with instance has
