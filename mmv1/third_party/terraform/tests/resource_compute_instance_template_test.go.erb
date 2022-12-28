@@ -1110,13 +1110,6 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-<% unless version == 'ga' -%>
-	var expectedMaxRunDuration = compute.Duration{}
-	// Define in testAccComputeInstanceTemplate_spot
-	expectedMaxRunDuration.Nanos = 123
-	expectedMaxRunDuration.Seconds = 60
-<% end -%>
-
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -1141,16 +1134,15 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-<% unless version == 'ga' -%>
 	var expectedMaxRunDuration = compute.Duration{}
 	// Define in testAccComputeInstanceTemplate_spot
 	expectedMaxRunDuration.Nanos = 123
 	expectedMaxRunDuration.Seconds = 60
-<% end -%>
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1158,7 +1150,7 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_spot(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_spot_maxRunDuration(randString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -1166,9 +1158,7 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 					testAccCheckComputeInstanceTemplatePreemptible(&instanceTemplate, true),
 					testAccCheckComputeInstanceTemplateProvisioningModel(&instanceTemplate, "SPOT"),
 					testAccCheckComputeInstanceTemplateInstanceTerminationAction(&instanceTemplate, "DELETE"),
-<% unless version == 'ga' -%>
 					testAccCheckComputeInstanceTemplateMaxRunDuration(&instanceTemplate, expectedMaxRunDuration),
-<% end -%>
 				),
 			},
 			{
@@ -1179,6 +1169,8 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 		},
 	})
 }
+<% end -%>
+
 
 
 func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
@@ -2991,6 +2983,47 @@ resource "google_compute_instance_template" "foobar" {
     automatic_restart = false
     provisioning_model = "SPOT"
     instance_termination_action = "STOP"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+`, suffix)
+}
+
+func testAccComputeInstanceTemplate_spot_maxRunDuration(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    preemptible       = true
+    automatic_restart = false
+    provisioning_model = "SPOT"
+    instance_termination_action = "DELETE"
 <% unless version == 'ga' -%>
 		max_run_duration {
 			nanos = 123
