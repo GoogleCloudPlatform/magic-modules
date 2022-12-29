@@ -29,6 +29,60 @@ contains the fields of the resource based on how it behaves in the API, and
 behaviour. Not all fields will need to be added to `terraform.yaml`- only add an
 entry for your field if you need to configure one of the available option(s).
 
+## Adding a product
+
+Product definitions are USUALLY a particular API domain (like `compute.googleapis.com`) and can contain
+on or more objects (Terraform resources). The product definitions (`!ruby/object:Api::Product`) are located 
+in `mmv1/products/<product>/api.yaml`. 
+
+|       Name        |  Type  |                                   Description                                   |                                   Notes                                    | Required |
+| :---------------: | :----: | :-----------------------------------------------------------------------------: | :------------------------------------------------------------------------: | :------- |
+|      `name`       | string |            Name of the product/API, using appropriate UpperCamelCase            |                                                                            | yes      |
+|  `display_name`   | string |                     A full display name for the GCPproduct                      | Defines the subcategory in the documentation, uses `name` if not specified | no       |
+|    `versions`     |  list  |  List of versions (ie. ga, beta) that the product provides with the base URLs   |                                                                            | yes      |
+|     `scopes`      |  list  |                  The authentication scopes required by the API                  |                                                                            | yes      |
+|  `apis_required`  |  list  |                     List of ApiReferences of required APIs                      |                                                                            | no       |
+|     `objects`     |  list  |                  List of objects/Terraform resources generated                  |                                                                            | yes      |
+|      `async`      | object | Sets the default asynchronous (long-running operation) settings for all objects |                                                                            | no       |
+| `operation_retry` | string |                    Custom code for retrying async operations                    |                                                                            | no       |
+
+## Adding a resource
+
+A resource in `api.yaml` consist of a `!ruby/object:Api::Resource` definition under the product's (`!ruby/object:Api::Product`) 
+`objects` key.
+
+|         Name         |  Type   |                                                 Description                                                 |              Notes               | Required |
+| :------------------: | :-----: | :---------------------------------------------------------------------------------------------------------: | :------------------------------: | :------- |
+|        `name`        | string  |                           Name of the resource, using appropriate UpperCamelCase                            |                                  | yes      |
+|        `kind`        | string  |                                              Deprecated field.                                              |                                  | no       |
+|    `description`     | string  |                             Description of the resource, used in documentation.                             |                                  | yes      |
+|    `min_version`     | string  |               Minimum version for this resource (eg. `beta` if the resource is only in beta).               |                                  | no       |
+|      `base_url`      | string  | Sets the base URL for the resource by appending it to the base_url in parent product's `versions.base_url`. | Can also be fully qualified URL. | yes      |
+|    `cai_base_url`    | string  |            Sets the Cloud Asset Inventory base URL, useful for regionalized endpoint base URLs.             |                                  | no       |
+|     `self_link`      | string  |                           Defines the `self_link` field generated for the object.                           |                                  | no       |
+|   `has_self_link`    | boolean |      Defines if the resource has a `self_link` field in the API response. Conflicts with `self_link`.       |                                  | no       |
+|     `read_verb`      | string  |                                   HTTP method used to read the resource.                                    |                                  | no       |
+| `read_query_params`  | string  |                            Query parameters to append when reading the resource.                            |                                  | no       |
+|     `create_url`     | string  |                                 Override the URL used to create the object.                                 |                                  | no       |
+|    `create_verb`     | string  |                                  HTTP method used to create the resource.                                   |                                  | no       |
+|     `update_url`     | string  |                                 Override the URL used to update the object.                                 |                                  | yes      |
+|    `update_verb`     | string  |                                  HTTP method used to update the resource.                                   |                                  | no       |
+|    `update_mask`     | boolean |                     If true, sends the `updateMask` parameter when performing updates.                      |                                  | no       |
+|     `delete_url`     | string  |                              Override the URL used for deleting the resource.                               |                                  | no       |
+|    `delete_verb`     | string  |                                  HTTP method used to delete the resource.                                   |                                  | no       |
+|     `references`     | object  |                                    References to official documentation.                                    |                                  | yes      |
+|    `nested_query`    | object  |        Useful when a resource doesn't have a direct object read method, but returns a list instead.         |                                  | no       |
+|      `identity`      |  list   |              List of parameter named that uniquely identify the resource. Defaults to `name`.               |                                  | no       |
+|       `async`        | object  |                       Asynchronous long-running operation settings for the resource.                        |                                  | no       |
+|       `input`        | boolean |                                  If true, the resource cannot be updated.                                   |                                  | no       |
+|      `exclude`       | boolean |                                    If true, don't generate the resource.                                    |                                  | no       |
+|  `exclude_resource`  | boolean |                              Only create IAM policy, not the resource itself.                               |                                  | no       |
+|      `readonly`      | boolean |                                   If true, resource cannot be configured.                                   |                                  | no       |
+|     `parameters`     |  list   |                      Defines a list of fields. Deprecated (use `properties` instead).                       |                                  | no       |
+|     `properties`     |  list   |                                Defines the list of fields for the resource.                                 |                                  | yes      |
+|     `iam_policy`     | object  |                                  Resource-level IAM policy configuration.                                   |                                  | no       |
+| `collection_url_key` | string  |                                              Deprecated field.                                              |                                  | no       |
+
 ## Field Configuration
 
 ### `api.yaml`
