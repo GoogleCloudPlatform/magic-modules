@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -11,8 +10,8 @@ import (
 	"google.golang.org/api/dataproc/v1"
 )
 
-var IamDataprocClusterSchema = map[string]*schema.Schema{
-	"cluster": {
+var IamDataprocJobSchema = map[string]*schema.Schema{
+	"job_id": {
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
@@ -31,15 +30,15 @@ var IamDataprocClusterSchema = map[string]*schema.Schema{
 	},
 }
 
-type DataprocClusterIamUpdater struct {
+type DataprocJobIamUpdater struct {
 	project string
 	region  string
-	cluster string
+	jobId   string
 	d       TerraformResourceData
 	Config  *Config
 }
 
-func NewDataprocClusterUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
+func NewDataprocJobUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
@@ -57,29 +56,29 @@ func NewDataprocClusterUpdater(d TerraformResourceData, config *Config) (Resourc
 		return nil, fmt.Errorf("Error setting region: %s", err)
 	}
 
-	return &DataprocClusterIamUpdater{
+	return &DataprocJobIamUpdater{
 		project: project,
 		region:  region,
-		cluster: d.Get("cluster").(string),
+		jobId:   d.Get("job_id").(string),
 		d:       d,
 		Config:  config,
 	}, nil
 }
 
-func DataprocClusterIdParseFunc(d *schema.ResourceData, config *Config) error {
-	fv, err := parseRegionalFieldValue("clusters", d.Id(), "project", "region", "zone", d, config, true)
+func DataprocJobIdParseFunc(d *schema.ResourceData, config *Config) error {
+	fv, err := parseRegionalFieldValue("jobs", d.Id(), "project", "region", "zone", d, config, true)
 	if err != nil {
 		return err
 	}
 
+	if err := d.Set("job_id", fv.Name); err != nil {
+		return fmt.Errorf("Error setting job_id: %s", err)
+	}
 	if err := d.Set("project", fv.Project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("region", fv.Region); err != nil {
 		return fmt.Errorf("Error setting region: %s", err)
-	}
-	if err := d.Set("cluster", fv.Name); err != nil {
-		return fmt.Errorf("Error setting cluster: %s", err)
 	}
 
 	// Explicitly set the id so imported resources have the same ID format as non-imported ones.
@@ -87,7 +86,8 @@ func DataprocClusterIdParseFunc(d *schema.ResourceData, config *Config) error {
 	return nil
 }
 
-func (u *DataprocClusterIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+func (u *DataprocJobIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+	
 	req := &dataproc.GetIamPolicyRequest{}
 
 	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
@@ -95,7 +95,7 @@ func (u *DataprocClusterIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 		return nil, err
 	}
 
-	p, err := u.Config.NewDataprocClient(userAgent).Projects.Regions.Clusters.GetIamPolicy(u.GetResourceId(), req).Do()
+	p, err := u.Config.NewDataprocClient(userAgent).Projects.Regions.Jobs.GetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -108,7 +108,7 @@ func (u *DataprocClusterIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 	return cloudResourcePolicy, nil
 }
 
-func (u *DataprocClusterIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
+func (u *DataprocJobIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
 	dataprocPolicy, err := resourceManagerToDataprocPolicy(policy)
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
@@ -120,7 +120,7 @@ func (u *DataprocClusterIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 	}
 
 	req := &dataproc.SetIamPolicyRequest{Policy: dataprocPolicy}
-	_, err = u.Config.NewDataprocClient(userAgent).Projects.Regions.Clusters.SetIamPolicy(u.GetResourceId(), req).Do()
+	_, err = u.Config.NewDataprocClient(userAgent).Projects.Regions.Jobs.SetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -128,14 +128,32 @@ func (u *DataprocClusterIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 	return nil
 }
 
-func (u *DataprocClusterIamUpdater) GetResourceId() string {
-	return fmt.Sprintf("projects/%s/regions/%s/clusters/%s", u.project, u.region, u.cluster)
+func (u *DataprocJobIamUpdater) GetResourceId() string {
+	return fmt.Sprintf("projects/%s/regions/%s/jobs/%s", u.project, u.region, u.jobId)
 }
 
-func (u *DataprocClusterIamUpdater) GetMutexKey() string {
-	return fmt.Sprintf("iam-dataproc-cluster-%s-%s-%s", u.project, u.region, u.cluster)
+func (u *DataprocJobIamUpdater) GetMutexKey() string {
+	return fmt.Sprintf("iam-dataproc-job-%s-%s-%s", u.project, u.region, u.jobId)
 }
 
-func (u *DataprocClusterIamUpdater) DescribeResource() string {
-	return fmt.Sprintf("Dataproc Cluster %s/%s/%s", u.project, u.region, u.cluster)
+func (u *DataprocJobIamUpdater) DescribeResource() string {
+	return fmt.Sprintf("Dataproc Job %s/%s/%s", u.project, u.region, u.jobId)
+}
+
+func resourceManagerToDataprocPolicy(p *cloudresourcemanager.Policy) (*dataproc.Policy, error) {
+	out := &dataproc.Policy{}
+	err := Convert(p, out)
+	if err != nil {
+		return nil, errwrap.Wrapf("Cannot convert a dataproc policy to a cloudresourcemanager policy: {{err}}", err)
+	}
+	return out, nil
+}
+
+func dataprocToResourceManagerPolicy(p *dataproc.Policy) (*cloudresourcemanager.Policy, error) {
+	out := &cloudresourcemanager.Policy{}
+	err := Convert(p, out)
+	if err != nil {
+		return nil, errwrap.Wrapf("Cannot convert a cloudresourcemanager policy to a dataproc policy: {{err}}", err)
+	}
+	return out, nil
 }

@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -1208,7 +1207,6 @@ resource "google_dataproc_cluster" "virtual_cluster" {
   }
 `, projectID, rnd, projectID, rnd, rnd, rnd, rnd, rnd, rnd)
 }
-<% end -%>
 
 func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster, roles ...string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
