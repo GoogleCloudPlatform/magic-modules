@@ -16,7 +16,7 @@ func TestAccDataSourceGoogleComputeSecurityPolicy_basic(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudRunServiceDestroyProducer(t),
+		CheckDestroy: testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleComputeSecurityPolicy_basic(context),
