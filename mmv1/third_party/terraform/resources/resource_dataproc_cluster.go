@@ -2332,6 +2332,7 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 			},
 		}
 	}
+
 	return []map[string]interface{}{gceConfig}
 }
 

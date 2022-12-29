@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-
 	"google.golang.org/api/dataproc/v1"
 )
 

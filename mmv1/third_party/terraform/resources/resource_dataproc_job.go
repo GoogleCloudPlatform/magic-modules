@@ -1283,6 +1283,7 @@ func flattenJobStatus(s *dataproc.JobStatus) []map[string]interface{} {
 }
 
 func flattenJobPlacement(jp *dataproc.JobPlacement) []map[string]interface{} {
+
 	return []map[string]interface{}{
 		{
 			"cluster_name": jp.ClusterName,
