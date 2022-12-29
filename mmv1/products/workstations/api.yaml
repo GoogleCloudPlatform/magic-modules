@@ -177,3 +177,4 @@ objects:
               description: |
                 A list of messages that carry the error details.
               item_type: Api::Type::KeyValuePairs
+              output: true
