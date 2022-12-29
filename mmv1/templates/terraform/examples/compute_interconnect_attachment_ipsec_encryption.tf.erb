@@ -7,6 +7,9 @@ resource "google_compute_interconnect_attachment" "<%= ctx[:primary_resource_id]
   ipsec_internal_addresses = [
     google_compute_address.address.self_link,
   ]
+  labels                   = {
+    "foo" = "bar"
+  }
 }
 
 resource "google_compute_address" "address" {

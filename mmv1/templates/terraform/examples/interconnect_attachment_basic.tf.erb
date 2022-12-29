@@ -4,6 +4,9 @@ resource "google_compute_interconnect_attachment" "<%= ctx[:primary_resource_id]
   type                     = "PARTNER"
   router                   = google_compute_router.foobar.id
   mtu                      = 1500
+  labels                   = {
+    "foo" = "bar"
+  }
 }
 
 resource "google_compute_router" "foobar" {
