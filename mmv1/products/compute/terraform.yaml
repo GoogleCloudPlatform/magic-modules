@@ -2595,18 +2595,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "my-network"
       - !ruby/object:Provider::Terraform::Examples
         name: "router_md5_authentication"
-        primary_resource_id: "peer"
-        vars:
-          router_name: "my-router"
-          peer_name: "my-router-peer"
-          network_name: "my-network"
-          interface_name: "interface-name"
-          subnetwork_name: "my-subnetwork"
-          vpn_tunnel_name: "my-vpn-tunnel"
-          vpn_gateway_name: "my-vpn-gateway"
-          ha_vpn_gateway_name: "my-ha-vpn-gateway"
-          md5_key1: "md5 original key 1"
-          md5_key2: "md5 original key 2"
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_router_encrypted_interconnect"
         primary_resource_id: "encrypted-interconnect-router"
