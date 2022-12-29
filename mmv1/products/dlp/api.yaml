@@ -1344,8 +1344,7 @@ objects:
                 description: Transform the record by applying various field transformations.
                 at_least_one_of:
                   - deidentify_config.0.record_transformations.0.field_transformations
-                  # Uncomment below when field(s) are implemented
-                  # - deidentify_config.0.record_transformations.0.record_suppressions
+                  - deidentify_config.0.record_transformations.0.record_suppressions
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::Array
@@ -1602,3 +1601,115 @@ objects:
                                       - :ALPHA_LOWER_CASE
                                       - :PUNCTUATION
                                       - :WHITESPACE
+              - !ruby/object:Api::Type::Array
+                name: 'recordSuppressions'
+                description: Configuration defining which records get suppressed entirely. Records that match any suppression rule are omitted from the output.
+                at_least_one_of:
+                  - deidentify_config.0.record_transformations.0.field_transformations
+                  - deidentify_config.0.record_transformations.0.record_suppressions
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: condition
+                      description: A condition that when it evaluates to true will result in the record being evaluated to be suppressed from the transformed content.
+                      properties:
+                        - !ruby/object:Api::Type::NestedObject
+                          name: expressions
+                          description: An expression, consisting of an operator and conditions.
+                          properties:
+                            - !ruby/object:Api::Type::Enum
+                              name: logicalOperator
+                              description: The operator to apply to the result of conditions. Default and currently only supported value is AND.
+                              default_value: :AND
+                              values:
+                                - :AND
+                            - !ruby/object:Api::Type::NestedObject
+                              name: conditions
+                              description: Conditions to apply to the expression.
+                              properties:
+                                - !ruby/object:Api::Type::Array
+                                  name: conditions
+                                  description: A collection of conditions.
+                                  item_type: !ruby/object:Api::Type::NestedObject
+                                    properties:
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: field
+                                        description: Field within the record this condition is evaluated against.
+                                        required: true
+                                        properties:
+                                          - !ruby/object:Api::Type::String
+                                            name: name
+                                            description: Name describing the field.
+                                      - !ruby/object:Api::Type::Enum
+                                        name: operator
+                                        description: Operator used to compare the field or infoType to the value.
+                                        required: true
+                                        values:
+                                          - :EQUAL_TO
+                                          - :NOT_EQUAL_TO
+                                          - :GREATER_THAN
+                                          - :LESS_THAN
+                                          - :GREATER_THAN_OR_EQUALS
+                                          - :LESS_THAN_OR_EQUALS
+                                          - :EXISTS
+                                      - !ruby/object:Api::Type::NestedObject
+                                        name: value
+                                        description: Value to compare against. [Mandatory, except for EXISTS tests.]
+                                        properties:
+                                          - !ruby/object:Api::Type::String
+                                            name: integerValue
+                                            description: An integer value (int64 format)
+                                          - !ruby/object:Api::Type::Double
+                                            name: floatValue
+                                            description: A float value.
+                                          - !ruby/object:Api::Type::String
+                                            name: stringValue
+                                            description: A string value.
+                                          - !ruby/object:Api::Type::Boolean
+                                            name: booleanValue
+                                            description: A boolean value.
+                                          - !ruby/object:Api::Type::String
+                                            name: timestampValue
+                                            description: |
+                                              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                                          - !ruby/object:Api::Type::NestedObject
+                                            name: timeValue
+                                            description: Represents a time of day.
+                                            properties:
+                                              - !ruby/object:Api::Type::Integer
+                                                name: hours
+                                                description: |
+                                                  Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: minutes
+                                                description: Minutes of hour of day. Must be from 0 to 59.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: seconds
+                                                description: Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: nanos
+                                                description: Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                                          - !ruby/object:Api::Type::NestedObject
+                                            name: dateValue
+                                            description: Represents a whole or partial calendar date.
+                                            properties:
+                                              - !ruby/object:Api::Type::Integer
+                                                name: year
+                                                description: Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: month
+                                                description: Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                                              - !ruby/object:Api::Type::Integer
+                                                name: day
+                                                description: Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+                                          - !ruby/object:Api::Type::Enum
+                                            name: dayOfWeekValue
+                                            description: Represents a day of the week.
+                                            values:
+                                              - :MONDAY
+                                              - :TUESDAY
+                                              - :WEDNESDAY
+                                              - :THURSDAY
+                                              - :FRIDAY
+                                              - :SATURDAY
+                                              - :SUNDAY
