@@ -120,7 +120,7 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: "annotations"
         description: "Client-specified annotations. This is distinct from labels."
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Fingerprint
         name: "etag"
         description: |
           Checksum computed by the server. 
