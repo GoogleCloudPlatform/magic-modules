@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceGoogleComputeFirewall_basic(t *testing.T) {
+func TestAccDataSourceGoogleComputeRouterNat_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -16,43 +16,58 @@ func TestAccDataSourceGoogleComputeFirewall_basic(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudRunServiceDestroyProducer(t),
+		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleCloudFirewall_basic(context),
+				Config: testAccDataSourceGoogleComputeRouterNat_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_compute_firewall.foo", "google_compute_firewall.default"),
+					checkDataSourceStateMatchesResourceState("data.google_compute_router_nat.foo", "google_compute_router_nat.nat"),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceGoogleCloudFirewall_basic(context map[string]interface{}) string {
+func testAccDataSourceGoogleComputeRouterNat_basic(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_firewall" "default" {
-	name    = "my-firewall%{random_suffix}"
-	network = google_compute_network.default.name
-
-	allow {
-		protocol = "icmp"
-	}
-
-	allow {
-		protocol = "tcp"
-		ports    = ["80", "8080", "1000-2000"]
-	}
-
-	source_tags = ["web"]
+resource "google_compute_network" "net" {
+  name = "my-network%{random_suffix}"
 }
-
-resource "google_compute_network" "default" {
-	name = "my-network%{random_suffix}"
+	  
+resource "google_compute_subnetwork" "subnet" {
+  name          = "my-subnetwork%{random_suffix}"
+  network       = google_compute_network.net.id
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
 }
-	
-data "google_compute_firewall" "foo" {
-	name = google_compute_firewall.default.name
-	project = google_compute_firewall.default.project
+	  
+resource "google_compute_router" "router" {
+  name    = "my-router%{random_suffix}"
+  region  = google_compute_subnetwork.subnet.region
+  network = google_compute_network.net.id
+
+  bgp {
+   asn = 64514
+  }
+}
+	  
+resource "google_compute_router_nat" "nat" {
+  name                               = "my-router-nat%{random_suffix}"
+  router                             = google_compute_router.router.name
+  region                             = google_compute_router.router.region
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
+	  
+data "google_compute_router_nat" "foo" {
+  name = google_compute_router_nat.nat.name
+  router = google_compute_router_nat.nat.router
+  region = google_compute_router.router.region
 }`, context)
 
 }
