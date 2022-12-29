@@ -130,16 +130,6 @@ objects:
         description: |
           Time the Instance was created in UTC.
         output: true
-      - !ruby/object:Api::Type::Time
-        name: "updateTime"
-        description: |
-          Time the Instance was updated in UTC.
-        output: true
-      - !ruby/object:Api::Type::Time
-        name: "deleteTime"
-        description: |
-          Time the Instance was deleted in UTC.
-        output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'privateClusterConfig'
         description: |
