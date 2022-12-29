@@ -23,8 +23,9 @@ data "google_project" "project" {
 }
 
 resource "google_compute_network" "default" {
-  provider = google-beta
-  name = "<%= ctx[:vars]['workstation_cluster_name'] %>"
+  provider               = google-beta
+  name                   = "<%= ctx[:vars]['workstation_cluster_name'] %>"
+  auto_create_subnetwork = false
 }
 
 resource "google_compute_subnetwork" "default" {
