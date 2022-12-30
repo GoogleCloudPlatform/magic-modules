@@ -224,6 +224,12 @@ objects:
               The amount of memory available for a function.
               Defaults to 256M. Supported units are k, M, G, Mi, Gi. If no unit is
               supplied the value is interpreted as bytes.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxInstanceRequestConcurrency'
+            description: 'Sets the maximum number of concurrent requests that each instance can receive. Defaults to 1.'
+          - !ruby/object:Api::Type::String
+            name: 'availableCpu'
+            description: 'The number of CPUs used in a single container instance. Default value is calculated from available memory.'
           - !ruby/object:Api::Type::KeyValuePairs
             name: 'environmentVariables'
             description: 'Environment variables that shall be available during function execution.'

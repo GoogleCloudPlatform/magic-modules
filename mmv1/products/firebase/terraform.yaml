@@ -57,6 +57,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - project
           - deletion_policy
     virtual_fields:
+      # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
       - !ruby/object:Api::Type::String
         name: 'deletion_policy'
         description: |
@@ -92,6 +93,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/iosApps/{{appId}}", "iosApps/{{appId}}", "{{appId}}"]
     autogen_async: true
     skip_sweeper: true # Skip sweeper generation and use hard-delete in hand-written sweeper
+    properties:
+      deletion_policy: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrDefaultStringSuppress("DELETE")'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_apple_app_basic"
