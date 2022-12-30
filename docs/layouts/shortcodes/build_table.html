@@ -9,29 +9,29 @@
   .tg .tg-dgl5{border-color:black;background-color:#FFF;text-align:left;vertical-align:top}
   </style>
   <table class="tg">
-  <thead>
     <tr>
-      <th class="tg-c3ow" colspan="2"><span style="font-weight:bold">magic-modules - build commands</span></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="tg-0pky" colspan="2"><span style="font-weight:bold">make provider</span><br>Builds the terraform provider with both mmv1 and tpgtools. <br>Copies all generated files as a merge with the provider in OUTPUT_PATH.</td>
+      <td class="tg-c3ow" colspan="2"><span style="font-weight:bold">magic-modules - build variables</span></td>
     </tr>
     <tr>
-      <td class="tg-c3ow" colspan="2"><span style="font-weight:bold">magic-modules - build parameters</span></td>
+      <td class="tg-0pky" ><span style="font-weight:bold">OUTPUT_PATH </span>(required) </td>
+      <td class="tg-0pky">The location of the provider you are unioning generation into.</td>
     </tr>
     <tr>
-      <td class="tg-0pky" colspan="2"><span style="font-weight:bold">OUTPUT_PATH </span>(required) - the location of the provider you are unioning generation into.</td>
+      <td class="tg-0pky"><span style="font-weight:bold">VERSION</span> (required)</td>
+      <td class="tg-0pky">The version of the provider you are building into. <br/> Valid values are 'ga' and 'beta'.</td>
     </tr>
     <tr>
-      <td class="tg-dgl5" colspan="2"><span style="font-weight:bold">VERSION</span> (required) - the version of the provider you are building into. <br/> Valid values are 'ga' and 'beta'.</td>
+      <td class="tg-0pky"><span style="font-weight:bold">ENGINE</span> (optional)</td>
+      <td class="tg-0pky">Modifies make provider to build either tpgtools or mmv1 valid values are <span style="color:#905;background-color:#DDD">'mmv1'</span> or <span style="color:#905;background-color:#DDD">`tpgtools`</span>. Note that running make provider with ENGINE set to <span style="color:#905;background-color:#DDD">`tpgtools`</span> will build any prerequisite  mmv1 files required for tpgtools.</td>
     </tr>
     <tr>
-      <td class="tg-0pky" colspan="2"><span style="font-weight:bold">ENGINE</span> - modifies make build to build either tpgtools or mmv1 valid values are <span style="color:#905;background-color:#DDD">'mmv1'</span> or <span style="color:#905;background-color:#DDD">`tpgtools`</span>. <br>  Note that running make build with ENGINE set to <span style="color:#905;background-color:#DDD">`tpgtools`</span> will build any prerequisite <br>  mmv1 files required for tpgtools.</td>
+      <td class="tg-0pky"><span style="font-weight:bold;font-style:normal">PRODUCT</span> (optional)</td>
+      <td class="tg-0pky">Specifies the product to build. Equivalent to the folder name within <span style="color:#905;background-color:#DDD">`/mmv1/products`</span> or <span style="color:#905;background-color:#DDD">`/tpgtools/api`</span>. Useful to scope the build to your changes. Note: mmv1 files in <span style="color:#905;background-color:#DDD">`mmv1/third_party/terraform`</span> on run of make provider are always built. So if you've only modified files in this directory you can set the PRODUCT to a non-existant one to skip the generation of non-handwritten, code.</td>
     </tr>
     <tr>
-      <td class="tg-dgl5" colspan="2"><span style="font-weight:bold;font-style:normal">PRODUCT</span> - specifies the product to build. Equivalent to the folder name within <span style="color:#905;background-color:#DDD">`/mmv1/products`</span> or <span style="color:#905;background-color:#DDD">`/tpgtools/api`</span>. Useful to scope the build to your changes. Note: mmv1 files in <span style="color:#905;background-color:#DDD">`mmv1/third_party/terraform`</span> on run of make build are always built when building through mmv1. So if you've only modified files in this directory you can set the PRODUCT to a non-existant one to skip the generation of non-handwritten, code.</td>
+      <td class="tg-0pky"><span style="font-weight:bold;font-style:normal">RESOURCE</span> (optional)</td>
+      <td class="tg-0pky">Specifies the resource to build. Equivalent to the product name within the <span style="color:#905;background-color:#DDD">`api.yaml`</span> file for <span style="color:#905;background-color:#DDD">`mmv1`</span> or the terraform resource name for <span style="color:#905;background-color:#DDD">`tpgtools`</span> resources. If filtering for mmv1 <span style="color:#905;background-color:#DDD">`PRODUCT`</span> must be defined.</td>
     </tr>
+
   </tbody>
   </table>
