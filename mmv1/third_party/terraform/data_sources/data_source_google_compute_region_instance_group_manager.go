@@ -12,6 +12,11 @@ func dataSourceGoogleComputeRegionInstanceGroupManager() *schema.Resource {
 	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeRegionInstanceGroupManager().Schema)
 	addRequiredFieldsToSchema(dsSchema, "name")
 	addOptionalFieldsToSchema(dsSchema, "project", "region")
+	dsSchema["wait_for_instances"] = &schema.Schema{
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+	}
 
 	return &schema.Resource{
 		Read:   dataSourceComputeRegionInstanceGroupManagerRead,

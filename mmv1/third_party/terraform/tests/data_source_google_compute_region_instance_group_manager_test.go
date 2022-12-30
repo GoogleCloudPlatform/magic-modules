@@ -21,13 +21,7 @@ func TestAccDataSourceGoogleComputeRegionInstanceGroupManager_basic(t *testing.T
 			{
 				Config: testAccDataSourceGoogleComputeRegionInstanceGroupManager_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
-						"data.google_compute_region_instance_group_manager.foo",
-						"google_compute_region_instance_group_manager.appserver",
-						map[string]struct{}{
-							"wait_for_instances": {},
-						},
-					),
+					checkDataSourceStateMatchesResourceState("data.google_compute_region_instance_group_manager.foo", "google_compute_region_instance_group_manager.appserver"),
 				),
 			},
 		},
