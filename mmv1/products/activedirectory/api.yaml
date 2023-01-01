@@ -133,7 +133,7 @@ objects:
       exclude: false
       method_name_separator: ":"
       parent_resource_attribute: "name"
-      import_format: ["projects/{{project}}/locations/global/domains/{{domain_name}}"]
+      import_format: ["{{name}}"]
     parameters:
       - !ruby/object:Api::Type::String
         name: domainName

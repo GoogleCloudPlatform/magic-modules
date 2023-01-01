@@ -15,7 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Domain: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
-    import_format: ["projects/{{project}}/locations/global/domains/{{domain_name}}", "{{name}}"]
+    import_format: ["{{name}}"]
     autogen_async: true
     properties:
       authorizedNetworks: !ruby/object:Overrides::Terraform::PropertyOverride
