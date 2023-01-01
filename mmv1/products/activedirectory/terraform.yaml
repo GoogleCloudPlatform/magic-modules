@@ -14,8 +14,12 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Domain: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{name}}"
-    import_format: ["{{name}}"]
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      allowed_iam_role: 'roles/managedidentities.viewer'
+      parent_resource_attribute: domain_name
+      base_url: projects/{{project}}/locations/global/domains/{{domain_name}}
+      method_name_separator: ':'
+      import_format: ["projects/{{project}}/locations/global/domains/{{domain_name}}", "{{project}}/{{domain_name}}", "{{domain_name}}"]
     autogen_async: true
     properties:
       authorizedNetworks: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -30,7 +34,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "active_directory_domain_basic"
         primary_resource_id: "ad-domain"
-        primary_resource_name: 'fmt.Sprintf("tfgen%s", context["random_suffix"])'
+        primary_resource_name: 'fmt.Sprintf("tfgen%s.org.com", context["random_suffix"])'
         vars:
           name: "myorg"
           # the part of the domain before the first "." must be <15 chars, and
