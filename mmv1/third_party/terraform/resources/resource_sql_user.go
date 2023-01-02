@@ -236,12 +236,26 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		pp := expandPasswordPolicy(v)
 		user.PasswordPolicy = pp
 	}
-	err = validateUserType(typ, host, password)
-	if err != nil {
-		return err
-	}
+
 	mutexKV.Lock(instanceMutexKey(project, instance))
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
+
+	if v, ok := d.GetOk("host"); ok {
+		if v.(string) != "" {
+			var fetchedInstance *sqladmin.DatabaseInstance
+			err = retryTimeDuration(func() (rerr error) {
+				fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
+				return rerr
+			}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
+			if err != nil {
+				return handleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("instance").(string)))
+			}
+			if !strings.Contains(fetchedInstance.DatabaseVersion, "MYSQL") {
+				return fmt.Errorf("Error: Host field is only supported for MySQL instances: %s", fetchedInstance.DatabaseVersion)
+			}
+		}
+	}
+
 	var op *sqladmin.Operation
 	insertFunc := func() error {
 		op, err = config.NewSqlAdminClient(userAgent).Users.Insert(project, instance,
@@ -411,11 +425,6 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		password := d.Get("password").(string)
 		host := d.Get("host").(string)
 
-		err = validateUserType(d.Get("type").(string), host, password)
-		if err != nil {
-			return err
-		}
-
 		user := &sqladmin.User{
 			Name:     name,
 			Instance: instance,
@@ -528,17 +537,4 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-// Prevents user setting password or host for CLOUD_IAM_USER and CLOUD_IAM_SERVICE_ACCOUNT user types.
-func validateUserType(typ, host, password string) error {
-	if typ == "CLOUD_IAM_USER" || typ == "CLOUD_IAM_SERVICE_ACCOUNT" {
-		if host != "" && len(host) > 0 {
-			return fmt.Errorf("Host field should be set only for MySQL BUILT_IN users")
-		}
-		if password != "" && len(password) > 0 {
-			return fmt.Errorf("Password field should be set only for BUILT_IN users")
-		}
-	}
-	return nil
 }
