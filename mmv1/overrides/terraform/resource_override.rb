@@ -23,8 +23,7 @@ module Overrides
     # values from api.yaml.
     class ResourceOverride < Overrides::ResourceOverride
       def self.attributes
-        [
-        ]
+        []
       end
 
       attr_reader(*attributes)
@@ -32,7 +31,6 @@ module Overrides
 
       def validate
         super
-
       end
 
       def apply(resource)

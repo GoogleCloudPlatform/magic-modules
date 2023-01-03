@@ -131,12 +131,6 @@ module Api
       # Names of attributes that can't be set alongside this one
       attr_reader :conflicts_with
 
-      # Names of attributes that at least one of must be set
-      attr_reader :at_least_one_of
-
-      # Names of attributes that exactly one of must be set
-      attr_reader :exactly_one_of
-
       # Names of fields that should be included in the updateMask.
       attr_reader :update_mask_fields
 
@@ -640,11 +634,11 @@ module Api
         check :resource, type: ::String, required: true
         check :imports, type: ::String, required: TrueClass
 
-        # TODO (camthornton): product reference may not exist yet
-        unless @__resource.__product.nil?
-          check_resource_ref_exists
-          check_resource_ref_property_exists
-        end
+        # TODO: (camthornton) product reference may not exist yet
+        return if @__resource.__product.nil?
+
+        check_resource_ref_exists
+        check_resource_ref_property_exists
       end
 
       def property
@@ -789,14 +783,15 @@ module Api
       end
     end
 
+    # Support for schema ValidateFunc functionality.
     class Validation < Object
       # Ensures the value matches this regex
       attr_reader :regex
       attr_reader :function
-  
+
       def validate
         super
-  
+
         check :regex, type: String
         check :function, type: String
       end

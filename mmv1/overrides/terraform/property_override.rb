@@ -50,7 +50,6 @@ module Overrides
 
       def validate
         super
-
       end
 
       def apply(api_property)

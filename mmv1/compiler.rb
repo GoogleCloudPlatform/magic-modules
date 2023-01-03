@@ -136,7 +136,7 @@ if override_dir
 end
 
 products_to_generate = all_product_files if all_products
-raise 'No api.yaml or product.yaml files found. Check your provider (-e) name.' if products_to_generate.empty?
+raise 'No api.yaml or product.yaml files found.' if products_to_generate.empty?
 
 start_time = Time.now
 Google::LOGGER.info "Generating MM output to '#{output_path}'"
@@ -174,7 +174,7 @@ all_product_files.each do |product_name|
              end
     product_yaml = result.to_yaml
   elsif File.exist?(api_yaml_path)
-    product_yaml = File.read(api_yaml_path)  
+    product_yaml = File.read(api_yaml_path)
   elsif File.exist?(product_override_path)
     result = if File.exist?(product_yaml_path)
                YAML.load_file(product_yaml_path).merge(YAML.load_file(product_override_path))
@@ -206,20 +206,20 @@ all_product_files.each do |product_name|
       "#{product_name} does not have a '#{version}' version, skipping"
     next
   end
-  
+
   if File.exist?(product_yaml_path) || File.exist?(product_override_path)
     resources = []
-    Dir[product_name+'/*'].each do |file_path|
-      unless File.basename(file_path) == "product.yaml" || File.basename(file_path) == "terraform.yaml"
-        # Google::LOGGER.info "Generating #{file_path}"
-        resource_yaml = File.read(file_path)
-        resource = Api::Compiler.new(resource_yaml).run
-        resource.validate
-        resources.push(resource)
-      end
+    Dir[product_name + '/*'].each do |file_path|
+      next if File.basename(file_path) == 'product.yaml' \
+       || File.basename(file_path) == 'terraform.yaml'
+
+      resource_yaml = File.read(file_path)
+      resource = Api::Compiler.new(resource_yaml).run
+      resource.validate
+      resources.push(resource)
     end
     product_api.set_variable(resources, 'objects')
-  end 
+  end
 
   if File.exist?(provider_yaml_path)
     product_api, provider_config, = \
