@@ -1,0 +1,105 @@
+--- !ruby/object:Api::Resource
+  name: 'Repository'
+  base_url: projects/{{project}}/locations/{{location}}/repositories
+  create_url: projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}
+  self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
+  update_verb: :PATCH
+  update_mask: true
+  description: A repository for storing artifacts
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://cloud.google.com/artifact-registry/docs/overview'
+    api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
+  iam_policy: !ruby/object:Api::Resource::IamPolicy
+    exclude: false
+    method_name_separator: ':'
+    # TODO (camthornton): Change to repository_id in 4.0
+    parent_resource_attribute: 'repository'
+    import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository}}", "{{repository}}"]
+    base_url: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+    self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+    allowed_iam_role: 'roles/artifactregistry.reader'
+  properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: |-
+      The name of the repository, for example:
+      "projects/p1/locations/us-central1/repositories/repo1"
+    output: true
+  - !ruby/object:Api::Type::String
+    name: repository_id
+    description: |-
+      The last part of the repository name, for example:
+      "repo1"
+    required: true
+    input: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: |
+      The name of the location this repository is located in.
+    required: true
+    input: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: format
+    description: |-
+      The format of packages that are stored in the repository. Supported formats
+      can be found [here](https://cloud.google.com/artifact-registry/docs/supported-formats).
+      You can only create alpha formats if you are a member of the
+      [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
+    required: true
+    input: true
+  - !ruby/object:Api::Type::String
+    name: description
+    description: |-
+      The user-provided description of the repository.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    description: |
+      Labels with user-defined metadata.
+      This field may contain up to 64 entries. Label keys and values may be no
+      longer than 63 characters. Label keys must begin with a lowercase letter
+      and may only contain lowercase letters, numeric characters, underscores,
+      and dashes.
+  - !ruby/object:Api::Type::String
+    name: 'kmsKeyName'
+    description: |-
+      The Cloud KMS resource name of the customer managed encryption key that’s
+      used to encrypt the contents of the Repository. Has the form:
+      `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
+      This value may not be changed after the Repository has been created.
+    input: true
+  - !ruby/object:Api::Type::Time
+    name: createTime
+    description: The time when the repository was created.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: updateTime
+    description: The time when the repository was last updated.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'mavenConfig'
+    description: |-
+      MavenRepositoryConfig is maven related repository details.
+      Provides additional configuration details for repositories of the maven
+      format type.
+    properties:
+      # Maven properties.
+      - !ruby/object:Api::Type::Boolean
+        name: 'allowSnapshotOverwrites'
+        description: |-
+          The repository with this flag will allow publishing the same
+          snapshot versions.
+        input: true
+      - !ruby/object:Api::Type::Enum
+        name: 'versionPolicy'
+        description: |-
+          Version policy defines the versions that the registry will accept.
+        input: true
+        values:
+        - :VERSION_POLICY_UNSPECIFIED
+        - :RELEASE
+        - :SNAPSHOT
+        default_value: :VERSION_POLICY_UNSPECIFIED

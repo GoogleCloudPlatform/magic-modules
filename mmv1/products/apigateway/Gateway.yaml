@@ -1,0 +1,55 @@
+--- !ruby/object:Api::Resource
+  name: 'Gateway'
+  min_version: beta
+  create_url: projects/{{project}}/locations/{{region}}/gateways?gatewayId={{gateway_id}}
+  self_link: projects/{{project}}/locations/{{region}}/gateways/{{gateway_id}}
+  base_url: projects/{{project}}/locations/{{region}}/gateways
+  update_verb: :PATCH
+  update_mask: true
+  identity:
+    - gatewayId
+  description: |
+    A consumable API that can be used by multiple Gateways.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://cloud.google.com/api-gateway/docs/quickstart'
+    api: 'https://cloud.google.com/api-gateway/docs/reference/rest/v1beta/projects.locations.apis'
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: 'region'
+      description: |
+        The region of the gateway for the API.
+      input: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: gatewayId
+      description: |
+        Identifier to assign to the Gateway. Must be unique within scope of the parent resource(project).
+      required: true
+      input: true
+      url_param_only: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        Resource name of the Gateway. Format: projects/{project}/locations/{region}/gateways/{gateway}
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'displayName'
+      description: |
+        A user-visible name for the API.
+    - !ruby/object:Api::Type::String
+      name: 'apiConfig'
+      required: true
+      description: |
+        Resource name of the API Config for this Gateway. Format: projects/{project}/locations/global/apis/{api}/configs/{apiConfig}.
+        When changing api configs please ensure the new config is a new resource and the lifecycle rule `create_before_destroy` is set.
+    - !ruby/object:Api::Type::String
+      name: 'defaultHostname'
+      output: true
+      description: The default API Gateway host name of the form {gatewayId}-{hash}.{region_code}.gateway.dev.
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'labels'
+      description: |
+        Resource labels to represent user-provided metadata.
