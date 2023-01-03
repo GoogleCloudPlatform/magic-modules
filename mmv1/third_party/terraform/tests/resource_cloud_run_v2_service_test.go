@@ -46,6 +46,9 @@ resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   description = "description creating"
   location = "us-central1"
+  annotations = {
+    generated-by = "magic-modules"
+  }
   ingress = "INGRESS_TRAFFIC_ALL"
   labels = {
     label-1 = "value-1"
@@ -106,6 +109,9 @@ resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   description = "description updating"
   location = "us-central1"
+  annotations = {
+    generated-by = "magic-modules-files"
+  }
   ingress = "INGRESS_TRAFFIC_ALL"
   binary_authorization {
     use_default = true
@@ -187,50 +193,6 @@ resource "google_compute_subnetwork" "custom_test" {
 resource "google_compute_network" "custom_test" {
   name                    = "tf-test-run-network%{random_suffix}"
   auto_create_subnetworks = false
-}
-`, context)
-}
-
-func TestAccCloudRunV2Service_cloudrunv2ServiceFullBasic(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-	}
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCloudRunV2Service_cloudrunv2ServiceBasic(context),
-			},
-			{
-				ResourceName:            "google_cloud_run_v2_service.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location"},
-			},
-		},
-	})
-}
-
-func testAccCloudRunV2Service_cloudrunv2ServiceBasic(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_cloud_run_v2_service" "default" {
-  name     = "tf-test-cloudrun-service%{random_suffix}"
-  description = "description creating"
-  location = "us-central1"
-  annotations = {
-    generated-by = "magic-modules"
-  }
-  template {
-    containers {
-      name = "container-1"
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
-    }
-  }
 }
 `, context)
 }

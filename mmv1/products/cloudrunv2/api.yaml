@@ -778,10 +778,11 @@ objects:
             name: "labels"
             description: |-
               KRM-style labels for the resource.
-          - !ruby/object:Api::Type::KeyValuePairs
-            name: "annotations"
-            description: |-
-              KRM-style annotations for the resource.
+          # blocked on b/244872932
+          # - !ruby/object:Api::Type::KeyValuePairs
+          #   name: "annotations"
+          #   description: |-
+          #     KRM-style annotations for the resource.
           - !ruby/object:Api::Type::NestedObject
             name: "scaling"
             description: |
