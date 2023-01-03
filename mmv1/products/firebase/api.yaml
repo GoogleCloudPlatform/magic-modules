@@ -233,9 +233,8 @@ objects:
         description: |
           The SHA256 certificate hashes for the AndroidApp.
         item_type: Api::Type::String  
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Fingerprint
         name: etag
-        output: true
         description: |
           This checksum is computed by the server based on the value of other fields, and it may be sent
           with update requests to ensure the client has an up-to-date value before proceeding.
