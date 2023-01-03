@@ -41,7 +41,7 @@ func resourceBigtableInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: `The name (also called Instance Id in the Cloud Console) of the Cloud Bigtable instance. It has to be 6-33 characters and must only contain hyphens, lowercase letters and numbers.`,
+				Description: `The name (also called Instance Id in the Cloud Console) of the Cloud Bigtable instance. Must be 6-33 characters and must only contain hyphens, lowercase letters and numbers.`,
 			},
 
 			"cluster": {
@@ -54,7 +54,7 @@ func resourceBigtableInstance() *schema.Resource {
 						"cluster_id": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: `The ID of the Cloud Bigtable cluster. It has to be 6-30 characters and must only contain hyphens, lowercase letters and numbers.`,
+							Description: `The ID of the Cloud Bigtable cluster. Must be 6-30 characters and must only contain hyphens, lowercase letters and numbers.`,
 						},
 						"zone": {
 							Type:        schema.TypeString,

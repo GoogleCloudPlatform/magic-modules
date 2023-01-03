@@ -79,7 +79,7 @@ resource "google_bigtable_instance" "production-instance" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name (also called Instance Id in the Cloud Console) of the Cloud Bigtable instance. It has to be 6-33 characters and must only contain hyphens, lowercase letters and numbers.
+* `name` - (Required) The name (also called Instance Id in the Cloud Console) of the Cloud Bigtable instance. Must be 6-33 characters and must only contain hyphens, lowercase letters and numbers.
 
 * `cluster` - (Required) A block of cluster configuration options. This can be specified at least once, and up 
 to as many as possible within 8 cloud regions. Removing the field entirely from the config will cause the provider
@@ -108,7 +108,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 <a name="nested_cluster"></a>The `cluster` block supports the following arguments:
 
-* `cluster_id` - (Required) The ID of the Cloud Bigtable cluster. It has to be 6-30 characters and must only contain hyphens, lowercase letters and numbers.
+* `cluster_id` - (Required) The ID of the Cloud Bigtable cluster. Must be 6-30 characters and must only contain hyphens, lowercase letters and numbers.
 
 * `zone` - (Optional) The zone to create the Cloud Bigtable cluster in. If it not
 specified, the provider zone is used. Each cluster must have a different zone in the same region. Zones that support
