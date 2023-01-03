@@ -429,7 +429,7 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
    (see [Project and instance metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#project_and_instance_metadata)).
 
 * `reservation_affinity` - (Optional) Reservation Affinity for consuming Zonal reservation.
-    * `consume_reservation_type` - (Optional) Metrics sources to enable.
+    * `consume_reservation_type` - (Optional) Corresponds to the type of reservation consumption.
     * `key` - (Optional) Corresponds to the label key of reservation resource.
     * `values` - (Optional) Corresponds to the label values of reservation resource.
 
