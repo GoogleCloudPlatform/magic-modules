@@ -1,0 +1,23 @@
+// The generated code sets the wrong masks for the following fields.
+newUpdateMask := []string{}
+if d.HasChange("authorization") {
+    newUpdateMask = append(newUpdateMask, "authorization.admin_users")
+}
+if d.HasChange("logging_config") {
+    newUpdateMask = append(newUpdateMask, "logging_config.component_config.enable_components")
+}
+if d.HasChange("monitoring_config") {
+    newUpdateMask = append(newUpdateMask, "monitoring_config.managed_prometheus_config.enabled")
+}
+// Pull out any other set fields from the generated mask.
+for _, mask := range updateMask {
+    if mask == "authorization" || mask == "loggingConfig" || mask == "monitoringConfig" {
+        continue
+    }
+    newUpdateMask = append(newUpdateMask, mask)
+}
+// Overwrite the previously set mask.
+url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
+if err != nil {
+    return err
+}
