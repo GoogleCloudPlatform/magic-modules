@@ -72,7 +72,7 @@ to delete/recreate the entire `google_bigtable_table` resource.
     is not provided, the provider project is used.
 
 * `deletion_protection` - (Optional) A field to make the table protected against data loss i.e. when set to PROTECTED, deleting the table, the column families in the table, and the instance containing the table would be
-    prohibited. If not provided, currently deletion protection will be set to UNPROTECTED as it is the API default value.
+    prohibited. If not provided, deletion protection will be set to UNPROTECTED.
 
 -----
 
