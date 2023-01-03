@@ -1,7 +1,17 @@
-resource "google_vertex_ai_metadata_schema" "<%= ctx[:primary_resource_id] %>"{
+resource "google_vertex_ai_metadata_schema" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['name'] %>"
   description = "Schema to test the terraform module"
-  schema = "schema"
-  schemaVersion = "0.0.1"
-  schemaType = "ARTIFACT_TYPE"
+  schema = <<-EOT
+    title: system.Dataset
+    version: 0.0.1
+    type: object
+    additionalProperties: false
+    properties:
+      container_format:
+        type: string
+      payload_format:
+        type: string
+  EOT
+  schema_version = "0.0.1"
+  schema_type = "ARTIFACT_TYPE"
 }
