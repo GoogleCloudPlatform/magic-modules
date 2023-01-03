@@ -1,4 +1,5 @@
 resource "google_vertex_ai_metadata_schema" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
   name = "<%= ctx[:vars]['name'] %>"
   description = "Schema to test the terraform module"
   schema = <<-EOT
