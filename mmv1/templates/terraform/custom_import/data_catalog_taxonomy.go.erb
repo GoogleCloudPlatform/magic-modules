@@ -9,9 +9,9 @@
     d.SetId(name)
 
     re := regexp.MustCompile("projects/(.+)/(?:locations|regions)/(.+)/taxonomies/(.+)")
-	if matches := re.FindStringSubmatch(name); matches != nil {
-		d.Set("project", matches[1])
+    if matches := re.FindStringSubmatch(name); matches != nil {
+        d.Set("project", matches[1])
         d.Set("locations", matches[2])
-	}
+    }
 
     return []*schema.ResourceData{d}, nil
