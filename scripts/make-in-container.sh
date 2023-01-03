@@ -7,6 +7,7 @@ set -e
 
 BUILDER_IMAGE="gcr.io/graphite-docker-images/downstream-builder:latest"
 DEV_IMAGE="gcr.io/graphite-docker-images/magic-modules-dev:latest"
+GOPATH="/Users/enkuwfeleke/go"
 
 main() {
     if which podman > /dev/null; then
@@ -23,7 +24,7 @@ main() {
         echo "unable to find magic-modules-dev container"
         build_dev_container
     fi
-
+    echo $GOPATH
     ${CONTAINER_EXECUTABLE} run --rm \
     -v "$PWD:/magic-modules" -v "$GOPATH:$GOPATH" \
     -it "${DEV_IMAGE}" "$@"
