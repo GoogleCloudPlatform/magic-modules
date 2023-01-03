@@ -88,6 +88,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - deletion_policy
     virtual_fields:
       - !ruby/object:Api::Type::String
+        # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
         name: 'deletion_policy'
         description: |
           (Optional) Set to `ABANDON` to allow the AndroidApp to be untracked from terraform state
@@ -101,9 +102,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/iosApps/{{appId}}", "iosApps/{{appId}}", "{{appId}}"]
     autogen_async: true
     skip_sweeper: true # Skip sweeper generation and use hard-delete in hand-written sweeper
-    properties:
-      deletion_policy: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'emptyOrDefaultStringSuppress("DELETE")'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_apple_app_basic"
@@ -135,6 +133,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - deletion_policy
     virtual_fields:
       - !ruby/object:Api::Type::String
+        # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
         name: 'deletion_policy'
         description: |
           (Optional) Set to `ABANDON` to allow the Apple to be untracked from terraform state
