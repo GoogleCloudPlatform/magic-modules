@@ -1343,7 +1343,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_compactPlacement(t *testing.T) {
 	t.Parallel()
 
@@ -1390,7 +1389,6 @@ resource "google_container_node_pool" "np" {
 }
 `, cluster, np, placementType)
 }
-<% end -%>
 
 func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
