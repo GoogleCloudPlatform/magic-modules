@@ -68,6 +68,11 @@ tpgtools:
 	cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
+test:
+	cd mmv1;\
+		bundle; \
+		bundle exec rake test
+
 validator:
 	cd mmv1;\
 		bundle; \
@@ -93,4 +98,3 @@ upgrade-dcl:
 
 
 .PHONY: mmv1 tpgtools
-
