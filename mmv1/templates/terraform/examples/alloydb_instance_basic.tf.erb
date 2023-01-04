@@ -4,6 +4,10 @@ resource "google_alloydb_instance" "<%= ctx[:primary_resource_id] %>" {
   instance_id   = "<%= ctx[:vars]['alloydb_instance_name'] %>"
   instance_type = "PRIMARY"
 
+  machine_config {
+    cpu_count = 2
+  }
+
   depends_on = [google_service_networking_connection.vpc_connection]
 }
 

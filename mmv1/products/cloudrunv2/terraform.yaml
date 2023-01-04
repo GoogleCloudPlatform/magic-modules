@@ -1,0 +1,169 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+ 
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Job:  !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
+    import_format: ["projects/{{project}}/locations/{{location}}/jobs/{{name}}"]
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_job_basic"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_job_name: "cloudrun-job"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_job_sql"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_job_name: "cloudrun-job"
+          secret_id: "secret"
+          cloud_run_sql_name: "cloudrun-sql"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_job_vpcaccess"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_job_name: "cloudrun-job"
+          vpc_access_connector_name: "run-vpc"
+          vpc_compute_subnetwork_name: "run-subnetwork"
+          compute_network_name: "run-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_job_probes"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_job_name: "cloudrun-job"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_job_secret"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_job_name: "cloudrun-job"
+          secret_id: "secret"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      launchStage: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.parallelism: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.taskCount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.template.executionEnvironment: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.template.maxRetries: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.template.serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.template.timeout: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.template.containers: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.template.containers.resources: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.template.containers.resources.limits: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.template.containers.startupProbe: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.template.containers.startupProbe.tcpSocket.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  Service:  !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
+    import_format: ["projects/{{project}}/locations/{{location}}/services/{{name}}"]
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_service_basic"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-service"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_service_sql"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-service"
+          secret_id: "secret-1"
+          cloud_run_sql_name: "cloudrun-sql"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_service_vpcaccess"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-service"
+          vpc_access_connector_name: "run-vpc"
+          vpc_compute_subnetwork_name: "run-subnetwork"
+          compute_network_name: "run-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_service_probes"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-service"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrunv2_service_secret"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-service"
+          secret_id: "secret-1"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      launchStage: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      ingress: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.maxInstanceRequestConcurrency: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.timeout: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.containers.ports: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.containers.ports.name: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.containers.resources: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.containers.resources.limits: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.containers.startupProbe: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.containers.startupProbe.tcpSocket.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.scaling: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      traffic: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      traffic.percent: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true

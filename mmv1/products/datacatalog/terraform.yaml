@@ -98,7 +98,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           regex: '^[a-z_][a-z0-9_]{0,63}$'
       fields: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
-          Set of tag template field IDs and the settings for the field. This set is an exhaustive list of the allowed fields. This set must contain at least one field and at most 500 fields.
+          Set of tag template field IDs and the settings for the field. This set is an exhaustive list of the allowed fields. This set must contain at least one field and at most 500 fields. The change of field_id will be resulting in re-creating of field. The change of primitive_type will be resulting in re-creating of field, however if the field is a required, you cannot update it.
       fields.type.enumType: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}} Exactly one of `primitive_type` or `enum_type` must be set
@@ -107,12 +107,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       fields.type.primitiveType: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}} Exactly one of `primitive_type` or `enum_type` must be set
+        default_from_api: true
+      fields.description: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      fields.displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      fields.isRequired: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      fields.order: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
         required: false
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/data_catalog_tag_template.go.erb
+      custom_import: 'templates/terraform/custom_import/data_catalog_tag_template.go.erb'
+      pre_update: 'templates/terraform/pre_update/tagtemplate_fields.go.erb'
+      post_update: 'templates/terraform/post_update/tagtemplate_fields.go.erb'
+      constants: 'templates/terraform/constants/tagtemplate_fields.go.erb'
   Tag: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{name}}"]
     id_format: "{{name}}"

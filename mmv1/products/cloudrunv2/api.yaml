@@ -1,0 +1,1347 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+!ruby/object:Api::Product
+name: CloudRunV2
+display_name: Cloud Run (2nd gen)
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://run.googleapis.com/v2/
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Run API
+    url: https://console.cloud.google.com/apis/library/run.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: "Job"
+    base_url: projects/{{project}}/locations/{{location}}/jobs
+    self_link: projects/{{project}}/locations/{{location}}/jobs/{{name}}
+    create_url: projects/{{project}}/locations/{{location}}/jobs?jobId={{name}}
+    update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/run/docs/'
+      api: "https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.jobs"
+    description: |
+      A Cloud Run Job resource that references a container image which is run to completion.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: "name"
+        base_url: "{{op_id}}"
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: "response"
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: "done"
+        complete: true
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: "error"
+        message: "message"
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: "location"
+        input: true
+        url_param_only: true
+        description: The location of the cloud run job
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "name"
+        required: true
+        input: true
+        url_param_only: true
+        description: |
+          Name of the Job.
+        pattern: projects/{{project}}/locations/{{location}}/jobs/{{name}}
+      - !ruby/object:Api::Type::String
+        name: "uid"
+        output: true
+        description: |
+          Server assigned unique identifier for the Execution. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.
+      - !ruby/object:Api::Type::String
+        name: "generation"
+        output: true
+        description: |
+          A number that monotonically increases every time the user modifies the desired state.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "labels"
+        description: |-
+          KRM-style labels for the resource. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component, environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels Cloud Run will populate some labels with 'run.googleapis.com' or 'serving.knative.dev' namespaces. Those labels are read-only, and user changes will not be preserved.
+      # blocked on b/244872932
+      # - !ruby/object:Api::Type::KeyValuePairs
+      #   name: "annotations"
+      #   description: |-
+      #     KRM-style annotations for the resource. Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects. Cloud Run will populate some annotations using 'run.googleapis.com' or 'serving.knative.dev' namespaces. This field follows Kubernetes annotations' namespacing, limits, and rules. More info: https://kubernetes.io/docs/user-guide/annotations
+      - !ruby/object:Api::Type::String
+        name: "client"
+        description: |
+          Arbitrary identifier for the API client.
+      - !ruby/object:Api::Type::String
+        name: "clientVersion"
+        description: |
+          Arbitrary version identifier for the API client.
+      - !ruby/object:Api::Type::Enum
+        name: "launchStage"
+        description: |
+          The launch stage as defined by Google Cloud Platform Launch Stages. Cloud Run supports ALPHA, BETA, and GA. If no value is specified, GA is assumed.
+        values:
+          - :UNIMPLEMENTED
+          - :PRELAUNCH
+          - :EARLY_ACCESS
+          - :ALPHA
+          - :BETA
+          - :GA
+          - :DEPRECATED
+      - !ruby/object:Api::Type::NestedObject
+        name: "binaryAuthorization"
+        description: |
+          Settings for the Binary Authorization feature.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "breakglassJustification"
+            description: |
+              If present, indicates to use Breakglass using this justification. If useDefault is False, then it must be empty. For more information on breakglass, see https://cloud.google.com/binary-authorization/docs/using-breakglass
+          - !ruby/object:Api::Type::Boolean
+            name: "useDefault"
+            description: |
+              If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+      - !ruby/object:Api::Type::NestedObject
+        name: "template"
+        required: true
+        description: |
+          The template used to create executions for this Job.
+        properties:
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: "labels"
+            description: |-
+              KRM-style labels for the resource.
+          # blocked on b/244872932
+          # - !ruby/object:Api::Type::KeyValuePairs
+          #   name: "annotations"
+          #   description: |-
+          #     KRM-style annotations for the resource.
+          - !ruby/object:Api::Type::Integer
+            name: "parallelism"
+            description: |-
+              Specifies the maximum desired number of tasks the execution should run at given time. Must be <= taskCount. When the job is run, if this field is 0 or unset, the maximum possible value will be used for that execution. The actual number of tasks running in steady state will be less than this number when there are fewer tasks waiting to be completed remaining, i.e. when the work left to do is less than max parallelism.
+          - !ruby/object:Api::Type::Integer
+            name: "taskCount"
+            description: |-
+              Specifies the desired number of tasks the execution should run. Setting to 1 means that parallelism is limited to 1 and the success of that task signals the success of the execution. More info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/
+          - !ruby/object:Api::Type::NestedObject
+            name: "template"
+            required: true
+            description: |
+              Describes the task(s) that will be created when executing an execution
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: "containers"
+                description: |-
+                  Holds the single container that defines the unit of execution for this task.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: "name"
+                      description: |-
+                        Name of the container specified as a DNS_LABEL.
+                    - !ruby/object:Api::Type::String
+                      name: "image"
+                      required: true
+                      description: |-
+                        URL of the Container image in Google Container Registry or Google Artifact Registry. More info: https://kubernetes.io/docs/concepts/containers/images
+                    - !ruby/object:Api::Type::Array
+                      name: "command"
+                      description: |-
+                        Entrypoint array. Not executed within a shell. The docker image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                      item_type: Api::Type::String
+                    - !ruby/object:Api::Type::Array
+                      name: "args"
+                      description: |-
+                        Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                      item_type: Api::Type::String
+                    - !ruby/object:Api::Type::Array
+                      name: "env"
+                      description: |-
+                        List of environment variables to set in the container.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: "name"
+                            required: true
+                            description: |-
+                              Name of the environment variable. Must be a C_IDENTIFIER, and mnay not exceed 32768 characters.
+                          - !ruby/object:Api::Type::String
+                            name: "value"
+                            description: |-
+                              Variable references $(VAR_NAME) are expanded using the previous defined environment variables in the container and any route environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "", and the maximum length is 32768 bytes
+                            # exactly_one_of:
+                            #   - template.0.template.0.containers.0.env.0.value
+                            #   - template.0.template.0.containers.0.env.0.valueSource
+                          - !ruby/object:Api::Type::NestedObject
+                            name: "valueSource"
+                            description: |-
+                              Source for the environment variable's value.
+                            # exactly_one_of:
+                            #   - template.0.template.0.containers.0.env.0.value
+                            #   - template.0.template.0.containers.0.env.0.valueSource
+                            properties:
+                              - !ruby/object:Api::Type::NestedObject
+                                name: "secretKeyRef"
+                                description: |-
+                                  Selects a secret and a specific version from Cloud Secret Manager.
+                                properties:
+                                  - !ruby/object:Api::Type::String
+                                    name: "secret"
+                                    required: true
+                                    description: |-
+                                      The name of the secret in Cloud Secret Manager. Format: {secretName} if the secret is in the same project. projects/{project}/secrets/{secretName} if the secret is in a different project.
+                                  - !ruby/object:Api::Type::String
+                                    name: "version"
+                                    required: true
+                                    description: |-
+                                      The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "resources"
+                      description: |-
+                        Compute Resource requirements by this container. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources
+                      properties:
+                        - !ruby/object:Api::Type::KeyValuePairs
+                          name: "limits"
+                          description: |-
+                            Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    - !ruby/object:Api::Type::Array
+                      name: "ports"
+                      description: |-
+                        List of ports to expose from the container. Only a single port can be specified. The specified ports must be listening on all interfaces (0.0.0.0) within the container to be accessible.
+
+                        If omitted, a port number will be chosen and passed to the container through the PORT environment variable for the container to listen on
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: "name"
+                            description: |-
+                              If specified, used to specify which protocol to use. Allowed values are "http1" and "h2c".
+                          - !ruby/object:Api::Type::Integer
+                            name: "containerPort"
+                            description: |-
+                              Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
+                    - !ruby/object:Api::Type::Array
+                      name: "volumeMounts"
+                      description: |-
+                        Volume to mount into the container's filesystem.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: "name"
+                            required: true
+                            description: |-
+                              This must match the Name of a Volume.
+                          - !ruby/object:Api::Type::String
+                            name: "mountPath"
+                            required: true
+                            description: |-
+                              Path within the container at which the volume should be mounted. Must not contain ':'. For Cloud SQL volumes, it can be left empty, or must otherwise be /cloudsql. All instances defined in the Volume will be available as /cloudsql/[instance]. For more information on Cloud SQL volumes, visit https://cloud.google.com/sql/docs/mysql/connect-run
+                    - !ruby/object:Api::Type::String
+                      name: "workingDir"
+                      description: |-
+                        Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "livenessProbe"
+                      description: |-
+                        Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                      properties:
+                        - !ruby/object:Api::Type::Integer
+                            name: "initialDelaySeconds"
+                            description: |-
+                              Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                            default_value: 0
+                        - !ruby/object:Api::Type::Integer
+                            name: "timeoutSeconds"
+                            description: |-
+                              Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                            default_value: 1
+                        - !ruby/object:Api::Type::Integer
+                            name: "periodSeconds"
+                            description: |-
+                              How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
+                            default_value: 10
+                        - !ruby/object:Api::Type::Integer
+                            name: "failureThreshold"
+                            description: |-
+                              Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+                            default_value: 3
+                        - !ruby/object:Api::Type::NestedObject
+                            name: "httpGet"
+                            description: |-
+                              HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
+                            send_empty_value: true
+                            allow_empty_object: true
+                            # exactly_one_of:
+                            #   - template.0.template.0.containers.0.livenessProbe.0.httpGet
+                            #   - template.0.template.0.containers.0.livenessProbe.0.tcpSocket
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: "path"
+                                default_value: "/"
+                                description: |-
+                                  Path to access on the HTTP server. Defaults to '/'.
+                              - !ruby/object:Api::Type::Array
+                                name: httpHeaders
+                                description: |-
+                                  Custom headers to set in the request. HTTP allows repeated headers.
+                                item_type: !ruby/object:Api::Type::NestedObject
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: name
+                                      required: true
+                                      description: |-
+                                        The header field name
+                                    - !ruby/object:Api::Type::String
+                                      name: value
+                                      description: |-
+                                        The header field value
+                                      default_value: ""
+                                      send_empty_value: true
+                        - !ruby/object:Api::Type::NestedObject
+                            name: "tcpSocket"
+                            description: |-
+                              TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
+                            send_empty_value: true
+                            allow_empty_object: true
+                            # exactly_one_of:
+                            #   - template.0.template.0.containers.0.livenessProbe.0.httpGet
+                            #   - template.0.template.0.containers.0.livenessProbe.0.tcpSocket
+                            properties:
+                              - !ruby/object:Api::Type::Integer
+                                name: port
+                                description: |-
+                                  Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "startupProbe"
+                      description: |-
+                        Startup probe of application within the container. All other probes are disabled if a startup probe is provided, until it succeeds. Container will not be added to service endpoints if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                      properties:
+                        - !ruby/object:Api::Type::Integer
+                            name: "initialDelaySeconds"
+                            description: |-
+                              Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                            default_value: 0
+                        - !ruby/object:Api::Type::Integer
+                            name: "timeoutSeconds"
+                            description: |-
+                              Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                            default_value: 1
+                        - !ruby/object:Api::Type::Integer
+                            name: "periodSeconds"
+                            description: |-
+                              How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
+                            default_value: 10
+                        - !ruby/object:Api::Type::Integer
+                            name: "failureThreshold"
+                            description: |-
+                              Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+                            default_value: 3
+                        - !ruby/object:Api::Type::NestedObject
+                            name: "httpGet"
+                            description: |-
+                              HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
+                            send_empty_value: true
+                            allow_empty_object: true
+                            # exactly_one_of:
+                            #   - template.0.template.0.containers.startupProbe.0.httpGet
+                            #   - template.0.template.0.containers.startupProbe.0.tcpSocket
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: "path"
+                                default_value: "/"
+                                description: |-
+                                  Path to access on the HTTP server. Defaults to '/'.
+                              - !ruby/object:Api::Type::Array
+                                name: "httpHeaders"
+                                description: |-
+                                  Custom headers to set in the request. HTTP allows repeated headers.
+                                item_type: !ruby/object:Api::Type::NestedObject
+                                  properties:
+                                    - !ruby/object:Api::Type::String
+                                      name: name
+                                      required: true
+                                      description: |-
+                                        The header field name
+                                    - !ruby/object:Api::Type::String
+                                      name: value
+                                      description: |-
+                                        The header field value
+                                      default_value: ""
+                                      send_empty_value: true
+                        - !ruby/object:Api::Type::NestedObject
+                            name: "tcpSocket"
+                            description: |-
+                              TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
+                            send_empty_value: true
+                            allow_empty_object: true
+                            # exactly_one_of:
+                            #   - template.0.template.0.containers.startupProbe.0.httpGet
+                            #   - template.0.template.0.containers.startupProbe.0.tcpSocket
+                            properties:
+                              - !ruby/object:Api::Type::Integer
+                                name: port
+                                description: |-
+                                  Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+              - !ruby/object:Api::Type::Array
+                name: "volumes"
+                description: |-
+                  A list of Volumes to make available to containers.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: "name"
+                      required: true
+                      description: |-
+                        Volume's name.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "secret"
+                      description: |-
+                        Secret represents a secret that should populate this volume. More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
+                      # exactly_one_of:
+                      #   - template.0.template.0.volumes.0.secret
+                      #   - template.0.template.0.volumes.0.cloudSqlInstance
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: "secret"
+                          required: true
+                          description: |-
+                            The name of the secret in Cloud Secret Manager. Format: {secret} if the secret is in the same project. projects/{project}/secrets/{secret} if the secret is in a different project.
+                        - !ruby/object:Api::Type::Integer
+                          name: "defaultMode"
+                          description: |-
+                            Integer representation of mode bits to use on created files by default. Must be a value between 0000 and 0777 (octal), defaulting to 0444. Directories within the path are not affected by this setting.
+                        - !ruby/object:Api::Type::Array
+                          name: "items"
+                          description: |-
+                            If unspecified, the volume will expose a file whose name is the secret, relative to VolumeMount.mount_path. If specified, the key will be used as the version to fetch from Cloud Secret Manager and the path will be the name of the file exposed in the volume. When items are defined, they must specify a path and a version.
+                          item_type: !ruby/object:Api::Type::NestedObject
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: "path"
+                                required: true
+                                description: |-
+                                  The relative path of the secret in the container.
+                              - !ruby/object:Api::Type::String
+                                name: "version"
+                                required: true
+                                description: |-
+                                  The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
+                              - !ruby/object:Api::Type::Integer
+                                name: "mode"
+                                required: true
+                                description: |-
+                                  Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "cloudSqlInstance"
+                      description: |-
+                        For Cloud SQL volumes, contains the specific instances that should be mounted. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run.
+                      # exactly_one_of:
+                      #   - template.0.template.0.volumes.0.secret
+                      #   - template.0.template.0.volumes.0.cloudSqlInstance
+                      properties:
+                        - !ruby/object:Api::Type::Array
+                          name: "instances"
+                          description: |-
+                            The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
+                          item_type: Api::Type::String
+              - !ruby/object:Api::Type::String
+                name: "timeout"
+                description: |-
+                  Max allowed time duration the Task may be active before the system will actively try to mark it failed and kill associated containers. This applies per attempt of a task, meaning each retry can run for the full timeout.
+
+                  A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+              - !ruby/object:Api::Type::String
+                name: "serviceAccount"
+                description: |-
+                  Email address of the IAM service account associated with the Task of a Job. The service account represents the identity of the running task, and determines what permissions the task has. If not provided, the task will use the project's default service account.
+              - !ruby/object:Api::Type::Enum
+                name: "executionEnvironment"
+                description: |-
+                  The execution environment being used to host this Task.
+                values:
+                  - :EXECUTION_ENVIRONMENT_GEN1
+                  - :EXECUTION_ENVIRONMENT_GEN2
+              - !ruby/object:Api::Type::String
+                name: "encryptionKey"
+                description: |-
+                  A reference to a customer managed encryption key (CMEK) to use to encrypt this container image. For more information, go to https://cloud.google.com/run/docs/securing/using-cmek
+              - !ruby/object:Api::Type::NestedObject
+                name: "vpcAccess"
+                description: |-
+                  VPC Access configuration to use for this Task. For more information, visit https://cloud.google.com/run/docs/configuring/connecting-vpc.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: "connector"
+                    description: |-
+                      VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
+                  - !ruby/object:Api::Type::Enum
+                    name: "egress"
+                    description: |-
+                      Traffic VPC egress settings.
+                    values:
+                      - :ALL_TRAFFIC
+                      - :PRIVATE_RANGES_ONLY
+              - !ruby/object:Api::Type::Integer
+                name: "maxRetries"
+                description: |-
+                  Number of retries allowed per Task, before marking this Task failed.
+      - !ruby/object:Api::Type::String
+        name: "observedGeneration"
+        output: true
+        description: |
+          The generation of this Job. See comments in reconciling for additional information on reconciliation process in Cloud Run.
+      - !ruby/object:Api::Type::NestedObject
+        name: "terminalCondition"
+        output: true
+        description: |
+          The Condition of this Job, containing its readiness status, and detailed error information in case it did not reach the desired state
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "type"
+            output: true
+            description: |-
+              type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
+          - !ruby/object:Api::Type::String
+            name: "state"
+            output: true
+            description: |-
+              State of the condition.
+          - !ruby/object:Api::Type::String
+            name: "message"
+            output: true
+            description: |-
+              Human readable message indicating details about the current status.
+          - !ruby/object:Api::Type::Time
+            name: "lastTransitionTime"
+            output: true
+            description: |-
+              Last time the condition transitioned from one status to another.
+
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+          - !ruby/object:Api::Type::String
+            name: "severity"
+            output: true
+            description: |-
+              How to interpret failures of this condition, one of Error, Warning, Info
+          - !ruby/object:Api::Type::String
+            name: "reason"
+            output: true
+            description: |-
+              A common (service-level) reason for this condition.
+          - !ruby/object:Api::Type::String
+            name: "revisionReason"
+            output: true
+            description: |-
+              A reason for the revision condition.
+          - !ruby/object:Api::Type::String
+            name: "executionReason"
+            output: true
+            description: |-
+              A reason for the execution condition.
+      - !ruby/object:Api::Type::Array
+        name: "conditions"
+        description: |-
+          The Conditions of all other associated sub-resources. They contain additional diagnostics information in case the Job does not reach its desired state. See comments in reconciling for additional information on `reconciliation` process in Cloud Run.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "type"
+              output: true
+              description: |-
+                type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
+            - !ruby/object:Api::Type::String
+              name: "state"
+              output: true
+              description: |-
+                State of the condition.
+            - !ruby/object:Api::Type::String
+              name: "message"
+              output: true
+              description: |-
+                Human readable message indicating details about the current status.
+            - !ruby/object:Api::Type::Time
+              name: "lastTransitionTime"
+              output: true
+              description: |-
+                Last time the condition transitioned from one status to another.
+
+                A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+            - !ruby/object:Api::Type::String
+              name: "severity"
+              output: true
+              description: |-
+                How to interpret failures of this condition, one of Error, Warning, Info
+            - !ruby/object:Api::Type::String
+              name: "reason"
+              output: true
+              description: |-
+                A common (service-level) reason for this condition.
+            - !ruby/object:Api::Type::String
+              name: "revisionReason"
+              output: true
+              description: |-
+                A reason for the revision condition.
+            - !ruby/object:Api::Type::String
+              name: "executionReason"
+              output: true
+              description: |-
+                A reason for the execution condition.
+      - !ruby/object:Api::Type::Integer
+        name: "executionCount"
+        output: true
+        description: |
+          Number of executions created for this job.
+      - !ruby/object:Api::Type::NestedObject
+        name: "latestCreatedExecution"
+        output: true
+        description: |
+          Name of the last created execution.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "name"
+            output: true
+            description: |
+              Name of the execution.
+          - !ruby/object:Api::Type::Time
+            name: "createTime"
+            output: true
+            description: |
+              Creation timestamp of the execution.
+
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+          - !ruby/object:Api::Type::Time
+            name: "completionTime"
+            output: true
+            description: |
+              Completion timestamp of the execution.
+
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      - !ruby/object:Api::Type::Boolean
+        name: "reconciling"
+        output: true
+        description: |
+          Returns true if the Job is currently being acted upon by the system to bring it into the desired state.
+
+          When a new Job is created, or an existing one is updated, Cloud Run will asynchronously perform all necessary steps to bring the Job to the desired state. This process is called reconciliation. While reconciliation is in process, observedGeneration and latest_succeeded_execution, will have transient values that might mismatch the intended state: Once reconciliation is over (and this field is false), there are two possible outcomes: reconciliation succeeded and the state matches the Job, or there was an error, and reconciliation failed. This state can be found in terminalCondition.state.
+
+          If reconciliation succeeded, the following fields will match: observedGeneration and generation, latest_succeeded_execution and latestCreatedExecution.
+
+          If reconciliation failed, observedGeneration and latest_succeeded_execution will have the state of the last succeeded execution or empty for newly created Job. Additional information on the failure can be found in terminalCondition and conditions
+      - !ruby/object:Api::Type::String
+        name: "etag"
+        output: true
+        description: |
+          A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
+  - !ruby/object:Api::Resource
+    name: "Service"
+    base_url: projects/{{project}}/locations/{{location}}/services
+    self_link: projects/{{project}}/locations/{{location}}/services/{{name}}
+    create_url: projects/{{project}}/locations/{{location}}/services?serviceId={{name}}
+    update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/run/docs/'
+      api: "https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services"
+    description: |
+      Service acts as a top-level container that manages a set of configurations and revision templates which implement a network service. Service exists to provide a singular abstraction which can be access controlled, reasoned about, and which encapsulates software lifecycle decisions such as rollout policy and team resource ownership.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: "name"
+        base_url: "{{op_id}}"
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: "response"
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: "done"
+        complete: true
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: "error"
+        message: "message"
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: "location"
+        input: true
+        url_param_only: true
+        description: The location of the cloud run service
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "name"
+        required: true
+        input: true
+        url_param_only: true
+        description: |
+          Name of the Service.
+        pattern: projects/{{project}}/locations/{{location}}/services/{{name}}
+      - !ruby/object:Api::Type::String
+        name: "description"
+        description: |
+          User-provided description of the Service. This field currently has a 512-character limit.
+      - !ruby/object:Api::Type::String
+        name: "uid"
+        output: true
+        description: |
+          Server assigned unique identifier for the trigger. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.
+      - !ruby/object:Api::Type::String
+        name: "generation"
+        output: true
+        description: |
+          A number that monotonically increases every time the user modifies the desired state. Please note that unlike v1, this is an int64 value. As with most Google APIs, its JSON representation will be a string instead of an integer.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "labels"
+        description: |-
+          Map of string keys and values that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component, environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels Cloud Run will populate some labels with 'run.googleapis.com' or 'serving.knative.dev' namespaces. Those labels are read-only, and user changes will not be preserved.
+      # Blocked on b/244872932 for implementation    
+      # - !ruby/object:Api::Type::KeyValuePairs
+      #   name: "annotations"
+      #   description: |-
+      #     Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects. Cloud Run will populate some annotations using 'run.googleapis.com' or 'serving.knative.dev' namespaces. This field follows Kubernetes annotations' namespacing, limits, and rules. More info: https://kubernetes.io/docs/user-guide/annotations
+      - !ruby/object:Api::Type::String
+        name: "client"
+        description: |
+          Arbitrary identifier for the API client.
+      - !ruby/object:Api::Type::String
+        name: "clientVersion"
+        description: |
+          Arbitrary version identifier for the API client.
+      - !ruby/object:Api::Type::Enum
+        name: "ingress"
+        description: |
+          Provides the ingress settings for this Service. On output, returns the currently observed ingress settings, or INGRESS_TRAFFIC_UNSPECIFIED if no revision is active.
+        values:
+          - :INGRESS_TRAFFIC_ALL
+          - :INGRESS_TRAFFIC_INTERNAL_ONLY
+          - :INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER
+      - !ruby/object:Api::Type::Enum
+        name: "launchStage"
+        description: |
+          The launch stage as defined by Google Cloud Platform Launch Stages. Cloud Run supports ALPHA, BETA, and GA. If no value is specified, GA is assumed.
+        values:
+          - :UNIMPLEMENTED
+          - :PRELAUNCH
+          - :EARLY_ACCESS
+          - :ALPHA
+          - :BETA
+          - :GA
+          - :DEPRECATED
+      - !ruby/object:Api::Type::NestedObject
+        name: "binaryAuthorization"
+        description: |
+          Settings for the Binary Authorization feature.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "breakglassJustification"
+            description: |
+              If present, indicates to use Breakglass using this justification. If useDefault is False, then it must be empty. For more information on breakglass, see https://cloud.google.com/binary-authorization/docs/using-breakglass
+          - !ruby/object:Api::Type::Boolean
+            name: "useDefault"
+            description: |
+              If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+      - !ruby/object:Api::Type::NestedObject
+        name: "template"
+        required: true
+        description: |
+          The template used to create revisions for this Service.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "revision"
+            description: |-
+              The unique name for the revision. If this field is omitted, it will be automatically generated based on the Service name.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: "labels"
+            description: |-
+              KRM-style labels for the resource.
+          # Blocked on b/244872932 for implementation 
+          # - !ruby/object:Api::Type::KeyValuePairs
+          #   name: "annotations"
+          #   description: |-
+          #     KRM-style annotations for the resource.
+          - !ruby/object:Api::Type::NestedObject
+            name: "scaling"
+            description: |
+              Scaling settings for this Revision.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: "minInstanceCount"
+                description: |-
+                  Minimum number of serving instances that this resource should have.
+              - !ruby/object:Api::Type::Integer
+                name: "maxInstanceCount"
+                description: |-
+                  Maximum number of serving instances that this resource should have.
+          - !ruby/object:Api::Type::NestedObject
+            name: "vpcAccess"
+            description: |-
+              VPC Access configuration to use for this Task. For more information, visit https://cloud.google.com/run/docs/configuring/connecting-vpc.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: "connector"
+                description: |-
+                  VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
+              - !ruby/object:Api::Type::Enum
+                name: "egress"
+                description: |-
+                  Traffic VPC egress settings.
+                values:
+                  - :ALL_TRAFFIC
+                  - :PRIVATE_RANGES_ONLY
+          - !ruby/object:Api::Type::String
+            name: "timeout"
+            description: |-
+              Max allowed time for an instance to respond to a request.
+
+              A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::String
+            name: "serviceAccount"
+            description: |-
+              Email address of the IAM service account associated with the revision of the service. The service account represents the identity of the running revision, and determines what permissions the revision has. If not provided, the revision will use the project's default service account.
+          - !ruby/object:Api::Type::Array
+            name: "containers"
+            description: |-
+              Holds the single container that defines the unit of execution for this task.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "name"
+                  description: |-
+                    Name of the container specified as a DNS_LABEL.
+                - !ruby/object:Api::Type::String
+                  name: "image"
+                  required: true
+                  description: |-
+                    URL of the Container image in Google Container Registry or Google Artifact Registry. More info: https://kubernetes.io/docs/concepts/containers/images
+                - !ruby/object:Api::Type::Array
+                  name: "command"
+                  description: |-
+                    Entrypoint array. Not executed within a shell. The docker image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                  item_type: Api::Type::String
+                - !ruby/object:Api::Type::Array
+                  name: "args"
+                  description: |-
+                    Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+                  item_type: Api::Type::String
+                - !ruby/object:Api::Type::Array
+                  name: "env"
+                  description: |-
+                    List of environment variables to set in the container.
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: "name"
+                        required: true
+                        description: |-
+                          Name of the environment variable. Must be a C_IDENTIFIER, and mnay not exceed 32768 characters.
+                      - !ruby/object:Api::Type::String
+                        name: "value"
+                        description: |-
+                          Variable references $(VAR_NAME) are expanded using the previous defined environment variables in the container and any route environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "", and the maximum length is 32768 bytes
+                        # exactly_one_of:
+                        #   - template.0.containers.0.env.0.value
+                        #   - template.0.containers.0.env.0.valueSource
+                      - !ruby/object:Api::Type::NestedObject
+                        name: "valueSource"
+                        description: |-
+                          Source for the environment variable's value.
+                        # exactly_one_of:
+                        #   - template.0.containers.0.env.0.value
+                        #   - template.0.containers.0.env.0.valueSource
+                        properties:
+                          - !ruby/object:Api::Type::NestedObject
+                            name: "secretKeyRef"
+                            description: |-
+                              Selects a secret and a specific version from Cloud Secret Manager.
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: "secret"
+                                required: true
+                                description: |-
+                                  The name of the secret in Cloud Secret Manager. Format: {secretName} if the secret is in the same project. projects/{project}/secrets/{secretName} if the secret is in a different project.
+                              - !ruby/object:Api::Type::String
+                                name: "version"
+                                description: |-
+                                  The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "resources"
+                  description: |-
+                    Compute Resource requirements by this container. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources
+                  properties:
+                    - !ruby/object:Api::Type::KeyValuePairs
+                      name: "limits"
+                      description: |-
+                        Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    - !ruby/object:Api::Type::Boolean
+                      name: "cpuIdle"
+                      description: |-
+                        Determines whether CPU should be throttled or not outside of requests.
+                - !ruby/object:Api::Type::Array
+                  name: "ports"
+                  description: |-
+                    List of ports to expose from the container. Only a single port can be specified. The specified ports must be listening on all interfaces (0.0.0.0) within the container to be accessible.
+
+                    If omitted, a port number will be chosen and passed to the container through the PORT environment variable for the container to listen on
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: "name"
+                        description: |-
+                          If specified, used to specify which protocol to use. Allowed values are "http1" and "h2c".
+                      - !ruby/object:Api::Type::Integer
+                        name: "containerPort"
+                        description: |-
+                          Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
+                - !ruby/object:Api::Type::Array
+                  name: "volumeMounts"
+                  description: |-
+                    Volume to mount into the container's filesystem.
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: "name"
+                        required: true
+                        description: |-
+                          This must match the Name of a Volume.
+                      - !ruby/object:Api::Type::String
+                        name: "mountPath"
+                        required: true
+                        description: |-
+                          Path within the container at which the volume should be mounted. Must not contain ':'. For Cloud SQL volumes, it can be left empty, or must otherwise be /cloudsql. All instances defined in the Volume will be available as /cloudsql/[instance]. For more information on Cloud SQL volumes, visit https://cloud.google.com/sql/docs/mysql/connect-run
+                - !ruby/object:Api::Type::String
+                  name: "workingDir"
+                  description: |-
+                    Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "livenessProbe"
+                  description: |-
+                    Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                        name: "initialDelaySeconds"
+                        description: |-
+                          Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                        default_value: 0
+                    - !ruby/object:Api::Type::Integer
+                        name: "timeoutSeconds"
+                        description: |-
+                          Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                        default_value: 1
+                    - !ruby/object:Api::Type::Integer
+                        name: "periodSeconds"
+                        description: |-
+                          How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
+                        default_value: 10
+                    - !ruby/object:Api::Type::Integer
+                        name: "failureThreshold"
+                        description: |-
+                          Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+                        default_value: 3
+                    - !ruby/object:Api::Type::NestedObject
+                        name: "httpGet"
+                        description: |-
+                          HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
+                        send_empty_value: true
+                        allow_empty_object: true
+                        # exactly_one_of:
+                        #   - template.0.containers.0.livenessProbe.0.httpGet
+                        #   - template.0.containers.0.livenessProbe.0.tcpSocket
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: "path"
+                            default_value: "/"
+                            description: |-
+                              Path to access on the HTTP server. Defaults to '/'.
+                          - !ruby/object:Api::Type::Array
+                            name: "httpHeaders"
+                            description: |-
+                              Custom headers to set in the request. HTTP allows repeated headers.
+                            item_type: !ruby/object:Api::Type::NestedObject
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: name
+                                  required: true
+                                  description: |-
+                                    The header field name
+                                - !ruby/object:Api::Type::String
+                                  name: value
+                                  description: |-
+                                    The header field value
+                                  default_value: ""
+                                  send_empty_value: true
+                    - !ruby/object:Api::Type::NestedObject
+                        name: "tcpSocket"
+                        description: |-
+                          TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
+                        send_empty_value: true
+                        allow_empty_object: true
+                        # exactly_one_of:
+                        #   - template.0.containers.0.livenessProbe.0.httpGet
+                        #   - template.0.containers.0.livenessProbe.0.tcpSocket
+                        properties:
+                          - !ruby/object:Api::Type::Integer
+                            name: port
+                            description: |-
+                              Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "startupProbe"
+                  description: |-
+                    Startup probe of application within the container. All other probes are disabled if a startup probe is provided, until it succeeds. Container will not be added to service endpoints if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                        name: "initialDelaySeconds"
+                        description: |-
+                          Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                        default_value: 0
+                    - !ruby/object:Api::Type::Integer
+                        name: "timeoutSeconds"
+                        description: |-
+                          Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                        default_value: 1
+                    - !ruby/object:Api::Type::Integer
+                        name: "periodSeconds"
+                        description: |-
+                          How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
+                        default_value: 10
+                    - !ruby/object:Api::Type::Integer
+                        name: "failureThreshold"
+                        description: |-
+                          Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+                        default_value: 3
+                    - !ruby/object:Api::Type::NestedObject
+                        name: "httpGet"
+                        description: |-
+                          HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
+                        send_empty_value: true
+                        allow_empty_object: true
+                        # exactly_one_of:
+                        #   - template.0.containers.0.startupProbe.0.httpGet
+                        #   - template.0.containers.0.startupProbe.0.tcpSocket
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: "path"
+                            default_value: "/"
+                            description: |-
+                              Path to access on the HTTP server. Defaults to '/'.
+                          - !ruby/object:Api::Type::Array
+                            name: "httpHeaders"
+                            description: |-
+                              Custom headers to set in the request. HTTP allows repeated headers.
+                            item_type: !ruby/object:Api::Type::NestedObject
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: name
+                                  required: true
+                                  description: |-
+                                    The header field name
+                                - !ruby/object:Api::Type::String
+                                  name: value
+                                  description: |-
+                                    The header field value
+                                  default_value: ""
+                                  send_empty_value: true
+                    - !ruby/object:Api::Type::NestedObject
+                        name: "tcpSocket"
+                        description: |-
+                          TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
+                        send_empty_value: true
+                        allow_empty_object: true
+                        # exactly_one_of:
+                        #   - template.0.containers.0.startupProbe.0.httpGet
+                        #   - template.0.containers.0.startupProbe.0.tcpSocket
+                        properties:
+                          - !ruby/object:Api::Type::Integer
+                            name: port
+                            description: |-
+                              Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080. 
+          - !ruby/object:Api::Type::Array
+            name: "volumes"
+            description: |-
+              A list of Volumes to make available to containers.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "name"
+                  required: true
+                  description: |-
+                    Volume's name.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "secret"
+                  description: |-
+                    Secret represents a secret that should populate this volume. More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: "secret"
+                      required: true
+                      description: |-
+                        The name of the secret in Cloud Secret Manager. Format: {secret} if the secret is in the same project. projects/{project}/secrets/{secret} if the secret is in a different project.
+                    - !ruby/object:Api::Type::Integer
+                      name: "defaultMode"
+                      description: |-
+                        Integer representation of mode bits to use on created files by default. Must be a value between 0000 and 0777 (octal), defaulting to 0444. Directories within the path are not affected by this setting.
+                    - !ruby/object:Api::Type::Array
+                      name: "items"
+                      description: |-
+                        If unspecified, the volume will expose a file whose name is the secret, relative to VolumeMount.mount_path. If specified, the key will be used as the version to fetch from Cloud Secret Manager and the path will be the name of the file exposed in the volume. When items are defined, they must specify a path and a version.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: "path"
+                            required: true
+                            description: |-
+                              The relative path of the secret in the container.
+                          - !ruby/object:Api::Type::String
+                            name: "version"
+                            description: |-
+                              The Cloud Secret Manager secret version. Can be 'latest' for the latest value or an integer for a specific version
+                          - !ruby/object:Api::Type::Integer
+                            name: "mode"
+                            required: true
+                            description: |-
+                              Integer octal mode bits to use on this file, must be a value between 01 and 0777 (octal). If 0 or not set, the Volume's default mode will be used.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "cloudSqlInstance"
+                  description: |-
+                    For Cloud SQL volumes, contains the specific instances that should be mounted. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run.
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: "instances"
+                      description: |-
+                        The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
+                      item_type: Api::Type::String
+          - !ruby/object:Api::Type::Enum
+            name: "executionEnvironment"
+            description: |-
+              The sandbox environment to host this Revision.
+            values:
+              - :EXECUTION_ENVIRONMENT_GEN1
+              - :EXECUTION_ENVIRONMENT_GEN2
+          - !ruby/object:Api::Type::String
+            name: "encryptionKey"
+            description: |-
+              A reference to a customer managed encryption key (CMEK) to use to encrypt this container image. For more information, go to https://cloud.google.com/run/docs/securing/using-cmek
+          - !ruby/object:Api::Type::Integer
+            name: "maxInstanceRequestConcurrency"
+            description: |-
+              Sets the maximum number of requests that each serving instance can receive.      
+      - !ruby/object:Api::Type::Array
+        name: "traffic"
+        description: |-
+          Specifies how to distribute traffic over a collection of Revisions belonging to the Service. If traffic is empty or not provided, defaults to 100% traffic to the latest Ready Revision.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::Enum
+            name: "type"
+            description: |
+              The allocation type for this traffic target.
+            values:
+              - :TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST
+              - :TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION
+          - !ruby/object:Api::Type::String
+            name: "revision"
+            description: |
+              Revision to which to send this portion of traffic, if traffic allocation is by revision.
+          - !ruby/object:Api::Type::Integer
+            name: "percent"
+            description: |
+              Specifies percent of the traffic to this Revision. This defaults to zero if unspecified.
+          - !ruby/object:Api::Type::String
+            name: "tag"
+            description: |
+              Indicates a string to be part of the URI to exclusively reference this target.  
+      - !ruby/object:Api::Type::String
+        name: "observedGeneration"
+        output: true
+        description: |
+          The generation of this Service currently serving traffic. See comments in reconciling for additional information on reconciliation process in Cloud Run. Please note that unlike v1, this is an int64 value. As with most Google APIs, its JSON representation will be a string instead of an integer.
+      - !ruby/object:Api::Type::NestedObject
+        name: "terminalCondition"
+        output: true
+        description: |
+          The Condition of this Service, containing its readiness status, and detailed error information in case it did not reach a serving state. See comments in reconciling for additional information on reconciliation process in Cloud Run.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "type"
+            output: true
+            description: |-
+              type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
+          - !ruby/object:Api::Type::String
+            name: "state"
+            output: true
+            description: |-
+              State of the condition.
+          - !ruby/object:Api::Type::String
+            name: "message"
+            output: true
+            description: |-
+              Human readable message indicating details about the current status.
+          - !ruby/object:Api::Type::Time
+            name: "lastTransitionTime"
+            output: true
+            description: |-
+              Last time the condition transitioned from one status to another.
+          - !ruby/object:Api::Type::String
+            name: "severity"
+            output: true
+            description: |-
+              How to interpret failures of this condition, one of Error, Warning, Info
+          - !ruby/object:Api::Type::String
+            name: "reason"
+            output: true
+            description: |-
+              A common (service-level) reason for this condition.
+          - !ruby/object:Api::Type::String
+            name: "revisionReason"
+            output: true
+            description: |-
+              A reason for the revision condition.
+          - !ruby/object:Api::Type::String
+            name: "executionReason"
+            output: true
+            description: |-
+              A reason for the execution condition.
+      - !ruby/object:Api::Type::Array
+        name: "conditions"
+        description: |-
+          The Conditions of all other associated sub-resources. They contain additional diagnostics information in case the Service does not reach its Serving state. See comments in reconciling for additional information on reconciliation process in Cloud Run.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "type"
+              output: true
+              description: |-
+                type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
+            - !ruby/object:Api::Type::String
+              name: "state"
+              output: true
+              description: |-
+                State of the condition.
+            - !ruby/object:Api::Type::String
+              name: "message"
+              output: true
+              description: |-
+                Human readable message indicating details about the current status.
+            - !ruby/object:Api::Type::Time
+              name: "lastTransitionTime"
+              output: true
+              description: |-
+                Last time the condition transitioned from one status to another.
+
+                A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+            - !ruby/object:Api::Type::String
+              name: "severity"
+              output: true
+              description: |-
+                How to interpret failures of this condition, one of Error, Warning, Info
+            - !ruby/object:Api::Type::String
+              name: "reason"
+              output: true
+              description: |-
+                A common (service-level) reason for this condition.
+            - !ruby/object:Api::Type::String
+              name: "revisionReason"
+              output: true
+              description: |-
+                A reason for the revision condition.
+            - !ruby/object:Api::Type::String
+              name: "executionReason"
+              output: true
+              description: |-
+                A reason for the execution condition.
+      - !ruby/object:Api::Type::String
+        name: "latestReadyRevision"
+        output: true
+        description: |
+          Name of the latest revision that is serving traffic. See comments in reconciling for additional information on reconciliation process in Cloud Run.
+      - !ruby/object:Api::Type::String
+        name: "latestCreatedRevision"
+        output: true
+        description: |
+          Name of the last created revision. See comments in reconciling for additional information on reconciliation process in Cloud Run.
+      - !ruby/object:Api::Type::Array
+        name: "trafficStatuses"
+        description: |-
+          Detailed status information for corresponding traffic targets. See comments in reconciling for additional information on reconciliation process in Cloud Run.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "type"
+              output: true
+              description: |-
+                The allocation type for this traffic target.
+            - !ruby/object:Api::Type::String
+              name: "revision"
+              output: true
+              description: |-
+                Revision to which this traffic is sent.
+            - !ruby/object:Api::Type::Integer
+              name: "percent"
+              output: true
+              description: |-
+                Specifies percent of the traffic to this Revision.
+            - !ruby/object:Api::Type::String
+              name: "tag"
+              output: true
+              description: |-
+                Indicates the string used in the URI to exclusively reference this target.
+            - !ruby/object:Api::Type::String
+              name: "uri"
+              output: true
+              description: |-
+                Displays the target URI.
+      - !ruby/object:Api::Type::String
+        name: "uri"
+        output: true
+        description: |
+          The main URI in which this Service is serving traffic.
+      - !ruby/object:Api::Type::Boolean
+        name: "reconciling"
+        output: true
+        description: |
+          Returns true if the Service is currently being acted upon by the system to bring it into the desired state.
+
+          When a new Service is created, or an existing one is updated, Cloud Run will asynchronously perform all necessary steps to bring the Service to the desired serving state. This process is called reconciliation. While reconciliation is in process, observedGeneration, latest_ready_revison, trafficStatuses, and uri will have transient values that might mismatch the intended state: Once reconciliation is over (and this field is false), there are two possible outcomes: reconciliation succeeded and the serving state matches the Service, or there was an error, and reconciliation failed. This state can be found in terminalCondition.state.
+
+          If reconciliation succeeded, the following fields will match: traffic and trafficStatuses, observedGeneration and generation, latestReadyRevision and latestCreatedRevision.
+
+          If reconciliation failed, trafficStatuses, observedGeneration, and latestReadyRevision will have the state of the last serving revision, or empty for newly created Services. Additional information on the failure can be found in terminalCondition and conditions.
+      - !ruby/object:Api::Type::String
+        name: "etag"
+        output: true
+        description: |
+          A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
+
+
