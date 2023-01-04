@@ -11,6 +11,10 @@ func dataSourceGoogleContainerAttachedInstallManifest() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleContainerAttachedInstallManifestRead,
 		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"parent": {
 				Type:     schema.TypeString,
 				Required: true,

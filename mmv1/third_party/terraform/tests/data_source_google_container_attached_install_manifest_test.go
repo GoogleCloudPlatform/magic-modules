@@ -54,6 +54,7 @@ data "google_container_attached_versions" "versions" {
 }
 
 data "google_container_attached_install_manifest" "manifest" {
+	location = "us-west1"
 	parent = "projects/${data.google_project.project.project_id}/locations/us-west1"
 	cluster_id = "test-cluster-%s"
 	platform_version = data.google_container_attached_versions.versions.valid_versions[0]
