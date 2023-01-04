@@ -93,6 +93,72 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       constants: templates/terraform/constants/private_connection.go.erb
       post_create: templates/terraform/post_create/private_connection.go.erb
       post_import: templates/terraform/post_import/private_connection.go.erb
+  Stream: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
+    import_format: ["projects/{{project}}/locations/{{location}}/streams/{{stream_id}}"]
+    properties:
+      destinationConfig.gcsDestinationConfig.fileRotationMb: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      destinationConfig.gcsDestinationConfig.fileRotationInterval: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      destinationConfig.destinationConnectionProfile: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: "projectNumberDiffSuppress"
+      sourceConfig.sourceConnectionProfile: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: "projectNumberDiffSuppress"
+      sourceConfig.mysqlSourceConfig.maxConcurrentCdcTasks: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(0)'
+    virtual_fields:
+      - !ruby/object:Api::Type::Enum
+        name: 'desired_state'
+        description: |
+          Desired state of the Stream. Set this field to `RUNNING` to start the stream, and `PAUSED` to pause the stream.
+        values:
+          - :NOT_STARTED
+          - :RUNNING
+          - :PAUSED
+        default_value: :NOT_STARTED
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: 'templates/terraform/constants/datastream_stream.go.erb'
+      post_create: 'templates/terraform/post_create/datastream_stream.go.erb'
+      post_import: 'templates/terraform/post_import/datastream_stream.go.erb'
+      pre_update: 'templates/terraform/pre_update/datastream_stream.go.erb'
+      post_update: 'templates/terraform/post_update/datastream_stream.go.erb'
+      encoder: 'templates/terraform/encoders/datastream_stream.go.erb'
+      resource_definition: 'templates/terraform/resource_definition/datastream_stream.go.erb'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_basic"
+        pull_external: true
+        primary_resource_id: "default"
+        skip_docs: true
+        vars:
+          stream_id: "my-stream"
+          private_connection_id: "my-connection"
+          network_name: "my-network"
+          source_connection_profile_id: "source-profile"
+          database_instance_name: "my-instance"
+          deletion_protection: "true"
+          bucket_name: "my-bucket"
+          destination_connection_profile_id: "destination-profile"
+        test_vars_overrides:
+          deletion_protection: "false"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_full"
+        pull_external: true
+        primary_resource_id: "default"
+        vars:
+          stream_id: "my-stream"
+          private_connection_id: "my-connection"
+          network_name: "my-network"
+          source_connection_profile_id: "source-profile"
+          database_instance_name: "my-instance"
+          deletion_protection: "true"
+          bucket_name: "my-bucket"
+          destination_connection_profile_id: "destination-profile"
+        test_vars_overrides:
+          deletion_protection: "false"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
