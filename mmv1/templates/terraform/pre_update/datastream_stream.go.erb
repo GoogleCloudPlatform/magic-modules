@@ -12,6 +12,19 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
+
+if d.HasChange("desired_state") {
+  updateMask = append(updateMask, "state")
+}
+
+// Override the previous setting of updateMask to include state.
+// updateMask is a URL parameter but not present in the schema, so replaceVars
+// won't set it
+url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+  return err
+}
+
 if err := waitForDatastreamStreamReady(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
   return fmt.Errorf("Error waiting for Stream %q to be NOT_STARTED, RUNNING, or PAUSED before updating: %q", d.Get("name").(string), err)
 }
