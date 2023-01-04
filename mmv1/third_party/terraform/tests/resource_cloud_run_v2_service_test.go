@@ -268,7 +268,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceProbesUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
 			{
-				Config: estAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbeAndStartupProbe(context),
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbeAndStartupProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
