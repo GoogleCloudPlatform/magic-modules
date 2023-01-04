@@ -245,9 +245,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "schema"
         vars:
           name: "test-schema"
-    properties:
-      region: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
+       default_from_api: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
