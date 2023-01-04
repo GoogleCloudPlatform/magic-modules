@@ -11,13 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Provider::Terraform::Config
+--- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    import_format:
-      ["projects/{{project}}/locations/{{location}}/services/{{service_id}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/services/{{service_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dataproc_metastore_service_basic"
@@ -75,7 +73,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         primary_resource_id: "telemetry"
         vars:
-          metastore_service_name: "telemetry"
+          metastore_service_name: "telemetry"          
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -83,18 +81,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       tier: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      telemetryConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      hiveMetastoreConfig.configOverrides:
-        !ruby/object:Overrides::Terraform::PropertyOverride
+      hiveMetastoreConfig.configOverrides: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: "dataprocMetastoreServiceOverrideSuppress"
+      telemetryConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true        
   Federation: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    import_format:
-      [
-        "projects/{{project}}/locations/{{location}}/federations/{{federation_id}}",
-      ]
+    import_format: ["projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dataproc_metastore_federation_basic"
@@ -109,4 +103,4 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed-bq%s", context["random_suffix"])'
         vars:
-          metastore_federation_name: "fed-2"
+          metastore_federation_name: "fed-2"          
