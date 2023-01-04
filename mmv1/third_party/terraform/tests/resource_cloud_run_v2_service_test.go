@@ -446,7 +446,6 @@ resource "google_cloud_run_v2_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -478,7 +477,6 @@ resource "google_cloud_run_v2_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -513,7 +511,6 @@ resource "google_cloud_run_v2_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
