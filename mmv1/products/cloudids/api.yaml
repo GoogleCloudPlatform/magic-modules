@@ -46,9 +46,10 @@ objects:
     name: 'Endpoint'
     base_url: 'projects/{{project}}/locations/{{location}}/endpoints'
     create_url: 'projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}'
+    update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}?update_mask=threat_exceptions'
     self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
     create_verb: :POST
-    input: true
+    update_verb: :PATCH
     description: |
       Cloud IDS is an intrusion detection service that provides threat detection for intrusions, malware, spyware, and command-and-control attacks on your network.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -101,6 +102,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'severity'
         required: true
+        input: true
         description: |
           The minimum alert severity level that is reported by the endpoint.
         values:
@@ -109,3 +111,8 @@ objects:
           - :MEDIUM
           - :HIGH
           - :CRITICAL
+      - !ruby/object:Api::Type::Array
+        name: 'threat_exceptions'
+        description: |
+          Configuration for threat IDs excluded from generating alerts. Limit: 99 IDs.
+        item_type: Api::Type::String
