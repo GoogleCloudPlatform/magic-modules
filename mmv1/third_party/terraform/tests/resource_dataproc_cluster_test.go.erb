@@ -1374,7 +1374,7 @@ func testAccDataprocCluster_withReservationAffinity(rnd string) string {
 	return fmt.Sprintf(`
 
 resource "google_compute_reservation" "reservation" {
-  name = "default"
+  name = "tf-test-dproc-reservation-%s"
   zone = "us-central1-f"
 
   specific_reservation {
@@ -1410,7 +1410,7 @@ resource "google_dataproc_cluster" "basic" {
     }
   }
 }
-`, rnd)
+`, rnd, rnd)
 }
 
 func testAccDataprocCluster_singleNodeCluster(rnd string) string {
