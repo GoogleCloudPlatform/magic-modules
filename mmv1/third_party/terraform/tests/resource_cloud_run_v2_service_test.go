@@ -437,7 +437,7 @@ resource "google_cloud_run_v2_service" "default" {
 
 
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context map[string]interface{}) string {
-	return fmt.Sprintf(`
+	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
@@ -468,7 +468,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(context map[string]interface{}) string {
-	return fmt.Sprintf(`
+	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
@@ -501,7 +501,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbeAndStartupProbe(context map[string]interface{}) string {
-	return fmt.Sprintf(`
+	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
