@@ -488,7 +488,7 @@ resource "google_cloud_run_v2_service" "default" {
       liveness_probe {
         grpc {
           port = 8080
-          service = "health"
+          service = "grpc.health.v1.Health"
         }
       }
     }
@@ -523,13 +523,13 @@ resource "google_cloud_run_v2_service" "default" {
       liveness_probe {
         grpc {
           port = 8080
-          service = "health"
+          service = "grpc.health.v1.Health"
         }
       }
       startup_probe {
         grpc {
           port = 8080
-          service = "startup"
+          service = "grpc.health.v1.Health"
         }
       }
     }
