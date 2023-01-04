@@ -436,10 +436,10 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 
-func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(name, project string) string {
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context map[string]interface{}) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_v2_service" "default" {
-  name     = "%s"
+  name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
 
   metadata {
@@ -464,17 +464,16 @@ resource "google_cloud_run_v2_service" "default" {
     ]
   }
 }
-`, name, project)
+`, context)
 }
 
-func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(name, project string) string {
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(context map[string]interface{}) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_v2_service" "default" {
-  name     = "%s"
+  name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
 
   metadata {
-    namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
     }
@@ -498,17 +497,16 @@ resource "google_cloud_run_v2_service" "default" {
     ]
   }
 }
-`, name, project)
+`, context)
 }
 
-func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbeAndStartupProbe(name, project string) string {
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbeAndStartupProbe(context map[string]interface{}) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_v2_service" "default" {
-  name     = "%s"
+  name     = "tf-test-cloudrun-service%{random_suffix}"
   location = "us-central1"
 
   metadata {
-    namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
     }
@@ -538,5 +536,5 @@ resource "google_cloud_run_v2_service" "default" {
     ]
   }
 }
-`, name, project)
+`, context)
 }
