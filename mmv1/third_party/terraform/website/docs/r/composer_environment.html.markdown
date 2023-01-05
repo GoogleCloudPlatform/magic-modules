@@ -916,15 +916,15 @@ The `scheduler` block supports:
 The `triggerer` block supports:
 
 * `cpu` -
-  (Optional)
+  (Required)
   The number of CPUs for a single Airflow triggerer.
 
 * `memory_gb` -
-  (Optional)
+  (Required)
   The amount of memory (GB) for a single Airflow triggerer.
 
 * `count` -
-  (Optional)
+  (Required)
   The number of Airflow triggerers.
 
 The `web_server` block supports:
