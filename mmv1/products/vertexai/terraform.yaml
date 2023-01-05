@@ -238,7 +238,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   MetadataSchema: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%metadatastore}}/metadataSchemas/{{name}}"]
     autogen_async: false
-    id_format: '{{name}}'
     skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
