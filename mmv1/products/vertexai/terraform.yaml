@@ -244,6 +244,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "schema"
         vars:
           name: "test-schema"
+          project: "vertex-ai"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
