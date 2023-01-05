@@ -9,24 +9,28 @@ import (
 
 func TestResourceMapChanges(t *testing.T) {
 	for _, test := range []struct {
+		name                  string
 		oldResourceMap        map[string]*schema.Resource
 		newResourceMap        map[string]*schema.Resource
-		expectedChangedFields map[string][]string
+		expectedChangedFields map[string]FieldCoverage
 	}{
 		{
+			name:                  "empty-maps",
 			oldResourceMap:        map[string]*schema.Resource{},
 			newResourceMap:        map[string]*schema.Resource{},
-			expectedChangedFields: map[string][]string{},
+			expectedChangedFields: map[string]FieldCoverage{},
 		},
 		{
+			name:           "empty-resources",
 			oldResourceMap: map[string]*schema.Resource{},
 			newResourceMap: map[string]*schema.Resource{
 				"google_service_one_resource_one": {},
 				"google_service_one_resource_two": {},
 			},
-			expectedChangedFields: map[string][]string{},
+			expectedChangedFields: map[string]FieldCoverage{},
 		},
 		{
+			name: "new-nested-field",
 			oldResourceMap: map[string]*schema.Resource{
 				"google_service_one_resource_one": {
 					Schema: map[string]*schema.Schema{
@@ -102,11 +106,12 @@ func TestResourceMapChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedChangedFields: map[string][]string{
-				"google_service_one_resource_two": {"field_two.field_four"},
+			expectedChangedFields: map[string]FieldCoverage{
+				"google_service_one_resource_two": {"field_two": FieldCoverage{"field_four": false}},
 			},
 		},
 		{
+			name: "new-field-in-two-resources",
 			oldResourceMap: map[string]*schema.Resource{
 				"google_service_one_resource_one": {
 					Schema: map[string]*schema.Schema{
@@ -185,15 +190,15 @@ func TestResourceMapChanges(t *testing.T) {
 					},
 				},
 			},
-			expectedChangedFields: map[string][]string{
-				"google_service_one_resource_one": {"field_two.field_four"},
-				"google_service_one_resource_two": {"field_two.field_four"},
+			expectedChangedFields: map[string]FieldCoverage{
+				"google_service_one_resource_one": {"field_two": FieldCoverage{"field_four": false}},
+				"google_service_one_resource_two": {"field_two": FieldCoverage{"field_four": false}},
 			},
 		},
 	} {
 		changedFields := resourceMapChanges(test.oldResourceMap, test.newResourceMap)
 		if !reflect.DeepEqual(changedFields, test.expectedChangedFields) {
-			t.Errorf("unexpected changed resources: %v, expected %v", changedFields, test.expectedChangedFields)
+			t.Errorf("%s test failed: unexpected changed resources: %v, expected %v", test.name, changedFields, test.expectedChangedFields)
 		}
 	}
 }

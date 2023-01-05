@@ -5,9 +5,10 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
@@ -15,8 +16,37 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
+type Resource map[string]any // config of one resource in a test
+
+type Resources map[string]Resource // map of resource names to resource configs
+
+type Step map[string]Resources // map of resource types to resources of that type
+
 type Test struct {
-	Steps []map[string]any
+	Name  string
+	Steps []Step
+}
+
+func readAllTests(providerDir string) ([]*Test, error) {
+	files, err := os.ReadDir(providerDir)
+	if err != nil {
+		return nil, err
+	}
+	allTests := make([]*Test, 0)
+	errs := make([]error, 0)
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), "_test.go") {
+			tests, err := readTestFile(filepath.Join(providerDir, file.Name()))
+			if err != nil {
+				errs = append(errs, err)
+			}
+			allTests = append(allTests, tests...)
+		}
+	}
+	if len(errs) > 0 {
+		return allTests, fmt.Errorf("errors reading tests: %v", errs)
+	}
+	return allTests, nil
 }
 
 func readTestFile(filename string) ([]*Test, error) {
@@ -35,8 +65,10 @@ func readTestFile(filename string) ([]*Test, error) {
 			// This is an import, constant, type, or variable declaration
 			for _, spec := range genDecl.Specs {
 				if valueSpec, ok := spec.(*ast.ValueSpec); ok {
-					if basicLit, ok := valueSpec.Values[0].(*ast.BasicLit); ok {
-						varDecls[valueSpec.Names[0].Name] = basicLit
+					if len(valueSpec.Values) > 0 {
+						if basicLit, ok := valueSpec.Values[0].(*ast.BasicLit); ok {
+							varDecls[valueSpec.Names[0].Name] = basicLit
+						}
 					}
 				}
 			}
@@ -45,12 +77,13 @@ func readTestFile(filename string) ([]*Test, error) {
 	tests := make([]*Test, 0)
 	errs := make([]error, 0)
 	for name, funcDecl := range funcDecls {
-		if unicode.IsUpper(rune(name[0])) {
+		if strings.HasPrefix(name, "TestAcc") {
 			test, err := readTestFunc(funcDecl, funcDecls, varDecls)
 			if err != nil {
 				errs = append(errs, err)
 			}
 			if test != nil {
+				test.Name = name
 				tests = append(tests, test)
 			}
 		}
@@ -128,7 +161,7 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	return test, nil
 }
 
-func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (map[string]any, error) {
+func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (Step, error) {
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
 			return readConfigFunc(configFunc)
@@ -148,7 +181,7 @@ func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.
 	return nil, fmt.Errorf("failed to get ident for %v", configCallExpr.Fun)
 }
 
-func readConfigFunc(configFunc *ast.FuncDecl) (map[string]any, error) {
+func readConfigFunc(configFunc *ast.FuncDecl) (Step, error) {
 	for _, stmt := range configFunc.Body.List {
 		if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
 			for _, result := range returnStmt.Results {
@@ -168,7 +201,7 @@ func readConfigFunc(configFunc *ast.FuncDecl) (map[string]any, error) {
 	return nil, fmt.Errorf("failed to find a return statement in %v", configFunc.Body.List)
 }
 
-func readConfigBasicLit(configBasicLit *ast.BasicLit) (map[string]any, error) {
+func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
 	if configStr, err := strconv.Unquote(configBasicLit.Value); err != nil {
 		return nil, err
 	} else {
@@ -177,7 +210,6 @@ func readConfigBasicLit(configBasicLit *ast.BasicLit) (map[string]any, error) {
 		parser := hclparse.NewParser()
 		file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
 		if diagnostics.HasErrors() {
-			fmt.Println(configStr)
 			return nil, fmt.Errorf("errors parsing hcl: %v", diagnostics.Errs())
 		}
 		content, diagnostics := file.Body.Content(&hcl.BodySchema{
@@ -195,23 +227,19 @@ func readConfigBasicLit(configBasicLit *ast.BasicLit) (map[string]any, error) {
 		if diagnostics.HasErrors() {
 			return nil, fmt.Errorf("errors getting hcl body content: %v", diagnostics.Errs())
 		}
-		m := make(map[string]any)
+		m := make(map[string]Resources)
 		errs := make([]error, 0)
 		for _, block := range content.Blocks {
 			if _, ok := m[block.Labels[0]]; !ok {
 				// Create an empty map for this resource type.
-				m[block.Labels[0]] = make(map[string]any)
-			}
-			resourceTypeMap, ok := m[block.Labels[0]].(map[string]any)
-			if !ok {
-				continue
+				m[block.Labels[0]] = make(Resources)
 			}
 			// Use the resource name as a key.
 			resourceConfig, err := readHCLBlockBody(block.Body, file.Bytes)
 			if err != nil {
 				errs = append(errs, err)
 			}
-			resourceTypeMap[block.Labels[1]] = resourceConfig
+			m[block.Labels[0]][block.Labels[1]] = resourceConfig
 		}
 		if len(errs) > 0 {
 			return m, fmt.Errorf("errors reading hcl blocks: %v", errs)
@@ -220,8 +248,8 @@ func readConfigBasicLit(configBasicLit *ast.BasicLit) (map[string]any, error) {
 	}
 }
 
-func readHCLBlockBody(body hcl.Body, fileBytes []byte) (map[string]any, error) {
-	var m map[string]any
+func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
+	var m Resource
 	gohcl.DecodeBody(body, nil, &m)
 	for k, v := range m {
 		attr, ok := v.(*hcl.Attribute)

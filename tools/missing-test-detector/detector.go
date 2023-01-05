@@ -1,104 +1,72 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 )
 
 type MissingTestInfo struct {
 	UntestedFields []string
-	TestCount      int
-	StepCount      int
+	Tests          []string
 }
 
-// Detect missing tests for the given resource names in the given provider directory.
+type FieldSet map[string]struct{}
+
+// Detect missing tests for the given resource changes map in the given slice of tests.
 // Return a map of resource names to missing test info about that resource.
-func detectMissingTests(changedFields map[string][]string, providerDir string) (map[string]*MissingTestInfo, error) {
-	missingTests := make(map[string]*MissingTestInfo)
-	errs := make([]error, 0)
-	for resourceName, fields := range changedFields {
-		missingTestInfo, err := detectMissingTest(resourceName, providerDir, fields)
-		if err != nil {
-			errs = append(errs, err)
-		}
-		missingTests[resourceName] = missingTestInfo
-	}
-	if len(errs) > 0 {
-		return missingTests, fmt.Errorf("errors detecting missing tests: %v", errs)
-	}
-	return missingTests, nil
-}
-
-func detectMissingTest(resourceName, providerDir string, fields []string) (*MissingTestInfo, error) {
-	testFileSuffixes := []string{"_test.go", "_generated_test.go"}
-	allTests := make([]*Test, 0)
-	errs := make([]error, 0)
-	for _, testFileSuffix := range testFileSuffixes {
-		testFile := filepath.Join(providerDir, strings.Replace(resourceName, "google", "resource", 1)+testFileSuffix)
-		tests, err := readTestFile(testFile)
-		if err != nil && !os.IsNotExist(err) {
-			errs = append(errs, err)
-		}
-		allTests = append(allTests, tests...)
-	}
-	var err error
-	if len(errs) > 0 {
-		err = fmt.Errorf("errors reading test files: %v", errs)
-	}
-	stepCount := 0
+func detectMissingTests(changedFields map[string]FieldCoverage, allTests []*Test) map[string]*MissingTestInfo {
+	resourceNamesToTests := make(map[string][]string)
 	for _, test := range allTests {
-		stepCount += len(test.Steps)
-	}
-	if untestedFields := compareResourceToTests(resourceName, fields, allTests); len(untestedFields) > 0 {
-		return &MissingTestInfo{
-			UntestedFields: untestedFields,
-			TestCount:      len(allTests),
-			StepCount:      stepCount,
-		}, err
-	}
-	return nil, err
-}
-
-// Return a list of fields as dot-separated paths in the given resource that are not covered by the given tests.
-func compareResourceToTests(resourceName string, fields []string, tests []*Test) []string {
-	untestedFields := make([]string, 0)
-	for _, field := range fields {
-		if !fieldInTests(resourceName, strings.Split(field, "."), tests) {
-			untestedFields = append(untestedFields, field)
-		}
-	}
-	return untestedFields
-}
-
-// Return true if field is present in at least one step of the given tests.
-func fieldInTests(resourceName string, path []string, tests []*Test) bool {
-	for _, test := range tests {
 		for _, step := range test.Steps {
-			if resources, ok := step[resourceName].(map[string]any); ok {
-				// Resources is a map of all resources of the given type.
-				for _, resource := range resources {
-					// Loop through all instances of the main tested resource.
-					field := resource.(map[string]any)
-					present := true
-					for _, fieldName := range path {
-						fieldValue, ok := field[fieldName]
-						if !ok {
-							present = false
-							break
-						}
-						field, ok = fieldValue.(map[string]any)
-						if !ok {
-							break
-						}
-					}
-					if present {
-						return true
+			for resourceName, resourceMap := range step {
+				if changedResourceFields, ok := changedFields[resourceName]; ok {
+					// This resource type has changed fields.
+					resourceNamesToTests[resourceName] = append(resourceNamesToTests[resourceName], test.Name)
+					for _, resourceConfig := range resourceMap {
+						markCoverage(changedResourceFields, resourceConfig)
 					}
 				}
 			}
 		}
 	}
-	return false
+	missingTests := make(map[string]*MissingTestInfo)
+	for resourceName, fieldCoverage := range changedFields {
+		untested := untestedFields(fieldCoverage, nil)
+		if len(untested) > 0 {
+			missingTests[resourceName] = &MissingTestInfo{
+				UntestedFields: untestedFields(fieldCoverage, nil),
+				Tests:          resourceNamesToTests[resourceName],
+			}
+		}
+	}
+	return missingTests
+}
+
+func markCoverage(fieldCoverage FieldCoverage, config Resource) {
+	for fieldName, fieldValue := range config {
+		if coverage, ok := fieldCoverage[fieldName]; ok {
+			if covered, ok := coverage.(bool); ok {
+				if !covered {
+					fieldCoverage[fieldName] = true
+				}
+			} else if objectCoverage, ok := coverage.(FieldCoverage); ok {
+				if fieldValueConfig, ok := fieldValue.(Resource); ok {
+					markCoverage(objectCoverage, fieldValueConfig)
+				}
+			}
+		}
+	}
+}
+
+func untestedFields(fieldCoverage FieldCoverage, path []string) []string {
+	fields := make([]string, 0)
+	for fieldName, coverage := range fieldCoverage {
+		if covered, ok := coverage.(bool); ok {
+			if !covered {
+				fields = append(fields, strings.Join(append(path, fieldName), "."))
+			}
+		} else if objectCoverage, ok := coverage.(FieldCoverage); ok {
+			fields = append(fields, untestedFields(objectCoverage, append(path, fieldName))...)
+		}
+	}
+	return fields
 }

@@ -1,51 +1,41 @@
 package main
 
 import (
+	"os"
 	"testing"
 )
 
+// This test only ensures there isn't a panic reading tests in the provider.
+func TestReadAllTests(t *testing.T) {
+	if providerDir := os.Getenv("PROVIDER_DIR"); providerDir != "" {
+		readAllTests(providerDir)
+	}
+}
+
 func TestReadTestFile(t *testing.T) {
-	endpointTests, err := readTestFile("testdata/resource_vertex_ai_endpoint_test.go")
+	coveredResourceTests, err := readTestFile("testdata/covered_resource_test.go")
 	if err != nil {
-		t.Errorf("error reading endpoint test file: %v", err)
+		t.Fatalf("error reading covered resource test file: %v", err)
 	}
-	if len(endpointTests) != 1 {
-		t.Errorf("unexpected number of endpointTests: %d, expected 1", len(endpointTests))
+	if len(coveredResourceTests) != 1 {
+		t.Fatalf("unexpected number of coveredResourceTests: %d, expected 1", len(coveredResourceTests))
 	}
-	if len(endpointTests[0].Steps) != 2 {
-		t.Errorf("unexpected number of test steps: %d, expected 2", len(endpointTests[0].Steps))
+	if len(coveredResourceTests[0].Steps) != 2 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(coveredResourceTests[0].Steps))
 	}
-	if endpoints, ok := endpointTests[0].Steps[0]["google_vertex_ai_endpoint"]; !ok {
-		t.Errorf("did not find an endpoint resource in %v", endpointTests[0].Steps[0])
-	} else if endpointsMap, ok := endpoints.(map[string]any); !ok {
-		t.Errorf("did not find a map of endpoint resources, found %v", endpoints)
-	} else if endpoint, ok := endpointsMap["endpoint"]; !ok {
-		t.Errorf("did not find an endpoint in %v", endpointsMap)
-	} else if endpointConfig, ok := endpoint.(map[string]any); !ok {
-		t.Errorf("endpoint config was not a map, was %v", endpoint)
-	} else if len(endpointConfig) != 8 {
-		t.Errorf("found wrong number of fields in endpoint config: %d, expected 8", len(endpointConfig))
+	if coveredResources, ok := coveredResourceTests[0].Steps[0]["covered_resource"]; !ok {
+		t.Errorf("did not find covered_resource in %v", coveredResourceTests[0].Steps[0])
+	} else if coveredResource, ok := coveredResources["resource"]; !ok {
+		t.Errorf("did not find a covered resource in %v", coveredResources)
+	} else if len(coveredResource) != 2 {
+		t.Errorf("found wrong number of fields in covered resource config: %d, expected 2", len(coveredResource))
 	}
-	instanceTests, err := readTestFile("testdata/resource_sql_database_instance_test.go")
+	configVariableTests, err := readTestFile("testdata/config_variable_test.go")
 	if err != nil {
-		t.Errorf("error reading sql database instance test file: %v", err)
+		t.Fatalf("error reading config variable test file: %v", err)
 	}
-	if len(instanceTests) != 37 {
-		t.Errorf("unexpected number of instanceTests: %d, expected 37", len(instanceTests))
+	if len(configVariableTests) != 1 {
+		t.Fatalf("unexpected number of instanceTests: %d, expected 1", len(configVariableTests))
 	}
-	for _, instanceTest := range instanceTests {
-		for _, step := range instanceTest.Steps {
-			if instances, ok := step["google_sql_database_instance"]; !ok {
-				t.Errorf("did not find a database instance resource in %v", step)
-			} else if instancesMap, ok := instances.(map[string]any); !ok {
-				t.Errorf("did not find a map of database instance resources, found %v", instances)
-			} else {
-				for name, instance := range instancesMap {
-					if _, ok := instance.(map[string]any); !ok {
-						t.Errorf("database instance %s config was not a map, was %v", name, instance)
-					}
-				}
-			}
-		}
-	}
+
 }

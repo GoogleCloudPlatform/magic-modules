@@ -12,12 +12,14 @@ var flagProviderDir = flag.String("provider-dir", "", "directory where test file
 func main() {
 	flag.Parse()
 
-	missingTests, err := detectMissingTests(changedResourceFields(), *flagProviderDir)
+	allTests, err := readAllTests(*flagProviderDir)
 	if err != nil {
-		glog.Errorf("error detecting missing tests: %v", err)
+		glog.Errorf("error reading all test files: %v", err)
 	}
+
+	missingTests := detectMissingTests(changedResourceFields(), allTests)
 	for resourceName, missingTestInfo := range missingTests {
-		fmt.Printf("Resource %s changed, found %d tests with %d total steps\n", resourceName, missingTestInfo.TestCount, missingTestInfo.StepCount)
+		fmt.Printf("Resource %s changed, found the following tests: %v\n", resourceName, missingTestInfo.Tests)
 		if len(missingTestInfo.UntestedFields) > 0 {
 			fmt.Printf("Untested fields: %v\n", missingTestInfo.UntestedFields)
 		}
