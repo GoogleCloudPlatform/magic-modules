@@ -407,7 +407,7 @@ func TestAccDataprocCluster_withNodeGroupAffinity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
 
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.node_group_affinity.0.node_group_uri", "https://www.googleapis.com/compute/v1/projects/ci-test-project-188019/zones/us-central1-f/nodeGroups/test-nodegroup"),
+					resource.TestMatchResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.node_group_affinity.0.node_group_uri", regexp.MustCompile("test-nodegroup")),
 				),
 			},
 		},
@@ -1439,7 +1439,7 @@ func testAccDataprocCluster_withNodeGroupAffinity(rnd string) string {
 	return fmt.Sprintf(`
 
 resource "google_compute_node_template" "nodetmpl" {
-  name   = "test-nodetmpl"
+  name   = "test-nodetmpl-%s"
   region = "us-central1"
 
   node_affinity_labels = {
@@ -1452,7 +1452,7 @@ resource "google_compute_node_template" "nodetmpl" {
 }
 
 resource "google_compute_node_group" "nodes" {
-  name = "test-nodegroup"
+  name = "test-nodegroup-%s"
   zone = "us-central1-f"
 
   size          = 3
@@ -1472,7 +1472,7 @@ resource "google_dataproc_cluster" "basic" {
     }
   }
 }
-`, rnd)
+`, rnd, rnd, rnd)
 }
 
 func testAccDataprocCluster_singleNodeCluster(rnd string) string {
