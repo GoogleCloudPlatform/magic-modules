@@ -1905,7 +1905,7 @@ func testAccComposerEnvironment_airflow2RecoveryCfg(name, network, subnetwork st
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
   name   = "%s"
-  region = "us-east1"
+  region = "us-central1"
 
     config {
       node_config {
@@ -1922,19 +1922,12 @@ resource "google_composer_environment" "test" {
 
       recovery_config {
 				scheduled_snapshots_config {
-					enabled = true
-					snapshot_location = "gs://example-bucket/environment_snapshots"
+					enabled = 									 true
+					snapshot_location = 				 "gs://example-bucket/environment_snapshots"
 					snapshot_creation_schedule = "0 4 * * *"
-					time_zone = "UTC+01"
+					time_zone = 								 "UTC+01"
 				}
    	  }
-      environment_size = "ENVIRONMENT_SIZE_LARGE"
-      private_environment_config {
-        enable_private_endpoint                 = true
-        cloud_composer_network_ipv4_cidr_block  = "10.3.192.0/24"
-        master_ipv4_cidr_block                  = "172.16.194.0/23"
-        cloud_sql_ipv4_cidr_block               = "10.3.224.0/20"
-      }
     }
 
 }
@@ -1947,7 +1940,7 @@ resource "google_compute_network" "test" {
 resource "google_compute_subnetwork" "test" {
   name          = "%s"
   ip_cidr_range = "10.2.0.0/16"
-  region        = "us-east1"
+  region        = "us-central1"
   network       = google_compute_network.test.self_link
   private_ip_google_access = true
 }
@@ -1958,7 +1951,7 @@ func testAccComposerEnvironmentUpdate_airflow2RecoveryCfg(name, network, subnetw
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
   name   = "%s"
-  region = "us-east1"
+  region = "us-central1"
 
     config {
       node_config {
@@ -1981,13 +1974,6 @@ resource "google_composer_environment" "test" {
 					time_zone = "UTC+02"
 				}
    	  }
-      environment_size = "ENVIRONMENT_SIZE_LARGE"
-      private_environment_config {
-        enable_private_endpoint                 = true
-        cloud_composer_network_ipv4_cidr_block  = "10.3.192.0/24"
-        master_ipv4_cidr_block                  = "172.16.194.0/23"
-        cloud_sql_ipv4_cidr_block               = "10.3.224.0/20"
-      }
     }
 
 }
@@ -2000,7 +1986,7 @@ resource "google_compute_network" "test" {
 resource "google_compute_subnetwork" "test" {
   name          = "%s"
   ip_cidr_range = "10.2.0.0/16"
-  region        = "us-east1"
+  region        = "us-central1"
   network       = google_compute_network.test.self_link
   private_ip_google_access = true
 }

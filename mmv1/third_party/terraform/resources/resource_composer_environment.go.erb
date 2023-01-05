@@ -67,6 +67,10 @@ var (
 		"config.0.master_authorized_networks_config",
 	}
 
+	recoveryConfigKeys = []string{
+		"config.0.recovery_config.0.scheduled_snapshots_config",
+	}
+
 	workloadsConfigKeys = []string{
 		"config.0.workloads_config.0.scheduler",
 		<% unless version == "ga" -%>
@@ -343,11 +347,11 @@ func resourceComposerEnvironment() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"scheduled_snapshots_config": {
-										Type:        schema.TypeList,
-										Optional:    true,
-										ForceNew:    false,
-										Description: `The configuration settings for scheduled snapshots.`,
-										MaxItems:    1,
+										Type:        	schema.TypeList,
+										Optional:    	true,
+										AtLeastOneOf: recoveryConfigKeys,
+										Description:  `The configuration settings for scheduled snapshots.`,
+										MaxItems:    	1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"enabled": {

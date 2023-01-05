@@ -283,7 +283,7 @@ The following arguments are supported:
 
 * `recovery_config` -
   (Optional, Cloud Composer 2 only)
-  The configuration settings for recovery.
+  The configuration settings for recovery. Structure is [documented below](#nested_recovery_config).
 
 * `software_config` -
   (Optional)
