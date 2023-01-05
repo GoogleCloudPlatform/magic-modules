@@ -236,7 +236,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   MetadataSchema: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["{{%metadatastore}}/metadataSchemas/{{name}}"]
+    id_format: '{{name}}'
     autogen_async: false
     examples:
       - !ruby/object:Provider::Terraform::Examples
