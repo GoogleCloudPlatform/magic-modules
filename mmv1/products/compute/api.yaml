@@ -14769,6 +14769,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'expireTime'
+        output: true
+        description: 'Expire time of the certificate in RFC3339 text format.'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -14882,7 +14886,7 @@ objects:
       - !ruby/object:Api::Type::Time
         name: 'expireTime'
         description: |
-          Expire time of the certificate.
+          Expire time of the certificate in RFC3339 text format.
         output: true
   - !ruby/object:Api::Resource
     name: 'RegionSslCertificate'
@@ -14941,6 +14945,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'expireTime'
+        output: true
+        description: 'Expire time of the certificate in RFC3339 text format.'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
