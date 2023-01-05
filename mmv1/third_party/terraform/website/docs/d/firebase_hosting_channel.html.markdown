@@ -29,6 +29,6 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-* `id` - an identifier for the resource with format `sites/{{site_id}}/channels/{{channel_id}}`
+* `id` - An identifier for the resource with format `sites/{{site_id}}/channels/{{channel_id}}`. Same as `name`
 
-* `name` - The fully-qualified resource name for the channel, in the format: `sites/SITE_ID/channels/CHANNEL_ID`
+* `name` - The fully-qualified resource name for the channel, in the format: `sites/{{site_id}}/channels/{{channel_id}}`.
