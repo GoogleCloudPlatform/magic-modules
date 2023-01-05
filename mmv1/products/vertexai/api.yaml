@@ -1000,9 +1000,9 @@ objects:
 # Vertex AI Metadata Store Metadata Schemas
   - !ruby/object:Api::Resource
     name: MetadataSchema
-    base_url: '{{metadatastore}}/metadataSchemas'
-    create_url: '{{metadatastore}}/metadataSchemas?metadataSchemaId={{name}}'
-    self_link: '{{metadatastore}}/metadataSchemas/{{name}}'
+    base_url: 'projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/metadataSchemas'
+    create_url: 'projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/metadataSchemas?metadataSchemaId={{name}}'
+    self_link: 'projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/metadataSchemas/{{name}}'
     min_version: beta
     input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
