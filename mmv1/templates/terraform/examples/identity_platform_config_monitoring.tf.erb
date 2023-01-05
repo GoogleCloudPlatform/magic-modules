@@ -13,7 +13,6 @@ resource "google_project_service" "identitytoolkit" {
   service = "identitytoolkit.googleapis.com"
 }
 
-
 resource "google_identity_platform_config" "default" {
   project = google_project.default.project_id
   autodelete_anonymous_users = true
@@ -23,4 +22,8 @@ resource "google_identity_platform_config" "default" {
       enabled = true
     }
   }
+
+  depends_on = [
+    google_project_service.identitytoolkit
+  ] 
 }
