@@ -1011,6 +1011,9 @@ objects:
           'https://cloud.google.com/vertex-ai/docs'
       api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.metadataStores.metadataSchemas'
     async: !ruby/object:Api::OpAsync
+      actions:
+        - create
+        - delete
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
