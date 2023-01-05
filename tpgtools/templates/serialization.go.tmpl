@@ -161,7 +161,6 @@ func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.
 					{{- end }}
 	}
 				{{- else if eq $field.Type.String "TypeMap" }}
-		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
 		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
 		keys{{$field.PackageName}} := []string{}
 		// golang range goes over maps in an arbitrary order- we've gotta order the
@@ -173,7 +172,12 @@ func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.
 		sort.Strings(keys{{$field.PackageName}})
 
 		for _, k := range keys{{$field.PackageName}} {
+		  {{- if $field.ElemIsBasicType }}
 			outputConfig += fmt.Sprintf("%v = %q, ", k, r.{{$field.PackageName}}[k])
+			{{- else }}
+			element := r.{{$field.PackageName}}[k]
+			outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&element))
+			{{- end }}
 		}
 		outputConfig += "}\n"
 				{{- end}}
@@ -227,7 +231,6 @@ func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.Packa
 						{{- end }}
 	}
 					{{- else if eq $field.Type.String "TypeMap" }}
-		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
 		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
 		keys{{$field.PackageName}} := []string{}
 		// golang range goes over maps in an arbitrary order- we've gotta order the
@@ -239,7 +242,12 @@ func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.Packa
 		sort.Strings(keys{{$field.PackageName}})
 
 		for _, k := range keys{{$field.PackageName}} {
+		  {{- if $field.ElemIsBasicType }}
 			outputConfig += fmt.Sprintf("%v = %q, ", k, r.{{$field.PackageName}}[k])
+			{{- else }}
+			element := r.{{$field.PackageName}}[k]
+			outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&element))
+			{{- end }}
 		}
 		outputConfig += "}\n"
 					{{- end}}

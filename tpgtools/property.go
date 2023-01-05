@@ -273,6 +273,7 @@ func buildGetter(p Property, rawGetter string) string {
 		}
 		return fmt.Sprintf("dcl.Int64(int64(%s.(int)))", rawGetter)
 	case SchemaTypeMap:
+		// TODO(maciek, P0): fixme
 		return fmt.Sprintf("checkStringMap(%s)", rawGetter)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.Type.IsEnumArray() {
@@ -311,6 +312,7 @@ func (p Property) DefaultStateSetter() string {
 	case SchemaTypeFloat:
 		fallthrough
 	case SchemaTypeMap:
+		// TODO(maciek, P0): fixme
 		return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.typ.Items != nil && ((p.typ.Items.Type == "string" && len(p.typ.Items.Enum) == 0) || p.typ.Items.Type == "integer") {
@@ -356,6 +358,7 @@ func (p Property) flattenGetterWithParent(parent string) string {
 		if p.EnumBool {
 			return fmt.Sprintf("flattenEnumBool(%s.%s)", parent, p.PackageName)
 		}
+		// TODO(maciek, P0): check if map is typed
 		return fmt.Sprintf("%s.%s", parent, p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.Type.IsEnumArray() {
@@ -543,9 +546,17 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		}
 
 		if p.Type.String() == SchemaTypeMap {
-			e := "&schema.Schema{Type: schema.TypeString}"
-			p.Elem = &e
-			p.ElemIsBasicType = true
+			if v.AdditionalProperties.Properties != nil {
+				props, err := createPropertiesFromSchema(v.AdditionalProperties, typeFetcher, overrides, resource, &p, location)
+				if err != nil {
+					return nil, err
+				}
+				p.Properties = props
+			} else {
+				e := "&schema.Schema{Type: schema.TypeString}"
+				p.Elem = &e
+				p.ElemIsBasicType = true
+			}
 		}
 
 		if sens, ok := v.Extension["x-dcl-sensitive"].(bool); ok {
@@ -585,8 +596,10 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			if err != nil {
 				return nil, err
 			}
-
 			p.Properties = props
+		}
+
+		if len(p.Properties) > 0 {
 			if !p.Computed {
 				// Computed fields cannot specify MaxItems
 				mi := int64(1)
