@@ -482,8 +482,8 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: 'fixedNodeCount'
             exactly_one_of:
-              - fixed_node_count
-              - scaling
+              - online_serving_config.0.fixed_node_count
+              - online_serving_config.0.scaling
             description: |
               The number of nodes for each cluster. The number of nodes will not scale automatically but can be scaled manually by providing different values when updating.
           - !ruby/object:Api::Type::NestedObject
