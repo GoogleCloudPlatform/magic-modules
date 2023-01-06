@@ -372,6 +372,14 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `endpoint_config` (Optional) The config settings for port access on the cluster.
    Structure [defined below](#nested_endpoint_config).
 
+* `dataproc_metric_config` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
+
+  * `metrics` - (Required) Metrics sources to enable.
+
+    * `metric_source` - (Required) A source for the collection of Dataproc OSS metrics (see [available OSS metrics](https://cloud.google.com//dataproc/docs/guides/monitoring#available_oss_metrics)).
+
+    * `metric_overrides` - (Optional) One or more [available OSS metrics] (https://cloud.google.com/dataproc/docs/guides/monitoring#available_oss_metrics) to collect for the metric course.
+
 * `metastore_config` (Optional) The config setting for metastore service with the cluster.
    Structure [defined below](#nested_metastore_config).
 - - -
