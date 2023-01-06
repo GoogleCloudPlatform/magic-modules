@@ -133,6 +133,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         pull_external: true
         primary_resource_id: "default"
         skip_docs: true
+        # Random provider
+        skip_vcr: true
         vars:
           stream_id: "my-stream"
           private_connection_id: "my-connection"
@@ -148,6 +150,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "datastream_stream_full"
         pull_external: true
         primary_resource_id: "default"
+        # Random provider
+        skip_vcr: true
         vars:
           stream_id: "my-stream"
           private_connection_id: "my-connection"
