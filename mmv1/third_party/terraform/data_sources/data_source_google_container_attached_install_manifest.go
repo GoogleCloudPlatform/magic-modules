@@ -51,7 +51,7 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 	}
 	params := map[string]string{
 		"attached_cluster_id": clusterId,
-		"platform_version": platformVersion,
+		"platform_version":    platformVersion,
 	}
 	url, err = addQueryParams(url, params)
 	if err != nil {
