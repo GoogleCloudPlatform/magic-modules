@@ -1,37 +1,35 @@
 <style type="text/css">
-  .tg  {border-collapse:collapse;border-spacing:0;}
-  .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-    overflow:hidden;padding:10px 5px;word-break:normal;}
-  .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-    font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-  .tg .tg-c3ow{border-color:black;text-align:center;vertical-align:top}
-  .tg .tg-0pky{border-color:black;text-align:left;vertical-align:top}
-  .tg .tg-dgl5{border-color:black;background-color:#FFF;text-align:left;vertical-align:top}
+  .build-table  {border-collapse:collapse;border-spacing:0;}
+  .build-table th{font-weight: bold;}
+  .build-table th span.reduce-impact{font-weight: normal;}
+  .build-table span.code{color:#905;background-color:#DDD}
   </style>
-  <table class="tg">
-    <tr>
-      <td class="tg-c3ow" colspan="2"><span style="font-weight:bold">magic-modules - build variables</span></td>
-    </tr>
-    <tr>
-      <td class="tg-0pky" ><span style="font-weight:bold">OUTPUT_PATH </span>(required) </td>
-      <td class="tg-0pky">The location of the provider you are unioning generation into.</td>
-    </tr>
-    <tr>
-      <td class="tg-0pky"><span style="font-weight:bold">VERSION</span> (required)</td>
-      <td class="tg-0pky">The version of the provider you are building into. <br/> Valid values are 'ga' and 'beta'.</td>
-    </tr>
-    <tr>
-      <td class="tg-0pky"><span style="font-weight:bold">ENGINE</span> (optional)</td>
-      <td class="tg-0pky">Modifies make provider to build either tpgtools or mmv1 valid values are <span style="color:#905;background-color:#DDD">'mmv1'</span> or <span style="color:#905;background-color:#DDD">`tpgtools`</span>. Note that running make provider with ENGINE set to <span style="color:#905;background-color:#DDD">`tpgtools`</span> will build any prerequisite  mmv1 files required for tpgtools.</td>
-    </tr>
-    <tr>
-      <td class="tg-0pky"><span style="font-weight:bold;font-style:normal">PRODUCT</span> (optional)</td>
-      <td class="tg-0pky">Specifies the product to build. Equivalent to the folder name within <span style="color:#905;background-color:#DDD">`/mmv1/products`</span> or <span style="color:#905;background-color:#DDD">`/tpgtools/api`</span>. Useful to scope the build to your changes. Note: mmv1 files in <span style="color:#905;background-color:#DDD">`mmv1/third_party/terraform`</span> on run of make provider are always built. So if you've only modified files in this directory you can set the PRODUCT to a non-existant one to skip the generation of non-handwritten, code.</td>
-    </tr>
-    <tr>
-      <td class="tg-0pky"><span style="font-weight:bold;font-style:normal">RESOURCE</span> (optional)</td>
-      <td class="tg-0pky">Specifies the resource to build. Equivalent to the product name within the <span style="color:#905;background-color:#DDD">`api.yaml`</span> file for <span style="color:#905;background-color:#DDD">`mmv1`</span> or the terraform resource name for <span style="color:#905;background-color:#DDD">`tpgtools`</span> resources. If filtering for mmv1 <span style="color:#905;background-color:#DDD">`PRODUCT`</span> must be defined.</td>
-    </tr>
-
-  </tbody>
+  <table class="build-table">
+    <thead>
+      <tr>
+        <th colspan="2">magic-modules - build variables</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>OUTPUT_PATH <span class="reduce-impact">(required)</span> </th>
+        <td >The location of the provider you are unioning generation into.</td>
+      </tr>
+      <tr>
+        <th>VERSION <span class="reduce-impact">(required)</span></th>
+        <td>The version of the provider you are building into. <br/> Valid values are <span class="code">'ga'</span> and <span class="code">'beta'</span>.</td>
+      </tr>
+      <tr>
+        <th >ENGINE <span class="reduce-impact">(optional)</span></td>
+        <td >Modifies make provider to build either tpgtools or mmv1 valid values are <span class="code">'mmv1'</span> or <span class="code">`tpgtools`</span>. Note that running make provider with ENGINE set to <span class="code">`tpgtools`</span> will build any prerequisite  mmv1 files required for tpgtools.</td>
+      </tr>
+      <tr>
+        <th>PRODUCT <span class="reduce-impact">(optional)</span></td>
+        <td >Specifies the product to build. Equivalent to the folder name within <span class="code">`/mmv1/products`</span> or <span class="code">`/tpgtools/api`</span>. Useful to scope the build to your changes. Note: mmv1 files in <span class="code">`mmv1/third_party/terraform`</span> on run of make provider are always built. So if you've only modified files in this directory you can set the PRODUCT to a non-existant one to skip the generation of non-handwritten, code.</td>
+      </tr>
+      <tr>
+        <th>RESOURCE <span class="reduce-impact">(optional)</span></th>
+        <td >Specifies the resource to build. Equivalent to the product name within the <span class="code">`api.yaml`</span> file for <span class="code">`mmv1`</span> or the terraform resource name for <span class="code">`tpgtools`</span> resources. If filtering for mmv1 <span class="code">`PRODUCT`</span> must be defined.</td>
+      </tr>
+    </tbody>
   </table>
