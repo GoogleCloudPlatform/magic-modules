@@ -66,6 +66,9 @@ resource "google_cloud_run_v2_service" "default" {
       max_instance_count = 3
       min_instance_count = 1
     }
+    annotations = {
+      generated-by = "magic-modules"
+    }
     containers {
       name = "container-1"
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -92,7 +95,8 @@ resource "google_cloud_run_v2_service" "default" {
   }
   traffic {
     type = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
-    tag = "traffic-tag-1"
+    tag = "tt-1"
+    percent = 100
   }
 }
 
@@ -134,6 +138,9 @@ resource "google_cloud_run_v2_service" "default" {
       max_instance_count = 2
       min_instance_count = 1
     }
+    annotations = {
+      generated-by = "magic-modules-test"
+    }
     containers {
       name = "container-update"
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -165,7 +172,7 @@ resource "google_cloud_run_v2_service" "default" {
   traffic {
     type = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
     percent = 100
-    tag = "traffic-tag-update"
+    tag = "tt-update"
   }
 }
 
