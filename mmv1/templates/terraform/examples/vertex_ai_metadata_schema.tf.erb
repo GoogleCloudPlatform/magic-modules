@@ -10,7 +10,7 @@ resource "google_vertex_ai_metadata_schema" "<%= ctx[:primary_resource_id] %>" {
   description = "Schema to test the terraform module"
   metadatastore = google_vertex_ai_metadata_store.store.id
   schema = <<-EOT
-    title: system.Dataset
+    title: custom.Dataset
     version: 0.0.1
     type: object
     additionalProperties: false
