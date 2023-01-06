@@ -42,20 +42,6 @@ describe Api::Product do
     it { is_expected.to raise_error(StandardError, /Missing 'versions'/) }
   end
 
-  context 'requires objects' do
-    subject do
-      lambda do
-        product('name: "foo"',
-                'name: "Bar"',
-                'versions:',
-                '  - !ruby/object:Api::Product::Version',
-                '    name: ga',
-                '    base_url: "baz"').validate
-      end
-    end
-    it { is_expected.to raise_error(StandardError, /Missing 'objects'/) }
-  end
-
   context 'lowest version' do
     subject do
       product('name: "foo"',
