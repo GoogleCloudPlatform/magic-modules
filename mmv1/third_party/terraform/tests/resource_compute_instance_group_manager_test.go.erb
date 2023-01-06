@@ -394,7 +394,7 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"status"},
 			},
       {
-				Config: testAccInstanceGroupManager_statefulRemoved(network, template, target, igm, hck),
+				Config: testAccInstanceGroupManager_statefulRemoved(network, template, target, igm),
 			},
 			{
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
@@ -1549,7 +1549,7 @@ resource "google_compute_http_health_check" "zero" {
 `, network, template, target, igm, hck)
 }
 
-func testAccInstanceGroupManager_statefulRemoved(network, template, target, igm, hck string) string {
+func testAccInstanceGroupManager_statefulRemoved(network, template, target, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -1619,13 +1619,7 @@ resource "google_compute_instance_group_manager" "igm-basic" {
     delete_rule = "NEVER"
   }
 }
-resource "google_compute_http_health_check" "zero" {
-  name               = "%s"
-  request_path       = "/"
-  check_interval_sec = 1
-  timeout_sec        = 1
-}
-`, network, template, target, igm, hck)
+`, network, template, target, igm)
 }
 
 func testAccInstanceGroupManager_waitForStatus(template, target, igm, perInstanceConfig string) string {
