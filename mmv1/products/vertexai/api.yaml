@@ -489,8 +489,8 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'scaling'
             exactly_one_of:
-              - fixed_node_count
-              - scaling
+              - online_serving_config.0.fixed_node_count
+              - online_serving_config.0.scaling
             description: |
               Online serving scaling configuration. Only one of fixedNodeCount and scaling can be set. Setting one will reset the other.
             properties:
