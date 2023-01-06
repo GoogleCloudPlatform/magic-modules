@@ -1907,28 +1907,28 @@ resource "google_composer_environment" "test" {
   name   = "%s"
   region = "us-central1"
 
-    config {
-      node_config {
-        network          = google_compute_network.test.self_link
-        subnetwork       = google_compute_subnetwork.test.self_link
-        ip_allocation_policy {
-          cluster_ipv4_cidr_block = "10.0.0.0/16"
-        }
+  config {
+    node_config {
+      network          = google_compute_network.test.self_link
+      subnetwork       = google_compute_subnetwork.test.self_link
+      ip_allocation_policy {
+        cluster_ipv4_cidr_block = "10.0.0.0/16"
       }
-
-      software_config {
-        image_version = "composer-2-airflow-2"
-      }
-
-      recovery_config {
-				scheduled_snapshots_config {
-					enabled = 									 true
-					snapshot_location = 				 "gs://example-bucket/environment_snapshots"
-					snapshot_creation_schedule = "0 4 * * *"
-					time_zone = 								 "UTC+01"
-				}
-   	  }
     }
+
+    software_config {
+      image_version = "composer-2-airflow-2"
+    }
+
+    recovery_config {
+			scheduled_snapshots_config {
+				enabled = 									 true
+				snapshot_location = 				 "gs://example-bucket/environment_snapshots"
+				snapshot_creation_schedule = "0 4 * * *"
+				time_zone = 								 "UTC+01"
+			}
+    }
+  }
 
 }
 
@@ -1953,28 +1953,28 @@ resource "google_composer_environment" "test" {
   name   = "%s"
   region = "us-central1"
 
-    config {
-      node_config {
-        network          = google_compute_network.test.self_link
-        subnetwork       = google_compute_subnetwork.test.self_link
-        ip_allocation_policy {
-          cluster_ipv4_cidr_block = "10.0.0.0/16"
-        }
+  config {
+    node_config {
+      network          = google_compute_network.test.self_link
+      subnetwork       = google_compute_subnetwork.test.self_link
+      ip_allocation_policy {
+        cluster_ipv4_cidr_block = "10.0.0.0/16"
       }
-
-      software_config {
-        image_version = "composer-2-airflow-2"
-      }
-
-      recovery_config {
-				scheduled_snapshots_config {
-					enabled = true
-					snapshot_location = "gs://example-bucket/environment_snapshots2"
-					snapshot_creation_schedule = "1 2 * * *"
-					time_zone = "UTC+02"
-				}
-   	  }
     }
+
+    software_config {
+      image_version = "composer-2-airflow-2"
+    }
+
+    recovery_config {
+			scheduled_snapshots_config {
+				enabled = true
+				snapshot_location = "gs://example-bucket/environment_snapshots2"
+				snapshot_creation_schedule = "1 2 * * *"
+				time_zone = "UTC+02"
+			}
+    }
+  }
 
 }
 

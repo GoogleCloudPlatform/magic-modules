@@ -884,25 +884,25 @@ The `ip_allocation_policy` block supports:
 The `recovery_config` block supports:
 
 * `scheduled_snapshots_config` -
-  (Required)
+  (Optional)
   The recovery configuration settings for the Cloud Composer environment.
 
 The `scheduled_snapshots_config` block supports:
 
 * `enabled` -
-  (Required)
+  (Optional)
   When enabled, Cloud Composer periodically saves snapshots of your environment to a Cloud Storage bucket.
 
 * `snapshot_location` -
-  (Required)
+  (Optional)
   The URI of a bucket folder where to save the snapshot.
 
 * `snapshot_creation_schedule` -
-  (Required)
+  (Optional)
   Snapshot schedule, in the unix-cron format.
 
 * `time_zone` -
-  (Required)
+  (Optional)
   A time zone for the schedule. This value is a time offset and does not take into account daylight saving time changes. Valid values are from UTC-12 to UTC+12. Examples: UTC, UTC-01, UTC+03.
 
 The `workloads_config` block supports:

@@ -340,7 +340,6 @@ func resourceComposerEnvironment() *schema.Resource {
 						"recovery_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
-							Computed:     true,
 							AtLeastOneOf: composerConfigKeys,
 							MaxItems:     1,
 							Description:  `The recovery configuration settings for the Cloud Composer environment`,
@@ -356,26 +355,22 @@ func resourceComposerEnvironment() *schema.Resource {
 											Schema: map[string]*schema.Schema{
 												"enabled": {
 													Type:        schema.TypeBool,
-													Required:    true,
-													ForceNew:    false,
+													Optional:    true,
 													Description: `When enabled, Cloud Composer periodically saves snapshots of your environment to a Cloud Storage bucket.`,
 												},
 												"snapshot_location": {
 													Type:        schema.TypeString,
-													Required:    true,
-													ForceNew:    false,
+													Optional:    true,
 													Description: `the URI of a bucket folder where to save the snapshot.`,
 												},
 												"snapshot_creation_schedule": {
 													Type:        schema.TypeString,
-													Required:    true,
-													ForceNew:    false,
+													Optional:    true,
 													Description: `Snapshot schedule, in the unix-cron format.`,
 												},
 												"time_zone": {
 													Type:        schema.TypeString,
-													Required:    true,
-													ForceNew:    false,
+													Optional:    true,
 													Description: `A time zone for the schedule. This value is a time offset and does not take into account daylight saving time changes. Valid values are from UTC-12 to UTC+12. Examples: UTC, UTC-01, UTC+03.`,
 												},
 											},
