@@ -498,7 +498,7 @@ objects:
                 name: 'minNodeCount'
                 required: true
                 description: |
-                  Required. The minimum number of nodes to scale down to. Must be greater than or equal to 1.
+                  The minimum number of nodes to scale down to. Must be greater than or equal to 1.
               - !ruby/object:Api::Type::Integer
                 name: 'maxNodeCount'
                 required: true
