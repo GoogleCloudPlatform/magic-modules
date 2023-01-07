@@ -56,6 +56,11 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: "error"
         message: "message"
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_attribute: 'name'
+      base_url: projects/{{project}}/locations/{{location}}/jobs/{{name}}
+      import_format: ["projects/{{project}}/locations/{{location}}/jobs/{{name}}", "{{name}}"]
     parameters:
       - !ruby/object:Api::Type::String
         name: "location"

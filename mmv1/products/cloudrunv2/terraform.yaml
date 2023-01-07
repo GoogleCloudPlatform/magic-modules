@@ -21,7 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudrunv2_job_basic"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_job_name: "cloudrun-job"
       - !ruby/object:Provider::Terraform::Examples
