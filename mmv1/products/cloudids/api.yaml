@@ -46,10 +46,10 @@ objects:
     name: 'Endpoint'
     base_url: 'projects/{{project}}/locations/{{location}}/endpoints'
     create_url: 'projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}'
-    update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}?update_mask=threat_exceptions'
     self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
     create_verb: :POST
     update_verb: :PATCH
+    update_mask: true
     description: |
       Cloud IDS is an intrusion detection service that provides threat detection for intrusions, malware, spyware, and command-and-control attacks on your network.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -86,6 +86,7 @@ objects:
         description: |
           Name of the VPC network that is connected to the IDS endpoint. This can either contain the VPC network name itself (like "src-net") or the full URL to the network (like "projects/{project_id}/global/networks/src-net").
       - !ruby/object:Api::Type::String
+        input: true
         name: 'description'
         description: |
           An optional description of the endpoint.
@@ -112,7 +113,7 @@ objects:
           - :HIGH
           - :CRITICAL
       - !ruby/object:Api::Type::Array
-        name: 'threat_exceptions'
+        name: 'threatExceptions'
         description: |
           Configuration for threat IDs excluded from generating alerts. Limit: 99 IDs.
         item_type: Api::Type::String

@@ -25,19 +25,17 @@ func TestAccCloudIdsEndpoint_basic(t *testing.T) {
 				Config: testCloudIds_basic(context),
 			},
 			{
-				ResourceName:            "google_cloud_ids_endpoint.endpoint",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"threat_exceptions"},
+				ResourceName:      "google_cloud_ids_endpoint.endpoint",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testCloudIds_basicUpdate(context),
 			},
 			{
-				ResourceName:            "google_cloud_ids_endpoint.endpoint",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"threat_exceptions"},
+				ResourceName:      "google_cloud_ids_endpoint.endpoint",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
