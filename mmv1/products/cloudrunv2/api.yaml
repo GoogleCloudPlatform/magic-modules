@@ -719,7 +719,7 @@ objects:
         name: "labels"
         description: |-
           Map of string keys and values that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component, environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels Cloud Run will populate some labels with 'run.googleapis.com' or 'serving.knative.dev' namespaces. Those labels are read-only, and user changes will not be preserved.
-      # Blocked on b/244872932 for implementation    
+      # Blocked on b/244872932 for implementation
       # - !ruby/object:Api::Type::KeyValuePairs
       #   name: "annotations"
       #   description: |-
@@ -779,7 +779,7 @@ objects:
             name: "labels"
             description: |-
               KRM-style labels for the resource.
-          # Blocked on b/244872932 for implementation 
+          # Blocked on b/244872932 for implementation
           # - !ruby/object:Api::Type::KeyValuePairs
           #   name: "annotations"
           #   description: |-
@@ -1200,7 +1200,7 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: "maxInstanceRequestConcurrency"
             description: |-
-              Sets the maximum number of requests that each serving instance can receive.      
+              Sets the maximum number of requests that each serving instance can receive.
       - !ruby/object:Api::Type::Array
         name: "traffic"
         description: |-
@@ -1225,7 +1225,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: "tag"
             description: |
-              Indicates a string to be part of the URI to exclusively reference this target.  
+              Indicates a string to be part of the URI to exclusively reference this target.
       - !ruby/object:Api::Type::String
         name: "observedGeneration"
         output: true
@@ -1389,5 +1389,3 @@ objects:
         output: true
         description: |
           A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
-
-

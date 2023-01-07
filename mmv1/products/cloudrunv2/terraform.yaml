@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Job:  !ruby/object:Overrides::Terraform::ResourceOverride
@@ -162,6 +162,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       template.containers.startupProbe.tcpSocket.port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       template.containers.startupProbe.grpc.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      template.containers.livenessProbe.grpc.port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       template.scaling: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
