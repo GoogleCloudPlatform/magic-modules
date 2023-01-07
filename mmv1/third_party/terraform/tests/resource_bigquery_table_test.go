@@ -2076,7 +2076,7 @@ resource "google_storage_bucket" "test" {
 
 resource "google_storage_bucket_object" "test" {
   name    = "%s"
-  source = "./test-fixtures/bigquerytable/test.snappy.parquet"
+  source = "./test-fixtures/bigquerytable/test.parquet.gzip"
   bucket = google_storage_bucket.test.name
 }
 
