@@ -124,6 +124,83 @@ module Api
       # [Optional] If set to true, indicates that a resource is not configurable
       # such as GCP regions.
       attr_reader :readonly
+
+      # ====================
+      # Terraform Overrides
+      # ====================
+
+      # [Optional] If non-empty, overrides the full filename prefix
+      # i.e. google/resource_product_{{resource_filename_override}}.go
+      # i.e. google/resource_product_{{resource_filename_override}}_test.go
+      attr_reader :filename_override
+
+      # If non-empty, overrides the full given resource name.
+      # i.e. 'google_project' for resourcemanager.Project
+      # Use Provider::Terraform::Config.legacy_name to override just
+      # product name.
+      # Note: This should not be used for vanity names for new products.
+      # This was added to handle preexisting handwritten resources that
+      # don't match the natural generated name exactly, and to support
+      # services with a mix of handwritten and generated resources.
+      attr_reader :legacy_name
+
+      # The Terraform resource id format used when calling #setId(...).
+      # For instance, `{{name}}` means the id will be the resource name.
+      attr_reader :id_format
+      attr_reader :import_format
+      attr_reader :custom_code
+      attr_reader :docs
+
+      # Lock name for a mutex to prevent concurrent API calls for a given
+      # resource.
+      attr_reader :mutex
+
+      # Examples in documentation. Backed by generated tests, and have
+      # corresponding OiCS walkthroughs.
+      attr_reader :examples
+
+      # Virtual fields on the Terraform resource. Usage and differences from url_param_only
+      # are documented in provider/terraform/virtual_fields.rb
+      attr_reader :virtual_fields
+
+      # TODO(alexstephen): Deprecate once all resources using autogen async.
+      # If true, generates product operation handling logic.
+      attr_reader :autogen_async
+
+      # If true, resource is not importable
+      attr_reader :exclude_import
+
+      # If true, exclude resource from Terraform Validator
+      # (i.e. terraform-provider-conversion)
+      attr_reader :exclude_validator
+
+      # If true, skip sweeper generation for this resource
+      attr_reader :skip_sweeper
+
+      attr_reader :timeouts
+
+      # An array of function names that determine whether an error is retryable.
+      attr_reader :error_retry_predicates
+
+      attr_reader :schema_version
+
+      # Set to true for resources that are unable to be deleted, such as KMS keyrings or project
+      # level resources such as firebase project
+      attr_reader :skip_delete
+
+      # This enables resources that get their project via a reference to a different resource
+      # instead of a project field to use User Project Overrides
+      attr_reader :supports_indirect_user_project_override
+
+      # Function to transform a read error so that handleNotFound recognises
+      # it as a 404. This should be added as a handwritten fn that takes in
+      # an error and returns one.
+      attr_reader :read_error_transform
+
+      # If true, resources that failed creation will be marked as tainted. As a consequence
+      # these resources will be deleted and recreated on the next apply call. This pattern
+      # is preferred over deleting the resource directly in post_create_failure hooks.
+      attr_reader :taint_resource_on_failed_create
     end
 
     include Properties
@@ -180,6 +257,33 @@ module Api
 
       check :iam_policy, type: Api::Resource::IamPolicy
       check :exclude_resource, type: :boolean, default: false
+
+      @examples ||= []
+
+      check :filename_override, type: String
+      check :legacy_name, type: String
+      check :id_format, type: String
+      check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
+      check :virtual_fields,
+            item_type: Api::Type,
+            type: Array,
+            default: []
+
+      check :custom_code, type: Provider::Terraform::CustomCode,
+                          default: Provider::Terraform::CustomCode.new
+      check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
+      check :import_format, type: Array, item_type: String, default: []
+      check :autogen_async, type: :boolean, default: false
+      check :exclude_import, type: :boolean, default: false
+
+      check :timeouts, type: Api::Timeouts
+      check :error_retry_predicates, type: Array, item_type: String
+      check :schema_version, type: Integer
+      check :skip_delete, type: :boolean, default: false
+      check :supports_indirect_user_project_override, type: :boolean, default: false
+      check :read_error_transform, type: String
+      check :taint_resource_on_failed_create, type: :boolean, default: false
+      check :skip_sweeper, type: :boolean, default: false
 
       validate_identity unless @identity.nil?
     end
