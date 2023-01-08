@@ -356,7 +356,7 @@ objects:
                 description: |
                   Whether Google Cloud services such as BigQuery are allowed to
                   access data in this Cloud SQL instance over a private IP connection.
-                  (Requires enabling the Service Networking API (servicenetworking.googleapis.com).)
+                  SQLSERVER database type is not supported.
           - !ruby/object:Api::Type::String
             name: 'tier'
             description: |
