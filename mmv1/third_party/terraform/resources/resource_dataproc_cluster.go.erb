@@ -1819,7 +1819,7 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 
 func expandDataprocMetricConfig(cfg map[string]interface{}) *dataproc.DataprocMetricConfig {
 	conf := &dataproc.DataprocMetricConfig{}
-	metricsConfigs := cfg["metrics"].([]interface{})
+	metricsConfigs := cfg["metrics"].(*schema.Set).List()
 	metricsSet := make([]*dataproc.Metric, 0, len(metricsConfigs))
 
 	for _, raw := range metricsConfigs {
