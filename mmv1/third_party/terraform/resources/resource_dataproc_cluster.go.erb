@@ -1107,7 +1107,7 @@ by Dataproc`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"metrics": {
-										Type:         schema.TypeSet,
+										Type:         schema.TypeList,
 										Required:     true,
 										Description:  `Metrics sources to enable.`,
 										Elem:         metricsSchema(),
@@ -1819,7 +1819,7 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 
 func expandDataprocMetricConfig(cfg map[string]interface{}) *dataproc.DataprocMetricConfig {
 	conf := &dataproc.DataprocMetricConfig{}
-	metricsConfigs := cfg["metrics"].(*schema.Set).List()
+	metricsConfigs := cfg["metrics"].([]interface{})
 	metricsSet := make([]*dataproc.Metric, 0, len(metricsConfigs))
 
 	for _, raw := range metricsConfigs {
@@ -2356,16 +2356,16 @@ func flattenDataprocMetricConfig(d *schema.ResourceData, dmc *dataproc.DataprocM
 	}
 
 	metrics := map[string]interface{}{}
-	metricsTypeSet := schema.NewSet(schema.HashResource(metricsSchema()), []interface{}{})
+	metricsTypeList := schema.NewSet(schema.HashResource(metricsSchema()), []interface{}{}).List()
 	for _, metric := range dmc.Metrics {
 		data := map[string]interface{}{
 			"metric_source":  metric.MetricSource,
 			"metric_overrides": metric.MetricOverrides,
 		}
 
-		metricsTypeSet.Add(data)
+		metricsTypeList = append(metricsTypeList, &data)
 	}
-	metrics["metrics"] = metricsTypeSet
+	metrics["metrics"] = metricsTypeList
 
 	return []map[string]interface{}{metrics}
 }
