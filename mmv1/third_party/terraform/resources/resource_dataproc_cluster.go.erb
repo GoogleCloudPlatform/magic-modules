@@ -1099,7 +1099,7 @@ by Dataproc`,
 						},
 
 						"dataproc_metric_config": {
-							Type:        schema.TypeSet,
+							Type:        schema.TypeList,
 							Optional:    true,
 							MaxItems:    1,
 							Description: `The config for Dataproc metrics.`,
@@ -1107,7 +1107,7 @@ by Dataproc`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"metrics": {
-										Type:         schema.TypeSet,
+										Type:         schema.TypeList,
 										Required:     true,
 										Description:  `Metrics sources to enable.`,
 										Elem:         metricsSchema(),
@@ -1819,7 +1819,7 @@ func expandEndpointConfig(cfg map[string]interface{}) *dataproc.EndpointConfig {
 
 func expandDataprocMetricConfig(cfg map[string]interface{}) *dataproc.DataprocMetricConfig {
 	conf := &dataproc.DataprocMetricConfig{}
-	metricsConfigs := cfg["metrics"].(*schema.Set).List()
+	metricsConfigs := cfg["metrics"].([]interface{})
 	metricsSet := make([]*dataproc.Metric, 0, len(metricsConfigs))
 
 	for _, raw := range metricsConfigs {
