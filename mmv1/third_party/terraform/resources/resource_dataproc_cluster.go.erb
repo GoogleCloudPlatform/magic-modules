@@ -1107,7 +1107,7 @@ by Dataproc`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"metrics": {
-										Type:         schema.TypeList,
+										Type:         schema.TypeSet,
 										Required:     true,
 										Description:  `Metrics sources to enable.`,
 										Elem:         metricsSchema(),
@@ -2355,7 +2355,7 @@ func flattenDataprocMetricConfig(d *schema.ResourceData, dmc *dataproc.DataprocM
 		return nil
 	}
 
-	data := map[string]interface{}{}
+	metrics := map[string]interface{}{}
 	metricsTypeSet := schema.NewSet(schema.HashResource(metricsSchema()), []interface{}{})
 	for _, metric := range dmc.Metrics {
 		data := map[string]interface{}{
@@ -2365,9 +2365,9 @@ func flattenDataprocMetricConfig(d *schema.ResourceData, dmc *dataproc.DataprocM
 
 		metricsTypeSet.Add(data)
 	}
-	data["metrics"] = metricsTypeSet
+	metrics["metrics"] = metricsTypeSet
 
-	return []map[string]interface{}{data}
+	return []map[string]interface{}{metrics}
 }
 
 func flattenMetastoreConfig(d *schema.ResourceData, ec *dataproc.MetastoreConfig) []map[string]interface{} {
