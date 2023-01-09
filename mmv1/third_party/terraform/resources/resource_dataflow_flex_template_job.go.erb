@@ -166,7 +166,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  `The configuration for VM IPs. Options are "WORKER_IP_PUBLIC" or "WORKER_IP_PRIVATE".`,
-				ValidateFunc: validation.StringInSlice([]string{"WORKER_IP_PUBLIC", "WORKER_IP_PRIVATE", ""}, false),
+				ValidateFunc: validation.StringInSlice([]string{"WORKER_IP_PUBLIC", "WORKER_IP_PRIVATE"}, false),
 			},
 
 			"additional_experiments": {
