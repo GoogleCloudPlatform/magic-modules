@@ -66,6 +66,15 @@ var (
 		"config.0.master_authorized_networks_config",
 	}
 
+	workloadsConfigKeys = []string{
+		"config.0.workloads_config.0.scheduler",
+		<% unless version == "ga" -%>
+		"config.0.workloads_config.0.triggerer",
+		<% end -%>
+		"config.0.workloads_config.0.web_server",
+		"config.0.workloads_config.0.worker",
+	}
+
 	composerPrivateEnvironmentConfig = []string{
 		"config.0.private_environment_config.0.enable_private_endpoint",
 		"config.0.private_environment_config.0.master_ipv4_cidr_block",
@@ -568,6 +577,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"scheduler": {
 										Type:        schema.TypeList,
 										Optional:    true,
+										AtLeastOneOf: workloadsConfigKeys,
 										ForceNew:    false,
 										Description: `Configuration for resources used by Airflow schedulers.`,
 										MaxItems:     1,
@@ -604,9 +614,41 @@ func resourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
+									<% unless version == "ga" -%>
+									"triggerer": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										AtLeastOneOf: workloadsConfigKeys,
+										Description: `Configuration for resources used by Airflow triggerers.`,
+										MaxItems:    1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu": {
+													Type:         schema.TypeFloat,
+													Required:     true,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `CPU request and limit for a single Airflow triggerer replica.`,
+												},
+												"memory_gb": {
+													Type:         schema.TypeFloat,
+													Required:     true,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Memory (GB) request and limit for a single Airflow triggerer replica.`,
+												},
+												"count": {
+													Type:         schema.TypeInt,
+													Required:     true,
+													ValidateFunc: validation.IntAtLeast(0),
+													Description:  `The number of triggerers.`,
+												},
+											},
+										},
+									},
+									<% end -%>
 									"web_server": {
 										Type:        schema.TypeList,
 										Optional:    true,
+										AtLeastOneOf: workloadsConfigKeys,
 										ForceNew:    false,
 										Description: `Configuration for resources used by Airflow web server.`,
 										MaxItems:     1,
@@ -639,6 +681,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"worker": {
 										Type:        schema.TypeList,
 										Optional:    true,
+										AtLeastOneOf: workloadsConfigKeys,
 										ForceNew:    false,
 										Description: `Configuration for resources used by Airflow workers.`,
 										MaxItems:     1,
@@ -1242,45 +1285,66 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		return nil
 	}
 
-	  transformed := make(map[string]interface{})
-    transformedScheduler := make(map[string]interface{})
-    transformedWebServer := make(map[string]interface{})
-    transformedWorker := make(map[string]interface{})
+	transformed := make(map[string]interface{})
+	transformedScheduler := make(map[string]interface{})
+	<% unless version == "ga" -%>
+	transformedTriggerer := make(map[string]interface{})
+	<% end -%>
+	transformedWebServer := make(map[string]interface{})
+	transformedWorker := make(map[string]interface{})
 
-    wlCfgScheduler := workloadsConfig.Scheduler
-    wlCfgWebServer := workloadsConfig.WebServer
-    wlCfgWorker := workloadsConfig.Worker
+	wlCfgScheduler := workloadsConfig.Scheduler
+	<% unless version == "ga" -%>
+	wlCfgTriggerer := workloadsConfig.Triggerer
+	<% end -%>
+	wlCfgWebServer := workloadsConfig.WebServer
+	wlCfgWorker := workloadsConfig.Worker
 
-    if wlCfgScheduler == nil {
-      transformedScheduler = nil
-    } else {
-      transformedScheduler["cpu"] = wlCfgScheduler.Cpu
-      transformedScheduler["memory_gb"] = wlCfgScheduler.MemoryGb
-      transformedScheduler["storage_gb"] = wlCfgScheduler.StorageGb
-      transformedScheduler["count"] = wlCfgScheduler.Count
-    }
+	if wlCfgScheduler == nil {
+		transformedScheduler = nil
+	} else {
+		transformedScheduler["cpu"] = wlCfgScheduler.Cpu
+		transformedScheduler["memory_gb"] = wlCfgScheduler.MemoryGb
+		transformedScheduler["storage_gb"] = wlCfgScheduler.StorageGb
+		transformedScheduler["count"] = wlCfgScheduler.Count
+	}
 
-    if wlCfgWebServer == nil {
-      transformedWebServer = nil
-    } else {
-      transformedWebServer["cpu"] = wlCfgWebServer.Cpu
-      transformedWebServer["memory_gb"] = wlCfgWebServer.MemoryGb
-      transformedWebServer["storage_gb"] = wlCfgWebServer.StorageGb
-    }
+	<% unless version == "ga" -%>
+	if wlCfgTriggerer == nil {
+		transformedTriggerer = nil
+	} else {
+		transformedTriggerer["cpu"] = wlCfgTriggerer.Cpu
+		transformedTriggerer["memory_gb"] = wlCfgTriggerer.MemoryGb
+		transformedTriggerer["count"] = wlCfgTriggerer.Count
+	}
+	<% end -%>
 
-    if wlCfgWorker == nil {
-      transformedWorker = nil
-    } else {
-      transformedWorker["cpu"] = wlCfgWorker.Cpu
-      transformedWorker["memory_gb"] = wlCfgWorker.MemoryGb
-      transformedWorker["storage_gb"] = wlCfgWorker.StorageGb
-      transformedWorker["min_count"] = wlCfgWorker.MinCount
-      transformedWorker["max_count"] = wlCfgWorker.MaxCount
-    }
+	if wlCfgWebServer == nil {
+		transformedWebServer = nil
+	} else {
+		transformedWebServer["cpu"] = wlCfgWebServer.Cpu
+		transformedWebServer["memory_gb"] = wlCfgWebServer.MemoryGb
+		transformedWebServer["storage_gb"] = wlCfgWebServer.StorageGb
+	}
 
-    transformed["scheduler"] = []interface{}{transformedScheduler}
-    transformed["web_server"] = []interface{}{transformedWebServer}
-    transformed["worker"] = []interface{}{transformedWorker}
+	if wlCfgWorker == nil {
+		transformedWorker = nil
+	} else {
+		transformedWorker["cpu"] = wlCfgWorker.Cpu
+		transformedWorker["memory_gb"] = wlCfgWorker.MemoryGb
+		transformedWorker["storage_gb"] = wlCfgWorker.StorageGb
+		transformedWorker["min_count"] = wlCfgWorker.MinCount
+		transformedWorker["max_count"] = wlCfgWorker.MaxCount
+	}
+
+	transformed["scheduler"] = []interface{}{transformedScheduler}
+	<% unless version == "ga" -%>
+	if transformedTriggerer != nil {
+		transformed["triggerer"] = []interface{}{transformedTriggerer}
+	}
+	<% end -%>
+	transformed["web_server"] = []interface{}{transformedWebServer}
+	transformed["worker"] = []interface{}{transformedWorker}
 
 
 	return []interface{}{transformed}
@@ -1619,6 +1683,19 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 			transformed.Scheduler = transformedScheduler
 		}
 	}
+
+	<% unless version == "ga" -%>
+	if v, ok := original["triggerer"]; ok {
+		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+			transformedTriggerer := &composer.TriggererResource{}
+			originalTriggererRaw := v.([]interface{})[0].(map[string]interface{})
+			transformedTriggerer.Count = int64(originalTriggererRaw["count"].(int))
+			transformedTriggerer.Cpu = originalTriggererRaw["cpu"].(float64)
+			transformedTriggerer.MemoryGb = originalTriggererRaw["memory_gb"].(float64)
+			transformed.Triggerer = transformedTriggerer
+		}
+	}
+	<% end -%>
 
 	if v, ok := original["web_server"]; ok {
 		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {

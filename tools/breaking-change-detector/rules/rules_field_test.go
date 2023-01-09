@@ -439,3 +439,25 @@ func (tc *fieldTestCase) check(rule FieldRule, t *testing.T) {
 		t.Errorf("Test `%s` failed: expected %v violations, got %v", tc.name, tc.expectedViolation, violation)
 	}
 }
+
+func TestBreakingMessage(t *testing.T) {
+	breakageMessage := fieldRule_OptionalComputedToOptional.IsRuleBreak(
+		&schema.Schema{
+			Optional: true,
+			Computed: true,
+		},
+		&schema.Schema{
+			Optional: true,
+		},
+		MessageContext{
+			Resource: "a",
+			Field:    "b",
+			Version:  "beta",
+		},
+	)
+
+	if !strings.Contains(breakageMessage, "Field `b` transitioned from optional+computed to optional `a`") {
+		t.Errorf("Test `%s` failed: replacements for `{{<val>}}` not successful ", "TestBreakingMessage")
+	}
+
+}
