@@ -232,10 +232,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
         return err
     }
 
-	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
-
 	request := dataflow.LaunchFlexTemplateRequest{
-
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
@@ -266,8 +263,6 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 }
 
 func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *Config) (dataflow.FlexTemplateRuntimeEnvironment, error) {
-
-	labels := expandStringMap(d, "labels")
 
 	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
 
@@ -447,17 +442,9 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-    id := d.Id()
-
-    params := expandStringMap(d, "parameters")
     tnamemapping := expandStringMap(d, "transform_name_mapping")
 
     env, err := resourceDataflowFlexJobSetupEnv(d, config)
-    if err != nil {
-        return err
-    }
-
-    requestedState, err := resourceDataflowJobMapRequestedState(d.Get("on_delete").(string))
     if err != nil {
         return err
     }
@@ -467,16 +454,15 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return fmt.Errorf("Error waiting for job with job ID %q to be running: %s", d.Id(), err)
 	}
-
-	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
 	
 	request := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
-			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
-			JobName:              d.Get("name").(string),
-			Parameters:           expandStringMap(d, "parameters"),
-			Environment:          &env,
-			Update:               true,
+			ContainerSpecGcsPath:  d.Get("container_spec_gcs_path").(string),
+			JobName:               d.Get("name").(string),
+			Parameters:            expandStringMap(d, "parameters"),
+			TransformNameMappings: tnamemapping,
+			Environment:           &env,
+			Update:                true,
 		},
 	}
 
