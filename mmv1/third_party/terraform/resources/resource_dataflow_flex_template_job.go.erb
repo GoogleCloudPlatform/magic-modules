@@ -27,6 +27,12 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 		Read:   resourceDataflowFlexTemplateJobRead,
 		Update: resourceDataflowFlexTemplateJobUpdate,
 		Delete: resourceDataflowFlexTemplateJobDelete,
+        CustomizeDiff: customdiff.All(
+            resourceDataflowJobTypeCustomizeDiff,
+        ),
+        Importer: &schema.ResourceImporter{
+            State: schema.ImportStatePassthrough,
+        },
 		Schema: map[string]*schema.Schema{
 
 			"container_spec_gcs_path": {
@@ -47,6 +53,12 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Computed:    true,
 				Description: `The region in which the created job should run.`,
 			},
+
+            "transform_name_mapping": {
+                Type:        schema.TypeMap,
+                Optional:    true,
+                Description: `Only applicable when updating a pipeline. Map of transform name prefixes of the job to be replaced with the corresponding name prefixes of the new job.`,
+            },
 
 			"on_delete": {
 				Type:         schema.TypeString,
@@ -170,7 +182,6 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 			"enable_streaming_engine": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
 				Description: `Indicates if the job should use the streaming engine feature.`,
 			},
 
@@ -186,7 +197,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Description: `The machine type to use for launching the job. The default is n1-standard-1.`,
 			},
 
-	"skip_wait_on_job_termination": {
+	        "skip_wait_on_job_termination": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
@@ -216,6 +227,11 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
+    env, err := resourceDataflowFlexJobSetupEnv(d, config)
+    if err != nil {
+        return err
+    }
+
 	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
 
 	request := dataflow.LaunchFlexTemplateRequest{
@@ -224,25 +240,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           expandStringMap(d, "parameters"),
-			Environment: &dataflow.FlexTemplateRuntimeEnvironment{
-				AdditionalUserLabels:  expandStringMap(d, "labels"),
-				AutoscalingAlgorithm:  d.Get("autoscaling_algorithm").(string),
-				NumWorkers:            int64(d.Get("num_workers").(int)),
-				MaxWorkers:            int64(d.Get("max_workers").(int)),
-				Network:               d.Get("network").(string),
-				ServiceAccountEmail:   d.Get("service_account_email").(string),
-				Subnetwork:            d.Get("subnetwork").(string),
-				TempLocation:          d.Get("temp_location").(string),
-				StagingLocation:       d.Get("staging_location").(string),
-				MachineType:           d.Get("machine_type").(string),
-				KmsKeyName:            d.Get("kms_key_name").(string),
-				IpConfiguration:       d.Get("ip_configuration").(string),
-				EnableStreamingEngine: d.Get("enable_streaming_engine").(bool),
-				AdditionalExperiments: additionalExperiments,
-				SdkContainerImage:     d.Get("ip_configuration").(string),
-				LauncherMachineType:   d.Get("machine_type").(string),
-			},
-
+			Environment: &env,
 		},
 	}
 
@@ -265,6 +263,33 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 	}
 
 	return resourceDataflowFlexTemplateJobRead(d, meta)
+}
+
+func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *Config) (dataflow.FlexTemplateRuntimeEnvironment, error) {
+
+	labels := expandStringMap(d, "labels")
+
+	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
+
+	env := dataflow.FlexTemplateRuntimeEnvironment{
+                AdditionalUserLabels:  expandStringMap(d, "labels"),
+                AutoscalingAlgorithm:  d.Get("autoscaling_algorithm").(string),
+                NumWorkers:            int64(d.Get("num_workers").(int)),
+                MaxWorkers:            int64(d.Get("max_workers").(int)),
+                Network:               d.Get("network").(string),
+                ServiceAccountEmail:   d.Get("service_account_email").(string),
+                Subnetwork:            d.Get("subnetwork").(string),
+                TempLocation:          d.Get("temp_location").(string),
+                StagingLocation:       d.Get("staging_location").(string),
+                MachineType:           d.Get("machine_type").(string),
+                KmsKeyName:            d.Get("kms_key_name").(string),
+                IpConfiguration:       d.Get("ip_configuration").(string),
+                EnableStreamingEngine: d.Get("enable_streaming_engine").(bool),
+                AdditionalExperiments: additionalExperiments,
+                SdkContainerImage:     d.Get("sdk_container_image").(string),
+                LauncherMachineType:   d.Get("launcher_machine_type").(string),
+    }
+	return env, nil
 }
 
 // resourceDataflowFlexTemplateJobRead reads a Flex Template Job resource.
@@ -292,11 +317,17 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		return handleNotFoundError(err, d, fmt.Sprintf("Dataflow job %s", jobId))
 	}
 
+	if err := d.Set("job_id", job.Id); err != nil {
+		return fmt.Errorf("Error setting job_id: %s", err)
+	}
 	if err := d.Set("state", job.CurrentState); err != nil {
 		return fmt.Errorf("Error setting state: %s", err)
 	}
 	if err := d.Set("name", job.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("type", job.Type); err != nil {
+		return fmt.Errorf("Error setting type: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
@@ -304,12 +335,53 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("labels", job.Labels); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
+	if err := d.Set("kms_key_name", job.Environment.ServiceKmsKeyName); err != nil {
+		return fmt.Errorf("Error setting kms_key_name: %s", err)
+	}
+    if err := d.Set("service_account_email", job.Environment.ServiceAccountEmail); err != nil {
+        return fmt.Errorf("Error setting service_account_email: %s", err)
+    }
+
+    sdkPipelineOptions, err := ConvertToMap(job.Environment.SdkPipelineOptions)
+	if err != nil {
+		return err
+	}
+	optionsMap := sdkPipelineOptions["options"].(map[string]interface{})
+
+	if err := d.Set("temp_location", optionsMap["tempLocation"]); err != nil {
+		return fmt.Errorf("Error setting temp_gcs_location: %s", err)
+	}
+	if err := d.Set("network", optionsMap["network"]); err != nil {
+		return fmt.Errorf("Error setting network: %s", err)
+	}
+    if err := d.Set("num_workers", optionsMap["numWorkers"]); err != nil {
+        return fmt.Errorf("Error setting num_workers: %s", err)
+    }
+    if err := d.Set("max_workers", optionsMap["maxWorkers"]); err != nil {
+        return fmt.Errorf("Error setting max_workers: %s", err)
+    }
+    if err := d.Set("staging_location", optionsMap["stagingLocation"]); err != nil {
+        return fmt.Errorf("Error setting staging_location: %s", err)
+    }
+    if err := d.Set("sdk_container_image", optionsMap["sdkContainerImage"]); err != nil {
+        return fmt.Errorf("Error setting sdk_container_image: %s", err)
+    }
+    if err := d.Set("network", optionsMap["network"]); err != nil {
+        return fmt.Errorf("Error setting network: %s", err)
+    }
+    if err := d.Set("subnetwork", optionsMap["subnetwork"]); err != nil {
+        return fmt.Errorf("Error setting subnetwork: %s", err)
+    }
+    if err := d.Set("machine_type", optionsMap["workerMachineType"]); err != nil {
+        return fmt.Errorf("Error setting machine_type: %s", err)
+    }
 
   if ok := shouldStopDataflowJobDeleteQuery(job.CurrentState, d.Get("skip_wait_on_job_termination").(bool)); ok {
 		log.Printf("[DEBUG] Removing resource '%s' because it is in state %s.\n", job.Name, job.CurrentState)
 		d.SetId("")
 		return nil
 	}
+    d.SetId(job.Id)
 
 	return nil
 }
@@ -375,6 +447,21 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
+    id := d.Id()
+
+    params := expandStringMap(d, "parameters")
+    tnamemapping := expandStringMap(d, "transform_name_mapping")
+
+    env, err := resourceDataflowFlexJobSetupEnv(d, config)
+    if err != nil {
+        return err
+    }
+
+    requestedState, err := resourceDataflowJobMapRequestedState(d.Get("on_delete").(string))
+    if err != nil {
+        return err
+    }
+
 	// wait until current job is running or terminated
 	err = waitForDataflowJobState(d, config, d.Id(), userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
 	if err != nil {
@@ -388,24 +475,7 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           expandStringMap(d, "parameters"),
-			Environment: &dataflow.FlexTemplateRuntimeEnvironment{
-				AdditionalUserLabels:  expandStringMap(d, "labels"),
-				AutoscalingAlgorithm:  d.Get("autoscaling_algorithm").(string),
-				NumWorkers:            int64(d.Get("num_workers").(int)),
-				MaxWorkers:            int64(d.Get("max_workers").(int)),
-				Network:               d.Get("network").(string),
-				ServiceAccountEmail:   d.Get("service_account_email").(string),
-				Subnetwork:            d.Get("subnetwork").(string),
-				TempLocation:          d.Get("temp_gcs_location").(string),
-				StagingLocation:       d.Get("staging_gcs_location").(string),
-				MachineType:           d.Get("machine_type").(string),
-				KmsKeyName:            d.Get("kms_key_name").(string),
-				IpConfiguration:       d.Get("ip_configuration").(string),
-				EnableStreamingEngine: d.Get("enable_streaming_engine").(bool),
-				AdditionalExperiments: additionalExperiments,
-				SdkContainerImage:     d.Get("ip_configuration").(string),
-				LauncherMachineType:   d.Get("machine_type").(string),
-			},
+			Environment:          &env,
 			Update:               true,
 		},
 	}

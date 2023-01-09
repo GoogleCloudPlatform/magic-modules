@@ -39,6 +39,12 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 				),
 			},
+            {
+                ResourceName:            "google_dataflow_flex_template_job.job",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+            },
 		},
 	})
 }
@@ -69,6 +75,12 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 					testAccDataflowJobHasOption(t, "google_dataflow_flex_template_job.job", "topic", "projects/myproject/topics/mytopic2"),
 				),
 			},
+            {
+                ResourceName:            "google_dataflow_flex_template_job.job",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "transform_name_mapping", "state"},
+            },
 		},
 	})
 }
@@ -127,6 +139,12 @@ func TestAccDataflowFlexTemplateJob_withServiceAccount(t *testing.T) {
 					testAccDataflowFlexTemplateJobHasServiceAccount(t, "google_dataflow_flex_template_job.job", accountId),
 				),
 			},
+            {
+                ResourceName:            "google_dataflow_flex_template_job.job",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+            },
 		},
 	})
 }
@@ -153,6 +171,12 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 					testAccDataflowFlexTemplateJobHasNetwork(t, "google_dataflow_flex_template_job.job", network),
 				),
 			},
+            {
+                ResourceName:            "google_dataflow_flex_template_job.job",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+            },
 		},
 	})
 }
@@ -180,6 +204,12 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 					testAccDataflowFlexTemplateJobHasSubNetwork(t, "google_dataflow_flex_template_job.job", subnetwork),
 				),
 			},
+            {
+                ResourceName:            "google_dataflow_flex_template_job.job",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+            },
 		},
 	})
 }
@@ -204,6 +234,12 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 				),
 			},
+            {
+                ResourceName:            "google_dataflow_flex_template_job.job",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "ip_configuration", "state"},
+            },
 		},
 	})
 }
@@ -231,6 +267,12 @@ func TestAccDataflowFlexTemplateJob_withLabels(t *testing.T) {
 					testAccDataflowFlexTemplateJobHasLabels(t, "google_dataflow_flex_template_job.job", key),
 				),
 			},
+            {
+                ResourceName:            "google_dataflow_flex_template_job.job",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+            },
 		},
 	})
 }
@@ -257,6 +299,12 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 				),
 			},
+            {
+                ResourceName:            "google_dataflow_flex_template_job.job",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination",  "state"},
+            },
 		},
 	})
 }
@@ -284,6 +332,12 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 					testAccDataflowFlexTemplateJobHasAdditionalExperiments(t, "google_dataflow_flex_template_job.job", additionalExperiments),
 				),
 			},
+            {
+                ResourceName:            "google_dataflow_flex_template_job.job",
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "additional_experiments"},
+            },
 		},
 	})
 }
