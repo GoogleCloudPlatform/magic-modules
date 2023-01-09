@@ -137,6 +137,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       serviceConfig.availableCpu: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      serviceConfig.maxInstanceRequestConcurrency: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       serviceConfig.service: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       serviceConfig.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
