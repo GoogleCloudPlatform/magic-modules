@@ -135,6 +135,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_bucket.go.erb'
       buildConfig.environmentVariables: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      serviceConfig.availableCpu: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       serviceConfig.service: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       serviceConfig.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
