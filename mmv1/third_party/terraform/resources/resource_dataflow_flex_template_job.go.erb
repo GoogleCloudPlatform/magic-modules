@@ -4,6 +4,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"log"
 	"strings"
 	"time"
@@ -27,12 +28,12 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 		Read:   resourceDataflowFlexTemplateJobRead,
 		Update: resourceDataflowFlexTemplateJobUpdate,
 		Delete: resourceDataflowFlexTemplateJobDelete,
-        CustomizeDiff: customdiff.All(
-            resourceDataflowJobTypeCustomizeDiff,
-        ),
-        Importer: &schema.ResourceImporter{
-            State: schema.ImportStatePassthrough,
-        },
+		CustomizeDiff: customdiff.All(
+			resourceDataflowJobTypeCustomizeDiff,
+		),
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"container_spec_gcs_path": {
@@ -54,11 +55,11 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Description: `The region in which the created job should run.`,
 			},
 
-            "transform_name_mapping": {
-                Type:        schema.TypeMap,
-                Optional:    true,
-                Description: `Only applicable when updating a pipeline. Map of transform name prefixes of the job to be replaced with the corresponding name prefixes of the new job.`,
-            },
+			"transform_name_mapping": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `Only applicable when updating a pipeline. Map of transform name prefixes of the job to be replaced with the corresponding name prefixes of the new job.`,
+			},
 
 			"on_delete": {
 				Type:         schema.TypeString,
@@ -190,20 +191,19 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Optional:    true,
 				Description: `The algorithm to use for autoscaling`,
 			},
-	
+
 			"launcher_machine_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: `The machine type to use for launching the job. The default is n1-standard-1.`,
 			},
 
-	        "skip_wait_on_job_termination": {
+			"skip_wait_on_job_termination": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
 				Description: `If true, treat DRAINING and CANCELLING as terminal job states and do not wait for further changes before removing from terraform state and moving on. WARNING: this will lead to job name conflicts if you do not ensure that the job names are different, e.g. by embedding a release ID or by using a random_id.`,
 			},
-
 		},
 		UseJSONNumber: true,
 	}
@@ -227,17 +227,17 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-    env, err := resourceDataflowFlexJobSetupEnv(d, config)
-    if err != nil {
-        return err
-    }
+	env, err := resourceDataflowFlexJobSetupEnv(d, config)
+	if err != nil {
+		return err
+	}
 
 	request := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           expandStringMap(d, "parameters"),
-			Environment: &env,
+			Environment:          &env,
 		},
 	}
 
@@ -267,23 +267,23 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *Config) (da
 	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
 
 	env := dataflow.FlexTemplateRuntimeEnvironment{
-                AdditionalUserLabels:  expandStringMap(d, "labels"),
-                AutoscalingAlgorithm:  d.Get("autoscaling_algorithm").(string),
-                NumWorkers:            int64(d.Get("num_workers").(int)),
-                MaxWorkers:            int64(d.Get("max_workers").(int)),
-                Network:               d.Get("network").(string),
-                ServiceAccountEmail:   d.Get("service_account_email").(string),
-                Subnetwork:            d.Get("subnetwork").(string),
-                TempLocation:          d.Get("temp_location").(string),
-                StagingLocation:       d.Get("staging_location").(string),
-                MachineType:           d.Get("machine_type").(string),
-                KmsKeyName:            d.Get("kms_key_name").(string),
-                IpConfiguration:       d.Get("ip_configuration").(string),
-                EnableStreamingEngine: d.Get("enable_streaming_engine").(bool),
-                AdditionalExperiments: additionalExperiments,
-                SdkContainerImage:     d.Get("sdk_container_image").(string),
-                LauncherMachineType:   d.Get("launcher_machine_type").(string),
-    }
+		AdditionalUserLabels:  expandStringMap(d, "labels"),
+		AutoscalingAlgorithm:  d.Get("autoscaling_algorithm").(string),
+		NumWorkers:            int64(d.Get("num_workers").(int)),
+		MaxWorkers:            int64(d.Get("max_workers").(int)),
+		Network:               d.Get("network").(string),
+		ServiceAccountEmail:   d.Get("service_account_email").(string),
+		Subnetwork:            d.Get("subnetwork").(string),
+		TempLocation:          d.Get("temp_location").(string),
+		StagingLocation:       d.Get("staging_location").(string),
+		MachineType:           d.Get("machine_type").(string),
+		KmsKeyName:            d.Get("kms_key_name").(string),
+		IpConfiguration:       d.Get("ip_configuration").(string),
+		EnableStreamingEngine: d.Get("enable_streaming_engine").(bool),
+		AdditionalExperiments: additionalExperiments,
+		SdkContainerImage:     d.Get("sdk_container_image").(string),
+		LauncherMachineType:   d.Get("launcher_machine_type").(string),
+	}
 	return env, nil
 }
 
@@ -333,11 +333,11 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("kms_key_name", job.Environment.ServiceKmsKeyName); err != nil {
 		return fmt.Errorf("Error setting kms_key_name: %s", err)
 	}
-    if err := d.Set("service_account_email", job.Environment.ServiceAccountEmail); err != nil {
-        return fmt.Errorf("Error setting service_account_email: %s", err)
-    }
+	if err := d.Set("service_account_email", job.Environment.ServiceAccountEmail); err != nil {
+		return fmt.Errorf("Error setting service_account_email: %s", err)
+	}
 
-    sdkPipelineOptions, err := ConvertToMap(job.Environment.SdkPipelineOptions)
+	sdkPipelineOptions, err := ConvertToMap(job.Environment.SdkPipelineOptions)
 	if err != nil {
 		return err
 	}
@@ -349,34 +349,34 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("network", optionsMap["network"]); err != nil {
 		return fmt.Errorf("Error setting network: %s", err)
 	}
-    if err := d.Set("num_workers", optionsMap["numWorkers"]); err != nil {
-        return fmt.Errorf("Error setting num_workers: %s", err)
-    }
-    if err := d.Set("max_workers", optionsMap["maxWorkers"]); err != nil {
-        return fmt.Errorf("Error setting max_workers: %s", err)
-    }
-    if err := d.Set("staging_location", optionsMap["stagingLocation"]); err != nil {
-        return fmt.Errorf("Error setting staging_location: %s", err)
-    }
-    if err := d.Set("sdk_container_image", optionsMap["sdkContainerImage"]); err != nil {
-        return fmt.Errorf("Error setting sdk_container_image: %s", err)
-    }
-    if err := d.Set("network", optionsMap["network"]); err != nil {
-        return fmt.Errorf("Error setting network: %s", err)
-    }
-    if err := d.Set("subnetwork", optionsMap["subnetwork"]); err != nil {
-        return fmt.Errorf("Error setting subnetwork: %s", err)
-    }
-    if err := d.Set("machine_type", optionsMap["workerMachineType"]); err != nil {
-        return fmt.Errorf("Error setting machine_type: %s", err)
-    }
+	if err := d.Set("num_workers", optionsMap["numWorkers"]); err != nil {
+		return fmt.Errorf("Error setting num_workers: %s", err)
+	}
+	if err := d.Set("max_workers", optionsMap["maxWorkers"]); err != nil {
+		return fmt.Errorf("Error setting max_workers: %s", err)
+	}
+	if err := d.Set("staging_location", optionsMap["stagingLocation"]); err != nil {
+		return fmt.Errorf("Error setting staging_location: %s", err)
+	}
+	if err := d.Set("sdk_container_image", optionsMap["sdkContainerImage"]); err != nil {
+		return fmt.Errorf("Error setting sdk_container_image: %s", err)
+	}
+	if err := d.Set("network", optionsMap["network"]); err != nil {
+		return fmt.Errorf("Error setting network: %s", err)
+	}
+	if err := d.Set("subnetwork", optionsMap["subnetwork"]); err != nil {
+		return fmt.Errorf("Error setting subnetwork: %s", err)
+	}
+	if err := d.Set("machine_type", optionsMap["workerMachineType"]); err != nil {
+		return fmt.Errorf("Error setting machine_type: %s", err)
+	}
 
-  if ok := shouldStopDataflowJobDeleteQuery(job.CurrentState, d.Get("skip_wait_on_job_termination").(bool)); ok {
+	if ok := shouldStopDataflowJobDeleteQuery(job.CurrentState, d.Get("skip_wait_on_job_termination").(bool)); ok {
 		log.Printf("[DEBUG] Removing resource '%s' because it is in state %s.\n", job.Name, job.CurrentState)
 		d.SetId("")
 		return nil
 	}
-    d.SetId(job.Id)
+	d.SetId(job.Id)
 
 	return nil
 }
@@ -442,19 +442,19 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-    tnamemapping := expandStringMap(d, "transform_name_mapping")
+	tnamemapping := expandStringMap(d, "transform_name_mapping")
 
-    env, err := resourceDataflowFlexJobSetupEnv(d, config)
-    if err != nil {
-        return err
-    }
+	env, err := resourceDataflowFlexJobSetupEnv(d, config)
+	if err != nil {
+		return err
+	}
 
 	// wait until current job is running or terminated
 	err = waitForDataflowJobState(d, config, d.Id(), userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
 	if err != nil {
 		return fmt.Errorf("Error waiting for job with job ID %q to be running: %s", d.Id(), err)
 	}
-	
+
 	request := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath:  d.Get("container_spec_gcs_path").(string),
@@ -548,10 +548,10 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 	}
 
 	// Wait for state to reach terminal state (canceled/drained/done plus cancelling/draining if skipWait)
-  skipWait := d.Get("skip_wait_on_job_termination").(bool)
-  var ok bool
-  ok = shouldStopDataflowJobDeleteQuery(d.Get("state").(string), skipWait)
-  for !ok {
+	skipWait := d.Get("skip_wait_on_job_termination").(bool)
+	var ok bool
+	ok = shouldStopDataflowJobDeleteQuery(d.Get("state").(string), skipWait)
+	for !ok {
 		log.Printf("[DEBUG] Waiting for job with job state %q to terminate...", d.Get("state").(string))
 		time.Sleep(5 * time.Second)
 
@@ -559,7 +559,7 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 		if err != nil {
 			return fmt.Errorf("Error while reading job to see if it was properly terminated: %v", err)
 		}
-    ok = shouldStopDataflowJobDeleteQuery(d.Get("state").(string), skipWait)
+		ok = shouldStopDataflowJobDeleteQuery(d.Get("state").(string), skipWait)
 	}
 
 	// Only remove the job from state if it's actually successfully hit a final state.
