@@ -34,4 +34,3 @@ The following arguments are supported:
 ## Attributes Reference
 
 See [google_beyondcorp_app_gateway](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/beyondcorp_app_gateway) resource for details of the available attributes.
-
