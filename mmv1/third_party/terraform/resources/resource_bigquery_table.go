@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
@@ -177,6 +178,10 @@ func bigQueryTableConnectionIdSuppress(name, old, new string, _ *schema.Resource
 	// "{{project}}.{{location}}.{{connection_id}}" or
 	// "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}".
 	// but always returns "{{project}}.{{location}}.{{connection_id}}"
+
+	if isEmptyValue(reflect.ValueOf(old)) || isEmptyValue(reflect.ValueOf(new)) {
+		return false
+	}
 
 	re := regexp.MustCompile("projects/(.+)/(?:locations|regions)/(.+)/connections/(.+)")
 	if matches := re.FindStringSubmatch(new); matches != nil {
