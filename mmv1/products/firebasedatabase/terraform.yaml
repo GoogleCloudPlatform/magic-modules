@@ -17,34 +17,34 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ['projects/{{project}}/locations/{{region}}/instances/{{instance_id}}', '{{region}}/{{instance_id}}']
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "firebase_database_instance"
+        name: "firebase_database_instance_basic"
         min_version: "beta"
         primary_resource_id: "basic"
         vars:
           instance_id: "active-db"
+          region: "us-central1"
         test_env_vars:
           project_id: :PROJECT_NAME
-          region: :REGION
       - !ruby/object:Provider::Terraform::Examples
-        name: "firebase_database_instance_disabled"
+        name: "firebase_database_instance_full"
         min_version: "beta"
         primary_resource_id: "full"
         vars:
           instance_id: "disabled-db"
+          region: "europe-west1"
         test_env_vars:
           project_id: :PROJECT_NAME
-          region: :REGION
         ignore_read_extra:
           - "desired_state"
       - !ruby/object:Provider::Terraform::Examples
-        name: "firebase_database_instance_default"
+        name: "firebase_database_instance_default_database"
         min_version: "beta"
         primary_resource_id: "default"
         vars:
           project_id: "rtdb-project"
+          region: "us-central1"
         test_env_vars:
           org_id: :ORG_ID
-          region: :REGION
     virtual_fields:
       - !ruby/object:Api::Type::Enum
         name: desired_state
