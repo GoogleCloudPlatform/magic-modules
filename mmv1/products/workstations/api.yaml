@@ -28,9 +28,9 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: "WorkstationCluster"
-    self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workStationCluster_id}}"
+    self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstationClusterId}}"
     base_url: "projects/{{project}}/locations/{{location}}/workstationClusters"
-    create_url: "projects/{{project}}/locations/{{location}}/workstationClusters?workstationClusterId={{workStationCluster_id}}"
+    create_url: "projects/{{project}}/locations/{{location}}/workstationClusters?workstationClusterId={{workstationClusterId}}"
     update_verb: :PATCH
     update_mask: true
     min_version: beta
