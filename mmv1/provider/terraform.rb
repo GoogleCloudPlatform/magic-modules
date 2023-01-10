@@ -22,6 +22,7 @@ require 'overrides/terraform/resource_override'
 require 'overrides/terraform/property_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
+require 'google/logger'
 
 module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform
@@ -43,6 +44,8 @@ module Provider
 
       attr_accessor :resource_name
     end
+
+    @@count = 0
 
     # Sorts properties in the order they should appear in the TF schema:
     # Required, Optional, Computed
@@ -185,12 +188,23 @@ module Provider
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(pwd, data, generate_code, generate_docs)
+      Google::LOGGER.info "Generating resource"
       if generate_code
-        FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+        product_name = @api.name.downcase
+        Google::LOGGER.info "Generating resource product_name #{product_name}"
+
+        target_folder = File.join(folder_name(data.version), 'service', product_name)
+        FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+        Google::LOGGER.info "Generating resource product_name #{product_name} #{target_folder}"
         data.generate(pwd,
                       '/templates/terraform/resource.erb',
-                      "#{folder_name(data.version)}/resource_#{full_resource_name(data)}.go",
+                      "#{target_folder}/resource_#{full_resource_name(data)}.go",
                       self)
+        # @@count += 1
+        # Google::LOGGER.info "Generating resource count #{@@count}"
+        # FileUtils.rm "#{folder_name(data.version)}/resource_#{full_resource_name(data)}.go"
+        # @@count -= 1
+        # Google::LOGGER.info "Generating resource count #{@@count}"
       end
 
       return unless generate_docs
@@ -203,6 +217,7 @@ module Provider
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
       filepath = File.join(target_folder, "#{full_resource_name(data)}.html.markdown")
+      Google::LOGGER.info "generate_documentation  #{filepath}"
       data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
     end
 
@@ -214,14 +229,21 @@ module Provider
                 < @api.version_obj_or_closest(e.min_version)
                 end
                     .empty?
-
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      product_name = @api.name.downcase
+      target_folder = File.join(folder_name(data.version), 'service', product_name)
+      FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
       data.generate(
         pwd,
         'templates/terraform/examples/base_configs/test_file.go.erb',
-        "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_generated_test.go",
+        "#{target_folder}/resource_#{full_resource_name(data)}_generated_test.go",
         self
       )
+
+      # @@count += 1
+      # Google::LOGGER.info "generate_resource_tests count #{@@count}"
+      # FileUtils.rm "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_generated_test.go"
+      # @@count -= 1
+      # Google::LOGGER.info "generate_resource_tests count #{@@count}"
     end
 
     def generate_resource_sweepers(pwd, data)
@@ -230,30 +252,45 @@ module Provider
                 data.object.custom_code.pre_delete ||
                 data.object.custom_code.post_delete ||
                 data.object.skip_delete
-
+      product_name = @api.name.downcase
+      target_folder = File.join(folder_name(data.version), 'service', product_name)
+      FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
       file_name =
-        "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go"
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+        "#{target_folder}/resource_#{full_resource_name(data)}_sweeper_test.go"
       data.generate(pwd,
                     'templates/terraform/sweeper_file.go.erb',
                     file_name,
                     self)
+
+      # @@count += 1
+      # Google::LOGGER.info "generate_resource_sweepers count #{@@count}"
+      # FileUtils.rm "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go"
+      # @@count -= 1
+      # Google::LOGGER.info "generate_resource_sweepers count #{@@count}"
     end
 
     def generate_operation(pwd, output_folder, _types)
       return if @api.objects.select(&:autogen_async).empty?
 
-      product_name = @api.name.underscore
       data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
 
       data.object = @api.objects.select(&:autogen_async).first
 
       data.async = data.object.async
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      product_name = @api.name.downcase
+      product_name_underscore = @api.name.underscore
+      target_folder = File.join(folder_name(data.version), 'service', product_name)
+      FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
       data.generate(pwd,
                     'templates/terraform/operation.go.erb',
-                    "#{folder_name(data.version)}/#{product_name}_operation.go",
+                    "#{target_folder}/#{product_name_underscore}_operation.go",
                     self)
+
+      # @@count += 1
+      # Google::LOGGER.info "generate_operation count #{@@count}"
+      # FileUtils.rm "#{folder_name(data.version)}/#{product_name}_operation.go"
+      # @@count -= 1
+      # Google::LOGGER.info "generate_operation count #{@@count}"
     end
 
     # Generate the IAM policy for this object. This is used to query and test
@@ -262,20 +299,34 @@ module Provider
       if generate_code \
         && (!data.object.iam_policy.min_version \
         || data.object.iam_policy.min_version >= data.version)
-        FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+        product_name = @api.name.downcase
+        target_folder = File.join(folder_name(data.version), 'service', product_name)
+        FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
         data.generate(pwd,
                       'templates/terraform/iam_policy.go.erb',
-                      "#{folder_name(data.version)}/iam_#{full_resource_name(data)}.go",
+                      "#{target_folder}/iam_#{full_resource_name(data)}.go",
                       self)
+
+        # @@count += 1
+        # Google::LOGGER.info "generate_iam_policy count #{@@count}"
+        # FileUtils.rm "#{folder_name(data.version)}/iam_#{full_resource_name(data)}.go"
+        # @@count -= 1
+        # Google::LOGGER.info "generate_iam_policy count #{@@count}"
 
         # Only generate test if testable examples exist.
         unless data.object.examples.reject(&:skip_test).empty?
           data.generate(
             pwd,
             'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-            "#{folder_name(data.version)}/iam_#{full_resource_name(data)}_generated_test.go",
+            "#{target_folder}/iam_#{full_resource_name(data)}_generated_test.go",
             self
           )
+
+          # @@count += 1
+          # Google::LOGGER.info "generate_iam_policy count #{@@count}"
+          # FileUtils.rm "#{folder_name(data.version)}/iam_#{full_resource_name(data)}_generated_test.go"
+          # @@count -= 1
+          # Google::LOGGER.info "generate_iam_policy count #{@@count}"
         end
       end
 
