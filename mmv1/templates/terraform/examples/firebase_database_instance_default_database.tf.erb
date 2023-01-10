@@ -22,7 +22,7 @@ resource "google_project_service" "firebase_database" {
 resource "google_firebase_database_instance" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   project  = google_firebase_project.default.project
-  region   = "<%= ctx[:test_env_vars]['region'] %>"
+  region   = "us-central1"
   instance_id = "<%= ctx[:vars]['project_id'] %>-default-rtdb"
   type     = "DEFAULT_DATABASE"
 }
