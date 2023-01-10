@@ -1,11 +1,12 @@
 ---
 title: "Add a handwritten datasource"
+summary: "Datasources are like terraform resources except they don't *create* anything."
 weight: 22
 ---
 
 # Add a handwritten datasource
 
-**Note** : only handwritten datasources are currently supported
+**Note:** only handwritten datasources are currently supported
 
 Datasources are like terraform resources except they don't *create* anything.
 They are simply read-only operations that will expose some sort of values needed

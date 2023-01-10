@@ -91,6 +91,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_template_name: "my-instance-template"
           target_pool_name: "my-target-pool"
           igm_name: "my-igm"
+          # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+          # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
+          provider_name: "google-beta"
+          provider_alias: ""
+        test_vars_overrides:
+          provider_name: '"google-beta.us-central1"'
+          provider_alias: '"alias  = \"us-central1\""'
+        oics_vars_overrides:
+          provider_name: "google-beta"
+          provider_alias: ""
       - !ruby/object:Provider::Terraform::Examples
         name: "autoscaler_basic"
         primary_resource_id: "foobar"
@@ -401,7 +411,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       iap.oauth2ClientSecretSha256: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
+        name: 'generated_id'
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -949,6 +959,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "port_range"
           - "target"
           - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_vpc_psc"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "psc-endpoint"
+          consumer_network_name: "consumer-net"
+          ip_name: "website-ip"
+          producer_network_name: "producer-net"
+          producer_psc_network_name: "producer-psc-net"
+          service_attachment_name: "producer-service"
+          producer_forwarding_rule_name: "producer-forwarding-rule"
+          producer_backend_name: "producer-service-backend"
+          producer_healthcheck_name: "producer-service-health-check"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
+          - "ip_address"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:
@@ -1343,8 +1371,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       guestOsFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         is_set: true
-      imageEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
+      imageEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      imageEncryptionKey.sha256: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      imageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.erb'
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: 'kmsKeySelfLink'
+        description: |
+          The self link of the encryption key that is stored in Google Cloud
+          KMS.
       licenses: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       rawDisk.sha1Checksum: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2648,6 +2685,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       enableDynamicPortAllocation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       rules: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: computeRouterNatRulesHash
@@ -2695,6 +2733,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "router_peer_bfd"
         primary_resource_id: "peer"
         skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_router_appliance"
+        primary_resource_id: "peer"
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"
@@ -3088,6 +3132,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
+      privateIpGoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       privateIpv6GoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -3607,6 +3653,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           udp500_forwarding_rule_name: "fr-udp500"
           udp4500_forwarding_rule_name: "fr-udp4500"
           route_name: "route1"
+          # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+          # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
+          provider_name: "google-beta"
+          provider_alias: ""
+        test_vars_overrides:
+          provider_name: '"google-beta.us-central1"'
+          provider_alias: '"alias  = \"us-central1\""'
+        oics_vars_overrides:
+          provider_name: "google-beta"
+          provider_alias: ""
     properties:
       targetVpnGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         resource: 'VpnGateway'

@@ -13,17 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-<% if version == "ga" -%>
 	"google.golang.org/api/dataproc/v1"
-<% else -%>
-	dataproc "google.golang.org/api/dataproc/v1beta2"
-<% end -%>
 )
 
 var (
 	resolveDataprocImageVersion = regexp.MustCompile(`(?P<Major>[^\s.-]+)\.(?P<Minor>[^\s.-]+)(?:\.(?P<Subminor>[^\s.-]+))?(?:\-(?P<Distr>[^\s.-]+))?`)
 
-<% if version == "ga" -%>
 	virtualClusterConfigKeys = []string{
 		"virtual_cluster_config.0.staging_bucket",
 		"virtual_cluster_config.0.auxiliary_services_config",
@@ -51,7 +46,6 @@ var (
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.gke_cluster_target",
 		"virtual_cluster_config.0.kubernetes_cluster_config.0.gke_cluster_config.0.node_pool_target",
 	}
-<% end -%>
 
 	gceClusterConfigKeys = []string{
 		"cluster_config.0.gce_cluster_config.0.zone",
@@ -63,12 +57,20 @@ var (
 		"cluster_config.0.gce_cluster_config.0.internal_ip_only",
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config",
 		"cluster_config.0.gce_cluster_config.0.metadata",
+		"cluster_config.0.gce_cluster_config.0.reservation_affinity",
+		"cluster_config.0.gce_cluster_config.0.node_group_affinity",
 	}
 
 	schieldedInstanceConfigKeys = []string{
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_secure_boot",
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_vtpm",
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_integrity_monitoring",
+	}
+
+	reservationAffinityKeys = []string{
+		"cluster_config.0.gce_cluster_config.0.reservation_affinity.0.consume_reservation_type",
+		"cluster_config.0.gce_cluster_config.0.reservation_affinity.0.key",
+		"cluster_config.0.gce_cluster_config.0.reservation_affinity.0.values",
 	}
 
 	preemptibleWorkerDiskConfigKeys = []string{
@@ -117,7 +119,6 @@ func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceDat
 	return false
 }
 
-<% if version == "ga" -%>
 const resourceDataprocGoogleProvidedDPGKEPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.dpgke"
 const resourceDataprocGoogleProvidedSparkPrefix = "virtual_cluster_config.0.kubernetes_cluster_config.0.kubernetes_software_config.0.properties.spark"
 
@@ -134,7 +135,6 @@ func resourceDataprocPropertyDiffSuppress(k, old, new string, d *schema.Resource
 	// For other keys, don't suppress diff.
 	return false
 }
-<% end -%>
 
 func resourceDataprocCluster() *schema.Resource {
 	return &schema.Resource{
@@ -211,7 +211,6 @@ func resourceDataprocCluster() *schema.Resource {
 				Description: `The list of labels (key/value pairs) to be applied to instances in the cluster. GCP generates some itself including goog-dataproc-cluster-name which is the name of the cluster.`,
 			},
 
-<% if version == "ga" -%>
 			"virtual_cluster_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -473,7 +472,6 @@ func resourceDataprocCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"cluster_config": {
 				Type:        schema.TypeList,
@@ -638,6 +636,62 @@ func resourceDataprocCluster() *schema.Resource {
 											},
 										},
 									},
+
+									"reservation_affinity": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										AtLeastOneOf: gceClusterConfigKeys,
+										Computed:     true,
+										MaxItems:     1,
+										Description:  `Reservation Affinity for consuming Zonal reservation.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"consume_reservation_type": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													AtLeastOneOf: reservationAffinityKeys,
+													ForceNew:     true,
+													ValidateFunc: validation.StringInSlice([]string{"NO_RESERVATION", "ANY_RESERVATION", "SPECIFIC_RESERVATION"}, false),
+													Description:  `Type of reservation to consume.`,
+												},
+												"key": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													AtLeastOneOf: reservationAffinityKeys,
+													ForceNew:     true,
+													Description:  `Corresponds to the label key of reservation resource.`,
+												},
+												"values": {
+													Type:         schema.TypeSet,
+													Elem:         &schema.Schema{Type: schema.TypeString},
+													Optional:     true,
+													AtLeastOneOf: reservationAffinityKeys,
+													ForceNew:     true,
+													Description:  `Corresponds to the label values of reservation resource.`,
+												},
+											},
+										},
+									},
+
+									"node_group_affinity": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										AtLeastOneOf: gceClusterConfigKeys,
+										Computed:     true,
+										MaxItems:     1,
+										Description:  `Node Group Affinity for sole-tenant clusters.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"node_group_uri": {
+													Type:         schema.TypeString,
+													ForceNew:     true,
+													Required:     true,
+													Description:  `The URI of a sole-tenant that the cluster will be created on.`,
+													DiffSuppressFunc: compareSelfLinkOrResourceName,
+												},
+											},
+										},
+									},
 								},
 							},
 						},
@@ -680,7 +734,7 @@ func resourceDataprocCluster() *schema.Resource {
 											"cluster_config.0.preemptible_worker_config.0.disk_config",
 										},
 										ForceNew:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"PREEMPTIBILITY_UNSPECIFIED", "NON_PREEMPTIBLE", "PREEMPTIBLE", "SPOT"}, false),
 										Default:      "PREEMPTIBLE",
 									},
 
@@ -1206,15 +1260,11 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		ProjectId:   project,
 	}
 
-<% if version == "ga" -%>
 	if _, ok := d.GetOk("virtual_cluster_config"); ok {
 		cluster.VirtualClusterConfig, err = expandVirtualClusterConfig(d, config)
 	} else {
 		cluster.Config, err = expandClusterConfig(d, config)
 	}
-<% else -%>
-	cluster.Config, err = expandClusterConfig(d, config)
-<% end -%>
 
 	if err != nil {
 		return err
@@ -1253,7 +1303,6 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 	return resourceDataprocClusterRead(d, meta)
 }
 
-<% if version == "ga" -%>
 func expandVirtualClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.VirtualClusterConfig, error) {
 	conf := &dataproc.VirtualClusterConfig{}
 
@@ -1435,7 +1484,6 @@ func expandGkeNodePoolAutoscalingConfig(cfg map[string]interface{}) *dataproc.Gk
 	}
 	return conf
 }
-<% end -%>
 
 func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.ClusterConfig, error) {
 	conf := &dataproc.ClusterConfig{
@@ -1573,6 +1621,26 @@ func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.G
 		}
 		if v, ok := cfgSic["enable_vtpm"]; ok {
 			conf.ShieldedInstanceConfig.EnableVtpm = v.(bool)
+		}
+	}
+	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.reservation_affinity"); ok {
+		cfgRa := v.([]interface{})[0].(map[string]interface{})
+		conf.ReservationAffinity = &dataproc.ReservationAffinity{}
+		if v, ok := cfgRa["consume_reservation_type"]; ok {
+			conf.ReservationAffinity.ConsumeReservationType = v.(string)
+		}
+		if v, ok := cfgRa["key"]; ok {
+			conf.ReservationAffinity.Key = v.(string)
+		}
+		if v, ok := cfgRa["values"]; ok {
+			conf.ReservationAffinity.Values = convertStringSet(v.(*schema.Set))
+		}
+	}
+	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.node_group_affinity"); ok {
+		cfgNga := v.([]interface{})[0].(map[string]interface{})
+		conf.NodeGroupAffinity = &dataproc.NodeGroupAffinity{}
+		if v, ok := cfgNga["node_group_uri"]; ok {
+			conf.NodeGroupAffinity.NodeGroupUri = v.(string)
 		}
 	}
 	return conf, nil
@@ -1946,7 +2014,6 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 
 	var cfg []map[string]interface{}
 
-<% if version == "ga" -%>
 	if cluster.Config != nil {
 		cfg, err = flattenClusterConfig(d, cluster.Config)
 
@@ -1968,22 +2035,9 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
-<% else -%>
-	cfg, err = flattenClusterConfig(d, cluster.Config)
-
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("cluster_config", cfg)
-	if err != nil {
-		return err
-	}
-<% end -%>
 	return nil
 }
 
-<% if version == "ga" -%>
 func flattenVirtualClusterConfig(d *schema.ResourceData, cfg *dataproc.VirtualClusterConfig) ([]map[string]interface{}, error) {
 	data := map[string]interface{}{
 		"staging_bucket":            d.Get("virtual_cluster_config.0.staging_bucket"),
@@ -2099,7 +2153,6 @@ func flattenKubernetesSoftwareConfig(d *schema.ResourceData, cfg *dataproc.Kuber
 
 	return []map[string]interface{}{data}
 }
-<% end -%>
 
 func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) ([]map[string]interface{}, error) {
 
@@ -2297,6 +2350,22 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 				"enable_integrity_monitoring": gcc.ShieldedInstanceConfig.EnableIntegrityMonitoring,
 				"enable_secure_boot":          gcc.ShieldedInstanceConfig.EnableSecureBoot,
 				"enable_vtpm":                 gcc.ShieldedInstanceConfig.EnableVtpm,
+			},
+		}
+	}
+	if gcc.ReservationAffinity != nil {
+		gceConfig["reservation_affinity"] = []map[string]interface{}{
+			{
+				"consume_reservation_type":    gcc.ReservationAffinity.ConsumeReservationType,
+				"key":                         gcc.ReservationAffinity.Key,
+				"values":                      gcc.ReservationAffinity.Values,
+			},
+		}
+	}
+	if gcc.NodeGroupAffinity != nil {
+		gceConfig["node_group_affinity"] = []map[string]interface{}{
+			{
+				"node_group_uri":    gcc.NodeGroupAffinity.NodeGroupUri,
 			},
 		}
 	}

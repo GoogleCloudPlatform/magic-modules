@@ -32,7 +32,7 @@ module Api
     def run
       # Compile step #1: compile with generic class to instantiate target class
       config = Google::YamlValidator.parse(@catalog)
-      unless config.class <= Api::Product
+      unless config.class <= Api::Product || config.class <= Api::Resource
         raise StandardError, "#{@catalog} is #{config.class}"\
           ' instead of Api::Product' \
       end

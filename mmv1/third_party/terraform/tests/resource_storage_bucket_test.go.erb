@@ -54,6 +54,33 @@ func TestAccStorageBucket_basic(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
+	t.Parallel()
+
+	bucketName := testBucketName(t)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basicWithAutoclass(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "force_destroy", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
 func TestAccStorageBucket_requesterPays(t *testing.T) {
 	t.Parallel()
 
@@ -1330,6 +1357,18 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
+func testAccStorageBucket_basicWithAutoclass(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+  autoclass  {
+    enabled  = true
+  }
+}
+`, bucketName)
+}
+
 func testAccStorageBucket_requesterPays(bucketName string, pays bool) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
@@ -1623,6 +1662,14 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_suffix = ["test"]
       age            = 2
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+    condition {
+      age = 1
     }
   }
 }
