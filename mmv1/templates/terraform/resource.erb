@@ -791,6 +791,8 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         if err != nil {
             return err
         }
+
+<%= lines(compile(pwd + '/' + object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%      if object.supports_indirect_user_project_override -%>
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
             billingProject = parts[1]
