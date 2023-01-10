@@ -160,9 +160,9 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `stateful_disk` - (Optional) Disks created on the instances that will be preserved on instance delete, update, etc. Structure is [documented below](#nested_stateful_disk). For more information see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/configuring-stateful-disks-in-migs).
 
-* `internal_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) Internal network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_internal_ip).
+* `stateful_internal_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) Internal network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_internal_ip).
 
-* `external_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_external_ip).
+* `stateful_external_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
 
 * `update_policy` - (Optional) The update policy for this managed instance group. Structure is [documented below](#nested_update_policy). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers/patch)
 
@@ -281,13 +281,13 @@ one of which has a `target_size.percent` of `60` will create 2 instances of that
 
 * `delete_rule` - (Optional), A value that prescribes what should happen to the stateful disk when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the disk when the VM is deleted, but do not delete the disk. `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently deleted from the instance group. The default is `NEVER`.
 
-<a name="nested_internal_ip"></a>The `internal_ip` block supports:
+<a name="nested_stateful_internal_ip"></a>The `stateful_internal_ip` block supports:
 
 * `network_interface_name` - (Required), The network interface name of the internal Ip.
 
 * `delete_rule` - (Optional), A value that prescribes what should happen to the internal ip when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the ip when the VM is deleted, but do not delete the ip. `ON_PERMANENT_INSTANCE_DELETION` will delete the internal ip when the VM is permanently deleted from the instance group.
 
-<a name="nested_external_ip"></a>The `external_ip` block supports:
+<a name="nested_stateful_external_ip"></a>The `stateful_external_ip` block supports:
 
 * `network_interface_name` - (Required), The network interface name of the external Ip.
 
