@@ -117,8 +117,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dlp_job_trigger_bigquery_identifying_fields"
         primary_resource_id: "bigquery_identifying_fields"
-        vars:
-          trigger: "trigger"
         test_env_vars:
           project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
