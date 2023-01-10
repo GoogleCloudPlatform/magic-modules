@@ -15,7 +15,7 @@
 !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   WorkstationCluster: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workStationCluster_id}}", "{{workStationCluster_id}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}", "{{workstation_cluster_id}}"]
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
