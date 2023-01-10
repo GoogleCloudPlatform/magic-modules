@@ -116,7 +116,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
 	})
 }
 
-func TestAccDataflowFlexTemplateJob_withServiceAccount(t *testing.T) {
+func TestAccDataflowFlexTemplateJob_withServiceAccountCreateAndUpdate(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
 	skipIfVcr(t)
@@ -125,6 +125,7 @@ func TestAccDataflowFlexTemplateJob_withServiceAccount(t *testing.T) {
 	randStr := randString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	accountId := "tf-test-dataflow-sa" + randStr
+	accountId2 := "tf-test-dataflow-sa2" + randStr
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -136,6 +137,19 @@ func TestAccDataflowFlexTemplateJob_withServiceAccount(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasServiceAccount(t, "google_dataflow_flex_template_job.job", accountId),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.job",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+			},
+			{
+				Config: testAccDataflowFlexTemplateJob_serviceAccount(job, accountId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
+					testAccDataflowFlexTemplateJobHasServiceAccount(t, "google_dataflow_flex_template_job.job", accountId2),
 				),
 			},
 			{
@@ -157,6 +171,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 	randStr := randString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
+	network2 := "tf-test-dataflow-net2" + randStr
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -165,6 +180,19 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_network(job, network),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
+					testAccDataflowFlexTemplateJobHasNetwork(t, "google_dataflow_flex_template_job.job", network),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.job",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+			},
+			{
+				Config: testAccDataflowFlexTemplateJob_network(job, network2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasNetwork(t, "google_dataflow_flex_template_job.job", network),
@@ -190,6 +218,7 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
 	subnetwork := "tf-test-dataflow-subnetwork" + randStr
+	subnetwork2 := "tf-test-dataflow-subnetwork" + randStr
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -201,6 +230,19 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasSubNetwork(t, "google_dataflow_flex_template_job.job", subnetwork),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.job",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+			},
+			{
+				Config: testAccDataflowFlexTemplateJob_subnetwork(job, network, subnetwork),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
+					testAccDataflowFlexTemplateJobHasSubNetwork(t, "google_dataflow_flex_template_job.job", subnetwork2),
 				),
 			},
 			{
@@ -243,7 +285,7 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 	})
 }
 
-func TestAccDataflowFlexTemplateJob_withLabels(t *testing.T) {
+func TestAccDataflowFlexTemplateJob_withLabelsCreateAndUpdate(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
 	skipIfVcr(t)
@@ -253,6 +295,8 @@ func TestAccDataflowFlexTemplateJob_withLabels(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	key := "my-label"
 	value := "my-value"
+    key2 := "my-label"
+    value2 := "my-value"
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -261,6 +305,19 @@ func TestAccDataflowFlexTemplateJob_withLabels(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_labels(job, key, value),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
+					testAccDataflowFlexTemplateJobHasLabels(t, "google_dataflow_flex_template_job.job", key),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.job",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+			},
+			{
+				Config: testAccDataflowFlexTemplateJob_labels(job, key2, value2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasLabels(t, "google_dataflow_flex_template_job.job", key),
