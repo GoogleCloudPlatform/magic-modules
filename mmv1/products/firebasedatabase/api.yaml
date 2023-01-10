@@ -42,7 +42,7 @@ objects:
         name: 'region'
         description: |
           A reference to the region where the Firebase Realtime database resides.
-          Check all available regions https://firebase.google.com/docs/projects/locations#rtdb-locations
+          Check all [available regions](https://firebase.google.com/docs/projects/locations#rtdb-locations)
         required: true
         input: true
         url_param_only: true
