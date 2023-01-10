@@ -312,7 +312,7 @@ objects:
                   - !ruby/object:Api::Type::Array
                     name: 'identifyingFields'
                     description: |
-                      Specifies the BigQuery fields that will be returned with findings (each field is expected to be comma separated).
+                      Specifies the BigQuery fields that will be returned with findings.
                       If not specified, no identifying fields will be returned for findings.
                     item_type: !ruby/object:Api::Type::NestedObject
                       properties:

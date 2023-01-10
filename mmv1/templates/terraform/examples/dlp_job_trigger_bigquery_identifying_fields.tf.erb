@@ -31,7 +31,7 @@ resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id
 				rows_limit = 1000
 				sample_method = "RANDOM_START"
 				identifying_fields {
-					name = "hello"
+					name = "field"
 				}
 			}
 		}
