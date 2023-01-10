@@ -14,7 +14,7 @@
 ---
 !ruby/object:Api::Product
 name: CloudRunV2
-display_name: Cloud Run
+display_name: Cloud Run (2nd gen)
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
