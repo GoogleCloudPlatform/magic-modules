@@ -987,7 +987,7 @@ resource "google_compute_security_policy" "policy" {
   description = "updated description"
 
   adaptive_protection_config {
-    layer_7_ddos_defense_config {
+    layer_7_ddos_defense_config 
       enable = false
       rule_visibility = "STANDARD"
     }
@@ -1005,11 +1005,11 @@ resource "google_compute_security_policy" "policy" {
 
   adaptive_protection_config {
     auto_deploy_config {
-		load_threshold = 0.8
-		confidence_threshold = 0.5
-		impacted_baseline_threshold = 0.01
-		expiration_sec = 7200
-	}
+      load_threshold = 0.8
+      confidence_threshold = 0.5
+      impacted_baseline_threshold = 0.01
+      expiration_sec = 7200
+    }
   }
 }
 `, spName)
