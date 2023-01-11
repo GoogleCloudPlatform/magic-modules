@@ -2,11 +2,50 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"context"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server"
+	"log"
+
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
+	"github.com/hashicorp/terraform-plugin-mux/tf6to5server"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 )
 
 func main() {
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: google.Provider})
+
+	downgradedFrameworkProvider, err := tf6to5server.DowngradeServer(
+		context.Background(),
+		providerserver.NewProtocol6(google.New()),
+	)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	providers := []func() tfprotov5.ProviderServer{
+		func() tfprotov5.ProviderServer {
+			return downgradedFrameworkProvider
+		},
+
+		// Example terraform-plugin-sdk/v2 provider
+		google.Provider().GRPCProvider,
+	}
+
+	muxServer, err := tf5muxserver.NewMuxServer(context.Background(), providers...)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	var serveOpts []tf5server.ServeOpt
+
+	err = tf5server.Serve(
+		"registry.terraform.io/hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
+		muxServer.ProviderServer,
+		serveOpts...,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
