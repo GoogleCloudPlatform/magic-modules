@@ -1,6 +1,6 @@
 [
     {
-        "name": "//logging.googleapis.com/projects/{{.Provider.project}}/metrics/my-test/metric",
+        "name": "//logging.googleapis.com/projects/{{.Provider.project}}/metrics/my-test%2Fmetric",
         "asset_type": "logging.googleapis.com/Metric",
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "resource": {
