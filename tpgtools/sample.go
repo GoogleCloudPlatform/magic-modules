@@ -340,11 +340,12 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 				newDepFilename = strings.TrimPrefix(newDepFilename, "samples/")
 				newDeps = append(newDeps, newSample.generateSampleDependencyWithName(newDepFilename, basicResourceName(newDepFilename)))
 			}
-			println("misio")
-			for _, dep := range newSample.DependencyList {
-				println(dep.FileName)
-			}
-			//newSample.DependencyList = newDeps
+			// TODO(maciek, P0): remove
+			//println("misio")
+			//for _, dep := range newSample.DependencyList {
+			//	println(dep.FileName)
+			//}
+			newSample.DependencyList = newDeps
 		}
 		newSample.TestSlug = RenderedString(fmt.Sprintf("%sUpdate%v", newSample.TestSlug, i))
 		newSample.Updates = nil

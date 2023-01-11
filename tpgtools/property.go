@@ -273,11 +273,13 @@ func buildGetter(p Property, rawGetter string) string {
 		}
 		return fmt.Sprintf("dcl.Int64(int64(%s.(int)))", rawGetter)
 	case SchemaTypeMap:
-		// TODO(maciek, P0): fixme
-		return fmt.Sprintf("checkStringMap(%s)", rawGetter)
+		if p.ElemIsBasicType {
+			return fmt.Sprintf("checkStringMap(%s)", rawGetter)
+		}
+		return fmt.Sprintf("checkObjectMap[%s.%s%s](%s)", p.resource.Package(), p.resource.DCLStructName(), p.PackagePath(), rawGetter)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.Type.IsEnumArray() {
-			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
+			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.TerraformName(), p.PackagePath(), rawGetter)
 		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "string" {
 			return fmt.Sprintf("expandStringArray(%s)", rawGetter)
@@ -312,7 +314,6 @@ func (p Property) DefaultStateSetter() string {
 	case SchemaTypeFloat:
 		fallthrough
 	case SchemaTypeMap:
-		// TODO(maciek, P0): fixme
 		return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.typ.Items != nil && ((p.typ.Items.Type == "string" && len(p.typ.Items.Enum) == 0) || p.typ.Items.Type == "integer") {
