@@ -630,6 +630,7 @@ Google Cloud KMS.`,
 							Optional:    true,
 							Description: `The timeout for new network connections to hosts.`,
 							MaxItems:    1,
+							ForceNew:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"seconds": {
