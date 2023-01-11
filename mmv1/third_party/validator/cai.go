@@ -99,7 +99,7 @@ type RestoreDefault struct {
 func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([%[:word:]]+)}}")
 
-	// workaround for empty project
+	// workaround for empty project.
 	placeholderSet := false
 	if config.Project == "" {
 		config.Project = fmt.Sprintf("placeholder-%s", randString(8))
