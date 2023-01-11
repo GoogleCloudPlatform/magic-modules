@@ -279,7 +279,7 @@ func buildGetter(p Property, rawGetter string) string {
 		return fmt.Sprintf("checkObjectMap[%s.%s%s](%s)", p.resource.Package(), p.resource.DCLStructName(), p.PackagePath(), rawGetter)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.Type.IsEnumArray() {
-			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.TerraformName(), p.PackagePath(), rawGetter)
+			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
 		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "string" {
 			return fmt.Sprintf("expandStringArray(%s)", rawGetter)
