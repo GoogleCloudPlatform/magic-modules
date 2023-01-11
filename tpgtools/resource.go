@@ -698,19 +698,19 @@ func (r Resource) getSamples(docs bool) []Sample {
 		if len(r.Samples[0].DocHideConditional) > 0 {
 			for _, dochidec := range r.Samples[0].DocHideConditional {
 				if r.location == dochidec.Location {
-					hideList = append(hideList, dochidec.Name)
+					hideList = append (hideList, dochidec.Name)
 				}
 			}
 		}
 	} else {
 		hideList = r.Samples[0].Testhide
-		if len(r.Samples[0].TestHideConditional) > 0 {
-			for _, testhidec := range r.Samples[0].TestHideConditional {
-				if r.location == testhidec.Location {
-					hideList = append(hideList, testhidec.Name)
-				}
-			}
-		}
+                if len(r.Samples[0].TestHideConditional) > 0 {
+                        for _, testhidec := range r.Samples[0].TestHideConditional {
+                                if r.location == testhidec.Location {
+                                        hideList = append (hideList, testhidec.Name)
+                                }
+                        }
+                }
 	}
 	for _, sample := range r.Samples {
 		shouldhide := false
@@ -820,7 +820,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-	resourceType := r.DCLTitle()
+        resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(string(sampleAccessoryFolder), "meta.yaml")
 	samples := []Sample{}
 

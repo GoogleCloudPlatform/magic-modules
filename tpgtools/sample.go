@@ -101,12 +101,11 @@ type DocHideCondition struct {
 }
 
 type TestHideCondition struct {
-	// Location is the location attribute to match, if matched, append Name to list of Testhide
-	Location string `yaml:"location"`
-	// Name specifies sample file name to add to Testhide if location matches.
-	Name string `yaml:"file_name"`
+        // Location is the location attribute to match, if matched, append Name to list of Testhide
+        Location string `yaml:"location"`
+        // Name specifies sample file name to add to Testhide if location matches.
+        Name string `yaml:"file_name"`
 }
-
 // Dependency contains data that describes a single resource in a sample
 type Dependency struct {
 	// FileName is the name of the file as it appears in testcases.yaml
