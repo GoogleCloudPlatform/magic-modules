@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
-	"strings"
 )
 
 type ConvertFunc func(d TerraformResourceData, config *Config) ([]Asset, error)
@@ -98,10 +97,7 @@ type RestoreDefault struct {
 // generated unique string will be used: "placeholder-" + randomString().
 // This is done to preserve uniqueness of asset.name for a given asset.asset_type.
 func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
-	if strings.Contains(linkTmpl, "%") {
-		linkTmpl = strings.ReplaceAll(linkTmpl, "%", "")
-	}
-	re := regexp.MustCompile("{{([[:word:]]+)}}")
+	re := regexp.MustCompile("{{([%[:word:]]+)}}")
 
 	// workaround for empty project
 	placeholderSet := false
