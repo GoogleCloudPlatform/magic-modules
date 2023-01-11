@@ -5,8 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-<% if version == "ga" -%>
-<% else -%>
+<% unless version == 'ga' -%>
 	"reflect"
 <% end -%>
 	"regexp"
