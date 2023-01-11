@@ -30,7 +30,7 @@ func TestAccorkstationsWorkstationCluster_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"etag"},
 			},
 			{
-				Config: testAccWorkstationsWorkstationCluster_workstationClusterBasicExample(context),
+				Config: testAccorkstationsWorkstationCluster_update(context),
 			},
 			{
 				ResourceName:            "google_workstations_workstation_cluster.default",
