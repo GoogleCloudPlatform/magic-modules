@@ -49,6 +49,23 @@ func TestDetectMissingTests(t *testing.T) {
 			},
 			expectedUntestedFields: []string{"field_four.field_five.field_six", "field_one"},
 		},
+		{
+			name: "config-variable-resource",
+			changedFields: map[string]FieldCoverage{
+				"config_variable": {
+					"field_one": false,
+				},
+			},
+		},
+		{
+			name: "no-test-resource",
+			changedFields: map[string]FieldCoverage{
+				"no_test": {
+					"field_one": false,
+				},
+			},
+			expectedUntestedFields: []string{"field_one"},
+		},
 	} {
 		missingTests := detectMissingTests(test.changedFields, allTests)
 		if len(test.expectedUntestedFields) == 0 {

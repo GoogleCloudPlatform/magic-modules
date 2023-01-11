@@ -33,6 +33,7 @@ func changedFields(oldResource, newResource *schema.Resource, nested bool) Field
 	fields := make(FieldCoverage)
 	for fieldName, newFieldSchema := range newResource.Schema {
 		if fieldName == "project" && !nested {
+			// Skip checking the project field of resources since the provider automatically includes it.
 			continue
 		}
 		var changed any

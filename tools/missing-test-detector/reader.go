@@ -149,6 +149,14 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 								errs = append(errs, err)
 							}
 							test.Steps = append(test.Steps, step)
+						} else if ident, ok := keyValueExpr.Value.(*ast.Ident); ok {
+							if configVar, ok := varDecls[ident.Name]; ok {
+								step, err := readConfigBasicLit(configVar)
+								if err != nil {
+									errs = append(errs, err)
+								}
+								test.Steps = append(test.Steps, step)
+							}
 						}
 					}
 				}
@@ -165,18 +173,8 @@ func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
 			return readConfigFunc(configFunc)
-		} else if ident, ok := configCallExpr.Args[0].(*ast.Ident); ok {
-			// Check if config is declared as a variable rather than a function.
-			if configVar, ok := varDecls[ident.Name]; ok {
-				return readConfigBasicLit(configVar)
-			}
 		}
-		return nil, fmt.Errorf("failed to find function declaration %s or variable in %v", ident.Name, configCallExpr.Args)
-	} else if ident, ok := configCallExpr.Args[0].(*ast.Ident); ok {
-		// Check if config is declared as a variable rather than a function.
-		if configVar, ok := varDecls[ident.Name]; ok {
-			return readConfigBasicLit(configVar)
-		}
+		return nil, fmt.Errorf("failed to find function declaration %s", ident.Name)
 	}
 	return nil, fmt.Errorf("failed to get ident for %v", configCallExpr.Fun)
 }

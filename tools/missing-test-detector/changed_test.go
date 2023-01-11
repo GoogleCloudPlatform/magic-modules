@@ -195,6 +195,50 @@ func TestResourceMapChanges(t *testing.T) {
 				"google_service_one_resource_two": {"field_two": FieldCoverage{"field_four": false}},
 			},
 		},
+		{
+			name: "deleted-field",
+			oldResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_one": {
+					Schema: map[string]*schema.Schema{
+						"field_one": {
+							Type: schema.TypeString,
+						},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_one": {
+					Schema: map[string]*schema.Schema{},
+				},
+			},
+			expectedChangedFields: map[string]FieldCoverage{},
+		},
+		{
+			name: "deleted-resource",
+			oldResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_one": {
+					Schema: map[string]*schema.Schema{
+						"field_one": {
+							Type: schema.TypeString,
+						},
+					},
+				},
+			},
+			expectedChangedFields: map[string]FieldCoverage{},
+		},
+		{
+			name: "new-resource",
+			newResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_one": {
+					Schema: map[string]*schema.Schema{
+						"field_one": {
+							Type: schema.TypeString,
+						},
+					},
+				},
+			},
+			expectedChangedFields: map[string]FieldCoverage{"google_service_one_resource_one": {"field_one": false}},
+		},
 	} {
 		changedFields := resourceMapChanges(test.oldResourceMap, test.newResourceMap)
 		if !reflect.DeepEqual(changedFields, test.expectedChangedFields) {
