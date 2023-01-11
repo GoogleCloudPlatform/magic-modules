@@ -1091,7 +1091,7 @@ func testAccComputeSecurityPolicy_withRateLimitOptions_withEnforceOnKeyConfigs(s
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
 	name        = "%s"
-	description = "hrottle rule with enforce_on_key_configs"
+	description = "throttle rule with enforce_on_key_configs"
 
 	rule {
 		action   = "allow"
