@@ -1921,12 +1921,12 @@ resource "google_composer_environment" "test" {
     }
 
     recovery_config {
-			scheduled_snapshots_config {
-				enabled = 									 true
-				snapshot_location = 				 "gs://example-bucket/environment_snapshots"
-				snapshot_creation_schedule = "0 4 * * *"
-				time_zone = 								 "UTC+01"
-			}
+      scheduled_snapshots_config {
+        enabled = 									 true
+        snapshot_location = 				 "gs://example-bucket/environment_snapshots"
+        snapshot_creation_schedule = "0 4 * * *"
+        time_zone = 								 "UTC+01"
+      }
     }
   }
 
