@@ -468,9 +468,10 @@ func testAccDataflowFlexTemplateJobHasMachineType(t *testing.T, res, expectedTyp
 			return fmt.Errorf("Error getting dataflow job instance template: %s", err)
 		}
 		actualType := instanceTmpl.Properties.MachineType
-        if expectedType != actualType {
-            return fmt.Errorf("instance type mismatch, expected machine type = %q, actual machine type = %q", expectedType, actualType)
-        }
+		if expectedType != actualType {
+			return fmt.Errorf("instance type mismatch, expected machine type = %q, actual machine type = %q", expectedType, actualType)
+		}
+		return nil
 	}
 }
 
