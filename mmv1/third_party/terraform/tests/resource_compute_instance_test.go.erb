@@ -6463,12 +6463,12 @@ resource "google_compute_instance" "foobar" {
     provisioning_model = "SPOT"
     automatic_restart = false
     preemptible = true
-		instance_termination_action = "DELETE"
+    instance_termination_action = "DELETE"
 <% unless version == 'ga' -%>
-		max_run_duration {
-			nanos = 123
-			seconds = 60
-		}
+    max_run_duration {
+        nanos = 123
+        seconds = 60
+    }
 <% end -%>
   }
 }
