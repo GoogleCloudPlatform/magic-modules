@@ -64,10 +64,9 @@ mmv1:
 		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
 
 tpgtools:
-	#make serialize
+	make serialize
 	cd tpgtools;\
-		dlv debug --headless --listen=localhost:5005 --api-version=2 --accept-multiclient . -- --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
-#		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
 validator:
 	cd mmv1;\
