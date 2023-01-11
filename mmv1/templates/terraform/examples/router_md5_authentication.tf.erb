@@ -165,19 +165,19 @@ resource "google_compute_router" "vpn_router" {
 
   md5_authentication_keys {
     name                    = "name1"
-    key                     = "shared key 1"
+    key                     = "shared key 1-%{random_suffix}"
   }
   md5_authentication_keys {
     name                    = "name2"
-    key                     = "shared key 2"
-  }
-  md5_authentication_keys {
-    name                    = "name2"
-    key                     = "shared key 2"
+    key                     = "shared key 2-%{random_suffix}"
   }
   md5_authentication_keys {
     name                    = "name3"
-    key                     = "shared key 3"
+    key                     = "shared key 3-%{random_suffix}"
+  }
+  md5_authentication_keys {
+    name                    = "name4"
+    key                     = "shared key 4-%{random_suffix}"
   }
 }
 
