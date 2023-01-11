@@ -1,7 +1,7 @@
 if isEmptyValue(reflect.ValueOf(d.Get("metadata_schema_id"))) {
 // connection id is set by API when unset and required to GET the connection
 // it is set by reading the "name" field rather than a field in the response
-if err := d.Set("metadata_schema_id", flattenBigqueryConnectionConnectionConnectionId("", d, config)); err != nil {
+if err := d.Set("metadata_schema_id", flattenVertexAIMetadataSchemaMetadataSchemaId("", d, config)); err != nil {
 return fmt.Errorf("Error reading Connection: %s", err)
 }
 }
