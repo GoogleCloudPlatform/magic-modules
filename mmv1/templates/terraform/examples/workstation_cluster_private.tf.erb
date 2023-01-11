@@ -2,8 +2,8 @@ resource "google_workstations_workstation_cluster" "<%= ctx[:primary_resource_id
   provider   = google-beta
   workstation_cluster_id = "<%= ctx[:vars]['workstation_cluster_name'] %>"
   location   = "us-central1"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-  subnetwork = "projects/${data.google_project.project.number}/global/subnetworks/${google_compute_subnetwork.default.name}"
+  network    = google_compute_network.default.self_link
+  subnetwork = google_compute_subnetwork.default.self_link
 
   private_cluster_config {
     enable_private_endpoint = true
@@ -33,5 +33,6 @@ resource "google_compute_subnetwork" "default" {
   name = "<%= ctx[:vars]['workstation_cluster_name'] %>"
   ip_cidr_range = "10.2.0.0/16"
   region        = "us-central1"
-  network       = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network       = google_compute_network.default.self_link
 }
+
