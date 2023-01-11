@@ -183,6 +183,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 			"enable_streaming_engine": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				ForceNew:    true,
 				Description: `Indicates if the job should use the streaming engine feature.`,
 			},
 

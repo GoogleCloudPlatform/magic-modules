@@ -162,6 +162,52 @@ func TestAccDataflowFlexTemplateJob_withServiceAccountCreateAndUpdate(t *testing
 	})
 }
 
+func TestAccDataflowFlexTemplateJob_withMachineTypeCreateAndUpdate(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
+	t.Parallel()
+
+	randStr := randString(t, 10)
+	job := "tf-test-dataflow-job-" + randStr
+	machineType1 := "n1-standard-2"
+	machineType2 := "n2-standard-2"
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowFlexTemplateJob_machineType(job, machineType1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
+					testAccDataflowFlexTemplateJobHasMachineType(t, "google_dataflow_flex_template_job.job", machineType1),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.job",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+			},
+			{
+				Config: testAccDataflowFlexTemplateJob_machineType(job, machineType2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
+					testAccDataflowFlexTemplateJobHasMachineType(t, "google_dataflow_flex_template_job.job", machineType2),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.job",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
+			},
+		},
+	})
+}
+
 func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
@@ -415,6 +461,19 @@ func testAccDataflowFlexTemplateJobHasServiceAccount(t *testing.T, res, expected
 	}
 }
 
+func testAccDataflowFlexTemplateJobHasMachineType(t *testing.T, res, expectedType string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		instanceTmpl, err := testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t, s, res)
+		if err != nil {
+			return fmt.Errorf("Error getting dataflow job instance template: %s", err)
+		}
+		actualType := instanceTmpl.Properties.MachineType
+        if expectedType != actualType {
+            return fmt.Errorf("instance type mismatch, expected machine type = %q, actual machine type = %q", expectedType, actualType)
+        }
+	}
+}
+
 func testAccDataflowFlexTemplateJobHasNetwork(t *testing.T, res, expected string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		instanceTmpl, err := testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t, s, res)
@@ -581,9 +640,35 @@ resource "google_dataflow_flex_template_job" "job" {
    "my_labels" = "value"
   }
   service_account_email = google_service_account.dataflow-sa.email
-
 }
 `, accountId, job)
+}
+
+// note: this config creates a job that doesn't actually do anything, but still runs
+func testAccDataflowFlexTemplateJob_machineType(job, machineType string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+data "google_storage_bucket_object" "flex_template" {
+  name   = "latest/flex/Streaming_Data_Generator"
+  bucket = "dataflow-templates"
+}
+
+resource "google_dataflow_flex_template_job" "job" {
+  name = "%s"
+  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
+  on_delete = "cancel"
+  parameters = {
+    schemaLocation = "gs://mybucket/schema.json"
+    qps = "1"
+    topic = "projects/myproject/topics/mytopic"
+  }
+  labels = {
+   "my_labels" = "value"
+  }
+  machine_type = "%s"
+}
+`, job, machineType )
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
