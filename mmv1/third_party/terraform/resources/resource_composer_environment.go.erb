@@ -355,7 +355,7 @@ func resourceComposerEnvironment() *schema.Resource {
 											Schema: map[string]*schema.Schema{
 												"enabled": {
 													Type:        schema.TypeBool,
-													Optional:    true,
+													Required:    true,
 													Description: `When enabled, Cloud Composer periodically saves snapshots of your environment to a Cloud Storage bucket.`,
 												},
 												"snapshot_location": {
