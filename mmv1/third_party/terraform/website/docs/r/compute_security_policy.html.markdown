@@ -320,7 +320,7 @@ The following arguments are supported:
 
 * `layer_7_ddos_defense_config` - (Optional) Configuration for [Google Cloud Armor Adaptive Protection Layer 7 DDoS Defense](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_layer_7_ddos_defense_config).
 
-* `auto_deploy_config` - (Optional) Configuration for [Automatically deploy Adaptive Protection suggested rules](https://cloud.google.com/armor/docs/adaptive-protection-auto-deploy?hl=en). 
+* `auto_deploy_config` - (Optional) Configuration for [Automatically deploy Adaptive Protection suggested rules](https://cloud.google.com/armor/docs/adaptive-protection-auto-deploy?hl=en). Structure is [documented below](#nested_auto_deploy_config).
 
 <a name="nested_layer_7_ddos_defense_config"></a>The `layer_7_ddos_defense_config` block supports:
 
@@ -328,7 +328,7 @@ The following arguments are supported:
 
 * `rule_visibility` - (Optional) Rule visibility can be one of the following: STANDARD - opaque rules. (default) PREMIUM - transparent rules.
 
-<a name="auto_deploy_config"></a>The `auto_deploy_config` block supports:
+<a name="nested_auto_deploy_config"></a>The `auto_deploy_config` block supports:
 
 * `load_threshold` - (Optional) Identifies new attackers only when the load to the backend service that is under attack exceeds this threshold.
 

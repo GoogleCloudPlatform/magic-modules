@@ -1159,13 +1159,11 @@ func expandAutoDeployConfig(configured []interface{}) *compute.SecurityPolicyAda
 	}
 
 	data := configured[0].(map[string]interface{})
-
 	return &compute.SecurityPolicyAdaptiveProtectionConfigAutoDeployConfig{
-		LoadThreshold:   data["load_threshold"].(float64),
-		ConfidenceThreshold:   data["confidence_threshold"].(float64),
-		ImpactedBaselineThreshold:   data["impacted_baseline_threshold"].(float64),
-		ExpirationSec:   int64(data["expiration_sec"].(int)),
-		ForceSendFields: []string{"Enable"},
+		LoadThreshold: data["load_threshold"].(float64),
+		ConfidenceThreshold: data["confidence_threshold"].(float64),
+		ImpactedBaselineThreshold: data["impacted_baseline_threshold"].(float64),
+		ExpirationSec: int64(data["expiration_sec"].(int)),
 	}
 }
 <% end -%>
