@@ -51,9 +51,9 @@ resource "google_workstations_workstation_cluster" "default" {
   provider               = google-beta
   display_name           = "tf-test-workstation-cluster%{random_suffix}"
   workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"
-  location               = "us-central1"
-  network    			 = google_compute_network.default.self_link
-  subnetwork 			 = google_compute_subnetwork.default.self_link
+  location               = "us-east1"
+  network    			 = google_compute_network.default.name
+  subnetwork 			 = google_compute_subnetwork.default.name
 
   labels = {
 	update = "true" 
@@ -73,9 +73,9 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.default.self_link
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-east1"
+  network       = google_compute_network.default.name
 }
 `, context)
 }
