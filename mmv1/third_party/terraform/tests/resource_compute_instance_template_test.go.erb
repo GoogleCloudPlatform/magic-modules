@@ -3025,10 +3025,10 @@ resource "google_compute_instance_template" "foobar" {
     provisioning_model = "SPOT"
     instance_termination_action = "DELETE"
 <% unless version == 'ga' -%>
-		max_run_duration {
-			nanos = 123
-			seconds = 60
-		}
+    max_run_duration {
+	nanos = 123
+	seconds = 60
+    }
 <% end -%>
 
   }
