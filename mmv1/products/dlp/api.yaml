@@ -320,7 +320,7 @@ objects:
                           name: 'name'
                           required: true
                           description: |
-                            field name
+                            Name of a BigQuery field to be returned with the findings.
           - !ruby/object:Api::Type::Array
             name: 'actions'
             required: true
