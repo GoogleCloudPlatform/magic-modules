@@ -1,4 +1,4 @@
-resource "google_project" "<%= ctx[:primary_resource_id] %>" {
+resource "google_project" "default" {
   provider = google-beta
   project_id = "<%= ctx[:vars]['project_id'] %>"
   name       = "<%= ctx[:vars]['project_id'] %>"
@@ -8,7 +8,7 @@ resource "google_project" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
-resource "google_firebase_project" "<%= ctx[:primary_resource_id] %>" {
+resource "google_firebase_project" "default" {
   provider = google-beta
   project  = google_project.default.project_id
 }
@@ -19,10 +19,11 @@ resource "google_project_service" "firebase_database" {
   service  = "firebasedatabase.googleapis.com"
 }
 
-resource "google_firebase_database_instance" "<%= ctx[:primary_resource_id] %>" {
+resource "google_firebase_database_instance" "default" {
   provider = google-beta
   project  = google_firebase_project.default.project
   region   = "us-central1"
   instance_id = "<%= ctx[:vars]['project_id'] %>-default-rtdb"
   type     = "DEFAULT_DATABASE"
+  depends_on = [google_project_service.firebase_database]
 }
