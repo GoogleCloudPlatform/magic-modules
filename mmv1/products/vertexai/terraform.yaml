@@ -249,6 +249,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      metadata_schema_id: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_flatten: "templates/terraform/custom_flatten/id_from_name.erb"
+      id_format: "projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/metadataSchemas/{{metadata_schema_id}}"
+      custom_code: !ruby/object:Provider::Terraform::CustomCode
+        post_create: templates/terraform/post_create/vertexai_metadata_schema_id.go.erb
+        encoder: templates/terraform/encoders/vertexai_metadata.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

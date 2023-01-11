@@ -1000,9 +1000,9 @@ objects:
 # Vertex AI Metadata Store Metadata Schemas
   - !ruby/object:Api::Resource
     name: MetadataSchema
-    base_url: 'projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/metadataSchemas'
-    create_url: 'projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/metadataSchemas?metadataSchemaId={{name}}'
-    self_link: 'projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/metadataSchemas/{{name}}'
+    base_url: '{{metadatastore}}/metadataSchemas'
+    self_link: '{{metadatastore}}/metadataSchemas/{{metadata_schema_id}}'
+    create_url: '{{metadatastore}}/metadataSchemas?metadataSchemaId={{metadata_schema_id}}'
     min_version: beta
     input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -1033,6 +1033,15 @@ objects:
     description: |-
       Instance of a general MetadataSchema.
     parameters:
+      - !ruby/onject:Api::Type::ResourceRef
+        name: 'metadatastore'
+        description: |
+          The name of Metadata Store to use, in the format projects/{project}/locations/{location}/metadatastore/{metadatastore}.
+        required: true
+        input: true
+        resource: 'MetadataStore'
+        imports: 'name'
+        url_param_only: true
       - !ruby/object:Api::Type::String
         name: metadatastore
         description: The name of Metadata Store to use, in the format projects/{project}/locations/{location}/metadatastore/{metadatastore}.
@@ -1044,6 +1053,11 @@ objects:
         name: 'name'
         output: true
         description: The resource name of the MetadataSchema.
+      - !ruby/object:Api::Type::String
+        name: 'metadata_schema_id'
+        description: The Metadata Schema Id.
+        required: false
+        input: true
       - !ruby/object:Api::Type::String
         name: 'description'
         input: true
