@@ -473,6 +473,10 @@ objects:
               name: stringValue
               description: |
                 Holds the value for a tag field with string type.
+            - !ruby/object:Api::Type::String
+              name: richtextValue
+              description: |
+                Holds the value for a tag field with richtext type.
             - !ruby/object:Api::Type::Boolean
               name: boolValue
               send_empty_value: true
