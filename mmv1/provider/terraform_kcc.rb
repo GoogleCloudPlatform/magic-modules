@@ -35,7 +35,7 @@ module Provider
                      .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 
       examples.each do |example|
-        folder_name = data.product.name + "-" + kind + '-' + example.name
+        folder_name = data.product.name + '-' + kind + '-' + example.name
         folder_name += '-skipped' if example.skip_test
         target_folder = File.join('samples', folder_name)
 
@@ -87,76 +87,100 @@ module Provider
     def guess_metadata_mapping_name(object)
       # Split the last import format by '/' and take the last part. Then use
       # the regex to verify if it is a value field in the format of {{value}}.
-      last_import_part = import_id_formats_from_resource(object)[-1].split('/')[-1].scan(/{{[[:word:]]+}}/)
+      last_import_part =
+        import_id_formats_from_resource(object)[-1].split('/')[-1].scan(/{{[[:word:]]+}}/)
       # If it is a value field, the length of last_import_part will be 1;
       # otherwise it'll be 0.
       # Remove '{{' and '}}' and only return the field name.
       last_import_part.first.gsub('{{', '').gsub('}}', '') if last_import_part.length == 1
     end
 
-    def is_server_generated_name(name, object)
-      has_computed_name_configured = object.custom_code.post_create == 'templates/terraform/post_create/set_computed_name.erb' if object.custom_code.post_create
+    def server_generated_name?(name, object)
+      if object.custom_code.post_create
+        has_computed_name_configured =
+          object.custom_code.post_create == 'templates/terraform/post_create/set_computed_name.erb'
+      end
       camel_case_name = name.camelize(:lower)
-      has_output_only_name = object.all_properties.any?{ |p| p.name == camel_case_name && p.output }
+      has_output_only_name =
+        object.all_properties.any? { |p| p.name == camel_case_name && p.output }
       has_computed_name_configured || has_output_only_name
     end
 
     def supports_conditions(iam_policy)
       request_type = iam_policy.iam_conditions_request_type
-      valid_request_types = ['QUERY_PARAM', 'QUERY_PARAM_NESTED', 'REQUEST_BODY']
-      return valid_request_types.include?(request_type.to_s)
+      valid_request_types = %w[QUERY_PARAM QUERY_PARAM_NESTED REQUEST_BODY]
+      valid_request_types.include?(request_type.to_s)
     end
 
     def get_resource_id_value_template(id_template, is_server_generated_name, object)
-      return nil if !is_server_generated_name
+      return nil unless is_server_generated_name
 
       if id_template.split('/').length == 1 && object.base_url != id_template
         raw_value_template = object.base_url
       end
-      return nil if raw_value_template == nil
 
-      value_template = raw_value_template + '/{{value}}'
+      return nil if raw_value_template.nil?
     end
 
     def get_container(id_template, is_server_generated_name, object)
       container = get_container_from_template(id_template)
       raise 'error having more than one container' if container.length > 2
-      if container.length == 0 && is_server_generated_name
-        value_template = get_resource_id_value_template(id_template, is_server_generated_name, object)
-        container = get_container_from_template(value_template) if value_template != nil
+
+      if container.empty? && is_server_generated_name
+        value_template =
+          get_resource_id_value_template(id_template, is_server_generated_name, object)
+        container = get_container_from_template(value_template) unless value_template.nil?
         raise 'error having more than one container' if container.length > 2
       end
-      return container
+      container
     end
 
     def get_container_from_template(template)
-      container = Array.new()
+      container = []
       id_template_parts = template.split('/')
 
       projects_field_index = id_template_parts.find_index('projects')
-      project_field_name = id_template_parts[projects_field_index + 1].gsub('{{', '').gsub('}}', '') if !projects_field_index.nil?
-      container += ['project', project_field_name] if !project_field_name.nil? && project_field_name != 'name'
+      unless projects_field_index.nil?
+        project_field_name =
+          id_template_parts[projects_field_index + 1].gsub('{{', '').gsub('}}', '')
+      end
+      if !project_field_name.nil? && project_field_name != 'name'
+        container += ['project', project_field_name]
+      end
 
       folders_field_index = id_template_parts.find_index('folders')
-      folder_field_name = id_template_parts[folders_field_index + 1].gsub('{{', '').gsub('}}', '') if !folders_field_index.nil?
-      container += ['folder', folder_field_name] if !folder_field_name.nil? && folder_field_name != 'name'
+      unless folders_field_index.nil?
+        folder_field_name = id_template_parts[folders_field_index + 1].gsub('{{', '').gsub('}}', '')
+      end
+      if !folder_field_name.nil? && folder_field_name != 'name'
+        container += ['folder', folder_field_name]
+      end
 
       organizations_field_index = id_template_parts.find_index('organizations')
-      organization_field_name = id_template_parts[organizations_field_index + 1].gsub('{{', '').gsub('}}', '') if !organizations_field_index.nil?
-      container += ['organization', organization_field_name] if !organization_field_name.nil? && organization_field_name != 'name'
+      unless organizations_field_index.nil?
+        organization_field_name =
+          id_template_parts[organizations_field_index + 1].gsub('{{', '').gsub('}}', '')
+      end
+      if !organization_field_name.nil? && organization_field_name != 'name'
+        container += ['organization', organization_field_name]
+      end
 
       billing_accounts_field_index = id_template_parts.find_index('billingAccounts')
-      billing_account_field_name = id_template_parts[billing_accounts_field_index + 1].gsub('{{', '').gsub('}}', '') if !billing_accounts_field_index.nil?
-      container += ['billingAccount', billing_account_field_name] if !billing_account_field_name.nil? && billing_account_field_name != 'name'
+      unless billing_accounts_field_index.nil?
+        billing_account_field_name =
+          id_template_parts[billing_accounts_field_index + 1].gsub('{{', '').gsub('}}', '')
+      end
+      if !billing_account_field_name.nil? && billing_account_field_name != 'name'
+        container += ['billingAccount', billing_account_field_name]
+      end
 
-      return container
+      container
     end
 
     def get_hierarchical_reference(container)
-      hierarchical_reference = Array.new()
+      hierarchical_reference = []
       hierarchical_reference += [container[0], container[0] + 'Ref'] if container.length == 2
-      return hierarchical_reference
+      hierarchical_reference
     end
-
   end
 end

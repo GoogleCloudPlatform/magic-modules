@@ -44,7 +44,7 @@ spec:
       name = guess_metadata_mapping_name(object)
       has_name = !name.nil?
       has_labels = object.all_user_properties.map(&:name).include?("labels")
-      is_server_generated = is_server_generated_name(name, object) if has_name
+      is_server_generated = server_generated_name?(name, object) if has_name
       resource_id_value_template = get_resource_id_value_template(id_template, is_server_generated, object)
 
       iam_policy = object&.iam_policy
