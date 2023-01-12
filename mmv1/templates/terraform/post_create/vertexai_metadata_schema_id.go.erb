@@ -1,14 +1,14 @@
 if isEmptyValue(reflect.ValueOf(d.Get("metadata_schema_id"))) {
-// connection id is set by API when unset and required to GET the connection
-// it is set by reading the "name" field rather than a field in the response
-if err := d.Set("metadata_schema_id", flattenVertexAIMetadataSchemaMetadataSchemaId("", d, config)); err != nil {
-return fmt.Errorf("Error reading Connection: %s", err)
-}
+  // connection id is set by API when unset and required to GET the connection
+  // it is set by reading the "name" field rather than a field in the response
+  if err := d.Set("metadata_schema_id", flattenVertexAIMetadataSchemaMetadataSchemaId("", d, config)); err != nil {
+    return fmt.Errorf("Error reading Connection: %s", err)
+  }
 }
 
 // Reset id to make sure connection_id is not empty
-id2, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/connections/{{metadata_schema_id}}")
+id2, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/metadataStore/{{metadatastore}}/metadataSchema{{metadata_schema_id}}")
 if err != nil {
-return fmt.Errorf("Error constructing id: %s", err)
+  return fmt.Errorf("Error constructing id: %s", err)
 }
 d.SetId(id2)
