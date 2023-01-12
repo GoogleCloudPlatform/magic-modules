@@ -49,9 +49,8 @@ func testAccorkstationsWorkstationCluster_update(context map[string]interface{})
 	return Nprintf(`
 resource "google_workstations_workstation_cluster" "default" {
   provider               = google-beta
-  display_name           = "tf-test-workstation-cluster%{random_suffix}"
-  workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"
-  location               = "us-east1"
+  display_name           = "tf-test-workstation-cluster-%{random_suffix}"
+  workstation_cluster_id = "tf-test-workstation-cluster-%{random_suffix}"
   network    			 = google_compute_network.default.name
   subnetwork 			 = google_compute_subnetwork.default.name
 
@@ -66,13 +65,13 @@ data "google_project" "project" {
 
 resource "google_compute_network" "default" {
   provider               = google-beta
-  name                   = "tf-test-workstation-cluster%{random_suffix}"
+  name                   = "tf-test-workstation-cluster-%{random_suffix}"
   auto_create_subnetwork = false
 }
 
 resource "google_compute_subnetwork" "default" {
   provider      = google-beta
-  name          = "tf-test-workstation-cluster%{random_suffix}"
+  name          = "tf-test-workstation-cluster-%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-east1"
   network       = google_compute_network.default.name

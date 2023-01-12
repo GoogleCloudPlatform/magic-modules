@@ -1,7 +1,6 @@
 resource "google_workstations_workstation_cluster" "<%= ctx[:primary_resource_id] %>" {
   provider   = google-beta
   workstation_cluster_id = "<%= ctx[:vars]['workstation_cluster_name'] %>"
-  location   = "us-central1"
   network    = google_compute_network.default.name
   subnetwork = google_compute_subnetwork.default.name
 
@@ -27,7 +26,7 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   provider = google-beta
   name = "<%= ctx[:vars]['workstation_cluster_name'] %>"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-east1"
   network       = google_compute_network.default.name
 }
