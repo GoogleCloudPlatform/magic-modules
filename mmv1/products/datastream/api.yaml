@@ -448,7 +448,9 @@ objects:
             name: 'mysqlSourceConfig'
             allow_empty_object: true
             send_empty_value: true
-            required: true
+            exactly_one_of:
+            - source_config.0.mysql_source_config
+            - source_config.0.postgresql_source_config
             description: |
               MySQL data source configuration.
             properties:
@@ -608,7 +610,9 @@ objects:
             name: 'postgresqlSourceConfig'
             allow_empty_object: true
             send_empty_value: true
-            required: true
+            exactly_one_of:
+            - source_config.0.mysql_source_config
+            - source_config.0.postgresql_source_config
             description: |
               PostgreSQL data source configuration.
             properties:
@@ -783,7 +787,7 @@ objects:
                 The name of the publication that includes the set of all tables
                 that are defined in the stream's include_objects.
 
-  - !ruby/object:Api::Type::NestedObject
+      - !ruby/object:Api::Type::NestedObject
         name: 'destinationConfig'
         required: true
         description: |
