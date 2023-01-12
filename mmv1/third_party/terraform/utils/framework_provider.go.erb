@@ -16,16 +16,21 @@ var (
 )
 
 // New is a helper function to simplify provider server and testing implementation.
-func New() provider.Provider {
-    return &frameworkProvider{}
+func New(version string) provider.Provider {
+    return &frameworkProvider{
+        version: version,
+    }
 }
 
 // frameworkProvider is the provider implementation.
-type frameworkProvider struct{}
+type frameworkProvider struct{
+    version string
+}
 
 // Metadata returns the provider type name.
 func (p *frameworkProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
     resp.TypeName = "google<%= "-" + version unless version == 'ga'  -%>"
+    resp.Version = p.version
 }
 
 // Schema defines the provider-level schema for configuration data.
