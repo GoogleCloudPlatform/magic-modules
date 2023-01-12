@@ -178,6 +178,9 @@ resource "google_cloud_identity_group_membership" "basic" {
 }
 
 func TestAccCloudIdentityGroupMembership_membershipDoesNotExist(t *testing.T) {
+	// Skip VCR because the service account needs to be created/deleted out of
+	// band, and so those calls aren't recorded
+	skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
