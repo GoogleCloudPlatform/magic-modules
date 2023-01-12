@@ -109,6 +109,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(0)'
+      sourceConfig.postgresqlSourceConfig.maxConcurrentBackfillTasks: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(0)'
     virtual_fields:
       - !ruby/object:Api::Type::Enum
         name: 'desired_state'

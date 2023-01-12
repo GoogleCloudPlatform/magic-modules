@@ -786,6 +786,12 @@ objects:
               description: |
                 The name of the publication that includes the set of all tables
                 that are defined in the stream's include_objects.
+            - !ruby/object:Api::Type::Integer
+              name: 'maxConcurrentBackfillTasks'
+              send_empty_value: true
+              description: |
+                Maximum number of concurrent backfill tasks. The number should be non
+                negative. If not set (or set to 0), the system's default value will be used.
 
       - !ruby/object:Api::Type::NestedObject
         name: 'destinationConfig'
