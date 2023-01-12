@@ -237,7 +237,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   MetadataSchema: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{metadatastore}}/metadataSchemas/{{metadata_schema_id}}"]
-    autogen_async: true
+    autogen_async: false
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_metadata_schema"
