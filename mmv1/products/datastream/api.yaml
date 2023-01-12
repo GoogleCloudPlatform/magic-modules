@@ -622,7 +622,7 @@ objects:
                 PostgreSQL objects to retrieve from the source.
               properties:
               - !ruby/object:Api::Type::Array
-                name: 'postgresqlSchema'
+                name: 'postgresqlSchemas'
                 required: true
                 min_size: 1
                 description: |
@@ -637,7 +637,7 @@ objects:
                     description: |
                       Database name.
                   - !ruby/object:Api::Type::Array
-                    name: 'postgresqlTable'
+                    name: 'postgresqlTables'
                     min_size: 1
                     description: |
                       Tables in the schema.
@@ -651,7 +651,7 @@ objects:
                         description: |
                           Table name.
                       - !ruby/object:Api::Type::Array
-                        name: 'postgresqlColumn'
+                        name: 'postgresqlColumns'
                         min_size: 1
                         description: |
                           PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -701,7 +701,7 @@ objects:
                 PostgreSQL objects to exclude from the stream.
               properties:
               - !ruby/object:Api::Type::Array
-                name: 'postgresqlSchema'
+                name: 'postgresqlSchemas'
                 required: true
                 min_size: 1
                 description: |
@@ -716,7 +716,7 @@ objects:
                     description: |
                       Database name.
                   - !ruby/object:Api::Type::Array
-                    name: 'postgresqlTable'
+                    name: 'postgresqlTables'
                     min_size: 1
                     description: |
                       Tables in the schema.
@@ -730,7 +730,7 @@ objects:
                         description: |
                           Table name.
                       - !ruby/object:Api::Type::Array
-                        name: 'postgresqlColumn'
+                        name: 'postgresqlColumns'
                         min_size: 1
                         description: |
                           PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -993,12 +993,12 @@ objects:
                                   description: |
                                     The ordinal position of the column in the table.
           - !ruby/object:Api::Type::NestedObject
-            name: 'excludeObjects'
+            name: 'postgresqlExcludedObjects'
             description: |
               PostgreSQL data source objects to avoid backfilling.
             properties:
             - !ruby/object:Api::Type::Array
-              name: 'postgresqlSchema'
+              name: 'postgresqlSchemas'
               required: true
               min_size: 1
               description: |
@@ -1013,7 +1013,7 @@ objects:
                   description: |
                     Database name.
                 - !ruby/object:Api::Type::Array
-                  name: 'postgresqlTable'
+                  name: 'postgresqlTables'
                   min_size: 1
                   description: |
                     Tables in the schema.
@@ -1027,7 +1027,7 @@ objects:
                       description: |
                         Table name.
                     - !ruby/object:Api::Type::Array
-                      name: 'postgresqlColumn'
+                      name: 'postgresqlColumns'
                       min_size: 1
                       description: |
                         PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
