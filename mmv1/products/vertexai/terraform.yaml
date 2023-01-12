@@ -237,7 +237,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   MetadataSchema: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{%metadatastore}}/metadataSchemas/{{name}}"]
-    id_format: '{{name}}'
+    id_format: "projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/metadataSchemas/{{metadata_schema_id}}"
     autogen_async: false
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -252,10 +252,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       metadata_schema_id: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         custom_flatten: "templates/terraform/custom_flatten/id_from_name.erb"
-      id_format: "projects/{{project}}/locations/{{region}}/metadataStores/{{metadatastore}}/metadataSchemas/{{metadata_schema_id}}"
-      custom_code: !ruby/object:Provider::Terraform::CustomCode
-        post_create: templates/terraform/post_create/vertexai_metadata_schema_id.go.erb
-        encoder: templates/terraform/encoders/vertexai_metadata.go.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/vertexai_metadata_schema_id.go.erb
+      encoder: templates/terraform/encoders/vertexai_metadata.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
