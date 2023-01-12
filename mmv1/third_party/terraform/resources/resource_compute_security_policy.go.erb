@@ -1164,6 +1164,7 @@ func expandAutoDeployConfig(configured []interface{}) *compute.SecurityPolicyAda
 		ConfidenceThreshold: data["confidence_threshold"].(float64),
 		ImpactedBaselineThreshold: data["impacted_baseline_threshold"].(float64),
 		ExpirationSec: int64(data["expiration_sec"].(int)),
+		ForceSendFields: []string{"Enable"},
 	}
 }
 <% end -%>
