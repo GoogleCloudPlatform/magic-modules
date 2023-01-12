@@ -1033,10 +1033,9 @@ objects:
     description: |-
       Instance of a general MetadataSchema.
     parameters:
-      - !ruby/onject:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRef
         name: 'metadatastore'
-        description: |
-          The name of Metadata Store to use, in the format projects/{project}/locations/{location}/metadatastore/{metadatastore}.
+        description: The name of Metadata Store to use, in the format projects/{project}/locations/{location}/metadatastore/{metadatastore}.
         required: true
         input: true
         resource: 'MetadataStore'
