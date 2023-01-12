@@ -57,6 +57,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       selfManaged.pemCertificate: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+      selfManaged.pemPrivateKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
       selfManaged: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         ignore_read: true
