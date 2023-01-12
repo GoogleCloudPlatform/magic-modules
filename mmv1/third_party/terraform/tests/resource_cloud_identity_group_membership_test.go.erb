@@ -197,7 +197,7 @@ func TestAccCloudIdentityGroupMembership_membershipDoesNotExist(t *testing.T) {
 
 	sa, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.Create("projects/" + project, r).Do()
 	if err != nil {
-		t.Errorf("Error creating service account: %s", err)
+		t.Fatalf("Error creating service account: %s", err)
 	}
 
 	context["member_id"] = sa.Email
