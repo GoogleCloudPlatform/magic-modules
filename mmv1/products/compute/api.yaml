@@ -8928,6 +8928,7 @@ objects:
             properties:
             - !ruby/object:Api::Type::String
               name: 'projectId'
+              required: true
               description: |
                 The project id/number should be the same as the key of this project config in the project map.
   - !ruby/object:Api::Resource
