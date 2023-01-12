@@ -362,6 +362,7 @@ objects:
                     - :STRING
                     - :BOOL
                     - :TIMESTAMP
+                    - :RICHTEXT
                 - !ruby/object:Api::Type::NestedObject
                   name: enumType
                   description: |
