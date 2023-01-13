@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Beyondcorp
-display_name: Google BeyondCorp
+display_name: BeyondCorp
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -213,3 +213,115 @@ objects:
             name: 'ingressPort'
             description: |
               The ingress port of an allocated connection.
+  - !ruby/object:Api::Resource
+    name: 'AppConnection'
+    description: |
+      A BeyondCorp AppConnection resource represents a BeyondCorp protected AppConnection to a remote application.
+      It creates all the necessary GCP components needed for creating a BeyondCorp protected AppConnection. 
+      Multiple connectors can be authorised for a single AppConnection.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/beyondcorp-enterprise/docs/enable-app-connector'
+      api: 'https://cloud.google.com/beyondcorp/docs/reference/rest#rest-resource:-v1.projects.locations.appconnections'
+    base_url: projects/{{project}}/locations/{{region}}/appConnections
+    self_link: projects/{{project}}/locations/{{region}}/appConnections/{{name}}
+    create_url: projects/{{project}}/locations/{{region}}/appConnections?app_connection_id={{name}}
+    update_verb: :PATCH
+    update_mask: true
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 30
+          update_minutes: 30
+          delete_minutes: 30
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          ID of the AppConnection.
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: |
+          The region of the AppConnection.
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          An arbitrary user-provided name for the AppConnection.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Resource labels to represent user provided metadata.
+      - !ruby/object:Api::Type::String
+        name: 'type'
+        description: |
+          The type of network connectivity used by the AppConnection. Refer to
+          https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#type
+          for a list of possible values.
+        input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'applicationEndpoint'
+        description: |
+          Address of the remote application endpoint for the BeyondCorp AppConnection.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'host'
+            description: |
+              Hostname or IP address of the remote application endpoint.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'port'
+            description: |
+              Port of the remote application endpoint.
+            required: true
+      - !ruby/object:Api::Type::Array
+        name: connectors
+        item_type: Api::Type::String
+        description: |
+          List of AppConnectors that are authorised to be associated with this AppConnection
+      - !ruby/object:Api::Type::NestedObject
+        name: gateway
+        description: |
+          Gateway used by the AppConnection.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'appGateway'
+            description: |
+              AppGateway name in following format: projects/{project_id}/locations/{locationId}/appgateways/{gateway_id}.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'type'
+            description: |
+              The type of hosting used by the gateway. Refer to
+              https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#Type_1
+              for a list of possible values.
+          - !ruby/object:Api::Type::String
+            name: 'uri'
+            description: |
+              Server-defined URI for this resource.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'ingressPort'
+            description: |
+              Ingress port reserved on the gateways for this AppConnection, if not specified or zero, the default port is 19443.
+            output: true

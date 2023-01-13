@@ -1,6 +1,4 @@
 resource "google_iam_workforce_pool" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-
   workforce_pool_id = "<%= ctx[:vars]["workforce_pool_id"] %>"
   parent            = "organizations/<%= ctx[:test_env_vars]["org_id"] %>"
   location          = "global"

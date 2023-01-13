@@ -54,7 +54,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects'
     properties:
       - !ruby/object:Api::Type::String
         name: projectNumber
@@ -89,7 +89,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.defaultLocation/finalize'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.defaultLocation/finalize'
     properties:
       - !ruby/object:Api::Type::String
         name: locationId
@@ -112,7 +112,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.webApps'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps'
     async: !ruby/object:Api::OpAsync
       actions: ["create", "delete"]
       operation: !ruby/object:Api::OpAsync::Operation
@@ -170,7 +170,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/docs/android/setup'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.androidApps'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.androidApps'
     async: !ruby/object:Api::OpAsync
       actions: ["create", "delete"]
       operation: !ruby/object:Api::OpAsync::Operation
@@ -204,25 +204,40 @@ objects:
       - !ruby/object:Api::Type::String
         name: name
         description: |
-          The fully qualified resource name of the App, for example:
+          The fully qualified resource name of the AndroidApp, for example:
           projects/projectId/androidApps/appId
         output: true
       - !ruby/object:Api::Type::String
         name: displayName
         required: true
         description: |
-          The user-assigned display name of the App.
+          The user-assigned display name of the AndroidApp.
       - !ruby/object:Api::Type::String
         name: appId
         output: true
         description: |
-          The globally unique, Firebase-assigned identifier of the App.
+          The globally unique, Firebase-assigned identifier of the AndroidApp.
           This identifier should be treated as an opaque token, as the data format is not specified.
       - !ruby/object:Api::Type::String
         name: packageName
         description: |
           Immutable. The canonical package name of the Android app as would appear in the Google Play
           Developer Console.
+      - !ruby/object:Api::Type::Array
+        name: sha1Hashes
+        description: |
+          The SHA1 certificate hashes for the AndroidApp.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: sha256Hashes
+        description: |
+          The SHA256 certificate hashes for the AndroidApp.
+        item_type: Api::Type::String  
+      - !ruby/object:Api::Type::Fingerprint
+        name: etag
+        description: |
+          This checksum is computed by the server based on the value of other fields, and it may be sent
+          with update requests to ensure the client has an up-to-date value before proceeding.
   - !ruby/object:Api::Resource
     name: 'AppleApp'
     min_version: beta
@@ -238,7 +253,7 @@ objects:
       guides:
         'Official Documentation':
           'https://firebase.google.com/docs/ios/setup'
-      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.iosApps'
+      api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.iosApps'
     async: !ruby/object:Api::OpAsync
       actions: ["create", "delete"]
       operation: !ruby/object:Api::OpAsync::Operation

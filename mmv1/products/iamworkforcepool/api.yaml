@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://iam.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://iam.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/iam
 apis_required:
@@ -48,13 +51,9 @@ objects:
     create_url: locations/{{location}}/workforcePools?workforcePoolId={{workforce_pool_id}}
     update_verb: :PATCH
     update_mask: true
-    min_version: beta
     description: |
       Represents a collection of external workforces. Provides namespaces for
       federated users that can be referenced in IAM policies.
-      Note: Ask your Google Cloud account team to request access to workforce identity
-      federation for your billing/quota project. The account team notifies you when the project is
-      granted access.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Manage pools':
@@ -102,7 +101,7 @@ objects:
            * ACTIVE: The pool is active, and may be used in Google Cloud policies.
            * DELETED: The pool is soft-deleted. Soft-deleted pools are permanently deleted
              after approximately 30 days. You can restore a soft-deleted pool using
-             [UndeleteWorkforcePool][WorkforcePools.UndeleteWorkforcePool].
+             [workforcePools.undelete](https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools/undelete#google.iam.admin.v1.WorkforcePools.UndeleteWorkforcePool).
              You cannot reuse the ID of a soft-deleted pool until it is permanently deleted.
              While a pool is deleted, you cannot use it to exchange tokens, or use
              existing tokens to access resources. If the pool is undeleted, existing
@@ -133,12 +132,8 @@ objects:
     create_url: locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers?workforcePoolProviderId={{provider_id}}
     update_verb: :PATCH
     update_mask: true
-    min_version: beta
     description: |
       A configuration for an external identity provider.
-      ~> **Note:** Ask your Google Cloud account team to request access to workforce identity
-      federation for your billing/quota project. The account team notifies you when the project is
-      granted access.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Configure a provider within the workforce pool':
