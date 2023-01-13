@@ -35,7 +35,7 @@ module Provider
                      .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 
       examples.each do |example|
-        folder_name = data.product.name + '-' + kind + '-' + example.name
+        folder_name = "#{data.product.name}-#{kind}-#{example.name}"
         folder_name += '-skipped' if example.skip_test
         target_folder = File.join('samples', folder_name)
 
@@ -120,6 +120,8 @@ module Provider
       end
 
       return nil if raw_value_template.nil?
+
+      "#{raw_value_template}/{{value}}"
     end
 
     def get_container(id_template, is_server_generated_name, object)
@@ -179,7 +181,7 @@ module Provider
 
     def get_hierarchical_reference(container)
       hierarchical_reference = []
-      hierarchical_reference += [container[0], container[0] + 'Ref'] if container.length == 2
+      hierarchical_reference += [container[0], "#{container[0]}Ref"] if container.length == 2
       hierarchical_reference
     end
   end
