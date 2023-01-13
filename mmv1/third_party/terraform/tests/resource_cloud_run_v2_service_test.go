@@ -134,7 +134,7 @@ resource "google_cloud_run_v2_service" "default" {
       min_instance_count = 1
     }
     annotations = {
-      generated-by = "magic-modules-test"
+      generated-by = "magic-modules"
     }
     containers {
       name = "container-update"
