@@ -122,6 +122,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "abc"
+              version = "version-1"
             }
           }
         }
@@ -144,6 +145,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "abc"
+              version = "version-1"
             }
           }
         }
@@ -163,6 +165,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
+              version = "version-1"
             }
           }
         }
@@ -185,6 +188,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             radix = 10
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
+              version = "version-1"
             }
           }
         }
@@ -207,6 +211,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
+              version = "version-1"
             }
           }
         }
@@ -226,6 +231,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
+              version = "version-1"
             }
           }
         }
@@ -311,6 +317,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "abcd"
+              version = "version-2"
             }
           }
         }
@@ -329,6 +336,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPEf"
+              version = "version-2"
             }
           }
         }
@@ -351,6 +359,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             radix = 10
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPEF"
+              version = "version-2"
             }
           }
         }
@@ -373,6 +382,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
+              version = "version-2"
             }
           }
         }
@@ -542,6 +552,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             radix = 10
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
+              version = "version-1"
             }
           }
         }
@@ -649,6 +660,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "CREDIT_CARD_NUMBER"
+              version = "version-1"
             }
             context {
               name = "unconditionally-crypto-deterministic-field"
@@ -802,6 +814,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             }
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
+              version = "version-2"
             }
           }
         }
@@ -927,6 +940,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               # update info type
               name = "CREDIT_CARD_TRACK_NUMBER"
+              version = "version-2"
             }
             context {
               name = "unconditionally-crypto-deterministic-field"
