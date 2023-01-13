@@ -177,7 +177,6 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'endpointProtocol'
             min_version: beta
-            input: true
             default_value: :THRIFT
             description: |
               The protocol to use for the metastore service endpoint. If unspecified, defaults to `THRIFT`.
