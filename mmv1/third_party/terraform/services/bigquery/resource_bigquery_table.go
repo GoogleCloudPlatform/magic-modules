@@ -658,6 +658,18 @@ func ResourceBigQueryTable() *schema.Resource {
 							Optional:    true,
 							Description: `When creating an external table, the user can provide a reference file with the table schema. This is enabled for the following formats: AVRO, PARQUET, ORC.`,
 						},
+						"metadata_cache_mode": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  `Metadata Cache Mode for the table. Set this to enable caching of metadata from external data source.`,
+							ValidateFunc: validation.StringInSlice([]string{"AUTOMATIC", "MANUAL"}, false),
+						},
+						"object_metadata": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  `ObjectMetadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If ObjectMetadata is set, sourceFormat should be omitted.`,
+							ValidateFunc: validation.StringInSlice([]string{"SIMPLE"}, false),
+						},
 					},
 				},
 			},
@@ -1392,6 +1404,12 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 	if v, ok := raw["reference_file_schema_uri"]; ok {
 		edc.ReferenceFileSchemaUri = v.(string)
 	}
+	if v, ok := raw["metadata_cache_mode"]; ok {
+		edc.MetadataCacheMode = v.(string)
+	}
+	if v, ok := raw["object_metadata"]; ok {
+		edc.ObjectMetadata = v.(string)
+	}
 
 	return edc, nil
 
@@ -1440,6 +1458,13 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 
 	if edc.ReferenceFileSchemaUri != "" {
 		result["reference_file_schema_uri"] = edc.ReferenceFileSchemaUri
+	}
+	if edc.MetadataCacheMode != "" {
+		result["metadata_cache_mode"] = edc.MetadataCacheMode
+	}
+
+	if edc.ObjectMetadata != "" {
+		result["object_metadata"] = edc.ObjectMetadata
 	}
 
 	return []map[string]interface{}{result}, nil
