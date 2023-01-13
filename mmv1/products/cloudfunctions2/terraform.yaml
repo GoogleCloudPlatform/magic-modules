@@ -41,9 +41,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "function"
         vars:
           bucket_name: "gcf-source"
-          service_account: "sa"
+          service_account: "gcf-sa"
           topic: "functions2-topic"
-          function: "function"
+          function: "gcf-function"
           zip_path: "function-source.zip"
         test_env_vars:
           project: :PROJECT_NAME
@@ -61,8 +61,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           bucket_name_source: "gcf-source-bucket"
           bucket_name_trigger: "gcf-trigger-bucket"
-          service_account: "sa"
-          function_name: "function"
+          service_account: "gcf-sa"
+          function_name: "gcf-function"
           zip_path: "function-source.zip"
         test_env_vars:
           project: :PROJECT_NAME
@@ -134,6 +134,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       buildConfig.source.storageSource.bucket: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/cloudfunctions2_function_source_bucket.go.erb'
       buildConfig.environmentVariables: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      serviceConfig.availableCpu: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      serviceConfig.maxInstanceRequestConcurrency: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       serviceConfig.service: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

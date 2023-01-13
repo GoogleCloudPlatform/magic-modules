@@ -72,6 +72,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       resource_definition: 'templates/terraform/resource_definition/spanner_database.go.erb'
       post_create: templates/terraform/post_create/spanner_database.go.erb
       pre_delete: templates/terraform/pre_delete/resource_spanner_database.go
+      pre_update: templates/terraform/pre_update/spanner_database.go.erb
   InstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     # This is appropriate for a datasource - doesn't have a create method.
     exclude: true

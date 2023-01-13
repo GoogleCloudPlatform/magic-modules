@@ -93,11 +93,6 @@ resource "google_cloud_run_v2_service" "default" {
       }
     }
   }
-  traffic {
-    type = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
-    tag = "tt-1"
-    percent = 100
-  }
 }
 
 resource "google_service_account" "service_account" {

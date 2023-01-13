@@ -52,7 +52,7 @@ fi
 # This is where you add people to the random-assignee rotation. This list
 # might not equal the list of users who do not need to have an assigne.
 # If you add people to this list, please also add them to the re-request review list above
-ASSIGNEE=$(shuf -n 1 <(printf "rileykarson\nc2thorn\nslevenick\nscottsuarez\nmegan07\nmelinath\nroaks3\nSarahFrench\nzli82016\ntrodge"))
+ASSIGNEE=$(shuf -n 1 <(printf "rileykarson\nc2thorn\nslevenick\nscottsuarez\nshuyama1\nmegan07\nmelinath\nroaks3\nSarahFrench\nzli82016\ntrodge"))
 comment=$(cat << EOF
 Hello!  I am a robot who works on Magic Modules PRs.
 
