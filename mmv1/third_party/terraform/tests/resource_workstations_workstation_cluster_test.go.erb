@@ -51,7 +51,7 @@ resource "google_workstations_workstation_cluster" "default" {
   provider   			 = google-beta
   workstation_cluster_id = "workstation-cluster-%{random_suffix}"
   network    			 = "projects/${data.google_project.project.project_id}/global/networks/${google_compute_network.default.name}"
-  subnetwork 			 = "projects/${data.google_project.project.project_id}/regions/us-east1/subnetworks/${google_compute_network.default.name}"
+  subnetwork 			 = "projects/${data.google_project.project.project_id}/regions/us-east1/subnetworks/${google_compute_subnetwork.default.name}"
   location   		     = "us-east1"
 
   labels = {
