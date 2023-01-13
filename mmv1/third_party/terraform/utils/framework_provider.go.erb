@@ -3,11 +3,18 @@ package google
 
 import (
     "context"
+    "net/http"
+    "os"
+
+    "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 
     "github.com/hashicorp/terraform-plugin-framework/datasource"
+    "github.com/hashicorp/terraform-plugin-framework/path"
     "github.com/hashicorp/terraform-plugin-framework/provider"
     "github.com/hashicorp/terraform-plugin-framework/provider/schema"
     "github.com/hashicorp/terraform-plugin-framework/resource"
+    "github.com/hashicorp/terraform-plugin-framework/schema/validator"
+    "github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -35,11 +42,158 @@ func (p *frameworkProvider) Metadata(_ context.Context, _ provider.MetadataReque
 
 // Schema defines the provider-level schema for configuration data.
 func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
-    resp.Schema = schema.Schema{}
+    resp.Schema = schema.Schema{
+        Attributes: map[string]schema.Attribute{
+            "credentials": schema.StringAttribute{
+                Optional: true,
+                // ValidateFunc: validateCredentials,
+                Validators: []validator.String{
+                    stringvalidator.ConflictsWith(path.Expressions{
+                        path.MatchRoot("access_token"),
+                    }...),
+                },
+            },
+
+            "access_token": schema.StringAttribute{
+                Optional: true,
+                Validators: []validator.String{
+                    stringvalidator.ConflictsWith(path.Expressions{
+                        path.MatchRoot("access_token"),
+                    }...),
+                },
+            },
+            "impersonate_service_account": schema.StringAttribute{
+                Optional: true,
+            },
+            "impersonate_service_account_delegates": schema.ListAttribute{
+                Optional:    true,
+                ElementType: types.StringType,
+            },
+            "project": schema.StringAttribute{
+                Optional: true,
+            },
+            "billing_project": schema.StringAttribute{
+                Optional: true,
+            },
+            "region": schema.StringAttribute{
+                Optional: true,
+            },
+            "zone": schema.StringAttribute{
+                Optional: true,
+            },
+            "scopes": schema.ListAttribute{
+                Optional:    true,
+                ElementType: types.StringType,
+            },
+            "user_project_override": schema.BoolAttribute{
+                Optional: true,
+            },
+            "request_timeout": schema.StringAttribute{
+                Optional: true,
+            },
+            "request_reason": schema.StringAttribute{
+                Optional: true,
+            },
+        },
+        Blocks: map[string]schema.Block{
+            "batching": schema.SingleNestedBlock{
+                Attributes: map[string]schema.Attribute{
+                    "send_after": schema.StringAttribute{
+                        Optional: true,
+                        // ValidateFunc: validateNonNegativeDuration(),
+                    },
+                    "enable_batching": schema.BoolAttribute{
+                        Optional: true,
+                    },
+                },
+            },
+        },
+    }
 }
 
 // Configure prepares an API client for data sources and resources.
 func (p *frameworkProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+    var data ProviderModel
+
+    resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    // Configuration values are now available.
+
+    // Set defaults if needed
+    if data.ImpersonateServiceAccount.IsNull() {
+        data.ImpersonateServiceAccount = types.StringValue(os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT"))
+    }
+
+    if data.Project.IsNull() {
+        project := MultiEnvDefault([]string{
+                    "GOOGLE_PROJECT",
+                    "GOOGLE_CLOUD_PROJECT",
+                    "GCLOUD_PROJECT",
+                    "CLOUDSDK_CORE_PROJECT",
+                }, nil)
+        if project != nil {
+            data.Project = types.StringValue(project.(string))
+        }
+    }
+
+    if data.BillingProject.IsNull() {
+        data.BillingProject = types.StringValue(os.Getenv("GOOGLE_BILLING_PROJECT"))
+    }
+
+    if data.Region.IsNull() {
+        region := MultiEnvDefault([]string{
+                    "GOOGLE_REGION",
+                    "GCLOUD_REGION",
+                    "CLOUDSDK_COMPUTE_REGION",
+                }, nil)
+
+        if region != nil {
+            data.Region = types.StringValue(region.(string))
+        }
+    }
+
+    if data.Zone.IsNull() {
+        zone := MultiEnvDefault([]string{
+                    "GOOGLE_ZONE",
+                    "GCLOUD_ZONE",
+                    "CLOUDSDK_COMPUTE_ZONE",
+                }, nil)
+
+        if zone != nil {
+            data.Zone = types.StringValue(zone.(string))
+        }
+    }
+
+    if data.Batching.SendAfter.IsNull() {
+        data.Batching.SendAfter = types.StringValue("10s")
+    }
+
+    if data.Batching.EnableBatching.IsNull() {
+        data.Batching.EnableBatching = types.BoolValue(true)
+    }
+
+    if data.UserProjectOverride.IsNull() {
+        override, err := strconv.ParseBool(os.Getenv("USER_PROJECT_OVERRIDE"))
+        if err != nil {
+            resp.Diagnostics.AddError(
+                "error parsing environment variable `USER_PROJECT_OVERRIDE` into bool", err.Error())
+        }
+        data.UserProjectOverride = types.BoolValue(override)
+    }
+
+    if data.RequestReason.IsNull() {
+        data.RequestReason = types.StringValue(os.Getenv("CLOUDSDK_CORE_REQUEST_REASON"))
+    }
+
+
+    // Example client configuration for data sources and resources
+    client := http.DefaultClient
+    resp.DataSourceData = client
+    resp.ResourceData = client
 }
 
 // DataSources defines the data sources implemented in the provider.
