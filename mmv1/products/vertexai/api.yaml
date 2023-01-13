@@ -744,6 +744,7 @@ objects:
         description: |
           Type of Feature value. Immutable. https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features#ValueType
         required: true
+        input: true
 # Vertex ML Metadata
   - !ruby/object:Api::Resource
     name: MetadataStore
