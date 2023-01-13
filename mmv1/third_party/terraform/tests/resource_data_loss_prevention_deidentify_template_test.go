@@ -12,6 +12,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	context := map[string]interface{}{
 		"organization":  getTestOrgFromEnv(t),
 		"random_suffix": randString(t, 10),
+		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -116,7 +117,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             crypto_key {
               kms_wrapped {
                 wrapped_key     = "B64/WRAPPED/TOKENIZATION/KEY"
-                crypto_key_name = google_kms_crypto_key.my_key.id
+                crypto_key_name = "%{kms_key_name}"
               }
             }
             surrogate_info_type {
@@ -178,7 +179,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             crypto_key {
               kms_wrapped {
                 wrapped_key     = "B64/WRAPPED/TOKENIZATION/KEY"
-                crypto_key_name = google_kms_crypto_key.my_key.id
+                crypto_key_name = "%{kms_key_name}"
               }
             }
             radix = 10
@@ -231,16 +232,6 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
       }
     }
   }
-}
-
-resource "google_kms_crypto_key" "my_key" {
-  name     = "tf-test-example-k%{random_suffix}"
-  key_ring = google_kms_key_ring.key_ring.id
-}
-
-resource "google_kms_key_ring" "key_ring" {
-  name     = "tf-test-example-keyr%{random_suffix}"
-  location = "global"
 }
 `, context)
 }
@@ -315,7 +306,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             crypto_key {
               kms_wrapped {
                 wrapped_key     = "B64/WRAPPED/TOKENIZATION/KEY"
-                crypto_key_name = google_kms_crypto_key.my_key.id
+                crypto_key_name = "%{kms_key_name}"
               }
             }
             surrogate_info_type {
@@ -354,7 +345,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             crypto_key {
               kms_wrapped {
                 wrapped_key     = "B64/WRAPPED/TOKENIZATION/KEY"
-                crypto_key_name = google_kms_crypto_key.my_key.id
+                crypto_key_name = "%{kms_key_name}"
               }
             }
             radix = 10
@@ -389,16 +380,6 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
     }
   }
 }
-
-resource "google_kms_crypto_key" "my_key" {
-  name     = "tf-test-example-k%{random_suffix}"
-  key_ring = google_kms_key_ring.key_ring.id
-}
-
-resource "google_kms_key_ring" "key_ring" {
-  name     = "tf-test-example-keyr%{random_suffix}"
-  location = "global"
-}
 `, context)
 }
 
@@ -408,6 +389,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	context := map[string]interface{}{
 		"organization":  getTestOrgFromEnv(t),
 		"random_suffix": randString(t, 10),
+		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -518,7 +500,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             crypto_key {
               kms_wrapped {
                 wrapped_key     = "B64/WRAPPED/TOKENIZATION/KEY"
-                crypto_key_name = google_kms_crypto_key.my_key.id
+                crypto_key_name = "%{kms_key_name}"
               }
             }
             radix = 10
@@ -656,16 +638,6 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
       }
     }
   }
-}
-
-resource "google_kms_crypto_key" "my_key" {
-  name     = "tf-test-example-k%{random_suffix}"
-  key_ring = google_kms_key_ring.key_ring.id
-}
-
-resource "google_kms_key_ring" "key_ring" {
-  name     = "tf-test-example-keyr%{random_suffix}"
-  location = "global"
 }
 `, context)
 }
@@ -917,16 +889,6 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 
     }
   }
-}
-
-resource "google_kms_crypto_key" "my_key" {
-  name     = "tf-test-example-k%{random_suffix}"
-  key_ring = google_kms_key_ring.key_ring.id
-}
-
-resource "google_kms_key_ring" "key_ring" {
-  name     = "tf-test-example-keyr%{random_suffix}"
-  location = "global"
 }
 `, context)
 }
