@@ -195,7 +195,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     datasource, after creation the computed schema will be stored in
     `google_bigquery_table.schema`
 
-* `source_format` (Required) - The data format. Please see sourceFormat under
+* `source_format` (Optional) - The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
     in Bigquery's public API documentation for supported formats. To use "GOOGLE_SHEETS"
     the `scopes` must include "https://www.googleapis.com/auth/drive.readonly".

@@ -442,7 +442,7 @@ func ResourceBigQueryTable() *schema.Resource {
 						// SourceFormat [Required] The data format.
 						"source_format": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
 							Description: ` Please see sourceFormat under ExternalDataConfiguration in Bigquery's public API documentation (https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration) for supported formats. To use "GOOGLE_SHEETS" the scopes must include "googleapis.com/auth/drive.readonly".`,
 							ValidateFunc: validation.StringInSlice([]string{
 								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "ICEBERG", "DATASTORE_BACKUP", "PARQUET", "ORC", "BIGTABLE",
@@ -665,11 +665,11 @@ func ResourceBigQueryTable() *schema.Resource {
 							ValidateFunc: validation.StringInSlice([]string{"AUTOMATIC", "MANUAL"}, false),
 						},
 						"object_metadata": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Description:  `Object Metadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If ObjectMetadata is set, sourceFormat should be omitted.`,
-							ValidateFunc: validation.StringInSlice([]string{"SIMPLE"}, false),
-							ConflictsWith: []string{"external_data_configuration.0.source_format"}
+							Type:          schema.TypeString,
+							Optional:      true,
+							Description:   `Object Metadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If ObjectMetadata is set, sourceFormat should be omitted.`,
+							ValidateFunc:  validation.StringInSlice([]string{"SIMPLE"}, false),
+							ConflictsWith: []string{"external_data_configuration.0.source_format"},
 						},
 					},
 				},
