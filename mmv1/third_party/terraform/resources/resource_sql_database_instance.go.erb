@@ -1249,6 +1249,7 @@ func expandIpConfiguration(configured []interface{}) *sqladmin.IpConfiguration {
 		ForceSendFields:                         []string{"Ipv4Enabled", "RequireSsl"},
 	}
 }
+
 func expandAuthorizedNetworks(configured []interface{}) []*sqladmin.AclEntry {
 	an := make([]*sqladmin.AclEntry, 0, len(configured))
 	for _, _acl := range configured {
