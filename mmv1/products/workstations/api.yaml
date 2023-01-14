@@ -116,7 +116,6 @@ objects:
         description: |
           Whether this resource is in degraded mode, in which case it may require user action to restore full functionality. 
           Details can be found in the conditions field.
-        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: "annotations"
         description: "Client-specified annotations. This is distinct from labels."
