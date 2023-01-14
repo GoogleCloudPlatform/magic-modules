@@ -188,7 +188,7 @@ resource "google_compute_network" "custom_test" {
 `, context)
 }
 
-func TestAccCloudRunV2Service_cloudrunv2ServiceProbesUpdate(t *testing.T) {
+func TestAccCloudRunV2Service_cloudrunv2ServiceTCPProbesUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -218,6 +218,22 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceProbesUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
+		},
+	})
+}
+
+func TestAccCloudRunV2Service_cloudrunv2ServiceHTTPProbesUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithHTTPStartupProbeAndTCPLivenessProbe(context),
 			},
@@ -245,6 +261,22 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceProbesUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
+		},
+	})
+}
+
+func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context),
 			},
