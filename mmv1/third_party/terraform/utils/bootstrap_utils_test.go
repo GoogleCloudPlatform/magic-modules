@@ -418,7 +418,10 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 			PointInTimeRecoveryEnabled: true,
 		}
 		settings := &sqladmin.Settings{
-			Tier:                "db-f1-micro",
+			// Creation of a shared core tier ("db-f1-micro") instance of the POSTGRES database type in the us-central1 region
+			// sometimes takes longer than 30 minutes, causing timeout errors in dependent tests and making the CI tests flaky.
+			// So selecting a non shared core instance tier is more desirable as of this writing.
+			Tier:                "db-custom-1-3840",
 			BackupConfiguration: backupConfig,
 		}
 		bootstrapInstance = &sqladmin.DatabaseInstance{
