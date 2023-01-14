@@ -104,7 +104,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(30 * time.Minute),
+			Create: schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
@@ -356,6 +356,7 @@ is set to true. Defaults to ZONAL.`,
 							Type:     schema.TypeString,
 							Optional: true,
 							Default: "PD_SSD",
+							ForceNew: true,
 							DiffSuppressFunc: caseDiffDashSuppress,
 							Description: `The type of data disk: PD_SSD or PD_HDD. Defaults to PD_SSD.`,
 						},
@@ -913,8 +914,8 @@ func privatePathForGoogleCloudServicesSqlServerOnlyCustomizeDiff(_ context.Conte
 func pitrPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
 	pitr := diff.Get("settings.0.backup_configuration.0.point_in_time_recovery_enabled").(bool)
 	dbVersion := diff.Get("database_version").(string)
-	if pitr && !strings.Contains(dbVersion, "POSTGRES") {
-		return fmt.Errorf("point_in_time_recovery_enabled is only available for Postgres. You may want to consider using binary_log_enabled instead.")
+	if pitr && (!strings.Contains(dbVersion, "POSTGRES") && !strings.Contains(dbVersion, "SQLSERVER")) {
+		return fmt.Errorf("point_in_time_recovery_enabled is only available for Postgres and SQL Server. You may want to consider using binary_log_enabled instead.")
 	}
 	return nil
 }
