@@ -205,6 +205,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `reference_file_schema_uri` - (Optional) When creating an external table, the user can provide a reference file with the table schema. This is enabled for the following formats: AVRO, PARQUET, ORC.
 
+* `metadata_cache_mode` - (Optional) Metadata Cache Mode for the table. Set this to enable caching of metadata from external data source. Valid values are `AUTOMATIC` and `MANUAL`.
+
+* `object_metadata` - (Optional) Object Metadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If `object_metadata` is set, `source_format` should be omitted.
+
 <a name="nested_csv_options"></a>The `csv_options` block supports:
 
 * `quote` (Required) - The value that is used to quote data sections in a
