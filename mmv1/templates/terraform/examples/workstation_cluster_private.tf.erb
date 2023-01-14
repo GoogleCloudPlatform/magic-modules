@@ -3,7 +3,7 @@ resource "google_workstations_workstation_cluster" "<%= ctx[:primary_resource_id
   workstation_cluster_id = "<%= ctx[:vars]['workstation_cluster_name'] %>"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-east1"
+  location               = "us-central1"
 
   private_cluster_config {
     enable_private_endpoint = true
@@ -32,6 +32,6 @@ resource "google_compute_subnetwork" "default" {
   provider = google-beta
   name          = "<%= ctx[:vars]['workstation_cluster_name'] %>"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-east1"
+  region        = "us-central1"
   network       = google_compute_network.default.name
 }
