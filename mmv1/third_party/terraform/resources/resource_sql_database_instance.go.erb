@@ -900,7 +900,7 @@ func privateNetworkCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta
 func privatePathForGoogleCloudServicesSqlServerOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
 	enablePrivPath := diff.Get("settings.0.ip_configuration.0.enable_private_path_for_google_cloud_services").(bool)
 	dbVersion := diff.Get("database_version").(string)
-	if enablePrivPath != nil && strings.Contains(dbVersion, "SQLSERVER") {
+	if enablePrivPath && strings.Contains(dbVersion, "SQLSERVER") {
 		return fmt.Errorf("enable_private_path_for_google_cloud_services is not supported on SQL Server database types.")
 	}
 	return nil
