@@ -12,13 +12,7 @@ resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id
 	inspect_job {
 		inspect_template_name = "fake"
 		actions {
-			save_findings {
-				output_config {
-					table {
-						project_id = "project"
-						dataset_id = "dataset"
-					}
-				}
+			publish_findings_to_cloud_data_catalog {
 			}
 		}
 		storage_config {

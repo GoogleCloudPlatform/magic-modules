@@ -12,14 +12,8 @@ resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id
 	inspect_job {
 		inspect_template_name = "fake"
 		actions {
-			save_findings {
-				output_config {
-					table {
-						project_id = "project"
-						dataset_id = "dataset"
-					}
-				}
-			}
+			publish_summary_to_cscc {
+            }
 		}
 		storage_config {
 			big_query_options {
