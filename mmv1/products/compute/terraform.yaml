@@ -426,6 +426,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       securityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
+      edgeSecurityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -2733,6 +2735,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "router_peer_bfd"
         primary_resource_id: "peer"
         skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_router_appliance"
+        primary_resource_id: "peer"
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"

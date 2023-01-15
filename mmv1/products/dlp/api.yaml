@@ -309,6 +309,18 @@ objects:
                       - :TOP
                       - :RANDOM_START
                     default_value: :TOP
+                  - !ruby/object:Api::Type::Array
+                    name: 'identifyingFields'
+                    description: |
+                      Specifies the BigQuery fields that will be returned with findings.
+                      If not specified, no identifying fields will be returned for findings.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          required: true
+                          description: |
+                            Name of a BigQuery field to be returned with the findings.
           - !ruby/object:Api::Type::Array
             name: 'actions'
             required: true
@@ -495,6 +507,10 @@ objects:
                   description: |
                     Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                     at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
+                - !ruby/object:Api::Type::String
+                  name: 'version'
+                  description: |
+                    Version of the information type to use. By default, the version is set to stable
           - !ruby/object:Api::Type::Array
             name: 'contentOptions'
             description: |

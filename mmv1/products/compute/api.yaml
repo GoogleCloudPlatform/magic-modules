@@ -1807,6 +1807,10 @@ objects:
         name: 'securityPolicy'
         description: |
           The security policy associated with this backend service.
+      - !ruby/object:Api::Type::String
+        name: 'edgeSecurityPolicy'
+        description: |
+          The resource URL for the edge security policy associated with this backend service.
       - !ruby/object:Api::Type::NestedObject
         name: 'securitySettings'
         description: |
@@ -14400,6 +14404,15 @@ objects:
           If set to true, the peer connection can be established with routing information.
           The default is true.
         default_value: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'routerApplianceInstance'
+        resource: 'Instance'
+        imports: 'selfLink'
+        description: |
+          The URI of the VM instance that is used as third-party router appliances
+          such as Next Gen Firewalls, Virtual Routers, or Router Appliances.
+          The VM instance must be located in zones contained in the same region as
+          this Cloud Router. The VM instance is the peer side of the BGP session.
   - !ruby/object:Api::Resource
     name: 'SecurityPolicy'
     kind: 'compute#securityPolicy'
@@ -14760,6 +14773,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'expireTime'
+        output: true
+        description: 'Expire time of the certificate in RFC3339 text format.'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -14873,7 +14890,7 @@ objects:
       - !ruby/object:Api::Type::Time
         name: 'expireTime'
         description: |
-          Expire time of the certificate.
+          Expire time of the certificate in RFC3339 text format.
         output: true
   - !ruby/object:Api::Resource
     name: 'RegionSslCertificate'
@@ -14932,6 +14949,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'expireTime'
+        output: true
+        description: 'Expire time of the certificate in RFC3339 text format.'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
