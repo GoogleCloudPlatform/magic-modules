@@ -1,0 +1,10 @@
+.gcloudignore
+.git
+.gitignore
+*.md
+*.log
+.DS_Store
+.env
+.envrc
+*~
+*.tar
