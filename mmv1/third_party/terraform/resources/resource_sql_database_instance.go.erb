@@ -180,14 +180,14 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 									"start_date": {
 										Type:		schema.TypeString,
 										Required:	true,
-										Description:	`Start date after which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,								
-									},  
-									"time": { 
+										Description:	`Start date after which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,
+									},
+									"time": {
 										Type:		schema.TypeString,
 										Required:	true,
 										Description:	`Time in UTC when the "deny maintenance period" starts on start_date and ends on end_date. The time is in format: HH:mm:SS, i.e., 00:00:00`,
-									},  
-						
+									},
+
 								},
 							},
 						},
@@ -679,6 +679,7 @@ is set to true. Defaults to ZONAL.`,
 
 			"instance_type": {
 				Type:		schema.TypeString,
+				Optional:		true,
 				Computed: 	true,
 				Description: `The type of the instance. The valid values are:- 'SQL_INSTANCE_TYPE_UNSPECIFIED', 'CLOUD_SQL_INSTANCE', 'ON_PREMISES_INSTANCE' and 'READ_REPLICA_INSTANCE'.`,
 			},
@@ -927,7 +928,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if err := d.Set("name", name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	
+
 	// SQL Instances that fail to create are expensive- see https://github.com/hashicorp/terraform-provider-google/issues/7154
 	// We can fail fast to stop instance names from getting reserved.
 	network := d.Get("settings.0.ip_configuration.0.private_network").(string)
@@ -1490,7 +1491,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	desiredSetting := d.Get("settings")
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
-	
+
 	// Check if the database version is being updated, because patching database version is an atomic operation and can not be
 	// performed with other fields, we first patch database version before updating the rest of the fields.
 	if v, ok := d.GetOk("database_version"); ok {
