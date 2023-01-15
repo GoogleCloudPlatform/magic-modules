@@ -296,6 +296,24 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
 			{
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCStartupProbe(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCStartupProbe(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location"},
+			},
+			{
 				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbeAndStartupProbe(context),
 			},
 			{
@@ -463,7 +481,6 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
@@ -472,14 +489,11 @@ resource "google_cloud_run_v2_service" "default" {
 
   template {
     containers {
-      image = "us-docker.pkg.dev/magic-modules-373708/gcr.io/cloud-run-hello-grpc"
+      image = "us-docker.pkg.dev/magic-modules-374220/cloud-run-hello-grpc/cloud-run-hello-grpc"
       ports {
         container_port = 8080
       }
       liveness_probe {
-        grpc {}
-      }
-      startup_probe {
         grpc {}
       }
     }
@@ -496,7 +510,7 @@ resource "google_cloud_run_v2_service" "default" {
 
   template {
     containers {
-      image = "us-docker.pkg.dev/magic-modules-373708/gcr.io/cloud-run-hello-grpc"
+      image = "us-docker.pkg.dev/magic-modules-374220/cloud-run-hello-grpc/cloud-run-hello-grpc"
       ports {
         container_port = 8080
       }
@@ -506,8 +520,49 @@ resource "google_cloud_run_v2_service" "default" {
           service = "grpc.health.v1.Health"
         }
       }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCStartupProbe(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  location = "us-central1"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/magic-modules-374220/cloud-run-hello-grpc/cloud-run-hello-grpc"
+      ports {
+        container_port = 8080
+      }
       startup_probe {
         grpc {}
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCStartupProbe(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  location = "us-central1"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/magic-modules-374220/cloud-run-hello-grpc/cloud-run-hello-grpc"
+      ports {
+        container_port = 8080
+      }
+      startup_probe {
+        grpc {
+          port = 8080
+        }
       }
     }
   }
@@ -523,7 +578,7 @@ resource "google_cloud_run_v2_service" "default" {
 
   template {
     containers {
-      image = "us-docker.pkg.dev/magic-modules-373708/gcr.io/cloud-run-hello-grpc"
+      image = "us-docker.pkg.dev/magic-modules-374220/cloud-run-hello-grpc/cloud-run-hello-grpc"
       ports {
         container_port = 8080
       }
@@ -536,7 +591,6 @@ resource "google_cloud_run_v2_service" "default" {
       startup_probe {
         grpc {
           port = 8080
-          service = "grpc.health.v1.Health"
         }
       }
     }
