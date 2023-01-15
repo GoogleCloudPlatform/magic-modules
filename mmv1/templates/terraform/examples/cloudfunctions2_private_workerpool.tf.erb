@@ -1,4 +1,3 @@
-# [START functions_v2_private_workerpool]
 locals {
   project = "<%= ctx[:test_env_vars]['project'] %>" # Google Cloud Platform Project ID
 }
@@ -48,4 +47,3 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
     timeout_seconds     = 60
   }
 }
-# [END functions_v2_private_workerpool]
