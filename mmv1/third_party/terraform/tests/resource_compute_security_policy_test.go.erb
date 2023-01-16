@@ -1092,37 +1092,24 @@ func testAccComputeSecurityPolicy_withRateLimitOptions_withEnforceOnKeyConfigs(s
 resource "google_compute_security_policy" "policy" {
 	name        = "%s"
 	description = "throttle rule with enforce_on_key_configs"
-
+	
 	rule {
-		action   = "allow"
-		priority = "5000"
+		priority = 5000
 		match {
 			versioned_expr = "SRC_IPS_V1"
 			config {
 				src_ip_ranges = ["*"]
 			}
 		}
-		description = "default rule"
-	}
-
-	rule {
 		action = "throttle"
-		priority = 100
-		match {
-			versioned_expr = "SRC_IPS_V1"
-			config {
-				src_ip_ranges = [
-					"0.0.0.0/32",
-				]
-			}
-		}
 		rate_limit_options {
-			conform_action = "allow"
-			exceed_action = "deny(429)"
 			rate_limit_threshold {
 				count = 10
 				interval_sec = 60
 			}
+			conform_action = "allow"
+			exceed_action = "deny(429)"
+			
 			enforce_on_key_configs {
 				enforce_on_key_type = "HTTP_PATH"
 			}
