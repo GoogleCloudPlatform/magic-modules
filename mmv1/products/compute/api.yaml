@@ -1807,6 +1807,10 @@ objects:
         name: 'securityPolicy'
         description: |
           The security policy associated with this backend service.
+      - !ruby/object:Api::Type::String
+        name: 'edgeSecurityPolicy'
+        description: |
+          The resource URL for the edge security policy associated with this backend service.
       - !ruby/object:Api::Type::NestedObject
         name: 'securitySettings'
         description: |

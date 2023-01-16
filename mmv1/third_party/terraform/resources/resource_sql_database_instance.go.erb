@@ -103,7 +103,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(30 * time.Minute),
+			Create: schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
@@ -354,6 +354,7 @@ is set to true. Defaults to ZONAL.`,
 							Type:     schema.TypeString,
 							Optional: true,
 							Default: "PD_SSD",
+							ForceNew: true,
 							DiffSuppressFunc: caseDiffDashSuppress,
 							Description: `The type of data disk: PD_SSD or PD_HDD. Defaults to PD_SSD.`,
 						},

@@ -56,6 +56,11 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: "error"
         message: "message"
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_attribute: 'name'
+      base_url: projects/{{project}}/locations/{{location}}/jobs/{{name}}
+      import_format: ["projects/{{project}}/locations/{{location}}/jobs/{{name}}", "{{name}}"]
     parameters:
       - !ruby/object:Api::Type::String
         name: "location"
@@ -669,6 +674,11 @@ objects:
       api: "https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services"
     description: |
       Service acts as a top-level container that manages a set of configurations and revision templates which implement a network service. Service exists to provide a singular abstraction which can be access controlled, reasoned about, and which encapsulates software lifecycle decisions such as rollout policy and team resource ownership.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_attribute: 'name'
+      base_url: projects/{{project}}/locations/{{location}}/services/{{name}}
+      import_format: ["projects/{{project}}/locations/{{location}}/services/{{name}}", "{{name}}"]
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: "name"
