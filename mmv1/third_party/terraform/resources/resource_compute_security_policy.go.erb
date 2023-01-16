@@ -271,6 +271,31 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
 									},
 
+									<% unless version == 'ga' -%>
+									"enforce_on_key_configs": {
+										Type:        schema.TypeList,
+										Description: `Enforce On Key Config of this security policy`,
+										Optional:    true,
+										MaxItems:    3,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enforce_on_key_type": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													Default:      "ALL",
+													Description:  `Determines the key to enforce the rate_limit_threshold on`,
+													ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE", "HTTP_PATH", "SNI", "REGION_CODE"}, false),
+												},
+												"enforce_on_key_name": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
+												},
+											},
+										},
+									},
+									<% end -%>
+
 									"ban_threshold": {
 										Type:        schema.TypeList,
 										Optional:    true,
@@ -1151,6 +1176,9 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute
 		ConformAction:         data["conform_action"].(string),
 		EnforceOnKey:          data["enforce_on_key"].(string),
 		EnforceOnKeyName:      data["enforce_on_key_name"].(string),
+		<% unless version == 'ga' -%>
+		EnforceOnKeyConfigs:   expandSecurityPolicyEnforceOnKeyConfigs(data["enforce_on_key_configs"].([]interface{})),
+		<% end -%>
 		BanDurationSec:        int64(data["ban_duration_sec"].(int)),
 		ExceedRedirectOptions: expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})),
 	}
@@ -1168,6 +1196,27 @@ func expandThreshold(configured []interface{}) *compute.SecurityPolicyRuleRateLi
 	}
 }
 
+<% unless version == 'ga' -%>
+func expandSecurityPolicyEnforceOnKeyConfigs(configured []interface{}) []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig {
+	params := make([]*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig, 0, len(configured))
+	
+	for _, raw := range configured {
+		params = append(params, expandSecurityPolicyEnforceOnKeyConfigsFields(raw))
+	}
+
+	return params
+}
+
+func expandSecurityPolicyEnforceOnKeyConfigsFields(raw interface{}) *compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig {
+	data := raw.(map[string]interface{})
+
+	return &compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig{
+		EnforceOnKeyType: data["enforce_on_key_type"].(string),
+		EnforceOnKeyName: data["enforce_on_key_name"].(string),
+	}
+}
+<% end -%>
+
 func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleRateLimitOptions) []map[string]interface{} {
 	if conf == nil {
 		return nil
@@ -1180,6 +1229,9 @@ func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleR
 		"conform_action":          conf.ConformAction,
 		"enforce_on_key":          conf.EnforceOnKey,
 		"enforce_on_key_name":     conf.EnforceOnKeyName,
+		<% unless version == 'ga' -%>
+		"enforce_on_key_configs": flattenSecurityPolicyEnforceOnKeyConfigs(conf.EnforceOnKeyConfigs),
+		<% end -%> 
 		"ban_duration_sec":        conf.BanDurationSec,
 		"exceed_redirect_options": flattenSecurityPolicyRedirectOptions(conf.ExceedRedirectOptions),
 	}
@@ -1211,6 +1263,31 @@ func expandSecurityPolicyRuleRedirectOptions(configured []interface{}) *compute.
 		Target: data["target"].(string),
 	}
 }
+
+<% unless version == 'ga' -%>
+func flattenSecurityPolicyEnforceOnKeyConfigs(conf []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig) []map[string]interface{} {
+	if conf == nil || len(conf) == 0 {
+		return nil
+	}
+
+	transformed := make([]map[string]interface{}, 0, len(conf))
+	for _, raw := range conf {
+		transformed = append(transformed, flattenSecurityPolicyEnforceOnKeyConfigsFields(raw))
+	}
+	return transformed
+}
+
+func flattenSecurityPolicyEnforceOnKeyConfigsFields(conf *compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig) map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"enforce_on_key_name":  conf.EnforceOnKeyName,
+		"enforce_on_key_type": conf.EnforceOnKeyType,
+	}
+}
+<% end -%>
 
 func flattenSecurityPolicyRedirectOptions(conf *compute.SecurityPolicyRuleRedirectOptions) []map[string]interface{} {
 	if conf == nil {
