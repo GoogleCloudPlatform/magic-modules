@@ -290,7 +290,7 @@ The following arguments are supported:
 
 <a name="nested_enforce_on_key_configs"></a>The `enforce_on_key_configs` block supports:
 
-* `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
+* `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types: HTTP_HEADER: Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE: Name of the HTTP cookie whose value is taken as the key value.
 
 * `enforce_on_key_type` - (Optional) Determines the key to enforce the rate_limit_threshold on. If not specified, defaults to "ALL".
 
