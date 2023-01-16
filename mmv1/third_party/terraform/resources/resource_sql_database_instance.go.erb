@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -111,6 +112,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
 			customdiff.ForceNewIfChange("master_instance_name", isMasterInstanceNameSet),
+			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
 			pitrPostgresOnlyCustomizeDiff,
 		),
@@ -2076,16 +2078,9 @@ func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, n
 
 func checkPromoteConfigurations(d *schema.ResourceData) error {
 	masterInstanceName := d.GetRawConfig().GetAttr("master_instance_name")
-	if !masterInstanceName.IsNull() {
-		return fmt.Errorf("Replica promote configuration check failed. Please remove master_instance_name and try again.")
-	}
-
 	replicaConfigurations := d.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
-	if len(replicaConfigurations) != 0 {
-		return fmt.Errorf("Replica promote configuration check failed. Please remove replica_configuration and try again.")
-	}
 
-	return nil
+	return validatePromoteConfigurations(MasterInstanceName, replicaConfiguration)
 }
 
 func isMasterInstanceNameSet(_ context.Context, oldMasterInstanceName interface{}, newMasterInstanceName interface{}, _ interface{}) bool {
@@ -2094,4 +2089,36 @@ func isMasterInstanceNameSet(_ context.Context, oldMasterInstanceName interface{
 	}
 
 	return true
+}
+
+func checkPromoteConfigurationsAndUpdateDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	masterInstanceName := diff.GetRawConfig().GetAttr("master_instance_name")
+	replicaConfigurations := diff.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
+
+	err := validatePromoteConfigurations(MasterInstanceName, replicaConfiguration)
+	if (err != nil) {
+		return err
+	}
+
+	err = diff.SetNew("master_instance_name", nil)
+	if err != nil {
+		return err
+	}
+
+	err = diff.SetNew("replica_configuration", nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func validatePromoteConfigurations(masterInstanceName cty.Value, replicaConfigurations []cty.Value) error {
+	if !masterInstanceName.IsNull() {
+		return fmt.Errorf("Replica promote configuration check failed. Please remove master_instance_name and try again.")
+	}
+
+	if len(replicaConfigurations) != 0 {
+		return fmt.Errorf("Replica promote configuration check failed. Please remove replica_configuration and try again.")
+	}
+	return nil
 }
