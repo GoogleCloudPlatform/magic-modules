@@ -29,7 +29,7 @@ mmv1/third_party/terraform/website/docs/
 ```
 
 
-The subfolder `d` corresponds to data sources, and `r` corresponds to resources, and each file inside correspond to a page in the official provider documentation. For example, if you needed to update existing documentation for the `google_compute_instance` resource you should search in the `r` folder for a file with a name starting `compute_instance` (i.e. the resource name with the provider name removed from the start). The file [/docs/r/compute_instance.html.markdown](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/website/docs/r/compute_instance.html.markdown) corresponds to the [page for the `google_compute_instance` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance) in the official provider documentation.
+The subfolder `d` corresponds to data sources, and `r` corresponds to resources, and each file inside creates a page in the official provider documentation. For example, if you needed to update existing documentation for the `google_compute_instance` resource you should search in the `r` folder for a file with a name starting `compute_instance` (i.e. the resource name with the provider name removed from the start). The file [/docs/r/compute_instance.html.markdown](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/website/docs/r/compute_instance.html.markdown) is used to produce the [page for the `google_compute_instance` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance) in the official provider documentation.
 
 ## Making changes
 
