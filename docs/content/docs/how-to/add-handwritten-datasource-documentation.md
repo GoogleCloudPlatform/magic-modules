@@ -1,6 +1,6 @@
 ---
 title: "Add new handwritten data source documentation"
-summary: "New handwritten datasources require new handwritten documentation to be created"
+summary: "New handwritten datasources require new handwritten documentation to be created."
 weight: 25
 ---
 
