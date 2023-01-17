@@ -207,6 +207,10 @@ resource "google_spanner_database_iam_member" "foo" {
   instance = google_spanner_database.database.instance
   role     = "%s"
   member   = "serviceAccount:${google_service_account.test_account.email}"
+  condition {
+    title      = "Access only database one"
+    expression = "resource.type == \"spanner.googleapis.com/DatabaseRole\" && resource.name.endsWith(\"/databaseRoles/parent\")"
+  }
 }
 `, account, instance, instance, database, roleId)
 }
