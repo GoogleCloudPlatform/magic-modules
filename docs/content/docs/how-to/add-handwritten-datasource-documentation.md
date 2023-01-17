@@ -150,4 +150,9 @@ Under the list of arguments there are sections like this that contain an anchor 
 
 Attributes are exported values that can be accessed from a data source (or resource) and are not set by the users Terraform configuration. They could be computed values, or values read from the API.
 
-Attributes are documented in a bulleted list, and nested blocks are documented in the way described above.
+If the data source has the same attributes as its equivalent resource in the provider, you can just link to the documentation for the resource. This avoids duplicating information that already exists elsewhere.
+
+For example the documentation for the `google_storage_bucket` data source links to the `google_storage_bucket` resource documentation ([see here](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/storage_bucket#attributes-reference))
+
+
+If there isn't an equivalent resource in the provider, or the attributes are different, then document the attributes in a bulleted list as usual. Nested blocks are documented in the way previously described above.
