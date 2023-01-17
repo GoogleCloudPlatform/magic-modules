@@ -1094,7 +1094,7 @@ resource "google_compute_security_policy" "policy" {
 	description = "throttle rule with enforce_on_key_configs"
 	
 	rule {
-		priority = 5000
+		priority = 2147483647
 		match {
 			versioned_expr = "SRC_IPS_V1"
 			config {
@@ -1109,14 +1109,16 @@ resource "google_compute_security_policy" "policy" {
 			}
 			conform_action = "allow"
 			exceed_action = "deny(429)"
-			
+
 			enforce_on_key_configs {
 				enforce_on_key_type = "HTTP_PATH"
 			}
+
 			enforce_on_key_configs {
 				enforce_on_key_type = "HTTP_HEADER"
                 enforce_on_key_name = "user-agent"
 			}
+			
 			enforce_on_key_configs {
 				enforce_on_key_type = "REGION_CODE"
 			}
