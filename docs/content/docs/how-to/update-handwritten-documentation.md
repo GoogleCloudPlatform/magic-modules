@@ -6,6 +6,11 @@ weight: 24
 
 # Update existing documentation for a handwritten resource or datasource
 
+{{< hint info >}}
+**Note:** If you want to find information about documentation for a generated resource, look at the [Documentation](#documentation) page instead. The information on this page will not be relevant for resources that have generated documentation.
+
+{{< /hint >}}
+
 ## How providers documentation works
 
 For general information about how provider documentation works, see [Documentation](#documentation).
