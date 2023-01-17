@@ -19,7 +19,7 @@ See [`How does Terraform work?`](https://developer.hashicorp.com/terraform/intro
 
 [`ForceNew`](https://developer.hashicorp.com/terraform/intro#how-does-terraform-work) in a Terraform resource schema attribute that indicates that a field is immutable, i.e. that a change to the field requires the resource to be destroyed and recreated.
 
-This is necessary and required for cases where a field can't be updated in-place, so that the core workflow of aligning real infrastructure with configuration can be achieved. If a field or resource can never be updated in-place and is not marked with `ForceNew`, that is considered a bug in the provider.
+This is necessary and required for cases where a field can't be updated in-place, so that the core workflow of aligning real infrastructure with configuration can be achieved. Terraform assumes that all fields in a resource are either marked as `ForceNew` or that updates are handled through the `Update` function of the resource's implementation. If a field or resource can never be updated in-place and is not marked with `ForceNew`, that is considered a bug in the provider.
 
 In addition, some fields or resources may be possible to update in place, but only under specific conditions. In these cases, you can call `diff.ForceNew` inside a [`CustomizeDiff`](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/customizing-differences) function to force recreation when pertinent. This is considered a good and useful enhancement in cases where it doesn't introduce undue complexity. Any `CustomizeDiff` function like this should be thoroughly unit tested.
 
