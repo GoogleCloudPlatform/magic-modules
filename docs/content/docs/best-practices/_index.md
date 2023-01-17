@@ -17,7 +17,7 @@ See [`How does Terraform work?`](https://developer.hashicorp.com/terraform/intro
 
 ## ForceNew
 
-[`ForceNew`](https://developer.hashicorp.com/terraform/intro#how-does-terraform-work) in a Terraform resource schema indicates that a change to the field requires the resource to be destroyed and recreated.
+[`ForceNew`](https://developer.hashicorp.com/terraform/intro#how-does-terraform-work) in a Terraform resource schema attribute that indicates that a field is immutable, i.e. that a change to the field requires the resource to be destroyed and recreated.
 
 This is necessary and required for cases where a field can't be updated in-place, so that the core workflow of aligning real infrastructure with configuration can be achieved. If a field or resource can never be updated in-place and is not marked with `ForceNew`, that is considered a bug in the provider.
 
