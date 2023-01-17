@@ -25,7 +25,7 @@ objects:
     name: 'Cluster'
     base_url: projects/{{project}}/locations/{{location}}/attachedClusters
     create_url: projects/{{project}}/locations/{{location}}/attachedClusters?attached_cluster_id={{name}}
-    delete_url: projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}
+    delete_url: projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}?ignore_errors=true
     update_url: projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}
     self_link: projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}
     update_verb: :PATCH
