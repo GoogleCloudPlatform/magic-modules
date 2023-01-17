@@ -58,6 +58,21 @@ objects:
         description: |
           Whether anonymous users will be auto-deleted after a period of 30 days
       - !ruby/object:Api::Type::NestedObject
+        name: multiTenantConfig 
+        description: |
+          Configuration related to multi-tenant functionality.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: allowTenants
+            description: |
+              Whether this project can have tenants or not.
+          - !ruby/object:Api::Type::String
+            name: defaultTenantLocation
+            description: |
+              The default cloud parent org or folder that the tenant project should be created under. 
+              The parent resource name should be in the format of "/", such as "folders/123" or "organizations/456". 
+              If the value is not set, the tenant will be created under the same organization or folder as the agent project.
+      - !ruby/object:Api::Type::NestedObject
         name: monitoring 
         description: |
           Configuration related to monitoring project activity.
