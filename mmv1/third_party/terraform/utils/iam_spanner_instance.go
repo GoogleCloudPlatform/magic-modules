@@ -73,7 +73,9 @@ func (u *SpannerInstanceIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 	p, err := u.Config.NewSpannerClient(userAgent).Projects.Instances.GetIamPolicy(spannerInstanceId{
 		Project:  u.project,
 		Instance: u.instance,
-	}.instanceUri(), &spanner.GetIamPolicyRequest{}).Do()
+	}.instanceUri(), &spanner.GetIamPolicyRequest{
+		Options: &spanner.GetPolicyOptions{RequestedPolicyVersion: iamPolicyVersion},
+	}).Do()
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
