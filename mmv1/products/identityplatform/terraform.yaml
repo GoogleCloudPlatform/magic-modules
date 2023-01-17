@@ -120,6 +120,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "identity_platform_tenant_monitoring"
         primary_resource_id: "tenant"
+        vars:
+          instance_name: "memory-cache"
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_acct: :BILLING_ACCT
   ProjectDefaultConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     create_verb: :PATCH
     delete_verb: :PATCH
