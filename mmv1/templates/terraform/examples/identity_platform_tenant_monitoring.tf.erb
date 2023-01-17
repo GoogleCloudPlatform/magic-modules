@@ -16,7 +16,7 @@ resource "google_project_service" "identitytoolkit" {
 resource "google_identity_platform_config" "default" {
   project = google_project.default.project_id
 
-  multi_tenant {
+  multi_tenant_config {
     allow_tenants = true
   }
 
