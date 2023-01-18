@@ -1552,6 +1552,7 @@ objects:
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'name'
+                  required: true
                   values:
                     - :ROUND_ROBIN
                     - :LEAST_REQUEST
@@ -1606,6 +1607,7 @@ objects:
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'name'
+                  required: true
                   description: |
                     Identifies the custom policy.
 
