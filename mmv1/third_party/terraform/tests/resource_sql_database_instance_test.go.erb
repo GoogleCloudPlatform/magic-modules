@@ -196,36 +196,6 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 	})
 }
 
-func TestAccSqlDatabaseInstance_PrmoteReplica(t *testing.T) {
-	t.Parallel()
-
-	databaseName := "sql-instance-test-" + randString(t, 10)
-	failoverName := "sql-instance-test-failover-" + randString(t, 10)
-	// 1. Create an instance.
-	// 2. Add a root@'%' user.
-	// 3. Create a replica and assert it succeeds (it'll fail if we try to delete the root user thinking it's a
-	//    default user)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testGoogleSqlDatabaseInstanceConfig_withReplica(databaseName, failoverName),
-			},
-			resource.TestStep{
-				ResourceName:      "google_sql_database_instance.instance",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-			resource.TestStep{
-				Config: testGoogleSqlDatabaseInstanceConfig_withReplicaPromote(databaseName, failoverName),
-			},
-		},
-	})
-}
-
 // This test requires an arbitrary error to occur during the SQL instance creation. Currently, we
 // are relying on an error that occurs when settings are used on a MySQL clone. Note that this is
 // somewhat brittle, and the test could begin failing if that error no longer behaves the same way.
@@ -1535,10 +1505,6 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNameAndRep
 
 	databaseName := "sql-instance-test-" + randString(t, 10)
 	failoverName := "sql-instance-test-failover-" + randString(t, 10)
-	// 1. Create an instance.
-	// 2. Add a root@'%' user.
-	// 3. Create a replica and assert it succeeds (it'll fail if we try to delete the root user thinking it's a
-	//    default user)
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -1552,10 +1518,6 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNameAndRep
 				ExpectError: regexp.MustCompile("Replica promote configuration check failed. Please remove master_instance_name and try again."),
 			},
 			{
-				/** Check if replica promote was not promoted:
-				1. master_instance_name should be present
-				3. instance_type should be "READ_REPLICA_INSTANCE"
-				*/
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -1570,10 +1532,6 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 
 	databaseName := "sql-instance-test-" + randString(t, 10)
 	failoverName := "sql-instance-test-failover-" + randString(t, 10)
-	// 1. Create an instance.
-	// 2. Add a root@'%' user.
-	// 3. Create a replica and assert it succeeds (it'll fail if we try to delete the root user thinking it's a
-	//    default user)
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -1587,10 +1545,6 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 				Check:  resource.ComposeTestCheckFunc(checkPromoteReplicaSkipConfigurations("google_sql_database_instance.instance-failover")),
 			},
 			{
-				/** Check if replica promote was not promoted:
-				1. master_instance_name should be present
-				3. instance_type should be "READ_REPLICA_INSTANCE"
-				*/
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
