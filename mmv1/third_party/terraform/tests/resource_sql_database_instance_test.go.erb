@@ -196,6 +196,36 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_PrmoteReplica(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "sql-instance-test-" + randString(t, 10)
+	failoverName := "sql-instance-test-failover-" + randString(t, 10)
+	// 1. Create an instance.
+	// 2. Add a root@'%' user.
+	// 3. Create a replica and assert it succeeds (it'll fail if we try to delete the root user thinking it's a
+	//    default user)
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testGoogleSqlDatabaseInstanceConfig_withReplica(databaseName, failoverName),
+			},
+			resource.TestStep{
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			resource.TestStep{
+				Config: testGoogleSqlDatabaseInstanceConfig_withReplicaPromote(databaseName, failoverName),
+			},
+		},
+	})
+}
+
 // This test requires an arbitrary error to occur during the SQL instance creation. Currently, we
 // are relying on an error that occurs when settings are used on a MySQL clone. Note that this is
 // somewhat brittle, and the test could begin failing if that error no longer behaves the same way.
@@ -1779,6 +1809,43 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
+func testGoogleSqlDatabaseInstanceConfig_withReplicaPromote(instanceName, failoverName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+
+  settings {
+    tier = "db-n1-standard-1"
+
+    backup_configuration {
+      binary_log_enabled = "true"
+      enabled            = "true"
+      start_time         = "18:00"
+    }
+  }
+}
+
+resource "google_sql_database_instance" "instance-failover" {
+  name                 = "%s"
+  region               = "us-central1"
+  database_version     = "MYSQL_5_7"
+  master_instance_name = google_sql_database_instance.instance.name
+  deletion_protection  = false
+	instance_type = "CLOUD_SQL_INSTANCE"
+  replica_configuration {
+    failover_target = "true"
+  }
+
+  settings {
+    tier = "db-n1-standard-1"
+  }
+}
+`, instanceName, failoverName)
+}
+
 func testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressRangeName string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
@@ -2080,7 +2147,7 @@ resource "google_sql_database_instance" "instance" {
     tier                   = "db-f1-micro"
     location_preference {
       zone           = "us-central1-f"
-	  secondary_zone = "us-central1-a"	  
+	  secondary_zone = "us-central1-a"
     }
 
     ip_configuration {
@@ -2748,7 +2815,7 @@ func checkInstanceTypeIsPresent(resourceName string) func(*terraform.State) erro
 			return fmt.Errorf("can't find %s in state", resourceName)
 		}
 		rsAttr := rs.Primary.Attributes
-		_, ok = rsAttr["instance_type"]; 
+		_, ok = rsAttr["instance_type"];
 		if !ok {
 			return fmt.Errorf("Instance type is not computed for %s", resourceName)
 		}

@@ -2078,9 +2078,9 @@ func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, n
 
 func checkPromoteConfigurations(d *schema.ResourceData) error {
 	masterInstanceName := d.GetRawConfig().GetAttr("master_instance_name")
-	replicaConfigurations := d.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
+	replicaConfiguration := d.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
 
-	return validatePromoteConfigurations(MasterInstanceName, replicaConfiguration)
+	return validatePromoteConfigurations(masterInstanceName, replicaConfiguration)
 }
 
 func isMasterInstanceNameSet(_ context.Context, oldMasterInstanceName interface{}, newMasterInstanceName interface{}, _ interface{}) bool {
@@ -2093,9 +2093,9 @@ func isMasterInstanceNameSet(_ context.Context, oldMasterInstanceName interface{
 
 func checkPromoteConfigurationsAndUpdateDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 	masterInstanceName := diff.GetRawConfig().GetAttr("master_instance_name")
-	replicaConfigurations := diff.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
+	replicaConfiguration := diff.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
 
-	err := validatePromoteConfigurations(MasterInstanceName, replicaConfiguration)
+	err := validatePromoteConfigurations(masterInstanceName, replicaConfiguration)
 	if (err != nil) {
 		return err
 	}
