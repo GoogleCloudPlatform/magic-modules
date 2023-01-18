@@ -58,7 +58,7 @@ objects:
         description: |
           Whether anonymous users will be auto-deleted after a period of 30 days
       - !ruby/object:Api::Type::NestedObject
-        name: 'multiTenantConfig' 
+        name: 'multiTenant' 
         description: |
           Configuration related to multi-tenant functionality.
         properties:
