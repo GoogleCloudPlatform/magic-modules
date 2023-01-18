@@ -4,7 +4,7 @@ summary: "Handwritten resources and datasources have handwritten documentation t
 weight: 24
 ---
 
-# Update existing documentation for a handwritten resource or datasource
+# Update handwritten provider documentation (for handwritten resource or datasource)
 
 {{< hint info >}}
 **Note:** If you want to find information about documentation for a generated resource, look at the [Documentation](#documentation) page instead. The information on this page will not be relevant for resources that have generated documentation.

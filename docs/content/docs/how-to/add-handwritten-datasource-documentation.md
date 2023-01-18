@@ -1,14 +1,13 @@
 ---
-title: "Add new handwritten data source documentation"
+title: "Add documentation for a handwritten data source"
 summary: "New handwritten datasources require new handwritten documentation to be created."
 weight: 25
 ---
 
-# Add documentation for a new handwritten datasource
+# Add documentation for a handwritten data source
 
 {{< hint info >}}
 **Note:** If you want to find information about documentation for a generated resource, look at the [Documentation](#documentation) page instead. The information on this page will not be relevant for resources that have generated documentation.
-
 {{< /hint >}}
 
 ## How providers documentation works
