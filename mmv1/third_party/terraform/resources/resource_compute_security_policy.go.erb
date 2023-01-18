@@ -276,7 +276,6 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Type:        schema.TypeList,
 										Description: `Enforce On Key Config of this security policy`,
 										Optional:    true,
-										MaxItems:    3,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"enforce_on_key_type": {
