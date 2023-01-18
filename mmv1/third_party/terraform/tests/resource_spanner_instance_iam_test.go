@@ -55,6 +55,7 @@ func TestAccSpannerInstanceIamMember(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/spanner.databaseAdmin"
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	conditionTitle := "Access only database one"
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -66,10 +67,10 @@ func TestAccSpannerInstanceIamMember(t *testing.T) {
 			},
 			{
 				ResourceName: "google_spanner_instance_iam_member.foo",
-				ImportStateId: fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", spannerInstanceId{
+				ImportStateId: fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com %s", spannerInstanceId{
 					Instance: instance,
 					Project:  project,
-				}.terraformId(), role, account, project),
+				}.terraformId(), role, account, project, conditionTitle),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
