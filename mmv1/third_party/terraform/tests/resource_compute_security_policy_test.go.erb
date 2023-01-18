@@ -249,6 +249,14 @@ func TestAccComputeSecurityPolicy_withAdaptiveProtectionAutoDeployConfig(t *test
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+						{
+				Config: testAccComputeSecurityPolicy_withAdaptiveProtectionAutoDeployConfig_update(spName),
+			},
+			{
+				ResourceName:      "google_compute_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -1009,6 +1017,24 @@ resource "google_compute_security_policy" "policy" {
       confidence_threshold = 0.5
       impacted_baseline_threshold = 0.01
       expiration_sec = 7200
+    }
+  }
+}
+`, spName)
+}
+
+func testAccComputeSecurityPolicy_withAdaptiveProtectionAutoDeployConfig_update(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+  name        = "%s"
+  description = "updated description"
+
+  adaptive_protection_config {
+    auto_deploy_config {
+		load_threshold = 0.8
+		confidence_threshold = 0.5
+		impacted_baseline_threshold = 0.01
+		expiration_sec = 8000
     }
   }
 }
