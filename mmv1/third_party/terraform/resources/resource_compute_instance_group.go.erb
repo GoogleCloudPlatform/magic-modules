@@ -18,7 +18,7 @@ import (
 <% end -%>
 )
 
-func resourceComputeInstanceGroup() *schema.Resource {
+func ResourceComputeInstanceGroup() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceGroupCreate,
 		Read:   resourceComputeInstanceGroupRead,
@@ -94,7 +94,7 @@ func resourceComputeInstanceGroup() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				ForceNew:         true,
 				Description:      `The URL of the network the instance group is in. If this is different from the network where the instances are in, the creation fails. Defaults to the network where the instances are in (if neither network nor instances is specified, this field will be blank).`,
 			},
@@ -143,17 +143,17 @@ func validInstanceURLs(instanceUrls []string) bool {
 
 func resourceComputeInstanceGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -195,14 +195,14 @@ func resourceComputeInstanceGroupCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	if v, ok := d.GetOk("instances"); ok {
-		tmpUrls := convertStringArr(v.(*schema.Set).List())
+		tmpUrls := ConvertStringArr(v.(*schema.Set).List())
 
 		var instanceUrls []string
 		for _, v := range tmpUrls {
 			if strings.HasPrefix(v, "https://") {
 				instanceUrls = append(instanceUrls, v)
 			} else {
-				url, err := replaceVars(d, config, "{{ComputeBasePath}}"+v)
+				url, err := ReplaceVars(d, config, "{{ComputeBasePath}}"+v)
 				if err != nil {
 					return err
 				}
@@ -233,17 +233,17 @@ func resourceComputeInstanceGroupCreate(d *schema.ResourceData, meta interface{}
 
 func resourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -253,7 +253,7 @@ func resourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}) 
 	instanceGroup, err := config.NewComputeClient(userAgent).InstanceGroups.Get(
 		project, zone, name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Instance Group %q", name))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Instance Group %q", name))
 	}
 
 	// retrieve instance group members
@@ -310,17 +310,17 @@ func resourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}) 
 }
 func resourceComputeInstanceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -332,8 +332,8 @@ func resourceComputeInstanceGroupUpdate(d *schema.ResourceData, meta interface{}
 		// to-do check for no instances
 		from_, to_ := d.GetChange("instances")
 
-		from := convertStringArr(from_.(*schema.Set).List())
-		to := convertStringArr(to_.(*schema.Set).List())
+		from := ConvertStringArr(from_.(*schema.Set).List())
+		to := ConvertStringArr(to_.(*schema.Set).List())
 
 		if !validInstanceURLs(from) {
 			return fmt.Errorf("Error invalid instance URLs: %v", from)
@@ -415,17 +415,17 @@ func resourceComputeInstanceGroupUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceComputeInstanceGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -446,14 +446,14 @@ func resourceComputeInstanceGroupDelete(d *schema.ResourceData, meta interface{}
 
 func resourceComputeInstanceGroupImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instanceGroups/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<name>[^/]+)",
 		"(?P<zone>[^/]+)/(?P<name>[^/]+)",
 	}, d, config); err != nil {
 		return nil, err
 	}
-	id, err := replaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroups/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroups/{{name}}")
 	if err != nil {
 		return nil, err
 	}

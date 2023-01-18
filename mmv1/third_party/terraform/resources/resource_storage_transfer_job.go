@@ -45,7 +45,7 @@ var (
 	}
 )
 
-func resourceStorageTransferJob() *schema.Resource {
+func ResourceStorageTransferJob() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceStorageTransferJobCreate,
 		Read:   resourceStorageTransferJobRead,
@@ -511,12 +511,12 @@ func diffSuppressEmptyStartTimeOfDay(k, old, new string, d *schema.ResourceData)
 
 func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -554,12 +554,12 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -567,7 +567,7 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 	name := d.Get("name").(string)
 	res, err := config.NewStorageTransferClient(userAgent).TransferJobs.Get(name, project).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Transfer Job %q", name))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Transfer Job %q", name))
 	}
 
 	if res.Status == "DELETED" {
@@ -614,12 +614,12 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 
 func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -686,12 +686,12 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1015,8 +1015,8 @@ func expandObjectConditions(conditions []interface{}) *storagetransfer.ObjectCon
 
 	condition := conditions[0].(map[string]interface{})
 	return &storagetransfer.ObjectConditions{
-		ExcludePrefixes:                     convertStringArr(condition["exclude_prefixes"].([]interface{})),
-		IncludePrefixes:                     convertStringArr(condition["include_prefixes"].([]interface{})),
+		ExcludePrefixes:                     ConvertStringArr(condition["exclude_prefixes"].([]interface{})),
+		IncludePrefixes:                     ConvertStringArr(condition["include_prefixes"].([]interface{})),
 		MaxTimeElapsedSinceLastModification: condition["max_time_elapsed_since_last_modification"].(string),
 		MinTimeElapsedSinceLastModification: condition["min_time_elapsed_since_last_modification"].(string),
 	}
@@ -1124,7 +1124,7 @@ func expandTransferJobNotificationConfig(notificationConfigs []interface{}) *sto
 	}
 
 	if notificationConfig["event_types"] != nil {
-		apiData.EventTypes = convertStringArr(notificationConfig["event_types"].(*schema.Set).List())
+		apiData.EventTypes = ConvertStringArr(notificationConfig["event_types"].(*schema.Set).List())
 	}
 
 	log.Printf("[DEBUG] apiData: %v\n\n", apiData)
@@ -1142,7 +1142,7 @@ func flattenTransferJobNotificationConfig(notificationConfig *storagetransfer.No
 	}
 
 	if notificationConfig.EventTypes != nil {
-		data["event_types"] = convertStringArrToInterface(notificationConfig.EventTypes)
+		data["event_types"] = ConvertStringArrToInterface(notificationConfig.EventTypes)
 	}
 
 	return []map[string]interface{}{data}

@@ -23,7 +23,7 @@ func (w *ContainerAttachedOperationWaiter) QueryOp() (interface{}, error) {
 	// Returns the proper get.
 	url := fmt.Sprintf("https://%s-gkemulticloud.googleapis.com/v1/%s", region, w.CommonOperationWaiter.Op.Name)
 
-	return sendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
+	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
 func createContainerAttachedWaiter(config *Config, op map[string]interface{}, project, activity, userAgent string) (*ContainerAttachedOperationWaiter, error) {

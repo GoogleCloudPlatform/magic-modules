@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -12,21 +12,21 @@ func TestAccDataSourceGoogleCloudFunctionsFunction_basic(t *testing.T) {
 	t.Parallel()
 
 	funcDataNameHttp := "data.google_cloudfunctions_function.function_http"
-	functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
+	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleCloudFunctionsFunctionConfig(functionName,
 					bucketName, zipFilePath),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState(funcDataNameHttp,
+					CheckDataSourceStateMatchesResourceState(funcDataNameHttp,
 						"google_cloudfunctions_function.function_http"),
 				),
 			},

@@ -6,12 +6,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourcePrivatecaCertificateAuthority() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourcePrivatecaCertificateAuthority().Schema)
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "location")
-	addOptionalFieldsToSchema(dsSchema, "pool")
-	addOptionalFieldsToSchema(dsSchema, "certificate_authority_id")
+func DataSourcePrivatecaCertificateAuthority() *schema.Resource {
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourcePrivatecaCertificateAuthority().Schema)
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "location")
+	AddOptionalFieldsToSchema(dsSchema, "pool")
+	AddOptionalFieldsToSchema(dsSchema, "certificate_authority_id")
 
 	dsSchema["pem_csr"] = &schema.Schema{
 		Type:     schema.TypeString,
@@ -26,12 +26,12 @@ func dataSourcePrivatecaCertificateAuthority() *schema.Resource {
 
 func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return fmt.Errorf("Error generating user agent: %s", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -45,27 +45,27 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 
 	// pem_csr is only applicable for SUBORDINATE CertificateAuthorities when their state is AWAITING_USER_ACTIVATION
 	if d.Get("type") == "SUBORDINATE" && d.Get("state") == "AWAITING_USER_ACTIVATION" {
-		url, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
+		url, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
 		if err != nil {
 			return err
 		}
 
 		billingProject := ""
 
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return fmt.Errorf("Error fetching project for CertificateAuthority: %s", err)
 		}
 		billingProject = project
 
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
 
-		res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+		res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("PrivatecaCertificateAuthority %q", d.Id()))
+			return HandleNotFoundError(err, d, fmt.Sprintf("PrivatecaCertificateAuthority %q", d.Id()))
 		}
 		if err := d.Set("pem_csr", res["pemCsr"]); err != nil {
 			return fmt.Errorf("Error fetching CertificateAuthority: %s", err)

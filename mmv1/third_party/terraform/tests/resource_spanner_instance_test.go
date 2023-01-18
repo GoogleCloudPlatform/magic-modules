@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -51,10 +51,10 @@ func expectEquals(t *testing.T, expected, actual string) {
 func TestAccSpannerInstance_basic(t *testing.T) {
 	t.Parallel()
 
-	idName := fmt.Sprintf("spanner-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	idName := fmt.Sprintf("spanner-test-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -75,10 +75,10 @@ func TestAccSpannerInstance_basic(t *testing.T) {
 func TestAccSpannerInstance_noNodeCountSpecified(t *testing.T) {
 	t.Parallel()
 
-	idName := fmt.Sprintf("spanner-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	idName := fmt.Sprintf("spanner-test-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -91,13 +91,13 @@ func TestAccSpannerInstance_noNodeCountSpecified(t *testing.T) {
 
 func TestAccSpannerInstance_basicWithAutogenName(t *testing.T) {
 	// Randomness
-	skipIfVcr(t)
+	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	displayName := fmt.Sprintf("spanner-test-%s-dname", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	displayName := fmt.Sprintf("spanner-test-%s-dname", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -117,14 +117,14 @@ func TestAccSpannerInstance_basicWithAutogenName(t *testing.T) {
 
 func TestAccSpannerInstance_update(t *testing.T) {
 	// Randomness
-	skipIfVcr(t)
+	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	dName1 := fmt.Sprintf("spanner-dname1-%s", randString(t, 10))
-	dName2 := fmt.Sprintf("spanner-dname2-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	dName1 := fmt.Sprintf("spanner-dname1-%s", RandString(t, 10))
+	dName2 := fmt.Sprintf("spanner-dname2-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

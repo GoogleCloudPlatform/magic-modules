@@ -18,7 +18,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 		return v.(string), nil
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}

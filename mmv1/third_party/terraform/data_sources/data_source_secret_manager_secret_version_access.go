@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceSecretManagerSecretVersionAccess() *schema.Resource {
+func DataSourceSecretManagerSecretVersionAccess() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceSecretManagerSecretVersionAccessRead,
 		Schema: map[string]*schema.Schema{
@@ -21,7 +21,7 @@ func dataSourceSecretManagerSecretVersionAccess() *schema.Resource {
 			"secret": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"version": {
 				Type:     schema.TypeString,
@@ -43,7 +43,7 @@ func dataSourceSecretManagerSecretVersionAccess() *schema.Resource {
 
 func dataSourceSecretManagerSecretVersionAccessRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -67,19 +67,19 @@ func dataSourceSecretManagerSecretVersionAccessRead(d *schema.ResourceData, meta
 	versionNum := d.Get("version")
 
 	if versionNum != "" {
-		url, err = replaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/{{version}}")
+		url, err = ReplaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/{{version}}")
 		if err != nil {
 			return err
 		}
 	} else {
-		url, err = replaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/latest")
+		url, err = ReplaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/latest")
 		if err != nil {
 			return err
 		}
 	}
 
 	url = fmt.Sprintf("%s:access", url)
-	resp, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	resp, err := SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving available secret manager secret version access: %s", err.Error())
 	}

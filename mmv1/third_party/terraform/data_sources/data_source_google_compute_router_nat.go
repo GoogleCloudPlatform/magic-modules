@@ -6,12 +6,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleComputeRouterNat() *schema.Resource {
+func DataSourceGoogleComputeRouterNat() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeRouterNat().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceComputeRouterNat().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "name", "router")
-	addOptionalFieldsToSchema(dsSchema, "project", "region")
+	AddRequiredFieldsToSchema(dsSchema, "name", "router")
+	AddOptionalFieldsToSchema(dsSchema, "project", "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeRouterNatRead,
@@ -23,7 +23,7 @@ func dataSourceGoogleComputeRouterNat() *schema.Resource {
 func dataSourceGoogleComputeRouterNatRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	id, err := replaceVars(d, config, "{{project}}/{{region}}/{{router}}/{{name}}")
+	id, err := ReplaceVars(d, config, "{{project}}/{{region}}/{{router}}/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

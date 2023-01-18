@@ -7,15 +7,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleComputeNetworkEndpointGroup() *schema.Resource {
+func DataSourceGoogleComputeNetworkEndpointGroup() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeNetworkEndpointGroup().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceComputeNetworkEndpointGroup().Schema)
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "zone")
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "self_link")
+	AddOptionalFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "zone")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "self_link")
 
 	return &schema.Resource{
 		Read:   dataSourceComputeNetworkEndpointGroupRead,
@@ -26,11 +26,11 @@ func dataSourceGoogleComputeNetworkEndpointGroup() *schema.Resource {
 func dataSourceComputeNetworkEndpointGroupRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	if name, ok := d.GetOk("name"); ok {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return err
 		}
-		zone, err := getZone(d, config)
+		zone, err := GetZone(d, config)
 		if err != nil {
 			return err
 		}

@@ -189,10 +189,11 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 	t.Parallel()
 
 	moduleName := "my-module"
-	managedZoneName := fmt.Sprintf("tf-test-zone-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
+	managedZoneName := fmt.Sprintf("tf-test-zone-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck: func() { TestAccPreCheck(t) },
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"google": func() (tfprotov5.ProviderServer, error) {
 				provider, err := MuxedProviders(t.Name())
@@ -202,7 +203,7 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 		// CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, randString(t, 10)),
+				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, RandString(t, 10)),
 			},
 		},
 	})

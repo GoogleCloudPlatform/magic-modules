@@ -79,7 +79,7 @@ func expandListOrganizationPolicy(configured []interface{}) (*ListPolicy, error)
 		if all {
 			allValues = 1
 		} else {
-			allowedValues = convertStringArr(values.List())
+			allowedValues = ConvertStringArr(values.List())
 		}
 	}
 
@@ -91,7 +91,7 @@ func expandListOrganizationPolicy(configured []interface{}) (*ListPolicy, error)
 		if all {
 			allValues = 0
 		} else {
-			deniedValues = convertStringArr(values.List())
+			deniedValues = ConvertStringArr(values.List())
 		}
 	}
 

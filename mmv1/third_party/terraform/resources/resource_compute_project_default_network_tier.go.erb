@@ -17,7 +17,7 @@ import (
 <% end -%>
 )
 
-func resourceComputeProjectDefaultNetworkTier() *schema.Resource {
+func ResourceComputeProjectDefaultNetworkTier() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeProjectDefaultNetworkTierCreateOrUpdate,
 		Read:   resourceComputeProjectDefaultNetworkTierRead,
@@ -55,12 +55,12 @@ func resourceComputeProjectDefaultNetworkTier() *schema.Resource {
 
 func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	projectID, err := getProject(d, config)
+	projectID, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceDa
 
 func resourceComputeProjectDefaultNetworkTierRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func resourceComputeProjectDefaultNetworkTierRead(d *schema.ResourceData, meta i
 
 	project, err := config.NewComputeClient(userAgent).Projects.Get(projectId).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project data for project %q", projectId))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Project data for project %q", projectId))
 	}
 
 	err = d.Set("network_tier", project.DefaultNetworkTier)

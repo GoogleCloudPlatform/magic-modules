@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleAppEngineDefaultServiceAccount() *schema.Resource {
+func DataSourceGoogleAppEngineDefaultServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleAppEngineDefaultServiceAccountRead,
 		Schema: map[string]*schema.Schema{
@@ -41,12 +41,12 @@ func dataSourceGoogleAppEngineDefaultServiceAccount() *schema.Resource {
 
 func dataSourceGoogleAppEngineDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func dataSourceGoogleAppEngineDefaultServiceAccountRead(d *schema.ResourceData, 
 
 	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(serviceAccountName).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
 	}
 
 	d.SetId(sa.Name)

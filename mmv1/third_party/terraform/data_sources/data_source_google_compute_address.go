@@ -13,7 +13,7 @@ var (
 	computeAddressLinkRegex  = regexp.MustCompile("projects/(.+)/regions/(.+)/addresses/(.+)$")
 )
 
-func dataSourceGoogleComputeAddress() *schema.Resource {
+func DataSourceGoogleComputeAddress() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleComputeAddressRead,
 
@@ -55,16 +55,16 @@ func dataSourceGoogleComputeAddress() *schema.Resource {
 
 func dataSourceGoogleComputeAddressRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func dataSourceGoogleComputeAddressRead(d *schema.ResourceData, meta interface{}
 
 	address, err := config.NewComputeClient(userAgent).Addresses.Get(project, region, name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Address Not Found : %s", name))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Address Not Found : %s", name))
 	}
 
 	if err := d.Set("address", address.Address); err != nil {

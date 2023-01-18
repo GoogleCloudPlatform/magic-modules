@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleSQLCaCerts() *schema.Resource {
+func DataSourceGoogleSQLCaCerts() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleSQLCaCertsRead,
 
@@ -15,7 +15,7 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 			"instance": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"project": {
 				Type:     schema.TypeString,
@@ -61,7 +61,7 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 
 func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

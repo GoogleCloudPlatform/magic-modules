@@ -101,11 +101,12 @@ type DocHideCondition struct {
 }
 
 type TestHideCondition struct {
-        // Location is the location attribute to match, if matched, append Name to list of Testhide
-        Location string `yaml:"location"`
-        // Name specifies sample file name to add to Testhide if location matches.
-        Name string `yaml:"file_name"`
+	// Location is the location attribute to match, if matched, append Name to list of Testhide
+	Location string `yaml:"location"`
+	// Name specifies sample file name to add to Testhide if location matches.
+	Name string `yaml:"file_name"`
 }
+
 // Dependency contains data that describes a single resource in a sample
 type Dependency struct {
 	// FileName is the name of the file as it appears in testcases.yaml
@@ -381,7 +382,7 @@ var translationMap = map[string]translationIndex{
 	"org_id": {
 		docsValue:    "123456789",
 		contextKey:   "org_id",
-		contextValue: "getTestOrgFromEnv(t)",
+		contextValue: "GetTestOrgFromEnv(t)",
 	},
 	"org_name": {
 		docsValue:    "example.com",
@@ -391,12 +392,12 @@ var translationMap = map[string]translationIndex{
 	"region": {
 		docsValue:    "us-west1",
 		contextKey:   "region",
-		contextValue: "getTestRegionFromEnv()",
+		contextValue: "GetTestRegionFromEnv()",
 	},
 	"zone": {
 		docsValue:    "us-west1-a",
 		contextKey:   "zone",
-		contextValue: "getTestZoneFromEnv()",
+		contextValue: "GetTestZoneFromEnv()",
 	},
 	"org_target": {
 		docsValue:    "123456789",
@@ -406,7 +407,7 @@ var translationMap = map[string]translationIndex{
 	"billing_account": {
 		docsValue:    "000000-0000000-0000000-000000",
 		contextKey:   "billing_acct",
-		contextValue: "getTestBillingAccountFromEnv(t)",
+		contextValue: "GetTestBillingAccountFromEnv(t)",
 	},
 	"test_service_account": {
 		docsValue:    "emailAddress:my@service-account.com",
@@ -416,7 +417,7 @@ var translationMap = map[string]translationIndex{
 	"project": {
 		docsValue:    "my-project-name",
 		contextKey:   "project_name",
-		contextValue: "getTestProjectFromEnv()",
+		contextValue: "GetTestProjectFromEnv()",
 	},
 	"project_number": {
 		docsValue:    "my-project-number",

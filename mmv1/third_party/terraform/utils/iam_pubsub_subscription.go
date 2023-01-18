@@ -14,7 +14,7 @@ var IamPubsubSubscriptionSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		DiffSuppressFunc: compareSelfLinkOrResourceName,
+		DiffSuppressFunc: CompareSelfLinkOrResourceName,
 	},
 	"project": {
 		Type:     schema.TypeString,
@@ -31,7 +31,7 @@ type PubsubSubscriptionIamUpdater struct {
 }
 
 func NewPubsubSubscriptionIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func PubsubSubscriptionIdParseFunc(d *schema.ResourceData, _ *Config) error {
 }
 
 func (u *PubsubSubscriptionIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (u *PubsubSubscriptionIamUpdater) GetResourceIamPolicy() (*cloudresourceman
 }
 
 func (u *PubsubSubscriptionIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}

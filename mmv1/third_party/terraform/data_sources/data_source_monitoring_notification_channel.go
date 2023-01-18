@@ -7,15 +7,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceMonitoringNotificationChannel() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceMonitoringNotificationChannel().Schema)
+func DataSourceMonitoringNotificationChannel() *schema.Resource {
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceMonitoringNotificationChannel().Schema)
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "display_name")
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "type")
-	addOptionalFieldsToSchema(dsSchema, "labels")
-	addOptionalFieldsToSchema(dsSchema, "user_labels")
+	AddOptionalFieldsToSchema(dsSchema, "display_name")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "type")
+	AddOptionalFieldsToSchema(dsSchema, "labels")
+	AddOptionalFieldsToSchema(dsSchema, "user_labels")
 
 	return &schema.Resource{
 		Read:   dataSourceMonitoringNotificationChannelRead,
@@ -25,12 +25,12 @@ func dataSourceMonitoringNotificationChannel() *schema.Resource {
 
 func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{MonitoringBasePath}}v3/projects/{{project}}/notificationChannels")
+	url, err := ReplaceVars(d, config, "{{MonitoringBasePath}}v3/projects/{{project}}/notificationChannels")
 	if err != nil {
 		return err
 	}
@@ -74,17 +74,17 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 	params := map[string]string{
 		"filter": filter,
 	}
-	url, err = addQueryParams(url, params)
+	url, err = AddQueryParams(url, params)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	response, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	response, err := SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving NotificationChannels: %s", err)
 	}

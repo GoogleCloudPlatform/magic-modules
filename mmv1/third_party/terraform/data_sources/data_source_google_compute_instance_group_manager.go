@@ -7,10 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleComputeInstanceGroupManager() *schema.Resource {
+func DataSourceGoogleComputeInstanceGroupManager() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeInstanceGroupManager().Schema)
-	addOptionalFieldsToSchema(dsSchema, "name", "self_link", "project", "zone")
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceComputeInstanceGroupManager().Schema)
+	AddOptionalFieldsToSchema(dsSchema, "name", "self_link", "project", "zone")
 
 	return &schema.Resource{
 		Read:   dataSourceComputeInstanceGroupManagerRead,
@@ -36,11 +36,11 @@ func dataSourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta inte
 		}
 		d.SetId(fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s", parsed.Project, parsed.Zone, parsed.Name))
 	} else if name, ok := d.GetOk("name"); ok {
-		zone, err := getZone(d, config)
+		zone, err := GetZone(d, config)
 		if err != nil {
 			return err
 		}
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return err
 		}

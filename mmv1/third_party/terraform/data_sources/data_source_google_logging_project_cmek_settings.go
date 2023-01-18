@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleLoggingProjectCmekSettings() *schema.Resource {
+func DataSourceGoogleLoggingProjectCmekSettings() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleLoggingProjectCmekSettingsRead,
 		Schema: map[string]*schema.Schema{
@@ -52,32 +52,32 @@ func dataSourceGoogleLoggingProjectCmekSettings() *schema.Resource {
 
 func dataSourceGoogleLoggingProjectCmekSettingsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/cmekSettings")
+	url, err := ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/cmekSettings")
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for ProjectCmekSettings: %s", err)
 	}
 	billingProject = project
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("LoggingProjectCmekSettings %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("LoggingProjectCmekSettings %q", d.Id()))
 	}
 
 	d.SetId(fmt.Sprintf("projects/%s/cmekSettings", project))

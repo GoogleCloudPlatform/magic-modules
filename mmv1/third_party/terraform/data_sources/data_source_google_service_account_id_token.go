@@ -16,7 +16,7 @@ const (
 	userInfoScope = "https://www.googleapis.com/auth/userinfo.email"
 )
 
-func dataSourceGoogleServiceAccountIdToken() *schema.Resource {
+func DataSourceGoogleServiceAccountIdToken() *schema.Resource {
 
 	return &schema.Resource{
 		Read: dataSourceGoogleServiceAccountIdTokenRead,
@@ -28,14 +28,14 @@ func dataSourceGoogleServiceAccountIdToken() *schema.Resource {
 			"target_service_account": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
+				ValidateFunc: ValidateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
 			},
 			"delegates": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: validateRegexp(ServiceAccountLinkRegex),
+					ValidateFunc: ValidateRegexp(ServiceAccountLinkRegex),
 				},
 			},
 			"include_email": {
@@ -63,7 +63,7 @@ func dataSourceGoogleServiceAccountIdToken() *schema.Resource {
 
 func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

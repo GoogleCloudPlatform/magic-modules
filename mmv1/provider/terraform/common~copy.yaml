@@ -42,6 +42,19 @@
 -%>
 '<%= dir -%>/<%= fname -%>': 'third_party/terraform/utils/<%= fname -%>'
 <% end -%>
+
+<% Dir["third_party/terraform/products/**"].each do |product_path|
+  puts product_path
+  product_name = product_path.split('/')[-1]
+  puts product_name
+  Dir[product_path + "/*.go"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/service/<%= product_name -%>/<%= fname -%>': '<%= product_path -%>/<%= fname -%>'
+<% end -%>
+<% end -%>
+
+
 <%
   Dir["third_party/terraform/scripts/**/*.*"].each do |file_path|
     next if file_path.end_with?('.erb')

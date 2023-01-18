@@ -116,8 +116,8 @@ func TestNewConfigUserAgent(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		t.Run(c.userAgent, func(t *testing.T) {
-			cfg, err := NewConfig(ctx, "project", "", "", offline, c.userAgent, nil)
+		t.Run(c.UserAgent, func(t *testing.T) {
+			cfg, err := NewConfig(ctx, "project", "", "", offline, c.UserAgent, nil)
 			if err != nil {
 				t.Fatalf("error building config: %s", err)
 			}

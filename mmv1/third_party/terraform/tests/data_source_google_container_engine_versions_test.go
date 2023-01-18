@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"errors"
@@ -13,9 +13,9 @@ import (
 func TestAccContainerEngineVersions_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleContainerEngineVersionsConfig,
@@ -30,9 +30,9 @@ func TestAccContainerEngineVersions_basic(t *testing.T) {
 func TestAccContainerEngineVersions_filtered(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleContainerEngineVersions_filtered,

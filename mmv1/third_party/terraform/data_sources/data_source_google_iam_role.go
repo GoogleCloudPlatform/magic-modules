@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleIamRole() *schema.Resource {
+func DataSourceGoogleIamRole() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleIamRoleRead,
 		Schema: map[string]*schema.Schema{
@@ -33,7 +33,7 @@ func dataSourceGoogleIamRole() *schema.Resource {
 
 func dataSourceGoogleIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func dataSourceGoogleIamRoleRead(d *schema.ResourceData, meta interface{}) error
 	roleName := d.Get("name").(string)
 	role, err := config.NewIamClient(userAgent).Roles.Get(roleName).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Error reading IAM Role %s: %s", roleName, err))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Error reading IAM Role %s: %s", roleName, err))
 	}
 
 	d.SetId(role.Name)

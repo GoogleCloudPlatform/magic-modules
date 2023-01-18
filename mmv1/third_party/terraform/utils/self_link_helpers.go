@@ -16,13 +16,13 @@ func compareResourceNames(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 // Compare only the relative path of two self links.
-func compareSelfLinkRelativePaths(_, old, new string, _ *schema.ResourceData) bool {
-	oldStripped, err := getRelativePath(old)
+func CompareSelfLinkRelativePaths(_, old, new string, _ *schema.ResourceData) bool {
+	oldStripped, err := GetRelativePath(old)
 	if err != nil {
 		return false
 	}
 
-	newStripped, err := getRelativePath(new)
+	newStripped, err := GetRelativePath(new)
 	if err != nil {
 		return false
 	}
@@ -34,11 +34,11 @@ func compareSelfLinkRelativePaths(_, old, new string, _ *schema.ResourceData) bo
 	return false
 }
 
-// compareSelfLinkOrResourceName checks if two resources are the same resource
+// CompareSelfLinkOrResourceName checks if two resources are the same resource
 //
 // Use this method when the field accepts either a name or a self_link referencing a resource.
 // The value we store (i.e. `old` in this method), must be a self_link.
-func compareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) bool {
+func CompareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) bool {
 	newParts := strings.Split(new, "/")
 
 	if len(newParts) == 1 {
@@ -50,16 +50,16 @@ func compareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) b
 	}
 
 	// The `new` string is a self_link
-	return compareSelfLinkRelativePaths("", old, new, nil)
+	return CompareSelfLinkRelativePaths("", old, new, nil)
 }
 
 // Hash the relative path of a self link.
 func selfLinkRelativePathHash(selfLink interface{}) int {
-	path, _ := getRelativePath(selfLink.(string))
+	path, _ := GetRelativePath(selfLink.(string))
 	return hashcode(path)
 }
 
-func getRelativePath(selfLink string) (string, error) {
+func GetRelativePath(selfLink string) (string, error) {
 	stringParts := strings.SplitAfterN(selfLink, "projects/", 2)
 	if len(stringParts) != 2 {
 		return "", fmt.Errorf("String was not a self link: %s", selfLink)
@@ -112,19 +112,19 @@ func getResourcePropertiesFromSelfLinkOrSchema(d *schema.ResourceData, config *C
 	if selfLink, ok := d.GetOk("self_link"); ok {
 		return GetLocationalResourcePropertiesFromSelfLinkString(selfLink.(string))
 	} else {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return "", "", "", err
 		}
 
 		location := ""
 		if locationType == Regional {
-			location, err = getRegion(d, config)
+			location, err = GetRegion(d, config)
 			if err != nil {
 				return "", "", "", err
 			}
 		} else if locationType == Zonal {
-			location, err = getZone(d, config)
+			location, err = GetZone(d, config)
 			if err != nil {
 				return "", "", "", err
 			}

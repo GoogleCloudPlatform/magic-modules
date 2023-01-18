@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleProjects() *schema.Resource {
+func DataSourceGoogleProjects() *schema.Resource {
 	return &schema.Resource{
 		Read: datasourceGoogleProjectsRead,
 		Schema: map[string]*schema.Schema{
@@ -63,7 +63,7 @@ func dataSourceGoogleProjects() *schema.Resource {
 
 func datasourceGoogleProjectsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -75,12 +75,12 @@ func datasourceGoogleProjectsRead(d *schema.ResourceData, meta interface{}) erro
 		params["filter"] = d.Get("filter").(string)
 		url := "https://cloudresourcemanager.googleapis.com/v1/projects"
 
-		url, err := addQueryParams(url, params)
+		url, err := AddQueryParams(url, params)
 		if err != nil {
 			return err
 		}
 
-		res, err := sendRequest(config, "GET", "", url, userAgent, nil)
+		res, err := SendRequest(config, "GET", "", url, userAgent, nil)
 		if err != nil {
 			return fmt.Errorf("Error retrieving projects: %s", err)
 		}

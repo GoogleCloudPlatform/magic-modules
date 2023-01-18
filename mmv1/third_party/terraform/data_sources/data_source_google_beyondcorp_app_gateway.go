@@ -6,14 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleBeyondcorpAppGateway() *schema.Resource {
+func DataSourceGoogleBeyondcorpAppGateway() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceBeyondcorpAppGateway().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceBeyondcorpAppGateway().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleBeyondcorpAppGatewayRead,
@@ -26,12 +26,12 @@ func dataSourceGoogleBeyondcorpAppGatewayRead(d *schema.ResourceData, meta inter
 
 	name := d.Get("name").(string)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

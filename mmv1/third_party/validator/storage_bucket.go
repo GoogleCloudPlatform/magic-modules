@@ -47,7 +47,7 @@ func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) ([]Asset
 }
 
 func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
-	project, _ := getProject(d, config)
+	project, _ := GetProject(d, config)
 
 	// Get the bucket and location
 	bucket := d.Get("name").(string)
@@ -56,7 +56,7 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[str
 	// Create a bucket, setting the labels, location and name.
 	sb := &storage.Bucket{
 		Name:             bucket,
-		Labels:           expandLabels(d),
+		Labels:           ExpandLabels(d),
 		Location:         location,
 		IamConfiguration: expandIamConfiguration(d),
 	}
@@ -120,9 +120,9 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
 		corsRule := storage.BucketCors{
-			Origin:         convertStringArr(data["origin"].([]interface{})),
-			Method:         convertStringArr(data["method"].([]interface{})),
-			ResponseHeader: convertStringArr(data["response_header"].([]interface{})),
+			Origin:         ConvertStringArr(data["origin"].([]interface{})),
+			Method:         ConvertStringArr(data["method"].([]interface{})),
+			ResponseHeader: ConvertStringArr(data["response_header"].([]interface{})),
 			MaxAgeSeconds:  int64(data["max_age_seconds"].(int)),
 		}
 

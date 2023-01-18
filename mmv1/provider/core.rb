@@ -127,6 +127,7 @@ module Provider
           target_dir = File.dirname(target_file)
           Google::LOGGER.debug "Copying #{source} => #{target}"
           FileUtils.mkpath target_dir
+          FileUtils.mkpath target_dir
 
           # If we've modified a file since starting an MM run, it's a reasonable
           # assumption that it was this run that modified it.
@@ -148,6 +149,7 @@ module Provider
         @target_version_name,
         build_env
       )
+      Google::LOGGER.info "compile_product_files #{output_folder} #{@config.files.compile} #{file_template}"
       compile_file_list(output_folder, @config.files.compile, file_template)
     end
 
@@ -178,7 +180,7 @@ module Provider
       Dir.chdir output_folder
       files.map do |target, source|
         Thread.new do
-          Google::LOGGER.debug "Compiling #{source} => #{target}"
+          Google::LOGGER.info "Compiling #{source} => #{target}"
           file_template.generate(pwd, source, target, self)
         end
       end.map(&:join)
@@ -214,10 +216,10 @@ module Provider
       unless object.exclude_resource
         FileUtils.mkpath output_folder
         Dir.chdir output_folder
-        Google::LOGGER.debug "Generating #{object.name} resource"
+        Google::LOGGER.info "Generating #{object.name} resource"
         generate_resource(pwd, data.clone, generate_code, generate_docs)
         if generate_code
-          Google::LOGGER.debug "Generating #{object.name} tests"
+          Google::LOGGER.info "Generating #{object.name} tests"
           generate_resource_tests(pwd, data.clone)
           generate_resource_sweepers(pwd, data.clone)
           generate_resource_files(pwd, data.clone)
@@ -230,7 +232,7 @@ module Provider
 
       FileUtils.mkpath output_folder
       Dir.chdir output_folder
-      Google::LOGGER.debug "Generating #{object.name} IAM policy"
+      Google::LOGGER.info "Generating #{object.name} IAM policy"
       generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
       Dir.chdir pwd
     end

@@ -41,6 +41,14 @@ module Provider
                          pwd:
       end
 
+      def build_flatten_method_service(prefix, property, object, pwd)
+        compile_template pwd + '/templates/terraform/flatten_property_method_service.erb',
+                         prefix: prefix,
+                         property: property,
+                         object: object,
+                         pwd: pwd
+      end
+
       # Transforms a Terraform schema representation of a property into a
       # representation used by the Cloud API.
       def build_expand_method(prefix, property, object, pwd)
@@ -49,6 +57,14 @@ module Provider
                          property:,
                          object:,
                          pwd:
+      end
+
+      def build_expand_method_service(prefix, property, object, pwd)
+        compile_template pwd + '/templates/terraform/expand_property_method_service.erb',
+                         prefix: prefix,
+                         property: property,
+                         object: object,
+                         pwd: pwd
       end
 
       def build_expand_resource_ref(var_name, property, pwd)

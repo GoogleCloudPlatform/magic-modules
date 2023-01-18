@@ -4,7 +4,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package google_test
 
 import (
 	"context"
@@ -27,7 +27,7 @@ func testSweepFirebaseWebApp(region string) error {
 	resourceName := "FirebaseWebApp"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := sharedConfigForRegion(region)
+	config, err := SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -40,7 +40,7 @@ func testSweepFirebaseWebApp(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := getTestBillingAccountFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
 	d := &ResourceDataMock{
@@ -54,13 +54,13 @@ func testSweepFirebaseWebApp(region string) error {
 	}
 
 	listTemplate := strings.Split("https://firebase.googleapis.com/v1beta1/projects/{{project}}/webApps", "?")[0]
-	listUrl, err := replaceVars(d, config, listTemplate)
+	listUrl, err := ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
 		return nil
 	}
 
-	res, err := sendRequest(config, "GET", config.Project, listUrl, config.userAgent, nil)
+	res, err := SendRequest(config, "GET", config.Project, listUrl, config.UserAgent, nil)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", listUrl, err)
 		return nil
@@ -86,13 +86,13 @@ func testSweepFirebaseWebApp(region string) error {
 
 		name := GetResourceNameFromSelfLink(obj["name"].(string))
 		// Skip resources that shouldn't be sweeped
-		if !isSweepableTestResource(name) {
+		if !IsSweepableTestResource(name) {
 			nonPrefixCount++
 			continue
 		}
 
 		deleteTemplate := "https://firebase.googleapis.com/v1beta1/{{name}}:remove"
-		deleteUrl, err := replaceVars(d, config, deleteTemplate)
+		deleteUrl, err := ReplaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
 			return nil
@@ -103,7 +103,7 @@ func testSweepFirebaseWebApp(region string) error {
 		body["immediate"] = true
 
 		// Don't wait on operations as we may have a lot to delete
-		_, err = sendRequest(config, "POST", config.Project, deleteUrl, config.userAgent, body)
+		_, err = SendRequest(config, "POST", config.Project, deleteUrl, config.UserAgent, body)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {

@@ -72,7 +72,7 @@ func resourceIamAuditConfigRead(newUpdaterFunc newResourceIamUpdaterFunc) schema
 		eAuditConfig := getResourceIamAuditConfig(d)
 		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("AuditConfig for %s on %q", eAuditConfig.Service, updater.DescribeResource()))
+			return HandleNotFoundError(err, d, fmt.Sprintf("AuditConfig for %s on %q", eAuditConfig.Service, updater.DescribeResource()))
 		}
 		log.Printf("[DEBUG]: Retrieved policy for %s: %+v", updater.DescribeResource(), p)
 
@@ -184,7 +184,7 @@ func resourceIamAuditConfigDelete(newUpdaterFunc newResourceIamUpdaterFunc, enab
 			err = iamPolicyReadModifyWrite(updater, modifyF)
 		}
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %s with IAM audit config %q", updater.DescribeResource(), d.Id()))
+			return HandleNotFoundError(err, d, fmt.Sprintf("Resource %s with IAM audit config %q", updater.DescribeResource(), d.Id()))
 		}
 
 		return resourceIamAuditConfigRead(newUpdaterFunc)(d, meta)
@@ -198,7 +198,7 @@ func getResourceIamAuditConfig(d *schema.ResourceData) *cloudresourcemanager.Aud
 		logConfig := y.(map[string]interface{})
 		auditLogConfigs[x] = &cloudresourcemanager.AuditLogConfig{
 			LogType:         logConfig["log_type"].(string),
-			ExemptedMembers: convertStringArr(logConfig["exempted_members"].(*schema.Set).List()),
+			ExemptedMembers: ConvertStringArr(logConfig["exempted_members"].(*schema.Set).List()),
 		}
 	}
 	return &cloudresourcemanager.AuditConfig{
@@ -214,7 +214,7 @@ func flattenAuditLogConfigs(configs []*cloudresourcemanager.AuditLogConfig) *sch
 	for _, conf := range configs {
 		res.Add(map[string]interface{}{
 			"log_type":         conf.LogType,
-			"exempted_members": schema.NewSet(schema.HashSchema(exemptedMemberSchema), convertStringArrToInterface(conf.ExemptedMembers)),
+			"exempted_members": schema.NewSet(schema.HashSchema(exemptedMemberSchema), ConvertStringArrToInterface(conf.ExemptedMembers)),
 		})
 	}
 	return res

@@ -1,11 +1,11 @@
 config := meta.(*Config)
 
-project, err := getProject(d, config)
+project, err := GetProject(d, config)
 if err != nil {
  	return nil, err
 }
 
-userAgent, err := generateUserAgentString(d, config.userAgent)
+userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
 	return nil, err
 }

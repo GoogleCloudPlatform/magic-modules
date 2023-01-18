@@ -9,13 +9,13 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
-func dataSourceGoogleStorageBucketObjectContent() *schema.Resource {
+func DataSourceGoogleStorageBucketObjectContent() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceStorageBucketObject().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceStorageBucketObject().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "bucket")
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "content")
+	AddRequiredFieldsToSchema(dsSchema, "bucket")
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "content")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleStorageBucketObjectContentRead,
@@ -25,7 +25,7 @@ func dataSourceGoogleStorageBucketObjectContent() *schema.Resource {
 
 func dataSourceGoogleStorageBucketObjectContentRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

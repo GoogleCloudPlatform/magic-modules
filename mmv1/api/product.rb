@@ -58,6 +58,8 @@ module Api
 
     attr_reader :async
 
+    attr_reader :isMigrated
+
     def validate
       super
       set_variables @objects, :__product

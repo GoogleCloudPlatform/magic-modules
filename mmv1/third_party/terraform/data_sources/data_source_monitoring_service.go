@@ -19,8 +19,8 @@ func dataSourceMonitoringServiceType(
 	typeStateSetter monitoringServiceTypeStateSetter) *schema.Resource {
 
 	// Convert monitoring schema to ds schema
-	dsSchema := datasourceSchemaFromResourceSchema(resourceMonitoringService().Schema)
-	addOptionalFieldsToSchema(dsSchema, "project")
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceMonitoringService().Schema)
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	// Add schema specific to the service type
 	dsSchema = mergeSchemas(typeSchema, dsSchema)
@@ -37,28 +37,28 @@ func dataSourceMonitoringServiceType(
 func dataSourceMonitoringServiceTypeReadFromList(listFilter string, typeStateSetter monitoringServiceTypeStateSetter) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*Config)
-		userAgent, err := generateUserAgentString(d, config.userAgent)
+		userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
 		}
 
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return err
 		}
 
-		filters, err := replaceVars(d, config, listFilter)
+		filters, err := ReplaceVars(d, config, listFilter)
 		if err != nil {
 			return err
 		}
 
 		listUrlTmpl := "{{MonitoringBasePath}}v3/projects/{{project}}/services?filter=" + neturl.QueryEscape(filters)
-		url, err := replaceVars(d, config, listUrlTmpl)
+		url, err := ReplaceVars(d, config, listUrlTmpl)
 		if err != nil {
 			return err
 		}
 
-		resp, err := sendRequest(config, "GET", project, url, userAgent, nil, isMonitoringConcurrentEditError)
+		resp, err := SendRequest(config, "GET", project, url, userAgent, nil, isMonitoringConcurrentEditError)
 		if err != nil {
 			return fmt.Errorf("unable to list Monitoring Service for data source: %v", err)
 		}

@@ -54,7 +54,7 @@ func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) ([]Ass
 }
 
 func GetComputeInstanceApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func expandComputeInstance(project string, d TerraformResourceData, config *Conf
 		Name:                   d.Get("name").(string),
 		NetworkInterfaces:      networkInterfaces,
 		Tags:                   resourceInstanceTags(d),
-		Labels:                 expandLabels(d),
+		Labels:                 ExpandLabels(d),
 		ServiceAccounts:        expandServiceAccounts(d.Get("service_account").([]interface{})),
 		GuestAccelerators:      accels,
 		MinCpuPlatform:         d.Get("min_cpu_platform").(string),
@@ -250,7 +250,7 @@ func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([
 }
 
 func expandBootDisk(d TerraformResourceData, config *Config, project string) (*compute.AttachedDisk, error) {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}

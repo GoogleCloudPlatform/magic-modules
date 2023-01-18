@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
-func resourceStorageObjectAcl() *schema.Resource {
+func ResourceStorageObjectAcl() *schema.Resource {
 	return &schema.Resource{
 		Create:        resourceStorageObjectAclCreate,
 		Read:          resourceStorageObjectAclRead,
@@ -73,7 +73,7 @@ func resourceStorageObjectAclDiff(_ context.Context, diff *schema.ResourceDiff, 
 		return nil
 	}
 
-	sObject, err := config.NewStorageClient(config.userAgent).Objects.Get(bucket.(string), object.(string)).Projection("full").Do()
+	sObject, err := config.NewStorageClient(config.UserAgent).Objects.Get(bucket.(string), object.(string)).Projection("full").Do()
 	if err != nil {
 		// Failing here is OK! Generally, it means we are at Create although it could mean the resource is gone.
 		// Create won't show the object owner being given
@@ -115,7 +115,7 @@ func getObjectAclId(object string) string {
 
 func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) er
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}/objects/{{object}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}/objects/{{object}}")
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceStorageObjectAclRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func resourceStorageObjectAclRead(d *schema.ResourceData, meta interface{}) erro
 
 	roleEntities, err := getRoleEntitiesAsStringsFromApi(config, bucket, object, userAgent)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Storage Object ACL for Bucket %q", d.Get("bucket").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Storage Object ACL for Bucket %q", d.Get("bucket").(string)))
 	}
 
 	err = d.Set("role_entity", roleEntities)
@@ -200,7 +200,7 @@ func resourceStorageObjectAclRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceStorageObjectAclUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -208,7 +208,7 @@ func resourceStorageObjectAclUpdate(d *schema.ResourceData, meta interface{}) er
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}/objects/{{object}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}/objects/{{object}}")
 	if err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func resourceStorageObjectAclUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceStorageObjectAclDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -266,7 +266,7 @@ func resourceStorageObjectAclDelete(d *schema.ResourceData, meta interface{}) er
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}/objects/{{object}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}/objects/{{object}}")
 	if err != nil {
 		return err
 	}

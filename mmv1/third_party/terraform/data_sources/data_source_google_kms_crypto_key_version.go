@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleKmsCryptoKeyVersion() *schema.Resource {
+func DataSourceGoogleKmsCryptoKeyVersion() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleKmsCryptoKeyVersionRead,
 		Schema: map[string]*schema.Schema{
@@ -60,12 +60,12 @@ func dataSourceGoogleKmsCryptoKeyVersion() *schema.Resource {
 
 func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}")
+	url, err := ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}")
 	if err != nil {
 		return err
 	}
@@ -76,9 +76,9 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 	if err != nil {
 		return err
 	}
-	res, err := sendRequest(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("KmsCryptoKeyVersion %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("KmsCryptoKeyVersion %q", d.Id()))
 	}
 
 	if err := d.Set("version", flattenKmsCryptoKeyVersionVersion(res["name"], d)); err != nil {
@@ -97,25 +97,25 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error setting CryptoKeyVersion: %s", err)
 	}
 
-	url, err = replaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
+	url, err = ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Getting purpose of CryptoKey: %#v", url)
-	res, err = sendRequest(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil)
+	res, err = SendRequest(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("KmsCryptoKey %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("KmsCryptoKey %q", d.Id()))
 	}
 
 	if res["purpose"] == "ASYMMETRIC_SIGN" || res["purpose"] == "ASYMMETRIC_DECRYPT" {
-		url, err = replaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}/publicKey")
+		url, err = ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}/publicKey")
 		if err != nil {
 			return err
 		}
 		log.Printf("[DEBUG] Getting public key of CryptoKeyVersion: %#v", url)
 
-		res, err = sendRequestWithTimeout(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil, d.Timeout(schema.TimeoutRead), isCryptoKeyVersionsPendingGeneration)
+		res, err = SendRequestWithTimeout(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil, d.Timeout(schema.TimeoutRead), isCryptoKeyVersionsPendingGeneration)
 
 		if err != nil {
 			log.Printf("Error generating public key: %s", err)
@@ -135,7 +135,7 @@ func flattenKmsCryptoKeyVersionVersion(v interface{}, d *schema.ResourceData) in
 	parts := strings.Split(v.(string), "/")
 	version := parts[len(parts)-1]
 	// Handles the string fixed64 format
-	if intVal, err := stringToFixed64(version); err == nil {
+	if intVal, err := StringToFixed64(version); err == nil {
 		return intVal
 	} // let terraform core handle it if we can't convert the string to an int.
 	return v

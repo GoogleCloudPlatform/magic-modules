@@ -32,10 +32,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var dclResources = map[string]*schema.Resource{
+var DclResources = map[string]*schema.Resource{
 {{- range $res := . }}
 	{{- if not $res.SkipInProvider }}
-	"{{$res.TerraformName}}": resource{{$res.PathType}}(),
+	"{{$res.TerraformName}}": Resource{{$res.PathType}}(),
 	{{- end }}
 {{- end }}
 }

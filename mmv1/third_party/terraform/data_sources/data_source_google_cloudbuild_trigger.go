@@ -7,12 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleCloudBuildTrigger() *schema.Resource {
+func DataSourceGoogleCloudBuildTrigger() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudBuildTrigger().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceCloudBuildTrigger().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "trigger_id", "location")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddRequiredFieldsToSchema(dsSchema, "trigger_id", "location")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudBuildTriggerRead,
@@ -24,7 +24,7 @@ func dataSourceGoogleCloudBuildTrigger() *schema.Resource {
 func dataSourceGoogleCloudBuildTriggerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

@@ -179,7 +179,7 @@ func bigQueryTableConnectionIdSuppress(name, old, new string, _ *schema.Resource
 	// "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}".
 	// but always returns "{{project}}.{{location}}.{{connection_id}}"
 
-	if isEmptyValue(reflect.ValueOf(old)) || isEmptyValue(reflect.ValueOf(new)) {
+	if IsEmptyValue(reflect.ValueOf(old)) || IsEmptyValue(reflect.ValueOf(new)) {
 		return false
 	}
 
@@ -360,7 +360,7 @@ func resourceBigQueryTableSchemaCustomizeDiff(_ context.Context, d *schema.Resou
 	return resourceBigQueryTableSchemaCustomizeDiffFunc(d)
 }
 
-func resourceBigQueryTable() *schema.Resource {
+func ResourceBigQueryTable() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBigQueryTableCreate,
 		Read:   resourceBigQueryTableRead,
@@ -982,7 +982,7 @@ func resourceBigQueryTable() *schema.Resource {
 func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, error) {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -1063,7 +1063,7 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 
 	if v, ok := d.GetOk("clustering"); ok {
 		table.Clustering = &bigquery.Clustering{
-			Fields:          convertStringArr(v.([]interface{})),
+			Fields:          ConvertStringArr(v.([]interface{})),
 			ForceSendFields: []string{"Fields"},
 		}
 	}
@@ -1073,12 +1073,12 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 
 func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1130,14 +1130,14 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Reading BigQuery table: %s", d.Id())
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1147,7 +1147,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 	res, err := config.NewBigQueryClient(userAgent).Tables.Get(project, datasetID, tableID).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
+		return HandleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -1281,7 +1281,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1293,7 +1293,7 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[INFO] Updating BigQuery table: %s", d.Id())
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1313,14 +1313,14 @@ func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Deleting BigQuery table: %s", d.Id())
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1781,7 +1781,7 @@ func flattenMaterializedView(mvd *bigquery.MaterializedViewDefinition) []map[str
 
 func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/datasets/(?P<dataset_id>[^/]+)/tables/(?P<table_id>[^/]+)",
 		"(?P<project>[^/]+)/(?P<dataset_id>[^/]+)/(?P<table_id>[^/]+)",
 		"(?P<dataset_id>[^/]+)/(?P<table_id>[^/]+)",
@@ -1795,7 +1795,7 @@ func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

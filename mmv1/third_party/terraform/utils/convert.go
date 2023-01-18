@@ -57,7 +57,7 @@ func setOmittedFields(item, out interface{}) {
 	// Loop through all the fields of the struct to look for omitted fields and nested fields
 	for i := 0; i < iVal.NumField(); i++ {
 		iField := iVal.Field(i)
-		if isEmptyValue(iField) {
+		if IsEmptyValue(iField) {
 			continue
 		}
 

@@ -9,7 +9,7 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-func resourceSqlSslCert() *schema.Resource {
+func ResourceSqlSslCert() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlSslCertCreate,
 		Read:   resourceSqlSslCertRead,
@@ -94,12 +94,12 @@ func resourceSqlSslCert() *schema.Resource {
 
 func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -144,12 +144,12 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -160,7 +160,7 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 
 	sslCerts, err := config.NewSqlAdminClient(userAgent).SslCerts.Get(project, instance, fingerprint).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
+		return HandleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
 	}
 
 	if sslCerts == nil {
@@ -201,12 +201,12 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

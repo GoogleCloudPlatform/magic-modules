@@ -211,7 +211,7 @@ func resolveImage(c *Config, project, name, userAgent string) (string, error) {
 func resolveImageRefToRelativeURI(providerProject, name string) (string, error) {
 	switch {
 	case resolveImageLink.MatchString(name): // https://www.googleapis.com/compute/v1/projects/xyz/global/images/xyz
-		namePath, err := getRelativePath(name)
+		namePath, err := GetRelativePath(name)
 		if err != nil {
 			return "", err
 		}

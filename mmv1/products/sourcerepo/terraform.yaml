@@ -44,7 +44,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           Resource name of the repository, of the form `{{repo}}`.
           The repo name may contain slashes. eg, `name/with/slash`
       pubsubConfigs: !ruby/object:Overrides::Terraform::PropertyOverride
-        key_diff_suppress_func: 'compareSelfLinkOrResourceName'
+        key_diff_suppress_func: 'CompareSelfLinkOrResourceName'
         key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
         key_description: |
           A Cloud Pub/Sub topic in this repo's project. Values are of the form

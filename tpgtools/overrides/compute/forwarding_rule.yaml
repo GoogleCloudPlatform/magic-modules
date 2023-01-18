@@ -83,19 +83,19 @@
   field: port_range
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: compareSelfLinkRelativePaths
+    diffsuppressfunc: CompareSelfLinkRelativePaths
   field: target
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    diffsuppressfunc: CompareSelfLinkOrResourceName
   field: subnetwork
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    diffsuppressfunc: CompareSelfLinkOrResourceName
   field: location
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    diffsuppressfunc: CompareSelfLinkOrResourceName
   field: network
 - type: DIFF_SUPPRESS_FUNC
   details:
@@ -107,11 +107,11 @@
   field: ip_address
 - type: CUSTOM_VALIDATION
   details:
-    function: validateGCEName
+    function: ValidateGCEName
   field: service_label
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    diffsuppressfunc: CompareSelfLinkOrResourceName
   field: backend_service
 - type: CUSTOM_NAME
   details:

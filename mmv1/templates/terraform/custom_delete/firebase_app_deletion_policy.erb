@@ -9,13 +9,13 @@
 	// End of Handwritten
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for App: %s", err)
 	}
 	billingProject = project
 
-	url, err := replaceVars(d, config, "{{FirebaseBasePath}}{{name}}:remove")
+	url, err := ReplaceVars(d, config, "{{FirebaseBasePath}}{{name}}:remove")
 	if err != nil {
 		return err
 	}
@@ -23,13 +23,13 @@
 	log.Printf("[DEBUG] Deleting App %q", d.Id())
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, "App")
+		return HandleNotFoundError(err, d, "App")
 	}
 
 	err = firebaseOperationWaitTime(

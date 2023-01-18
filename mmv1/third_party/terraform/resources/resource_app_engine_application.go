@@ -12,7 +12,7 @@ import (
 	appengine "google.golang.org/api/appengine/v1"
 )
 
-func resourceAppEngineApplication() *schema.Resource {
+func ResourceAppEngineApplication() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAppEngineApplicationCreate,
 		Read:   resourceAppEngineApplicationRead,
@@ -200,12 +200,12 @@ func appEngineApplicationLocationIDCustomizeDiff(_ context.Context, d *schema.Re
 
 func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	lockName, err := replaceVars(d, config, "apps/{{project}}")
+	lockName, err := ReplaceVars(d, config, "apps/{{project}}")
 	if err != nil {
 		return err
 	}
@@ -242,7 +242,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 
 func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -250,7 +250,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 
 	app, err := config.NewAppEngineClient(userAgent).Apps.Get(pid).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("App Engine Application %q", pid))
+		return HandleNotFoundError(err, d, fmt.Sprintf("App Engine Application %q", pid))
 	}
 	if err := d.Set("auth_domain", app.AuthDomain); err != nil {
 		return fmt.Errorf("Error setting auth_domain: %s", err)
@@ -314,7 +314,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -324,7 +324,7 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	lockName, err := replaceVars(d, config, "apps/{{project}}")
+	lockName, err := ReplaceVars(d, config, "apps/{{project}}")
 	if err != nil {
 		return err
 	}

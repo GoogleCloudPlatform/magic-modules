@@ -1,6 +1,6 @@
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package google_test
 
 import (
 <% unless object.skip_delete -%>
@@ -15,6 +15,8 @@ import (
 <% unless object.skip_delete -%>
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 <% end -%>
+"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/provider"
 )
 <%
 
@@ -49,7 +51,7 @@ object.examples
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
 <% if example.skip_vcr -%>
-	skipIfVcr(t)
+	provider.SkipIfVcr(t)
 <% end -%>
   t.Parallel()
 
@@ -60,16 +62,16 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"<%= var_name %>": <%= override %>,
 	<% end -%>
 	<% end -%>
-			"random_suffix": randString(t, 10),
+			"random_suffix": RandString(t, 10),
 	}
 
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+	provider.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { provider.TestAccPreCheck(t) },
 		<% unless versioned_provider -%>
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 		<% else -%>
-		Providers: testAccProvidersOiCS,
+		Providers: provider.testAccProvidersOiCS,
 		<% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -117,9 +119,9 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 		<% if object.custom_code.test_check_destroy -%>
 	<%= lines(compile(pwd + '/' + object.custom_code.test_check_destroy)) -%>
 		<% else -%>
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+		url, err := ReplaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 		if err != nil {
 			return err
 		}
@@ -130,7 +132,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			billingProject = config.BillingProject
 		}
 
-		_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+		_, err = SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 		if err == nil {
 				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 			}

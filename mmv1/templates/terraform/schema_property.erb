@@ -44,7 +44,7 @@
 <% end -%>
 <% unless property.validation.nil? || property.output -%>
 	<% if !property.validation.regex.nil? -%>
-  ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
+  ValidateFunc: ValidateRegexp(`<%= property.validation.regex -%>`),
 	<% elsif !property.validation.function.nil? -%>
 	ValidateFunc: <%= property.validation.function -%>,
 	<% end # property.validation.nil?  -%>
@@ -59,7 +59,7 @@
 <% if !property.diff_suppress_func.nil? -%>
   DiffSuppressFunc: <%= property.diff_suppress_func %>,
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
-  DiffSuppressFunc: compareSelfLinkOrResourceName,
+  DiffSuppressFunc: CompareSelfLinkOrResourceName,
 <% end -%>
 <% unless property.state_func.nil? -%>
 	StateFunc: <%= property.state_func %>,
@@ -124,7 +124,7 @@
       Elem: &schema.Schema{
         Type: <%= tf_types[property.item_type.class] -%>,
     <% if property.item_type.is_a?(Api::Type::ResourceRef) -%>
-        DiffSuppressFunc: compareSelfLinkOrResourceName,
+        DiffSuppressFunc: CompareSelfLinkOrResourceName,
     <% end -%>
       },
   <% end -%>

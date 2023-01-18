@@ -16,7 +16,7 @@ import (
 	"google.golang.org/api/servicemanagement/v1"
 )
 
-func resourceEndpointsService() *schema.Resource {
+func ResourceEndpointsService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceEndpointsServiceCreate,
 		Read:   resourceEndpointsServiceRead,
@@ -212,12 +212,12 @@ func getEndpointServiceGRPCConfigSource(serviceConfig, protoConfig string) *serv
 
 func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -287,7 +287,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	// we currently only support full rollouts - anyone trying to do incremental
 	// rollouts or A/B testing is going to need a more precise tool than this resource.
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -348,7 +348,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -366,7 +366,7 @@ func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) er
 
 func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

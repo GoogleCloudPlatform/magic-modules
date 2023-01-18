@@ -13,14 +13,14 @@ import (
 // CA related utilities.
 
 func enableCA(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	enableUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:enable")
+	enableUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:enable")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Enabling CertificateAuthority")
 
-	res, err := sendRequest(config, "POST", billingProject, enableUrl, userAgent, nil)
+	res, err := SendRequest(config, "POST", billingProject, enableUrl, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error enabling CertificateAuthority: %s", err)
 	}
@@ -36,14 +36,14 @@ func enableCA(config *Config, d *schema.ResourceData, project string, billingPro
 }
 
 func disableCA(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	disableUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
+	disableUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Disabling CA")
 
-	dRes, err := sendRequest(config, "POST", billingProject, disableUrl, userAgent, nil)
+	dRes, err := SendRequest(config, "POST", billingProject, disableUrl, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error disabling CA: %s", err)
 	}
@@ -91,13 +91,13 @@ func activateSubCAWithThirdPartyIssuer(config *Config, d *schema.ResourceData, p
 	activateObj["subordinateConfig"].(map[string]interface{})["pemIssuerChain"] = make(map[string]interface{})
 	activateObj["subordinateConfig"].(map[string]interface{})["pemIssuerChain"].(map[string]interface{})["pemCertificates"] = pemIssuerChain
 
-	activateUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:activate")
+	activateUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:activate")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Activating CertificateAuthority: %#v", activateObj)
-	res, err := sendRequest(config, "POST", billingProject, activateUrl, userAgent, activateObj)
+	res, err := SendRequest(config, "POST", billingProject, activateUrl, userAgent, activateObj)
 	if err != nil {
 		return fmt.Errorf("Error enabling CertificateAuthority: %s", err)
 	}
@@ -129,11 +129,11 @@ func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, p
 	issuer := ca.(string)
 
 	// 2. fetch CSR
-	fetchCSRUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
+	fetchCSRUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
 	if err != nil {
 		return err
 	}
-	res, err := sendRequest(config, "GET", billingProject, fetchCSRUrl, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, fetchCSRUrl, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("failed to fetch CSR: %v", err)
 	}
@@ -176,18 +176,18 @@ func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, p
 		return err
 	}
 
-	PrivatecaBasePath, err := replaceVars(d, config, "{{PrivatecaBasePath}}")
+	PrivatecaBasePath, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}")
 	if err != nil {
 		return err
 	}
 	signUrl := fmt.Sprintf("%v%v/certificates?certificateId=%v", PrivatecaBasePath, poolName, certId)
-	signUrl, err = addQueryParams(signUrl, map[string]string{"issuingCertificateAuthorityId": issuerId})
+	signUrl, err = AddQueryParams(signUrl, map[string]string{"issuingCertificateAuthorityId": issuerId})
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Signing CA Certificate: %#v", obj)
-	res, err = sendRequestWithTimeout(config, "POST", billingProject, signUrl, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err = SendRequestWithTimeout(config, "POST", billingProject, signUrl, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Certificate: %s", err)
 	}
@@ -199,13 +199,13 @@ func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, p
 	activateObj["subordinateConfig"] = make(map[string]interface{})
 	activateObj["subordinateConfig"].(map[string]interface{})["certificateAuthority"] = issuer
 
-	activateUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:activate")
+	activateUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:activate")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Activating CertificateAuthority: %#v", activateObj)
-	res, err = sendRequest(config, "POST", billingProject, activateUrl, userAgent, activateObj)
+	res, err = SendRequest(config, "POST", billingProject, activateUrl, userAgent, activateObj)
 	if err != nil {
 		return fmt.Errorf("Error enabling CertificateAuthority: %s", err)
 	}

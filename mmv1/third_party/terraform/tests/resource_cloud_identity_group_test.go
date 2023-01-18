@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"testing"
@@ -12,12 +12,12 @@ func TestAccCloudIdentityGroup_update(t *testing.T) {
 	context := map[string]interface{}{
 		"org_domain":    getTestOrgDomainFromEnv(t),
 		"cust_id":       getTestCustIdFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckCloudIdentityGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

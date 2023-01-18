@@ -20,7 +20,7 @@ import (
 
 var instancesSelfLinkPattern = regexp.MustCompile(fmt.Sprintf(zonalLinkBasePattern, "instances"))
 
-func resourceComputeTargetPool() *schema.Resource {
+func ResourceComputeTargetPool() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeTargetPoolCreate,
 		Read:   resourceComputeTargetPoolRead,
@@ -72,7 +72,7 @@ func resourceComputeTargetPool() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
-					DiffSuppressFunc: compareSelfLinkOrResourceName,
+					DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				},
 				Description: `List of zero or one health check name or self_link. Only legacy google_compute_http_health_check is supported.`,
 			},
@@ -172,7 +172,7 @@ func convertInstancesToUrls(d *schema.ResourceData, config *Config, project stri
 			if len(splitName) != 2 {
 				return nil, fmt.Errorf("Invalid instance name, require URL or zone/name: %s", name)
 			} else {
-				url, err := replaceVars(d, config, fmt.Sprintf(
+				url, err := ReplaceVars(d, config, fmt.Sprintf(
 					"{{ComputeBasePath}}projects/%s/zones/%s/instances/%s",
 					project, splitName[0], splitName[1]))
 				if err != nil {
@@ -187,17 +187,17 @@ func convertInstancesToUrls(d *schema.ResourceData, config *Config, project stri
 
 func resourceComputeTargetPoolCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -235,7 +235,7 @@ func resourceComputeTargetPoolCreate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	// It probably maybe worked, so store the ID now
-	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/targetPools/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/targetPools/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -250,17 +250,17 @@ func resourceComputeTargetPoolCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceComputeTargetPoolUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -398,17 +398,17 @@ func convertInstancesFromUrls(urls []string) []string {
 
 func resourceComputeTargetPoolRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -416,7 +416,7 @@ func resourceComputeTargetPoolRead(d *schema.ResourceData, meta interface{}) err
 	tpool, err := config.NewComputeClient(userAgent).TargetPools.Get(
 		project, region, d.Get("name").(string)).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Target Pool %q", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Target Pool %q", d.Get("name").(string)))
 	}
 
 	if err := d.Set("self_link", tpool.SelfLink); err != nil {
@@ -460,17 +460,17 @@ func resourceComputeTargetPoolRead(d *schema.ResourceData, meta interface{}) err
 
 func resourceComputeTargetPoolDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -492,7 +492,7 @@ func resourceComputeTargetPoolDelete(d *schema.ResourceData, meta interface{}) e
 
 func resourceTargetPoolStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/targetPools/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
 		"(?P<region>[^/]+)/(?P<name>[^/]+)",
@@ -502,7 +502,7 @@ func resourceTargetPoolStateImporter(d *schema.ResourceData, meta interface{}) (
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/targetPools/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/targetPools/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

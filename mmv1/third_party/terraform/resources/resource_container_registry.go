@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceContainerRegistry() *schema.Resource {
+func ResourceContainerRegistry() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceContainerRegistryCreate,
 		Read:   resourceContainerRegistryRead,
@@ -45,12 +45,12 @@ func resourceContainerRegistry() *schema.Resource {
 
 func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -64,12 +64,12 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	// Performing a token handshake with the GCR API causes the backing bucket to create if it hasn't already.
-	url, err := replaceVars(d, config, fmt.Sprintf("%s?service=gcr.io&scope=repository:{{project}}/my-repo:push,pull", urlBase))
+	url, err := ReplaceVars(d, config, fmt.Sprintf("%s?service=gcr.io&scope=repository:{{project}}/my-repo:push,pull", urlBase))
 	if err != nil {
 		return err
 	}
 
-	_, err = sendRequestWithTimeout(config, "GET", project, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
+	_, err = SendRequestWithTimeout(config, "GET", project, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return err
@@ -79,13 +79,13 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	location := d.Get("location").(string)
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) err
 
 	res, err := config.NewStorageClient(userAgent).Buckets.Get(name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Container Registry Storage Bucket %q", name))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Container Registry Storage Bucket %q", name))
 	}
 	log.Printf("[DEBUG] Read bucket %v at location %v\n\n", res.Name, res.SelfLink)
 

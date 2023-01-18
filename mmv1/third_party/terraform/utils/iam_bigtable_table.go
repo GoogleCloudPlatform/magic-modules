@@ -38,7 +38,7 @@ type BigtableTableIamUpdater struct {
 }
 
 func NewBigtableTableUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func BigtableTableIdParseFunc(d *schema.ResourceData, config *Config) error {
 		return err
 	}
 
-	project, _ := getProject(d, config)
+	project, _ := GetProject(d, config)
 
 	for k, v := range m {
 		values[k] = v
@@ -90,7 +90,7 @@ func BigtableTableIdParseFunc(d *schema.ResourceData, config *Config) error {
 func (u *BigtableTableIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
 	req := &bigtableadmin.GetIamPolicyRequest{}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (u *BigtableTableIamUpdater) SetResourceIamPolicy(policy *cloudresourcemana
 
 	req := &bigtableadmin.SetIamPolicyRequest{Policy: bigtablePolicy}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -10,15 +10,15 @@ import (
 func TestAccComputeTargetGrpcProxy_update(t *testing.T) {
 	t.Parallel()
 
-	proxy := fmt.Sprintf("tf-manual-proxy-%s", randString(t, 10))
-	urlmap1 := fmt.Sprintf("tf-manual-urlmap1-%s", randString(t, 10))
-	urlmap2 := fmt.Sprintf("tf-manual-urlmap2-%s", randString(t, 10))
-	backend := fmt.Sprintf("tf-manual-backend-%s", randString(t, 10))
-	healthcheck := fmt.Sprintf("tf-manual-healthcheck-%s", randString(t, 10))
+	proxy := fmt.Sprintf("tf-manual-proxy-%s", RandString(t, 10))
+	urlmap1 := fmt.Sprintf("tf-manual-urlmap1-%s", RandString(t, 10))
+	urlmap2 := fmt.Sprintf("tf-manual-urlmap2-%s", RandString(t, 10))
+	backend := fmt.Sprintf("tf-manual-backend-%s", RandString(t, 10))
+	healthcheck := fmt.Sprintf("tf-manual-healthcheck-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeTargetGrpcProxyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

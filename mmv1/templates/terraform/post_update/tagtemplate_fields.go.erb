@@ -33,7 +33,7 @@ for _, raw := range n.(*schema.Set).List() {
 
 // fields schema to create schema.set below
 dataCatalogTagTemplateFieldsSchema := &schema.Resource{
-    Schema: resourceDataCatalogTagTemplate().Schema["fields"].Elem.(*schema.Resource).Schema,
+    Schema: ResourceDataCatalogTagTemplate().Schema["fields"].Elem.(*schema.Resource).Schema,
 }
 
 for name, change := range vals {
@@ -80,7 +80,7 @@ for name, change := range vals {
 
     // if we have old and new values, but are not equal, update with the new state
     if !reflect.DeepEqual(changeOldProp, changeNewProp) {
-        url1, err := replaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields/"+name)
+        url1, err := ReplaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields/"+name)
         if err != nil {
             return err
         }
@@ -115,7 +115,7 @@ for name, change := range vals {
             return resourceDataCatalogTagTemplateRead(d, meta)
         }
 
-        res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url1, userAgent, changeNewProp, d.Timeout(schema.TimeoutDelete))
+        res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url1, userAgent, changeNewProp, d.Timeout(schema.TimeoutDelete))
         if err != nil {
             return fmt.Errorf("Error updating TagTemplate Field %v: %s", name, err)
         }

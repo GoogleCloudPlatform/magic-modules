@@ -1,6 +1,6 @@
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package google
+package google_test
 
 import (
 <% if object.min_version.name == "ga" -%>
@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/provider"
 )
 
 <%# Since most resources define a "basic" config as their first example, we can reuse that config to create a resource to test IAM resources with. -%>
@@ -39,16 +41,16 @@ import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.b
 		<% if i != params.size - 1 -%>
 			<%# If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment -%>
 			<% if object.iam_policy.test_project_name.nil? -%>
-				<% import_qualifiers.push('getTestProjectFromEnv()') -%>
+				<% import_qualifiers.push('GetTestProjectFromEnv()') -%>
 			<% else -%>
 				<% import_qualifiers.push('context["project_id"]') -%>
 			<% end -%>
 		<% end -%>
 	<% elsif param == 'zone' -%>
-		<% import_qualifiers.push('getTestZoneFromEnv()') -%>
+		<% import_qualifiers.push('GetTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
 		<% if example.region_override.nil? -%>
-				<% import_qualifiers.push('getTestRegionFromEnv()') -%>
+				<% import_qualifiers.push('GetTestRegionFromEnv()') -%>
 			<% else -%>
 				<% import_qualifiers.push("\"#{example.region_override}\"") -%>
 			<% end -%>
@@ -59,12 +61,12 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+	provider.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { provider.TestAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers:    testAccProvidersOiCS,
+		Providers:    provider.testAccProvidersOiCS,
 <% else -%>
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
@@ -105,12 +107,12 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	provider.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { provider.TestAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		Providers: provider.testAccProvidersOiCS,
 <% else -%>
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -147,12 +149,12 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 	context["service_account"] = sa
 <% end -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	provider.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { provider.TestAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		Providers: provider.testAccProvidersOiCS,
 <% else -%>
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -193,12 +195,12 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	provider.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { provider.TestAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		Providers: provider.testAccProvidersOiCS,
 <% else -%>
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -224,17 +226,17 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 
 func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	provider.SkipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	provider.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { provider.TestAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		Providers: provider.testAccProvidersOiCS,
 <% else -%>
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -279,12 +281,12 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	provider.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { provider.TestAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		Providers: provider.testAccProvidersOiCS,
 <% else -%>
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -310,17 +312,17 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 
 func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	provider.SkipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	provider.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { provider.TestAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		Providers: provider.testAccProvidersOiCS,
 <% else -%>
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -381,12 +383,12 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 <% end -%>
 	expectedPolicyData = strings.Replace(expectedPolicyData, "<", "\\u003c", -1)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	provider.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { provider.TestAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
-		Providers: testAccProvidersOiCS,
+		Providers: provider.testAccProvidersOiCS,
 <% else -%>
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 <% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{

@@ -6,14 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleComputeBackendService() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeBackendService().Schema)
+func DataSourceGoogleComputeBackendService() *schema.Resource {
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceComputeBackendService().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceComputeBackendServiceRead,
@@ -26,7 +26,7 @@ func dataSourceComputeBackendServiceRead(d *schema.ResourceData, meta interface{
 
 	serviceName := d.Get("name").(string)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

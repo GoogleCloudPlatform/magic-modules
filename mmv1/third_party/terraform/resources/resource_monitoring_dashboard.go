@@ -31,7 +31,7 @@ func monitoringDashboardDiffSuppress(k, old, new string, d *schema.ResourceData)
 	return reflect.DeepEqual(oldMap, newMap)
 }
 
-func resourceMonitoringDashboard() *schema.Resource {
+func ResourceMonitoringDashboard() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceMonitoringDashboardCreate,
 		Read:   resourceMonitoringDashboardRead,
@@ -74,7 +74,7 @@ func resourceMonitoringDashboard() *schema.Resource {
 
 func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -84,16 +84,16 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{MonitoringBasePath}}v1/projects/{{project}}/dashboards")
+	url, err := ReplaceVars(d, config, "{{MonitoringBasePath}}v1/projects/{{project}}/dashboards")
 	if err != nil {
 		return err
 	}
-	res, err := sendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutCreate), isMonitoringConcurrentEditError)
+	res, err := SendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutCreate), isMonitoringConcurrentEditError)
 	if err != nil {
 		return fmt.Errorf("Error creating Dashboard: %s", err)
 	}
@@ -109,21 +109,21 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 
 func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	res, err := sendRequest(config, "GET", project, url, userAgent, nil, isMonitoringConcurrentEditError)
+	res, err := SendRequest(config, "GET", project, url, userAgent, nil, isMonitoringConcurrentEditError)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -143,7 +143,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -160,13 +160,13 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 
 	nObj["etag"] = oObj["etag"]
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
-	_, err = sendRequestWithTimeout(config, "PATCH", project, url, userAgent, nObj, d.Timeout(schema.TimeoutUpdate), isMonitoringConcurrentEditError)
+	_, err = SendRequestWithTimeout(config, "PATCH", project, url, userAgent, nObj, d.Timeout(schema.TimeoutUpdate), isMonitoringConcurrentEditError)
 	if err != nil {
 		return fmt.Errorf("Error updating Dashboard %q: %s", d.Id(), err)
 	}
@@ -176,21 +176,21 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	_, err = sendRequestWithTimeout(config, "DELETE", project, url, userAgent, nil, d.Timeout(schema.TimeoutDelete), isMonitoringConcurrentEditError)
+	_, err = SendRequestWithTimeout(config, "DELETE", project, url, userAgent, nil, d.Timeout(schema.TimeoutDelete), isMonitoringConcurrentEditError)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
 	}
 
 	return nil

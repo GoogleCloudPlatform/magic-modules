@@ -6,15 +6,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleComputeHaVpnGateway() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeHaVpnGateway().Schema)
+func DataSourceGoogleComputeHaVpnGateway() *schema.Resource {
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceComputeHaVpnGateway().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeHaVpnGatewayRead,
@@ -27,12 +27,12 @@ func dataSourceGoogleComputeHaVpnGatewayRead(d *schema.ResourceData, meta interf
 
 	name := d.Get("name").(string)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

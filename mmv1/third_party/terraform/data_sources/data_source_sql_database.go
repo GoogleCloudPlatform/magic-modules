@@ -6,12 +6,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceSqlDatabase() *schema.Resource {
+func DataSourceSqlDatabase() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceSQLDatabase().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addRequiredFieldsToSchema(dsSchema, "instance")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceSQLDatabase().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "instance")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceSqlDatabaseRead,
@@ -21,7 +21,7 @@ func dataSourceSqlDatabase() *schema.Resource {
 
 func dataSourceSqlDatabaseRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for Database: %s", err)
 	}

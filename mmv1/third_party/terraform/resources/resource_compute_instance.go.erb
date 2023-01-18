@@ -97,7 +97,7 @@ func forceNewIfNetworkIPNotUpdatableFunc(d TerraformResourceDiff) error {
 	return nil
 }
 
-func resourceComputeInstance() *schema.Resource {
+func ResourceComputeInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceCreate,
 		Read:   resourceComputeInstanceRead,
@@ -168,7 +168,7 @@ func resourceComputeInstance() *schema.Resource {
 							AtLeastOneOf:     bootDiskKeys,
 							ForceNew:         true,
 							ConflictsWith:    []string{"boot_disk.0.disk_encryption_key_raw"},
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
+							DiffSuppressFunc: CompareSelfLinkRelativePaths,
 							Computed:         true,
 							Description:      `The self_link of the encryption key that is stored in Google Cloud KMS to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
 						},
@@ -241,7 +241,7 @@ func resourceComputeInstance() *schema.Resource {
 							Computed:         true,
 							ForceNew:         true,
 							ConflictsWith:    []string{"boot_disk.initialize_params"},
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the disk attached to this instance.`,
 						},
 					},
@@ -272,7 +272,7 @@ func resourceComputeInstance() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the network attached to this interface.`,
 						},
 
@@ -280,7 +280,7 @@ func resourceComputeInstance() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
@@ -448,7 +448,7 @@ func resourceComputeInstance() *schema.Resource {
 						"source": {
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the disk attached to this instance.`,
 						},
 
@@ -477,7 +477,7 @@ func resourceComputeInstance() *schema.Resource {
 						"kms_key_self_link": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
+							DiffSuppressFunc: CompareSelfLinkRelativePaths,
 							Computed:         true,
 							Description:      `The self_link of the encryption key that is stored in Google Cloud KMS to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
 						},
@@ -537,7 +537,7 @@ func resourceComputeInstance() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ForceNew:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The accelerator type resource exposed to this instance. E.g. nvidia-tesla-k80.`,
 						},
 					},
@@ -884,7 +884,7 @@ be from 0 to 999,999,999 inclusive.`,
 			"resource_policies": {
 				Type:             schema.TypeList,
 				Elem:             &schema.Schema{Type: schema.TypeString},
-				DiffSuppressFunc: compareSelfLinkRelativePaths,
+				DiffSuppressFunc: CompareSelfLinkRelativePaths,
 				Optional:         true,
 				MaxItems:         1,
 				Description:      `A list of self_links of resource policies to attach to the instance. Currently a max of 1 resource policy is supported.`,
@@ -951,21 +951,21 @@ be from 0 to 999,999,999 inclusive.`,
 }
 
 func getInstance(config *Config, d *schema.ResourceData) (*compute.Instance, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return nil, err
 	}
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
 	if err != nil {
-		return nil, handleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
+		return nil, HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
 	}
 	return instance, nil
 }
@@ -976,7 +976,7 @@ func getDisk(diskUri string, d *schema.ResourceData, config *Config) (*compute.D
 		return nil, err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -1076,7 +1076,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 <% end -%>
 		Tags:                       resourceInstanceTags(d),
-		Labels:                     expandLabels(d),
+		Labels:                     ExpandLabels(d),
 		ServiceAccounts:            expandServiceAccounts(d.Get("service_account").([]interface{})),
 		GuestAccelerators:          accels,
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
@@ -1088,7 +1088,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
 		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
 		DisplayDevice:              expandDisplayDevice(d),
-		ResourcePolicies:           convertStringArr(d.Get("resource_policies").([]interface{})),
+		ResourcePolicies:           ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
 	}, nil
 }
@@ -1148,18 +1148,18 @@ func waitUntilInstanceHasDesiredStatus(config *Config, d *schema.ResourceData) e
 
 func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
 	// Get the zone
-	z, err := getZone(d, config)
+	z, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -1203,7 +1203,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1273,7 +1273,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		if err := d.Set("tags_fingerprint", instance.Tags.Fingerprint); err != nil {
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
-		if err := d.Set("tags", convertStringArrToInterface(instance.Tags.Items)); err != nil {
+		if err := d.Set("tags", ConvertStringArrToInterface(instance.Tags.Items)); err != nil {
 			return fmt.Errorf("Error setting tags: %s", err)
 		}
 	}
@@ -1472,17 +1472,17 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 
 func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -1491,7 +1491,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	// Change back to getInstance(config, d) once updating alias ips is GA.
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
 	}
 
 	// Enable partial mode for the resource since it is possible
@@ -1558,7 +1558,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if d.HasChange("labels") {
-		labels := expandLabels(d)
+		labels := ExpandLabels(d)
 		labelFingerprint := d.Get("label_fingerprint").(string)
 		req := compute.InstancesSetLabelsRequest{Labels: labels, LabelFingerprint: labelFingerprint}
 
@@ -1588,7 +1588,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
-		resourcePolicies := convertStringArr(d.Get("resource_policies").([]interface{}))
+		resourcePolicies := ConvertStringArr(d.Get("resource_policies").([]interface{}))
 		if len(resourcePolicies) > 0 {
 			req := compute.InstancesAddResourcePoliciesRequest{ResourcePolicies: resourcePolicies}
 
@@ -2148,17 +2148,17 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func startInstanceOperation(d *schema.ResourceData, config *Config) (*compute.Operation, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -2167,7 +2167,7 @@ func startInstanceOperation(d *schema.ResourceData, config *Config) (*compute.Op
 	// Change back to getInstance(config, d) once updating alias ips is GA.
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
 	if err != nil {
-		return nil, handleNotFoundError(err, d, fmt.Sprintf("Instance %s", instance.Name))
+		return nil, HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", instance.Name))
 	}
 
 	// Retrieve instance from config to pull encryption keys if necessary
@@ -2343,17 +2343,17 @@ func desiredStatusDiff(_ context.Context, diff *schema.ResourceDiff, meta interf
 
 func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -2385,7 +2385,7 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 
 func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instances/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",
@@ -2394,7 +2394,7 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instances/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instances/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -2404,7 +2404,7 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
 }
 
 func expandBootDisk(d *schema.ResourceData, config *Config, project string) (*compute.AttachedDisk, error) {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"testing"
@@ -11,9 +11,9 @@ func TestAccDataSourceGoogleComputeDefaultServiceAccount_basic(t *testing.T) {
 
 	resourceName := "data.google_compute_default_service_account.default"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleComputeDefaultServiceAccount_basic,

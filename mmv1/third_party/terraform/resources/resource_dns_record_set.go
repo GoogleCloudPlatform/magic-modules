@@ -23,8 +23,8 @@ func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		return false
 	}
 
-	oList := convertStringArr(o.([]interface{}))
-	nList := convertStringArr(n.([]interface{}))
+	oList := ConvertStringArr(o.([]interface{}))
+	nList := ConvertStringArr(n.([]interface{}))
 
 	parseFunc := func(record string) string {
 		switch d.Get("type") {
@@ -69,7 +69,7 @@ func rrdatasListDiffSuppress(oldList, newList []string, fun func(x string) strin
 	return true
 }
 
-func resourceDnsRecordSet() *schema.Resource {
+func ResourceDnsRecordSet() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDnsRecordSetCreate,
 		Read:   resourceDnsRecordSetRead,
@@ -84,7 +84,7 @@ func resourceDnsRecordSet() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				Description:      `The name of the zone in which this record set will reside.`,
 			},
 
@@ -278,7 +278,7 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 					"network_url": {
 						Type:             schema.TypeString,
 						Required:         true,
-						DiffSuppressFunc: compareSelfLinkOrResourceName,
+						DiffSuppressFunc: CompareSelfLinkOrResourceName,
 						Description:      "The fully qualified url of the network in which the load balancer belongs. This should be formatted like `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.",
 					},
 					"project": {
@@ -299,12 +299,12 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 
 func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -379,12 +379,12 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -403,7 +403,7 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 		return reqErr
 	})
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("DNS Record Set %q", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("DNS Record Set %q", d.Get("name").(string)))
 	}
 	if len(resp.Rrsets) == 0 {
 		// The resource doesn't exist anymore
@@ -440,12 +440,12 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -493,7 +493,7 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] DNS Record delete request: %#v", chg)
 	chg, err = config.NewDnsClient(userAgent).Changes.Create(project, zone, chg).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, "google_dns_record_set")
+		return HandleNotFoundError(err, d, "google_dns_record_set")
 	}
 
 	w := &DnsChangeWaiter{
@@ -513,12 +513,12 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 
 func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -594,7 +594,7 @@ func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/managedZones/(?P<managed_zone>[^/]+)/rrsets/(?P<name>[^/]+)/(?P<type>[^/]+)",
 		"(?P<project>[^/]+)/(?P<managed_zone>[^/]+)/(?P<name>[^/]+)/(?P<type>[^/]+)",
 		"(?P<managed_zone>[^/]+)/(?P<name>[^/]+)/(?P<type>[^/]+)",
@@ -603,7 +603,7 @@ func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) (
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -613,7 +613,7 @@ func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) (
 }
 
 func expandDnsRecordSetRrdata(configured []interface{}) []string {
-	return convertStringArr(configured)
+	return ConvertStringArr(configured)
 }
 
 func expandDnsRecordSetRoutingPolicy(configured []interface{}, d TerraformResourceData, config *Config) (*dns.RRSetRoutingPolicy, error) {
@@ -683,7 +683,7 @@ func expandDnsRecordSetRoutingPolicyWrrItem(configured interface{}, d TerraformR
 		return nil, err
 	}
 	return &dns.RRSetRoutingPolicyWrrPolicyWrrPolicyItem{
-		Rrdatas:              convertStringArr(data["rrdatas"].([]interface{})),
+		Rrdatas:              ConvertStringArr(data["rrdatas"].([]interface{})),
 		Weight:               data["weight"].(float64),
 		HealthCheckedTargets: healthCheckedTargets,
 	}, nil
@@ -708,7 +708,7 @@ func expandDnsRecordSetRoutingPolicyGeoItem(configured interface{}, d TerraformR
 		return nil, err
 	}
 	return &dns.RRSetRoutingPolicyGeoPolicyGeoPolicyItem{
-		Rrdatas:              convertStringArr(data["rrdatas"].([]interface{})),
+		Rrdatas:              ConvertStringArr(data["rrdatas"].([]interface{})),
 		Location:             data["location"].(string),
 		HealthCheckedTargets: healthCheckedTargets,
 	}, nil
@@ -764,7 +764,7 @@ func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancerNetworkUrl(v inte
 	} else if strings.HasPrefix(v.(string), "https://") {
 		return v, nil
 	}
-	url, err := replaceVars(d, config, "{{ComputeBasePath}}"+v.(string))
+	url, err := ReplaceVars(d, config, "{{ComputeBasePath}}"+v.(string))
 	if err != nil {
 		return "", err
 	}

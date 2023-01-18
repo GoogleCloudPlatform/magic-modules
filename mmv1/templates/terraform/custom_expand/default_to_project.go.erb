@@ -15,7 +15,7 @@
 // If the property hasn't been explicitly set in config use the project defined by the provider or env.
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	if v == nil {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return project, nil
 		}

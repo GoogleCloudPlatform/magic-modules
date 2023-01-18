@@ -137,7 +137,7 @@ func emptyOrUnsetBlockDiffSuppressLogic(k, old, new string, o, n interface{}) bo
 		return false
 	}
 	for _, v := range contents {
-		if !isEmptyValue(reflect.ValueOf(v)) {
+		if !IsEmptyValue(reflect.ValueOf(v)) {
 			return false
 		}
 	}
@@ -209,7 +209,7 @@ func compareIpAddressOrSelfLinkOrResourceName(_, old, new string, _ *schema.Reso
 	}
 
 	// otherwise compare as self links
-	return compareSelfLinkOrResourceName("", old, new, nil)
+	return CompareSelfLinkOrResourceName("", old, new, nil)
 }
 
 <% if version != "ga" -%>
@@ -222,11 +222,11 @@ func alwaysDiffSuppress(_, _, _ string, _ *schema.ResourceData) bool {
 // Use this method when subnet is optioanl and auto_create_subnetworks = true
 // API sometimes choose a subnet so the diff needs to be ignored
 func compareOptionalSubnet(_, old, new string, _ *schema.ResourceData) bool {
-	if isEmptyValue(reflect.ValueOf(new)) {
+	if IsEmptyValue(reflect.ValueOf(new)) {
 		return true
 	}
 	// otherwise compare as self links
-	return compareSelfLinkOrResourceName("", old, new, nil)
+	return CompareSelfLinkOrResourceName("", old, new, nil)
 }
 
 // Suppress diffs in below cases

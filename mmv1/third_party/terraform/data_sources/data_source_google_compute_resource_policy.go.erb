@@ -7,12 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleComputeResourcePolicy() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeResourcePolicy().Schema)
+func DataSourceGoogleComputeResourcePolicy() *schema.Resource {
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceComputeResourcePolicy().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "region")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeResourcePolicyRead,
@@ -25,11 +25,11 @@ func dataSourceGoogleComputeResourcePolicyRead(d *schema.ResourceData, meta inte
 
 	name := d.Get("name").(string)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
+func DataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleBigqueryDefaultServiceAccountRead,
 		Schema: map[string]*schema.Schema{
@@ -29,19 +29,19 @@ func dataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
 
 func dataSourceGoogleBigqueryDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
 	projectResource, err := config.NewBigQueryClient(userAgent).Projects.GetServiceAccount(project).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, "BigQuery service account not found")
+		return HandleNotFoundError(err, d, "BigQuery service account not found")
 	}
 
 	d.SetId(projectResource.Email)

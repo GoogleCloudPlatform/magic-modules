@@ -6,15 +6,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceArtifactRegistryRepository() *schema.Resource {
+func DataSourceArtifactRegistryRepository() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceArtifactRegistryRepository().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceArtifactRegistryRepository().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "repository_id", "location")
+	AddRequiredFieldsToSchema(dsSchema, "repository_id", "location")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceArtifactRegistryRepositoryRead,
@@ -25,12 +25,12 @@ func dataSourceArtifactRegistryRepository() *schema.Resource {
 func dataSourceArtifactRegistryRepositoryRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}

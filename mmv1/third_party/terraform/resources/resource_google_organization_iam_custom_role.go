@@ -8,7 +8,7 @@ import (
 	"google.golang.org/api/iam/v1"
 )
 
-func resourceGoogleOrganizationIamCustomRole() *schema.Resource {
+func ResourceGoogleOrganizationIamCustomRole() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleOrganizationIamCustomRoleCreate,
 		Read:   resourceGoogleOrganizationIamCustomRoleRead,
@@ -74,7 +74,7 @@ func resourceGoogleOrganizationIamCustomRole() *schema.Resource {
 
 func resourceGoogleOrganizationIamCustomRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func resourceGoogleOrganizationIamCustomRoleCreate(d *schema.ResourceData, meta 
 			// If a role with same name exists and is enabled, just return error
 			return fmt.Errorf("Custom project role %s already exists and must be imported", roleId)
 		}
-	} else if err := handleNotFoundError(err, d, fmt.Sprintf("Custom Organization Role %q", roleId)); err == nil {
+	} else if err := HandleNotFoundError(err, d, fmt.Sprintf("Custom Organization Role %q", roleId)); err == nil {
 		// If no role was found, actually create a new role.
 		role, err := config.NewIamClient(userAgent).Organizations.Roles.Create(orgId, &iam.CreateRoleRequest{
 			RoleId: d.Get("role_id").(string),
@@ -125,14 +125,14 @@ func resourceGoogleOrganizationIamCustomRoleCreate(d *schema.ResourceData, meta 
 
 func resourceGoogleOrganizationIamCustomRoleRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	role, err := config.NewIamClient(userAgent).Organizations.Roles.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, d.Id())
+		return HandleNotFoundError(err, d, d.Id())
 	}
 
 	parsedRoleName, err := ParseOrganizationCustomRoleName(role.Name)
@@ -170,7 +170,7 @@ func resourceGoogleOrganizationIamCustomRoleRead(d *schema.ResourceData, meta in
 
 func resourceGoogleOrganizationIamCustomRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -210,7 +210,7 @@ func resourceGoogleOrganizationIamCustomRoleUpdate(d *schema.ResourceData, meta 
 
 func resourceGoogleOrganizationIamCustomRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

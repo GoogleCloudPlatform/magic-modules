@@ -2,15 +2,15 @@ package google
 
 import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-func dataSourceGoogleComputeHealthCheck() *schema.Resource {
+func DataSourceGoogleComputeHealthCheck() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeHealthCheck().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceComputeHealthCheck().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeHealthCheckRead,
@@ -19,7 +19,7 @@ func dataSourceGoogleComputeHealthCheck() *schema.Resource {
 }
 
 func dataSourceGoogleComputeHealthCheckRead(d *schema.ResourceData, meta interface{}) error {
-	id, err := replaceVars(d, meta.(*Config), "projects/{{project}}/global/healthChecks/{{name}}")
+	id, err := ReplaceVars(d, meta.(*Config), "projects/{{project}}/global/healthChecks/{{name}}")
 	if err != nil {
 		return err
 	}

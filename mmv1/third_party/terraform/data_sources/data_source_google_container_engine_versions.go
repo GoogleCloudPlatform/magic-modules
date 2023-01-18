@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleContainerEngineVersions() *schema.Resource {
+func DataSourceGoogleContainerEngineVersions() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleContainerEngineVersionsRead,
 		Schema: map[string]*schema.Schema{
@@ -62,17 +62,17 @@ func dataSourceGoogleContainerEngineVersions() *schema.Resource {
 
 func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}

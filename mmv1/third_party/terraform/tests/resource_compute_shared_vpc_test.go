@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -9,18 +9,18 @@ import (
 )
 
 func TestAccComputeSharedVpc_basic(t *testing.T) {
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
 
-	hostProject := fmt.Sprintf("tf-test-h-%d", randInt(t))
-	serviceProject := fmt.Sprintf("tf-test-s-%d", randInt(t))
+	hostProject := fmt.Sprintf("tf-test-h-%d", RandInt(t))
+	serviceProject := fmt.Sprintf("tf-test-s-%d", RandInt(t))
 
 	hostProjectResourceName := "google_compute_shared_vpc_host_project.host"
 	serviceProjectResourceName := "google_compute_shared_vpc_service_project.service"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSharedVpc_basic(hostProject, serviceProject, org, billingId),
@@ -54,9 +54,9 @@ func TestAccComputeSharedVpc_basic(t *testing.T) {
 
 func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		found, err := config.NewComputeClient(config.userAgent).Projects.Get(hostProject).Do()
+		found, err := config.NewComputeClient(config.UserAgent).Projects.Get(hostProject).Do()
 		if err != nil {
 			return fmt.Errorf("Error reading project %s: %s", hostProject, err)
 		}
@@ -75,8 +75,8 @@ func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, e
 
 func testAccCheckComputeSharedVpcServiceProject(t *testing.T, hostProject, serviceProject string, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
-		serviceHostProject, err := config.NewComputeClient(config.userAgent).Projects.GetXpnHost(serviceProject).Do()
+		config := GoogleProviderConfig(t)
+		serviceHostProject, err := config.NewComputeClient(config.UserAgent).Projects.GetXpnHost(serviceProject).Do()
 		if err != nil {
 			if enabled {
 				return fmt.Errorf("Expected service project to be enabled.")

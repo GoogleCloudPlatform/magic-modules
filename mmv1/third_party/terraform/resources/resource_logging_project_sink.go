@@ -10,7 +10,7 @@ import (
 
 const nonUniqueWriterAccount = "serviceAccount:cloud-logs@system.gserviceaccount.com"
 
-func resourceLoggingProjectSink() *schema.Resource {
+func ResourceLoggingProjectSink() *schema.Resource {
 	schm := &schema.Resource{
 		Create:        resourceLoggingProjectSinkCreate,
 		Read:          resourceLoggingProjectSinkRead,
@@ -42,12 +42,12 @@ func resourceLoggingProjectSink() *schema.Resource {
 
 func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -88,19 +88,19 @@ func resourceLoggingProjectSinkCustomizeDiffFunc(diff TerraformResourceDiff) err
 
 func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
 	sink, err := config.NewLoggingClient(userAgent).Projects.Sinks.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Logging Sink %s", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Project Logging Sink %s", d.Get("name").(string)))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -125,7 +125,7 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 
 func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -52,17 +52,17 @@ func TestProjectServiceServiceValidateFunc(t *testing.T) {
 func TestAccProjectService_basic(t *testing.T) {
 	t.Parallel()
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	provider.SkipIfVcr(t)
 
-	org := getTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_basic(services, pid, pname, org),
+				Config: testAccProjectService_basic(services, pid, Pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, true),
 				),
@@ -81,21 +81,21 @@ func TestAccProjectService_basic(t *testing.T) {
 			},
 			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, Pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, false),
 				),
 			},
 			// Create services with disabling turned off.
 			{
-				Config: testAccProjectService_noDisable(services, pid, pname, org),
+				Config: testAccProjectService_noDisable(services, pid, Pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, true),
 				),
 			},
 			// Check that services are still enabled even after the resources are deleted.
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, Pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, true),
 				),
@@ -106,20 +106,20 @@ func TestAccProjectService_basic(t *testing.T) {
 
 func TestAccProjectService_disableDependentServices(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	services := []string{"cloudbuild.googleapis.com", "containerregistry.googleapis.com"}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_disableDependentServices(services, pid, pname, org, billingId, "false"),
+				Config: testAccProjectService_disableDependentServices(services, pid, Pname, org, billingId, "false"),
 			},
 			{
 				ResourceName:            "google_project_service.test",
@@ -128,11 +128,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
 			},
 			{
-				Config:      testAccProjectService_dependencyRemoved(services, pid, pname, org, billingId),
+				Config:      testAccProjectService_dependencyRemoved(services, pid, Pname, org, billingId),
 				ExpectError: regexp.MustCompile("Please specify disable_dependent_services=true if you want to proceed with disabling all services."),
 			},
 			{
-				Config: testAccProjectService_disableDependentServices(services, pid, pname, org, billingId, "true"),
+				Config: testAccProjectService_disableDependentServices(services, pid, Pname, org, billingId, "true"),
 			},
 			{
 				ResourceName:            "google_project_service.test",
@@ -141,7 +141,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
 			},
 			{
-				Config:             testAccProjectService_dependencyRemoved(services, pid, pname, org, billingId),
+				Config:             testAccProjectService_dependencyRemoved(services, pid, Pname, org, billingId),
 				ExpectNonEmptyPlan: true,
 			},
 		},
@@ -151,15 +151,15 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 func TestAccProjectService_handleNotFound(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
 	service := "iam.googleapis.com"
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_handleNotFound(service, pid, pname, org),
+				Config: testAccProjectService_handleNotFound(service, pid, Pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, []string{service}, pid, true),
 				),
@@ -185,14 +185,14 @@ func TestAccProjectService_renamedService(t *testing.T) {
 		newName = new
 	}
 
-	org := getTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", randInt(t))
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	org := GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_single(newName, pid, pname, org),
+				Config: testAccProjectService_single(newName, pid, Pname, org),
 			},
 			{
 				ResourceName:            "google_project_service.test",
@@ -206,8 +206,8 @@ func TestAccProjectService_renamedService(t *testing.T) {
 
 func testAccCheckProjectService(t *testing.T, services []string, pid string, expectEnabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
-		currentlyEnabled, err := listCurrentlyEnabledServices(pid, "", config.userAgent, config, time.Minute*10)
+		config := GoogleProviderConfig(t)
+		currentlyEnabled, err := listCurrentlyEnabledServices(pid, "", config.UserAgent, config, time.Minute*10)
 		if err != nil {
 			return fmt.Errorf("Error listing services for project %q: %v", pid, err)
 		}

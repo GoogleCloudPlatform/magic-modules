@@ -20,7 +20,7 @@ func (w *DialogflowCXOperationWaiter) QueryOp() (interface{}, error) {
 	// Returns the proper get.
 	url := fmt.Sprintf("https://%s-dialogflow.googleapis.com/v3/%s", w.Location, w.CommonOperationWaiter.Op.Name)
 
-	return sendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
+	return SendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
 }
 
 func createDialogflowCXWaiter(config *Config, op map[string]interface{}, activity, userAgent, location string) (*DialogflowCXOperationWaiter, error) {

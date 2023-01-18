@@ -101,7 +101,7 @@ func resourceIamBindingCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc, en
 		modifyF := func(ep *cloudresourcemanager.Policy) error {
 			cleaned := filterBindingsWithRoleAndCondition(ep.Bindings, binding.Role, binding.Condition)
 			ep.Bindings = append(cleaned, binding)
-			ep.Version = iamPolicyVersion
+			ep.Version = IamPolicyVersion
 			return nil
 		}
 
@@ -136,7 +136,7 @@ func resourceIamBindingRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Rea
 		eCondition := conditionKeyFromCondition(eBinding.Condition)
 		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Binding (Role %q)", updater.DescribeResource(), eBinding.Role))
+			return HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Binding (Role %q)", updater.DescribeResource(), eBinding.Role))
 		}
 		log.Print(spew.Sprintf("[DEBUG] Retrieved policy for %s: %#v", updater.DescribeResource(), p))
 		log.Printf("[DEBUG] Looking for binding with role %q and condition %#v", eBinding.Role, eCondition)
@@ -279,7 +279,7 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 			err = iamPolicyReadModifyWrite(updater, modifyF)
 		}
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))
+			return HandleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))
 		}
 
 		return resourceIamBindingRead(newUpdaterFunc)(d, meta)
@@ -289,7 +289,7 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 func getResourceIamBinding(d *schema.ResourceData) *cloudresourcemanager.Binding {
 	members := d.Get("members").(*schema.Set).List()
 	b := &cloudresourcemanager.Binding{
-		Members: convertStringArr(members),
+		Members: ConvertStringArr(members),
 		Role:    d.Get("role").(string),
 	}
 	if c := expandIamCondition(d.Get("condition")); c != nil {

@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"testing"
@@ -12,14 +12,14 @@ func TestAccDataSourceCloudIdentityGroupMemberships_basic(t *testing.T) {
 		"org_domain":    getTestOrgDomainFromEnv(t),
 		"cust_id":       getTestCustIdFromEnv(t),
 		"identity_user": getTestIdentityUserFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
 	memberId := Nprintf("%{identity_user}@%{org_domain}", context)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudIdentityGroupMembershipConfig(context),

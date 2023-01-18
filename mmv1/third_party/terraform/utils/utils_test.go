@@ -22,7 +22,7 @@ func TestConvertStringArr(t *testing.T) {
 	input[2] = "aaa"
 
 	expected := []string{"aaa", "bbb", "ccc"}
-	actual := convertStringArr(input)
+	actual := ConvertStringArr(input)
 
 	if reflect.DeepEqual(expected, actual) {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
@@ -50,7 +50,7 @@ func TestConvertStringMap(t *testing.T) {
 	input["three"] = "3"
 
 	expected := map[string]string{"one": "1", "two": "2", "three": "3"}
-	actual := convertStringMap(input)
+	actual := ConvertStringMap(input)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("%s did not match expected value: %s", actual, expected)
@@ -145,41 +145,41 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 }
 
 func TestGetZone(t *testing.T) {
-	d := schema.TestResourceDataRaw(t, resourceComputeDisk().Schema, map[string]interface{}{
+	d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
 		"zone": "foo",
 	})
 	var config Config
 	if err := d.Set("zone", "foo"); err != nil {
 		t.Fatalf("Cannot set zone: %s", err)
 	}
-	if zone, err := getZone(d, &config); err != nil || zone != "foo" {
+	if zone, err := GetZone(d, &config); err != nil || zone != "foo" {
 		t.Fatalf("Zone '%s' != 'foo', %s", zone, err)
 	}
 	config.Zone = "bar"
-	if zone, err := getZone(d, &config); err != nil || zone != "foo" {
+	if zone, err := GetZone(d, &config); err != nil || zone != "foo" {
 		t.Fatalf("Zone '%s' != 'foo', %s", zone, err)
 	}
 	if err := d.Set("zone", ""); err != nil {
 		t.Fatalf("Error setting zone: %s", err)
 	}
-	if zone, err := getZone(d, &config); err != nil || zone != "bar" {
+	if zone, err := GetZone(d, &config); err != nil || zone != "bar" {
 		t.Fatalf("Zone '%s' != 'bar', %s", zone, err)
 	}
 	config.Zone = ""
-	if zone, err := getZone(d, &config); err == nil || zone != "" {
+	if zone, err := GetZone(d, &config); err == nil || zone != "" {
 		t.Fatalf("Zone '%s' != '', err=%s", zone, err)
 	}
 }
 
 func TestGetRegion(t *testing.T) {
-	d := schema.TestResourceDataRaw(t, resourceComputeDisk().Schema, map[string]interface{}{
+	d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
 		"zone": "foo",
 	})
 	var config Config
-	barRegionName := getRegionFromZone("bar")
-	fooRegionName := getRegionFromZone("foo")
+	barRegionName := GetRegionFromZone("bar")
+	fooRegionName := GetRegionFromZone("foo")
 
-	if region, err := getRegion(d, &config); err != nil || region != fooRegionName {
+	if region, err := GetRegion(d, &config); err != nil || region != fooRegionName {
 		t.Fatalf("Zone '%s' != '%s', %s", region, fooRegionName, err)
 	}
 
@@ -187,11 +187,11 @@ func TestGetRegion(t *testing.T) {
 	if err := d.Set("zone", ""); err != nil {
 		t.Fatalf("Error setting zone: %s", err)
 	}
-	if region, err := getRegion(d, &config); err != nil || region != barRegionName {
+	if region, err := GetRegion(d, &config); err != nil || region != barRegionName {
 		t.Fatalf("Zone '%s' != '%s', %s", region, barRegionName, err)
 	}
 	config.Region = "something-else"
-	if region, err := getRegion(d, &config); err != nil || region != config.Region {
+	if region, err := GetRegion(d, &config); err != nil || region != config.Region {
 		t.Fatalf("Zone '%s' != '%s', %s", region, config.Region, err)
 	}
 }
@@ -409,8 +409,8 @@ func TestDatasourceSchemaFromResourceSchema(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := datasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("datasourceSchemaFromResourceSchema() = %#v, want %#v", got, tt.want)
+			if got := DatasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DatasourceSchemaFromResourceSchema() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
@@ -496,7 +496,7 @@ func TestRetryTimeDuration(t *testing.T) {
 			Code: 500,
 		}
 	}
-	if err := retryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 500 {
+	if err := RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 500 {
 		t.Errorf("unexpected error retrying: %v", err)
 	}
 	if i < 2 {
@@ -513,7 +513,7 @@ func TestRetryTimeDuration_wrapped(t *testing.T) {
 		}
 		return errwrap.Wrapf("nested error: {{err}}", err)
 	}
-	if err := retryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil {
+	if err := RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil {
 		t.Errorf("unexpected nil error, expected an error")
 	} else {
 		innerErr := errwrap.GetType(err, &googleapi.Error{})
@@ -538,7 +538,7 @@ func TestRetryTimeDuration_noretry(t *testing.T) {
 			Code: 400,
 		}
 	}
-	if err := retryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 400 {
+	if err := RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 400 {
 		t.Errorf("unexpected error retrying: %v", err)
 	}
 	if i != 1 {
@@ -569,7 +569,7 @@ func TestRetryTimeDuration_URLTimeoutsShouldRetry(t *testing.T) {
 		}
 		return nil
 	}
-	err := retryTimeDuration(retryFunc, 1*time.Minute)
+	err := RetryTimeDuration(retryFunc, 1*time.Minute)
 	if err != nil {
 		t.Errorf("unexpected error: got '%v' want 'nil'", err)
 	}
@@ -722,7 +722,7 @@ func TestSnakeToPascalCase(t *testing.T) {
 }
 
 func TestCheckGCSName(t *testing.T) {
-	valid63 := randString(t, 63)
+	valid63 := RandString(t, 63)
 	cases := map[string]bool{
 		// Valid
 		"foobar":       true,
@@ -748,7 +748,7 @@ func TestCheckGCSName(t *testing.T) {
 		"fo":              false,
 		"foo$bar":         false,
 		"foo..bar":        false,
-		randString(t, 64): false,
+		RandString(t, 64): false,
 		fmt.Sprintf("%s.%s.%s.%s", valid63, valid63, valid63, valid63): false,
 	}
 

@@ -200,7 +200,7 @@ func suppressWindowsFamilyDiff(imageName, familyName string) bool {
 
 func expandComputeDiskType(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
-		return nil 
+		return nil
 	}
 
 	f, err := parseZonalFieldValue("diskTypes", v.(string), "project", "zone", d, config, true)
@@ -214,14 +214,14 @@ func expandComputeDiskType(v interface{}, d TerraformResourceData, config *Confi
 
 func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
-		return nil 
+		return nil
 	}
 
 	if v == nil {
 		return nil
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil
 	}
@@ -236,7 +236,7 @@ func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config
 
 func expandComputeDiskSnapshot(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
-		return nil 
+		return nil
 	}
 
 	f, err := parseGlobalFieldValue("snapshots", v.(string), "project", d, config, true)
@@ -257,7 +257,7 @@ func ConvertSelfLinkToV1UnlessNil(v interface{}) *string {
 	if vptr == nil {
 		return nil
 	}
-	
+
 	val := ConvertSelfLinkToV1(*vptr)
 	return &val
 }
@@ -287,7 +287,7 @@ func flattenComputeDiskImage(v interface{}, d *schema.ResourceData, meta interfa
 	if v == nil {
 		return nil
 	}
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil
 	}

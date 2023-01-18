@@ -6,12 +6,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleComputeDisk() *schema.Resource {
+func DataSourceGoogleComputeDisk() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeDisk().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "zone")
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceComputeDisk().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "zone")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeDiskRead,
@@ -22,7 +22,7 @@ func dataSourceGoogleComputeDisk() *schema.Resource {
 func dataSourceGoogleComputeDiskRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/zones/{{zone}}/disks/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/disks/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

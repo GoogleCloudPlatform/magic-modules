@@ -2,11 +2,12 @@ package google
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/storage/v1"
 )
 
-func resourceStorageDefaultObjectAcl() *schema.Resource {
+func ResourceStorageDefaultObjectAcl() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceStorageDefaultObjectAclCreateUpdate,
 		Read:   resourceStorageDefaultObjectAclRead,
@@ -36,7 +37,7 @@ func resourceStorageDefaultObjectAcl() *schema.Resource {
 
 func resourceStorageDefaultObjectAclCreateUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -51,7 +52,7 @@ func resourceStorageDefaultObjectAclCreateUpdate(d *schema.ResourceData, meta in
 		})
 	}
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}")
 	if err != nil {
 		return err
 	}
@@ -82,7 +83,7 @@ func resourceStorageDefaultObjectAclCreateUpdate(d *schema.ResourceData, meta in
 
 func resourceStorageDefaultObjectAclRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -90,7 +91,7 @@ func resourceStorageDefaultObjectAclRead(d *schema.ResourceData, meta interface{
 	bucket := d.Get("bucket").(string)
 	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Projection("full").Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Default Storage Object ACL for Bucket %q", d.Get("bucket").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Default Storage Object ACL for Bucket %q", d.Get("bucket").(string)))
 	}
 
 	var roleEntities []string
@@ -111,12 +112,12 @@ func resourceStorageDefaultObjectAclRead(d *schema.ResourceData, meta interface{
 
 func resourceStorageDefaultObjectAclDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}")
 	if err != nil {
 		return err
 	}

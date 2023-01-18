@@ -45,7 +45,7 @@ func GetServiceUsageApiObject(d TerraformResourceData, config *Config) (map[stri
 	serviceNameProp, err := expandServiceUsageServiceName(d.Get("service"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("service"); !isEmptyValue(reflect.ValueOf(serviceNameProp)) && (ok || !reflect.DeepEqual(v, serviceNameProp)) {
+	} else if v, ok := d.GetOkExists("service"); !IsEmptyValue(reflect.ValueOf(serviceNameProp)) && (ok || !reflect.DeepEqual(v, serviceNameProp)) {
 		obj["name"] = serviceNameProp
 	}
 

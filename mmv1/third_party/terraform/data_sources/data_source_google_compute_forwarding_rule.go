@@ -6,15 +6,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleComputeForwardingRule() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeForwardingRule().Schema)
+func DataSourceGoogleComputeForwardingRule() *schema.Resource {
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceComputeForwardingRule().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeForwardingRuleRead,
@@ -27,12 +27,12 @@ func dataSourceGoogleComputeForwardingRuleRead(d *schema.ResourceData, meta inte
 
 	name := d.Get("name").(string)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

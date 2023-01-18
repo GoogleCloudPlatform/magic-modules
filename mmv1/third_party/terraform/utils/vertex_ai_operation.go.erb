@@ -28,7 +28,7 @@ func (w *VertexAIOperationWaiter) QueryOp() (interface{}, error) {
 	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1beta1/%s", region, w.CommonOperationWaiter.Op.Name)
 <% end -%>
 
-	return sendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
+	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
 func createVertexAIWaiter(config *Config, op map[string]interface{}, project, activity, userAgent string) (*VertexAIOperationWaiter, error) {

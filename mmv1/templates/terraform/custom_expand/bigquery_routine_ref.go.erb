@@ -2,7 +2,7 @@ func expandBigQueryRoutineRoutineReference(v interface{}, d TerraformResourceDat
 
         transformed := make(map[string]interface{})
         transformed["datasetId"] = d.Get("dataset_id")
-        project, _ := getProject(d, config)
+        project, _ := GetProject(d, config)
         transformed["projectId"] = project
         transformed["routineId"] = d.Get("routine_id")
 

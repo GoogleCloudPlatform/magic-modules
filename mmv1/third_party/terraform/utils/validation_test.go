@@ -27,7 +27,7 @@ func TestValidateGCEName(t *testing.T) {
 		{TestName: "too long", Value: "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoob", ExpectError: true},
 	}
 
-	es := testStringValidationCases(x, validateGCEName)
+	es := testStringValidationCases(x, ValidateGCEName)
 	if len(es) > 0 {
 		t.Errorf("Failed to validate GCP names: %v", es)
 	}
@@ -134,7 +134,7 @@ func TestValidateServiceAccountLink(t *testing.T) {
 		},
 	}
 
-	es := testStringValidationCases(cases, validateRegexp(ServiceAccountLinkRegex))
+	es := testStringValidationCases(cases, ValidateRegexp(ServiceAccountLinkRegex))
 	if len(es) > 0 {
 		t.Errorf("Failed to validate Service Account Links: %v", es)
 	}

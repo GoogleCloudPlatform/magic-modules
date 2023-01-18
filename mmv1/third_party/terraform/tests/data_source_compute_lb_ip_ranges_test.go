@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"regexp"
@@ -8,9 +8,9 @@ import (
 )
 
 func TestAccDataSourceComputeLbIpRanges_basic(t *testing.T) {
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeLbIpRangesConfig,

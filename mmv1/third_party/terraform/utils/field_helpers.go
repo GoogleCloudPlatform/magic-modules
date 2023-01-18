@@ -155,7 +155,7 @@ type ZonalFieldValue struct {
 	Zone    string
 	Name    string
 
-	resourceType string
+	ResourceType string
 }
 
 func (f ZonalFieldValue) RelativeLink() string {
@@ -163,7 +163,7 @@ func (f ZonalFieldValue) RelativeLink() string {
 		return ""
 	}
 
-	return fmt.Sprintf(zonalLinkTemplate, f.Project, f.Zone, f.resourceType, f.Name)
+	return fmt.Sprintf(zonalLinkTemplate, f.Project, f.Zone, f.ResourceType, f.Name)
 }
 
 // Parses a zonal field supporting 5 different formats:
@@ -178,7 +178,7 @@ func (f ZonalFieldValue) RelativeLink() string {
 func parseZonalFieldValue(resourceType, fieldValue, projectSchemaField, zoneSchemaField string, d TerraformResourceData, config *Config, isEmptyValid bool) (*ZonalFieldValue, error) {
 	if len(fieldValue) == 0 {
 		if isEmptyValid {
-			return &ZonalFieldValue{resourceType: resourceType}, nil
+			return &ZonalFieldValue{ResourceType: resourceType}, nil
 		}
 		return nil, fmt.Errorf("The zonal field for resource %s cannot be empty.", resourceType)
 	}
@@ -189,7 +189,7 @@ func parseZonalFieldValue(resourceType, fieldValue, projectSchemaField, zoneSche
 			Project:      parts[1],
 			Zone:         parts[2],
 			Name:         parts[3],
-			resourceType: resourceType,
+			ResourceType: resourceType,
 		}, nil
 	}
 
@@ -204,7 +204,7 @@ func parseZonalFieldValue(resourceType, fieldValue, projectSchemaField, zoneSche
 			Project:      project,
 			Zone:         parts[1],
 			Name:         parts[2],
-			resourceType: resourceType,
+			ResourceType: resourceType,
 		}, nil
 	}
 
@@ -224,7 +224,7 @@ func parseZonalFieldValue(resourceType, fieldValue, projectSchemaField, zoneSche
 		Project:      project,
 		Zone:         zone.(string),
 		Name:         GetResourceNameFromSelfLink(fieldValue),
-		resourceType: resourceType,
+		ResourceType: resourceType,
 	}, nil
 }
 
@@ -370,7 +370,7 @@ func getRegionFromSchema(regionSchemaField, zoneSchemaField string, d TerraformR
 	if regionSchemaField == zoneSchemaField {
 		if v, ok := d.GetOk(regionSchemaField); ok {
 			if isZone(v.(string)) {
-				return getRegionFromZone(v.(string)), nil
+				return GetRegionFromZone(v.(string)), nil
 			}
 
 			return v.(string), nil
@@ -381,13 +381,13 @@ func getRegionFromSchema(regionSchemaField, zoneSchemaField string, d TerraformR
 		return GetResourceNameFromSelfLink(v.(string)), nil
 	}
 	if v, ok := d.GetOk(zoneSchemaField); ok && zoneSchemaField != "" {
-		return getRegionFromZone(v.(string)), nil
+		return GetRegionFromZone(v.(string)), nil
 	}
 	if config.Region != "" {
 		return config.Region, nil
 	}
 	if config.Zone != "" {
-		return getRegionFromZone(config.Zone), nil
+		return GetRegionFromZone(config.Zone), nil
 	}
 
 	return "", fmt.Errorf("Cannot determine region: set in this resource, or set provider-level 'region' or 'zone'.")

@@ -4,10 +4,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleKmsCryptoKey() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceKMSCryptoKey().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addRequiredFieldsToSchema(dsSchema, "key_ring")
+func DataSourceGoogleKmsCryptoKey() *schema.Resource {
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceKMSCryptoKey().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "key_ring")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleKmsCryptoKeyRead,

@@ -7,12 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleFirebaseWebApp() *schema.Resource {
+func DataSourceGoogleFirebaseWebApp() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceFirebaseWebApp().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(ResourceFirebaseWebApp().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "app_id")
+	AddRequiredFieldsToSchema(dsSchema, "app_id")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleFirebaseWebAppRead,
@@ -23,7 +23,7 @@ func dataSourceGoogleFirebaseWebApp() *schema.Resource {
 func dataSourceGoogleFirebaseWebAppRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	appId := d.Get("app_id")
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

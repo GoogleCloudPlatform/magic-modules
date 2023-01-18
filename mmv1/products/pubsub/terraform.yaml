@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_name: :PROJECT_NAME
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       messageStoragePolicy: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -128,7 +128,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       topic: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/computed_subscription_topic.erb
       ackDeadlineSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -169,7 +169,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_name: :PROJECT_NAME
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       # This can be changed once update is supported for schema definition

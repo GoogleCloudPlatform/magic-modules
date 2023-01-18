@@ -1,5 +1,5 @@
 <% autogen_exception -%>
-package google
+package google_test
 
 import (
 	"fmt"
@@ -13,13 +13,13 @@ import (
 func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: providerVersion450(),
-				Config:            testAccDataSourceDnsManagedZone_basic(randString(t, 10)),
+				Config:            testAccDataSourceDnsManagedZone_basic(RandString(t, 10)),
 				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",

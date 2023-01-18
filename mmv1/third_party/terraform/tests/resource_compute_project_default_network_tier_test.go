@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -10,16 +10,16 @@ import (
 func TestAccComputeProjectDefaultNetworkTier_basic(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
-	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
+	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, pname, org, billingId),
+				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, Pname, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_default_network_tier.fizzbuzz",
@@ -33,16 +33,16 @@ func TestAccComputeProjectDefaultNetworkTier_basic(t *testing.T) {
 func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
-	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
+	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, pname, org, billingId),
+				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, Pname, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_default_network_tier.fizzbuzz",
@@ -51,7 +51,7 @@ func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 			},
 
 			{
-				Config: testAccComputeProject_defaultNetworkTier_standard(projectID, pname, org, billingId),
+				Config: testAccComputeProject_defaultNetworkTier_standard(projectID, Pname, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_default_network_tier.fizzbuzz",

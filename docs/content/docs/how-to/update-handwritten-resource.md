@@ -283,11 +283,11 @@ When registering the resource in
 the entry should be guarded:
 
 ```diff
-				"google_monitoring_dashboard":                  resourceMonitoringDashboard(),
+				"google_monitoring_dashboard":                  ResourceMonitoringDashboard(),
 +				<% unless version == 'ga' -%>
-+				"google_project_service_identity":              resourceProjectServiceIdentity(),
++				"google_project_service_identity":              ResourceProjectServiceIdentity(),
 +				<% end -%>
-				"google_service_networking_connection":         resourceServiceNetworkingConnection(),
+				"google_service_networking_connection":         ResourceServiceNetworkingConnection(),
 ```
 
 If this is a new service entirely, all service-specific entries like client

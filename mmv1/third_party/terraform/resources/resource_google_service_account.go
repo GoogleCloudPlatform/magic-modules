@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/iam/v1"
 )
 
-func resourceGoogleServiceAccount() *schema.Resource {
+func ResourceGoogleServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleServiceAccountCreate,
 		Read:   resourceGoogleServiceAccountRead,
@@ -81,12 +81,12 @@ func resourceGoogleServiceAccount() *schema.Resource {
 
 func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 
 	d.SetId(sa.Name)
 
-	err = retryTimeDuration(func() (operr error) {
+	err = RetryTimeDuration(func() (operr error) {
 		_, saerr := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 		return saerr
 	}, d.Timeout(schema.TimeoutCreate), isNotFoundRetryableError("service account creation"))
@@ -134,7 +134,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) PollReadFunc {
 	return func() (map[string]interface{}, error) {
 		config := meta.(*Config)
-		userAgent, err := generateUserAgentString(d, config.userAgent)
+		userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return nil, err
 		}
@@ -151,7 +151,7 @@ func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) Po
 
 func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 	// Confirm the service account exists
 	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Service Account %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", d.Id()))
 	}
 
 	if err := d.Set("email", sa.Email); err != nil {
@@ -194,7 +194,7 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -271,7 +271,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/serviceAccounts/(?P<email>[^/]+)",
 		"(?P<project>[^/]+)/(?P<email>[^/]+)",
 		"(?P<email>[^/]+)"}, d, config); err != nil {
@@ -279,7 +279,7 @@ func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/serviceAccounts/{{email}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/serviceAccounts/{{email}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

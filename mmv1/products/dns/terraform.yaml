@@ -121,7 +121,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
           blocks in an update and then apply another update adding all of them back simultaneously.
       privateVisibilityConfig.networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         description: |
           The id or fully qualified URL of the VPC network to bind to.
           This should be formatted like `projects/{project}/global/networks/{network}` or
@@ -152,7 +152,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
       peeringConfig.targetNetwork.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/network_full_url.erb
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         description: |
           The id or fully qualified URL of the VPC network to forward queries to.
           This should be formatted like `projects/{project}/global/networks/{network}` or
@@ -214,7 +214,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           }
       networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/network_full_url.erb
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         description: |
           The id or fully qualified URL of the VPC network to forward queries to.
           This should be formatted like `projects/{project}/global/networks/{network}` or
@@ -240,7 +240,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/network_full_url.erb
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/response_policy_detach_network_gke.erb
   ResponsePolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride

@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"encoding/json"
@@ -360,7 +360,7 @@ func TestDataSourceGoogleIamPolicyRead(t *testing.T) {
 			}
 			// Note: for TestResourceDataRaw to process rawData ok, test inputs' data types have to be
 			// either primitive types, []interface{} or map[string]interface{}
-			d := schema.TestResourceDataRaw(t, dataSourceGoogleIamPolicy().Schema, rawData)
+			d := schema.TestResourceDataRaw(t, DataSourceGoogleIamPolicy().Schema, rawData)
 
 			// ACT - Update resource data using `dataSourceGoogleIamPolicyRead`
 			var meta interface{}

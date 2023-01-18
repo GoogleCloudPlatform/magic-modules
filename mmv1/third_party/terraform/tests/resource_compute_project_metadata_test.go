@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -12,17 +12,17 @@ import (
 func TestAccComputeProjectMetadata_basic(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
-	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
+	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_basic0_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_basic0_metadata(projectID, Pname, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -37,17 +37,17 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
-	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
+	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_modify0_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_modify0_metadata(projectID, Pname, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -56,7 +56,7 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 			},
 
 			{
-				Config: testAccComputeProject_modify1_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_modify1_metadata(projectID, Pname, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -71,17 +71,17 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
-	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
+	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_basic0_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_basic0_metadata(projectID, Pname, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -90,7 +90,7 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 			},
 
 			{
-				Config: testAccComputeProject_basic1_metadata(projectID, pname, org, billingId),
+				Config: testAccComputeProject_basic1_metadata(projectID, Pname, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -103,14 +103,14 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 
 func testAccCheckComputeProjectMetadataDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_project_metadata" {
 				continue
 			}
 
-			project, err := config.NewComputeClient(config.userAgent).Projects.Get(rs.Primary.ID).Do()
+			project, err := config.NewComputeClient(config.UserAgent).Projects.Get(rs.Primary.ID).Do()
 			if err == nil && len(project.CommonInstanceMetadata.Items) > 0 {
 				return fmt.Errorf("Error, metadata items still exist in %s", rs.Primary.ID)
 			}

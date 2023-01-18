@@ -21,6 +21,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Global MutexKV
+var mutexKV = NewMutexKV()
+
 type TerraformResourceDataChange interface {
 	GetChange(string) (interface{}, interface{})
 }
@@ -46,8 +49,8 @@ type TerraformResourceDiff interface {
 	ForceNew(string) error
 }
 
-// getRegionFromZone returns the region from a zone for Google cloud.
-func getRegionFromZone(zone string) string {
+// GetRegionFromZone returns the region from a zone for Google cloud.
+func GetRegionFromZone(zone string) string {
 	if zone != "" && len(zone) > 2 {
 		region := zone[:len(zone)-2]
 		return region
@@ -60,20 +63,20 @@ func getRegionFromZone(zone string) string {
 // - region extracted from the `zone` field in resource schema
 // - provider-level region
 // - region extracted from the provider-level zone
-func getRegion(d TerraformResourceData, config *Config) (string, error) {
+func GetRegion(d TerraformResourceData, config *Config) (string, error) {
 	return getRegionFromSchema("region", "zone", d, config)
 }
 
-// getProject reads the "project" field from the given resource data and falls
+// GetProject reads the "project" field from the given resource data and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
-func getProject(d TerraformResourceData, config *Config) (string, error) {
+func GetProject(d TerraformResourceData, config *Config) (string, error) {
 	return getProjectFromSchema("project", d, config)
 }
 
-// getBillingProject reads the "billing_project" field from the given resource data and falls
+// GetBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
-func getBillingProject(d TerraformResourceData, config *Config) (string, error) {
+func GetBillingProject(d TerraformResourceData, config *Config) (string, error) {
 	return getBillingProjectFromSchema("billing_project", d, config)
 }
 
@@ -95,7 +98,7 @@ func getRouterLockName(region string, router string) string {
 	return fmt.Sprintf("router/%s/%s", region, router)
 }
 
-func handleNotFoundError(err error, d *schema.ResourceData, resource string) error {
+func HandleNotFoundError(err error, d *schema.ResourceData, resource string) error {
 	if isGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[WARN] Removing %s because it's gone", resource)
 		// The resource doesn't exist anymore
@@ -172,8 +175,8 @@ func isNotFoundGrpcError(err error) bool {
 	return false
 }
 
-// expandLabels pulls the value of "labels" out of a TerraformResourceData as a map[string]string.
-func expandLabels(d TerraformResourceData) map[string]string {
+// ExpandLabels pulls the value of "labels" out of a TerraformResourceData as a map[string]string.
+func ExpandLabels(d TerraformResourceData) map[string]string {
 	return expandStringMap(d, "labels")
 }
 
@@ -195,10 +198,10 @@ func expandStringMap(d TerraformResourceData, key string) map[string]string {
 		return map[string]string{}
 	}
 
-	return convertStringMap(v.(map[string]interface{}))
+	return ConvertStringMap(v.(map[string]interface{}))
 }
 
-func convertStringMap(v map[string]interface{}) map[string]string {
+func ConvertStringMap(v map[string]interface{}) map[string]string {
 	m := make(map[string]string)
 	for k, val := range v {
 		m[k] = val.(string)
@@ -206,7 +209,7 @@ func convertStringMap(v map[string]interface{}) map[string]string {
 	return m
 }
 
-func convertStringArr(ifaceArr []interface{}) []string {
+func ConvertStringArr(ifaceArr []interface{}) []string {
 	return convertAndMapStringArr(ifaceArr, func(s string) string { return s })
 }
 
@@ -229,7 +232,7 @@ func mapStringArr(original []string, f func(string) string) []string {
 	return arr
 }
 
-func convertStringArrToInterface(strs []string) []interface{} {
+func ConvertStringArrToInterface(strs []string) []interface{} {
 	arr := make([]interface{}, len(strs))
 	for i, str := range strs {
 		arr[i] = str
@@ -302,7 +305,7 @@ func mergeSchemas(a, b map[string]*schema.Schema) map[string]*schema.Schema {
 	return merged
 }
 
-func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
+func MergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
 	merged := make(map[string]*schema.Resource)
 	duplicates := []string{}
 
@@ -318,13 +321,13 @@ func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Re
 
 	var err error
 	if len(duplicates) > 0 {
-		err = fmt.Errorf("saw duplicates in mergeResourceMaps: %v", duplicates)
+		err = fmt.Errorf("saw duplicates in MergeResourceMaps: %v", duplicates)
 	}
 
 	return merged, err
 }
 
-func stringToFixed64(v string) (int64, error) {
+func StringToFixed64(v string) (int64, error) {
 	return strconv.ParseInt(v, 10, 64)
 }
 
@@ -372,7 +375,7 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *C
 
 	// Get the project from the resource or fallback to the project
 	// in the provider configuration
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return "", err
 	}
@@ -380,8 +383,8 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *C
 	return fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", serviceAccount, project), nil
 }
 
-func paginatedListRequest(project, baseUrl, userAgent string, config *Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
-	res, err := sendRequest(config, "GET", project, baseUrl, userAgent, nil)
+func PaginatedListRequest(project, baseUrl, userAgent string, config *Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
+	res, err := SendRequest(config, "GET", project, baseUrl, userAgent, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +396,7 @@ func paginatedListRequest(project, baseUrl, userAgent string, config *Config, fl
 			break
 		}
 		url := fmt.Sprintf("%s?pageToken=%s", baseUrl, pageToken.(string))
-		res, err = sendRequest(config, "GET", project, url, userAgent, nil)
+		res, err = SendRequest(config, "GET", project, url, userAgent, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -426,7 +429,7 @@ func calcAddRemove(from []string, to []string) (add, remove []string) {
 	for _, u := range to {
 		found := false
 		for _, v := range from {
-			if compareSelfLinkOrResourceName("", v, u, nil) {
+			if CompareSelfLinkOrResourceName("", v, u, nil) {
 				found = true
 				break
 			}
@@ -438,7 +441,7 @@ func calcAddRemove(from []string, to []string) (add, remove []string) {
 	for _, u := range from {
 		found := false
 		for _, v := range to {
-			if compareSelfLinkOrResourceName("", u, v, nil) {
+			if CompareSelfLinkOrResourceName("", u, v, nil) {
 				found = true
 				break
 			}
@@ -481,7 +484,7 @@ func changeFieldSchemaToForceNew(sch *schema.Schema) {
 	}
 }
 
-func generateUserAgentString(d TerraformResourceData, currentUserAgent string) (string, error) {
+func GenerateUserAgentString(d TerraformResourceData, currentUserAgent string) (string, error) {
 	var m providerMeta
 
 	err := d.GetProviderMeta(&m)
@@ -504,7 +507,7 @@ func SnakeToPascalCase(s string) string {
 	return strings.Join(split, "")
 }
 
-func multiEnvSearch(ks []string) string {
+func MultiEnvSearch(ks []string) string {
 	for _, k := range ks {
 		if v := os.Getenv(k); v != "" {
 			return v
@@ -521,7 +524,7 @@ func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
 
 	// See https://github.com/golang/oauth2/issues/306 for a recommendation to do this from a Go maintainer
 	// URL retrieved from https://accounts.google.com/.well-known/openid-configuration
-	res, err := sendRequest(config, "GET", "NO_BILLING_PROJECT_OVERRIDE", "https://openidconnect.googleapis.com/v1/userinfo", userAgent, nil)
+	res, err := SendRequest(config, "GET", "NO_BILLING_PROJECT_OVERRIDE", "https://openidconnect.googleapis.com/v1/userinfo", userAgent, nil)
 
 	if err != nil {
 		return "", fmt.Errorf("error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
@@ -537,7 +540,7 @@ func checkStringMap(v interface{}) map[string]string {
 	if ok {
 		return m
 	}
-	return convertStringMap(v.(map[string]interface{}))
+	return ConvertStringMap(v.(map[string]interface{}))
 }
 
 // return a fake 404 so requests get retried or nested objects are considered deleted

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleContainerImage() *schema.Resource {
+func DataSourceGoogleContainerImage() *schema.Resource {
 	return &schema.Resource{
 		Read: containerRegistryImageRead,
 		Schema: map[string]*schema.Schema{
@@ -42,7 +42,7 @@ func dataSourceGoogleContainerImage() *schema.Resource {
 
 func containerRegistryImageRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -12,21 +12,21 @@ import (
 func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := randString(t, 10)
+	randomSuffix := RandString(t, 10)
 
 	rsName := "foo_" + randomSuffix
 	rsFullName := fmt.Sprintf("google_compute_resource_policy.%s", rsName)
 	dsName := "my_policy_" + randomSuffix
 	dsFullName := fmt.Sprintf("data.google_compute_resource_policy.%s", dsName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataSourceComputeResourcePolicyDestroy(t, rsFullName),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix),
-				Check:  checkDataSourceStateMatchesResourceState(rsFullName, dsFullName),
+				Check:  CheckDataSourceStateMatchesResourceState(rsFullName, dsFullName),
 			},
 		},
 	})
@@ -43,11 +43,11 @@ func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name strin
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			policyAttrs := rs.Primary.Attributes
 
-			_, err := config.NewComputeClient(config.userAgent).ResourcePolicies.Get(
+			_, err := config.NewComputeClient(config.UserAgent).ResourcePolicies.Get(
 				config.Project, policyAttrs["region"], policyAttrs["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("Resource Policy still exists")
