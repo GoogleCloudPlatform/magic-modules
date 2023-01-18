@@ -890,6 +890,13 @@ resource "google_compute_backend_service" "foobar" {
     consecutive_errors = 2
   }
 }
+
+resource "google_compute_health_check" "health_check" {
+  name = "%s"
+  http_health_check {
+    port = 80
+  }
+}
 `, serviceName, checkName)
 }
 
