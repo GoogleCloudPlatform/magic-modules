@@ -74,6 +74,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         vars:
           name: "my-instance"
+        ignore_read_extra:
+          - "password"
     properties:
       onPremisesConfiguration: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
@@ -83,6 +85,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       onPremisesConfiguration.port: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0, 65535)'
+      onPremisesConfiguration.password: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.erb
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
