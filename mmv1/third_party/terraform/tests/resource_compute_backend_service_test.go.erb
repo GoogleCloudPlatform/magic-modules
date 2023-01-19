@@ -880,7 +880,7 @@ resource "google_compute_backend_service" "foobar" {
 	  data = "{\"foo\": \"bar\"}"
 	}
 	policy {
-	  name = ROUND_ROBIN
+	  name = "ROUND_ROBIN"
 	}
   }
   circuit_breakers {
