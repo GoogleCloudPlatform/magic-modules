@@ -871,17 +871,19 @@ resource "google_compute_health_check" "health_check" {
 func testAccComputeBackendService_trafficDirectorLbPolicies(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
-  name                  = "%s"
-  health_checks         = [google_compute_health_check.health_check.self_link]
-  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+  name                   = "%s"
+  health_checks          = [google_compute_health_check.health_check.self_link]
+  load_balancing_scheme  = "INTERNAL_SELF_MANAGED"
   locality_lb_policies {
-	custom_policy {
-	  name = "myorg.CustomPolicy"
-	  data = "{\"foo\": \"bar\"}"
-	}
-	policy {
-	  name = "ROUND_ROBIN"
-	}
+    custom_policy {
+      name = "myorg.CustomPolicy"
+      data = "{\"foo\": \"bar\"}"
+    }
+  }
+  locality_lb_policies {
+    policy {
+      name = "ROUND_ROBIN"
+    }
   }
   circuit_breakers {
     max_connections = 10
