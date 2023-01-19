@@ -1031,9 +1031,9 @@ resource "google_compute_security_policy" "policy" {
 
   adaptive_protection_config {
     auto_deploy_config {
-      load_threshold = 0.8
-      confidence_threshold = 0.5
-      impacted_baseline_threshold = 0.01
+      load_threshold = 0.9
+      confidence_threshold = 0.6
+      impacted_baseline_threshold = 0.03
       expiration_sec = 8000
     }
   }
