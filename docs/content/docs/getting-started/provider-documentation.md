@@ -69,4 +69,4 @@ Terraform Provider Google (TPG) contains handwritten documentation for handwritt
 ### Generated documentation (mmv1)
 
 The majority of resources in TPG are generated, and the information used to generate provider code is also used to generate documentation. For information about how documentation is generated, see:
-- [Update MMmv1 resource documentation](/magic-modules/docs/how-to/update-mmv1-resource-documentation)
+- [Update MMv1 resource documentation](/magic-modules/docs/how-to/update-mmv1-resource-documentation)
