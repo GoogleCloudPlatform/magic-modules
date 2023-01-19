@@ -97,6 +97,12 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Computed: true,
 			},
 
+			"type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The type of this job, selected from the JobType enum.`,
+			},
+
 			"num_workers": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -134,7 +140,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 			"sdk_container_image": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: `The Cloud Storage path to use for temporary files. Must be a valid Cloud Storage URL, beginning with gs://.`,
+				Description: `Docker registry location of container image to use for the 'worker harness. Default is the container for the version of the SDK. Note this field is only valid for portable pipelines.`,
 			},
 
 			"network": {
@@ -377,7 +383,6 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		d.SetId("")
 		return nil
 	}
-	d.SetId(job.Id)
 
 	return nil
 }
