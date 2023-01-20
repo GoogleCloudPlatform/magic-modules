@@ -318,7 +318,7 @@ When adding a new MMv1 product or resource there are fields that you need to set
 
 When the underlying API of a feature is not final (i.e. a `vN` version like
 `v1` or `v2`), is in preview, or the API has no SLO we add it to the
-`google-beta` provider rather than the `google `provider, allowing users to
+`google-beta` provider rather than the `google` provider, allowing users to
 self-select for the stability level they are comfortable with.
 
 In MMv1, a "version tag" can be annotated on resources, fields, resource iam
