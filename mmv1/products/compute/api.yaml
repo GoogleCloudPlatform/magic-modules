@@ -4214,6 +4214,15 @@ objects:
           The internal fully qualified service name for this Forwarding Rule.
           This field is only used for INTERNAL load balancing.
         output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'ipVersion'
+        description: |
+          The IP Version that will be used by this forwarding rule. Valid options are IPV4 or IPV6.
+
+          If not set, the default value is IPV4.
+        values:
+          - :IPV4
+          - :IPV6
   - !ruby/object:Api::Resource
     name: 'GlobalAddress'
     kind: 'compute#address'

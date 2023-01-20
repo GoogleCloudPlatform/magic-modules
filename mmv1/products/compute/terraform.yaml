@@ -979,6 +979,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "port_range"
           - "target"
           - "ip_address"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_internallb_ipv6"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "ilb-ipv6-forwarding-rule"
+          backend_name: "ilb-ipv6-backend"
+          network_name: "net-ipv6"
+          subnet_name:  "subnet-internal-ipv6"
+        ignore_read_extra:
+          - "port_range"
+          - "target"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:
