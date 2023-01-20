@@ -4220,7 +4220,6 @@ objects:
           The IP Version that will be used by this forwarding rule. Valid options are IPV4 or IPV6.
 
           If not set, the default value is IPV4.
-        default_value: :IPV4
         values:
           - :IPV4
           - :IPV6
