@@ -1031,6 +1031,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       serviceLabel: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCEName'
+      ipVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   GlobalAddress: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
