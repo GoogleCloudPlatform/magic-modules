@@ -70,7 +70,7 @@ Updates to other fields, like `output` and `required`, are easier to troubleshoo
 | ----- | ---- | ------------------------- |
 | `deprecated` | boolean | Controls if `(Deprecated)` will be shown next to the argument name |
 | `description` | string | The description shown in for a given argument or attribute |
-| `name` | string | The name displayed in a list in arguments or attributes |
+| `name` | string | The name displayed in a list of arguments or attributes |
 | `output` | boolean | Used to prevent a field being presented as an argument in the docs |
 | `required` | boolean | Controls if `(Required)` will be shown next to the argument name |
 | `sensitive` | boolean | Is used to help create a list of sensitive values. This list is used in a warning callout about sensitive values in state at the top of the page |
