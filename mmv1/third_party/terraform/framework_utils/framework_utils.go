@@ -1,8 +1,8 @@
 package google
 
 import (
-	"context"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -14,21 +14,35 @@ import (
 
 const uaEnvVar = "TF_APPEND_USER_AGENT"
 
-func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion string) string {
+// MultiEnvDefaultFunc is a helper function that returns the value of the first
+// environment variable in the given list that returns a non-empty value. If
+// none of the environment variables return a value, the default value is
+// returned.
+func MultiEnvDefault(ks []string, dv interface{}) interface{} {
+	for _, k := range ks {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return dv
+}
+
+func CompileUserAgentString(name, tfVersion, provVersion string) string {
 	ua := fmt.Sprintf("Terraform/%s (+https://www.terraform.io) Terraform-Plugin-SDK/%s %s/%s", tfVersion, "terraform-plugin-framework", name, provVersion)
 
 	if add := os.Getenv(uaEnvVar); add != "" {
 		add = strings.TrimSpace(add)
 		if len(add) > 0 {
 			ua += " " + add
-			tflog.Debug(ctx, fmt.Sprintf("Using modified User-Agent: %s", ua))
+
+			log.Printf("[DEBUG] Using modified User-Agent: %s", ua)
 		}
 	}
 
 	return ua
 }
 
-func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
+func GetCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
 	// When environment variables UserProjectOverride and BillingProject are set for the provider,
 	// the header X-Goog-User-Project is set for the API requests.
 	// But it causes an error when calling GetCurrUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".
@@ -40,7 +54,7 @@ func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 	diags.Append(d...)
 
 	if diags.HasError() {
-		tflog.Info(p.context, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
+		log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 		return ""
 	}
 	if res["email"] == nil {

@@ -35,7 +35,7 @@ func sendFrameworkRequestWithTimeout(p *frameworkProvider, method, project, rawu
 	}
 
 	if timeout == 0 {
-		timeout = time.Hour
+		timeout = time.Duration(1) * time.Hour
 	}
 
 	var res *http.Response
