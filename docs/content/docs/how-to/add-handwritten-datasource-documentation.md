@@ -70,7 +70,7 @@ It should contain:
 - the page title, as an H1 header
 - a description general information about the data source
 
-The description can be as long or as short as necessary. The minimum information that's included in this section are links to official documentation and the API reference pages. Other guidance, warnings, or explanations of concepts can be included here. To create pronounced warning or info sections, see the [this documentation](/magic-modules/docs/getting-started/provider-documentation/#what-formatting-is-available) page for info.
+The description can be as long or as short as necessary. The minimum information that's included in this section are links to official documentation and the API reference pages. Other guidance, warnings, or explanations of concepts can be included here. To create pronounced warning or info sections, see the [provider documentation](/magic-modules/docs/getting-started/provider-documentation/#what-formatting-is-available) page for info.
 
 For example, here's the title and opening description of `/website/docs/d/kms_crypto_key.html.markdown` ([link to generated page](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key)):
 
