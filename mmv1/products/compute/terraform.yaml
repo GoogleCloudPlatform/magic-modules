@@ -1503,12 +1503,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "machine_image_basic"
         primary_resource_id: "image"
+        primary_resource_name: "fmt.Sprint(\"image\")"
         vars:
           vm_name: "vm"
           image_name: "image"
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_machine_image_kms"
         primary_resource_id: "image"
+        primary_resource_name: "fmt.Sprint(\"image\")"
         vars:
           vm_name: "vm"
           image_name: "image"
