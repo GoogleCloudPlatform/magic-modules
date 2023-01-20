@@ -1032,7 +1032,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCEName'
       ipVersion: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
+        default_value: :IPV4
   GlobalAddress: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
