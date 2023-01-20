@@ -24,7 +24,7 @@ For the Registry to successfully render documentation page, the markdown files i
 
 There are 4 types of documentation page. There's the [index page](https://github.com/hashicorp/terraform-provider-google/blob/main/website/docs/index.html.markdown), documentation for [resources](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs/r), documentation for [data sources](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs/d), and finally [guide pages](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs/guides).
 
-Resource and data source documentation can be organised under customised categories in the left-side navigation menu (see YAML front matter above)
+Resource and data source documentation can be organised under customised categories in the left-side navigation menu (see YAML frontmatter above)
 
 ## What information documentation needs to inlude
 
@@ -35,7 +35,10 @@ Resource and data source documentation can be organised under customised categor
 - Argument Reference section
 - Attribute Reference section
 
-In the Google provider we also include information about timeouts and how to import a resource into Terraform state.
+In the Google provider we also include:
+- information about timeouts, ([see example](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address#timeouts))
+- how to import a resource into Terraform state, ([see example](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address#import))
+- whether or not direct user project overrides are supported, ([see example](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address#user-project-overrides))
 
 ## How do you test documentation changes?
 
