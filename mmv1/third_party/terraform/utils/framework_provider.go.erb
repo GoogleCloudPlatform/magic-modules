@@ -114,16 +114,84 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "request_reason": schema.StringAttribute{
                 Optional: true,
             },
+
+            // Generated Products
+            <% products.each do |product| -%>
+            "<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            <% end -%>
+
+            // Handwritten Products / Versioned / Atypical Entries
+            "cloud_billing_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            "composer_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            "container_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            "dataflow_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            "iam_credentials_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            "resource_manager_v3_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            <% unless version == "ga" -%>
+            "runtimecconfig_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            <% end -%>
+            "iam_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            "service_networking_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            "service_usage_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            "bigtable_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+
+            // dcl
+            "container_aws_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
+            "container_azure_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                // ValidateFunc: validateCustomEndpoint,
+            },
         },
         Blocks: map[string]schema.Block{
-            "batching": schema.SingleNestedBlock{
-                Attributes: map[string]schema.Attribute{
-                    "send_after": schema.StringAttribute{
-                        Optional: true,
-                        // ValidateFunc: validateNonNegativeDuration(),
-                    },
-                    "enable_batching": schema.BoolAttribute{
-                        Optional: true,
+            "batching": schema.ListNestedBlock{
+                NestedObject: schema.NestedBlockObject{
+                    Attributes: map[string]schema.Attribute{
+                        "send_after": schema.StringAttribute{
+                            Optional: true,
+                            // ValidateFunc: validateNonNegativeDuration(),
+                        },
+                        "enable_batching": schema.BoolAttribute{
+                            Optional: true,
+                        },
                     },
                 },
             },
