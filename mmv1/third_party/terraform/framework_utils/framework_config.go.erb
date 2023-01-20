@@ -224,24 +224,6 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 		}
 	}
 
-	if data.ServiceUsageCustomEndpoint.IsNull() {
-		customEndpoint := MultiEnvDefault([]string{
-			"GOOGLE_SERVICE_USAGE_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[ServiceUsageBasePathKey])
-		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
-		}
-	}
-
-	if data.BigtableAdminCustomEndpoint.IsNull() {
-		customEndpoint := MultiEnvDefault([]string{
-			"GOOGLE_BIGTABLE_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[BigtableAdminBasePathKey])
-		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
-		}
-	}
-
 	if data.ContainerAwsCustomEndpoint.IsNull() {
 		customEndpoint := MultiEnvDefault([]string{
 			"GOOGLE_CONTAINERAWS_CUSTOM_ENDPOINT",
