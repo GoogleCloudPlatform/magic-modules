@@ -255,7 +255,7 @@ In addition to the arguments listed above, the following computed attributes are
 ## Timeouts
 
 `google_container_node_pool` provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - (Default `30 minutes`) Used for adding node pools
 - `update` - (Default `30 minutes`) Used for updates to node pools
