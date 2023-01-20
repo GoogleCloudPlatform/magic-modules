@@ -55,6 +55,12 @@
 -%>
 '<%= dir -%>/<%= fname -%>': 'third_party/terraform/framework_models/<%= fname -%>'
 <% end -%>
+<%
+  Dir["third_party/terraform/framework_utils/*.go"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname -%>': 'third_party/terraform/framework_utils/<%= fname -%>'
+<% end -%>
 '<%= dir -%>/test-fixtures/': 'third_party/terraform/utils/test-fixtures'
 <% end -%>
 <% if generate_docs -%>
