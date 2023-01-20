@@ -3,11 +3,12 @@ package google
 
 import (
     "context"
+    "fmt"
     "net/http"
     "os"
+    "time"
 
-    "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-
+    grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/path"
     "github.com/hashicorp/terraform-plugin-framework/provider"
@@ -15,11 +16,21 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/resource"
     "github.com/hashicorp/terraform-plugin-framework/schema/validator"
     "github.com/hashicorp/terraform-plugin-framework/types"
+    "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+    "github.com/sirupsen/logrus"
+
+    "google.golang.org/api/option"
+    "google.golang.org/grpc"
 )
 
 // Ensure the implementation satisfies the expected interfaces
 var (
     _ provider.Provider = &frameworkProvider{}
+
+    defaultClientScopes = []string{
+        "https://www.googleapis.com/auth/cloud-platform",
+        "https://www.googleapis.com/auth/userinfo.email",
+    }
 )
 
 // New is a helper function to simplify provider server and testing implementation.
@@ -31,6 +42,16 @@ func New(version string) provider.Provider {
 
 // frameworkProvider is the provider implementation.
 type frameworkProvider struct{
+    client *http.Client
+    context context.Context
+    gRPCLoggingOptions []option.ClientOption
+    pollInterval time.Duration
+    region string
+    requestBatcherIam *RequestBatcher
+    requestBatcherServiceUsage *RequestBatcher
+    scopes []string
+    userAgent string
+    userProjectOverride bool
     version string
 }
 
@@ -53,7 +74,6 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     }...),
                 },
             },
-
             "access_token": schema.StringAttribute{
                 Optional: true,
                 Validators: []validator.String{
@@ -124,77 +144,62 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
     // Configuration values are now available.
 
     // Set defaults if needed
-    if data.ImpersonateServiceAccount.IsNull() {
-        data.ImpersonateServiceAccount = types.StringValue(os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT"))
+    p.HandleDefaults(ctx, &data, &resp.Diagnostics)
+    if resp.Diagnostics.HasError() {
+        return
     }
 
-    if data.Project.IsNull() {
-        project := MultiEnvDefault([]string{
-                    "GOOGLE_PROJECT",
-                    "GOOGLE_CLOUD_PROJECT",
-                    "GCLOUD_PROJECT",
-                    "CLOUDSDK_CORE_PROJECT",
-                }, nil)
-        if project != nil {
-            data.Project = types.StringValue(project.(string))
-        }
+    
+    // Handle User Agent string
+    p.userAgent = CompileUserAgentString("terraform-provider-google<%= "-" + version unless version == 'ga'  -%>", req.TerraformVersion, p.version)
+    // opt in extension for adding to the User-Agent header
+    if ext := os.Getenv("GOOGLE_TERRAFORM_USERAGENT_EXTENSION"); ext != "" {
+        ua := p.userAgent
+        p.userAgent = fmt.Sprintf("%s %s", ua, ext)
     }
 
-    if data.BillingProject.IsNull() {
-        data.BillingProject = types.StringValue(os.Getenv("GOOGLE_BILLING_PROJECT"))
+    // Set up client configuration
+    p.SetupClient(ctx, data, &resp.Diagnostics)
+    if resp.Diagnostics.HasError() {
+        return
     }
 
-    if data.Region.IsNull() {
-        region := MultiEnvDefault([]string{
-                    "GOOGLE_REGION",
-                    "GCLOUD_REGION",
-                    "CLOUDSDK_COMPUTE_REGION",
-                }, nil)
+    // gRPC Logging setup
+    logger := logrus.StandardLogger()
 
-        if region != nil {
-            data.Region = types.StringValue(region.(string))
-        }
+    logrus.SetLevel(logrus.DebugLevel)
+    logrus.SetFormatter(&Formatter{
+        TimestampFormat: "2006/01/02 15:04:05",
+        LogFormat:       "%time% [%lvl%] %msg% \n",
+    })
+
+    alwaysLoggingDeciderClient := func(ctx context.Context, fullMethodName string) bool { return true }
+    grpc_logrus.ReplaceGrpcLogger(logrus.NewEntry(logger))
+
+    p.gRPCLoggingOptions = append(
+        p.gRPCLoggingOptions, option.WithGRPCDialOption(grpc.WithUnaryInterceptor(
+            grpc_logrus.PayloadUnaryClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
+        option.WithGRPCDialOption(grpc.WithStreamInterceptor(
+            grpc_logrus.PayloadStreamClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
+    )
+
+    // Handle Batching Config
+    batchingConfig := GetBatchingConfig(ctx, data.Batching, &resp.Diagnostics)
+    if resp.Diagnostics.HasError() {
+        return
     }
 
-    if data.Zone.IsNull() {
-        zone := MultiEnvDefault([]string{
-                    "GOOGLE_ZONE",
-                    "GCLOUD_ZONE",
-                    "CLOUDSDK_COMPUTE_ZONE",
-                }, nil)
-
-        if zone != nil {
-            data.Zone = types.StringValue(zone.(string))
-        }
-    }
-
-    if data.Batching.SendAfter.IsNull() {
-        data.Batching.SendAfter = types.StringValue("10s")
-    }
-
-    if data.Batching.EnableBatching.IsNull() {
-        data.Batching.EnableBatching = types.BoolValue(true)
-    }
-
-    if data.UserProjectOverride.IsNull() {
-        override, err := strconv.ParseBool(os.Getenv("USER_PROJECT_OVERRIDE"))
-        if err != nil {
-            resp.Diagnostics.AddError(
-                "error parsing environment variable `USER_PROJECT_OVERRIDE` into bool", err.Error())
-        }
-        data.UserProjectOverride = types.BoolValue(override)
-    }
-
-    if data.RequestReason.IsNull() {
-        data.RequestReason = types.StringValue(os.Getenv("CLOUDSDK_CORE_REQUEST_REASON"))
-    }
-
+    p.context = ctx
+    p.region = data.Region.String()
+    p.pollInterval = 10 * time.Second
+    p.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, batchingConfig)
+    p.requestBatcherIam = NewRequestBatcher("IAM", ctx, batchingConfig)
 
     // Example client configuration for data sources and resources
-    client := http.DefaultClient
-    resp.DataSourceData = client
-    resp.ResourceData = client
+    resp.DataSourceData = p.client
+    resp.ResourceData = p.client
 }
+
 
 // DataSources defines the data sources implemented in the provider.
 func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {

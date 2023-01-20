@@ -1,34 +1,44 @@
 package google
 
 import (
-	"context"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 const uaEnvVar = "TF_APPEND_USER_AGENT"
 
-func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion string) string {
+// MultiEnvDefaultFunc is a helper function that returns the value of the first
+// environment variable in the given list that returns a non-empty value. If
+// none of the environment variables return a value, the default value is
+// returned.
+func MultiEnvDefault(ks []string, dv interface{}) interface{} {
+	for _, k := range ks {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return dv
+}
+
+func CompileUserAgentString(name, tfVersion, provVersion string) string {
 	ua := fmt.Sprintf("Terraform/%s (+https://www.terraform.io) Terraform-Plugin-SDK/%s %s/%s", tfVersion, "terraform-plugin-framework", name, provVersion)
 
 	if add := os.Getenv(uaEnvVar); add != "" {
 		add = strings.TrimSpace(add)
 		if len(add) > 0 {
 			ua += " " + add
-			tflog.Debug(ctx, fmt.Sprintf("Using modified User-Agent: %s", ua))
+			log.Printf("[DEBUG] Using modified User-Agent: %s", ua)
 		}
 	}
 
 	return ua
 }
 
-func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
+func GetCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
 	// When environment variables UserProjectOverride and BillingProject are set for the provider,
 	// the header X-Goog-User-Project is set for the API requests.
 	// But it causes an error when calling GetCurrUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".
@@ -40,7 +50,7 @@ func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 	diags.Append(d...)
 
 	if diags.HasError() {
-		tflog.Info(p.context, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
+		log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 		return ""
 	}
 	if res["email"] == nil {
@@ -48,42 +58,4 @@ func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 		return ""
 	}
 	return res["email"].(string)
-}
-
-func generateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent string) string {
-	if metaData != nil && !metaData.ModuleName.IsNull() && metaData.ModuleName.ValueString() != "" {
-		return strings.Join([]string{currUserAgent, metaData.ModuleName.ValueString()}, " ")
-	}
-
-	return currUserAgent
-}
-
-// getProject reads the "project" field from the given resource and falls
-// back to the provider's value if not given. If the provider's value is not
-// given, an error is returned.
-func getProjectFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
-	return getProjectFromSchemaFramework("project", rVal, pVal, diags)
-}
-
-func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
-	if !rVal.IsNull() && rVal.ValueString() != "" {
-		return rVal
-	}
-
-	if !pVal.IsNull() && pVal.ValueString() != "" {
-		return pVal
-	}
-
-	diags.AddError("required field is not set", fmt.Sprintf("%s is not set", projectSchemaField))
-	return types.String{}
-}
-
-func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
-	if isGoogleApiErrorWithCode(err, 404) {
-		tflog.Warn(ctx, fmt.Sprintf("Removing %s because it's gone", resource))
-		// The resource doesn't exist anymore
-		state.RemoveResource(ctx)
-	}
-
-	diags.AddError(fmt.Sprintf("Error when reading or editing %s", resource), err.Error())
 }
