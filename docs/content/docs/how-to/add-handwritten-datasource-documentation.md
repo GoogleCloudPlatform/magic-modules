@@ -47,7 +47,7 @@ Pages within the documentation need to be consistent and contain the sections th
 The top of the file needs to contain frontmatter, which is used to create the new documentation page's title and manage how the page is linked to in the documentation's sidebar navigation. It it not rendered but it is very important for the new page in the documentation to be generated and available to users.
 
 You need to make sure your file's frontmatter includes:
-- `subcategory` - This sets which section in the sidebar navigation (left side) the new page is categorised into.
+- `subcategory` - This sets which section in the left-side navigation menu the new page is categorised into.
 - `page_title` - This frontmatter is specific to files in the Guides section (`/website/docs/guides`) but we set it for all markdown files.
 - `description` - A decription of the page.
 

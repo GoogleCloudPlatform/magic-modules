@@ -24,7 +24,7 @@ For the Registry to successfully render documentation page, the markdown files i
 
 There are 4 types of documentation page. There's the [index page](https://github.com/hashicorp/terraform-provider-google/blob/main/website/docs/index.html.markdown), documentation for [resources](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs/r), documentation for [data sources](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs/d), and finally [guide pages](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs/guides).
 
-Resource and data source documentation can be organised under customised categories in the left-side navigation bar (see YAML front matter above)
+Resource and data source documentation can be organised under customised categories in the left-side navigation menu (see YAML front matter above)
 
 ## What information documentation needs to inlude
 
@@ -41,7 +41,7 @@ In the Google provider we also include information about timeouts and how to imp
 
 You can copy and paste markdown into the Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it will be rendered.
 
-There currently isn't a way to preview how frontmatter will be used to create 
+There currently isn't a way to preview how frontmatter will be used to create the left-side navigation menu.
 
 
 ## What formatting is available
