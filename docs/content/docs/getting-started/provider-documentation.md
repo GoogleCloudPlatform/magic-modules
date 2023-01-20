@@ -7,13 +7,13 @@ weight: 60
 
 The provider is [documented on HashiCorp's Terraform Registry](https://registry.terraform.io/providers/hashicorp/google/latest/docs), which includes information about individual resources and datasources, and includes guides to help users configure or upgrade the provider in their projects.
 
-This document includes details about how provider documentation is used by the [public Registry](https://registry.terraform.io/providers), how it is made in the Magic Modules repo, and tools you can use when editing documentation.
+This document includes details about how provider documentation is used by the [Terraform Registry](https://registry.terraform.io/providers), how it is made in the Magic Modules repo, and tools you can use when editing documentation.
 
 There are other pages under [How To](/magic-modules/docs/how-to) that describe _how_ to approach making additions to the documentation.
 
-## How documentation is used by the public Registry
+## How documentation is used by the Terraform Registry
 
-The provider's documentation is rendered in the public Registry using [markdown files](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs) that are packaged into each release. The Registry allows users to browse past versions of the documentation, for example [the documentation for v3.0.0](https://registry.terraform.io/providers/hashicorp/google/3.0.0/docs/guides/getting_started).
+The provider's documentation is rendered in the Terraform Registry using [markdown files](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs) that are packaged into each release. The Registry allows users to browse past versions of the documentation, for example [the documentation for v3.0.0](https://registry.terraform.io/providers/hashicorp/google/3.0.0/docs/guides/getting_started).
 
 For the Registry to successfully render documentation page, the markdown files in each provider release need to follow some requirements:
 - Files need to be saved in a [specific directory](https://developer.hashicorp.com/terraform/registry/providers/docs#directory-structure).
