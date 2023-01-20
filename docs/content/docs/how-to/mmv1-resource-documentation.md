@@ -27,6 +27,14 @@ The main template used for documentation is `mmv1/templates/terraform/resource.h
 
 Almost all fields in the YAML influences the documentation generated for a given resource. Below are descriptions of fields that are directly referenced in the documentation templates, and multiple fields not described here are relevant to the eventual documentation's content.
 
+### Top level fields for a product
+
+These fields are found at the top of `api.yaml` files, and describe an overall product (ruby/object:Api::Product).
+
+| Field | Type | Relation to documentation | Example value |
+| ----- | ---- |------------------------- | ------------- |
+| `display_name` | string | Controls the value of `subcategory` in YAML frontmatter; determines where the link to the page appears in the left-side navigation menu. | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/39bded78e3032328e972f8e5b5f37796a451440b/mmv1/products/accesscontextmanager/product.yaml#L16) |
+
 ### Top level fields within resources
 
 These can be top-level properties of a resource (ruby/object:Api::Resource) or overrides for the resource (ruby/object:Overrides::Terraform::ResourceOverride), i.e. in `api.yaml` or `terraform.yaml`.
