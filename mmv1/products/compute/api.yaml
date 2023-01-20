@@ -4217,9 +4217,10 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'ipVersion'
         description: |
-          The IP Version that will be used by this forwarding rule. Valid options are IPV4 or IPV6.
+          The IP address version that will be used by this forwarding rule.
+          Valid options are IPV4 or IPV6.
 
-          If not set, the default value is IPV4.
+          If not set, the IPv4 address will be used by default.
         values:
           - :IPV4
           - :IPV6
