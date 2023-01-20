@@ -11,7 +11,7 @@ weight: 24
 
 {{< /hint >}}
 
-## How providers documentation works
+## How provider documentation works
 
 For general information about how provider documentation works, see [Provider Documentation](/magic-modules/docs/getting-started/provider-documentation).
 That page contains information about how documentation should be structured and how you can test changes to documentation.
