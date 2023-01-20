@@ -48,7 +48,7 @@ There currently isn't a way to preview how frontmatter will be used to create
 
 You can expect markdown to be rendered in a similar way to READMEs in GitHub. When in doubt, you can test how some markdown will be rendered using the testing tool in the Doc Preview Tool mentioned above.
 
-Something usedul to be aware of are [callouts](https://developer.hashicorp.com/terraform/registry/providers/docs#callouts), that allow blue, yellow and red (warning) sections to be used for important information. To see how they're rendered, paste the markdown below into the Doc Preview Tool.
+Something useful to be aware of are [callouts](https://developer.hashicorp.com/terraform/registry/providers/docs#callouts), that allow blue, yellow and red (warning) sections to be used for important information. To see how they're rendered, paste the markdown below into the Doc Preview Tool.
 
 ```markdown
 -> **Note** This callout is blue
