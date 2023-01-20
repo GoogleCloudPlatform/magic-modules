@@ -5,7 +5,7 @@ weight: 60
 
 # Provider documentation
 
-The provider is [documented on HashiCorp's public Registry](https://registry.terraform.io/providers/hashicorp/google/latest/docs), which includes information about individual resources and datasources, and includes guides to help users configure or upgrade the provider in their projects.
+The provider is [documented on HashiCorp's Terraform Registry](https://registry.terraform.io/providers/hashicorp/google/latest/docs), which includes information about individual resources and datasources, and includes guides to help users configure or upgrade the provider in their projects.
 
 This document includes details about how provider documentation is used by the [public Registry](https://registry.terraform.io/providers), how it is made in the Magic Modules repo, and tools you can use when editing documentation.
 
