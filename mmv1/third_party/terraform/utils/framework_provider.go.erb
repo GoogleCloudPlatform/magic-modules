@@ -162,14 +162,6 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Optional:     true,
                 // ValidateFunc: validateCustomEndpoint,
             },
-            "service_usage_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
-            },
-            "bigtable_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
-            },
 
             // dcl
             "container_aws_custom_endpoint": &schema.StringAttribute{
