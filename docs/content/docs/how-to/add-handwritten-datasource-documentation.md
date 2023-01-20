@@ -111,18 +111,19 @@ data "google_kms_crypto_key" "my_crypto_key" {
 
 The argument reference section tells user about the fields in the schema which they can set via their Terraform configuration. The fields are listed using bullet points, and each field is marked with whether it is required or optional.
 
-For example, this is the argument reference section from `/website/docs/d/kms_secret.html.markdown`:
+For example, this is the argument reference section from `/website/docs/d/compute_backend_bucket.html.markdown`:
 
 ```markdown
 ## Argument Reference
 
 The following arguments are supported:
 
-* `ciphertext` (Required) - The ciphertext to be decrypted, encoded in base64
-* `crypto_key` (Required) - The id of the CryptoKey that will be used to
-  decrypt the provided ciphertext. This is represented by the format
-  `{projectId}/{location}/{keyRingName}/{cryptoKeyName}`.
-* `additional_authenticated_data` (Optional) - The [additional authenticated data](https://cloud.google.com/kms/docs/additional-authenticated-data) used for integrity checks during encryption and decryption.
+* `name` - (Required) Name of the resource.
+
+- - -
+
+* `project` - (Optional) The ID of the project in which the resource belongs. If it
+    is not provided, the provider project is used.
 ```
 
 #### Nested blocks
