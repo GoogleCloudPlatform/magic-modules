@@ -27,7 +27,7 @@ resource "google_access_context_manager_access_level" "test-access" {
 }
 
 resource "google_access_context_manager_access_policy" "access-policy" {
-  parent = "organizations/123456789"
+  parent = "organizations/${google_project.project.org_id}"
   title  = "my policy"
 }
 
