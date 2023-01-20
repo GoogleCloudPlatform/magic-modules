@@ -23,6 +23,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       connection_id: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         custom_flatten: "templates/terraform/custom_flatten/id_from_name.erb"
+      aws: !ruby/object:Overrides::Terraform::PropertyOverride
+        update_mask_fields:
+          - "aws.access_role.iam_role_id"
     id_format: "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}"
     import_format: ["projects/{{project}}/locations/{{location}}/connections/{{connection_id}}", "{{project}}/{{location}}/{{connection_id}}", "{{location}}/{{connection_id}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
