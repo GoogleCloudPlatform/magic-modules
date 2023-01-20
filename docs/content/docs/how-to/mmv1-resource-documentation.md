@@ -23,9 +23,13 @@ The Magic Modules compiler parses YAML files, creates Ruby objects that are popu
 The main template used for documentation is `mmv1/templates/terraform/resource.html.markdown.erb`. As an example of how it works, you can see that the main title of documentation pages are created by some [processing of name data](https://github.com/GoogleCloudPlatform/magic-modules/blob/a69f1150de76f2b2cd9d37faa6bd44c1fb8a460a/mmv1/templates/terraform/resource.html.markdown.erb#L41) for a given resource and then using Ruby string methods to [print an escaped version of the name](https://github.com/GoogleCloudPlatform/magic-modules/blob/a69f1150de76f2b2cd9d37faa6bd44c1fb8a460a/mmv1/templates/terraform/resource.html.markdown.erb#L58) into an H1 header.
 
 
-## What YAML fields are used directly in the documentation
+## What YAML fields are used in the documentation
 
-Almost all fields in the YAML influences the documentation generated for a given resource. Below are descriptions of fields that are directly referenced in the documentation templates, and multiple fields not described here are relevant to the eventual documentation's content.
+The YAML files in Magic Modules are used to generate both the provider's Go code and the markdown documentation. As a result of this, changes to documentation happen automatically while you make a change to a resource's implementation in the provider. Often it's possible to address an issue without ever needing to think about documentation changes.
+
+However, if you are implementing a new product or resource from scratch, or making non-routine changes to documentation, then you will need to be aware of how the YAML fields are used. Especially as some are specific to documentation.
+
+Below are descriptions of fields that are directly referenced in the documentation templates.
 
 ### Top level fields for a product
 
