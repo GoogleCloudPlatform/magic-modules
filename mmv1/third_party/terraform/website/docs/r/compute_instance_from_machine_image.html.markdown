@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_instance_from_machine_image"
 description: |-
   Manages a VM instance resource within GCE.
 ---

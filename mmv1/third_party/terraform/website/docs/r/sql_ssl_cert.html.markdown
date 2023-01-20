@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud SQL"
-page_title: "Google: google_sql_ssl_cert"
 description: |-
   Creates a new SQL Ssl Cert in Google Cloud SQL.
 ---

@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_attached_disk"
 description: |-
   Resource that allows attaching existing persistent disks to compute instances.
 ---

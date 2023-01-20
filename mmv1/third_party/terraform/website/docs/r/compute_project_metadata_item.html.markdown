@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_project_metadata_item"
 description: |-
   Manages a single key/value pair on common instance metadata
 ---

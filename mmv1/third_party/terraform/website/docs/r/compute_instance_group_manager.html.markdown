@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_instance_group_manager"
 description: |-
   Manages an Instance Group within GCE.
 ---

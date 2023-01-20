@@ -1,6 +1,5 @@
 ---
 subcategory: "Dataproc"
-page_title: "Google: google_dataproc_workflow_template"
 description: |-
   A Workflow Template is a reusable workflow configuration.
 ---

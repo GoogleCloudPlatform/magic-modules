@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_project_usage_export_bucket"
 description: |-
   Manages a project's usage export bucket.
 ---

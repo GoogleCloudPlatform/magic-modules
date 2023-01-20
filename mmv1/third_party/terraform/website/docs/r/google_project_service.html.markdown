@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Platform"
-page_title: "Google: google_project_service"
 description: |-
  Allows management of a single API service for a Google Cloud Platform project.
 ---

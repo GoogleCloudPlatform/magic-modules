@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_router_interface"
 description: |-
   Manages a Cloud Router interface.
 ---

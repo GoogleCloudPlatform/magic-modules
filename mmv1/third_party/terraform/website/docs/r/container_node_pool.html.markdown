@@ -1,6 +1,5 @@
 ---
 subcategory: "Kubernetes (Container) Engine"
-page_title: "Google: google_container_node_pool"
 description: |-
   Manages a GKE NodePool resource.
 ---

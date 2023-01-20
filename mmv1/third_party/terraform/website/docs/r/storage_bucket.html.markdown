@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Storage"
-page_title: "Google: google_storage_bucket"
 description: |-
   Creates a new bucket in Google Cloud Storage.
 ---

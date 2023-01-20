@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Platform"
-page_title: "Google: google_project_default_service_accounts"
 description: |-
   Allows management of Google Cloud Platform project default service accounts.
 ---

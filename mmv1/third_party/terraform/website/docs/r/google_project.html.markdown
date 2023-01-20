@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Platform"
-page_title: "Google: google_project"
 description: |-
  Allows management of a Google Cloud Platform project.
 ---

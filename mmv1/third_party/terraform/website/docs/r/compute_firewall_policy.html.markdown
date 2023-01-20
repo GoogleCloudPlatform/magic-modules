@@ -14,7 +14,6 @@
 #
 # ----------------------------------------------------------------------------
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_firewall_policy"
 description: |-
   Creates a hierarchical firewall policy
 ---

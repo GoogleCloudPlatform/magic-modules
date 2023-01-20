@@ -1,6 +1,5 @@
 ---
 subcategory: "Dataproc"
-page_title: "Google: google_dataproc_cluster"
 description: |-
   Manages a Cloud Dataproc cluster resource.
 ---

@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_project_metadata"
 description: |-
   Manages common instance metadata
 ---

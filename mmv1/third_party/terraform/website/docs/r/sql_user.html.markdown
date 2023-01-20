@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud SQL"
-page_title: "Google: google_sql_user"
 description: |-
   Creates a new SQL user in Google Cloud SQL.
 ---
