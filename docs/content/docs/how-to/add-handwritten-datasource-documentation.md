@@ -10,7 +10,7 @@ weight: 25
 **Note:** If you want to find information about documentation for a generated resource, look at the [MMv1 resource documentation](/magic-modules/docs/how-to/mmv1-resource-documentation) page instead. The information on this page will not be relevant for resources that have generated documentation.
 {{< /hint >}}
 
-## How providers documentation works
+## How provider documentation works
 
 For general information about how provider documentation works, see [Provider Documentation](/magic-modules/docs/getting-started/provider-documentation).
 That page contains information about how documentation should be structured and how you can test changes to documentation.
