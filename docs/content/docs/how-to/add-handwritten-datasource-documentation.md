@@ -72,18 +72,18 @@ It should contain:
 
 The description can be as long or as short as necessary. The minimum information that's included in this section are links to official documentation and the API reference pages. Other guidance, warnings, or explanations of concepts can be included here. To create pronounced warning or info sections, see the [provider documentation](/magic-modules/docs/getting-started/provider-documentation/#what-formatting-is-available) page for info.
 
-For example, here's the title and opening description of `/website/docs/d/kms_crypto_key.html.markdown` ([link to generated page](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key)):
+For example, here's the title and opening description of `/website/docs/d/cloud_run_locations.html.markdown` ([link to generated page](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/cloud_run_locations)):
 
 ```markdown
-# google\_kms\_crypto\_key
+# google\_cloud\_run\_locations
 
-Provides access to a Google Cloud Platform KMS CryptoKey. For more information see
-[the official documentation](https://cloud.google.com/kms/docs/object-hierarchy#key)
-and
-[API](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys).
+Get Cloud Run locations available for a project. 
 
-A CryptoKey is an interface to key material which can be used to encrypt and decrypt data. A CryptoKey belongs to a
-Google Cloud KMS KeyRing.
+To get more information about Cloud Run, see:
+
+* [API documentation](https://cloud.google.com/run/docs/reference/rest/v1/projects.locations)
+* How-to Guides
+    * [Official Documentation](https://cloud.google.com/run/docs/)
 ```
 
 ### Example usage
