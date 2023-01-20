@@ -15,17 +15,32 @@ There are other pages under [How To](/magic-modules/docs/how-to) that describe _
 
 The provider's documentation is rendered in the Terraform Registry using [markdown files](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs) that are packaged into each release. The Registry allows users to browse past versions of the documentation, for example [the documentation for v3.0.0](https://registry.terraform.io/providers/hashicorp/google/3.0.0/docs/guides/getting_started).
 
-For the Registry to successfully render documentation page, the markdown files in each provider release need to follow some requirements:
-- Files need to be saved in a [specific directory](https://developer.hashicorp.com/terraform/registry/providers/docs#directory-structure).
-    - Note that the Google provider uses a legacy version of this requirement - a `website/docs/` folder.
-- Each file must include specific [YAML frontmatter](https://developer.hashicorp.com/terraform/registry/providers/docs#yaml-frontmatter).
-    - For resource/data source pages, `subcategory` determines where the link to the page is located in the left-side navigation.
-    - For guide pages, `page_title` sets the page title (as there isn't a resource to name it after).
-
 There are 4 types of documentation page. There's the [index page](https://github.com/hashicorp/terraform-provider-google/blob/main/website/docs/index.html.markdown), documentation for [resources](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs/r), documentation for [data sources](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs/d), and finally [guide pages](https://github.com/hashicorp/terraform-provider-google/tree/main/website/docs/guides).
 
-Resource and data source documentation can be organised under customised categories in the left-side navigation menu (see YAML frontmatter above)
+For the Registry to successfully render documentation page, the markdown files in each provider release need to follow some requirements, described below.
 
+### Directory structure
+
+Files need to be saved in a [specific directory](https://developer.hashicorp.com/terraform/registry/providers/docs#directory-structure).
+
+```
+mmv1/third_party/terraform/website/docs/
+├─ guides/
+│  ├─ ...
+├─ d/
+│  ├─ ...
+├─ r/
+│  ├─ ...
+├─ index.html.markdown
+```
+Note that the Google provider uses a legacy version of this requirement - a `website/docs/` folder.
+
+### YAML frontmatter
+
+Each file must include specific [YAML frontmatter](https://developer.hashicorp.com/terraform/registry/providers/docs#yaml-frontmatter).
+
+- `subcategory` - for resource/data source pages -  determines where the link to the page is located in the left-side navigation.
+- `page_title` - for guide pages -  sets the page title (as there isn't a resource to name it after). Here's [an example](https://github.com/hashicorp/terraform-provider-google/blob/46b96dcaec4e1563a5a0aff412e47896a3b72ea7/website/docs/guides/getting_started.html.markdown?plain=1#L2).
 ## What information documentation needs to inlude
 
 [HashiCorp advice](https://developer.hashicorp.com/terraform/registry/providers/docs#headers) is to include these sections:
@@ -36,9 +51,9 @@ Resource and data source documentation can be organised under customised categor
 - Attribute Reference section
 
 In the Google provider we also include:
-- information about timeouts, ([see example](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address#timeouts))
-- how to import a resource into Terraform state, ([see example](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address#import))
-- whether or not direct user project overrides are supported, ([see example](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address#user-project-overrides))
+- Timeouts, describing configurable timeouts for a resource: [see example](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address#timeouts)
+- Import, how to import a resource into Terraform state: [see example](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address#import)
+- User Project Overrides, whether or not direct user project overrides are supported: [see example](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address#user-project-overrides)
 
 ## How do you test documentation changes?
 
