@@ -1077,7 +1077,6 @@ objects:
                       # exactly_one_of:
                       #   - template.0.containers.0.startupProbe.0.httpGet
                       #   - template.0.containers.0.startupProbe.0.tcpSocket
-                      #   - template.0.containers.0.startupProbe.0.grpc
                       properties:
                         - !ruby/object:Api::Type::String
                           name: "path"
@@ -1110,33 +1109,11 @@ objects:
                       # exactly_one_of:
                       #   - template.0.containers.0.startupProbe.0.httpGet
                       #   - template.0.containers.0.startupProbe.0.tcpSocket
-                      #   - template.0.containers.0.startupProbe.0.grpc
                       properties:
                         - !ruby/object:Api::Type::Integer
                           name: port
                           description: |-
                             Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: grpc
-                      description: |-
-                        GRPC specifies an action involving a GRPC port.
-                      send_empty_value: true
-                      allow_empty_object: true
-                      # exactly_one_of:
-                      #   - template.0.containers.0.startupProbe.0.httpGet
-                      #   - template.0.containers.0.startupProbe.0.tcpSocket
-                      #   - template.0.containers.0.startupProbe.0.grpc
-                      properties:
-                        - !ruby/object:Api::Type::Integer
-                          name: port
-                          description: |-
-                            Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to 8080.
-                        - !ruby/object:Api::Type::String
-                          name: service
-                          description: |-
-                            The name of the service to place in the gRPC HealthCheckRequest
-                            (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
-                            If this is not specified, the default behavior is defined by gRPC.
           - !ruby/object:Api::Type::Array
             name: "volumes"
             description: |-

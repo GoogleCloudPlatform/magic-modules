@@ -155,8 +155,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       template.containers.startupProbe.tcpSocket.port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      template.containers.startupProbe.grpc.port: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
       template.containers.livenessProbe.grpc.port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       template.scaling: !ruby/object:Overrides::Terraform::PropertyOverride
