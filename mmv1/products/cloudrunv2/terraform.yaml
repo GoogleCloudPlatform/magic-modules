@@ -47,12 +47,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           vpc_compute_subnetwork_name: "run-subnetwork"
           compute_network_name: "run-network"
       - !ruby/object:Provider::Terraform::Examples
-        name: "cloudrunv2_job_probes"
-        primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
-        vars:
-          cloud_run_job_name: "cloudrun-job"
-      - !ruby/object:Provider::Terraform::Examples
         name: "cloudrunv2_job_secret"
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
