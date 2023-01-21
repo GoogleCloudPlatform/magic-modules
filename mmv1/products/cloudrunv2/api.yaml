@@ -1036,7 +1036,7 @@ objects:
                         - !ruby/object:Api::Type::Integer
                           name: port
                           description: |-
-                            Port number to access on the container. Number must be in the range 1 to 65535.
+                            Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to 8080.
                         - !ruby/object:Api::Type::String
                           name: service
                           description: |-
@@ -1130,7 +1130,7 @@ objects:
                         - !ruby/object:Api::Type::Integer
                           name: port
                           description: |-
-                            Port number to access on the container. Number must be in the range 1 to 65535.
+                            Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to 8080.
                         - !ruby/object:Api::Type::String
                           name: service
                           description: |-
