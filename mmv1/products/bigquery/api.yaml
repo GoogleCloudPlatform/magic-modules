@@ -1677,6 +1677,7 @@ objects:
             input: true
       - !ruby/object:Api::Type::Enum
         name: 'routineType'
+        required: true
         input: true
         description: The type of routine.
         values:
