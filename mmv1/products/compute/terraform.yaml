@@ -2697,6 +2697,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       tcpTransitoryIdleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      tcpTimeWaitTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       enableDynamicPortAllocation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         send_empty_value: true
