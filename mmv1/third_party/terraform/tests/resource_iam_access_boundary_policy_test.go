@@ -50,7 +50,7 @@ func testAccIAM2AccessBoundaryPolicy_iamAccessBoundaryPolicyBasic(t *testing.T) 
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "parent"},
 			},
-      {
+			{
 				Config: testAccIAM2AccessBoundaryPolicy_iamAccessBoundaryPolicyBasicExampleUpdate(context),
 			},
 			{
