@@ -1948,7 +1948,7 @@ resource "google_sql_database_instance" "instance-failover" {
   database_version     = "MYSQL_5_7"
   master_instance_name = google_sql_database_instance.instance.name
   deletion_protection  = false
-	instance_type = "CLOUD_SQL_INSTANCE"
+  instance_type = "CLOUD_SQL_INSTANCE"
   replica_configuration {
     failover_target = "true"
   }
@@ -1985,7 +1985,7 @@ resource "google_sql_database_instance" "instance-failover" {
   database_version     = "MYSQL_5_7"
   deletion_protection  = false
 
-	instance_type = "CLOUD_SQL_INSTANCE"
+  instance_type = "CLOUD_SQL_INSTANCE"
   settings {
     tier = "db-n1-standard-1"
   }
@@ -2091,6 +2091,7 @@ resource "google_sql_database_instance" "instance-failover" {
   settings {
     tier = "db-n1-standard-1"
   }
+  depends_on = [google_sql_database_instance.instance]
 }
 `, instanceName, failoverName)
 }
