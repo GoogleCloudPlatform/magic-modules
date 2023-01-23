@@ -1,6 +1,5 @@
 resource "google_secret_manager_secret" "github-token-secret" {
   provider = google-beta
-  project = "{{project}}"
   secret_id = "github-token-secret"
 
   replication {
@@ -25,14 +24,12 @@ data "google_iam_policy" "p4sa-secretAccessor" {
 
 resource "google_secret_manager_secret_iam_policy" "policy" {
   provider = google-beta
-  project = google_secret_manager_secret.github-token-secret.project
   secret_id = google_secret_manager_secret.github-token-secret.secret_id
   policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
 }
 
 resource "google_cloudbuildv2_connection" "my-connection" {
   provider = google-beta
-  project = "{{project}}"
   location = "{{region}}"
   name = "my-connection"
 
@@ -46,7 +43,6 @@ resource "google_cloudbuildv2_connection" "my-connection" {
 
 resource "google_cloudbuildv2_repository" "my-repository" {
   provider = google-beta
-  project = "{{project}}"
   location = "{{region}}"
   name = "my-repo"
   parent_connection = google_cloudbuildv2_connection.my-connection.name

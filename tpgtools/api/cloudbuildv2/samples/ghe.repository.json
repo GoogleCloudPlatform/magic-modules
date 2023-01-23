@@ -1,5 +1,4 @@
 {
-  "project": "{{project}}",
   "location": "{{region}}",
   "connection": "{{ref:ghe.connection.json:name}}",
   "name": "{{repository}}",
