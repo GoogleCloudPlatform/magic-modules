@@ -1,11 +1,3 @@
-// ----------------------------------------------------------------------------
-//
-//	This file is copied here by Magic Modules. The code for building up a
-//	storage bucket object is copied from the manually implemented
-//	provider file:
-//	third_party/terraform/resources/resource_storage_bucket.go
-//
-// ----------------------------------------------------------------------------
 package google
 
 import (
