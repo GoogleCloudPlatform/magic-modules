@@ -1,0 +1,6 @@
+test_hide:
+- github.yaml
+- github.tf.tmpl
+doc_hide:
+- ghe_repository.yaml
+- github_repository.yaml
