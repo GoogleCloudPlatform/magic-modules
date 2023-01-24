@@ -109,6 +109,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
           - "force_destroy"
+        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore_scaling"
         primary_resource_id: "featurestore"
