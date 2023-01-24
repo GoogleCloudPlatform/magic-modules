@@ -60,7 +60,7 @@ provider_installation {
 }
 ```
 
-Edit the file to replace `<REPLACE-ME>` with the output you saved from the first `echo` command, making sure to keep `/bin` at the end of the path. The full path is required and environment variables cannot be used. For example, `/Users/JohnDoe/go/bin` is a valid path for a user called `JohnDoe`.
+Edit the file to replace `<REPLACE-ME>` with the output you saved from the first `echo` command, making sure to keep `/bin` at the end of the path. The full path is required and environment variables cannot be used. For example, `/Users/MyUserName/go/bin` is a valid path for a user called `MyUserName`.
 
 Finally, save the file.
 
