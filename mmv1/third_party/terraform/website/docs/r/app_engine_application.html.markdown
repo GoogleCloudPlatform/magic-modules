@@ -9,6 +9,8 @@ description: |-
 
 Allows creation and management of an App Engine application.
 
+This line is for testing only.
+
 ~> App Engine applications cannot be deleted once they're created; you have to delete the
    entire project to delete the application. Terraform will report the application has been
    successfully deleted; this is a limitation of Terraform, and will go away in the future.
