@@ -172,6 +172,22 @@ If you do not want to use the `TF_CLI_CONFIG_FILE` environment variable, as desc
 
 In this scenario you will need to remember to edit this file to swap between using developer overrides and using the production provider versions.
 
+## Possible problems
+
+Filesystem mirrors (particularly "[_implicit_ filesystem mirrors](https://developer.hashicorp.com/terraform/cli/config/config-file#implied-local-mirror-directories)") are used automatically by Terraform, so can interfere with the expected behaviour of Terraform if you're not aware they're present.
+
+To stop using the filesystem mirror, you can run:
+
+```bash
+rm -rf ~/.terraform.d/plugins/registry.terraform.io/hashicorp/
+```
+
+Another way to debug this is to run a Terraform command with the `TF_LOG` environment variable set to `TRACE` . Then, look for a log line similar to the below:
+
+```bash
+[TRACE] getproviders.SearchLocalDirectory: found registry.terraform.io/hashicorp/google vX.X.X for darwin_arm64 at /Users/MyUserName/.terraform.d/plugins/registry.terraform.io/hashicorp/google/xxx
+```
+
 ## More information
 
 ### Filesystem mirrors
