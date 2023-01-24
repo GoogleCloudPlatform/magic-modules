@@ -105,7 +105,7 @@ provider_installation {
 }
 ```
 
-Edit the file to replace `<REPLACE-ME>` with the output you saved from the first `echo` command, making sure to keep `\bin` at the end of the path. The full path is required and environment variables cannot be used. For example, `C:\Users\JohnDoe\go\bin` is a valid path for a user called `JohnDoe`.
+Edit the file to replace `<REPLACE-ME>` with the output you saved from the first `echo` command, making sure to keep `\bin` at the end of the path. The full path is required and environment variables cannot be used. For example, `C:\Users\MyUserName\go\bin` is a valid path for a user called `MyUserName`.
 
 Finally, save the file.
 
@@ -145,8 +145,8 @@ To check that the developer override is working, run a `terraform plan` command 
 │ Warning: Provider development overrides are in effect
 │ 
 │ The following provider development overrides are set in the CLI configuration:
-│  - hashicorp/google in /Users/JohnDoe/go/bin
-│  - hashicorp/google-beta in /Users/JohnDoe/go/bin
+│  - hashicorp/google in /Users/MyUserName/go/bin
+│  - hashicorp/google-beta in /Users/MyUserName/go/bin
 │ 
 │ The behavior may therefore not match any released version of the provider and applying
 │ changes may cause the state to become incompatible with published releases.
