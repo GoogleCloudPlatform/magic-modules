@@ -1,12 +1,15 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const uaEnvVar = "TF_APPEND_USER_AGENT"
@@ -58,4 +61,34 @@ func GetCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 		return ""
 	}
 	return res["email"].(string)
+}
+
+// getProject reads the "project" field from the given resource and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func getProjectFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
+	return getProjectFromSchemaFramework("project", rVal, pVal, diags)
+}
+
+func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
+	if !rVal.IsNull() && rVal.String() != "" {
+		return rVal
+	}
+
+	if !pVal.IsNull() && pVal.String() != "" {
+		return pVal
+	}
+
+	diags.AddError("required field is not set", fmt.Sprintf("%s is not set", projectSchemaField))
+	return types.String{}
+}
+
+func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
+	if isGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[WARN] Removing %s because it's gone", resource)
+		// The resource doesn't exist anymore
+		state.RemoveResource(ctx)
+	}
+
+	diags.AddError(fmt.Sprintf("Error when reading or editing %s", resource), err.Error())
 }

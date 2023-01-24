@@ -14,11 +14,15 @@ import (
 
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
+    "google.golang.org/grpc"
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	
+    grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+    "github.com/sirupsen/logrus"
 )
 
 // Provider methods
@@ -297,6 +301,26 @@ func (p *frameworkProvider) SetupClient(ctx context.Context, data ProviderModel,
 	client.Timeout = timeout
 
 	p.client = client
+}
+
+func (p *frameworkProvider) SetupGrpcLogging() {
+	logger := logrus.StandardLogger()
+
+    logrus.SetLevel(logrus.DebugLevel)
+    logrus.SetFormatter(&Formatter{
+        TimestampFormat: "2006/01/02 15:04:05",
+        LogFormat:       "%time% [%lvl%] %msg% \n",
+    })
+
+    alwaysLoggingDeciderClient := func(ctx context.Context, fullMethodName string) bool { return true }
+    grpc_logrus.ReplaceGrpcLogger(logrus.NewEntry(logger))
+
+    p.gRPCLoggingOptions = append(
+        p.gRPCLoggingOptions, option.WithGRPCDialOption(grpc.WithUnaryInterceptor(
+            grpc_logrus.PayloadUnaryClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
+        option.WithGRPCDialOption(grpc.WithStreamInterceptor(
+            grpc_logrus.PayloadStreamClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
+    )
 }
 
 func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data ProviderModel, diags *diag.Diagnostics) {
