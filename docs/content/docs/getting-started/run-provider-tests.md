@@ -94,7 +94,7 @@ cd $GOPATH/src/github.com/hashicorp/terraform-provider-google/google
 TF_ACC=1 dlv test -- --test.v --test.run TestAccComputeRegionBackendService_withCdnPolicy
 Type 'help' for list of commands.
 (dlv) b google.TestAccComputeRegionBackendService_withCdnPolicy
-Breakpoint 1 set at 0x1de072b for github.com/github.com/hashicorp/terraform-provider-google/google.TestAccComputeRegionBackendService_withCdnPolicy() ./resource_compute_region_backend_service_test.go:540
+Breakpoint 1 set at 0x1de072b for github.com/hashicorp/terraform-provider-google/google.TestAccComputeRegionBackendService_withCdnPolicy() ./resource_compute_region_backend_service_test.go:540
 (dlv) c
 === RUN   TestAccComputeRegionBackendService_withCdnPolicy
 > github.com/terraform-providers/terraform-provider-google/google.TestAccComputeRegionBackendService_withCdnPolicy() ./resource_compute_region_backend_service_test.go:540 (hits goroutine(7):1 total:1) (PC: 0x1de072b)
