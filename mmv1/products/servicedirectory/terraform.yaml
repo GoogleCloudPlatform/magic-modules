@@ -20,7 +20,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "service_directory_namespace_basic"
         primary_resource_id: "example"
-        primary_resource_name: "fmt.Sprint(\"example-namespace\")"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-example-namespace%s\", context[\"random_suffix\"])"
         vars:
           namespace_id: "example-namespace"
         min_version: beta
@@ -39,7 +39,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "service_directory_service_basic"
         primary_resource_id: "example"
-        primary_resource_name: "fmt.Sprint(\"example-service\")"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-example-namespace%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-example-service%s\", context[\"random_suffix\"])"
         vars:
           service_id: "example-service"
           namespace_id: "example-namespace"

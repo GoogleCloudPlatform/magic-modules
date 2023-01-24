@@ -42,6 +42,7 @@ objects:
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
       set_iam_policy_verb: :POST
+      import_format: ["{{name}}"]
     min_version: beta
     description: |
       A container for `services`. Namespaces allow administrators to group services
@@ -93,6 +94,7 @@ objects:
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
       set_iam_policy_verb: :POST
+      import_format: ["{{name}}"]
     min_version: beta
     description: |
       An individual service. A service contains a name and optional metadata.
