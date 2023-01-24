@@ -7,11 +7,11 @@ weight: 20
 
 
 You can compile the Terraform provider you're working on using `make` or
-`make provider` in the magic-modules directory. Below you'll find a command reference,
+`make build` in the magic-modules directory. Below you'll find a command reference,
 sample commands, and instructions on how to clean up the repository.
 
-## `make provider` reference
-`make` or `make provider` will build the terraform provider. The following are variables
+## `make build` reference
+`make` or `make build` will build the terraform provider. The following are variables
 set either as environment or inline when calling `make`. They will inform the generator where
 and how to generate.
 
@@ -29,17 +29,17 @@ is recommended to be inside your GOPATH.
 ```bash
 cd magic-modules
 
-make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
-make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
+make build VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
+make build VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
 
 # Only generate a specific product (plus all common files)
-make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub
+make build VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub
 
 # Only generate only a specific resources for a product
-make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub RESOURCE=Topic
+make build VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub RESOURCE=Topic
 
 # Only generate common files, including all third_party code
-make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=foo
+make build VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=foo
 ```
 
 ## Cleaning up old files
