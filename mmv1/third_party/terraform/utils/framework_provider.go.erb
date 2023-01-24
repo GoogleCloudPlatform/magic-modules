@@ -8,24 +8,22 @@ import (
     "os"
     "time"
 
-    grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/path"
     "github.com/hashicorp/terraform-plugin-framework/provider"
+    "github.com/hashicorp/terraform-plugin-framework/provider/metaschema"
     "github.com/hashicorp/terraform-plugin-framework/provider/schema"
     "github.com/hashicorp/terraform-plugin-framework/resource"
     "github.com/hashicorp/terraform-plugin-framework/schema/validator"
     "github.com/hashicorp/terraform-plugin-framework/types"
     "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-    "github.com/sirupsen/logrus"
 
     "google.golang.org/api/option"
-    "google.golang.org/grpc"
 )
 
 // Ensure the implementation satisfies the expected interfaces
 var (
-    _ provider.Provider = &frameworkProvider{}
+    _ provider.ProviderWithMetaSchema = &frameworkProvider{}
 
     defaultClientScopes = []string{
         "https://www.googleapis.com/auth/cloud-platform",
@@ -34,7 +32,7 @@ var (
 )
 
 // New is a helper function to simplify provider server and testing implementation.
-func New(version string) provider.Provider {
+func New(version string) provider.ProviderWithMetaSchema {
     return &frameworkProvider{
         version: version,
     }
@@ -42,10 +40,12 @@ func New(version string) provider.Provider {
 
 // frameworkProvider is the provider implementation.
 type frameworkProvider struct{
+    billingProject types.String
     client *http.Client
     context context.Context
     gRPCLoggingOptions []option.ClientOption
     pollInterval time.Duration
+    project types.String
     region string
     requestBatcherIam *RequestBatcher
     requestBatcherServiceUsage *RequestBatcher
@@ -53,12 +53,28 @@ type frameworkProvider struct{
     userAgent string
     userProjectOverride bool
     version string
+
+    // paths for client setup
+    <% products.each do |product| -%>
+    <%= product[:definitions].name -%>BasePath string
+    <% end -%>
 }
 
 // Metadata returns the provider type name.
 func (p *frameworkProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
     resp.TypeName = "google<%= "-" + version unless version == 'ga'  -%>"
     resp.Version = p.version
+}
+
+// Metadata returns the provider type name.
+func (p *frameworkProvider) MetaSchema(_ context.Context, _ provider.MetaSchemaRequest, resp *provider.MetaSchemaResponse) {
+    resp.Schema = metaschema.Schema{
+        Attributes: map[string]metaschema.Attribute{
+            "module_name": metaschema.StringAttribute{
+                Optional: true,
+            },
+        },
+    }
 }
 
 // Schema defines the provider-level schema for configuration data.
@@ -225,23 +241,7 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
     }
 
     // gRPC Logging setup
-    logger := logrus.StandardLogger()
-
-    logrus.SetLevel(logrus.DebugLevel)
-    logrus.SetFormatter(&Formatter{
-        TimestampFormat: "2006/01/02 15:04:05",
-        LogFormat:       "%time% [%lvl%] %msg% \n",
-    })
-
-    alwaysLoggingDeciderClient := func(ctx context.Context, fullMethodName string) bool { return true }
-    grpc_logrus.ReplaceGrpcLogger(logrus.NewEntry(logger))
-
-    p.gRPCLoggingOptions = append(
-        p.gRPCLoggingOptions, option.WithGRPCDialOption(grpc.WithUnaryInterceptor(
-            grpc_logrus.PayloadUnaryClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
-        option.WithGRPCDialOption(grpc.WithStreamInterceptor(
-            grpc_logrus.PayloadStreamClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
-    )
+    p.SetupGrpcLogging()
 
     // Handle Batching Config
     batchingConfig := GetBatchingConfig(ctx, data.Batching, &resp.Diagnostics)
@@ -249,21 +249,30 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
         return
     }
 
+    // Setup Base Paths for clients
+    // Generated products
+    <% products.map.each do |product| -%>
+    p.<%= product[:definitions].name -%>BasePath = data.<%= product[:definitions].name -%>CustomEndpoint.String()
+    <% end -%>
+
     p.context = ctx
     p.region = data.Region.String()
     p.pollInterval = 10 * time.Second
+    p.project = data.Project
     p.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, batchingConfig)
     p.requestBatcherIam = NewRequestBatcher("IAM", ctx, batchingConfig)
 
     // Example client configuration for data sources and resources
-    resp.DataSourceData = p.client
-    resp.ResourceData = p.client
+    resp.DataSourceData = p
+    resp.ResourceData = p
 }
 
 
 // DataSources defines the data sources implemented in the provider.
 func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-    return nil
+    return []func() datasource.DataSource{
+        NewGoogleDnsRecordSetDataSource,
+    }
 }
 
 // Resources defines the resources implemented in the provider.

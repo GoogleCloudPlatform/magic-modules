@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 const uaEnvVar = "TF_APPEND_USER_AGENT"
@@ -64,14 +64,6 @@ func GetCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 	return res["email"].(string)
 }
 
-func generateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent string) string {
-	if metaData != nil && !metaData.ModuleName.IsNull() && metaData.ModuleName.ValueString() != "" {
-		return strings.Join([]string{currUserAgent, metaData.ModuleName.ValueString()}, " ")
-	}
-
-	return currUserAgent
-}
-
 // getProject reads the "project" field from the given resource and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
@@ -80,11 +72,11 @@ func getProjectFramework(rVal, pVal types.String, diags *diag.Diagnostics) types
 }
 
 func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
-	if !rVal.IsNull() && rVal.ValueString() != "" {
+	if !rVal.IsNull() && rVal.String() != "" {
 		return rVal
 	}
 
-	if !pVal.IsNull() && pVal.ValueString() != "" {
+	if !pVal.IsNull() && pVal.String() != "" {
 		return pVal
 	}
 
@@ -94,7 +86,7 @@ func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.S
 
 func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
 	if isGoogleApiErrorWithCode(err, 404) {
-		tflog.Warn(ctx, fmt.Sprintf("Removing %s because it's gone", resource))
+		log.Printf("[WARN] Removing %s because it's gone", resource)
 		// The resource doesn't exist anymore
 		state.RemoveResource(ctx)
 	}
