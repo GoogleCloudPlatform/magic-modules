@@ -504,6 +504,12 @@ objects:
                 required: true
                 description: |
                   The maximum number of nodes to scale up to. Must be greater than minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
+      - !ruby/object:Api::Type::Integer
+        name: 'onlineStorageTtlDays'
+        min_version: beta
+        default_value: 4000
+        description: |
+          TTL in days for feature values that will be stored in online serving storage. The Feature Store online storage periodically removes obsolete feature values older than onlineStorageTtlDays since the feature generation time. Note that onlineStorageTtlDays should be less than or equal to offlineStorageTtlDays for each EntityType under a featurestore. If not set, default to 4000 days
       - !ruby/object:Api::Type::NestedObject
         name: 'encryptionSpec'
         description: |
@@ -666,7 +672,12 @@ objects:
                 description: |
                   Specify a threshold value that can trigger the alert. For categorical feature, the distribution distance is calculated by L-inifinity norm. Each feature must have a non-zero threshold if they need to be monitored. Otherwise no alert will be triggered for that feature. The default value is 0.3.
                 required: true
-
+      - !ruby/object:Api::Type::Integer
+        name: 'offlineStorageTtlDays'
+        min_version: beta
+        default_value: 4000
+        description: |
+          Config for data retention policy in offline storage. TTL in days for feature values that will be stored in offline storage. The Feature Store offline storage periodically removes obsolete feature values older than offlineStorageTtlDays since the feature generation time. If unset (or explicitly set to 0), default to 4000 days TTL.
 
 # Vertex AI Featurestore Entity Type Feature
   - !ruby/object:Api::Resource
