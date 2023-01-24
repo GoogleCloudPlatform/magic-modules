@@ -34,6 +34,8 @@ GOOGLE_BILLING_ACCOUNT
 Unit tests (that is, tests that do not interact with the GCP API) are very fast and you can generally run them all if you have changed any of them:
 
 ```bash
+# for ga provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
 make test
 ```
 
@@ -55,6 +57,18 @@ TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testin
 
 `-run` is regexp-like, so multiple tests can be run in parallel by specifying a common substring of those tests (for example, `TestAccContainerNodePool` to run all node pool tests).
 
+## Sweepers
+
+Certain circumstances (panics, failed deletes, etc.) will leave behind dangling resources. These are bad: they often cost money to keep present and they often lead to quota failures in future test runs. Sweepers run before and after every test suite run in CI, and are used to delete all resources of a given type from the test project. Sweepers can be added in the tests for a given resource by adding an `init()` function that contains a call to `resource.AddTestSweepers(...)`. Sweepers should be added when possible.
+
+Sweepers run by using the -sweep and -sweep-run TESTARGS flags:
+```
+# for ga provider
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+make testacc TEST=./google TESTARGS='-sweep=us-central1 -sweep-run=<sweeper-name-here>'
+```
+
+
 ## Debugging tests
 
 You can [increase your test verbosity](https://www.terraform.io/docs/internals/debugging.html)  and redirect the output to a log file for analysis. This is often helpful in debugging issues.
@@ -73,14 +87,14 @@ You can also debug tests with [Delve](https://github.com/go-delve/delve):
 
 ```bash
 # Navigate to the google package within your local GCP Terraform provider Git clone.
-cd $GOPATH/src/github.com/terraform-providers/terraform-provider-google/google
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google/google
 
 # Execute the dlv command to launch the test.
 # Note that the --test.run flag uses the same regexp matching as go test --run.
 TF_ACC=1 dlv test -- --test.v --test.run TestAccComputeRegionBackendService_withCdnPolicy
 Type 'help' for list of commands.
 (dlv) b google.TestAccComputeRegionBackendService_withCdnPolicy
-Breakpoint 1 set at 0x1de072b for github.com/terraform-providers/terraform-provider-google/google.TestAccComputeRegionBackendService_withCdnPolicy() ./resource_compute_region_backend_service_test.go:540
+Breakpoint 1 set at 0x1de072b for github.com/github.com/hashicorp/terraform-provider-google/google.TestAccComputeRegionBackendService_withCdnPolicy() ./resource_compute_region_backend_service_test.go:540
 (dlv) c
 === RUN   TestAccComputeRegionBackendService_withCdnPolicy
 > github.com/terraform-providers/terraform-provider-google/google.TestAccComputeRegionBackendService_withCdnPolicy() ./resource_compute_region_backend_service_test.go:540 (hits goroutine(7):1 total:1) (PC: 0x1de072b)
