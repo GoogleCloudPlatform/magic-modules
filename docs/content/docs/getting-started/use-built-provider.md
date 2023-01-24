@@ -13,6 +13,10 @@ Sometimes, for example for manual testing, you may want to build the provider fr
 
 ## Developer Overrides
 
+{{< hint info >}}
+**Note:** Developer overrides are only available in Terraform v0.14 and later.
+{{< /hint >}}
+
 By default Terraform will download providers from the [public Registry](https://registry.terraform.io/), but there are several ways to override this behaviour and use providers from other sources. HashiCorp recommends developers use [development overrides](https://developer.hashicorp.com/terraform/plugin/debugging#terraform-cli-development-overrides) when dubugging code changes in a provider.
 
 Developer overrides are defined in an explicit [CLI configuration file](https://developer.hashicorp.com/terraform/cli/config/config-file#cli-configuration-file-terraformrc-or-terraform-rc). They allow you to use locally-built versions of providers without needing to change your Terraform configuration files or needing to run `terraform init`. There are also other features such as explicit warnings when overrides are in effect.
