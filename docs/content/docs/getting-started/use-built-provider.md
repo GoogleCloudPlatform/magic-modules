@@ -13,9 +13,9 @@ Sometimes, for example for manual testing, you may want to build the provider fr
 
 ## Developer Overrides
 
-By default Terraform will download providers from the [public Registry](https://registry.terraform.io/), but there are several ways to override this behaviour and use providers from other sources. The approach HashiCorp recommends for provider development is to use _developer overrides_, set in an explicit [CLI configuration file](https://developer.hashicorp.com/terraform/cli/config/config-file#cli-configuration-file-terraformrc-or-terraform-rc).
+By default Terraform will download providers from the [public Registry](https://registry.terraform.io/), but there are several ways to override this behaviour and use providers from other sources. HashiCorp recommends developers use [development overrides](https://developer.hashicorp.com/terraform/plugin/debugging#terraform-cli-development-overrides) when dubugging code changes in a provider.
 
-Developer overrides allow you to use locally built versions of providers without needing to change your Terraform configuration files or needing to run `terraform init`, and includes features like explicit warnings when overrides are in effect.
+Developer overrides are defined in an explicit [CLI configuration file](https://developer.hashicorp.com/terraform/cli/config/config-file#cli-configuration-file-terraformrc-or-terraform-rc). They allow you to use locally-built versions of providers without needing to change your Terraform configuration files or needing to run `terraform init`. There are also other features such as explicit warnings when overrides are in effect.
 
 In the sections below we describe how to create a Terraform CLI configuration file, and how to make the CLI use the file via an environment variable.
 
@@ -169,8 +169,6 @@ If you do not want to use the `TF_CLI_CONFIG_FILE` environment variable, as desc
 In this scenario you will need to remember to edit this file to swap between using developer overrides and using the production provider versions.
 
 ## More information
-
-There are several ways to make Terraform source providers from locations other than the public Registry. However, developer overrides are the approach recommended in HashiCorp's [plugin development documentation](https://developer.hashicorp.com/terraform/plugin/debugging#terraform-cli-development-overrides).
 
 ### Filesystem mirrors
 
