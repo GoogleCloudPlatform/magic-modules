@@ -178,7 +178,7 @@ An alternative to developer overrides is to use filesystem mirrors, where Terraf
 
 {{< details "More information" >}}
 
-Filesystem mirrors can used explicitly or implicitly by Terraform. Explicit filesystem mirrors can be [defined via the CLI configuration file]((https://developer.hashicorp.com/terraform/cli/config/config-file#filesystem_mirror)). In constast, once [implicit filesystem mirrors](https://developer.hashicorp.com/terraform/cli/config/config-file#implied-local-mirror-directories) are created by a user they are discovered and used by Terraform automatically.
+Filesystem mirrors can used explicitly or implicitly by Terraform. Explicit filesystem mirrors can be [defined via the CLI configuration file](https://developer.hashicorp.com/terraform/cli/config/config-file#filesystem_mirror). In contrast, once [implicit filesystem mirrors](https://developer.hashicorp.com/terraform/cli/config/config-file#implied-local-mirror-directories) are created by a user they are discovered and used by Terraform automatically.
 
 Filesystem mirrors require providers' files to be saved with specific paths for them to work correctly. To help with this, you can use the [`terraform providers mirror` command](https://developer.hashicorp.com/terraform/cli/commands/providers/mirror) to download a published provider to your local filesystem with the required file path.
 
