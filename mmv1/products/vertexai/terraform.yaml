@@ -99,7 +99,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "featurestore"
         primary_resource_name: "fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])"
         vars:
-          name: "terraform"
+          name: "terraform2"
           project: "appeng-flex"
           kms_key_name: "kms-name"
         test_env_vars:
@@ -114,7 +114,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "featurestore"
         primary_resource_name: "fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])"
         vars:
-          name: "terraform"
+          name: "terraform3"
           project: "appeng-flex"
           kms_key_name: "kms-name"
         test_env_vars:
