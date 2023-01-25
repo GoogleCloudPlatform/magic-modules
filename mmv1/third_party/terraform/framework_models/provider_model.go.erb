@@ -42,6 +42,19 @@ type ProviderModel struct {
 	// dcl
 	ContainerAwsCustomEndpoint      types.String `tfsdk:"container_aws_custom_endpoint"`
 	ContainerAzureCustomEndpoint    types.String `tfsdk:"container_azure_custom_endpoint"`
+
+	// dcl generated
+	ApikeysCustomEndpoint              types.String `tfsdk:"apikeys_custom_endpoint"`
+	AssuredWorkloadsCustomEndpoint     types.String `tfsdk:"assured_workloads_custom_endpoint"`
+	CloudBuildWorkerPoolCustomEndpoint types.String `tfsdk:"cloud_build_worker_pool_custom_endpoint"`
+	CloudDeployCustomEndpoint          types.String `tfsdk:"clouddeploy_custom_endpoint"`
+	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
+	DataplexCustomEndpoint             types.String `tfsdk:"dataplex_custom_endpoint"`
+	EventarcCustomEndpoint             types.String `tfsdk:"eventarc_custom_endpoint"`
+	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
+	NetworkConnectivityCustomEndpoint  types.String `tfsdk:"network_connectivity_custom_endpoint"`
+	OrgPolicyCustomEndpoint            types.String `tfsdk:"org_policy_custom_endpoint"`
+	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
 }
 
 type ProviderBatching struct {
