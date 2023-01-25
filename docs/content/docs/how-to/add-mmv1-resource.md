@@ -310,12 +310,15 @@ Example: DomainMapping (domainMappingLabelDiffSuppress)
 -   [constants file](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/templates/terraform/constants/cloud_run_domain_mapping.go.erb)
 -   [unit tests](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/third_party/terraform/tests/resource_cloud_run_domain_mapping_test.go#L9)
 
+## Documentation
+
+When adding a new MMv1 product or resource there are fields that you need to set within `api.yaml` and `terraform.yaml` that are specific to documentation for that resource. To learn more about MMv1 generated documentation and what YAML fields you need to pay attention to, see [Update MMv1 resource documentation](/magic-modules/docs/how-to/update-mmv1-resource-documentation).
 
 # Beta features
 
 When the underlying API of a feature is not final (i.e. a `vN` version like
 `v1` or `v2`), is in preview, or the API has no SLO we add it to the
-`google-beta` provider rather than the `google `provider, allowing users to
+`google-beta` provider rather than the `google` provider, allowing users to
 self-select for the stability level they are comfortable with.
 
 In MMv1, a "version tag" can be annotated on resources, fields, resource iam

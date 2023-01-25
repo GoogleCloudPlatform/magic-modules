@@ -8906,6 +8906,35 @@ objects:
               Maximum size of the node group. Set to a value less than or equal
               to 100 and greater than or equal to min-nodes.
             required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'shareSettings'
+        description: |
+          Share settings for the node group.
+        properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'shareType'
+          required: true
+          description: |
+            Node group sharing type.
+          values:
+          - :ORGANIZATION
+          - :SPECIFIC_PROJECTS
+          - :LOCAL
+        - !ruby/object:Api::Type::Map
+          name: 'projectMap'
+          description: |
+            A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
+          key_name: id
+          key_description: |
+            The project ID.
+          value_type: !ruby/object:Api::Type::NestedObject
+            name: projectConfig
+            properties:
+            - !ruby/object:Api::Type::String
+              name: 'projectId'
+              required: true
+              description: |
+                The project id/number should be the same as the key of this project config in the project map.
   - !ruby/object:Api::Resource
     name: 'NetworkPeeringRoutesConfig'
     base_url:  'projects/{{project}}/global/networks/{{network}}'
@@ -14105,6 +14134,12 @@ objects:
           Timeout (in seconds) for TCP transitory connections.
           Defaults to 30s if not set.
         default_value: 30
+      - !ruby/object:Api::Type::Integer
+        name: tcpTimeWaitTimeoutSec
+        description: |
+          Timeout (in seconds) for TCP connections that are in TIME_WAIT state.
+          Defaults to 120s if not set.
+        default_value: 120
       - !ruby/object:Api::Type::NestedObject
         name: logConfig
         description: |

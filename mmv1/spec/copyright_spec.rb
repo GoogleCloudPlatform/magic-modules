@@ -25,9 +25,8 @@ describe 'ensure files have copyright notice' do
                   my_tests = f.start_with?("#{my_path}/data/copyright_")
                   third_party = f.start_with?("#{my_root}/third_party/")
                   vendor = f.start_with?("#{my_root}/vendor/")
-                  version_added = f.include?('ansible_version_added.yaml')
 
-                  !my_tests && !vendor && !version_added && !third_party
+                  !my_tests && !vendor && !third_party
                 end
     checker = Google::CopyrightChecker.new(files)
     missing = checker.check_missing.collect { |f| "  - #{f}" }
