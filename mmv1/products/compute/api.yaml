@@ -14134,6 +14134,12 @@ objects:
           Timeout (in seconds) for TCP transitory connections.
           Defaults to 30s if not set.
         default_value: 30
+      - !ruby/object:Api::Type::Integer
+        name: tcpTimeWaitTimeoutSec
+        description: |
+          Timeout (in seconds) for TCP connections that are in TIME_WAIT state.
+          Defaults to 120s if not set.
+        default_value: 120
       - !ruby/object:Api::Type::NestedObject
         name: logConfig
         description: |

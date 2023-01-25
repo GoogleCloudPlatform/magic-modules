@@ -333,8 +333,10 @@ objects:
                   exactly_one_of:
                     - save_findings
                     - pub_sub
+                    - publish_findings_to_cloud_data_catalog
+                    - publish_summary_to_cscc
                   description: |
-                    Schedule for triggered jobs
+                    If set, the detailed findings will be persisted to the specified OutputStorageConfig. Only a single instance of this action can be specified. Compatible with: Inspect, Risk
                   properties:
                     - !ruby/object:Api::Type::NestedObject
                       name: 'outputConfig'
@@ -385,6 +387,8 @@ objects:
                   exactly_one_of:
                     - save_findings
                     - pub_sub
+                    - publish_findings_to_cloud_data_catalog
+                    - publish_summary_to_cscc
                   description: |
                     Publish a message into a given Pub/Sub topic when the job completes.
                   properties:
@@ -393,6 +397,30 @@ objects:
                       required: true
                       description: |
                         Cloud Pub/Sub topic to send notifications to.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'publishSummaryToCscc'
+                  exactly_one_of:
+                    - save_findings
+                    - pub_sub
+                    - publish_findings_to_cloud_data_catalog
+                    - publish_summary_to_cscc
+                  allow_empty_object: true
+                  send_empty_value: true
+                  properties: [ ]
+                  description: |
+                    Publish the result summary of a DlpJob to the Cloud Security Command Center.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'publishFindingsToCloudDataCatalog'
+                  exactly_one_of:
+                    - save_findings
+                    - pub_sub
+                    - publish_findings_to_cloud_data_catalog
+                    - publish_summary_to_cscc
+                  allow_empty_object: true
+                  send_empty_value: true
+                  properties: [ ]
+                  description: |
+                    Publish findings of a DlpJob to Data Catalog.
   - !ruby/object:Api::Resource
     name: 'InspectTemplate'
     create_url:  "{{parent}}/inspectTemplates"
