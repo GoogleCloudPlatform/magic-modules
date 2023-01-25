@@ -83,11 +83,11 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
         Attributes: map[string]schema.Attribute{
             "credentials": schema.StringAttribute{
                 Optional: true,
-                // ValidateFunc: validateCredentials,
                 Validators: []validator.String{
                     stringvalidator.ConflictsWith(path.Expressions{
                         path.MatchRoot("access_token"),
                     }...),
+                    CredentialsValidator(),
                 },
             },
             "access_token": schema.StringAttribute{
@@ -135,58 +135,82 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             <% products.each do |product| -%>
             "<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             <% end -%>
 
             // Handwritten Products / Versioned / Atypical Entries
             "cloud_billing_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             "composer_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             "container_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             "dataflow_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             "iam_credentials_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             "resource_manager_v3_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             <% unless version == "ga" -%>
             "runtimecconfig_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             <% end -%>
             "iam_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             "service_networking_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
 
             // dcl
             "container_aws_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
             "container_azure_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
-                // ValidateFunc: validateCustomEndpoint,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
             },
         },
         Blocks: map[string]schema.Block{
@@ -205,6 +229,8 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
         },
     }
+
+    configureDCLFrameworkProvider(&resp.Schema)
 }
 
 // Configure prepares an API client for data sources and resources.

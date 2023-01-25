@@ -18,7 +18,6 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"google": func() (tfprotov5.ProviderServer, error) {
 				provider, err := MuxedProviders(t.Name())
-
 				return provider(), err
 			},
 		},

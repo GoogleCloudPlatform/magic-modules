@@ -20,7 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-	
+
     grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
     "github.com/sirupsen/logrus"
 )
@@ -150,7 +150,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_CLOUD_BILLING_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths["cloud_billing_custom_endpoint"])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.CloudBillingCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 
@@ -159,7 +159,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_COMPOSER_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[ComposerBasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.ComposerCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 
@@ -168,7 +168,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_CONTAINER_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[ContainerBasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.ContainerCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 
@@ -177,7 +177,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_DATAFLOW_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[DataflowBasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.DataflowCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 
@@ -186,7 +186,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_IAM_CREDENTIALS_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[IamCredentialsBasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.IamCredentialsCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 
@@ -195,7 +195,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_RESOURCE_MANAGER_V3_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[ResourceManagerV3BasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.ResourceManagerV3CustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 
@@ -205,7 +205,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_RUNTIMECONFIG_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[RuntimeConfigBasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.RuntimeConfigCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 <% end -%>
@@ -215,7 +215,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_IAM_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[IAMBasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.IAMCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 
@@ -224,16 +224,17 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_SERVICE_NETWORKING_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[ServiceNetworkingBasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.ServiceNetworkingCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 
+	// dcl
 	if data.ContainerAwsCustomEndpoint.IsNull() {
 		customEndpoint := MultiEnvDefault([]string{
 			"GOOGLE_CONTAINERAWS_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[ContainerAwsBasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.ContainerAwsCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 
@@ -242,7 +243,107 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			"GOOGLE_CONTAINERAZURE_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[ContainerAzureBasePathKey])
 		if customEndpoint != nil {
-			data.Project = types.StringValue(customEndpoint.(string))
+			data.ContainerAzureCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	// DCL generated defaults
+	if data.ApikeysCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_APIKEYS_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.ApikeysCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.AssuredWorkloadsCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_ASSURED_WORKLOADS_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.AssuredWorkloadsCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.CloudBuildWorkerPoolCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_CLOUD_BUILD_WORKER_POOL_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.CloudBuildWorkerPoolCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.CloudDeployCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_CLOUDDEPLOY_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.CloudDeployCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.CloudResourceManagerCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_CLOUD_RESOURCE_MANAGER_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.CloudResourceManagerCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.DataplexCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_DATAPLEX_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.DataplexCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.EventarcCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_EVENTARC_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.EventarcCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.FirebaserulesCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_FIREBASERULES_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.FirebaserulesCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.NetworkConnectivityCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_NETWORK_CONNECTIVITY_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.NetworkConnectivityCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.OrgPolicyCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_ORG_POLICY_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.OrgPolicyCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
+	if data.RecaptchaEnterpriseCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_RECAPTCHA_ENTERPRISE_CUSTOM_ENDPOINT",
+		}, "")
+		if customEndpoint != nil {
+			data.RecaptchaEnterpriseCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 }
