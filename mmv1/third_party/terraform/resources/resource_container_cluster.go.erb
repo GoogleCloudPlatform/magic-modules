@@ -2249,20 +2249,6 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		}
 		waitErr := containerOperationWait(config, op, project, location, "resuming GKE cluster", userAgent, d.Timeout(schema.TimeoutRead))
 		if waitErr != nil {
-			// Check if the create operation failed because Terraform was prematurely terminated. If it was we can persist the
-			// operation id to state so that a subsequent refresh of this resource will wait until the operation has terminated
-			// before attempting to Read the state of the cluster. This allows a graceful resumption of a Create that was killed
-			// by the upstream Terraform process exiting early such as a sigterm.
-			select {
-			case <-config.context.Done():
-				log.Printf("[DEBUG] Persisting %s so this operation can be resumed \n", op.Name)
-				if err := d.Set("operation", op.Name); err != nil {
-					return fmt.Errorf("Error setting operation: %s", err)
-				}
-				return nil
-			default:
-				// leaving default case to ensure this is non blocking
-			}
 			// Try a GET on the cluster so we can see the state in debug logs. This will help classify error states.
 			clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
 			if config.UserProjectOverride {

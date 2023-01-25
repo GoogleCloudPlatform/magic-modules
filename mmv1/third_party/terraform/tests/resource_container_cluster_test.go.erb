@@ -4402,7 +4402,7 @@ func TestAccContainerCluster_failedCreation(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	project := BootstrapProject(t, "tf-test-project-fail-cluster", getTestBillingAccountFromEnv(t), []string{"container.googleapis.com"})
+	project := BootstrapProject(t, "tf-fail-cluster-test", getTestBillingAccountFromEnv(t), []string{"container.googleapis.com"})
 	removeContainerServiceAgentRoleFromContainerEngineRobot(t, project)
 
 	vcrTest(t, resource.TestCase{
@@ -4411,11 +4411,11 @@ func TestAccContainerCluster_failedCreation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccContainerCluster_failedCreation(clusterName, project.ProjectId),
-				ExpectError: regexp.MustCompile(".*timeout while waiting for state to become 'DONE'.*"),
+				ExpectError: regexp.MustCompile("timeout while waiting for state to become 'DONE'"),
 			},
 			{
 				Config:      testAccContainerCluster_failedCreation_update(clusterName, project.ProjectId),
-				ExpectError: regexp.MustCompile(".*Failed to create cluster.*"),
+				ExpectError: regexp.MustCompile("Failed to create cluster"),
 				Check:       testAccCheckContainerClusterDestroyProducer(t),
 			},
 		},

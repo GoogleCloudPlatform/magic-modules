@@ -372,30 +372,49 @@ func removeContainerServiceAgentRoleFromContainerEngineRobot(t *testing.T, proje
 	if err != nil {
 		t.Fatalf("error getting project iam policy: %v", err)
 	}
-	found := false
+	roleFound := false
+	changed := false
 	for _, binding := range policy.Bindings {
 		if binding.Role == "roles/container.serviceAgent" {
+			memberFound := false
 			for i, member := range binding.Members {
 				if member == containerEngineRobot {
 					binding.Members[i] = binding.Members[len(binding.Members)-1]
+					memberFound = true
 				}
 			}
-			binding.Members = binding.Members[:len(binding.Members)-1]
+			if memberFound {
+				binding.Members = binding.Members[:len(binding.Members)-1]
+				changed = true
+			}
 		} else if binding.Role == "roles/editor" {
-			binding.Members = append(binding.Members, containerEngineRobot)
-			found = true
+			memberFound := false
+			for _, member := range binding.Members {
+				if member == containerEngineRobot {
+					memberFound = true
+					break
+				}
+			}
+			if !memberFound {
+				binding.Members = append(binding.Members, containerEngineRobot)
+				changed = true
+			}
+			roleFound = true
 		}
 	}
-	if !found {
+	if !roleFound {
 		policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
 			Members: []string{containerEngineRobot},
 			Role:    "roles/editor",
 		})
+		changed = true
 	}
-	setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
-	policy, err = client.Projects.SetIamPolicy(project.ProjectId, setPolicyRequest).Do()
-	if err != nil {
-		t.Fatalf("error setting project iam policy: %v", err)
+	if changed {
+		setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
+		policy, err = client.Projects.SetIamPolicy(project.ProjectId, setPolicyRequest).Do()
+		if err != nil {
+			t.Fatalf("error setting project iam policy: %v", err)
+		}
 	}
 }
 
@@ -439,6 +458,14 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 		project, err = crmClient.Projects.Get(projectID).Do()
 		if err != nil {
 			t.Fatalf("Error getting bootstrapped project: %s", err)
+		}
+
+	}
+
+	if project.LifecycleState == "DELETE_REQUESTED" {
+		_, err := crmClient.Projects.Undelete(projectID, &cloudresourcemanager.UndeleteProjectRequest{}).Do()
+		if err != nil {
+			t.Fatalf("Error undeleting bootstrapped project: %s", err)
 		}
 	}
 
