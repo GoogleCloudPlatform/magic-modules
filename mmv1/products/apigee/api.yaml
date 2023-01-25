@@ -705,15 +705,12 @@ objects:
   - !ruby/object:Api::Resource
     name: 'AddonsConfig'
     self_link: 'organizations/{{org}}'
-    base_url: 'organizations/{{org}}'
+    base_url: 'organizations'
     create_url: 'organizations/{{org}}:setAddons'
     update_url: 'organizations/{{org}}:setAddons'
     update_verb: :POST
     delete_url: 'organizations/{{org}}:setAddons'
     delete_verb: :POST
-    nested_query: !ruby/object:Api::Resource::NestedQuery
-      keys:
-        - addonsConfig
     async: !ruby/object:Api::OpAsync
       actions: ['create', 'update', 'delete']
       operation: !ruby/object:Api::OpAsync::Operation
@@ -722,7 +719,7 @@ objects:
         wait_ms: 1000
       result: !ruby/object:Api::OpAsync::Result
         path: 'response'
-        resource_inside_response: true
+        resource_inside_response: false
       status: !ruby/object:Api::OpAsync::Status
         path: 'done'
         complete: True

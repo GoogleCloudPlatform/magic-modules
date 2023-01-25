@@ -1,0 +1,29 @@
+config := googleProviderConfig(t)
+
+url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org}}")
+if err != nil {
+    return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+    billingProject = config.BillingProject
+}
+
+res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+
+if err != nil {
+    // If the Apigee org doesn't exist, then a 403 can also be returned.
+    if isGoogleApiErrorWithCode(err, 403) || isGoogleApiErrorWithCode(err, 404) {
+        return nil
+    } else {
+        return err
+    }
+}
+
+v, ok := res["addonsConfig"]
+
+if ok || v != nil {
+    return fmt.Errorf("ApigeeAddonConfig still exists at %s", url)
+}
