@@ -2358,7 +2358,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier = "db-custom-1-3840"
+    tier = "db-f1-micro"
 
     availability_type = "REGIONAL"
 
@@ -2504,7 +2504,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier = "db-custom-1-3840"
+    tier = "db-f1-micro"
 
     insights_config {
       query_insights_enabled  = true
@@ -2723,7 +2723,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   settings {
-	tier = "db-custom-1-3840"
+	tier = "db-f1-micro"
 	backup_configuration {
 		enabled            = "false"
 	}
@@ -2784,7 +2784,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   settings {
-	tier = "db-custom-1-3840"
+	tier = "db-f1-micro"
 	backup_configuration {
 		enabled            = false
 	}
