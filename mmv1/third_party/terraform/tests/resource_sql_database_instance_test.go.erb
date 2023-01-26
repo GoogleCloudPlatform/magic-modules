@@ -3366,17 +3366,3 @@ resource "google_sql_database_instance" "main" {
 	}
 }`, instance, databaseVersion, rootPassword)
 }
-
-func testGoogleSqlDatabaseInstance_updateRootPassword(instance, databaseVersion, rootPassword string) string {
-	return fmt.Sprintf(`
-resource "google_sql_database_instance" "main" {
-    name             = "%s"
-	database_version = "%s"
-	region           = "us-central1"
-	deletion_protection = false
-	root_password = "%s"
-	settings {
-		tier = "db-custom-2-13312"
-	}
-}`, instance, databaseVersion, rootPassword)
-}
