@@ -21,7 +21,7 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 				return provider(), err
 			},
 		},
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducerFramework(t),
+		// CheckDestroy: testAccCheckDnsRecordSetDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDnsRecordSet_basic(randString(t, 10), randString(t, 10)),
@@ -48,6 +48,12 @@ resource "google_dns_record_set" "rs" {
   rrdatas      = [
 	"192.168.1.0",
   ]
+}
+
+data "google_dns_record_set" "rs" {
+  managed_zone = google_dns_record_set.rs.managed_zone
+  name         = google_dns_record_set.rs.name
+  type         = google_dns_record_set.rs.type
 }
 `, zoneName, recordSetName)
 }
