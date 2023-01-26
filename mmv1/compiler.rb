@@ -29,8 +29,6 @@ require 'api/compiler'
 require 'google/logger'
 require 'optparse'
 require 'pathname'
-require 'provider/ansible'
-require 'provider/ansible_devel'
 require 'provider/inspec'
 require 'provider/terraform'
 require 'provider/terraform_kcc'
@@ -241,7 +239,6 @@ all_product_files.each do |product_name|
     override_providers = {
       'oics' => Provider::TerraformOiCS,
       'validator' => Provider::TerraformValidator,
-      'ansible_devel' => Provider::Ansible::Devel,
       'kcc' => Provider::TerraformKCC
     }
 

@@ -1,4 +1,4 @@
-# Copyright 2022 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,6 +29,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
         min_version: beta
+  AccessBoundaryPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    import_format: ["{{parent}}/{{name}}"]
+    id_format: "{{parent}}/{{name}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_access_boundary_policy_basic"
+        skip_test: true
+        primary_resource_id: "example"
+        vars:
+          policy_name: "my-ab-policy"
+          account_id: "svc-acc"
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

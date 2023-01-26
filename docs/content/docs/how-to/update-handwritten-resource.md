@@ -192,7 +192,7 @@ applied state. Please test all fields you've added to the provider. It's importa
 for us to ensure all fields are usable and workable.
 
 ## Add documentation for the field to the respective markdown file
-See [Documentation](#documentation) for more information. Essentially you will
+See [Update handwritten provider documentation](/magic-modules/docs/how-to/update-handwritten-documentation) for more information. Essentially you will
 just be opening the corresponding markdown file and adding documentation, likely
 copied from the rest api to the markdown file. Follow the existing patterns there-in.
 
