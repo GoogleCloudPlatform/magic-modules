@@ -16,7 +16,6 @@
   create_url: "{{parent}}/authorizedOrgsDescs"
   self_link: "{{name}}"
   update_verb: :PATCH
-  # update_url: "{{name}}?updateMask=orgs"
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
       'gcloud docs': 'https://cloud.google.com/beyondcorp-enterprise/docs/cross-org-authorization'
@@ -48,43 +47,34 @@
     encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
     pre_update: templates/terraform/update_mask.erb
     custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
-  # custom_code: !ruby/object:Provider::Terraform::CustomCode
-  #   post_create: templates/terraform/post_create/accesspolicy.erb
   parameters:
     - !ruby/object:Api::Type::String
       name: parent
       input: true
       required: true
       description: |
-        The AccessPolicy this AccessLevel lives in.
-        Format: accessPolicies/{policy_id}
+        Required. Resource name for the access policy which owns this `AuthorizedOrgsDesc`.
       ignore_read: true
     - !ruby/object:Api::Type::String
       name: name
       input: true
       required: true
       description: |
-        The name of the authorized orgs description. 
-        Format: accessPolicies/{policy_id}/authorizedOrgsDescs/{myAuthorizedOrgsDescName}
+        Resource name for the `AuthorizedOrgsDesc`. Format:
+        `accessPolicies/{access_policy}/authorizedOrgsDescs/{authorized_orgs_desc}`.
+        The `authorized_orgs_desc` component must begin with a letter, followed by
+        alphanumeric characters or `_`.
+        After you create an `AuthorizedOrgsDesc`, you cannot change its `name`.
     - !ruby/object:Api::Type::Array
       name: orgs
       description: |
         The list of organization ids in this AuthorizedOrgsDesc.
         Format: `organizations/<org_number>`
+        Example: `organizations/123456`
       item_type: Api::Type::String
-  properties:
-    - !ruby/object:Api::Type::Time
-      name: 'createTime'
-      description: |
-        Time the AuthorizedOrgsDesc was created in UTC.
-      output: true
-    - !ruby/object:Api::Type::Time
-      name: 'updateTime'
-      description: |
-        Time the AuthorizedOrgsDesc was updated in UTC.
-      output: true
     - !ruby/object:Api::Type::Enum
       name: assetType
+      input: true
       description: |
         The type of entities that need to use the authorization relationship during
         evaluation, such as a device. Valid values are "ASSET_TYPE_DEVICE" and
@@ -93,9 +83,9 @@
         - :ASSET_TYPE_UNSPECIFIED
         - :ASSET_TYPE_DEVICE
         - :ASSET_TYPE_CREDENTIAL_STRENGTH
-      input: true
     - !ruby/object:Api::Type::Enum
       name: authorizationDirection
+      input: true
       description: |
         The direction of the authorization relationship between this organization
         and the organizations listed in the "orgs" field. The valid values for this
@@ -118,12 +108,22 @@
         - :AUTHORIZATION_DIRECTION_UNSPECIFIED
         - :AUTHORIZATION_DIRECTION_TO
         - :AUTHORIZATION_DIRECTION_FROM
-      input: true
     - !ruby/object:Api::Type::Enum
       name: authorizationType
+      input: true
       description: |
         A granular control type for authorization levels. Valid value is "AUTHORIZATION_TYPE_TRUST".
       values:
         - :AUTHORIZATION_TYPE_UNSPECIFIED
         - :AUTHORIZATION_TYPE_TRUST
-      input: true
+  properties:
+    - !ruby/object:Api::Type::Time
+      name: 'createTime'
+      description: |
+        Time the AuthorizedOrgsDesc was created in UTC.
+      output: true
+    - !ruby/object:Api::Type::Time
+      name: 'updateTime'
+      description: |
+        Time the AuthorizedOrgsDesc was updated in UTC.
+      output: true
