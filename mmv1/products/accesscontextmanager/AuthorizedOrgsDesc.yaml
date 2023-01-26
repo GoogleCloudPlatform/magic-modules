@@ -13,15 +13,14 @@
 --- !ruby/object:Api::Resource
   name: 'AuthorizedOrgsDesc'
   base_url: ""
-  create_url: "{{parent}}/authorizedOrgsDescs/{{name}}"
+  create_url: "{{parent}}/authorizedOrgsDescs"
   self_link: "{{name}}"
   update_verb: :PATCH
-  update_mask: true
-  # REFERENCES NEED TO BE UPDATED
+  # update_url: "{{name}}?updateMask=orgs"
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
-      'gcloud docs': 'https://cloud.google.com/sdk/gcloud/reference/access-context-manager/authorized-orgs'
-    api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies'
+      'gcloud docs': 'https://cloud.google.com/beyondcorp-enterprise/docs/cross-org-authorization'
+    api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.authorizedOrgsDescs'
   description: |
       An authorized organizations description describes a list of organizations
       (1) that have been authorized to use certain asset (for example, device) data
@@ -41,12 +40,13 @@
   examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "access_context_manager_authorized_orgs_desc_basic"
-      # skip_test: true
+      skip_test: true
       primary_resource_id: "authorized-orgs-desc"
   # Skipping the sweeper due to the non-standard base_url
-  skip_sweeper: false
+  skip_sweeper: true
   custom_code: !ruby/object:Provider::Terraform::CustomCode
     encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
+    pre_update: templates/terraform/update_mask.erb
     custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
   # custom_code: !ruby/object:Provider::Terraform::CustomCode
   #   post_create: templates/terraform/post_create/accesspolicy.erb
@@ -66,15 +66,25 @@
       description: |
         The name of the authorized orgs description. 
         Format: accessPolicies/{policy_id}/authorizedOrgsDescs/{myAuthorizedOrgsDescName}
-    - !ruby/object:Api::Type::Enum
-      name: authorization_type
+    - !ruby/object:Api::Type::Array
+      name: orgs
       description: |
-        A granular control type for authorization levels. Valid value is "AUTHORIZATION_TYPE_TRUST".
-      values:
-        - :AUTHORIZATION_TYPE_UNSPECIFIED
-        - :AUTHORIZATION_TYPE_TRUST
+        The list of organization ids in this AuthorizedOrgsDesc.
+        Format: `organizations/<org_number>`
+      item_type: Api::Type::String
+  properties:
+    - !ruby/object:Api::Type::Time
+      name: 'createTime'
+      description: |
+        Time the AuthorizedOrgsDesc was created in UTC.
+      output: true
+    - !ruby/object:Api::Type::Time
+      name: 'updateTime'
+      description: |
+        Time the AuthorizedOrgsDesc was updated in UTC.
+      output: true
     - !ruby/object:Api::Type::Enum
-      name: asset_type
+      name: assetType
       description: |
         The type of entities that need to use the authorization relationship during
         evaluation, such as a device. Valid values are "ASSET_TYPE_DEVICE" and
@@ -83,8 +93,9 @@
         - :ASSET_TYPE_UNSPECIFIED
         - :ASSET_TYPE_DEVICE
         - :ASSET_TYPE_CREDENTIAL_STRENGTH
+      input: true
     - !ruby/object:Api::Type::Enum
-      name: authorization_direction
+      name: authorizationDirection
       description: |
         The direction of the authorization relationship between this organization
         and the organizations listed in the "orgs" field. The valid values for this
@@ -107,20 +118,12 @@
         - :AUTHORIZATION_DIRECTION_UNSPECIFIED
         - :AUTHORIZATION_DIRECTION_TO
         - :AUTHORIZATION_DIRECTION_FROM
-    - !ruby/object:Api::Type::Array
-      name: orgs
+      input: true
+    - !ruby/object:Api::Type::Enum
+      name: authorizationType
       description: |
-        The list of organization ids in this AuthorizedOrgsDesc.
-        Format: `organizations/<org_number>`
-      item_type: Api::Type::String
-  properties:
-    - !ruby/object:Api::Type::Time
-      name: 'createTime'
-      description: |
-        Time the AuthorizedOrgsDesc was created in UTC.
-      output: true
-    - !ruby/object:Api::Type::Time
-      name: 'updateTime'
-      description: |
-        Time the AuthorizedOrgsDesc was updated in UTC.
-      output: true
+        A granular control type for authorization levels. Valid value is "AUTHORIZATION_TYPE_TRUST".
+      values:
+        - :AUTHORIZATION_TYPE_UNSPECIFIED
+        - :AUTHORIZATION_TYPE_TRUST
+      input: true
