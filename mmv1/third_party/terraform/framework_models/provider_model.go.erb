@@ -62,3 +62,8 @@ type ProviderBatching struct {
 	SendAfter      types.String `tfsdk:"send_after"`
 	EnableBatching types.Bool   `tfsdk:"enable_batching"`
 }
+
+// ProviderMetaModel describes the provider meta model
+type ProviderMetaModel struct {
+	ModuleName types.String `tfsdk:"module_name"`
+}

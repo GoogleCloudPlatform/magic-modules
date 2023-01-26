@@ -41,7 +41,7 @@ func CompileUserAgentString(name, tfVersion, provVersion string) string {
 	return ua
 }
 
-func GetCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
+func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
 	// When environment variables UserProjectOverride and BillingProject are set for the provider,
 	// the header X-Goog-User-Project is set for the API requests.
 	// But it causes an error when calling GetCurrUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".
@@ -61,6 +61,14 @@ func GetCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 		return ""
 	}
 	return res["email"].(string)
+}
+
+func generateFrameworkUserAgentString(metaData ProviderMetaModel, currUserAgent string) string {
+	if !metaData.ModuleName.IsNull() && metaData.ModuleName.ValueString() != "" {
+		return strings.Join([]string{currUserAgent, metaData.ModuleName.ValueString()}, " ")
+	}
+
+	return currUserAgent
 }
 
 // getProject reads the "project" field from the given resource and falls
