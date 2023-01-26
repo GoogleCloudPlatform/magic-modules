@@ -378,6 +378,12 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 		}, DefaultBasePaths[ServiceNetworkingBasePathKey]))
 	}
 
+	if d.Get(TagsLocationCustomEndpointEntryKey) == "" {
+		d.Set(TagsLocationCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_TAGS_LOCATION_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[TagsLocationBasePathKey]))
+	}
+
 	if d.Get(ContainerAwsCustomEndpointEntryKey) == "" {
 		d.Set(ContainerAwsCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_CONTAINERAWS_CUSTOM_ENDPOINT",
