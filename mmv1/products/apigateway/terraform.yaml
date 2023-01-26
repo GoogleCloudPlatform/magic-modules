@@ -79,7 +79,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "api_cfg"
         primary_resource_name: "fmt.Sprintf(\"tf-test-config-%s\", context[\"random_suffix\"])"
         vars:
-          api-id: "api-"
+          api_id: "api-"
           config_id: "config-"
         ignore_read_extra:
           - "grpc_services.0.file_descriptor_set"
@@ -90,7 +90,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "api_cfg"
         primary_resource_name: "fmt.Sprintf(\"tf-test-config-%s\", context[\"random_suffix\"])"
         vars:
-          api-id: "api-"
+          api_id: "api-"
           config_id: "config-"
     properties:
       openapiDocuments.document.contents: !ruby/object:Overrides::Terraform::PropertyOverride
