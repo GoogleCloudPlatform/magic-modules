@@ -242,7 +242,7 @@ The `settings` block supports:
 
 * `connector_enforcement` - (Optional) Specifies if connections must use Cloud SQL connectors.
 
-* `deletion_protection_enabled` - (Optional) Enables protection of an instance from accidental deletion protection across all surfaces (API, gcloud, Cloud Console and Terraform) by enabling the GCP Cloud SQL instance deletion protection. Terraform provider support was introduced in version 4.48.0. Defaults to `false`.
+* `deletion_protection_enabled` - (Optional) Enables protection of an instance from accidental deletion protection across all surfaces (API, gcloud, Cloud Console and Terraform) by enabling the [GCP Cloud SQL instance deletion protection](https://cloud.google.com/sql/docs/postgres/deletion-protection). Terraform provider support was introduced in version 4.48.0. Defaults to `false`.
 
 * `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
 
