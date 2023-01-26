@@ -109,6 +109,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(0)'
+      sourceConfig.postgresqlSourceConfig.maxConcurrentBackfillTasks: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(0)'
+      sourceConfig.oracleSourceConfig.maxConcurrentCdcTasks: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(0)'
+      sourceConfig.oracleSourceConfig.maxConcurrentBackfillTasks: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(0)'
     virtual_fields:
       - !ruby/object:Api::Type::Enum
         name: 'desired_state'
@@ -163,6 +175,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           destination_connection_profile_id: "destination-profile"
         test_vars_overrides:
           deletion_protection: "false"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_postgresql"
+        pull_external: true
+        primary_resource_id: "default"
+        skip_vcr: true
+        vars:
+          stream_id: "my-stream"
+          source_connection_profile_id: "source-profile"
+          destination_connection_profile_id: "destination-profile"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_oracle"
+        pull_external: true
+        primary_resource_id: "default"
+        skip_vcr: true
+        vars:
+          stream_id: "my-stream"
+          source_connection_profile_id: "source-profile"
+          destination_connection_profile_id: "destination-profile"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
