@@ -93,22 +93,25 @@ func (d *GoogleDnsRecordSetDataSource) Configure(ctx context.Context, req dataso
 		return
 	}
 
-	// userAgent, err := generateUserAgentString(d, p.userAgent)
-	// if err != nil {
-	// 	return err
-	// }
-
 	d.client = p.NewDnsClient(p.userAgent, &resp.Diagnostics)
 	d.project = p.project
 }
 
 func (d *GoogleDnsRecordSetDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleDnsRecordSetModel
+	var metaData ProviderMetaModel
 	var diags diag.Diagnostics
+
+	// Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	d.client.UserAgent = generateFrameworkUserAgentString(metaData, d.client.UserAgent)
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
