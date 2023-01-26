@@ -16,6 +16,7 @@ import (
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/api/option"
 
@@ -261,6 +262,133 @@ var DefaultBasePaths = map[string]string{
 var DefaultClientScopes = []string{
 	"https://www.googleapis.com/auth/cloud-platform",
 	"https://www.googleapis.com/auth/userinfo.email",
+}
+
+func HandleSDKDefaults(d *schema.ResourceData) {
+	if d.Get("impersonate_service_account") == "" {
+		d.Set("impersonate_service_account", multiEnvSearch([]string{
+			"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
+		}))
+	}
+
+	if d.Get("project") == "" {
+		d.Set("project", multiEnvSearch([]string{
+			"GOOGLE_PROJECT",
+			"GOOGLE_CLOUD_PROJECT",
+			"GCLOUD_PROJECT",
+			"CLOUDSDK_CORE_PROJECT",
+		}))
+	}
+
+	if d.Get("billing_project") == "" {
+		d.Set("billing_project", multiEnvSearch([]string{
+			"GOOGLE_BILLING_PROJECT",
+		}))
+	}
+
+	if d.Get("region") == "" {
+		d.Set("region", multiEnvSearch([]string{
+			"GOOGLE_REGION",
+			"GCLOUD_REGION",
+			"CLOUDSDK_COMPUTE_REGION",
+		}))
+	}
+
+	if d.Get("zone") == "" {
+		d.Set("zone", multiEnvSearch([]string{
+			"GOOGLE_ZONE",
+			"GCLOUD_ZONE",
+			"CLOUDSDK_COMPUTE_ZONE",
+		}))
+	}
+
+	if d.Get("user_project_override") == "" {
+		d.Set("user_project_override", multiEnvSearch([]string{
+			"USER_PROJECT_OVERRIDE",
+		}))
+	}
+
+	if d.Get("request_reason") == "" {
+		d.Set("request_reason", multiEnvSearch([]string{
+			"CLOUDSDK_CORE_REQUEST_REASON",
+		}))
+	}
+
+	// Generated Products
+	<% products.each do |product| -%>
+	if d.Get("<%= product[:definitions].name.underscore -%>_custom_endpoint") == "" {
+		d.Set("<%= product[:definitions].name.underscore -%>_custom_endpoint", MultiEnvDefault([]string{
+			"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[<%= product[:definitions].name -%>BasePathKey]))
+	}
+	<% end -%>
+
+	if d.Get(CloudBillingCustomEndpointEntryKey) == "" {
+		d.Set(CloudBillingCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_CLOUD_BILLING_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[CloudBillingBasePathKey]))
+	}
+
+	if d.Get(ComposerCustomEndpointEntryKey) == "" {
+		d.Set(ComposerCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_COMPOSER_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[ComposerBasePathKey]))
+	}
+
+	if d.Get(ContainerCustomEndpointEntryKey) == "" {
+		d.Set(ContainerCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_CONTAINER_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[ContainerBasePathKey]))
+	}
+
+	if d.Get(DataflowCustomEndpointEntryKey) == "" {
+		d.Set(DataflowCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_DATAFLOW_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[DataflowBasePathKey]))
+	}
+
+	if d.Get(IamCredentialsCustomEndpointEntryKey) == "" {
+		d.Set(IamCredentialsCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_IAM_CREDENTIALS_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[IamCredentialsBasePathKey]))
+	}
+
+	if d.Get(ResourceManagerV3CustomEndpointEntryKey) == "" {
+		d.Set(ResourceManagerV3CustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_RESOURCE_MANAGER_V3_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[ResourceManagerV3BasePathKey]))
+	}
+
+	<% unless version == "ga" -%>
+	if d.Get(RuntimeConfigCustomEndpointEntryKey) == "" {
+		d.Set(RuntimeConfigCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_RUNTIMECONFIG_CUSTOM_ENDPOINT",
+	}, DefaultBasePaths[RuntimeConfigBasePathKey]))
+	<% end -%>
+
+	if d.Get(IAMCustomEndpointEntryKey) == "" {
+		d.Set(IAMCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_IAM_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[IAMBasePathKey]))
+	}
+
+	if d.Get(ServiceNetworkingCustomEndpointEntryKey) == "" {
+		d.Set(ServiceNetworkingCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_SERVICE_NETWORKING_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[ServiceNetworkingBasePathKey]))
+	}
+
+	if d.Get(ContainerAwsCustomEndpointEntryKey) == "" {
+		d.Set(ContainerAwsCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_CONTAINERAWS_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[ContainerAwsBasePathKey]))
+	}
+
+	if d.Get(ContainerAzureCustomEndpointEntryKey) == "" {
+		d.Set(ContainerAzureCustomEndpointEntryKey, MultiEnvDefault([]string{
+			"GOOGLE_CONTAINERAZURE_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[ContainerAzureBasePathKey]))
+	}
 }
 
 func (c *Config) LoadAndValidate(ctx context.Context) error {

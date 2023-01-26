@@ -71,11 +71,11 @@ func getProjectFramework(rVal, pVal types.String, diags *diag.Diagnostics) types
 }
 
 func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
-	if !rVal.IsNull() && rVal.String() != "" {
+	if !rVal.IsNull() && rVal.ValueString() != "" {
 		return rVal
 	}
 
-	if !pVal.IsNull() && pVal.String() != "" {
+	if !pVal.IsNull() && pVal.ValueString() != "" {
 		return pVal
 	}
 

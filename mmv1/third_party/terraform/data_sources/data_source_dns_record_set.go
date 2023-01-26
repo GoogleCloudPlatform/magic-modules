@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -103,6 +104,7 @@ func (d *GoogleDnsRecordSetDataSource) Configure(ctx context.Context, req dataso
 
 func (d *GoogleDnsRecordSetDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleDnsRecordSetModel
+	var diags diag.Diagnostics
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -111,21 +113,29 @@ func (d *GoogleDnsRecordSetDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	project := getProjectFramework(data.Project, d.project, &resp.Diagnostics)
+	data.Project = getProjectFramework(data.Project, d.project, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	data.Id = types.StringValue(fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s/%s", project.String(), data.ManagedZone.String(), data.Name.String(), data.Type.String()))
-	clientResp, err := d.client.ResourceRecordSets.List(project.String(), data.ManagedZone.String()).Name(data.Name.String()).Type(data.Type.String()).Do()
+	data.Id = types.StringValue(fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s/%s", data.Project.ValueString(), data.ManagedZone.ValueString(), data.Name.ValueString(), data.Type.ValueString()))
+	clientResp, err := d.client.ResourceRecordSets.List(data.Project.ValueString(), data.ManagedZone.ValueString()).Name(data.Name.ValueString()).Type(data.Type.ValueString()).Do()
 	if err != nil {
-		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceDnsRecordSet %q", data.Name.String()), &resp.Diagnostics)
+		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceDnsRecordSet %q", data.Name.ValueString()), &resp.Diagnostics)
 	}
 	if len(clientResp.Rrsets) != 1 {
 		resp.Diagnostics.AddError("only expected 1 record set", fmt.Sprintf("%d record sets were returned", len(clientResp.Rrsets)))
 	}
 
 	tflog.Trace(ctx, "read dns record set data source")
+
+	data.Type = types.StringValue(clientResp.Rrsets[0].Type)
+	data.Ttl = types.Int64Value(clientResp.Rrsets[0].Ttl)
+	data.Rrdatas, diags = types.ListValueFrom(ctx, types.StringType, clientResp.Rrsets[0].Rrdatas)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
