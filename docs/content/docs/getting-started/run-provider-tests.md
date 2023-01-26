@@ -59,7 +59,7 @@ TESTARGS allows you to pass [testing flags](https://pkg.go.dev/cmd/go#hdr-Testin
 
 ## Sweepers
 
-Certain circumstances (panics, failed deletes, etc.) will leave behind dangling resources. These are bad: they often cost money to keep present and they often lead to quota failures in future test runs. Sweepers run before and after every test suite run in CI, and are used to delete all resources of a given type from the test project. Sweepers can be added in the tests for a given resource by adding an `init()` function that contains a call to `resource.AddTestSweepers(...)`. Sweepers should be added when possible.
+Certain circumstances (panics, failed deletes, etc.) will leave behind dangling resources. These are bad: they often cost money to keep present and they often lead to quota failures in future test runs. [Sweepers](https://developer.hashicorp.com/terraform/plugin/sdkv2/testing/acceptance-tests/sweepers) run before and after every test suite run in CI, and are used to delete all resources of a given type from the test project. Sweepers can be added in the tests for a given resource by adding an `init()` function that contains a call to `resource.AddTestSweepers(...)`. Sweepers should be added when possible.
 
 Sweepers run by using the -sweep and -sweep-run TESTARGS flags:
 ```bash
