@@ -605,7 +605,7 @@ resource "google_project_iam_member" "pubsub" {
   member  = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
 }
 
-resource "google_storage_transfer_agent_pool" "foo" {
+resource "google_storage_transfer_agent_pool" "source_pool" {
   name         = "test_name_soa_pool_name"
   bandwidth_limit {
     limit_mbps = "120"
@@ -619,7 +619,7 @@ resource "google_storage_transfer_job" "transfer_job" {
   project     = "%s"
 
   transfer_spec {
-    source_agent_pool_name = google_storage_transfer_agent_pool.foo.id
+    source_agent_pool_name = google_storage_transfer_agent_pool.source_pool.id
     posix_data_source {
     	root_directory = "/some/path"
     }
@@ -681,7 +681,7 @@ resource "google_project_iam_member" "pubsub" {
   member  = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
 }
 
-resource "google_storage_transfer_agent_pool" "foo" {
+resource "google_storage_transfer_agent_pool" "sink_pool" {
   name         = "test_name_soa_pool_name"
   bandwidth_limit {
     limit_mbps = "120"
@@ -695,7 +695,7 @@ resource "google_storage_transfer_job" "transfer_job" {
   project     = "%s"
 
   transfer_spec {
-    sink_agent_pool_name  = google_storage_transfer_agent_pool.foo.id
+    sink_agent_pool_name  = google_storage_transfer_agent_pool.sink_pool.id
     posix_data_sink {
     	root_directory = "/some/path"
     }
