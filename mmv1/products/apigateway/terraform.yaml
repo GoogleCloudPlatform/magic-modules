@@ -60,7 +60,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         name: "apigateway_api_config_basic"
         primary_resource_id: "api_cfg"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-config-%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-api-config%s\", context[\"random_suffix\"])" # Need to pass 2 ids into a Sprintf - parent resource id also needed to identify primary resource
+        primary_resource_name: "fmt.Sprintf(\"tf-test-api-%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-config%s\", context[\"random_suffix\"])" # Need to pass 2 ids into a Sprintf - parent resource id also needed to identify primary resource
         vars:
           api_id: "api-"
           config_id: "config-"
