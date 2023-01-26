@@ -201,14 +201,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
       encoder: templates/terraform/encoders/data_catalog_tag.go.erb
   Taxonomy: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["{{name}}"]
+    import_format: ["projects/{{project}},/locations/{{location}}/taxonomies/{{taxonomy}}", "{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "data_catalog_taxonomy_basic"
         primary_resource_id: "basic_taxonomy"
         primary_resource_name: "fmt.Sprintf(\"tf_test_my_taxonomy%s\", context[\"random_suffix\"])"
         vars:
-          display_name: "my_display_name"
+          display_name: "my_display_name" # Note, this isn't the identifier used in the URL for the resource. The identifier is a number returned from the API.
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
