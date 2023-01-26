@@ -347,8 +347,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       test_check_destroy: templates/terraform/custom_check_destroy/apigee_addons_override.go.erb
     examples:
     - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_addons_basic"
+      skip_test: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_addons_full"
+      skip_test: true
+    - !ruby/object:Provider::Terraform::Examples
       name: "apigee_addons_test"
       primary_resource_id: "apigee_org_addons"
+      skip_docs: true
       test_env_vars:
         org_id: :ORG_ID
         billing_account: :BILLING_ACCT
