@@ -198,6 +198,12 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     CustomEndpointValidator(),
                 },
             },
+            "tags_location_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                Validators: []validator.String{
+                    CustomEndpointValidator(),
+                },
+            },
 
             // dcl
             "container_aws_custom_endpoint": &schema.StringAttribute{

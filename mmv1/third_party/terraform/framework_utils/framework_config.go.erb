@@ -234,6 +234,15 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 		}
 	}
 
+	if data.TagsLocationCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_TAGS_LOCATION_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[TagsLocationBasePathKey])
+		if customEndpoint != nil {
+			data.TagsLocationCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+
 	// dcl
 	if data.ContainerAwsCustomEndpoint.IsNull() {
 		customEndpoint := MultiEnvDefault([]string{
