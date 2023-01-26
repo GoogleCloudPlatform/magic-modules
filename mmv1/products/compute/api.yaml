@@ -13653,6 +13653,11 @@ objects:
               attached.
             values:
               - :COLLOCATED
+          - !ruby/object:Api::Type::Integer
+            name: 'maxDistance'
+            min_version: 'beta'
+            description: |
+              Specifies the number of max logical switches.
       - !ruby/object:Api::Type::NestedObject
         name: 'instanceSchedulePolicy'
         conflicts:
