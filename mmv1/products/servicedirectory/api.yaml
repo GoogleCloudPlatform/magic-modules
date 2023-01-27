@@ -95,7 +95,7 @@ objects:
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
       set_iam_policy_verb: :POST
-      import_format: ["project/{{project}}/location/{{location}}/namespace/{{namespace}}/service/{{name}}"]
+      import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace}}/services/{{name}}"]
     min_version: beta
     description: |
       An individual service. A service contains a name and optional metadata.
