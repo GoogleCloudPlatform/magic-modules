@@ -16,8 +16,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Group: !ruby/object:Overrides::Terraform::ResourceOverride
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistenceWith403
+      check_response_func_absence: PollCheckForAbsenceWith403
       target_occurrences: 10
-      actions: ['create']
+      actions: ['create', 'update', 'delete']
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,
@@ -41,6 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/set_computed_name.erb
       custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
   GroupMembership: !ruby/object:Overrides::Terraform::ResourceOverride
+    read_error_transform: "transformCloudIdentityGroupMembershipReadError"
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,

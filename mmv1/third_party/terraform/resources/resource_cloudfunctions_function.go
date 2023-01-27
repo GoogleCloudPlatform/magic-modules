@@ -320,7 +320,7 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			"max_instances": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      0,
+				Computed:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 				Description:  `The limit on the maximum number of function instances that may coexist at a given time.`,
 			},
@@ -824,6 +824,9 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if d.HasChange("https_trigger_security_level") {
+		if function.HttpsTrigger == nil {
+			function.HttpsTrigger = &cloudfunctions.HttpsTrigger{}
+		}
 		function.HttpsTrigger.SecurityLevel = d.Get("https_trigger_security_level").(string)
 		updateMaskArr = append(updateMaskArr, "httpsTrigger", "httpsTrigger.securityLevel")
 	}

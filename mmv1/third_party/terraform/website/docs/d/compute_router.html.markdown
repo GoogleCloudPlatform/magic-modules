@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_router"
 description: |-
   Get a Cloud Router within GCE.
 ---
@@ -35,4 +34,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_compute_router](https://www.terraform.io/docs/providers/google/r/compute_router.html) resource for details of the available attributes.
+See [google_compute_router](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router) resource for details of the available attributes.

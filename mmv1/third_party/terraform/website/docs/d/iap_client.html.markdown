@@ -1,6 +1,5 @@
 ---
 subcategory: "Identity-Aware Proxy"
-page_title: "Google: google_iap_client"
 description: |-
   Contains the data that describes an Identity Aware Proxy owned client.
 ---
@@ -32,4 +31,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_iap_client](https://www.terraform.io/docs/providers/google/r/iap_client.html) resource for details of the available attributes.
+See [google_iap_client](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_client) resource for details of the available attributes.

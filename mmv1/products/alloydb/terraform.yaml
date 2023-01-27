@@ -22,6 +22,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       initialUser.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: "projectNumberDiffSuppress"
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -36,3 +38,66 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "full"
         vars:
           alloydb_cluster_name: "alloydb-cluster-full"          
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{cluster}}/instances/{{instance_id}}"]
+    autogen_async: true
+    properties:
+      availabilityType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      machineConfig.cpuCount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      machineConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "alloydb_instance_basic"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          alloydb_cluster_name: "alloydb-cluster"
+          alloydb_instance_name: "alloydb-instance"
+        ignore_read_extra:
+          - "reconciling"
+          - "update_time"
+  Backup: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/locations/{{location}}/backups/{{backup_id}}"]
+    autogen_async: true
+    properties:
+      clusterName: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: "projectNumberDiffSuppress"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "alloydb_backup_basic"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          alloydb_backup_id: "alloydb-backup"
+          alloydb_cluster_name: "alloydb-cluster"
+          alloydb_instance_name: "alloydb-instance"
+          network_name: "alloydb-network"
+        test_vars_overrides:
+          network_name: 'BootstrapSharedTestNetwork(t, "alloydb")'
+        ignore_read_extra:
+          - "reconciling"
+          - "update_time"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "alloydb_backup_full"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          alloydb_backup_id: "alloydb-backup"
+          alloydb_cluster_name: "alloydb-cluster"
+          alloydb_instance_name: "alloydb-instance"
+          network_name: "alloydb-network"
+        test_vars_overrides:
+          network_name: 'BootstrapSharedTestNetwork(t, "alloydb")'
+        ignore_read_extra:
+          - "reconciling"
+          - "update_time"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/alloydb_backup.erb

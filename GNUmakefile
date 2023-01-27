@@ -1,4 +1,5 @@
-
+# See https://googlecloudplatform.github.io/magic-modules/docs/getting-started/generate-providers/
+# for a guide on provider generation.
 
 default: build
 
@@ -54,7 +55,8 @@ endif
 ifeq ($(FORCE_DCL),)
   FORCE_DCL=latest
 endif
-terraform build:
+terraform build provider:
+	@make validate_environment;
 	make mmv1
 	make tpgtools
 
@@ -91,6 +93,14 @@ upgrade-dcl:
 		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
 
 
+validate_environment:
+# only print doctor script to console if there was a dependency failure detected.
+	@./scripts/doctor 2>&1 > /dev/null || ./scripts/doctor
+	@[ -d "$(OUTPUT_PATH)" ] || (printf " \e[1;31mdirectory '$(OUTPUT_PATH)' does not exist - ENV variable \033[0mOUTPUT_PATH\e[1;31m should be set to a provider directory. \033[0m \n" && exit 1);
+	@[ -n "$(VERSION)" ] || (printf " \e[1;31mversion '$(VERSION)' does not exist - ENV variable \033[0mVERSION\e[1;31m should be set to ga or beta \033[0m \n" && exit 1);
+
+doctor:
+	./scripts/doctor
 
 .PHONY: mmv1 tpgtools
 

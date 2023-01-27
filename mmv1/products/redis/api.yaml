@@ -145,7 +145,7 @@ objects:
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: persistenceConfig
-        description: Maintenance policy for an instance.
+        description: Persistence configuration for an instance.
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'persistenceMode'
@@ -160,14 +160,14 @@ objects:
               - :RDB
           - !ruby/object:Api::Type::Enum
             name: 'rdbSnapshotPeriod'
-            required: true
+            required: false
             description: |
               Optional. Available snapshot periods for scheduling.
 
               - ONE_HOUR:	Snapshot every 1 hour.
               - SIX_HOURS:	Snapshot every 6 hours.
               - TWELVE_HOURS:	Snapshot every 12 hours.
-              - TWENTY_FOUR_HOURS:	Snapshot every 24 horus.
+              - TWENTY_FOUR_HOURS:	Snapshot every 24 hours.
             values:
               - :ONE_HOUR
               - :SIX_HOURS

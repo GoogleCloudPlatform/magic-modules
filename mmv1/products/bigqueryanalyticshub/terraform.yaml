@@ -19,9 +19,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_analyticshub_data_exchange_basic"
-        min_version: beta
         primary_resource_id: "data_exchange"
         primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\", context[\"random_suffix\"])"
+        region_override: "US"
         vars:
           data_exchange_id: "my_data_exchange"
           description: "example data exchange"
@@ -31,9 +31,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_analyticshub_listing_basic"
-        min_version: beta
         primary_resource_id: "listing"
-        primary_resource_name: "fmt.Sprintf(\"tf_test_my_listing%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\", context[\"random_suffix\"])"
+        region_override: "US"
         vars:
           data_exchange_id: "my_data_exchange"
           listing_id: "my_listing"

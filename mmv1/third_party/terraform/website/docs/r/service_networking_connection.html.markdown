@@ -1,6 +1,5 @@
 ---
 subcategory: "Service Networking"
-page_title: "Google: google_service_networking_connection"
 description: |-
   Manages creating a private VPC connection to a service provider.
 ---
@@ -79,4 +78,4 @@ $ terraform import google_service_networking_connection.peering_connection /proj
 
 ## User Project Overrides
 
-This resource supports [User Project Overrides](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#user_project_override).
+This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).

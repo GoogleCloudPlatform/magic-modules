@@ -52,7 +52,6 @@
 ---
 <%= lines(autogen_notice(:yaml, pwd)) -%>
 subcategory: "<%= tf_subcategory -%>"
-page_title: "Google: <%= resource_ns_iam -%>"
 description: |-
   Collection of resources to manage IAM policy for <%= product.display_name -%> <%= object.name %>
 ---
@@ -224,7 +223,14 @@ The following arguments are supported:
 * `<%= param.name.underscore -%>` - (Required) <%= param.description -%> Used to find the parent resource to bind the IAM policy to
 <% end -%>
 <% end -%>
-<% if object.base_url.include?("{{project}}")-%>
+<% if object.iam_policy.base_url.present? -%>
+<% if object.iam_policy.base_url.include?("{{project}}") -%>
+<%# The following new line allow for project to be bullet-formatted properly. -%>
+
+* `project` - (Optional) The ID of the project in which the resource belongs.
+    If it is not provided, the project will be parsed from the identifier of the parent resource. If no project is provided in the parent identifier and no project is specified, the provider project is used.
+<% end -%>
+<% elsif object.base_url.include?("{{project}}")-%>
 <%# The following new line allow for project to be bullet-formatted properly. -%>
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
@@ -310,5 +316,5 @@ $ terraform import <%= resource_ns_iam -%>_policy.editor <%= all_formats.first.g
 <% if object.base_url.include?("{{project}}")-%>
 ## User Project Overrides
 
-This resource supports [User Project Overrides](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#user_project_override).
+This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).
 <% end -%>

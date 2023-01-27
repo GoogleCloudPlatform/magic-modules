@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_attached_disk"
 description: |-
   Resource that allows attaching existing persistent disks to compute instances.
 ---
@@ -8,7 +7,7 @@ description: |-
 # google\_compute\_attached\_disk
 
 Persistent disks can be attached to a compute instance using [the `attached_disk`
-section within the compute instance configuration](https://www.terraform.io/docs/providers/google/r/compute_instance.html#attached_disk).
+section within the compute instance configuration](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance#attached_disk).
 However there may be situations where managing the attached disks via the compute
 instance config isn't preferable or possible, such as attaching dynamic
 numbers of disks using the `count` variable.
@@ -17,7 +16,7 @@ numbers of disks using the `count` variable.
 To get more information about attaching disks, see:
 
 * [API documentation](https://cloud.google.com/compute/docs/reference/rest/v1/instances/attachDisk)
-* [Resource: google_compute_disk](https://www.terraform.io/docs/providers/google/r/compute_disk.html)
+* [Resource: google_compute_disk](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk)
 * How-to Guides
     * [Adding a persistent disk](https://cloud.google.com/compute/docs/disks/add-persistent-disk)
 
@@ -111,7 +110,7 @@ In addition to the arguments listed above, the following computed attributes are
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 5 minutes.
 - `delete` - Default is 5 minutes.

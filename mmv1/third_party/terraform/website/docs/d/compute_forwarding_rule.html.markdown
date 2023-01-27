@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_forwarding_rule"
 description: |-
   Get a regional forwarding rule within GCE.
 ---
@@ -33,4 +32,4 @@ The following arguments are supported:
     is not provided, the project region is used.
 
 ## Attributes Reference
-See [google_compute_forwarding_rule](https://www.terraform.io/docs/providers/google/r/compute_forwarding_rule.html) resource for details of the available attributes.
+See [google_compute_forwarding_rule](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_forwarding_rule) resource for details of the available attributes.

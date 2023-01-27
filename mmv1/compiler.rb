@@ -29,10 +29,9 @@ require 'api/compiler'
 require 'google/logger'
 require 'optparse'
 require 'pathname'
-require 'provider/ansible'
-require 'provider/ansible_devel'
 require 'provider/inspec'
 require 'provider/terraform'
+require 'provider/terraform_kcc'
 require 'provider/terraform_oics'
 require 'provider/terraform_validator'
 require 'pp' if ENV['COMPILER_DEBUG']
@@ -119,6 +118,9 @@ all_product_files = []
 Dir['products/**/api.yaml'].each do |file_path|
   all_product_files.push(File.dirname(file_path))
 end
+Dir['products/**/product.yaml'].each do |file_path|
+  all_product_files.push(File.dirname(file_path))
+end
 
 if override_dir
   Google::LOGGER.info "Using override directory '#{override_dir}'"
@@ -126,10 +128,14 @@ if override_dir
     product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
     all_product_files.push(product) unless all_product_files.include? product
   end
+  Dir["#{override_dir}/products/**/product.yaml"].each do |file_path|
+    product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
+    all_product_files.push(product) unless all_product_files.include? product
+  end
 end
 
 products_to_generate = all_product_files if all_products
-raise 'No api.yaml files found. Check your provider (-e) name.' if products_to_generate.empty?
+raise 'No api.yaml or product.yaml files found.' if products_to_generate.empty?
 
 start_time = Time.now
 Google::LOGGER.info "Generating MM output to '#{output_path}'"
@@ -142,32 +148,49 @@ provider = nil
 # rubocop:disable Metrics/BlockLength
 all_product_files.each do |product_name|
   product_override_path = ''
-  product_override_path = File.join(override_dir, product_name, 'api.yaml') if override_dir
-  product_yaml_path = File.join(product_name, 'api.yaml')
+  product_override_path = File.join(override_dir, product_name, 'product.yaml') if override_dir
+  product_yaml_path = File.join(product_name, 'product.yaml')
+
+  api_override_path = ''
+  api_override_path = File.join(override_dir, product_name, 'api.yaml') if override_dir
+  api_yaml_path = File.join(product_name, 'api.yaml')
 
   provider_override_path = ''
   provider_override_path = File.join(override_dir, product_name, "#{provider_name}.yaml") \
     if override_dir
   provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
 
-  unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
-    raise "#{product_name} does not contain an api.yaml file"
+  unless File.exist?(product_yaml_path) || File.exist?(product_override_path) \
+    || File.exist?(api_yaml_path) || File.exist?(api_override_path)
+    raise "#{product_name} does not contain an api.yaml or product.yaml file"
   end
 
-  if File.exist?(product_override_path)
+  if File.exist?(api_override_path)
+    result = if File.exist?(api_yaml_path)
+               YAML.load_file(api_yaml_path).merge(YAML.load_file(api_override_path))
+             else
+               YAML.load_file(api_override_path)
+             end
+    product_yaml = result.to_yaml
+  elsif File.exist?(api_yaml_path)
+    product_yaml = File.read(api_yaml_path)
+  elsif File.exist?(product_override_path)
     result = if File.exist?(product_yaml_path)
                YAML.load_file(product_yaml_path).merge(YAML.load_file(product_override_path))
              else
                YAML.load_file(product_override_path)
              end
     product_yaml = result.to_yaml
-  else
+  elsif File.exist?(product_yaml_path)
     product_yaml = File.read(product_yaml_path)
   end
 
   unless File.exist?(provider_yaml_path) || File.exist?(provider_override_path)
-    Google::LOGGER.info "#{product_name}: Skipped as no #{provider_name}.yaml file exists"
-    next
+    unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
+      Google::LOGGER.info "#{product_name}: Skipped as no #{provider_name}.yaml file exists"
+      next
+    end
+    provider_yaml_path = 'templates/terraform.yaml'
   end
 
   raise "Output path '#{output_path}' does not exist or is not a directory" \
@@ -181,6 +204,20 @@ all_product_files.each do |product_name|
     Google::LOGGER.info \
       "#{product_name} does not have a '#{version}' version, skipping"
     next
+  end
+
+  if File.exist?(product_yaml_path) || File.exist?(product_override_path)
+    resources = []
+    Dir[product_name + '/*'].each do |file_path|
+      next if File.basename(file_path) == 'product.yaml' \
+       || File.basename(file_path) == 'terraform.yaml'
+
+      resource_yaml = File.read(file_path)
+      resource = Api::Compiler.new(resource_yaml).run
+      resource.validate
+      resources.push(resource)
+    end
+    product_api.set_variable(resources, 'objects')
   end
 
   if File.exist?(provider_yaml_path)
@@ -202,7 +239,7 @@ all_product_files.each do |product_name|
     override_providers = {
       'oics' => Provider::TerraformOiCS,
       'validator' => Provider::TerraformValidator,
-      'ansible_devel' => Provider::Ansible::Devel
+      'kcc' => Provider::TerraformKCC
     }
 
     provider_class = override_providers[force_provider]

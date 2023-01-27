@@ -48,7 +48,8 @@ objects:
     create_url: 'projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}'
     self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
     create_verb: :POST
-    input: true
+    update_verb: :PATCH
+    update_mask: true
     description: |
       Cloud IDS is an intrusion detection service that provides threat detection for intrusions, malware, spyware, and command-and-control attacks on your network.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -85,22 +86,24 @@ objects:
         description: |
           Name of the VPC network that is connected to the IDS endpoint. This can either contain the VPC network name itself (like "src-net") or the full URL to the network (like "projects/{project_id}/global/networks/src-net").
       - !ruby/object:Api::Type::String
+        input: true
         name: 'description'
         description: |
           An optional description of the endpoint.
       - !ruby/object:Api::Type::String
-        name: 'endpoint_forwarding_rule'
+        name: 'endpointForwardingRule'
         output: true
         description: |
           URL of the endpoint's network address to which traffic is to be sent by Packet Mirroring.
       - !ruby/object:Api::Type::String
-        name: 'endpoint'
+        name: 'endpointIp'
         output: true
         description: |
           Internal IP address of the endpoint's network entry point.
       - !ruby/object:Api::Type::Enum
         name: 'severity'
         required: true
+        input: true
         description: |
           The minimum alert severity level that is reported by the endpoint.
         values:
@@ -109,3 +112,8 @@ objects:
           - :MEDIUM
           - :HIGH
           - :CRITICAL
+      - !ruby/object:Api::Type::Array
+        name: 'threatExceptions'
+        description: |
+          Configuration for threat IDs excluded from generating alerts. Limit: 99 IDs.
+        item_type: Api::Type::String

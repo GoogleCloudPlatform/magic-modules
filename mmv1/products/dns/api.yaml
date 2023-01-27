@@ -37,6 +37,13 @@ objects:
       A zone is a subtree of the DNS namespace under one administrative
       responsibility. A ManagedZone is a resource that represents a DNS zone
       hosted by the Cloud DNS service.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'managed_zone'
+      set_iam_policy_verb: :POST
+      import_format: ["projects/{{project}}/managedZones/{{managed_zone}}", "{{project}}/{{managed_zone}}"]
     properties:
       - !ruby/object:Api::Type::String
         name: 'description'
@@ -184,6 +191,18 @@ objects:
           resources that the zone is visible from.
         send_empty_value: true
         properties:
+          - !ruby/object:Api::Type::Array
+            name: 'gkeClusters'
+            description: 'The list of Google Kubernetes Engine clusters that can see this zone.'
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'gkeClusterName'
+                  description: |
+                    The resource name of the cluster to bind this ManagedZone to.  
+                    This should be specified in the format like  
+                    `projects/*/locations/*/clusters/*`
+                  required: true
           - !ruby/object:Api::Type::Array
             name: 'networks'
             description: 'The list of VPC networks that can see this zone.'
@@ -547,6 +566,18 @@ objects:
               The fully qualified URL of the VPC network to bind to.
               This should be formatted like
               `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+      - !ruby/object:Api::Type::Array
+            name: 'gkeClusters'
+            description: 'The list of Google Kubernetes Engine clusters that can see this zone.'
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'gkeClusterName'
+                  description: |
+                    The resource name of the cluster to bind this ManagedZone to.  
+                    This should be specified in the format like  
+                    `projects/*/locations/*/clusters/*`
+                  required: true
   - !ruby/object:Api::Resource
     name: 'ResponsePolicyRule'
     kind: 'dns#responsePolicyRule'

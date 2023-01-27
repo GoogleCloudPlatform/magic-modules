@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_ha_vpn_gateway"
 description: |-
   Get a HA VPN Gateway within GCE.
 ---
@@ -33,4 +32,4 @@ The following arguments are supported:
     is not provided, the project region is used.
 
 ## Attributes Reference
-See [google_compute_ha_vpn_gateway](https://www.terraform.io/docs/providers/google/r/compute_ha_vpn_gateway.html) resource for details of the available attributes.
+See [google_compute_ha_vpn_gateway](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_ha_vpn_gateway) resource for details of the available attributes.

@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Pub/Sub"
-page_title: "Google: google_pubsub_topic"
 description: |-
   Get information about a Google Cloud Pub/Sub Topic.
 ---
@@ -32,4 +31,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_pubsub_topic](https://www.terraform.io/docs/providers/google/r/pubsub_topic.html#argument-reference) resource for details of the available attributes.
+See [google_pubsub_topic](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic#argument-reference) resource for details of the available attributes.

@@ -25,6 +25,16 @@ var defaultOauthScopes = []string{
 	"https://www.googleapis.com/auth/trace.append",
 }
 
+func schemaLoggingVariant() *schema.Schema {
+	return &schema.Schema{
+		Type: schema.TypeString,
+		Optional: true,
+		Description: `Type of logging agent that is used as the default value for node pools in the cluster. Valid values include DEFAULT and MAX_THROUGHPUT.`,
+		Default: "DEFAULT",
+		ValidateFunc: validation.StringInSlice([]string{"DEFAULT", "MAX_THROUGHPUT"}, false),
+	}
+}
+
 func schemaGcfsConfig(forceNew bool) *schema.Schema {
         return &schema.Schema{
                 Type:     schema.TypeList,
@@ -143,12 +153,18 @@ func schemaNodeConfig() *schema.Schema {
 					Optional: true,
 					// Computed=true because GKE Sandbox will automatically add labels to nodes that can/cannot run sandboxed pods.
 					Computed: true,
-					ForceNew: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 					Description: `The map of Kubernetes labels (key/value pairs) to be applied to each node. These will added in addition to any default label(s) that Kubernetes may apply to the node.`,
 	<% unless version.nil? || version == 'ga' -%>
 					DiffSuppressFunc: containerNodePoolLabelsSuppress,
 	<% end -%>
+				},
+
+				"resource_labels": {
+					Type:        schema.TypeMap,
+					Optional:    true,
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					Description: `The GCE resource labels (a map of key/value pairs) to be applied to the node pool.`,
 				},
 
 				"local_ssd_count": {
@@ -159,6 +175,8 @@ func schemaNodeConfig() *schema.Schema {
 					ValidateFunc: validation.IntAtLeast(0),
 					Description:  `The number of local SSD disks to be attached to the node.`,
 				},
+
+				"logging_variant": schemaLoggingVariant(),
 
 	<% unless version == 'ga' -%>
 				"ephemeral_storage_config": {
@@ -413,7 +431,6 @@ func schemaNodeConfig() *schema.Schema {
 					ForceNew:   true,
 					Description: `The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool.`,
 				},
-	<% unless version == 'ga' -%>
 				// Note that AtLeastOneOf can't be set because this schema is reused by
 				// two different resources.
 				"kubelet_config": {
@@ -459,7 +476,6 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
-	<% end -%>
 				"node_group": {
 					Type:     schema.TypeString,
 					Optional: true,
@@ -471,7 +487,6 @@ func schemaNodeConfig() *schema.Schema {
 	}
 }
 
-<% unless version == "ga" -%>
 func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefaults {
         configs := configured.([]interface{})
 	if len(configs) == 0 || configs[0] == nil {
@@ -479,16 +494,24 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 	}
 	config := configs[0].(map[string]interface{})
 
-        nodeConfigDefaults := &container.NodeConfigDefaults{}
+	nodeConfigDefaults := &container.NodeConfigDefaults{}
+	if variant, ok := config["logging_variant"]; ok {
+		nodeConfigDefaults.LoggingConfig = &container.NodePoolLoggingConfig{
+			VariantConfig: &container.LoggingVariantConfig{
+				Variant: variant.(string),
+			},
+		}
+	}
+<% unless version == "ga" -%>
         if v, ok := config["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
                 gcfsConfig := v.([]interface{})[0].(map[string]interface{})
 		nodeConfigDefaults.GcfsConfig = &container.GcfsConfig{
 			Enabled: gcfsConfig["enabled"].(bool),
 		}
 	}
+<% end -%>
         return nodeConfigDefaults
 }
-<% end -%>
 
 func expandNodeConfig(v interface{}) *container.NodeConfig {
 	nodeConfigs := v.([]interface{})
@@ -543,6 +566,14 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 
 	if v, ok := nodeConfig["local_ssd_count"]; ok {
 		nc.LocalSsdCount = int64(v.(int))
+	}
+
+	if v, ok := nodeConfig["logging_variant"]; ok {
+		nc.LoggingConfig = &container.NodePoolLoggingConfig{
+			VariantConfig: &container.LoggingVariantConfig{
+				Variant: v.(string),
+			},
+		}
 	}
 
 <% unless version == 'ga' -%>
@@ -617,6 +648,14 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.Labels = m
 	}
 
+	if v, ok := nodeConfig["resource_labels"]; ok {
+		m := make(map[string]string)
+		for k, val := range v.(map[string]interface{}) {
+			m[k] = val.(string)
+		}
+		nc.ResourceLabels = m
+	}
+
 	if v, ok := nodeConfig["tags"]; ok {
 		tagsList := v.([]interface{})
 		tags := []string{}
@@ -678,7 +717,6 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.BootDiskKmsKey = v.(string)
 	}
 
-<% unless version == 'ga' -%>
 	if v, ok := nodeConfig["kubelet_config"]; ok {
 		nc.KubeletConfig = expandKubeletConfig(v)
 	}
@@ -687,7 +725,6 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.LinuxNodeConfig = expandLinuxNodeConfig(v)
 	}
 
-<% end -%>
 	if v, ok := nodeConfig["node_group"]; ok {
 		nc.NodeGroup = v.(string)
 	}
@@ -714,7 +751,6 @@ func expandWorkloadMetadataConfig(v interface{}) *container.WorkloadMetadataConf
 	return wmc
 }
 
-<% unless version == 'ga' -%>
 func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	if v == nil {
 		return nil
@@ -760,22 +796,22 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 	}
 }
 
-<% end -%>
-
-<% unless version == 'ga' -%>
 func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]interface{} {
         result := make([]map[string]interface{}, 0, 1)
-        
+
         if c == nil {
                 return result
         }
 
-        result = append(result, map[string]interface{}{
-                "gcfs_config": flattenGcfsConfig(c.GcfsConfig),
-        })
+	result = append(result, map[string]interface{}{})
+
+	result[0]["logging_variant"] = flattenLoggingVariant(c.LoggingConfig)
+
+<% unless version == 'ga' -%>
+	result[0]["gcfs_config"] = flattenGcfsConfig(c.GcfsConfig)
+<% end -%>
         return result
 }
-<% end -%>
 
 func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 	config := make([]map[string]interface{}, 0, 1)
@@ -790,6 +826,7 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 		"disk_type":                c.DiskType,
 		"guest_accelerator":        flattenContainerGuestAccelerators(c.Accelerators),
 		"local_ssd_count":          c.LocalSsdCount,
+		"logging_variant":          flattenLoggingVariant(c.LoggingConfig),
 <% unless version == 'ga' -%>
 		"ephemeral_storage_config": flattenEphemeralStorageConfig(c.EphemeralStorageConfig),
 <% end -%>
@@ -800,6 +837,7 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 		"metadata":                 c.Metadata,
 		"image_type":               c.ImageType,
 		"labels":                   c.Labels,
+		"resource_labels": 			c.ResourceLabels,
 		"tags":                     c.Tags,
 		"preemptible":              c.Preemptible,
 		"spot":                     c.Spot,
@@ -811,10 +849,8 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
 <% end -%>
 		"boot_disk_kms_key": 		c.BootDiskKmsKey,
-<% unless version == 'ga' -%>
 		"kubelet_config":           flattenKubeletConfig(c.KubeletConfig),
 		"linux_node_config":        flattenLinuxNodeConfig(c.LinuxNodeConfig),
-<% end -%>
 		"node_group":               c.NodeGroup,
 	})
 
@@ -868,6 +904,14 @@ func flattenEphemeralStorageConfig(c *container.EphemeralStorageConfig) []map[st
 	return result
 }
 <% end -%>
+
+func flattenLoggingVariant(c *container.NodePoolLoggingConfig) string {
+	variant := "DEFAULT"
+	if c != nil && c.VariantConfig != nil && c.VariantConfig.Variant != "" {
+		variant = c.VariantConfig.Variant
+	}
+	return variant
+}
 
 func flattenGcfsConfig(c *container.GcfsConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
@@ -1034,7 +1078,7 @@ func containerNodePoolTaintSuppress(k, old, new string, d *schema.ResourceData) 
 		}
 		if _, ok := taintSet[taint]; ok {
 			delete(taintSet, taint)
-		} else if !strings.HasPrefix(taint.Key, "sandbox.gke.io/") {
+		} else if !strings.HasPrefix(taint.Key, "sandbox.gke.io/") && taint.Key != "kubernetes.io/arch" {
 			// User-provided taint removed in new configuration.
 			return false
 		}
@@ -1050,7 +1094,6 @@ func containerNodePoolTaintSuppress(k, old, new string, d *schema.ResourceData) 
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -1072,4 +1115,3 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 	}
 	return result
 }
-<% end -%>

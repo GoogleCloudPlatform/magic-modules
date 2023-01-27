@@ -41,7 +41,7 @@ func resourceBigtableInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: `The name (also called Instance Id in the Cloud Console) of the Cloud Bigtable instance.`,
+				Description: `The name (also called Instance Id in the Cloud Console) of the Cloud Bigtable instance. Must be 6-33 characters and must only contain hyphens, lowercase letters and numbers.`,
 			},
 
 			"cluster": {
@@ -54,7 +54,7 @@ func resourceBigtableInstance() *schema.Resource {
 						"cluster_id": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: `The ID of the Cloud Bigtable cluster.`,
+							Description: `The ID of the Cloud Bigtable cluster. Must be 6-30 characters and must only contain hyphens, lowercase letters and numbers.`,
 						},
 						"zone": {
 							Type:        schema.TypeString,
@@ -69,7 +69,7 @@ func resourceBigtableInstance() *schema.Resource {
 							// so mark as computed.
 							Computed:     true,
 							ValidateFunc: validation.IntAtLeast(1),
-							Description:  `The number of nodes in your Cloud Bigtable cluster. Required, with a minimum of 1 for a PRODUCTION instance. Must be left unset for a DEVELOPMENT instance.`,
+							Description:  `The number of nodes in your Cloud Bigtable cluster. Required, with a minimum of 1 for each cluster in an instance.`,
 						},
 						"storage_type": {
 							Type:         schema.TypeString,
@@ -81,7 +81,6 @@ func resourceBigtableInstance() *schema.Resource {
 						"kms_key_name": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 							Computed:    true,
 							Description: `Describes the Cloud KMS encryption key that will be used to protect the destination Bigtable cluster. The requirements for this key are: 1) The Cloud Bigtable service account associated with the project that contains this cluster must be granted the cloudkms.cryptoKeyEncrypterDecrypter role on the CMEK key. 2) Only regional keys can be used and the region of the CMEK key must match the region of the cluster. 3) All clusters within an instance must use the same CMEK key. Values are of the form projects/{project}/locations/{location}/keyRings/{keyring}/cryptoKeys/{key}`,
 						},
@@ -246,9 +245,12 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 	instance, err := c.InstanceInfo(ctx, instanceName)
 	if err != nil {
-		log.Printf("[WARN] Removing %s because it's gone", instanceName)
-		d.SetId("")
-		return nil
+		if isNotFoundGrpcError(err) {
+			log.Printf("[WARN] Removing %s because it's gone", instanceName)
+			d.SetId("")
+			return nil
+		}
+		return err
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -463,7 +465,8 @@ func getBigtableZone(z string, config *Config) (string, error) {
 func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	oldCount, newCount := diff.GetChange("cluster.#")
 
-	// simulate Required:true, MinItems:1 for "cluster"
+	// Simulate Required:true, MinItems:1 for "cluster". This doesn't work
+	// when the whole `cluster` field is removed on update.
 	if newCount.(int) < 1 {
 		return fmt.Errorf("config is invalid: Too few cluster blocks: Should have at least 1 \"cluster\" block")
 	}
@@ -529,10 +532,10 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 		return fmt.Errorf("Error setting cluster diff: %s", err)
 	}
 
-	// Clusters can't have their zone / storage_type updated, ForceNew if it's
-	// changed. This will show a diff with the old state on the left side and
-	// the unmodified new state on the right and the ForceNew attributed to the
-	// _old state index_ even if the diff appears to have moved.
+	// Clusters can't have their zone, storage_type or kms_key_name updated,
+	// ForceNew if it's changed. This will show a diff with the old state on
+	// the left side and the unmodified new state on the right and the ForceNew
+	// attributed to the _old state index_ even if the diff appears to have moved.
 	// This depends on the clusters having been reordered already by the prior
 	// SetNew call.
 	// We've implemented it here because it doesn't return an error in the
@@ -543,6 +546,7 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 			continue
 		}
 
+		// ForceNew only if the old and the new clusters have the matching cluster ID.
 		oZone, nZone := diff.GetChange(fmt.Sprintf("cluster.%d.zone", i))
 		if oZone != nZone {
 			err := diff.ForceNew(fmt.Sprintf("cluster.%d.zone", i))
@@ -554,6 +558,14 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 		oST, nST := diff.GetChange(fmt.Sprintf("cluster.%d.storage_type", i))
 		if oST != nST {
 			err := diff.ForceNew(fmt.Sprintf("cluster.%d.storage_type", i))
+			if err != nil {
+				return fmt.Errorf("Error setting cluster diff: %s", err)
+			}
+		}
+
+		oKey, nKey := diff.GetChange(fmt.Sprintf("cluster.%d.kms_key_name", i))
+		if oKey != nKey {
+			err := diff.ForceNew(fmt.Sprintf("cluster.%d.kms_key_name", i))
 			if err != nil {
 				return fmt.Errorf("Error setting cluster diff: %s", err)
 			}

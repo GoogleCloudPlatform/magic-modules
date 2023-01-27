@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Spanner"
-page_title: "Google: google_spanner_instance_iam"
 description: |-
  Collection of resources to manage IAM policy for a Spanner instance.
 ---
@@ -44,7 +43,7 @@ resource "google_spanner_instance_iam_policy" "instance" {
 ```hcl
 resource "google_spanner_instance_iam_binding" "instance" {
   instance = "your-instance-name"
-  role     = "roles/compute.networkUser"
+  role     = "roles/spanner.databaseAdmin"
 
   members = [
     "user:jane@example.com",
@@ -57,7 +56,7 @@ resource "google_spanner_instance_iam_binding" "instance" {
 ```hcl
 resource "google_spanner_instance_iam_member" "instance" {
   instance = "your-instance-name"
-  role     = "roles/compute.networkUser"
+  role     = "roles/spanner.databaseAdmin"
   member   = "user:jane@example.com"
 }
 ```

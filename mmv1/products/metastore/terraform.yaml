@@ -59,7 +59,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         primary_resource_id: "metadata"
         vars:
-          metastore_service_name: "metastore-metadata"          
+          metastore_service_name: "metastore-metadata"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_private_service_connect"
+        skip_test: true
+        primary_resource_id: default
+        vars:
+          metastore_service_name: "metastore-srv"
+          network_name: "my-network"
+          subnet_name: "my-subnetwork"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dataproc_metastore_service_telemetry"
+        skip_docs: true
+        primary_resource_id: "telemetry"
+        vars:
+          metastore_service_name: "telemetry"          
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -70,6 +84,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       hiveMetastoreConfig.configOverrides: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: "dataprocMetastoreServiceOverrideSuppress"
+      telemetryConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true        
   Federation: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"]

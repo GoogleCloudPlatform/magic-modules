@@ -1,0 +1,2 @@
+- type: EXCLUDE
+  field: monitoring_config

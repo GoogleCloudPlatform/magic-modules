@@ -1,6 +1,5 @@
 ---
 subcategory: "Memorystore (Redis)"
-page_title: "Google: google_redis_instance"
 description: |-
   Get information about a Google Cloud Redis instance.
 ---
@@ -45,4 +44,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_redis_instance](https://www.terraform.io/docs/providers/google/r/redis_instance.html) resource for details of the available attributes.
+See [google_redis_instance](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance) resource for details of the available attributes.

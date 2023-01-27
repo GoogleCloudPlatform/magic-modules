@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_instance_from_template"
 description: |-
   Manages a VM instance resource within GCE.
 ---
@@ -88,7 +87,7 @@ are marked [Attributes as Blocks](/docs/configuration/attr-as-blocks.html):
 ## Attributes Reference
 
 All exported attributes from `google_compute_instance` are exported here.
-See https://www.terraform.io/docs/providers/google/r/compute_instance.html#attributes-reference
+See https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance#attributes-reference
 for details.
 
 ## Import
@@ -98,7 +97,7 @@ This resource does not support import.
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 6 minutes.
 - `update` - Default is 6 minutes.

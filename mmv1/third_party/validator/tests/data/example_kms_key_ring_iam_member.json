@@ -1,22 +1,17 @@
-[{
-	"name": "//cloudkms.googleapis.com/placeholder-BpLnfgDs",
-	"asset_type": "cloudkms.googleapis.com/KeyRing",
-	"ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-	"iam_policy": {
-		"bindings": [{
-			"role": "roles/cloudkms.admin",
-			"members": ["allAuthenticatedUsers"]
-		}]
-	}
-}, {
-	"name": "//cloudkms.googleapis.com/projects/{{.Provider.project}}/locations/global/keyRings/keyring-example",
-	"asset_type": "cloudkms.googleapis.com/KeyRing",
-	"ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-	"resource": {
-		"version": "v1",
-		"discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/cloudkms/v1/rest",
-		"discovery_name": "KeyRing",
-		"parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
-		"data": null
-	}
-}]
+[
+  {
+    "name": "//cloudkms.googleapis.com/projects/{{.Provider.project}}/locations/global/keyRings/keyring-example",
+    "asset_type": "cloudkms.googleapis.com/KeyRing",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/cloudkms.admin",
+          "members": [
+            "allAuthenticatedUsers"
+          ]
+        }
+      ]
+    }
+  }
+]

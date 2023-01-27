@@ -399,6 +399,10 @@ objects:
             name: 'userLabels'
             description: |
               User-provided labels, represented as a dictionary where each label is a single key value pair.
+          - !ruby/object:Api::Type::Boolean
+            name: 'deletionProtectionEnabled'
+            description: |
+              Configuration to protect against accidental instance deletion.
       - !ruby/object:Api::Type::String
         name: 'gceZone'
         output: true
@@ -726,6 +730,30 @@ objects:
             description: |
               The externally accessible port for the source database server.
               Defaults to 3306.
+          - !ruby/object:Api::Type::String
+            name: 'username'
+            description: |
+              The replication user account on the external server.
+          - !ruby/object:Api::Type::String
+            name: 'password'
+            description: |
+              The password for the replication user account.
+          - !ruby/object:Api::Type::String
+            name: 'dumpFilePath'
+            description: |
+              A file in the bucket that contains the data from the external server.
+          - !ruby/object:Api::Type::String
+            name: 'caCertificate'
+            description: |
+              The CA certificate on the external server. Include only if SSL/TLS is used on the external server.
+          - !ruby/object:Api::Type::String
+            name: 'clientCertificate'
+            description: |
+              The client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.
+          - !ruby/object:Api::Type::String
+            name: 'clientKey'
+            description: |
+              The private key file for the client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.
 
   # 'Operation' is not idempotent and will not be covered.
   # (it is used internally to assert the state of operations being performed)

@@ -56,10 +56,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           connection_profile_id: "my-profile"
       - !ruby/object:Provider::Terraform::Examples
-        name: "datastream_connection_profile_bigquery"
+        name: "datastream_connection_profile_bigquery_private_connection"
         primary_resource_id: "default"
         vars:
+          private_connection_id: "my-connection"
           connection_profile_id: "my-profile"
+          network_name: "my-network"
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_connection_profile_full"
         primary_resource_id: "default"
@@ -87,3 +89,104 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           private_connection_id: "my-connection"
           network_name: "my-network"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/private_connection.go.erb
+      post_create: templates/terraform/post_create/private_connection.go.erb
+      post_import: templates/terraform/post_import/private_connection.go.erb
+  Stream: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
+    import_format: ["projects/{{project}}/locations/{{location}}/streams/{{stream_id}}"]
+    properties:
+      destinationConfig.gcsDestinationConfig.fileRotationMb: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      destinationConfig.gcsDestinationConfig.fileRotationInterval: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      destinationConfig.destinationConnectionProfile: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: "projectNumberDiffSuppress"
+      sourceConfig.sourceConnectionProfile: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: "projectNumberDiffSuppress"
+      sourceConfig.mysqlSourceConfig.maxConcurrentCdcTasks: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(0)'
+    virtual_fields:
+      - !ruby/object:Api::Type::Enum
+        name: 'desired_state'
+        description: |
+          Desired state of the Stream. Set this field to `RUNNING` to start the stream, and `PAUSED` to pause the stream.
+        values:
+          - :NOT_STARTED
+          - :RUNNING
+          - :PAUSED
+        default_value: :NOT_STARTED
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: 'templates/terraform/constants/datastream_stream.go.erb'
+      post_create: 'templates/terraform/post_create/datastream_stream.go.erb'
+      post_import: 'templates/terraform/post_import/datastream_stream.go.erb'
+      pre_update: 'templates/terraform/pre_update/datastream_stream.go.erb'
+      post_update: 'templates/terraform/post_update/datastream_stream.go.erb'
+      encoder: 'templates/terraform/encoders/datastream_stream.go.erb'
+      resource_definition: 'templates/terraform/resource_definition/datastream_stream.go.erb'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_basic"
+        pull_external: true
+        primary_resource_id: "default"
+        skip_docs: true
+        # Random provider
+        skip_vcr: true
+        vars:
+          stream_id: "my-stream"
+          private_connection_id: "my-connection"
+          network_name: "my-network"
+          source_connection_profile_id: "source-profile"
+          database_instance_name: "my-instance"
+          deletion_protection: "true"
+          bucket_name: "my-bucket"
+          destination_connection_profile_id: "destination-profile"
+        test_vars_overrides:
+          deletion_protection: "false"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_full"
+        pull_external: true
+        primary_resource_id: "default"
+        # Random provider
+        skip_vcr: true
+        vars:
+          stream_id: "my-stream"
+          private_connection_id: "my-connection"
+          network_name: "my-network"
+          source_connection_profile_id: "source-profile"
+          database_instance_name: "my-instance"
+          deletion_protection: "true"
+          bucket_name: "my-bucket"
+          destination_connection_profile_id: "destination-profile"
+          stream_cmek: "kms-name"
+        test_vars_overrides:
+          deletion_protection: "false"
+          stream_cmek: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_bigquery"
+        pull_external: true
+        primary_resource_id: "default"
+        # Random provider
+        skip_vcr: true
+        vars:
+          stream_id: "my-stream"
+          private_connection_id: "my-connection"
+          network_name: "my-network"
+          source_connection_profile_id: "source-profile"
+          database_instance_name: "my-instance"
+          deletion_protection: "true"
+          destination_connection_profile_id: "destination-profile"
+          bigquery_destination_table_kms_key_name: "bigquery-kms-name"
+        test_vars_overrides:
+          deletion_protection: "false"
+          bigquery_destination_table_kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+  <%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

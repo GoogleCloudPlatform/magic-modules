@@ -1,6 +1,5 @@
 ---
 subcategory: "Runtime Configurator"
-page_title: "Google: google_runtimeconfig_config"
 description: |-
   Get information about a Google Cloud RuntimeConfig.
 ---
@@ -37,4 +36,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_runtimeconfig_config](https://www.terraform.io/docs/providers/google/r/runtimeconfig_config.html#argument-reference) resource for details of the available attributes.
+See [google_runtimeconfig_config](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/runtimeconfig_config#argument-reference) resource for details of the available attributes.

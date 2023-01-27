@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Key Management Service"
-page_title: "Google: google_kms_secret_ciphertext"
 description: |-
   Encrypts secret data with Google Cloud KMS and provides access to the ciphertext
 ---
@@ -101,4 +100,4 @@ The following attribute is exported:
 
 ## User Project Overrides
 
-This data source supports [User Project Overrides](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#user_project_override).
+This data source supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).

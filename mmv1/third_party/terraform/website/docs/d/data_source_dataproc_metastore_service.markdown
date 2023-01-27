@@ -1,6 +1,5 @@
 ---
 subcategory: "Dataproc"
-page_title: "Google: google_dataproc_metastore_service"
 description: |-
   Get a Dataproc Metastore Service from Google Cloud
 ---
@@ -32,4 +31,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_dataproc_metastore_service](https://www.terraform.io/docs/providers/google/r/dataproc_metastore_service.html) resource for details of all the available attributes.
+See [google_dataproc_metastore_service](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dataproc_metastore_service) resource for details of all the available attributes.

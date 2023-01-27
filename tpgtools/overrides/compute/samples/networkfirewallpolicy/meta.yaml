@@ -1,0 +1,14 @@
+# meta.yaml
+# this is a shared config file that all the tests merge with
+#
+doc_hide_conditional:
+  - location: global
+    file_name: regional.tf.tmpl
+  - location: region
+    file_name: global.tf.tmpl
+
+test_hide_conditional:
+  - location: global
+    file_name: regional.tf.tmpl
+  - location: region
+    file_name: global.tf.tmpl

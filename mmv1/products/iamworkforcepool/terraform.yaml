@@ -1,0 +1,99 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+legacy_name: iam
+overrides: !ruby/object:Overrides::ResourceOverrides
+  WorkforcePool: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      note: |
+        Ask your Google Cloud account team to request access to workforce identity federation for
+        your billing/quota project. The account team notifies you when the project is granted access.
+    autogen_async: true
+    import_format: [ "locations/{{location}}/workforcePools/{{workforce_pool_id}}" ]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_basic"
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+        test_env_vars:
+          org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_full"
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+        test_env_vars:
+          org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/iam_workforce_pool.go.erb
+      decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/iam_workforce_pool.go.erb
+    properties:
+      workforcePoolId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateWorkforcePoolId'
+  WorkforcePoolProvider: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      note: |
+        Ask your Google Cloud account team to request access to workforce identity federation for your
+        billing/quota project. The account team notifies you when the project is granted access.
+    autogen_async: true
+    import_format: ["locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_provider_saml_basic"
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+          provider_id: "example-prvdr"
+        test_env_vars:
+          org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_provider_saml_full"
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+          provider_id: "example-prvdr"
+        test_env_vars:
+          org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_provider_oidc_basic"
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+          provider_id: "example-prvdr"
+        test_env_vars:
+          org_id: :ORG_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workforce_pool_provider_oidc_full"
+        primary_resource_id: "example"
+        vars:
+          workforce_pool_id: "example-pool"
+          provider_id: "example-prvdr"
+        test_env_vars:
+          org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/iam_workforce_pool_provider.go.erb
+      decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
+    properties:
+      providerId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateWorkforcePoolProviderId'
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+  <%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

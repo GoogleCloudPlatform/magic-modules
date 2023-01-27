@@ -145,10 +145,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       consumerAcceptList: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: "projectListDiffSuppress"
       ipRange: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_instance.go.erb
+      constants: templates/terraform/constants/apigee_instance.go.erb
   Environment: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["{{org_id}}/environments/{{name}}", "{{org_id}}/{{name}}"]
@@ -325,6 +327,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       delete_minutes: 30
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_nat_address.go.erb
+  SyncAuthorization: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "organizations/{{name}}/syncAuthorization"
+    import_format: ["organizations/{{name}}/syncAuthorization"]
+    skip_delete: true
+    examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_sync_authorization_basic_test"
+      primary_resource_id: "apigee_sync_authorization"
+      vars:
+        account_id: "my-account"
+        project_id: "my-project"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
