@@ -363,7 +363,8 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 	if d.Get(RuntimeConfigCustomEndpointEntryKey) == "" {
 		d.Set(RuntimeConfigCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_RUNTIMECONFIG_CUSTOM_ENDPOINT",
-	}, DefaultBasePaths[RuntimeConfigBasePathKey]))
+		}, DefaultBasePaths[RuntimeConfigBasePathKey]))
+	}
 	<% end -%>
 
 	if d.Get(IAMCustomEndpointEntryKey) == "" {
