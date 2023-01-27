@@ -105,7 +105,7 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 
 	testDataSinkName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
-	testSourceAgentPoolName := randString(t, 10)
+	testSourceAgentPoolName := fmt.Sprintf("tf-test-source-agent-pool-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -129,7 +129,7 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 
 	testDataSourceName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
-	testSinkAgentPoolName := randString(t, 10)
+	testSinkAgentPoolName := fmt.Sprintf("tf-test-sink-agent-pool-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
