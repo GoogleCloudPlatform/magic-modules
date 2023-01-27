@@ -344,15 +344,6 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 		}
 	}
 
-	if data.OrgPolicyCustomEndpoint.IsNull() {
-		customEndpoint := MultiEnvDefault([]string{
-			"GOOGLE_ORG_POLICY_CUSTOM_ENDPOINT",
-		}, "")
-		if customEndpoint != nil {
-			data.OrgPolicyCustomEndpoint = types.StringValue(customEndpoint.(string))
-		}
-	}
-
 	if data.RecaptchaEnterpriseCustomEndpoint.IsNull() {
 		customEndpoint := MultiEnvDefault([]string{
 			"GOOGLE_RECAPTCHA_ENTERPRISE_CUSTOM_ENDPOINT",
