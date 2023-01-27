@@ -94,6 +94,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           connection_id: "my-connection"
           database: "projects/project/instances/instance/databases/database"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_connection_cloudspanner_analytics"
+        pull_external: true
+        skip_docs: true
+        primary_resource_id: "connection"
+        vars:
+          connection_id: "my-connection"
+          database: "projects/project/instances/instance/databases/database"          
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
