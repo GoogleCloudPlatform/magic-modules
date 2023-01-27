@@ -38,11 +38,12 @@ objects:
       api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
-      parent_resource_attribute: 'name'
+      parent_resource_attribute: 'namespace_id'
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
       set_iam_policy_verb: :POST
-      import_format: ["project/{{project}}/location/{{location}}/namespace/{{name}}"]
+      base_url: "projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}"
+      import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}"]
     min_version: beta
     description: |
       A container for `services`. Namespaces allow administrators to group services
