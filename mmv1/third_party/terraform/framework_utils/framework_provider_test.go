@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/hashicorp/terraform-plugin-mux/tf6to5server"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,6 +16,8 @@ import (
 
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -133,20 +132,9 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 func MuxedProviders(testName string) (func() tfprotov5.ProviderServer, error) {
 	ctx := context.Background()
 
-	// plugin framework provider
-	downgradedFrameworkProvider, err := tf6to5server.DowngradeServer(
-		context.Background(),
-		providerserver.NewProtocol6(&NewFrameworkTestProvider(testName).ProdProvider),
-	)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
 	providers := []func() tfprotov5.ProviderServer{
-		func() tfprotov5.ProviderServer {
-			return downgradedFrameworkProvider // framework provider
-		},
-		Provider().GRPCProvider, // sdk provider
+		providerserver.NewProtocol5(New("test")), // framework provider
+		Provider().GRPCProvider,                  // sdk provider
 	}
 
 	muxServer, err := tf5muxserver.NewMuxServer(ctx, providers...)
