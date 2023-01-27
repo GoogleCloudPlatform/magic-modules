@@ -1,0 +1,66 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ['projects/{{project}}/locations/{{region}}/instances/{{instance_id}}', '{{region}}/{{instance_id}}']
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_database_instance_basic"
+        min_version: "beta"
+        primary_resource_id: "basic"
+        vars:
+          instance_id: "active-db"
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_database_instance_full"
+        min_version: "beta"
+        primary_resource_id: "full"
+        vars:
+          instance_id: "disabled-db"
+        test_env_vars:
+          project_id: :PROJECT_NAME
+        ignore_read_extra:
+          - "desired_state"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_database_instance_default_database"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          project_id: "rtdb-project"
+        test_env_vars:
+          org_id: :ORG_ID
+    virtual_fields:
+      - !ruby/object:Api::Type::Enum
+        name: desired_state
+        description: The intended database state.
+        values:
+          - :ACTIVE
+          - :DISABLED
+        default_value: :ACTIVE
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: 'templates/terraform/constants/firebase_database_instance.go.erb'
+      decoder: templates/terraform/decoders/firebase_database_instance.go.erb
+      post_create: templates/terraform/post_create/firebase_database_instance.go.erb
+      pre_update: templates/terraform/pre_update/firebase_database_instance.go.erb
+      pre_delete: templates/terraform/pre_delete/firebase_database_instance.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/firebase_database_instance.go.erb
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

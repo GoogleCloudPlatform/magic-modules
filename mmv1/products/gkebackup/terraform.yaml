@@ -19,8 +19,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "gkebackup_backupplan_basic"
-        min_version: beta
         primary_resource_id: "basic"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-basic-plan%s\", context[\"random_suffix\"])"
         vars:
           name: "basic-plan"
           cluster_name: "basic-cluster"
@@ -28,14 +28,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "gkebackup_backupplan_autopilot"
-        min_version: beta
         primary_resource_id: "autopilot"
         vars:
           name: "autopilot-plan"
           cluster_name: "autopilot-cluster"
       - !ruby/object:Provider::Terraform::Examples
         name: "gkebackup_backupplan_cmek"
-        min_version: beta
         primary_resource_id: "cmek"
         vars:
           name: "cmek-plan"
@@ -45,7 +43,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "gkebackup_backupplan_full"
-        min_version: beta
         primary_resource_id: "full"
         vars:
           name: "full-plan"

@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_security_policy"
 description: |-
   Creates a Security Policy resource for Google Compute Engine.
 ---
@@ -259,14 +258,19 @@ The following arguments are supported:
 
 <a name="nested_rate_limit_options"></a>The `rate_limit_options` block supports:
 
+* `conform_action` - (Required) Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.
+
+* `exceed_action` - (Required) When a request is denied, returns the HTTP response code specified.
+    Valid options are "deny()" where valid values for status are 403, 404, 429, and 502.
+
+* `rate_limit_threshold` - (Required) Threshold at which to begin ratelimiting. Structure is [documented below](#nested_threshold).
+
 * `ban_duration_sec` - (Optional) Can only be specified if the `action` for the rule is "rate_based_ban".
     If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.
 
 * `ban_threshold` - (Optional) Can only be specified if the `action` for the rule is "rate_based_ban".
     If specified, the key will be banned for the configured 'ban_duration_sec' when the number of requests that exceed the 'rate_limit_threshold' also
     exceed this 'ban_threshold'. Structure is [documented below](#nested_threshold).
-
-* `conform_action` - (Optional) Action to take for requests that are under the configured rate limit threshold. Valid option is "allow" only.
 
 * `enforce_on_key` - (Optional) Determines the key to enforce the rate_limit_threshold on. If not specified, defaults to "ALL".
 
@@ -278,18 +282,13 @@ The following arguments are supported:
 
 * `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
 
-* `exceed_action` - (Optional) When a request is denied, returns the HTTP response code specified.
-    Valid options are "deny()" where valid values for status are 403, 404, 429, and 502.
-  
 * `exceed_redirect_options` - (Optional) Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect. Structure is [documented below](#nested_exceed_redirect_options).
-
-* `rate_limit_threshold` - (Optional) Threshold at which to begin ratelimiting. Structure is [documented below](#nested_threshold).
 
 <a name="nested_threshold"></a>The `{ban/rate_limit}_threshold` block supports:
 
-* `count` - (Optional) Number of HTTP(S) requests for calculating the threshold.
+* `count` - (Required) Number of HTTP(S) requests for calculating the threshold.
 
-* `interval_sec` - (Optional) Interval over which the threshold is computed.
+* `interval_sec` - (Required) Interval over which the threshold is computed.
 
 * <a  name="nested_exceed_redirect_options"></a>The `exceed_redirect_options` block supports:
 
@@ -320,11 +319,23 @@ The following arguments are supported:
 
 * `layer_7_ddos_defense_config` - (Optional) Configuration for [Google Cloud Armor Adaptive Protection Layer 7 DDoS Defense](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_layer_7_ddos_defense_config).
 
+* `auto_deploy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Automatically deploy Adaptive Protection suggested rules](https://cloud.google.com/armor/docs/adaptive-protection-auto-deploy?hl=en). Structure is [documented below](#nested_auto_deploy_config).
+
 <a name="nested_layer_7_ddos_defense_config"></a>The `layer_7_ddos_defense_config` block supports:
 
 * `enable` - (Optional) If set to true, enables CAAP for L7 DDoS detection.
 
 * `rule_visibility` - (Optional) Rule visibility can be one of the following: STANDARD - opaque rules. (default) PREMIUM - transparent rules.
+
+<a name="nested_auto_deploy_config"></a>The `auto_deploy_config` block supports:
+
+* `load_threshold` - (Optional) Identifies new attackers only when the load to the backend service that is under attack exceeds this threshold.
+
+* `confidence_threshold` - (Optional) Rules are only automatically deployed for alerts on potential attacks with confidence scores greater than this threshold.
+
+* `impacted_baseline_threshold` - (Optional) Rules are only automatically deployed when the estimated impact to baseline traffic from the suggested mitigation is below this threshold.
+
+* `expiration_sec` - (Optional) Google Cloud Armor stops applying the action in the automatically deployed rule to an identified attacker after this duration. The rule continues to operate against new requests.
 
 <a name="nested_recaptcha_options_config"></a>The `recaptcha_options_config` block supports:
 

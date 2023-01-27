@@ -411,7 +411,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       iap.oauth2ClientSecretSha256: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
+        name: 'generated_id'
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       logConfig.sampleRate: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -425,6 +425,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       securityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      edgeSecurityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -1371,8 +1373,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       guestOsFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         is_set: true
-      imageEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
+      imageEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      imageEncryptionKey.sha256: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      imageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.erb'
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: 'kmsKeySelfLink'
+        description: |
+          The self link of the encryption key that is stored in Google Cloud
+          KMS.
       licenses: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       rawDisk.sha1Checksum: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1767,6 +1778,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           group_name: "soletenant-group"
           template_name: "soletenant-tmpl"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_group_share_settings"
+        primary_resource_id: "nodes"
+        vars:
+          group_name: "soletenant-group"
+          template_name: "soletenant-tmpl"
+          guest_project_id: "project-id"
+          guest_project_name: "project-name"
+        test_env_vars:
+          org_id: :ORG_ID
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -1786,6 +1807,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       autoscalingPolicy.minNodes: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       autoscalingPolicy.maxNodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      shareSettings: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/pre_create/compute_node_group_url_replace.go.erb
@@ -2674,8 +2697,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       tcpTransitoryIdleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      tcpTimeWaitTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       enableDynamicPortAllocation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        send_empty_value: true
       rules: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: computeRouterNatRulesHash
@@ -2723,6 +2749,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "router_peer_bfd"
         primary_resource_id: "peer"
         skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_router_appliance"
+        primary_resource_id: "peer"
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"
@@ -3116,6 +3148,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
+      privateIpGoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       privateIpv6GoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride

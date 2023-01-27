@@ -182,6 +182,14 @@ func TestAccComputeRouterNat_withPortAllocationMethods(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
+      {
+				Config: testAccComputeRouterNatWithAllocationMethod(routerName, false, true),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			{
 				Config: testAccComputeRouterNatWithAllocationMethod(routerName, true, false),
 			},
@@ -592,6 +600,7 @@ resource "google_compute_router_nat" "foobar" {
   icmp_idle_timeout_sec            = 60
   tcp_established_idle_timeout_sec = 1600
   tcp_transitory_idle_timeout_sec  = 60
+  tcp_time_wait_timeout_sec        = 60
 
   log_config {
     enable = true
@@ -643,6 +652,7 @@ resource "google_compute_router_nat" "foobar" {
   icmp_idle_timeout_sec            = 60
   tcp_established_idle_timeout_sec = 1600
   tcp_transitory_idle_timeout_sec  = 60
+  tcp_time_wait_timeout_sec        = 60
 
   log_config {
     enable = true
@@ -694,6 +704,7 @@ resource "google_compute_router_nat" "foobar" {
   icmp_idle_timeout_sec            = 60
   tcp_established_idle_timeout_sec = 1600
   tcp_transitory_idle_timeout_sec  = 60
+  tcp_time_wait_timeout_sec        = 60
 
   log_config {
     enable = true

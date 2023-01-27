@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_instance_template"
 description: |-
   Manages a VM instance template resource within GCE.
 ---
@@ -253,7 +252,7 @@ resource "google_compute_instance_template" "instance_template" {
 
   // boot disk
   disk {
-    source_image = google_compute_image.my_image.self_link
+    source_image = data.google_compute_image.my_image.self_link
   }
 }
 ```
@@ -382,7 +381,23 @@ The following arguments are supported:
     `projects/{project}/global/images/family/{family}`, `global/images/{image}`,
     `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
     `{project}/{image}`, `{family}`, or `{image}`.
-~> **Note:** Either `source` or `source_image` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
+~> **Note:** Either `source`, `source_image`, or `source_snapshot` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
+
+* `source_image_encryption_key` - (Optional) The customer-supplied encryption
+    key of the source image. Required if the source image is protected by a
+    customer-supplied encryption key.
+
+    Instance templates do not store customer-supplied encryption keys, so you
+    cannot create disks for instances in a managed instance group if the source
+    images are encrypted with your own keys. Structure
+    [documented below](#nested_source_image_encryption_key).
+
+* `source_snapshot` - (Optional) The source snapshot to create this disk.
+~> **Note:** Either `source`, `source_image`, or `source_snapshot` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
+
+* `source_snapshot_encryption_key` - (Optional) The customer-supplied encryption
+    key of the source snapshot. Structure
+    [documented below](#nested_source_snapshot_encryption_key).
 
 * `interface` - (Optional) Specifies the disk interface to use for attaching this disk,
     which is either SCSI or NVME. The default is SCSI. Persistent disks must always use SCSI
@@ -395,7 +410,7 @@ The following arguments are supported:
 
 * `source` - (Optional) The name (**not self_link**)
     of the disk (such as those managed by `google_compute_disk`) to attach.
-~> **Note:** Either `source` or `source_image` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
+~> **Note:** Either `source`, `source_image`, or `source_snapshot` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
 
 * `disk_type` - (Optional) The GCE disk type. Such as `"pd-ssd"`, `"local-ssd"`,
     `"pd-balanced"` or `"pd-standard"`.
@@ -418,11 +433,29 @@ The following arguments are supported:
 
     If you do not provide an encryption key, then the disk will be encrypted using an automatically generated key and you do not need to provide a key to use the disk later.
 
-    Instance templates do not store customer-supplied encryption keys, so you cannot use your own keys to encrypt disks in a managed instance group.
+    Instance templates do not store customer-supplied encryption keys, so you cannot use your own keys to encrypt disks in a managed instance group. Structure [documented below](#nested_access_config).
 
 * `resource_policies` (Optional) -- A list (short name or id) of resource policies to attach to this disk for automatic snapshot creations. Currently a max of 1 resource policy is supported.
 
-The `disk_encryption_key` block supports:
+<a name="nested_source_image_encryption_key"></a>The `source_image_encryption_key` block supports:
+
+* `kms_key_service_account` - (Optional) The service account being used for the
+    encryption request for the given KMS key. If absent, the Compute Engine
+    default service account is used.
+
+* `kms_key_self_link` - (Required) The self link of the encryption key that is
+    stored in Google Cloud KMS.
+
+<a name="nested_source_snapshot_encryption_key"></a>The `source_snapshot_encryption_key` block supports:
+
+* `kms_key_service_account` - (Optional) The service account being used for the
+    encryption request for the given KMS key. If absent, the Compute Engine
+    default service account is used.
+
+* `kms_key_self_link` - (Required) The self link of the encryption key that is
+    stored in Google Cloud KMS.
+
+<a name="nested_disk_encryption_key"></a>The `disk_encryption_key` block supports:
 
 * `kms_key_self_link` - (Required) The self link of the encryption key that is stored in Google Cloud KMS
 
@@ -528,6 +561,20 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
     
 * `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
+
+* `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
+    
+<a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
+
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+	resolution. Durations less than one second are represented with a 0
+	`seconds` field and a positive `nanos` field. Must be from 0 to
+	 999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
+   315,576,000,000 inclusive. Note: these bounds are computed from: 60
+   sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
     
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
@@ -600,7 +647,7 @@ exported:
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 4 minutes.
 - `delete` - Default is 4 minutes.

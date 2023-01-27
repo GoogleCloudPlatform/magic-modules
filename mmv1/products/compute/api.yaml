@@ -1435,7 +1435,7 @@ objects:
            For internal load balancing, a URL to a HealthCheck resource must be specified instead.
       - !ruby/object:Api::Type::Integer
         name: 'id'
-        description: 'The unique identifier for the resource.'
+        description: 'The unique identifier for the resource. This identifier is defined by the server.'
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'iap'
@@ -1807,6 +1807,10 @@ objects:
         name: 'securityPolicy'
         description: |
           The security policy associated with this backend service.
+      - !ruby/object:Api::Type::String
+        name: 'edgeSecurityPolicy'
+        description: |
+          The resource URL for the edge security policy associated with this backend service.
       - !ruby/object:Api::Type::NestedObject
         name: 'securitySettings'
         description: |
@@ -3742,9 +3746,6 @@ objects:
           traffic that has destination IP address in these ranges. These ranges
           must be expressed in CIDR format. Only IPv4 is supported.
         item_type: Api::Type::String
-        conflicts:
-          - source_ranges
-          - source_tags
       - !ruby/object:Api::Type::Enum
         name: 'direction'
         description: |
@@ -3840,8 +3841,6 @@ objects:
           connection does not need to match both properties for the firewall to
           apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
           `source_tags` or `source_service_accounts` is required.
-        conflicts:
-          - destination_ranges
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3879,7 +3878,6 @@ objects:
         item_type: Api::Type::String
         conflicts:
           - source_service_accounts
-          - destination_ranges
           - target_service_accounts
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
@@ -6264,9 +6262,14 @@ objects:
           - !ruby/object:Api::Type::String
             # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
             name: 'kmsKeyName'
-            min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account being used for the encryption request for the
+              given KMS key. If absent, the Compute Engine default service
+              account is used.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: Labels to apply to this Image.
@@ -8903,6 +8906,35 @@ objects:
               Maximum size of the node group. Set to a value less than or equal
               to 100 and greater than or equal to min-nodes.
             required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'shareSettings'
+        description: |
+          Share settings for the node group.
+        properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'shareType'
+          required: true
+          description: |
+            Node group sharing type.
+          values:
+          - :ORGANIZATION
+          - :SPECIFIC_PROJECTS
+          - :LOCAL
+        - !ruby/object:Api::Type::Map
+          name: 'projectMap'
+          description: |
+            A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
+          key_name: id
+          key_description: |
+            The project ID.
+          value_type: !ruby/object:Api::Type::NestedObject
+            name: projectConfig
+            properties:
+            - !ruby/object:Api::Type::String
+              name: 'projectId'
+              required: true
+              description: |
+                The project id/number should be the same as the key of this project config in the project map.
   - !ruby/object:Api::Resource
     name: 'NetworkPeeringRoutesConfig'
     base_url:  'projects/{{project}}/global/networks/{{network}}'
@@ -14102,6 +14134,12 @@ objects:
           Timeout (in seconds) for TCP transitory connections.
           Defaults to 30s if not set.
         default_value: 30
+      - !ruby/object:Api::Type::Integer
+        name: tcpTimeWaitTimeoutSec
+        description: |
+          Timeout (in seconds) for TCP connections that are in TIME_WAIT state.
+          Defaults to 120s if not set.
+        default_value: 120
       - !ruby/object:Api::Type::NestedObject
         name: logConfig
         description: |
@@ -14401,6 +14439,15 @@ objects:
           If set to true, the peer connection can be established with routing information.
           The default is true.
         default_value: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'routerApplianceInstance'
+        resource: 'Instance'
+        imports: 'selfLink'
+        description: |
+          The URI of the VM instance that is used as third-party router appliances
+          such as Next Gen Firewalls, Virtual Routers, or Router Appliances.
+          The VM instance must be located in zones contained in the same region as
+          this Cloud Router. The VM instance is the peer side of the BGP session.
   - !ruby/object:Api::Resource
     name: 'SecurityPolicy'
     kind: 'compute#securityPolicy'
@@ -14569,8 +14616,19 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotEncryptionKey'
         description: |
-          The customer-supplied encryption key of the snapshot. Required if the
-          source snapshot is protected by a customer-supplied encryption key.
+          Encrypts the snapshot using a customer-supplied encryption key.
+
+          After you encrypt a snapshot using a customer-supplied key, you must
+          provide the same key if you use the snapshot later. For example, you
+          must provide the encryption key when you create a disk from the
+          encrypted snapshot in a future request.
+
+          Customer-supplied encryption keys do not protect access to metadata of
+          the snapshot.
+
+          If you do not provide an encryption key when creating the snapshot,
+          then the snapshot will be encrypted using an automatically generated
+          key and you do not need to provide a key to use the snapshot later.
         properties:
           - !ruby/object:Api::Type::String
             name: 'rawKey'
@@ -14750,6 +14808,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'expireTime'
+        output: true
+        description: 'Expire time of the certificate in RFC3339 text format.'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -14863,7 +14925,7 @@ objects:
       - !ruby/object:Api::Type::Time
         name: 'expireTime'
         description: |
-          Expire time of the certificate.
+          Expire time of the certificate in RFC3339 text format.
         output: true
   - !ruby/object:Api::Resource
     name: 'RegionSslCertificate'
@@ -14922,6 +14984,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'expireTime'
+        output: true
+        description: 'Expire time of the certificate in RFC3339 text format.'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -15802,6 +15868,9 @@ objects:
           If not specified IPV4_ONLY will be used.
       - !ruby/object:Api::Type::Enum
         name: 'ipv6AccessType'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        fingerprint_name: 'fingerprint'
         values:
           - :EXTERNAL
           - :INTERNAL

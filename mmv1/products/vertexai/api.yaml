@@ -481,9 +481,29 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'fixedNodeCount'
-            required: true
+            exactly_one_of:
+              - online_serving_config.0.fixed_node_count
+              - online_serving_config.0.scaling
             description: |
               The number of nodes for each cluster. The number of nodes will not scale automatically but can be scaled manually by providing different values when updating.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scaling'
+            exactly_one_of:
+              - online_serving_config.0.fixed_node_count
+              - online_serving_config.0.scaling
+            description: |
+              Online serving scaling configuration. Only one of fixedNodeCount and scaling can be set. Setting one will reset the other.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'minNodeCount'
+                required: true
+                description: |
+                  The minimum number of nodes to scale down to. Must be greater than or equal to 1.
+              - !ruby/object:Api::Type::Integer
+                name: 'maxNodeCount'
+                required: true
+                description: |
+                  The maximum number of nodes to scale up to. Must be greater than minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
       - !ruby/object:Api::Type::NestedObject
         name: 'encryptionSpec'
         description: |
@@ -724,6 +744,7 @@ objects:
         description: |
           Type of Feature value. Immutable. https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features#ValueType
         required: true
+        input: true
 # Vertex ML Metadata
   - !ruby/object:Api::Resource
     name: MetadataStore

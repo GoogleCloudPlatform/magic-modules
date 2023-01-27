@@ -15,6 +15,10 @@
 legacy_name: iam
 overrides: !ruby/object:Overrides::ResourceOverrides
   WorkforcePool: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      note: |
+        Ask your Google Cloud account team to request access to workforce identity federation for
+        your billing/quota project. The account team notifies you when the project is granted access.
     autogen_async: true
     import_format: [ "locations/{{location}}/workforcePools/{{workforce_pool_id}}" ]
     examples:
@@ -41,6 +45,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateWorkforcePoolId'
   WorkforcePoolProvider: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      note: |
+        Ask your Google Cloud account team to request access to workforce identity federation for your
+        billing/quota project. The account team notifies you when the project is granted access.
     autogen_async: true
     import_format: ["locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}"]
     examples:

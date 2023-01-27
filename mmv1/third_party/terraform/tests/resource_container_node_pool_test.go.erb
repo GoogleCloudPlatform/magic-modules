@@ -3,9 +3,7 @@ package google
 
 import (
 	"fmt"
-<% unless version.nil? || version == 'ga' -%>
 	"regexp"
-<% end -%>
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -392,7 +390,6 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 	t.Parallel()
 
@@ -484,7 +481,6 @@ func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 	t.Parallel()
@@ -1343,7 +1339,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_compactPlacement(t *testing.T) {
 	t.Parallel()
 
@@ -1390,7 +1385,6 @@ resource "google_container_node_pool" "np" {
 }
 `, cluster, np, placementType)
 }
-<% end -%>
 
 func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -1888,12 +1882,6 @@ resource "google_container_node_pool" "np_with_node_config" {
     ]
     preemptible      = true
     min_cpu_platform = "Intel Broadwell"
-	
-    tags = ["ga"]
-
-	resource_labels = {
-      "key1" = "value"
-    }
 
     taint {
       key    = "taint_key"
@@ -1909,6 +1897,16 @@ resource "google_container_node_pool" "np_with_node_config" {
 
     // Updatable fields
     image_type = "COS_CONTAINERD"
+
+    tags = ["foo"]
+
+    labels = {
+      "test.terraform.io/key1" = "foo"
+    }
+
+    resource_labels = {
+      "key1" = "foo"
+    }
   }
 }
 `, cluster, nodePool)
@@ -1939,13 +1937,6 @@ resource "google_container_node_pool" "np_with_node_config" {
     preemptible      = true
     min_cpu_platform = "Intel Broadwell"
 
-    tags = ["beta"]
-
-	resource_labels = {
-      "key1" = "value1"
-	  "key2" = "value2"
-    }
-
     taint {
       key    = "taint_key"
       value  = "taint_value"
@@ -1960,6 +1951,18 @@ resource "google_container_node_pool" "np_with_node_config" {
 
     // Updatable fields
     image_type = "UBUNTU_CONTAINERD"
+
+    tags = ["bar", "foobar"]
+
+    labels = {
+      "test.terraform.io/key1" = "bar"
+      "test.terraform.io/key2" = "foo"
+    }
+
+    resource_labels = {
+      "key1" = "bar"
+      "key2" = "foo"
+    }
   }
 }
 `, cluster, nodePool)
@@ -2219,7 +2222,6 @@ resource "google_container_node_pool" "with_sandbox_config" {
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, period string, quota bool) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -2297,7 +2299,6 @@ resource "google_container_node_pool" "with_linux_node_config" {
 }
 `, cluster, np, maxBacklog, soMaxConn, tcpMem, tcpMem, twReuse)
 }
-<% end -%>
 
 
 func testAccContainerNodePool_withNetworkConfig(cluster, np, network string) string {

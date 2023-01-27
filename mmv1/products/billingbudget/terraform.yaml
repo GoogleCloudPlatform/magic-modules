@@ -104,6 +104,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
          - "budgetFilter.customPeriod"
          - "budgetFilter.services"
          - "budgetFilter.creditTypesTreatment"   
+         - "budgetFilter.creditTypes"
+         - "budgetFilter.subaccounts"
       budgetFilter.services: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       budgetFilter.subaccounts: !ruby/object:Overrides::Terraform::PropertyOverride

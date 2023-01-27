@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://gkebackup.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://gkebackup.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 async: !ruby/object:Api::OpAsync
@@ -43,7 +46,6 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/gkebackup.googleapis.com
 objects:
   - !ruby/object:Api::Resource
-    min_version: beta
     name: 'BackupPlan'
     base_url: "projects/{{project}}/locations/{{location}}/backupPlans"
     create_url: projects/{{project}}/locations/{{location}}/backupPlans?backupPlanId={{name}}
@@ -56,6 +58,11 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke'
       api: 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.backupPlans'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_attribute: 'name'
+      base_url: projects/{{project}}/locations/{{location}}/backupPlans/{{name}}
+      import_format: ["projects/{{project}}/locations/{{location}}/backupPlans/{{name}}", "{{name}}"]
     parameters:
       - !ruby/object:Api::Type::String
         name: 'location'
