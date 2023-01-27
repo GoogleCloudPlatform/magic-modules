@@ -1,5 +1,4 @@
 {
-  "location": "{{region}}",
   "name": "{{connection}}",
   "githubEnterpriseConfig": {
     "hostUri": "https://ghe.proctor-staging-test.com",
@@ -8,5 +7,7 @@
     "appId":516,
     "appSlug":"myapp",
     "appInstallationId": 243
-  }
+  },
+  "project": "{{project}}",
+  "location": "{{region}}"
 }

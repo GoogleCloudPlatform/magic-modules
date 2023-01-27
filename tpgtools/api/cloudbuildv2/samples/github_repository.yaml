@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC. All Rights Reserved.
+# Copyright 2023 Google LLC. All Rights Reserved.
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ versions:
 - beta
 resource: samples/github.repository.json
 dependencies:
-- samples/github.connection.json
+- samples/github_update.connection.json
 variables:
 - name: connection
   type: resource_name

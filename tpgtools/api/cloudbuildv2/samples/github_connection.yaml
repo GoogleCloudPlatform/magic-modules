@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC. All Rights Reserved.
+# Copyright 2023 Google LLC. All Rights Reserved.
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@ description: Creates and updates a GitHub connection.
 type: connection
 versions:
 - beta
-resource: samples/github.connection.json
+resource: samples/github_initial.connection.json
+updates:
+- resource: samples/github_update.connection.json
+  dependencies: []
 variables:
 - name: connection
   type: resource_name

@@ -11,14 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: ghe_repository
-description: Creates a GitHub repository.
-type: repository
+name: ghe_complete_connection
+description: Creates a GitHub Enterprise connection.
+type: connection
 versions:
 - beta
-resource: samples/ghe.repository.json
-dependencies:
-- samples/ghe_complete.connection.json
+resource: samples/ghe_complete.connection.json
 variables:
 - name: connection
   type: resource_name
@@ -26,5 +24,3 @@ variables:
   type: project
 - name: region
   type: region
-- name: repository
-  type: resource_name

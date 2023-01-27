@@ -1,6 +1,7 @@
 {
+  "project": "{{project}}",
   "location": "{{region}}",
-  "connection": "{{ref:github.connection.json:name}}",
+  "connection": "{{ref:github_update.connection.json:name}}",
   "name": "{{repository}}",
   "remoteUri": "https://github.com/gcb-repos-robot/tf-demo.git"
 }

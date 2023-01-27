@@ -1,5 +1,4 @@
 {
-  "location": "{{region}}",
   "name": "{{connection}}",
   "githubConfig": {
     "appInstallationId": 31300675,
@@ -7,6 +6,11 @@
       "oauthTokenSecretVersion": "projects/gcb-terraform-creds/secrets/github-pat/versions/latest"
     }
   },
-  "annotations": {"somekey": "somevalue"},
+  "project": "{{project}}",
+  "location": "{{region}}",
+  "annotations": {
+    "somekey": "somevalue",
+    "otherkey": "othervalue"
+  },
   "disabled": false
 }
