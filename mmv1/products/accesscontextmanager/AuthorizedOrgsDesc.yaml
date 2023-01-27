@@ -39,7 +39,6 @@
   examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "access_context_manager_authorized_orgs_desc_basic"
-      skip_test: true
       primary_resource_id: "authorized-orgs-desc"
   # Skipping the sweeper due to the non-standard base_url
   skip_sweeper: true
