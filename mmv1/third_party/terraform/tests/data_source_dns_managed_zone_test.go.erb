@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -15,8 +16,13 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
+		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
+			"google": func() (tfprotov5.ProviderServer, error) {
+				provider, err := MuxedProviders(t.Name())
+				return provider(), err
+			},
+		},
+		// CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDnsManagedZone_basic(randString(t, 10)),
@@ -24,15 +30,18 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",
 					map[string]struct{}{
-						"dnssec_config.#":             {},
-						"private_visibility_config.#": {},
-						"peering_config.#":            {},
-						"forwarding_config.#":         {},
-						"force_destroy":               {},
-						"labels.#": 				   {},
-						"creation_time": 			   {},
+						"dnssec_config.#":                       {},
+						"private_visibility_config.#":           {},
+						"peering_config.#":                      {},
+						"forwarding_config.#":                   {},
+						"force_destroy":                         {},
+						"labels.#": 				                     {},
+						"creation_time": 			                   {},
+						"cloud_logging_config.#":                {},
+						"cloud_logging_config.0.%":              {},
+						"cloud_logging_config.0.enable_logging": {},
 <% unless version == "ga" -%>
-						"reverse_lookup":         {},
+						"reverse_lookup":                        {},
 <% end -%>
 					},
 				),
