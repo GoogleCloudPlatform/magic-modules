@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud SQL"
-page_title: "Google: google_sql_database_instance"
 description: |-
   Creates a new SQL database instance in Google Cloud SQL.
 ---
@@ -196,7 +195,7 @@ includes an up-to-date reference of supported versions.
 * `replica_configuration` - (Optional) The configuration for replication. The
     configuration is detailed below. Valid only for MySQL instances.
 
-* `root_password` - (Optional) Initial root password. Required for MS SQL Server.
+* `root_password` - (Optional) Initial root password. Can be updated. Required for MS SQL Server.
 
 * `encryption_key_name` - (Optional)
     The full path to the encryption key used for the CMEK disk encryption.  Setting
@@ -242,7 +241,7 @@ The `settings` block supports:
 
 * `connector_enforcement` - (Optional) Specifies if connections must use Cloud SQL connectors.
 
-* `deletion_protection_enabled` - (Optional) Enables protection of an instance from accidental deletion protection across all surfaces (API, gcloud, Cloud Console and Terraform). Defaults to `false`.
+* `deletion_protection_enabled` - (Optional) Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform). Defaults to `false`.
 
 * `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
 

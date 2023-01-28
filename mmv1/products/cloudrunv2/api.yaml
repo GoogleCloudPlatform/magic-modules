@@ -977,12 +977,9 @@ objects:
                     - !ruby/object:Api::Type::NestedObject
                         name: "httpGet"
                         description: |-
-                          HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
+                          HTTPGet specifies the http request to perform.
                         send_empty_value: true
                         allow_empty_object: true
-                        # exactly_one_of:
-                        #   - template.0.containers.0.livenessProbe.0.httpGet
-                        #   - template.0.containers.0.livenessProbe.0.tcpSocket
                         properties:
                           - !ruby/object:Api::Type::String
                             name: "path"
@@ -1009,12 +1006,10 @@ objects:
                     - !ruby/object:Api::Type::NestedObject
                         name: "tcpSocket"
                         description: |-
-                          TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
+                          TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
+                        deprecation_message: Cloud Run does not support tcp socket in liveness probe and `liveness_probe.tcp_socket` field will be removed in a future major release.
                         send_empty_value: true
                         allow_empty_object: true
-                        # exactly_one_of:
-                        #   - template.0.containers.0.livenessProbe.0.httpGet
-                        #   - template.0.containers.0.livenessProbe.0.tcpSocket
                         properties:
                           - !ruby/object:Api::Type::Integer
                             name: port
