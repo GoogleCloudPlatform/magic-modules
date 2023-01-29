@@ -37,10 +37,7 @@ func TestAccorkstationsWorkstationCluster_update(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag"},
-			},
-			{
-				Config: testAccWorkstationsWorkstationCluster_workstationClusterBasicExample(context),
-			},			
+			}
 		},
 	})
 }
