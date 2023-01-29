@@ -114,7 +114,7 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: "reconciling"
         description: |
-          Whether this resource is in degraded mode, in which case it may require user action to restore full functionality. 
+          Indicates whether this resource is currently being updated to match its intended state. 
           Details can be found in the conditions field.
       - !ruby/object:Api::Type::KeyValuePairs
         name: "annotations"
