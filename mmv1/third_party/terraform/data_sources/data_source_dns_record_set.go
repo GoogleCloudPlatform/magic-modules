@@ -99,7 +99,7 @@ func (d *GoogleDnsRecordSetDataSource) Configure(ctx context.Context, req dataso
 
 func (d *GoogleDnsRecordSetDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleDnsRecordSetModel
-	var metaData ProviderMetaModel
+	var metaData *ProviderMetaModel
 	var diags diag.Diagnostics
 
 	// Read Provider meta into the meta model
