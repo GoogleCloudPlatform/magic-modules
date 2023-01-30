@@ -154,14 +154,17 @@ func getTestAccFrameworkProviders(testName string, c resource.TestCase) map[stri
 
 	var testProvider string
 	providerMapKeys := reflect.ValueOf(c.ProtoV5ProviderFactories).MapKeys()
-	if strings.Contains(providerMapKeys[0].String(), "google-beta") {
-		testProvider = "google-beta"
-	} else {
-		testProvider = "google"
+	if len(providerMapKeys) > 0. {
+		if strings.Contains(providerMapKeys[0].String(), "google-beta") {
+			testProvider = "google-beta"
+		} else {
+			testProvider = "google"
+		}
+		return map[string]func() (tfprotov5.ProviderServer, error){
+			testProvider: myFunc,
+		}
 	}
-	return map[string]func() (tfprotov5.ProviderServer, error){
-		testProvider: myFunc,
-	}
+	return map[string]func() (tfprotov5.ProviderServer, error){}
 }
 
 func getTestFwProvider(t *testing.T) *frameworkTestProvider {
