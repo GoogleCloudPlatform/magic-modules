@@ -54,6 +54,9 @@ type ProviderModel struct {
 	EventarcCustomEndpoint             types.String `tfsdk:"eventarc_custom_endpoint"`
 	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
 	NetworkConnectivityCustomEndpoint  types.String `tfsdk:"network_connectivity_custom_endpoint"`
+<% if version == "ga" -%>
+	OrgPolicyCustomEndpoint            types.String `tfsdk:"org_policy_custom_endpoint"`
+<% end -%>
 	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
 }
 
