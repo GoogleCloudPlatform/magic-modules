@@ -50,8 +50,8 @@ func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 	return res["email"].(string)
 }
 
-func generateFrameworkUserAgentString(metaData ProviderMetaModel, currUserAgent string) string {
-	if !metaData.ModuleName.IsNull() && metaData.ModuleName.ValueString() != "" {
+func generateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent string) string {
+	if metaData != nil && !metaData.ModuleName.IsNull() && metaData.ModuleName.ValueString() != "" {
 		return strings.Join([]string{currUserAgent, metaData.ModuleName.ValueString()}, " ")
 	}
 
