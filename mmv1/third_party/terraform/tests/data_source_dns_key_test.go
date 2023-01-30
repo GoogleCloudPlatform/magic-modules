@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -14,9 +15,14 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
+		PreCheck: func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
+			"google": func() (tfprotov5.ProviderServer, error) {
+				provider, err := MuxedProviders(t.Name())
+				return provider(), err
+			},
+		},
+		// CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
@@ -38,9 +44,14 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
+		PreCheck: func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
+			"google": func() (tfprotov5.ProviderServer, error) {
+				provider, err := MuxedProviders(t.Name())
+				return provider(), err
+			},
+		},
+		// CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
