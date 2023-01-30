@@ -17,7 +17,7 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
-			"google<%= "-" + version unless version == 'ga'  -%>": func() (tfprotov5.ProviderServer, error) {
+			"google": func() (tfprotov5.ProviderServer, error) {
 				provider, err := MuxedProviders(t.Name())
 				return provider(), err
 			},
