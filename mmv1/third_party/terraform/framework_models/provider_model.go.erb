@@ -58,6 +58,10 @@ type ProviderModel struct {
 	OrgPolicyCustomEndpoint            types.String `tfsdk:"org_policy_custom_endpoint"`
 <% end -%>
 	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
+<% unless version == "ga" -%>
+	GkehubFeatureCustomEndpoint        types.String `tfsdk:"gkehub_feature_custom_endpoint"`
+	Cloudbuildv2CustomEndpoint         types.String `tfsdk:"cloudbuildv2_custom_endpoint"`
+<% end -%>
 }
 
 type ProviderBatching struct {
