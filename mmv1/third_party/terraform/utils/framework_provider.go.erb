@@ -62,7 +62,7 @@ type frameworkProvider struct{
 
 // Metadata returns the provider type name.
 func (p *frameworkProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
-    resp.TypeName = "google<%= "-" + version unless version == 'ga'  -%>"
+    resp.TypeName = "google"
     resp.Version = p.version
 }
 
@@ -179,7 +179,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 },
             },
             <% unless version == "ga" -%>
-            "runtimecconfig_custom_endpoint": &schema.StringAttribute{
+            "runtimeconfig_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
                     CustomEndpointValidator(),
