@@ -45,20 +45,20 @@ func TestAccorkstationsWorkstationCluster_update(t *testing.T) {
 func testAccorkstationsWorkstationCluster_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_workstations_workstation_cluster" "default" {
-  provider   			 = google-beta
-  workstation_cluster_id = "workstation-cluster-%{random_suffix}"
+  provider   		      	 = google-beta
+  workstation_cluster_id = "tf-test-workstation-cluster%{random_suffix}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location   		     = "us-central1"
+  location   		        = "us-central1"
 
   labels = {
-	update = "true" 
+	  update = "true"
   }
 }
 
 resource "google_compute_network" "default" {
   provider                = google-beta
-  name                    = "network-%{random_suffix}"
+  name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
 }
 
@@ -68,10 +68,10 @@ data "google_project" "project" {
 
 resource "google_compute_subnetwork" "default" {
   provider      = google-beta
-  name          = "subnetwork-%{random_suffix}"
+  name          = "tf-test-workstation-cluster%{random_suffix}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
-  network       = google_compute_network.default.id
+  network       = google_compute_network.default.name
 }
 `, context)
 }
