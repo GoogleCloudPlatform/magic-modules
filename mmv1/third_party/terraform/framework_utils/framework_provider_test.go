@@ -17,7 +17,10 @@ import (
 
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -127,6 +130,20 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 	}
 }
 
+func configureApiClient(ctx context.Context, p *frameworkTestProvider, diags *diag.Diagnostics) {
+	var data ProviderModel
+	var d diag.Diagnostics
+
+	// Set defaults if needed - the only attribute without a default is ImpersonateServiceAccountDelegates
+	// this is a bit of a hack, but we'll just initialize it here so that it's been initialized at least
+	data.ImpersonateServiceAccountDelegates, d = types.ListValue(types.StringType, []attr.Value{})
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	p.ProdProvider.ConfigureWithData(ctx, data, "test", diags)
+}
+
 func getTestAccFrameworkProviders(testName string, c resource.TestCase) map[string]func() (tfprotov5.ProviderServer, error) {
 	myFunc := func() (tfprotov5.ProviderServer, error) {
 		prov, err := MuxedProviders(testName)
@@ -156,13 +173,22 @@ func getTestFwProvider(t *testing.T) *frameworkTestProvider {
 		return fwProvider
 	}
 
-	return NewFrameworkTestProvider(t.Name())
+	var diags diag.Diagnostics
+	p := NewFrameworkTestProvider(t.Name())
+	configureApiClient(context.Background(), p, &diags)
+	if diags.HasError() {
+		log.Fatalf("%d errors when configuring test provider client: first is %s", diags.ErrorsCount(), diags.Errors()[0].Detail())
+	}
+
+	return p
 }
 
 func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 	t.Parallel()
 
 	moduleName := "my-module"
+	managedZoneName := fmt.Sprintf("tf-test-zone-%s", randString(t, 10))
+
 	vcrTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
@@ -171,10 +197,10 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 				return provider(), err
 			},
 		},
-		//CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+		// CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, randString(t, 10), randString(t, 10)),
+				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, randString(t, 10)),
 			},
 		},
 	})
