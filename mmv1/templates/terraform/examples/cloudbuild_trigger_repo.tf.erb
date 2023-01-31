@@ -1,0 +1,33 @@
+resource "google_cloudbuildv2_connection" "my-connection" {
+  provider = google-beta
+  location = "us-central1"
+  name = "my-connection"
+
+  github_config {
+    app_installation_id = <%= ctx[:vars]['installation_id'] %>
+    authorizer_credential {
+      oauth_token_secret_version = "<%= ctx[:vars]['pat_secret'] %>"
+    }
+  }
+}
+
+resource "google_cloudbuildv2_repository" "my-repository" {
+  provider = google-beta
+  name = "my-repo"
+  parent_connection = google_cloudbuildv2_connection.my-connection.id
+  remote_uri = "<%= ctx[:vars]['repo_uri'] %>"
+}
+
+resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  location = "us-central1"
+
+  repository_event_config {
+    repository = google_cloudbuildv2_repository.my-repository.id
+    push {
+      branch = "feature-.*"
+    }
+  }
+
+  filename = "cloudbuild.yaml"
+}
