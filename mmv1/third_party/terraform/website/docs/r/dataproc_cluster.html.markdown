@@ -1,6 +1,5 @@
 ---
 subcategory: "Dataproc"
-page_title: "Google: google_dataproc_cluster"
 description: |-
   Manages a Cloud Dataproc cluster resource.
 ---
@@ -371,6 +370,9 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
 * `endpoint_config` (Optional) The config settings for port access on the cluster.
    Structure [defined below](#nested_endpoint_config).
+
+* `dataproc_metric_config` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
+   Structure [defined below](#nested_dataproc_metric_config).
 
 * `metastore_config` (Optional) The config setting for metastore service with the cluster.
    Structure [defined below](#nested_metastore_config).
@@ -792,6 +794,26 @@ cluster_config {
 
 - - -
 
+<a name="nested_dataproc_metric_config"></a>The `dataproc_metric_config` block supports:
+
+```hcl
+dataproc_metric_config {
+      metrics {
+        metric_source = "HDFS"
+        metric_overrides = ["yarn:ResourceManager:QueueMetrics:AppsCompleted"]
+      }
+    }
+```
+
+
+* `metrics` - (Required) Metrics sources to enable.
+
+  * `metric_source` - (Required) A source for the collection of Dataproc OSS metrics (see [available OSS metrics](https://cloud.google.com//dataproc/docs/guides/monitoring#available_oss_metrics)).
+
+  * `metric_overrides` - (Optional) One or more [available OSS metrics] (https://cloud.google.com/dataproc/docs/guides/monitoring#available_oss_metrics) to collect for the metric course.
+
+- - -
+
 <a name="nested_lifecycle_config"></a>The `lifecycle_config` block supports:
 
 ```hcl
@@ -876,7 +898,7 @@ This resource does not support import.
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 45 minutes.
 - `update` - Default is 45 minutes.

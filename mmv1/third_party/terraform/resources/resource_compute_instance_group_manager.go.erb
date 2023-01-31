@@ -329,7 +329,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"stateful_internal_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				ForceNew:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -351,7 +350,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			"stateful_external_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				ForceNew:    true,
 				Description: `External IPs considered stateful by the instance group. `,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -1036,25 +1034,33 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 	preservedState.Disks = disks
 	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ip") {
-		internalIps := d.Get("stateful_internal_ip")
-		preservedState.InternalIPs = expandStatefulIps(internalIps.([]interface{}))
-		/*
-		The code below is used for deletion. To uncomment if the API supports "{}" for deletion.
-
-		if len(newInternalIps.([]interface{})) == 0 {
-			for _, raw := range oldInternalIps.([]interface{}) {
-				data := raw.(map[string]interface{})
-				networkIp := data["interface_name"].(string)
-				if _, exist := preservedState.InternalIPs[networkIp]; !exist {
-					preservedState.InternalIPs[networkIp] = compute.StatefulPolicyPreservedStateNetworkIp{}
-				}
+		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
+		preservedState.InternalIPs = expandStatefulIps(newInternalIps.([]interface{}))
+		// Remove Internal Ips
+		for _, raw := range oldInternalIps.([]interface{}) {
+			data := raw.(map[string]interface{})
+			networkIp := data["interface_name"].(string)
+			if _, exist := preservedState.InternalIPs[networkIp]; !exist {
+				preservedState.NullFields = append(preservedState.NullFields, "InternalIPs." + networkIp)
 			}
-		} 
-		*/
+		}
+		preservedState.ForceSendFields = append(preservedState.ForceSendFields, "InternalIPs")
+		
+
 	}
 	if d.HasChange("stateful_external_ip") {
-		externalIps := d.Get("stateful_external_ip")
-		preservedState.ExternalIPs = expandStatefulIps(externalIps.([]interface{}))
+		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
+		preservedState.ExternalIPs = expandStatefulIps(newExternalIps.([]interface{}))
+		// Remove External Ips
+		for _, raw := range oldExternalIps.([]interface{}) {
+			data := raw.(map[string]interface{})
+			networkIp := data["interface_name"].(string)
+			if _, exist := preservedState.ExternalIPs[networkIp]; !exist {
+				preservedState.NullFields = append(preservedState.NullFields, "ExternalIPs." + networkIp)
+			}
+		}
+		preservedState.ForceSendFields = append(preservedState.ForceSendFields, "ExternalIPs")
+		
 	}
 
 	<% end -%>

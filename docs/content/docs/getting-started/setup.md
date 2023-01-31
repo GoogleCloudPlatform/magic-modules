@@ -19,7 +19,7 @@ git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPAT
 Or run the following to check them all out:
 
 ```bash
-./tools/bootstrap
+./scripts/bootstrap
 ```
 
 Magic Modules won't work with old versions of the Terraform provider repos. If
@@ -85,7 +85,7 @@ To get started, you'll need:
 Now, you can verify you're ready with:
 
 ```bash
-./tools/doctor
+make doctor
 ```
 
 <details><summary>Expected output:</summary>

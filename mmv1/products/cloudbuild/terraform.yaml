@@ -49,6 +49,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_manual"
         primary_resource_id: "manual-trigger"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_manual_github_enterprise"
+        primary_resource_id: "manual-ghe-trigger"
+        skip_test: true
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_repo"
+        min_version: beta
+        primary_resource_id: "repo-trigger"
+        vars:
+          installation_id: "123123"
+          pat_secret: "projects/my-project/secrets/github-pat-secret/versions/latest"
+          repo_uri: "https://github.com/myuser/my-repo.git"
+        test_vars_overrides:
+          installation_id: 31300675
+          pat_secret: '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
+          repo_uri: '"https://github.com/gcb-repos-robot/tf-demo.git"'
 
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride

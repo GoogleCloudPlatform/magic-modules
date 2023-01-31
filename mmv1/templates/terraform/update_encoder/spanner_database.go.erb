@@ -19,17 +19,19 @@ updateDdls := []string{}
 
 //Only new ddl statments to be add to update call
 for i := len(oldDdls); i < len(newDdls); i++ {
-    updateDdls = append(updateDdls, newDdls[i].(string))
+	if newDdls[i] != nil {
+		updateDdls = append(updateDdls, newDdls[i].(string))
+	}
 }
 
 //Add statement to update version_retention_period property, if needed
 if d.HasChange("version_retention_period") {
-    dbName := d.Get("name")
-    retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", dbName, obj["versionRetentionPeriod"])
-    if dialect, ok := d.GetOk("database_dialect"); ok && dialect == "POSTGRESQL" {
-        retentionDdl = fmt.Sprintf("ALTER DATABASE \"%s\" SET spanner.version_retention_period TO \"%s\"", dbName, obj["versionRetentionPeriod"])
-    }
-    updateDdls = append(updateDdls, retentionDdl)
+	dbName := d.Get("name")
+	retentionDdl := fmt.Sprintf("ALTER DATABASE `%s` SET OPTIONS (version_retention_period=\"%s\")", dbName, obj["versionRetentionPeriod"])
+	if dialect, ok := d.GetOk("database_dialect"); ok && dialect == "POSTGRESQL" {
+		retentionDdl = fmt.Sprintf("ALTER DATABASE \"%s\" SET spanner.version_retention_period TO \"%s\"", dbName, obj["versionRetentionPeriod"])
+	}
+	updateDdls = append(updateDdls, retentionDdl)
 }
 
 obj["statements"] = updateDdls

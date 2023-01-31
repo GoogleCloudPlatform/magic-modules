@@ -1,6 +1,5 @@
 ---
 subcategory: "BigQuery"
-page_title: "Google: google_bigquery_table"
 description: |-
   Creates a table resource in a dataset for Google BigQuery.
 ---
@@ -204,6 +203,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `source_uris` - (Required) A list of the fully-qualified URIs that point to
     your data in Google Cloud.
+
+* `reference_file_schema_uri` - (Optional) When creating an external table, the user can provide a reference file with the table schema. This is enabled for the following formats: AVRO, PARQUET, ORC.
 
 <a name="nested_csv_options"></a>The `csv_options` block supports:
 
