@@ -3,9 +3,7 @@ package google
 
 import (
     "context"
-    "fmt"
     "net/http"
-    "os"
     "time"
 
     "github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -252,49 +250,10 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
     }
 
     // Configuration values are now available.
-
-    // Set defaults if needed
-    p.HandleDefaults(ctx, &data, &resp.Diagnostics)
+    p.ConfigureWithData(ctx, data, req.TerraformVersion, &resp.Diagnostics)
     if resp.Diagnostics.HasError() {
         return
     }
-
-    
-    // Handle User Agent string
-    p.userAgent = CompileUserAgentString("terraform-provider-google<%= "-" + version unless version == 'ga'  -%>", req.TerraformVersion, p.version)
-    // opt in extension for adding to the User-Agent header
-    if ext := os.Getenv("GOOGLE_TERRAFORM_USERAGENT_EXTENSION"); ext != "" {
-        ua := p.userAgent
-        p.userAgent = fmt.Sprintf("%s %s", ua, ext)
-    }
-
-    // Set up client configuration
-    p.SetupClient(ctx, data, &resp.Diagnostics)
-    if resp.Diagnostics.HasError() {
-        return
-    }
-
-    // gRPC Logging setup
-    p.SetupGrpcLogging()
-
-    // Handle Batching Config
-    batchingConfig := GetBatchingConfig(ctx, data.Batching, &resp.Diagnostics)
-    if resp.Diagnostics.HasError() {
-        return
-    }
-
-    // Setup Base Paths for clients
-    // Generated products
-    <% products.map.each do |product| -%>
-    p.<%= product[:definitions].name -%>BasePath = data.<%= product[:definitions].name -%>CustomEndpoint.ValueString()
-    <% end -%>
-
-    p.context = ctx
-    p.region = data.Region.String()
-    p.pollInterval = 10 * time.Second
-    p.project = data.Project
-    p.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, batchingConfig)
-    p.requestBatcherIam = NewRequestBatcher("IAM", ctx, batchingConfig)
 
     // Example client configuration for data sources and resources
     resp.DataSourceData = p
