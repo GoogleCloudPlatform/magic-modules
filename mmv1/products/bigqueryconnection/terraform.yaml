@@ -26,6 +26,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       aws: !ruby/object:Overrides::Terraform::PropertyOverride
         update_mask_fields:
           - "aws.access_role.iam_role_id"
+      azure: !ruby/object:Overrides::Terraform::PropertyOverride
+        update_mask_fields:
+          - "azure.customer_tenant_id"
+          - "azure.federated_application_client_id"
     id_format: "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}"
     import_format: ["projects/{{project}}/locations/{{location}}/connections/{{connection_id}}", "{{project}}/{{location}}/{{connection_id}}", "{{location}}/{{connection_id}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -87,6 +91,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           connection_id: "my-connection"
           customer_tenant_id: "customer-tenant-id"
+          federated_application_client_id: "b43eeeee-eeee-eeee-eeee-a480155501ce"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_connection_cloudspanner"
         pull_external: true

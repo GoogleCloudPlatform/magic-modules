@@ -168,6 +168,9 @@ objects:
             description: The id of customer's directory that host the data.
             required: true
           - !ruby/object:Api::Type::String
+            name: 'federatedApplicationClientId'
+            description: The Azure Application (client) ID where the federated credentials will be hosted.
+          - !ruby/object:Api::Type::String
             name: 'redirectUri'
             output: true
             description: The URL user will be redirected to after granting consent during connection setup.
