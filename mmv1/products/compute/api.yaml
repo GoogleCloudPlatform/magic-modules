@@ -1526,6 +1526,103 @@ objects:
           Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
           by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
           field set to true.
+      - !ruby/object:Api::Type::Array
+        name: 'localityLbPolicies'
+        description: |
+          A list of locality load balancing policies to be used in order of
+          preference. Either the policy or the customPolicy field should be set.
+          Overrides any value set in the localityLbPolicy field.
+
+          localityLbPolicies is only supported when the BackendService is referenced
+          by a URL Map that is referenced by a target gRPC proxy that has the
+          validateForProxyless field set to true.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'localityLbPolicyConfig'
+          description: |
+            Container for either a built-in LB policy supported by gRPC or Envoy or
+            a custom one implemented by the end user.
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'policy'
+              exactly_one_of:
+                - policy
+                - customPolicy
+              description: |
+                The configuration for a built-in load balancing policy.
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'name'
+                  required: true
+                  values:
+                    - :ROUND_ROBIN
+                    - :LEAST_REQUEST
+                    - :RING_HASH
+                    - :RANDOM
+                    - :ORIGINAL_DESTINATION
+                    - :MAGLEV
+                  description: |
+                    The name of a locality load balancer policy to be used. The value
+                    should be one of the predefined ones as supported by localityLbPolicy,
+                    although at the moment only ROUND_ROBIN is supported.
+
+                    This field should only be populated when the customPolicy field is not
+                    used.
+
+                    Note that specifying the same policy more than once for a backend is
+                    not a valid configuration and will be rejected.
+
+                    The possible values are:
+
+                    * `ROUND_ROBIN`: This is a simple policy in which each healthy backend
+                                    is selected in round robin order.
+
+                    * `LEAST_REQUEST`: An O(1) algorithm which selects two random healthy
+                                      hosts and picks the host which has fewer active requests.
+
+                    * `RING_HASH`: The ring/modulo hash load balancer implements consistent
+                                  hashing to backends. The algorithm has the property that the
+                                  addition/removal of a host from a set of N hosts only affects
+                                  1/N of the requests.
+
+                    * `RANDOM`: The load balancer selects a random healthy host.
+
+                    * `ORIGINAL_DESTINATION`: Backend host is selected based on the client
+                                              connection metadata, i.e., connections are opened
+                                              to the same address as the destination address of
+                                              the incoming connection before the connection
+                                              was redirected to the load balancer.
+
+                    * `MAGLEV`: used as a drop in replacement for the ring hash load balancer.
+                                Maglev is not as stable as ring hash but has faster table lookup
+                                build times and host selection times. For more information about
+                                Maglev, refer to https://ai.google/research/pubs/pub44824
+            - !ruby/object:Api::Type::NestedObject
+              name: 'customPolicy'
+              exactly_one_of:
+                - policy
+                - customPolicy
+              description: |
+                The configuration for a custom policy implemented by the user and
+                deployed with the client.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  required: true
+                  description: |
+                    Identifies the custom policy.
+
+                    The value should match the type the custom implementation is registered
+                    with on the gRPC clients. It should follow protocol buffer
+                    message naming conventions and include the full path (e.g.
+                    myorg.CustomLbPolicy). The maximum length is 256 characters.
+
+                    Note that specifying the same custom policy more than once for a
+                    backend is not a valid configuration and will be rejected.
+                - !ruby/object:Api::Type::String
+                  name: 'data'
+                  description: |
+                    An optional, arbitrary JSON object with configuration data, understood
+                    by a locally installed custom policy implementation.          
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -14134,6 +14231,12 @@ objects:
           Timeout (in seconds) for TCP transitory connections.
           Defaults to 30s if not set.
         default_value: 30
+      - !ruby/object:Api::Type::Integer
+        name: tcpTimeWaitTimeoutSec
+        description: |
+          Timeout (in seconds) for TCP connections that are in TIME_WAIT state.
+          Defaults to 120s if not set.
+        default_value: 120
       - !ruby/object:Api::Type::NestedObject
         name: logConfig
         description: |

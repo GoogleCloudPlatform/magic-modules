@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Composer"
-page_title: "Google: google_composer_environment"
 description: |-
   An environment for running orchestration tasks.
 ---
@@ -376,7 +375,7 @@ The following arguments are supported:
   for any GCP resources created under the Cloud Composer Environment.
 
 * `tags` -
-  (Optional, Cloud Composer 1 only)
+  (Optional)
   The list of instance tags applied to all node VMs. Tags are
   used to identify valid sources or targets for network
   firewalls. Each tag within the list must comply with RFC1035.
@@ -1026,7 +1025,7 @@ In addition to the arguments listed above, the following computed attributes are
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 60 minutes.
 - `update` - Default is 60 minutes.
