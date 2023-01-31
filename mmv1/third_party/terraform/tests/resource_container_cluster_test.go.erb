@@ -3494,6 +3494,28 @@ func TestAccContainerCluster_withTPUConfig(t *testing.T) {
 }
 <% end -%>
 
+func TestAccContainerCluster_autopilot_minimal(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_autopilot_minimal(clusterName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportStateId:     fmt.Sprintf("us-central1-a/%s", clusterName),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccContainerCluster_masterAuthorizedNetworksDisabled(t *testing.T, resource_name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource_name]
@@ -7359,3 +7381,12 @@ func TestValidateNodePoolAutoConfig(t *testing.T) {
 	}
 }
 <% end -%>
+
+func testAccContainerCluster_autopilot_minimal(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name             = "%s"
+  location         = "us-central1-a"
+	enable_autopilot = true
+}`, name)
+}
