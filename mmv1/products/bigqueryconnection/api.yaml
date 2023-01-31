@@ -170,7 +170,6 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'federatedApplicationClientId'
             description: The Azure Application (client) ID where the federated credentials will be hosted.
-            required: false
           - !ruby/object:Api::Type::String
             name: 'redirectUri'
             output: true
