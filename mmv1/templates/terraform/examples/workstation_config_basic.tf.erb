@@ -35,7 +35,7 @@ resource "google_workstations_workstation_cluster" "<%= ctx[:primary_resource_id
 resource "google_workstations_workstation_config" "<%= ctx[:primary_resource_id] %>" {
   provider               = google-beta
   workstation_config_id  = "<%= ctx[:vars]['workstation_config_name'] %>"
-  cluster                = google_workstations_workstation_cluster.<%= ctx[:primary_resource_id] %>.name
+  workstation_cluster_id = google_workstations_workstation_cluster.<%= ctx[:primary_resource_id] %>.id
   machine_type           = "e2-standard-8"
 
   host {
