@@ -269,10 +269,6 @@ objects:
         name: "runningTimeout"
         description: |
           How long to wait before automatically stopping a workstation after it started. A value of 0 indicates that workstations using this config should never time out. Must be greater than 0 and less than 24 hours if encryptionKey is set. Defaults to 12 hours
-      - !ruby/object:Api::Type::String
-        name: "displayName"
-        description: |
-          Human-readable name for this resource.
       - !ruby/object:Api::Type::NestedObject
         name: 'host'
         description: |
