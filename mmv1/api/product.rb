@@ -62,7 +62,7 @@ module Api
       super
       set_variables @objects, :__product
       check :display_name, type: String
-      check :objects, type: Array, item_type: Api::Resource, required: true
+      check :objects, type: Array, item_type: Api::Resource
       check :scopes, type: Array, item_type: String, required: true
       check :apis_required, type: Array, item_type: Api::Product::ApiReference
       check :operation_retry, type: String

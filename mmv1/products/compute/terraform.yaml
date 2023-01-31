@@ -426,6 +426,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       securityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
+      edgeSecurityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1776,6 +1778,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           group_name: "soletenant-group"
           template_name: "soletenant-tmpl"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_group_share_settings"
+        primary_resource_id: "nodes"
+        vars:
+          group_name: "soletenant-group"
+          template_name: "soletenant-tmpl"
+          guest_project_id: "project-id"
+          guest_project_name: "project-name"
+        test_env_vars:
+          org_id: :ORG_ID
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -1795,6 +1807,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       autoscalingPolicy.minNodes: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       autoscalingPolicy.maxNodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      shareSettings: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/pre_create/compute_node_group_url_replace.go.erb
@@ -2683,6 +2697,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       tcpTransitoryIdleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      tcpTimeWaitTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       enableDynamicPortAllocation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         send_empty_value: true
@@ -2733,6 +2749,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "router_peer_bfd"
         primary_resource_id: "peer"
         skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_router_appliance"
+        primary_resource_id: "peer"
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"

@@ -20,11 +20,6 @@ versions:
 - beta
 - alpha
 resource: samples/fixed.os_policy_assignment.json
-updates:
-- resource: samples/update_fixed.os_policy_assignment.json
-  dependencies: []
-- resource: samples/percent.os_policy_assignment.json
-  dependencies: []
 variables:
 - name: assignment
   type: resource_name

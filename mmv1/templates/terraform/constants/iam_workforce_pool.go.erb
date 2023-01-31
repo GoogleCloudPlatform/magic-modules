@@ -11,9 +11,9 @@ func validateWorkforcePoolId(v interface{}, k string) (ws []string, errors []err
 
     if !regexp.MustCompile(workforcePoolIdRegexp).MatchString(value) {
         errors = append(errors, fmt.Errorf(
-            "Workforce Pool Id \"%q\" must contain only lowercase letters [a-z], digits [0-9], and hyphens " +
+            "%q (%q) must contain only lowercase letters [a-z], digits [0-9], and hyphens " +
             "[-]. The WorkforcePool ID must be between 6 and 63 characters, begin " +
-            "with a letter, and cannot have a trailing hyphen.", k))
+            "with a letter, and cannot have a trailing hyphen.", k, value))
     }
 
     return
