@@ -12,7 +12,7 @@ resource "google_iam_workforce_pool_provider" "<%= ctx[:primary_resource_id] %>"
     "google.subject" = "assertion.sub"
   }
   oidc {
-    issuer_uri       = "https://accounts.google.com"
+    issuer_uri       = "https://accounts.thirdparty.com"
     client_id        = "client-id"
   }
 }

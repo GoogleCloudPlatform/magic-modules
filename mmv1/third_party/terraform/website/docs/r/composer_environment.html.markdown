@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud Composer"
-page_title: "Google: google_composer_environment"
 description: |-
   An environment for running orchestration tasks.
 ---
@@ -281,6 +280,10 @@ The following arguments are supported:
   (Optional)
   The configuration used for the Kubernetes Engine cluster.  Structure is [documented below](#nested_node_config).
 
+* `recovery_config` -
+  (Optional, Cloud Composer 2 only)
+  The configuration settings for recovery. Structure is [documented below](#nested_recovery_config).
+
 * `software_config` -
   (Optional)
   The configuration settings for software inside the environment.  Structure is [documented below](#nested_software_config).
@@ -372,7 +375,7 @@ The following arguments are supported:
   for any GCP resources created under the Cloud Composer Environment.
 
 * `tags` -
-  (Optional, Cloud Composer 1 only)
+  (Optional)
   The list of instance tags applied to all node VMs. Tags are
   used to identify valid sources or targets for network
   firewalls. Each tag within the list must comply with RFC1035.
@@ -784,7 +787,16 @@ The `software_config` block supports:
   `composer-1.16.x` to `composer-1.17.x`, or from `airflow-2.1.x` to `airflow-2.2.x`. You cannot upgrade between
   major Cloud Composer or Apache Airflow versions (from `1.x.x` to `2.x.x`). To do so, create a new environment.
 
+* `cloud_data_lineage_integration` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
+  Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and newer)
+  The configuration for Cloud Data Lineage integration. Structure is
+  [documented below](#nested_cloud_data_lineage_integration).
 
+<a name="nested_cloud_data_lineage_integration"></a>The `cloud_data_lineage_integration` block supports:
+* `enabled` -
+  (Required)
+  Whether or not Cloud Data Lineage integration is enabled.
 
 See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. The `private_environment_config` block supports:
 
@@ -877,11 +889,39 @@ The `ip_allocation_policy` block supports:
   The only allowed values for 'FREQ' field are 'FREQ=DAILY' and 'FREQ=WEEKLY;BYDAY=...'.
   Example values: 'FREQ=WEEKLY;BYDAY=TU,WE', 'FREQ=DAILY'.
 
+The `recovery_config` block supports:
+
+* `scheduled_snapshots_config` -
+  (Optional)
+  The recovery configuration settings for the Cloud Composer environment.
+
+The `scheduled_snapshots_config` block supports:
+
+* `enabled` -
+  (Optional)
+  When enabled, Cloud Composer periodically saves snapshots of your environment to a Cloud Storage bucket.
+
+* `snapshot_location` -
+  (Optional)
+  The URI of a bucket folder where to save the snapshot.
+
+* `snapshot_creation_schedule` -
+  (Optional)
+  Snapshot schedule, in the unix-cron format.
+
+* `time_zone` -
+  (Optional)
+  A time zone for the schedule. This value is a time offset and does not take into account daylight saving time changes. Valid values are from UTC-12 to UTC+12. Examples: UTC, UTC-01, UTC+03.
+
 The `workloads_config` block supports:
 
 * `scheduler` -
   (Optional)
   Configuration for resources used by Airflow schedulers.
+
+* `triggerer` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  Configuration for resources used by Airflow triggerer.
 
 * `web_server` -
   (Optional)
@@ -908,6 +948,20 @@ The `scheduler` block supports:
 * `count` -
   (Optional)
   The number of schedulers.
+
+The `triggerer` block supports:
+
+* `cpu` -
+  (Required)
+  The number of CPUs for a single Airflow triggerer.
+
+* `memory_gb` -
+  (Required)
+  The amount of memory (GB) for a single Airflow triggerer.
+
+* `count` -
+  (Required)
+  The number of Airflow triggerers.
 
 The `web_server` block supports:
 
@@ -971,7 +1025,7 @@ In addition to the arguments listed above, the following computed attributes are
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 60 minutes.
 - `update` - Default is 60 minutes.

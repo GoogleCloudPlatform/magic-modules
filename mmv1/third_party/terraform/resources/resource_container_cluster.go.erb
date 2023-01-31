@@ -74,10 +74,10 @@ var (
 		"addons_config.0.dns_cache_config",
 		"addons_config.0.gce_persistent_disk_csi_driver_config",
 		"addons_config.0.gke_backup_agent_config",
+		"addons_config.0.config_connector_config",
 	<% unless version == 'ga' -%>
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
-		"addons_config.0.config_connector_config",
 		
 	<% end -%>
 	}
@@ -440,6 +440,7 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						<% end -%>
 						"config_connector_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -456,7 +457,6 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-					<% end -%>
 					},
 				},
 			},
@@ -2236,6 +2236,8 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
+	clusterName := d.Get("name").(string)
+
 	operation := d.Get("operation").(string)
 	if operation != "" {
 		log.Printf("[DEBUG] in progress operation detected at %v, attempting to resume", operation)
@@ -2247,11 +2249,29 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		}
 		waitErr := containerOperationWait(config, op, project, location, "resuming GKE cluster", userAgent, d.Timeout(schema.TimeoutRead))
 		if waitErr != nil {
+			// Try a GET on the cluster so we can see the state in debug logs. This will help classify error states.
+			clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(containerClusterFullName(project, location, clusterName))
+			if config.UserProjectOverride {
+				clusterGetCall.Header().Add("X-Goog-User-Project", project)
+			}
+			_, getErr := clusterGetCall.Do()
+			if getErr != nil {
+				log.Printf("[WARN] Cluster %s was created in an error state and not found", clusterName)
+				d.SetId("")
+			}
+
+			if deleteErr := cleanFailedContainerCluster(d, meta); deleteErr != nil {
+				log.Printf("[WARN] Unable to clean up cluster from failed creation: %s", deleteErr)
+				// Leave ID set as the cluster likely still exists and should not be removed from state yet.
+			} else {
+				log.Printf("[WARN] Verified failed creation of cluster %s was cleaned up", d.Id())
+				d.SetId("")
+			}
+			// The resource didn't actually create
 			return waitErr
 		}
 	}
 
-	clusterName := d.Get("name").(string)
 	name := containerClusterFullName(project, location, clusterName)
 	clusterGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Get(name)
 	if config.UserProjectOverride {
@@ -2631,7 +2651,27 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's enable private endpoint has been updated to %v", d.Id(), enabled)
 	}
 
-        if d.HasChange("binary_authorization") {
+	if d.HasChange("private_cluster_config") && d.HasChange("private_cluster_config.0.master_global_access_config") {
+		config := d.Get("private_cluster_config.0.master_global_access_config")
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredPrivateClusterConfig: &container.PrivateClusterConfig{
+					MasterGlobalAccessConfig: expandPrivateClusterConfigMasterGlobalAccessConfig(config),
+					ForceSendFields:          []string{"MasterGlobalAccessConfig"},
+				},
+			},
+		}
+
+		updateF := updateFunc(req, "updating master global access config")
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's master global access config has been updated to %v", d.Id(), config)
+	}
+
+    if d.HasChange("binary_authorization") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
 				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization"), d.Get("enable_binary_authorization").(bool)),
@@ -3826,6 +3866,13 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
+	if v, ok := config["config_connector_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.ConfigConnectorConfig = &container.ConfigConnectorConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
 
 <% unless version == 'ga' -%>
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
@@ -3840,13 +3887,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	if v, ok := config["kalm_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.KalmConfig = &container.KalmConfig{
-			Enabled:         addon["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
-		}
-	}
-	if v, ok := config["config_connector_config"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.ConfigConnectorConfig = &container.ConfigConnectorConfig{
 			Enabled:         addon["enabled"].(bool),
 			ForceSendFields: []string{"Enabled"},
 		}
@@ -4808,6 +4848,13 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			},
 		}
 	}
+	if c.ConfigConnectorConfig != nil {
+		result["config_connector_config"] = []map[string]interface{}{
+			{
+				"enabled": c.ConfigConnectorConfig.Enabled,
+			},
+		}
+	}
 
 <% unless version == 'ga' -%>
 	if c.IstioConfig != nil {
@@ -4823,13 +4870,6 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		result["kalm_config"] = []map[string]interface{}{
 			{
 				"enabled": c.KalmConfig.Enabled,
-			},
-		}
-	}
-	if c.ConfigConnectorConfig != nil {
-		result["config_connector_config"] = []map[string]interface{}{
-			{
-				"enabled": c.ConfigConnectorConfig.Enabled,
 			},
 		}
 	}

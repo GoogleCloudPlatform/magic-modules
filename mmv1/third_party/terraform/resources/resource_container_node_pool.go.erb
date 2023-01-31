@@ -173,7 +173,6 @@ var schemaNodePool = map[string]*schema.Schema{
 		},
 	},
 
-<% unless version == 'ga' -%>
 	"placement_policy": {
 		Type:        schema.TypeList,
 		Optional:    true,
@@ -190,7 +189,6 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
-<% end -%>
 
 	"max_pods_per_node": &schema.Schema{
 		Type:        schema.TypeInt,
@@ -852,14 +850,12 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 	}
 
- <% unless version == 'ga' -%>
 	if v, ok := d.GetOk(prefix + "placement_policy"); ok {
 		placement_policy := v.([]interface{})[0].(map[string]interface{})
 		np.PlacementPolicy = &container.PlacementPolicy{
 			Type: placement_policy["type"].(string),
 		}
 	}
-<% end -%>
 
 	if v, ok := d.GetOk(prefix + "max_pods_per_node"); ok {
 		np.MaxPodsConstraint = &container.MaxPodsConstraint{
@@ -1044,7 +1040,6 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *container.NodeP
 		}
 	}
 
-<% unless version == 'ga' -%>
 	if np.PlacementPolicy != nil {
 		nodePool["placement_policy"] = []map[string]interface{}{
 			{
@@ -1052,7 +1047,6 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *container.NodeP
 			},
 		}
 	}
-<% end -%>
 
 	if np.MaxPodsConstraint != nil {
 		nodePool["max_pods_per_node"] = np.MaxPodsConstraint.MaxPodsPerNode
@@ -1417,7 +1411,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			log.Printf("[INFO] Updated workload_metadata_config for node pool %s", name)
 		}
 
-<% unless version == 'ga' -%>
 		if d.HasChange(prefix + "node_config.0.kubelet_config") {
 			req := &container.UpdateNodePoolRequest{
 				NodePoolId: name,
@@ -1485,7 +1478,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			log.Printf("[INFO] Updated linux_node_config for node pool %s", name)
 		}
 
-<% end -%>
 	}
 
 	if d.HasChange(prefix + "node_count") {
