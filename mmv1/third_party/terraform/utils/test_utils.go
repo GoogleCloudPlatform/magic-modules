@@ -217,7 +217,7 @@ func protoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.Provide
 // Used to set ExternalProviders in a resource.TestStep within an acceptance test.
 func providerVersion450() map[string]resource.ExternalProvider {
 	return map[string]resource.ExternalProvider{
-		"random": {
+		"google": {
 			VersionConstraint: "4.50.0",
 			Source:            "hashicorp/google",
 		},
