@@ -660,29 +660,15 @@ objects:
         'Provisioning NAT IPs':
           'https://cloud.google.com/apigee/docs/api-platform/security/nat-provisioning'
       api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses'
+
+
+
   # - !ruby/object:Api::Resource
   #   name: 'SharedFlow'
   #   base_url: 'organizations/{{org_id}}/sharedflows/{{name}}'
   #   create_url: 'organizations/{{org_id}}/sharedflows?name={{name}}&action=import'
   #   delete_url: 'organizations/{{org_id}}/sharedflows/{{name}}'
   #   self_link: 'organizations/{{org_id}}/sharedflows/{{name}}'
-  #   async: !ruby/object:Api::OpAsync
-  #     operation: !ruby/object:Api::OpAsync::Operation
-  #       path: 'name'
-  #       base_url: '{{op_id}}'
-  #       wait_ms: 1000
-  #     result: !ruby/object:Api::OpAsync::Result
-  #       path: 'response'
-  #       resource_inside_response: true
-  #     status: !ruby/object:Api::OpAsync::Status
-  #       path: 'done'
-  #       complete: True
-  #       allowed:
-  #         - True
-  #         - False
-  #     error: !ruby/object:Api::OpAsync::Error
-  #       path: 'error'
-  #       message: 'message'
   #   input: true
   #   description: |
   #     You can combine policies and resources into a shared flow that you can consume from multiple API proxies, and even from other shared flows. Although it's like a proxy, a shared flow has no endpoint. It can be used only from an API proxy or shared flow that's in the same organization as the shared flow itself.
