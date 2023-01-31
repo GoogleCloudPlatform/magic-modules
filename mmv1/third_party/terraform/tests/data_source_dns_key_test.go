@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -15,17 +14,24 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
-			"google": func() (tfprotov5.ProviderServer, error) {
-				provider, err := MuxedProviders(t.Name())
-				return provider(), err
-			},
-		},
-		// CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
+				ExternalProviders: providerVersion450(),
+				Config:            testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
+				Check: resource.ComposeTestCheckFunc(
+
+					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
+					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "1"),
+					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "zone_signing_keys.#", "1"),
+					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.#", "1"),
+					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.#", "1"),
+				),
+			},
+			{
+				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				Config:                   testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "1"),
@@ -44,17 +50,20 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
-			"google": func() (tfprotov5.ProviderServer, error) {
-				provider, err := MuxedProviders(t.Name())
-				return provider(), err
-			},
-		},
-		// CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
+				ExternalProviders: providerVersion450(),
+				Config:            testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "0"),
+					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "zone_signing_keys.#", "0"),
+				),
+			},
+			{
+				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				Config:                   testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "0"),
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "zone_signing_keys.#", "0"),
