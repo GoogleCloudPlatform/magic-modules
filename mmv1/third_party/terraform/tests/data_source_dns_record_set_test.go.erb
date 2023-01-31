@@ -3,31 +3,38 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 	t.Parallel()
 
+	var ttl1, ttl2 string // ttl is a computed string-type attribute that is easy to compare in the test
+
 	vcrTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
-			"google": func() (tfprotov5.ProviderServer, error) {
-				provider, err := MuxedProviders(t.Name())
-				return provider(), err
-			},
-		},
 		// CheckDestroy: testAccCheckDnsRecordSetDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDnsRecordSet_basic(randString(t, 10), randString(t, 10)),
+				ExternalProviders: providerVersion450(),
+				Config:            testAccDataSourceDnsRecordSet_basic(randString(t, 10), randString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),
+					testExtractResourceAttr("data.google_dns_record_set.rs", "ttl", &ttl1),
+				),
+			},
+			{
+				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				Config:                   testAccDataSourceDnsRecordSet_basic(randString(t, 10), randString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					checkDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),
+					testExtractResourceAttr("data.google_dns_record_set.rs", "ttl", &ttl2),
+					testCheckAttributeValuesEqual(&ttl1, &ttl2),
 				),
 			},
 		},
@@ -37,7 +44,7 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 func testAccDataSourceDnsRecordSet_basic(zoneName, recordSetName string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "zone" {
-  name     = "test-zone"
+  name     = "tf-test-zone"
   dns_name = "%s.hashicorptest.com."
 }
 
