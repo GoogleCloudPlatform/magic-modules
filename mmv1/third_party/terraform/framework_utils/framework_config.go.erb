@@ -27,6 +27,132 @@ import (
 
 // Provider methods
 
+// ConfigureWithData handles the bulk of configuring the provider
+// it is pulled out so that we can manually call this from our testing provider as well
+func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data ProviderModel, tfVersion string, diags *diag.Diagnostics) {
+	// Set defaults if needed
+	p.HandleDefaults(ctx, &data, diags)
+	if diags.HasError() {
+		return
+	}
+
+	// Handle User Agent string
+	p.userAgent = CompileUserAgentString("terraform-provider-google<%= "-" + version unless version == 'ga'  -%>", tfVersion, p.version)
+	// opt in extension for adding to the User-Agent header
+	if ext := os.Getenv("GOOGLE_TERRAFORM_USERAGENT_EXTENSION"); ext != "" {
+		ua := p.userAgent
+		p.userAgent = fmt.Sprintf("%s %s", ua, ext)
+	}
+
+	// Set up client configuration
+	p.SetupClient(ctx, data, diags)
+	if diags.HasError() {
+		return
+	}
+
+	// gRPC Logging setup
+	p.SetupGrpcLogging()
+
+	// Handle Batching Config
+	batchingConfig := GetBatchingConfig(ctx, data.Batching, diags)
+	if diags.HasError() {
+		return
+	}
+
+	// Setup Base Paths for clients
+	// Generated products
+	p.AccessApprovalBasePath = data.AccessApprovalCustomEndpoint.ValueString()
+	p.AccessContextManagerBasePath = data.AccessContextManagerCustomEndpoint.ValueString()
+	p.ActiveDirectoryBasePath = data.ActiveDirectoryCustomEndpoint.ValueString()
+	p.ApigeeBasePath = data.ApigeeCustomEndpoint.ValueString()
+	p.AppEngineBasePath = data.AppEngineCustomEndpoint.ValueString()
+	p.ArtifactRegistryBasePath = data.ArtifactRegistryCustomEndpoint.ValueString()
+	p.BeyondcorpBasePath = data.BeyondcorpCustomEndpoint.ValueString()
+	p.BigQueryBasePath = data.BigQueryCustomEndpoint.ValueString()
+	p.BigqueryAnalyticsHubBasePath = data.BigqueryAnalyticsHubCustomEndpoint.ValueString()
+	p.BigqueryConnectionBasePath = data.BigqueryConnectionCustomEndpoint.ValueString()
+	p.BigqueryDataTransferBasePath = data.BigqueryDataTransferCustomEndpoint.ValueString()
+	p.BigqueryReservationBasePath = data.BigqueryReservationCustomEndpoint.ValueString()
+	p.BigtableBasePath = data.BigtableCustomEndpoint.ValueString()
+	p.BillingBasePath = data.BillingCustomEndpoint.ValueString()
+	p.BinaryAuthorizationBasePath = data.BinaryAuthorizationCustomEndpoint.ValueString()
+	p.CertificateManagerBasePath = data.CertificateManagerCustomEndpoint.ValueString()
+	p.CloudAssetBasePath = data.CloudAssetCustomEndpoint.ValueString()
+	p.CloudBuildBasePath = data.CloudBuildCustomEndpoint.ValueString()
+	p.CloudFunctionsBasePath = data.CloudFunctionsCustomEndpoint.ValueString()
+	p.Cloudfunctions2BasePath = data.Cloudfunctions2CustomEndpoint.ValueString()
+	p.CloudIdentityBasePath = data.CloudIdentityCustomEndpoint.ValueString()
+	p.CloudIdsBasePath = data.CloudIdsCustomEndpoint.ValueString()
+	p.CloudIotBasePath = data.CloudIotCustomEndpoint.ValueString()
+	p.CloudRunBasePath = data.CloudRunCustomEndpoint.ValueString()
+	p.CloudRunV2BasePath = data.CloudRunV2CustomEndpoint.ValueString()
+	p.CloudSchedulerBasePath = data.CloudSchedulerCustomEndpoint.ValueString()
+	p.CloudTasksBasePath = data.CloudTasksCustomEndpoint.ValueString()
+	p.ComputeBasePath = data.ComputeCustomEndpoint.ValueString()
+	p.ContainerAnalysisBasePath = data.ContainerAnalysisCustomEndpoint.ValueString()
+	p.ContainerAttachedBasePath = data.ContainerAttachedCustomEndpoint.ValueString()
+	p.DataCatalogBasePath = data.DataCatalogCustomEndpoint.ValueString()
+	p.DataFusionBasePath = data.DataFusionCustomEndpoint.ValueString()
+	p.DataLossPreventionBasePath = data.DataLossPreventionCustomEndpoint.ValueString()
+	p.DataprocBasePath = data.DataprocCustomEndpoint.ValueString()
+	p.DataprocMetastoreBasePath = data.DataprocMetastoreCustomEndpoint.ValueString()
+	p.DatastoreBasePath = data.DatastoreCustomEndpoint.ValueString()
+	p.DatastreamBasePath = data.DatastreamCustomEndpoint.ValueString()
+	p.DeploymentManagerBasePath = data.DeploymentManagerCustomEndpoint.ValueString()
+	p.DialogflowBasePath = data.DialogflowCustomEndpoint.ValueString()
+	p.DialogflowCXBasePath = data.DialogflowCXCustomEndpoint.ValueString()
+	p.DNSBasePath = data.DNSCustomEndpoint.ValueString()
+	p.DocumentAIBasePath = data.DocumentAICustomEndpoint.ValueString()
+	p.EssentialContactsBasePath = data.EssentialContactsCustomEndpoint.ValueString()
+	p.FilestoreBasePath = data.FilestoreCustomEndpoint.ValueString()
+	p.FirestoreBasePath = data.FirestoreCustomEndpoint.ValueString()
+	p.GameServicesBasePath = data.GameServicesCustomEndpoint.ValueString()
+	p.GKEBackupBasePath = data.GKEBackupCustomEndpoint.ValueString()
+	p.GKEHubBasePath = data.GKEHubCustomEndpoint.ValueString()
+	p.HealthcareBasePath = data.HealthcareCustomEndpoint.ValueString()
+	p.IAM2BasePath = data.IAM2CustomEndpoint.ValueString()
+	p.IAMBetaBasePath = data.IAMBetaCustomEndpoint.ValueString()
+	p.IAMWorkforcePoolBasePath = data.IAMWorkforcePoolCustomEndpoint.ValueString()
+	p.IapBasePath = data.IapCustomEndpoint.ValueString()
+	p.IdentityPlatformBasePath = data.IdentityPlatformCustomEndpoint.ValueString()
+	p.KMSBasePath = data.KMSCustomEndpoint.ValueString()
+	p.LoggingBasePath = data.LoggingCustomEndpoint.ValueString()
+	p.MemcacheBasePath = data.MemcacheCustomEndpoint.ValueString()
+	p.MLEngineBasePath = data.MLEngineCustomEndpoint.ValueString()
+	p.MonitoringBasePath = data.MonitoringCustomEndpoint.ValueString()
+	p.NetworkManagementBasePath = data.NetworkManagementCustomEndpoint.ValueString()
+	p.NetworkServicesBasePath = data.NetworkServicesCustomEndpoint.ValueString()
+	p.NotebooksBasePath = data.NotebooksCustomEndpoint.ValueString()
+	p.OSConfigBasePath = data.OSConfigCustomEndpoint.ValueString()
+	p.OSLoginBasePath = data.OSLoginCustomEndpoint.ValueString()
+	p.PrivatecaBasePath = data.PrivatecaCustomEndpoint.ValueString()
+	p.PubsubBasePath = data.PubsubCustomEndpoint.ValueString()
+	p.PubsubLiteBasePath = data.PubsubLiteCustomEndpoint.ValueString()
+	p.RedisBasePath = data.RedisCustomEndpoint.ValueString()
+	p.ResourceManagerBasePath = data.ResourceManagerCustomEndpoint.ValueString()
+	p.SecretManagerBasePath = data.SecretManagerCustomEndpoint.ValueString()
+	p.SecurityCenterBasePath = data.SecurityCenterCustomEndpoint.ValueString()
+	p.ServiceManagementBasePath = data.ServiceManagementCustomEndpoint.ValueString()
+	p.ServiceUsageBasePath = data.ServiceUsageCustomEndpoint.ValueString()
+	p.SourceRepoBasePath = data.SourceRepoCustomEndpoint.ValueString()
+	p.SpannerBasePath = data.SpannerCustomEndpoint.ValueString()
+	p.SQLBasePath = data.SQLCustomEndpoint.ValueString()
+	p.StorageBasePath = data.StorageCustomEndpoint.ValueString()
+	p.StorageTransferBasePath = data.StorageTransferCustomEndpoint.ValueString()
+	p.TagsBasePath = data.TagsCustomEndpoint.ValueString()
+	p.TPUBasePath = data.TPUCustomEndpoint.ValueString()
+	p.VertexAIBasePath = data.VertexAICustomEndpoint.ValueString()
+	p.VPCAccessBasePath = data.VPCAccessCustomEndpoint.ValueString()
+	p.WorkflowsBasePath = data.WorkflowsCustomEndpoint.ValueString()
+
+	p.context = ctx
+	p.region = data.Region.String()
+	p.pollInterval = 10 * time.Second
+	p.project = data.Project
+	p.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, batchingConfig)
+	p.requestBatcherIam = NewRequestBatcher("IAM", ctx, batchingConfig)
+}
+
 // HandleDefaults will handle all the defaults necessary in the provider
 func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderModel, diags *diag.Diagnostics) {
 	if data.AccessToken.IsNull() && data.Credentials.IsNull() {
