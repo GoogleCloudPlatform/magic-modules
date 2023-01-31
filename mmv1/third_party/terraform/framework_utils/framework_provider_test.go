@@ -18,9 +18,7 @@ import (
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -127,24 +125,6 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 	} else {
 		log.Print("[DEBUG] VCR_PATH or VCR_MODE not set, skipping VCR")
 	}
-}
-
-// General test utils
-func MuxedProviders(testName string) (func() tfprotov5.ProviderServer, error) {
-	ctx := context.Background()
-
-	providers := []func() tfprotov5.ProviderServer{
-		providerserver.NewProtocol5(New("test")), // framework provider
-		Provider().GRPCProvider,                  // sdk provider
-	}
-
-	muxServer, err := tf5muxserver.NewMuxServer(ctx, providers...)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return muxServer.ProviderServer, nil
 }
 
 func getTestAccFrameworkProviders(testName string, c resource.TestCase) map[string]func() (tfprotov5.ProviderServer, error) {
