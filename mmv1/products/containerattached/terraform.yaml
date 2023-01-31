@@ -1,0 +1,84 @@
+# Copyright 2022 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Cluster: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Don't generate the LRO handling code because it doesn't account for regional services.
+    autogen_async: false
+    id_format: "projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}"
+    import_format: ["projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "container_attached_cluster_basic"
+        primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
+        primary_resource_id: "primary"
+        vars:
+          name: "basic"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "container_attached_cluster_full"
+        primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
+        primary_resource_id: "primary"
+        vars:
+          name: "basic"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "container_attached_cluster_ignore_errors"
+        primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
+        primary_resource_id: "primary"
+        vars:
+          name: "basic"
+        ignore_read_extra:
+          - "deletion_policy"
+    properties:
+      # The proto format of the authorization field is cumbersome to express in TF, so use a custom expander
+      # and flattener to massage the data.
+      authorization: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_authorization_user.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/containerattached_cluster_authorization_user.go.erb'
+      fleet.project: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^projects/[0-9]+$'
+      # If the user doesn't specify a loggingConfig, the server will supply a default value. Instead of
+      # letting that happen and allowing the config and state to get mismatched, just manually send an
+      # empty object if the user doesn't set anything and require the user to explicitly set the field if a
+      # value is desired.
+      # If the loggingConfig passed to the server is empty, an empty object is returned, so the diff in that
+      # case needs to be ignored.
+      loggingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_empty_logging.go.erb'
+        diff_suppress_func: 'suppressAttachedClustersLoggingConfigDiff'
+      # If the user omits the monitoring config, the server will still respond with an empty config, which
+      # causes diff problems.
+      monitoringConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      # `name` is returned as the full resource name by the service, so undo those changes locally.
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/containerattached_cluster_diff.go
+      pre_update: templates/terraform/pre_update/containerattached_update.go.erb
+      pre_delete: templates/terraform/pre_delete/container_attached_deletion_policy.go.erb
+    virtual_fields:
+      - !ruby/object:Api::Type::Enum
+        name: 'deletion_policy'
+        description: 'Policy to determine what flags to send on delete.'
+        values:
+          - :DELETE
+          - :DELETE_IGNORE_ERRORS
+        default_value: :DELETE
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

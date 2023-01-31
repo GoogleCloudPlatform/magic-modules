@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud SQL"
-page_title: "Google: google_sql_user"
 description: |-
   Creates a new SQL user in Google Cloud SQL.
 ---
@@ -79,7 +78,8 @@ The following arguments are supported:
 
 * `password` - (Optional) The password for the user. Can be updated. For Postgres
     instances this is a Required field, unless type is set to either CLOUD_IAM_USER
-    or CLOUD_IAM_SERVICE_ACCOUNT.
+    or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
+    and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
 
 * `type` - (Optional) The user type. It determines the method to authenticate the
     user during login. The default is the database's built-in user type. Flags
@@ -94,7 +94,7 @@ The following arguments are supported:
 - - -
 
 * `host` - (Optional) The host the user can connect from. This is only supported
-    for MySQL instances. Don't set this field for PostgreSQL instances.
+    for BUILT_IN users in MySQL instances. Don't set this field for PostgreSQL and SQL Server instances.
     Can be an IP address. Changing this forces a new resource to be created.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
@@ -123,7 +123,7 @@ Only the arguments listed above are exposed as attributes.
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 10 minutes.
 - `update` - Default is 10 minutes.

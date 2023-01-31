@@ -224,7 +224,7 @@ func (fr FieldRule) IsRuleBreak(old, new *schema.Schema, mc MessageContext) stri
 		return ""
 	}
 	mc.identifier = fr.identifier
-	mc.message = fr.identifier
+	mc.message = fr.message
 	return fr.isRuleBreak(old, new, mc)
 }
 

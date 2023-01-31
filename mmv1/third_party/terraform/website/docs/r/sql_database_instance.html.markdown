@@ -1,6 +1,5 @@
 ---
 subcategory: "Cloud SQL"
-page_title: "Google: google_sql_database_instance"
 description: |-
   Creates a new SQL database instance in Google Cloud SQL.
 ---
@@ -196,7 +195,7 @@ includes an up-to-date reference of supported versions.
 * `replica_configuration` - (Optional) The configuration for replication. The
     configuration is detailed below. Valid only for MySQL instances.
 
-* `root_password` - (Optional) Initial root password. Required for MS SQL Server.
+* `root_password` - (Optional) Initial root password. Can be updated. Required for MS SQL Server.
 
 * `encryption_key_name` - (Optional)
     The full path to the encryption key used for the CMEK disk encryption.  Setting
@@ -235,14 +234,14 @@ The `settings` block supports:
   instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For all instances, ensure that
   `settings.backup_configuration.enabled` is set to `true`.
   For MySQL instances, ensure that `settings.backup_configuration.binary_log_enabled` is set to `true`.
-  For Postgres instances, ensure that `settings.backup_configuration.point_in_time_recovery_enabled`
+  For Postgres and SQL Server instances, ensure that `settings.backup_configuration.point_in_time_recovery_enabled`
   is set to `true`. Defaults to `ZONAL`.
 
 * `collation` - (Optional) The name of server instance collation.
 
 * `connector_enforcement` - (Optional) Specifies if connections must use Cloud SQL connectors.
 
-* `deletion_protection_enabled` - (Optional) Enables protection of an instance from accidental deletion protection across all surfaces (API, gcloud, Cloud Console and Terraform). Defaults to `false`.
+* `deletion_protection_enabled` - (Optional) Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform) by enabling the [GCP Cloud SQL instance deletion protection](https://cloud.google.com/sql/docs/postgres/deletion-protection). Terraform provider support was introduced in version 4.48.0. Defaults to `false`.
 
 * `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
 
@@ -294,7 +293,7 @@ The optional `settings.backup_configuration` subblock supports:
 
 * `start_time` - (Optional) `HH:MM` format time indicating when backup
     configuration starts.
-* `point_in_time_recovery_enabled` - (Optional) True if Point-in-time recovery is enabled. Will restart database if enabled after instance creation. Valid only for PostgreSQL instances.
+* `point_in_time_recovery_enabled` - (Optional) True if Point-in-time recovery is enabled. Will restart database if enabled after instance creation. Valid only for PostgreSQL and SQL Server instances.
 
 * `location` - (Optional) The region where the backup will be stored
 
@@ -481,6 +480,8 @@ a workaround for an [issue fixed in Terraform 0.12](https://github.com/hashicorp
 but also provides a convenient way to access an IP of a specific type without
 performing filtering in a Terraform config.
 
+* `instance_type` - The type of the instance. The supported values are `SQL_INSTANCE_TYPE_UNSPECIFIED`, `CLOUD_SQL_INSTANCE`, `ON_PREMISES_INSTANCE` and `READ_REPLICA_INSTANCE`.
+
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.
 
@@ -499,7 +500,7 @@ performing filtering in a Terraform config.
 `google_sql_database_instance` provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
-- `create` - Default is 30 minutes.
+- `create` - Default is 40 minutes.
 - `update` - Default is 30 minutes.
 - `delete` - Default is 30 minutes.
 
