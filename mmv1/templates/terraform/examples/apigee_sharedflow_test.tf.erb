@@ -61,7 +61,7 @@ resource "google_apigee_environment" "<%= ctx[:primary_resource_id] %>" {
   display_name = "environment-1"
 }
 
-resource "google_apigee_sharedflow" "test_apigee_sharedflow" {
+resource "google_apigee_shared_flow" "test_apigee_sharedflow" {
   name            = "test-apigee-sharedflow"
   org_id          = google_apigee_organization.apigee_org.id
   config_bundle   = "./test-fixtures/apigee/apigee_sharedflow_bundle.zip"
