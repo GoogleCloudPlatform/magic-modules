@@ -600,6 +600,12 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
     }
   }
 <% end -%>
+
+<% unless version == "ga" -%>
+  instance_lifecycle_policy {
+    force_update_on_repair = "YES"
+  }
+<% end -%>
 }
 `, template, target, igm)
 }
@@ -700,6 +706,12 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
     labels = {
       foo = "bar"
     }
+  }
+<% end -%>
+
+<% unless version == "ga" -%>
+  instance_lifecycle_policy {
+    force_update_on_repair = "YES"
   }
 <% end -%>
 }
