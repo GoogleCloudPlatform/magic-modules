@@ -397,7 +397,6 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 			"ddos_protection_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
 				Description: `Ddos Protection Config of this security policy.`,
 				MaxItems:    1,
 				Elem: &schema.Resource{
@@ -1121,7 +1120,6 @@ func expandSecurityPolicyDdosProtectionConfig(configured []interface{}) *compute
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyDdosProtectionConfig {
 		DdosProtection:  data["ddos_protection"].(string),
-		ForceSendFields: []string{"Enable"},
 	}
 }
 
