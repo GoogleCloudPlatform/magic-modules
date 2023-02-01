@@ -263,88 +263,77 @@ objects:
         name: "host"
         description: |
           Runtime host for a workstation.
+        input: true
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: "gceInstance"
             description: |
               Specifies a Compute Engine instance as the host.
+            input: true
             properties:
               - !ruby/object:Api::Type::String
                 name: "machineType"
+                input: true
                 description: |-
                   The name of a Compute Engine machine type.
               - !ruby/object:Api::Type::String
                 name: "serviceAccount"
+                input: true
                 description: |-
                   Email address of the service account that will be used on VM instances used to support this config. This service account must have permission to pull the specified container image. If not set, VMs will run without a service account, in which case the image must be publicly accessible.
               - !ruby/object:Api::Type::Integer
                 name: "poolSize"
+                input: true
                 description: |-
                   Number of instances to pool for faster workstation startup.
               - !ruby/object:Api::Type::Integer
                 name: "bootDiskSizeGb"
+                input: true
                 description: |-
                   Size of the boot disk in GB.
               - !ruby/object:Api::Type::Array
                 name: "tags"
                 item_type: Api::Type::String
+                input: true
                 description: |
                   Network tags to add to the Compute Engine machines backing the Workstations.
               - !ruby/object:Api::Type::Boolean
                 name: "disablePublicIpAddresses"
+                input: true
                 description: |
                   Whether instances have no public IP address.
               - !ruby/object:Api::Type::NestedObject
                 name: "shieldedInstanceConfig"
                 description: |
                   A set of Compute Engine Shielded instance options.
+                input: true
                 properties:
                   - !ruby/object:Api::Type::Boolean
                     name: "enableSecureBoot"
+                    input: true
                     description: |
                       Whether the instance has Secure Boot enabled.
                   - !ruby/object:Api::Type::Boolean
                     name: "enableVtpm"
+                    input: true
                     description: |
                       Whether the instance has the vTPM enabled.
                   - !ruby/object:Api::Type::Boolean
                     name: "enableIntegrityMonitoring"
+                    input: true
                     description: |
                       Whether the instance has integrity monitoring enabled.
               - !ruby/object:Api::Type::NestedObject
                 name: "confidentialInstanceConfig"
                 description: |
                   A set of Compute Engine Confidential VM instance options.
+                input: true
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: "mountPath"
-                    description: |
-                      Location of this directory in the running workstation.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: "gcePd"
-                    description: |
-                      PersistentDirectory backed by a Compute Engine regional persistent disk.
-                    properties:
-                    - !ruby/object:Api::Type::String
-                      name: "fsType"
-                      description: |
-                        Type of file system that the disk should be formatted with. The workstation image must support this file system type. Must be empty if sourceSnapshot is set.
-                    - !ruby/object:Api::Type::String
-                      name: "diskType"
-                      description: |
-                        Type of the disk to use.
-                    - !ruby/object:Api::Type::Integer
-                      name: "sizeGb"
-                      description: |-
-                        Size of the disk in GB. Must be empty if sourceSnapshot is set.
-                    - !ruby/object:Api::Type::Enum
-                      name: "reclaimPolicy"
-                      description: |
-                        What should happen to the disk after the workstation is deleted. Defaults to DELETE.
-                      values:
-                        - :RECLAIM_POLICY_UNSPECIFIED
-                        - :DELETE
-                        - :RETAIN
+                - !ruby/object:Api::Type::Boolean
+                  name: "enableConfidentialCompute"
+                  input: true
+                  description: |
+                    Whether the instance has confidential compute enabled.
       - !ruby/object:Api::Type::Array
         name: "persistentDirectories"
         description: |
@@ -352,7 +341,7 @@ objects:
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::NestedObject
-              name: "PersistentDirectory"
+              name: "persistentDirectory"
               description: |
                 A directory to persist across workstation sessions.
               properties:
