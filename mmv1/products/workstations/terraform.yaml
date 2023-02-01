@@ -33,6 +33,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   WorkstationConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}",  "{{workstation_cluster_id}}", "{{workstation_config_id}}"]
     autogen_async: true
+    properties:
+      container: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "workstation_config_basic"
