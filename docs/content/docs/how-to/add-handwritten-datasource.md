@@ -20,7 +20,7 @@ a new datasource there are 5 steps to doing so.
 1. Add the datasource to the `provider.go.erb` index
 1. Implement a test which will create and resources and read the corresponding
   datasource.
-1. Add documentation.
+1. Add documentation. See: [Add documentation for a handwritten data source](/magic-modules/docs/how-to/add-handwritten-datasource-documentation)
 
 For creating a datasource based off an existing resource you can [make use of the
 schema directly](https://github.com/GoogleCloudPlatform/magic-modules/blob/1d293f7bfadacaa20580874c8e8634827fb99a14/mmv1/third_party/terraform/data_sources/data_source_cloud_run_service.go).

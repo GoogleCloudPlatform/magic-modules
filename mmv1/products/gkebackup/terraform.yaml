@@ -20,6 +20,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "gkebackup_backupplan_basic"
         primary_resource_id: "basic"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-basic-plan%s\", context[\"random_suffix\"])"
         vars:
           name: "basic-plan"
           cluster_name: "basic-cluster"

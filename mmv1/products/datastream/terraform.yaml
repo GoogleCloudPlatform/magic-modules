@@ -173,6 +173,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "true"
           bucket_name: "my-bucket"
           destination_connection_profile_id: "destination-profile"
+          stream_cmek: "kms-name"
         test_vars_overrides:
           deletion_protection: "false"
       - !ruby/object:Provider::Terraform::Examples
@@ -189,6 +190,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           stream_id: "my-stream"
           source_connection_profile_id: "source-profile"
           destination_connection_profile_id: "destination-profile"
+          stream_cmek: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_bigquery"
+        pull_external: true
+        primary_resource_id: "default"
+        # Random provider
+        skip_vcr: true
+        vars:
+          stream_id: "my-stream"
+          private_connection_id: "my-connection"
+          network_name: "my-network"
+          source_connection_profile_id: "source-profile"
+          database_instance_name: "my-instance"
+          deletion_protection: "true"
+          destination_connection_profile_id: "destination-profile"
+          bigquery_destination_table_kms_key_name: "bigquery-kms-name"
+        test_vars_overrides:
+          deletion_protection: "false"
+          bigquery_destination_table_kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
