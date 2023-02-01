@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -62,13 +63,13 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 			// When replaying, set the poll interval low to speed up tests
 			p.ProdProvider.pollInterval = 10 * time.Millisecond
 		default:
-			log.Printf("[DEBUG] No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv)
+			tflog.Debug(ctx, fmt.Sprintf("No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv))
 			return
 		}
 
 		envPath := os.Getenv("VCR_PATH")
 		if envPath == "" {
-			log.Print("[DEBUG] No environment var set for VCR_PATH, skipping VCR")
+			tflog.Debug(ctx, "No environment var set for VCR_PATH, skipping VCR")
 			return
 		}
 		path := filepath.Join(envPath, vcrFileName(p.TestName))
@@ -95,7 +96,7 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 
 			var b bytes.Buffer
 			if _, err := b.ReadFrom(r.Body); err != nil {
-				log.Printf("[DEBUG] Failed to read request body from cassette: %v", err)
+				tflog.Debug(ctx, fmt.Sprintf("Failed to read request body from cassette: %v", err))
 				return false
 			}
 			r.Body = ioutil.NopCloser(&b)
@@ -109,11 +110,11 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 			if strings.Contains(contentType, "application/json") {
 				var reqJson, cassetteJson interface{}
 				if err := json.Unmarshal([]byte(reqBody), &reqJson); err != nil {
-					log.Printf("[DEBUG] Failed to unmarshall request json: %v", err)
+					tflog.Debug(ctx, fmt.Sprintf("Failed to unmarshall request json: %v", err))
 					return false
 				}
 				if err := json.Unmarshal([]byte(i.Body), &cassetteJson); err != nil {
-					log.Printf("[DEBUG] Failed to unmarshall cassette json: %v", err)
+					tflog.Debug(ctx, fmt.Sprintf("Failed to unmarshall cassette json: %v", err))
 					return false
 				}
 				return reflect.DeepEqual(reqJson, cassetteJson)
@@ -126,7 +127,7 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 		configsLock.Unlock()
 		return
 	} else {
-		log.Print("[DEBUG] VCR_PATH or VCR_MODE not set, skipping VCR")
+		tflog.Debug(ctx, "VCR_PATH or VCR_MODE not set, skipping VCR")
 	}
 }
 
