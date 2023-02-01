@@ -4,7 +4,6 @@ package google
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"time"
@@ -19,7 +18,7 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 
     grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
@@ -38,7 +37,7 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 	}
 
 	// Handle User Agent string
-	p.userAgent = CompileUserAgentString("terraform-provider-google<%= "-" + version unless version == 'ga'  -%>", tfVersion, p.version)
+	p.userAgent = CompileUserAgentString(ctx, "terraform-provider-google<%= "-" + version unless version == 'ga'  -%>", tfVersion, p.version)
 	// opt in extension for adding to the User-Agent header
 	if ext := os.Getenv("GOOGLE_TERRAFORM_USERAGENT_EXTENSION"); ext != "" {
 		ua := p.userAgent
@@ -569,11 +568,11 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 
 		email := getCurrUserEmail(p, p.userAgent, diags)
 		if diags.HasError() {
-			log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
+			tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 			return
 		}
 
-		log.Printf("[INFO] Terraform is using this identity: %s", email)
+		tflog.Info(ctx, fmt.Sprintf("Terraform is using this identity: %s", email))
 		return
 	}
 
@@ -586,11 +585,11 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 	p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
 	email := getCurrUserEmail(p, p.userAgent, diags)
 	if diags.HasError() {
-		log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
+		tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 		return
 	}
 
-	log.Printf("[INFO] Terraform is configured with service account impersonation, original identity: %s, impersonated identity: %s", email, data.ImpersonateServiceAccount.ValueString())
+	tflog.Info(ctx, fmt.Sprintf("Terraform is configured with service account impersonation, original identity: %s, impersonated identity: %s", email, data.ImpersonateServiceAccount.ValueString()))
 
 	// Add the Impersonated ClientOption back in to the OAuth2 TokenSource
 	tokenSource = GetTokenSource(ctx, data, false, diags)
@@ -650,8 +649,8 @@ func GetCredentials(ctx context.Context, data ProviderModel, initialCredentialsO
 			return *creds
 		}
 
-		log.Printf("[INFO] Authenticating using configured Google JSON 'access_token'...")
-		log.Printf("[INFO]   -- Scopes: %s", clientScopes)
+		tflog.Info(ctx, "Authenticating using configured Google JSON 'access_token'...")
+		tflog.Info(ctx, fmt.Sprintf("  -- Scopes: %s", clientScopes))
 		return googleoauth.Credentials{
 			TokenSource: staticTokenSource{oauth2.StaticTokenSource(token)},
 		}
@@ -680,8 +679,8 @@ func GetCredentials(ctx context.Context, data ProviderModel, initialCredentialsO
 			return googleoauth.Credentials{}
 		}
 
-		log.Printf("[INFO] Authenticating using configured Google JSON 'credentials'...")
-		log.Printf("[INFO]   -- Scopes: %s", clientScopes)
+		tflog.Info(ctx, "Authenticating using configured Google JSON 'credentials'...")
+		tflog.Info(ctx, fmt.Sprintf("  -- Scopes: %s", clientScopes))
 		return *creds
 	}
 
@@ -696,8 +695,8 @@ func GetCredentials(ctx context.Context, data ProviderModel, initialCredentialsO
 		return *creds
 	}
 
-	log.Printf("[INFO] Authenticating using DefaultClient...")
-	log.Printf("[INFO]   -- Scopes: %s", clientScopes)
+	tflog.Info(ctx, "Authenticating using DefaultClient...")
+	tflog.Info(ctx, fmt.Sprintf("  -- Scopes: %s", clientScopes))
 	defaultTS, err := googleoauth.DefaultTokenSource(context.Background(), clientScopes...)
 	if err != nil {
 		diags.AddError(fmt.Sprintf("Attempted to load application default credentials since neither `credentials` nor `access_token` was set in the provider block.  "+

@@ -3,18 +3,18 @@ package google
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 const uaEnvVar = "TF_APPEND_USER_AGENT"
 
-func CompileUserAgentString(name, tfVersion, provVersion string) string {
+func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion string) string {
 	ua := fmt.Sprintf("Terraform/%s (+https://www.terraform.io) Terraform-Plugin-SDK/%s %s/%s", tfVersion, "terraform-plugin-framework", name, provVersion)
 
 	if add := os.Getenv(uaEnvVar); add != "" {
@@ -22,7 +22,7 @@ func CompileUserAgentString(name, tfVersion, provVersion string) string {
 		if len(add) > 0 {
 			ua += " " + add
 
-			log.Printf("[DEBUG] Using modified User-Agent: %s", ua)
+			tflog.Debug(ctx, fmt.Sprintf("Using modified User-Agent: %s", ua))
 		}
 	}
 
@@ -41,7 +41,7 @@ func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 	diags.Append(d...)
 
 	if diags.HasError() {
-		log.Printf("[INFO] error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
+		tflog.Info(p.context, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 		return ""
 	}
 	if res["email"] == nil {
@@ -81,7 +81,7 @@ func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.S
 
 func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
 	if isGoogleApiErrorWithCode(err, 404) {
-		log.Printf("[WARN] Removing %s because it's gone", resource)
+		tflog.Warn(ctx, fmt.Sprintf("Removing %s because it's gone", resource))
 		// The resource doesn't exist anymore
 		state.RemoveResource(ctx)
 	}

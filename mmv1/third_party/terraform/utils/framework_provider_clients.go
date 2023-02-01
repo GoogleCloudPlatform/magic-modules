@@ -1,13 +1,14 @@
 package google
 
 import (
-	"log"
+	"fmt"
 	"strings"
 
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/option"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Methods to create new services from config
@@ -21,7 +22,7 @@ func (p *frameworkProvider) NewDnsClient(userAgent string, diags *diag.Diagnosti
 	dnsClientBasePath := removeBasePathVersion(p.DNSBasePath)
 	dnsClientBasePath = strings.ReplaceAll(dnsClientBasePath, "/dns/", "")
 
-	log.Printf("[INFO] Instantiating Google Cloud DNS client for path %s", dnsClientBasePath)
+	tflog.Info(p.context, fmt.Sprintf("Instantiating Google Cloud DNS client for path %s", dnsClientBasePath))
 	clientDns, err := dns.NewService(p.context, option.WithHTTPClient(p.client))
 	if err != nil {
 		diags.AddWarning("error creating client dns", err.Error())
