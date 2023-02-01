@@ -10,46 +10,34 @@ import (
 )
 
 func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"org_id": getTestOrgFromEnv(t),
-	}
-
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerAuthorizedOrgsDescDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerAuthorizedOrgsDesc_accessContextManagerAuthorizedOrgsDescBasicExample(context),
+				Config: testAccAccessContextManagerAuthorizedOrgsDesc_accessContextManagerAuthorizedOrgsDescBasicExample(),
 			},
 			{
-				ResourceName:            "google_access_context_manager_authorized_orgs_desc.authorized-orgs-desc",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
+				ResourceName:      "google_access_context_manager_authorized_orgs_desc.authorized-orgs-desc",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func testAccAccessContextManagerAuthorizedOrgsDesc_accessContextManagerAuthorizedOrgsDescBasicExample(context map[string]interface{}) string {
+func testAccAccessContextManagerAuthorizedOrgsDesc_accessContextManagerAuthorizedOrgsDescBasicExample() string {
 	return Nprintf(`
 resource "google_access_context_manager_authorized_orgs_desc" "authorized-orgs-desc" {
-  parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}"
-  name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/authorizedOrgsDescs/fakeDescName"
+  parent = "accessPolicies/757713997611"
+  name   = "accessPolicies/757713997611/authorizedOrgsDescs/fakeDescName"
   authorization_type = "AUTHORIZATION_TYPE_TRUST"
   asset_type = "ASSET_TYPE_CREDENTIAL_STRENGTH"
   authorization_direction = "AUTHORIZATION_DIRECTION_TO"
   orgs = ["organizations/12345", "organizations/98765"]
 }
-
-resource "google_access_context_manager_access_policy" "access-policy" {
-  parent = "organizations/%{org_id}"
-  title  = "my policy"
-}
-`, context)
+`)
 }
 
 func testAccCheckAccessContextManagerAuthorizedOrgsDescDestroyProducer(t *testing.T) func(s *terraform.State) error {
