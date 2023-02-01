@@ -125,7 +125,7 @@ objects:
           Time the Instance was created in UTC.
         output: true
       - !ruby/object:Api::Type::NestedObject
-        name: 'privateClusterConfig'
+        name: "privateClusterConfig"
         description: |
           Configuration for private cluster.
         properties:
@@ -167,7 +167,7 @@ objects:
               description: |-
                 Human readable message indicating details about the current status.
             - !ruby/object:Api::Type::Array
-              name: 'details'
+              name: "details"
               description: |
                 A list of messages that carry the error details.
               item_type: Api::Type::KeyValuePairs
@@ -176,7 +176,7 @@ objects:
     name: "WorkstationConfig"
     self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}"
     base_url: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs"
-    create_url: "projects/{{project}}/locations/{{location}}/workstationClusters?workstationClusterId={{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}"
+    create_url: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs?workstationConfigId={{workstation_config_id}}"
     update_verb: :PATCH
     update_mask: true
     min_version: beta
@@ -219,7 +219,7 @@ objects:
         input: true
         url_param_only: true
         description: |
-          The ID of the workstation cluster.
+          The name of the workstation cluster.
       - !ruby/object:Api::Type::String
         name: "location"
         input: true
@@ -248,7 +248,7 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: "annotations"
         description: "Client-specified annotations. This is distinct from labels."
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Fingerprint
         name: "etag"
         description: |
           Checksum computed by the server. 
@@ -258,31 +258,14 @@ objects:
         description: |
           Time the Instance was created in UTC.
         output: true
-      - !ruby/object:Api::Type::Time
-        name: "updateTime"
-        description: |
-          Time the Instance was updated in UTC.
         output: true
-      - !ruby/object:Api::Type::Time
-        name: "deleteTime"
-        description: |
-          Time the Instance was deleted in UTC.
-        output: true
-      - !ruby/object:Api::Type::Time
-        name: "idleTimeout"
-        description: |
-          How long to wait before automatically stopping an instance that hasn't received any user traffic. A value of 0 indicates that this instance should never time out due to idleness. Defaults to 20 minutes.
-      - !ruby/object:Api::Type::Time
-        name: "runningTimeout"
-        description: |
-          How long to wait before automatically stopping a workstation after it started. A value of 0 indicates that workstations using this config should never time out. Must be greater than 0 and less than 24 hours if encryptionKey is set. Defaults to 12 hours
       - !ruby/object:Api::Type::NestedObject
-        name: 'host'
+        name: "host"
         description: |
           Runtime host for a workstation.
         properties:
           - !ruby/object:Api::Type::NestedObject
-            name: 'gceInstance'
+            name: "gceInstance"
             description: |
               Specifies a Compute Engine instance as the host.
             properties:
@@ -303,7 +286,7 @@ objects:
                 description: |-
                   Size of the boot disk in GB.
               - !ruby/object:Api::Type::Array
-                name: 'tags'
+                name: "tags"
                 item_type: Api::Type::String
                 description: |
                   Network tags to add to the Compute Engine machines backing the Workstations.
@@ -312,7 +295,7 @@ objects:
                 description: |
                   Whether instances have no public IP address.
               - !ruby/object:Api::Type::NestedObject
-                name: 'shieldedInstanceConfig'
+                name: "shieldedInstanceConfig"
                 description: |
                   A set of Compute Engine Shielded instance options.
                 properties:
@@ -329,7 +312,7 @@ objects:
                     description: |
                       Whether the instance has integrity monitoring enabled.
               - !ruby/object:Api::Type::NestedObject
-                name: 'confidentialInstanceConfig'
+                name: "confidentialInstanceConfig"
                 description: |
                   A set of Compute Engine Confidential VM instance options.
                 properties:
@@ -338,7 +321,7 @@ objects:
                     description: |
                       Location of this directory in the running workstation.
                   - !ruby/object:Api::Type::NestedObject
-                    name: 'gcePd'
+                    name: "gcePd"
                     description: |
                       PersistentDirectory backed by a Compute Engine regional persistent disk.
                     properties:
@@ -355,7 +338,7 @@ objects:
                       description: |-
                         Size of the disk in GB. Must be empty if sourceSnapshot is set.
                     - !ruby/object:Api::Type::Enum
-                      name: 'reclaimPolicy'
+                      name: "reclaimPolicy"
                       description: |
                         What should happen to the disk after the workstation is deleted. Defaults to DELETE.
                       values:
@@ -363,13 +346,13 @@ objects:
                         - :DELETE
                         - :RETAIN
       - !ruby/object:Api::Type::Array
-        name: 'persistentDirectories'
+        name: "persistentDirectories"
         description: |
           Directories to persist across workstation sessions.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::NestedObject
-              name: 'PersistentDirectory'
+              name: "PersistentDirectory"
               description: |
                 A directory to persist across workstation sessions.
               properties:
@@ -378,7 +361,7 @@ objects:
                   description: |
                     Location of this directory in the running workstation.
                 - !ruby/object:Api::Type::NestedObject
-                  name: 'gcePd'
+                  name: "gcePd"
                   description: |
                       PersistentDirectory backed by a Compute Engine regional persistent disk.
                   properties:
@@ -395,7 +378,7 @@ objects:
                     description: |-
                       Size of the disk in GB. Must be empty if sourceSnapshot is set.
                   - !ruby/object:Api::Type::Enum
-                    name: 'reclaimPolicy'
+                    name: "reclaimPolicy"
                     description: |
                       What should happen to the disk after the workstation is deleted. Defaults to DELETE.
                     values:
@@ -403,21 +386,21 @@ objects:
                       - :DELETE
                       - :RETAIN
       - !ruby/object:Api::Type::NestedObject
-          name: 'container'
+          name: "container"
           description: |
             Container that will be run for each workstation using this configuration when that workstation is started.
           properties:
             - !ruby/object:Api::Type::String
               name: "image"
               description: |
-                Docker image defining the container. This image must be accessible by the config's service account.
+                Docker image defining the container. This image must be accessible by the config"s service account.
             - !ruby/object:Api::Type::Array
-              name: 'command'
+              name: "command"
               item_type: Api::Type::String
               description: |
                 If set, overrides the default ENTRYPOINT specified by the image.
             - !ruby/object:Api::Type::Array
-              name: 'args'
+              name: "args"
               item_type: Api::Type::String
               description: |
                 Arguments passed to the entrypoint.
@@ -426,7 +409,7 @@ objects:
               description: |
                 If set, overrides the default DIR specified by the image.
             - !ruby/object:Api::Type::Array
-                name: 'env'
+                name: "env"
                 item_type: Api::Type::String
                 description: |
                   Environment variables passed to the container.
@@ -459,7 +442,7 @@ objects:
               description: |-
                 Human readable message indicating details about the current status.
             - !ruby/object:Api::Type::Array
-              name: 'details'
+              name: "details"
               description: |
                 A list of messages that carry the error details.
               item_type: Api::Type::KeyValuePairs
