@@ -133,6 +133,8 @@ The following arguments are supported:
     rule (rule with priority 2147483647 and match "\*"). If no rules are provided when creating a
     security policy, a default rule with action "allow" will be added. Structure is [documented below](#nested_rule).
 
+* `ddos_protection_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Google Cloud Armor DDOS Proctection Config](https://cloud.google.com/armor/docs/advanced-network-ddos). Structure is [documented below](#nested_ddos_protection_config).
+
 * `advanced_options_config` - (Optional) [Advanced Configuration Options](https://cloud.google.com/armor/docs/security-policy-overview#json-parsing).
     Structure is [documented below](#nested_advanced_options_config).
 
@@ -143,11 +145,16 @@ The following arguments are supported:
 * `type` - The type indicates the intended use of the security policy. This field can be set only at resource creation time.
   * CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services.
     They filter requests before they hit the origin servers.
+  * CLOUD_ARMOR_NETWORK security policies. If it matches, the corresponding 'action' is enforced. The match criteria for a rule consists of built-in match fields and potentially multiple user-defined match fields.
   * CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services
     (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage).
     They filter requests before the request is served from Google's cache.
   * CLOUD_ARMOR_INTERNAL_SERVICE - Cloud Armor internal service policies can be configured to filter HTTP requests targeting services 
     managed by Traffic Director in a service mesh. They filter requests before the request is served from the application.
+
+<a name="nested_ddos_protection_config"></a>The `ddos_protection_config` block supports:
+
+* `ddos_protection` - (Optional) DDOS protection. Supported values include: "STANDARD", "ADVANCED".
 
 <a name="nested_advanced_options_config"></a>The `advanced_options_config` block supports:
 
