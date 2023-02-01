@@ -45,12 +45,12 @@ resource "google_datastream_stream" "stream5" {
             exclude_objects {
                 oracle_schemas {
                     schema = "schema"
-                        oracle_tables {
-                            table = "table"
-                            oracle_columns {
-                                column = "column"
-                            }
+                    oracle_tables {
+                        table = "table"
+                        oracle_columns {
+                            column = "column"
                         }
+                    }
                 }
             }
             drop_large_objects {}
@@ -73,14 +73,13 @@ resource "google_datastream_stream" "stream5" {
         oracle_excluded_objects {
             oracle_schemas {
                 schema = "schema"
-                    oracle_tables {
-                        table = "table"
-                        oracle_columns {
-                            column = "column"
-                        }
+                oracle_tables {
+                    table = "table"
+                    oracle_columns {
+                        column = "column"
                     }
                 }
             }
         }
-	  }
+    }
 }

@@ -177,18 +177,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           deletion_protection: "false"
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_postgresql"
-        pull_external: true
         primary_resource_id: "default"
-        skip_vcr: true
         vars:
           stream_id: "my-stream"
           source_connection_profile_id: "source-profile"
           destination_connection_profile_id: "destination-profile"
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_oracle"
-        pull_external: true
         primary_resource_id: "default"
-        skip_vcr: true
         vars:
           stream_id: "my-stream"
           source_connection_profile_id: "source-profile"
