@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: CloudBuildv2
+name: Cloudbuildv2
 display_name: Cloud Build V2
 versions:
   - !ruby/object:Api::Product::Version
