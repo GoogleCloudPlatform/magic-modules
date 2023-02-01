@@ -67,7 +67,7 @@ data "google_dns_record_set" "rs" {
 `, managedZoneName, zoneName, recordSetName)
 }
 
-// Framework checkdestroy
+// testAccCheckDnsRecordSetDestroyProducerFramework is the framework version of the generated testAccCheckDnsRecordSetDestroyProducer
 func testAccCheckDnsRecordSetDestroyProducerFramework(t *testing.T) func(s *terraform.State) error {
 
 	return func(s *terraform.State) error {
