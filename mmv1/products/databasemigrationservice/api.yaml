@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Product
+--- !ruby/object:Api::Product
 name: DatabaseMigrationService
 display_name: DatabaseMigrationService
 versions:
@@ -31,11 +30,12 @@ objects:
     self_link: "projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}"
     base_url: "projects/{{project}}/locations/{{location}}/connectionProfiles"
     create_url: "projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}"
+    update_verb: :PATCH
     description: "A connection profile definition."
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        "Workstations": "https://cloud.google.com/database-migration/docs/"
-      api: "https://cloud.google.com/workstations/docs/reference/rest/v1/projects.locations.connectionProfiles/create"
+        "Database Migration": "https://cloud.google.com/database-migration/docs/"
+      api: "https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.connectionProfiles/create"
     parameters:
       - !ruby/object:Api::Type::String
         name: "connectionProfileId"
