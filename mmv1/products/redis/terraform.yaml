@@ -15,8 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
-      optional_properties: |
-        * `auth_string` - (Optional) AUTH String set on the instance. This field will only be populated if auth_enabled is true.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 20
       update_minutes: 20
