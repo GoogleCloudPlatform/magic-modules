@@ -12,7 +12,6 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-legacy_name: 'cloudbuildv2'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Connection: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_validator: true
