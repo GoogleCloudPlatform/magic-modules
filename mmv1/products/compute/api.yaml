@@ -16392,8 +16392,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/load-balancing/docs/tcp/internal-proxy'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/targetTcpProxies'
-    min_version: beta
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetTcpProxies'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
