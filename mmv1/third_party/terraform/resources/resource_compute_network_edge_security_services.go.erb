@@ -1,15 +1,21 @@
-<% unless version == 'ga' -%>
+<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	compute "google.golang.org/api/compute/v0.beta"
 	"log"
 	"time"
+	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+<% if version == 'ga' -%>
+	"google.golang.org/api/compute/v1"
+<% else -%>
+	compute "google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
+<% unless version == 'ga' -%>
 func resourceComputeNetworkEdgeSecurityServices() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeNetworkEdgeSecurityServicesCreate,
@@ -188,7 +194,6 @@ func resourceComputeNetworkEdgeSecurityServicesUpdate(d *schema.ResourceData, me
 	}
 
 	
-	<% unless version == 'ga' -%>
 	if len(networkEdgeSecurityServices.ForceSendFields) > 0 {
 		client := config.NewComputeClient(userAgent)
 
@@ -203,7 +208,6 @@ func resourceComputeNetworkEdgeSecurityServicesUpdate(d *schema.ResourceData, me
 			return err
 		}
 	}
-	<% end -%>
 
 	return resourceComputeNetworkEdgeSecurityServicesRead(d, meta)
 }
