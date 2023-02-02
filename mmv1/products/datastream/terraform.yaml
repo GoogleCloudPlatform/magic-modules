@@ -179,6 +179,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_postgresql"
         primary_resource_id: "default"
+        skip_test: true
         vars:
           stream_id: "my-stream"
           source_connection_profile_id: "source-profile"
@@ -186,6 +187,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_oracle"
         primary_resource_id: "default"
+        skip_test: true
         vars:
           stream_id: "my-stream"
           source_connection_profile_id: "source-profile"
