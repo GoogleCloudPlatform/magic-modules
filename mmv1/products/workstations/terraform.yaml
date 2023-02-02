@@ -34,7 +34,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}",  "{{workstation_cluster_id}}", "{{workstation_config_id}}"]
     autogen_async: true
     properties:
+      host.gceInstance.poolSize: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       container: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      container.image: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories.gcePd: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories.gcePd.diskType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories.gcePd.fsType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories.gcePd.sizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
