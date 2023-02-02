@@ -21,7 +21,7 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 		CheckDestroy: testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWorkstationsWorkstationConfig_WorkstationConfigBasicExample(context),
+				Config: testAccWorkstationsWorkstationConfig_workstationConfigBasicExample(context),
 			},
 			{
 				ResourceName:            "google_workstations_workstation_cluster.default",
