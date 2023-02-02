@@ -43,4 +43,12 @@ resource "google_workstations_workstation_config" "<%= ctx[:primary_resource_id]
       machine_type = "e2-standard-4"
     }
   }
+
+  container {
+    image = "intellij"
+    env = {
+      NAME = "FOO"
+      BABE = "bar"
+    }
+  }
 }

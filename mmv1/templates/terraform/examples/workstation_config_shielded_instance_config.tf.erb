@@ -37,10 +37,16 @@ resource "google_workstations_workstation_config" "<%= ctx[:primary_resource_id]
   workstation_config_id  = "<%= ctx[:vars]['workstation_config_name'] %>"
   workstation_cluster_id = google_workstations_workstation_cluster.<%= ctx[:primary_resource_id] %>.workstation_cluster_id
   location   		         = "us-central1"
-  
+
   host {
     gce_instance {
-      machine_type = "e2-standard-4"
+      machine_type                = "e2-standard-4"
+      boot_disk_size_gb           = 35
+      disable_public_ip_addresses = true
+      shielded_instance_config {
+        enable_secure_boot = true
+        enable_vtpm        = true
+      }
     }
   }
 }

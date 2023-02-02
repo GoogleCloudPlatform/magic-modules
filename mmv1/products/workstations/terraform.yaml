@@ -58,3 +58,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_config_container"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_config_persistent_directories"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_config_shielded_instance_config"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
