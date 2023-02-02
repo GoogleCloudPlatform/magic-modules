@@ -660,3 +660,45 @@ objects:
         'Provisioning NAT IPs':
           'https://cloud.google.com/apigee/docs/api-platform/security/nat-provisioning'
       api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses'
+  - !ruby/object:Api::Resource
+    name: 'SyncAuthorization'
+    self_link: 'organizations/{{name}}:getSyncAuthorization'
+    base_url: ''
+    create_url: 'organizations/{{name}}:setSyncAuthorization'
+    update_url: 'organizations/{{name}}:setSyncAuthorization'
+    read_verb: :POST
+    update_verb: :POST
+    description: |
+      Authorize the Synchronizer to download environment data from the control plane.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        description: |
+          Name of the Apigee organization.
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'identities'
+        required: true
+        send_empty_value: true
+        description: |
+          Array of service accounts to grant access to control plane resources, each specified using the following format: `serviceAccount:service-account-name`.
+
+          The `service-account-name` is formatted like an email address. For example: my-synchronizer-manager-serviceAccount@my_project_id.iam.gserviceaccount.com
+
+          You might specify multiple service accounts, for example, if you have multiple environments and wish to assign a unique service account to each one.
+
+          The service accounts must have **Apigee Synchronizer Manager** role. See also [Create service accounts](https://cloud.google.com/apigee/docs/hybrid/v1.8/sa-about#create-the-service-accounts).
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'etag'
+        description: |
+          Entity tag (ETag) used for optimistic concurrency control as a way to help prevent simultaneous updates from overwriting each other.
+          Used internally during updates.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Enable Synchronizer access':
+          'https://cloud.google.com/apigee/docs/hybrid/v1.8/synchronizer-access#enable-synchronizer-access'
+      api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations#getsyncauthorization'

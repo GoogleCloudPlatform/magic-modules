@@ -16,11 +16,7 @@ import (
 
 	"google.golang.org/api/googleapi"
 
-<% if version == "ga" -%>
 	"google.golang.org/api/dataproc/v1"
-<% else -%>
-	dataproc "google.golang.org/api/dataproc/v1beta2"
-<% end -%>
 )
 
 func TestDataprocExtractInitTimeout(t *testing.T) {
@@ -396,7 +392,6 @@ func TestAccDataprocCluster_withReservationAffinity(t *testing.T) {
 	})
 }
 
-<% if version == "ga" -%>
 func TestAccDataprocCluster_withDataprocMetricConfig(t *testing.T) {
 	t.Parallel()
 
@@ -421,7 +416,6 @@ func TestAccDataprocCluster_withDataprocMetricConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccDataprocCluster_withNodeGroupAffinity(t *testing.T) {
 	t.Parallel()
@@ -438,7 +432,7 @@ func TestAccDataprocCluster_withNodeGroupAffinity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
 
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.node_group_affinity.0.node_group_uri", "https://www.googleapis.com/compute/v1/projects/ci-test-project-188019/zones/us-central1-f/nodeGroups/test-nodegroup"),
+					resource.TestMatchResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.node_group_affinity.0.node_group_uri", regexp.MustCompile("test-nodegroup")),
 				),
 			},
 		},
@@ -530,7 +524,6 @@ func TestAccDataprocCluster_nonPreemptibleSecondary(t *testing.T) {
 	})
 }
 
-<% if version == "ga" -%>
 func TestAccDataprocCluster_spotSecondary(t *testing.T) {
 	t.Parallel()
 
@@ -551,7 +544,6 @@ func TestAccDataprocCluster_spotSecondary(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccDataprocCluster_withStagingBucket(t *testing.T) {
 	t.Parallel()
@@ -810,8 +802,8 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
-					// We only provide one, but GCP adds three, so expect 4.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.%", "4"),
+					// We only provide one, but GCP adds three and we added goog-dataproc-autozone internally, so expect 5.
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.%", "5"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.key1", "value1"),
 				),
 			},
@@ -943,18 +935,20 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 	t.Parallel()
 
 	pid := getTestProjectFromEnv()
-	msName_basic := fmt.Sprintf("projects/%s/locations/us-central1/services/metastore-srv", pid)
-	msName_update := fmt.Sprintf("projects/%s/locations/us-central1/services/metastore-srv-update", pid)
+	basicServiceId := "tf-test-metastore-srv-" + randString(t, 10)
+	updateServiceId := "tf-test-metastore-srv-update-" + randString(t, 10)
+	msName_basic := fmt.Sprintf("projects/%s/locations/us-central1/services/%s", pid, basicServiceId)
+	msName_update := fmt.Sprintf("projects/%s/locations/us-central1/services/%s", pid, updateServiceId)
 	
 	var cluster dataproc.Cluster
-	rnd := randString(t, 10)
+	clusterName := "tf-test-" + randString(t, 10)
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withMetastoreConfig(rnd),
+				Config: testAccDataprocCluster_withMetastoreConfig(clusterName, basicServiceId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service",msName_basic),
@@ -962,7 +956,7 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataprocCluster_withMetastoreConfig_update(rnd),
+				Config: testAccDataprocCluster_withMetastoreConfig_update(clusterName, updateServiceId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service", msName_update),
@@ -1290,6 +1284,7 @@ resource "google_dataproc_cluster" "virtual_cluster" {
   }
 `, projectID, rnd, projectID, rnd, rnd, rnd, rnd, rnd, rnd)
 }
+<% end -%>
 
 func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster, roles ...string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -1303,7 +1298,6 @@ func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster,
 		return fmt.Errorf("Cluster NodePools does not contain expected roles : %v", roles)
 	}
 }
-<% end -%>
 
 func testAccDataprocCluster_withAccelerators(rnd, acceleratorType, zone string) string {
 	return fmt.Sprintf(`
@@ -1429,7 +1423,7 @@ func testAccDataprocCluster_withReservationAffinity(rnd string) string {
 	return fmt.Sprintf(`
 
 resource "google_compute_reservation" "reservation" {
-  name = "default"
+  name = "tf-test-dproc-reservation-%s"
   zone = "us-central1-f"
 
   specific_reservation {
@@ -1457,7 +1451,7 @@ resource "google_dataproc_cluster" "basic" {
 
     gce_cluster_config {
       zone = "us-central1-f"
-      reservation_affinity {      
+      reservation_affinity {
         consume_reservation_type = "SPECIFIC_RESERVATION"
         key = "compute.googleapis.com/reservation-name"
         values = [google_compute_reservation.reservation.name]
@@ -1465,10 +1459,9 @@ resource "google_dataproc_cluster" "basic" {
     }
   }
 }
-`, rnd)
+`, rnd, rnd)
 }
 
-<% if version == "ga" -%>
 func testAccDataprocCluster_withDataprocMetricConfig(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
@@ -1491,13 +1484,12 @@ resource "google_dataproc_cluster" "basic" {
 }
 `, rnd)
 }
-<% end -%>
 
 func testAccDataprocCluster_withNodeGroupAffinity(rnd string) string {
 	return fmt.Sprintf(`
 
 resource "google_compute_node_template" "nodetmpl" {
-  name   = "test-nodetmpl"
+  name   = "test-nodetmpl-%s"
   region = "us-central1"
 
   node_affinity_labels = {
@@ -1510,7 +1502,7 @@ resource "google_compute_node_template" "nodetmpl" {
 }
 
 resource "google_compute_node_group" "nodes" {
-  name = "test-nodegroup"
+  name = "test-nodegroup-%s"
   zone = "us-central1-f"
 
   size          = 3
@@ -1530,7 +1522,7 @@ resource "google_dataproc_cluster" "basic" {
     }
   }
 }
-`, rnd)
+`, rnd, rnd, rnd)
 }
 
 func testAccDataprocCluster_singleNodeCluster(rnd string) string {
@@ -1713,7 +1705,6 @@ resource "google_dataproc_cluster" "non_preemptible_secondary" {
 	`, rnd)
 }
 
-<% if version == "ga" -%>
 func testAccDataprocCluster_spotSecondary(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "spot_secondary" {
@@ -1748,7 +1739,6 @@ resource "google_dataproc_cluster" "spot_secondary" {
 }
 	`, rnd)
 }
-<% end -%>
 
 func testAccDataprocCluster_withStagingBucketOnly(bucketName string) string {
 	return fmt.Sprintf(`
@@ -2179,10 +2169,10 @@ resource "google_dataproc_autoscaling_policy" "asp" {
 `, rnd, rnd)
 }
 
-func testAccDataprocCluster_withMetastoreConfig(rnd string) string {
+func testAccDataprocCluster_withMetastoreConfig(clusterName, serviceId string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_metastore_config" {
-	name                  = "tf-test-%s"
+	name                  = "%s"
 	region                = "us-central1"
 
 	cluster_config {
@@ -2193,7 +2183,7 @@ resource "google_dataproc_cluster" "with_metastore_config" {
 }
 
 resource "google_dataproc_metastore_service" "ms" {
-	service_id = "metastore-srv"
+	service_id = "%s"
 	location   = "us-central1"
 	port       = 9080
 	tier       = "DEVELOPER"
@@ -2207,13 +2197,13 @@ resource "google_dataproc_metastore_service" "ms" {
 		version = "3.1.2"
 	}
 }
-`, rnd)
+`, clusterName, serviceId)
 }
 
-func testAccDataprocCluster_withMetastoreConfig_update(rnd string) string {
+func testAccDataprocCluster_withMetastoreConfig_update(clusterName, serviceId string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_metastore_config" {
-	name                  = "tf-test-%s"
+	name                  = "%s"
 	region                = "us-central1"
 
 	cluster_config {
@@ -2224,7 +2214,7 @@ resource "google_dataproc_cluster" "with_metastore_config" {
 }
 
 resource "google_dataproc_metastore_service" "ms" {
-	service_id = "metastore-srv-update"
+	service_id = "%s"
 	location   = "us-central1"
 	port       = 9080
 	tier       = "DEVELOPER"
@@ -2238,5 +2228,5 @@ resource "google_dataproc_metastore_service" "ms" {
 		version = "3.1.2"
 	}
 }
-`, rnd)
+`, clusterName, serviceId)
 }
