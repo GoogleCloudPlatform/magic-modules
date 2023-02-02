@@ -30,7 +30,7 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"etag"},
 			},
 			{
-				Config: TestAccWorkstationsWorkstationConfig_update(context),
+				Config: testAccWorkstationsWorkstationConfig_update(context),
 			},
 			{
 				ResourceName:            "google_workstations_workstation_cluster.default",
@@ -42,7 +42,7 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 	})
 }
 
-func TestAccWorkstationsWorkstationConfig_update(context map[string]interface{}) string {
+func testAccWorkstationsWorkstationConfig_update(context map[string]interface{}) string {
 	return Nprintf(`
 data "google_project" "project" {
   provider = google-beta
