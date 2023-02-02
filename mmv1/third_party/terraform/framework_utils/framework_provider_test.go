@@ -42,6 +42,7 @@ func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
 	}
 }
 
+// Configure is here to overwrite the frameworkProvider configure function for VCR testing
 func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	if isVcrEnabled() {
 		configsLock.RLock()
