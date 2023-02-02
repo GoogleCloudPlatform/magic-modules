@@ -3,6 +3,7 @@ package google
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -16,10 +17,15 @@ func (w *TagsLocationOperationWaiter) QueryOp() (interface{}, error) {
 	if w == nil {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
-	// Returns the proper get.
-	url := fmt.Sprintf("%s%s", w.Config.TagsLocationBasePath, w.CommonOperationWaiter.Op.Name)
-
-	return sendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
+	location := GetLocationFromOpName(w.CommonOperationWaiter.Op.Name)
+	if location != w.CommonOperationWaiter.Op.Name {
+		// Found location in Op.Name, fill it in TagsLocationBasePath and rewrite URL
+		url := fmt.Sprintf("%s%s", strings.Replace(w.Config.TagsLocationBasePath, "{{location}}", location, 1), w.CommonOperationWaiter.Op.Name)
+		return sendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
+	} else {
+		url := fmt.Sprintf("%s%s", w.Config.TagsBasePath, w.CommonOperationWaiter.Op.Name)
+		return sendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
+	}
 }
 
 func createTagsLocationWaiter(config *Config, op map[string]interface{}, activity, userAgent string) (*TagsLocationOperationWaiter, error) {
