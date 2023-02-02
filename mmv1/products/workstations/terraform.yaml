@@ -36,6 +36,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       host.gceInstance.poolSize: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      host.gceInstance.bootDiskSizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       container: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       container.image: !ruby/object:Overrides::Terraform::PropertyOverride
