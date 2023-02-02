@@ -1,0 +1,115 @@
+--- !ruby/object:Api::Resource
+  name: 'InstanceGroup'
+  kind: 'compute#instanceGroup'
+  base_url: projects/{{project}}/zones/{{zone}}/instanceGroups
+  collection_url_key: 'items'
+  has_self_link: true
+  description: |
+    Represents an Instance Group resource. Instance groups are self-managed
+    and can contain identical or different instances. Instance groups do not
+    use an instance template. Unlike managed instance groups, you must create
+    and add instances to an instance group manually.
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      kind: 'compute#operation'
+      path: 'name'
+      base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'targetLink'
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'status'
+      complete: 'DONE'
+      allowed:
+        - 'PENDING'
+        - 'RUNNING'
+        - 'DONE'
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error/errors'
+      message: 'message'
+  input: true
+  parameters:
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'zone'
+      resource: 'Zone'
+      imports: 'name'
+      description: 'A reference to the zone where the instance group resides.'
+      required: true
+    - !ruby/object:Api::Type::Array
+      name: 'instances'
+      description: |
+        The list of instances associated with this InstanceGroup.
+        All instances must be created before being added to an InstanceGroup.
+        All instances not in this list will be removed from the InstanceGroup
+        and will not be deleted.
+        Only the full identifier of the instance will be returned.
+      exclude: true
+      item_type: !ruby/object:Api::Type::ResourceRef
+        name: 'instance'
+        description: 'An instance being added to the InstanceGroup'
+        resource: 'Instance'
+        imports: 'selfLink'
+  properties:
+    - !ruby/object:Api::Type::Time
+      name: 'creationTimestamp'
+      description: 'Creation timestamp in RFC3339 text format.'
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'description'
+      description: |
+        An optional description of this resource. Provide this property when
+        you create the resource.
+    # 'fingerprint' not applicable to state convergence.
+    - !ruby/object:Api::Type::Integer
+      name: 'id'
+      description: 'A unique identifier for this instance group.'
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        The name of the instance group.
+        The name must be 1-63 characters long, and comply with RFC1035.
+    - !ruby/object:Api::Type::Array
+      name: 'namedPorts'
+      description: |
+        Assigns a name to a port number.
+        For example: {name: "http", port: 80}.
+
+        This allows the system to reference ports by the assigned name
+        instead of a port number. Named ports can also contain multiple
+        ports.
+
+        For example: [{name: "http", port: 80},{name: "http", port: 8080}]
+
+        Named ports apply to all instances in this instance group.
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'name'
+            description: |
+              The name for this named port.
+              The name must be 1-63 characters long, and comply with RFC1035.
+          - !ruby/object:Api::Type::Integer
+            name: 'port'
+            description: |
+              The port number, which can be a value between 1 and 65535.
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'network'
+      resource: 'Network'
+      imports: 'selfLink'
+      description: |
+        The network to which all instances in the instance group belong.
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'region'
+      resource: 'Region'
+      imports: 'selfLink'
+      description: |
+        The region where the instance group is located
+        (for regional resources).
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'subnetwork'
+      resource: 'Subnetwork'
+      imports: 'selfLink'
+      description: |
+        The subnetwork to which all instances in the instance group belong.
+

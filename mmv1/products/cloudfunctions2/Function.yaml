@@ -1,0 +1,379 @@
+--- !ruby/object:Api::Resource
+  name: 'function'
+  base_url: projects/{{project}}/locations/{{location}}/functions
+  create_url: projects/{{project}}/locations/{{location}}/functions?functionId={{name}}
+  self_link: projects/{{project}}/locations/{{location}}/functions/{{name}}
+  create_verb: :POST
+  update_verb: :PATCH
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    api: 'https://cloud.google.com/functions/docs/reference/rest/v2beta/projects.locations.functions'
+  description: |
+    A Cloud Function that contains user computation executed in response to an event.
+  collection_url_key: 'functions'
+  update_mask: true
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+      # It takes about 35-40 mins to get the resource created
+      timeouts: !ruby/object:Api::Timeouts
+        insert_minutes: 60
+        update_minutes: 60
+        delete_minutes: 60
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: true
+      allowed:
+        - True
+        - False
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error'
+      message: 'message'
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: 'location'
+      input: true
+      url_param_only: true
+      description: The location of this cloud function.
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      required: true
+      input: true
+      description: |
+        A user-defined name of the function. Function names must
+        be unique globally and match pattern `projects/*/locations/*/functions/*`.
+      pattern: projects/{{project}}/locations/{{location}}/functions/{{name}}
+    - !ruby/object:Api::Type::String
+      name: 'description'
+      description: 'User-provided description of a function.'
+    - !ruby/object:Api::Type::Enum
+      name: 'environment'
+      output: true
+      description: 'The environment the function is hosted on.'
+      values:
+        - :ENVIRONMENT_UNSPECIFIED
+        - :GEN_1
+        - :GEN_2
+    - !ruby/object:Api::Type::Enum
+      name: 'state'
+      output: true
+      description: 'Describes the current state of the function.'
+      values:
+        - :STATE_UNSPECIFIED
+        - :ACTIVE
+        - :FAILED
+        - :DEPLOYING
+        - :DELETING
+        - :UNKNOWN
+    - !ruby/object:Api::Type::NestedObject
+      name: 'buildConfig'
+      description: |
+        Describes the Build step of the function that builds a container
+        from the given source.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'build'
+          description: |
+            The Cloud Build name of the latest successful
+            deployment of the function.
+          output: true
+        - !ruby/object:Api::Type::String
+          name: 'runtime'
+          description: |
+            The runtime in which to run the function. Required when deploying a new
+            function, optional when updating an existing function.
+        - !ruby/object:Api::Type::String
+          name: 'entryPoint'
+          description: |
+            The name of the function (as defined in source code) that will be executed.
+            Defaults to the resource name suffix, if not specified. For backward
+            compatibility, if function with given name is not found, then the system
+            will try to use function named "function". For Node.js this is name of a
+            function exported by the module specified in source_location.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'source'
+          description: 'The location of the function source code.'
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'storageSource'
+              description: 'If provided, get the source from this location in Google Cloud Storage.'
+              exactly_one_of:
+                - storage_source
+                - repo_source
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'bucket'
+                  description: 'Google Cloud Storage bucket containing the source'
+                - !ruby/object:Api::Type::String
+                  name: 'object'
+                  description: 'Google Cloud Storage object containing the source.'
+                - !ruby/object:Api::Type::Integer
+                  name: 'generation'
+                  description: |
+                    Google Cloud Storage generation for the object. If the generation
+                    is omitted, the latest generation will be used.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'repoSource'
+              description: 'If provided, get the source from this location in a Cloud Source Repository.'
+              exactly_one_of:
+                - storage_source
+                - repo_source
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'projectId'
+                  input: true
+                  description: |
+                    ID of the project that owns the Cloud Source Repository. If omitted, the
+                    project ID requesting the build is assumed.
+                - !ruby/object:Api::Type::String
+                  name: 'repoName'
+                  description: 'Name of the Cloud Source Repository.'
+                - !ruby/object:Api::Type::String
+                  name: 'branchName'
+                  description: 'Regex matching branches to build.'
+                  exactly_one_of:
+                    - branch_name
+                    - tag_name
+                    - commit_sha
+                - !ruby/object:Api::Type::String
+                  name: 'tagName'
+                  description: 'Regex matching tags to build.'
+                  exactly_one_of:
+                    - branch_name
+                    - tag_name
+                    - commit_sha
+                - !ruby/object:Api::Type::String
+                  name: 'commitSha'
+                  description: 'Regex matching tags to build.'
+                  exactly_one_of:
+                    - branch_name
+                    - tag_name
+                    - commit_sha
+                - !ruby/object:Api::Type::String
+                  name: 'dir'
+                  description: |
+                    Directory, relative to the source root, in which to run the build.
+                - !ruby/object:Api::Type::Boolean
+                  name: 'invertRegex'
+                  description: |
+                    Only trigger a build if the revision regex does
+                    NOT match the revision regex.
+        - !ruby/object:Api::Type::String
+          name: 'workerPool'
+          description: 'Name of the Cloud Build Custom Worker Pool that should be used to build the function.'
+        - !ruby/object:Api::Type::KeyValuePairs
+          name: 'environmentVariables'
+          description: |
+            User-provided build-time environment variables for the function.
+        - !ruby/object:Api::Type::String
+          name: 'dockerRepository'
+          description: |
+            User managed repository created in Artifact Registry optionally with a customer managed encryption key.
+    - !ruby/object:Api::Type::NestedObject
+      name: 'serviceConfig'
+      description: 'Describes the Service being deployed.'
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'service'
+          description: |
+            Name of the service associated with a Function.
+        - !ruby/object:Api::Type::Integer
+          name: 'timeoutSeconds'
+          description: |
+            The function execution timeout. Execution is considered failed and
+            can be terminated if the function is not completed at the end of the
+            timeout period. Defaults to 60 seconds.
+        - !ruby/object:Api::Type::String
+          name: 'availableMemory'
+          description: |
+            The amount of memory available for a function.
+            Defaults to 256M. Supported units are k, M, G, Mi, Gi. If no unit is
+            supplied the value is interpreted as bytes.
+        - !ruby/object:Api::Type::Integer
+          name: 'maxInstanceRequestConcurrency'
+          description: 'Sets the maximum number of concurrent requests that each instance can receive. Defaults to 1.'
+        - !ruby/object:Api::Type::String
+          name: 'availableCpu'
+          description: 'The number of CPUs used in a single container instance. Default value is calculated from available memory.'
+        - !ruby/object:Api::Type::KeyValuePairs
+          name: 'environmentVariables'
+          description: 'Environment variables that shall be available during function execution.'
+        - !ruby/object:Api::Type::Integer
+          name: 'maxInstanceCount'
+          description: |
+            The limit on the maximum number of function instances that may coexist at a
+            given time.
+        - !ruby/object:Api::Type::Integer
+          name: 'minInstanceCount'
+          description: |
+            The limit on the minimum number of function instances that may coexist at a
+            given time.
+        - !ruby/object:Api::Type::String
+          name: 'vpcConnector'
+          description: 'The Serverless VPC Access connector that this cloud function can connect to.'
+        - !ruby/object:Api::Type::Enum
+          name: 'vpcConnectorEgressSettings'
+          description: 'Available egress settings.'
+          values:
+            - :VPC_CONNECTOR_EGRESS_SETTINGS_UNSPECIFIED
+            - :PRIVATE_RANGES_ONLY
+            - :ALL_TRAFFIC
+        - !ruby/object:Api::Type::Enum
+          name: 'ingressSettings'
+          description: 'Available ingress settings. Defaults to "ALLOW_ALL" if unspecified.'
+          values:
+            - :ALLOW_ALL
+            - :ALLOW_INTERNAL_ONLY
+            - :ALLOW_INTERNAL_AND_GCLB
+          default_value: :ALLOW_ALL
+        - !ruby/object:Api::Type::String
+          name: 'uri'
+          description: 'URI of the Service deployed.'
+          output: true
+        - !ruby/object:Api::Type::String
+          name: 'gcfUri'
+          description: 'URIs of the Service deployed'
+          output: true
+        - !ruby/object:Api::Type::String
+          name: 'serviceAccountEmail'
+          description: 'The email of the service account for this function.'
+        - !ruby/object:Api::Type::Boolean
+          name: 'allTrafficOnLatestRevision'
+          description: 'Whether 100% of traffic is routed to the latest revision. Defaults to true.'
+          default_value: true
+        - !ruby/object:Api::Type::Array
+          name: 'secretEnvironmentVariables'
+          description: 'Secret environment variables configuration.'
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: key
+                description: |
+                  Name of the environment variable.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: projectId
+                description: |
+                  Project identifier (preferrably project number but can also be the project ID) of the project that contains the secret. If not set, it will be populated with the function's project assuming that the secret exists in the same project as of the function.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: secret
+                description: |
+                  Name of the secret in secret manager (not the full resource name).
+                required: true
+              - !ruby/object:Api::Type::String
+                name: version
+                description: |
+                  Version of the secret (version number or the string 'latest'). It is recommended to use a numeric version for secret environment variables as any updates to the secret value is not reflected until new instances start.
+                required: true
+        - !ruby/object:Api::Type::Array
+          name: 'secretVolumes'
+          description: 'Secret volumes configuration.'
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: mountPath
+                description: |
+                  The path within the container to mount the secret volume. For example, setting the mountPath as /etc/secrets would mount the secret value files under the /etc/secrets directory. This directory will also be completely shadowed and unavailable to mount any other secrets. Recommended mount path: /etc/secrets
+                required: true
+              - !ruby/object:Api::Type::String
+                name: projectId
+                description: |
+                  Project identifier (preferrably project number but can also be the project ID) of the project that contains the secret. If not set, it will be populated with the function's project assuming that the secret exists in the same project as of the function.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: secret
+                description: |
+                  Name of the secret in secret manager (not the full resource name).
+                required: true
+              - !ruby/object:Api::Type::Array
+                name: 'versions'
+                description: List of secret versions to mount for this secret. If empty, the latest version of the secret will be made available in a file named after the secret under the mount point.'
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: version
+                      description: |
+                        Version of the secret (version number or the string 'latest'). It is preferable to use latest version with secret volumes as secret value changes are reflected immediately.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: path
+                      description: |
+                        Relative path of the file under the mount path where the secret value for this version will be fetched and made available. For example, setting the mountPath as '/etc/secrets' and path as secret_foo would mount the secret value file at /etc/secrets/secret_foo.
+                      required: true
+    - !ruby/object:Api::Type::NestedObject
+      name: 'eventTrigger'
+      description: |
+        An Eventarc trigger managed by Google Cloud Functions that fires events in
+        response to a condition in another service.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'trigger'
+          description: 'Output only. The resource name of the Eventarc trigger.'
+          output: true
+        - !ruby/object:Api::Type::String
+          name: 'triggerRegion'
+          description: |
+            The region that the trigger will be in. The trigger will only receive
+            events originating in this region. It can be the same
+            region as the function, a different region or multi-region, or the global
+            region. If not provided, defaults to the same region as the function.
+        - !ruby/object:Api::Type::String
+          name: 'eventType'
+          description: 'Required. The type of event to observe.'
+        - !ruby/object:Api::Type::Array
+          name: 'eventFilters'
+          description: 'Criteria used to filter events.'
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: attribute
+                description: |
+                  'Required. The name of a CloudEvents attribute.
+                  Currently, only a subset of attributes are supported for filtering. Use the `gcloud eventarc providers describe` command to learn more about events and their attributes.
+                  Do not filter for the 'type' attribute here, as this is already achieved by the resource's `event_type` attribute.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: value
+                description: |
+                  Required. The value for the attribute.
+                  If the operator field is set as `match-path-pattern`, this value can be a path pattern instead of an exact value.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: operator
+                description: |
+                  Optional. The operator used for matching the events with the value of
+                  the filter. If not specified, only events that have an exact key-value
+                  pair specified in the filter are matched.
+                  The only allowed value is `match-path-pattern`.
+                  [See documentation on path patterns here](https://cloud.google.com/eventarc/docs/path-patterns)'
+        - !ruby/object:Api::Type::String
+          name: 'pubsubTopic'
+          description: |
+            The name of a Pub/Sub topic in the same project that will be used
+            as the transport topic for the event delivery.
+        - !ruby/object:Api::Type::String
+          name: 'serviceAccountEmail'
+          description: 'The email of the service account for this function.'
+        - !ruby/object:Api::Type::Enum
+          name: 'retryPolicy'
+          description: |
+            Describes the retry policy in case of function's execution failure.
+            Retried execution is charged as any other execution.
+          values:
+            - :RETRY_POLICY_UNSPECIFIED
+            - :RETRY_POLICY_DO_NOT_RETRY
+            - :RETRY_POLICY_RETRY
+    - !ruby/object:Api::Type::String
+      name: 'updateTime'
+      output: true
+      description: 'The last update timestamp of a Cloud Function.'
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'labels'
+      description: |
+        A set of key/value label pairs associated with this Cloud Function.

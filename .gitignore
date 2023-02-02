@@ -55,3 +55,7 @@ mmv1/build/*
 tpgtools/temp.serial
 
 tpgtools/serialization.go
+mmv1/_modules_count.sh
+mmv1/_testing
+mmv1/_testing.sh
+mmv1/convert.sh

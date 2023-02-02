@@ -1,0 +1,311 @@
+--- !ruby/object:Api::Resource
+  name: 'ForwardingRule'
+  kind: 'compute#forwardingRule'
+  base_url: projects/{{project}}/regions/{{region}}/forwardingRules
+  collection_url_key: 'items'
+  has_self_link: true
+  description: |
+    A ForwardingRule resource. A ForwardingRule resource specifies which pool
+    of target virtual machines to forward a packet to if it matches the given
+    [IPAddress, IPProtocol, portRange] tuple.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
+    api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRules'
+  input: true
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      kind: 'compute#operation'
+      path: 'name'
+      base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'targetLink'
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'status'
+      complete: 'DONE'
+      allowed:
+        - 'PENDING'
+        - 'RUNNING'
+        - 'DONE'
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error/errors'
+      message: 'message'
+  parameters:
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'region'
+      resource: 'Region'
+      imports: 'name'
+      description: |
+        A reference to the region where the regional forwarding rule resides.
+        This field is not applicable to global forwarding rules.
+      required: true
+  properties:
+    - !ruby/object:Api::Type::Time
+      name: 'creationTimestamp'
+      description: 'Creation timestamp in RFC3339 text format.'
+      output: true
+    - !ruby/object:Api::Type::Boolean
+      name: 'isMirroringCollector'
+      description: |
+          Indicates whether or not this load balancer can be used
+          as a collector for packet mirroring. To prevent mirroring loops,
+          instances behind this load balancer will not have their traffic
+          mirrored even if a PacketMirroring rule applies to them. This
+          can only be set to true for load balancers that have their
+          loadBalancingScheme set to INTERNAL.
+    - !ruby/object:Api::Type::String
+      name: 'pscConnectionId'
+      description: 'The PSC connection id of the PSC Forwarding Rule.'
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'pscConnectionStatus'
+      description: 'The PSC connection status of the PSC Forwarding Rule. Possible
+          values: STATUS_UNSPECIFIED, PENDING, ACCEPTED, REJECTED, CLOSED'
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'description'
+      description: |
+        An optional description of this resource. Provide this property when
+        you create the resource.
+    - !ruby/object:Api::Type::Integer
+      name: 'id'
+      description: 'The unique identifier for the resource.'
+      output: true
+    # This is a multi-resource resource reference (Address, GlobalAddress)
+    - !ruby/object:Api::Type::String
+      name: 'IPAddress'
+      description: |
+        The IP address that this forwarding rule serves. When a client sends
+        traffic to this IP address, the forwarding rule directs the traffic to
+        the target that you specify in the forwarding rule. The
+        loadBalancingScheme and the forwarding rule's target determine the
+        type of IP address that you can use. For detailed information, refer
+        to [IP address specifications](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts#ip_address_specifications).
+
+        An address can be specified either by a literal IP address or a
+        reference to an existing Address resource. If you don't specify a
+        reserved IP address, an ephemeral IP address is assigned.
+
+        The value must be set to 0.0.0.0 when the target is a targetGrpcProxy
+        that has validateForProxyless field set to true.
+
+        For Private Service Connect forwarding rules that forward traffic to
+        Google APIs, IP address must be provided.
+    - !ruby/object:Api::Type::Enum
+      name: 'IPProtocol'
+      description: |
+        The IP protocol to which this rule applies.
+
+        When the load balancing scheme is INTERNAL, only TCP and UDP are
+        valid.
+      values:
+        - :TCP
+        - :UDP
+        - :ESP
+        - :AH
+        - :SCTP
+        - :ICMP
+        - :L3_DEFAULT
+    # This is a multi-resource resource reference (BackendService (global), RegionBackendService)
+    # We have custom expands that manage this.
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'backendService'
+      resource: 'BackendService'
+      imports: 'selfLink'
+      description: |
+        A BackendService to receive the matched traffic. This is used only
+        for INTERNAL load balancing.
+    - !ruby/object:Api::Type::Enum
+      name: 'loadBalancingScheme'
+      description: |
+        This signifies what the ForwardingRule will be used for and can be
+        EXTERNAL, EXTERNAL_MANAGED, INTERNAL, or INTERNAL_MANAGED. EXTERNAL is used for Classic
+        Cloud VPN gateways, protocol forwarding to VMs from an external IP address,
+        and HTTP(S), SSL Proxy, TCP Proxy, and Network TCP/UDP load balancers.
+        INTERNAL is used for protocol forwarding to VMs from an internal IP address,
+        and internal TCP/UDP load balancers.
+        EXTERNAL_MANAGED is used for regional external HTTP(S) load balancers.
+        INTERNAL_MANAGED is used for internal HTTP(S) load balancers.
+
+        ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Note: This field must be set to ""
+        if the target is an URI of a service attachment.
+      values:
+        - :EXTERNAL
+        - :EXTERNAL_MANAGED
+        - :INTERNAL
+        - :INTERNAL_MANAGED
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        Name of the resource; provided by the client when the resource is
+        created. The name must be 1-63 characters long, and comply with
+        RFC1035. Specifically, the name must be 1-63 characters long and match
+        the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+        first character must be a lowercase letter, and all following
+        characters must be a dash, lowercase letter, or digit, except the last
+        character, which cannot be a dash.
+      required: true
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'network'
+      resource: 'Network'
+      imports: 'selfLink'
+      description: |
+        For internal load balancing, this field identifies the network that
+        the load balanced IP should belong to for this Forwarding Rule. If
+        this field is not specified, the default network will be used.
+        This field is only used for INTERNAL load balancing.
+    # TODO(nelsonjr): When implementing new types enable converting the
+    # manifest input from a single value to a range of form NN-NN. The API
+    # accepts a single value, e.g. '80', but the API stores and returns
+    # '80-80'. This causes idempotency false positive.
+    - !ruby/object:Api::Type::String
+      name: 'portRange'
+      description: |
+        This field is used along with the target field for TargetHttpProxy,
+        TargetHttpsProxy, TargetSslProxy, TargetTcpProxy, TargetVpnGateway,
+        TargetPool, TargetInstance.
+
+        Applicable only when IPProtocol is TCP, UDP, or SCTP, only packets
+        addressed to ports in the specified range will be forwarded to target.
+        Forwarding rules with the same [IPAddress, IPProtocol] pair must have
+        disjoint port ranges.
+
+        Some types of forwarding target have constraints on the acceptable
+        ports:
+
+        * TargetHttpProxy: 80, 8080
+        * TargetHttpsProxy: 443
+        * TargetTcpProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
+                          1883, 5222
+        * TargetSslProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
+                          1883, 5222
+        * TargetVpnGateway: 500, 4500
+    - !ruby/object:Api::Type::Array
+      name: 'ports'
+      max_size: 5
+      description: |
+        This field is used along with internal load balancing and network
+        load balancer when the forwarding rule references a backend service
+        and when protocol is not L3_DEFAULT.
+
+        A single port or a comma separated list of ports can be configured.
+        Only packets addressed to these ports will be forwarded to the backends
+        configured with this forwarding rule.
+
+        You can only use one of ports and portRange, or allPorts.
+        The three are mutually exclusive.
+
+        You may specify a maximum of up to 5 ports, which can be non-contiguous.
+      item_type: Api::Type::String
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'subnetwork'
+      resource: 'Subnetwork'
+      imports: 'selfLink'
+      description: |
+        The subnetwork that the load balanced IP should belong to for this
+        Forwarding Rule.  This field is only used for INTERNAL load balancing.
+
+        If the network specified is in auto subnet mode, this field is
+        optional. However, if the network is in custom subnet mode, a
+        subnetwork must be specified.
+    # This is a multi-resource resource reference (TargetHttp(s)Proxy,
+    # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
+    # TargetInstance)
+    - !ruby/object:Api::Type::String
+      name: 'target'
+      description: |
+        The URL of the target resource to receive the matched traffic.
+        The target must live in the same region as the forwarding rule.
+        The forwarded traffic must be of a type appropriate to the target
+        object.
+      update_verb: :POST
+      update_url:
+        'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
+    - !ruby/object:Api::Type::Boolean
+      name: 'allowGlobalAccess'
+      description: |
+        If true, clients can access ILB from all regions.
+        Otherwise only allows from the local region the ILB is located at.
+      send_empty_value: true
+      update_verb: :PATCH
+      update_url:  projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'labels'
+      description: |
+        Labels to apply to this forwarding rule.  A list of key->value pairs.
+      update_verb: :POST
+      update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+      min_version: beta
+    - !ruby/object:Api::Type::Fingerprint
+      name: 'labelFingerprint'
+      description: |
+        The fingerprint used for optimistic locking of this resource.  Used
+        internally during updates.
+      update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+      update_verb: :POST
+      min_version: beta
+    # While this field doesn't appear in the resource definition in the docs,
+    # it's present in Get and Insert, and the resource has no Update/Patch call.
+    - !ruby/object:Api::Type::Boolean
+      name: 'allPorts'
+      description: |
+        This field can be used with internal load balancer or network load balancer
+        when the forwarding rule references a backend service, or with the target
+        field when it references a TargetInstance. Set this to true to
+        allow packets addressed to any ports to be forwarded to the backends configured
+        with this forwarding rule. This can be used when the protocol is TCP/UDP, and it
+        must be set to true when the protocol is set to L3_DEFAULT.
+        Cannot be set if port or portRange are set.
+    - !ruby/object:Api::Type::Enum
+      name: 'networkTier'
+      description: |
+        The networking tier used for configuring this address. If this field is not
+        specified, it is assumed to be PREMIUM.
+      values:
+        - :PREMIUM
+        - :STANDARD
+      input: true
+    - !ruby/object:Api::Type::Array
+      name: 'serviceDirectoryRegistrations'
+      description: |
+        Service Directory resources to register this forwarding rule with. Currently,
+        only supports a single Service Directory resource.
+      min_size: 0
+      max_size: 1
+      input: true
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'namespace'
+            description: |
+              Service Directory namespace to register the forwarding rule under.
+            input: true
+          - !ruby/object:Api::Type::String
+            name: 'service'
+            description: |
+              Service Directory service to register the forwarding rule under.
+            input: true
+    - !ruby/object:Api::Type::String
+      name: 'serviceLabel'
+      description: |
+        An optional prefix to the service name for this Forwarding Rule.
+        If specified, will be the first label of the fully qualified service
+        name.
+
+        The label must be 1-63 characters long, and comply with RFC1035.
+        Specifically, the label must be 1-63 characters long and match the
+        regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first
+        character must be a lowercase letter, and all following characters
+        must be a dash, lowercase letter, or digit, except the last
+        character, which cannot be a dash.
+
+        This field is only used for INTERNAL load balancing.
+    - !ruby/object:Api::Type::String
+      name: 'serviceName'
+      description: |
+        The internal fully qualified service name for this Forwarding Rule.
+        This field is only used for INTERNAL load balancing.
+      output: true
+

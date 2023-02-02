@@ -1,0 +1,147 @@
+--- !ruby/object:Api::Resource
+  name: 'Routine'
+  kind: 'bigquery#routine'
+  base_url: projects/{{project}}/datasets/{{dataset_id}}/routines
+  self_link: projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}
+  description: |
+    A user-defined function or a stored procedure that belongs to a Dataset
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Routines Intro': 'https://cloud.google.com/bigquery/docs/reference/rest/v2/routines'
+    api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/routines'
+  properties:
+    - !ruby/object:Api::Type::NestedObject
+      name: routineReference
+      description: Reference describing the ID of this routine
+      required: true
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'datasetId'
+          description: The ID of the dataset containing this routine
+          required: true
+          input: true
+        - !ruby/object:Api::Type::String
+          name: 'projectId'
+          description: The ID of the project containing this routine
+          required: true
+          input: true
+        - !ruby/object:Api::Type::String
+          name: 'routineId'
+          description: The ID of the the routine. The ID must contain only
+            letters (a-z, A-Z), numbers (0-9), or underscores (_).
+            The maximum length is 256 characters.
+          required: true
+          input: true
+    - !ruby/object:Api::Type::Enum
+      name: 'routineType'
+      input: true
+      description: The type of routine.
+      values:
+        - :SCALAR_FUNCTION
+        - :PROCEDURE
+        - :TABLE_VALUED_FUNCTION
+    - !ruby/object:Api::Type::Integer
+      name: 'creationTime'
+      output: true
+      description: |
+        The time when this routine was created, in milliseconds since the
+        epoch.
+    - !ruby/object:Api::Type::Integer
+      name: 'lastModifiedTime'
+      output: true
+      description: |
+        The time when this routine was modified, in milliseconds since the
+        epoch.
+    - !ruby/object:Api::Type::Enum
+      name: 'language'
+      description: |
+        The language of the routine.
+      values:
+        - :SQL
+        - :JAVASCRIPT
+    - !ruby/object:Api::Type::Array
+      name: 'arguments'
+      description: Input/output argument of a function or a stored procedure.
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'name'
+            description: |
+              The name of this argument. Can be absent for function return argument.
+          - !ruby/object:Api::Type::Enum
+            name: 'argumentKind'
+            description: Defaults to FIXED_TYPE.
+            values:
+              - :FIXED_TYPE
+              - :ANY_TYPE
+            default_value: :FIXED_TYPE
+          - !ruby/object:Api::Type::Enum
+            name: 'mode'
+            description: |
+              Specifies whether the argument is input or output. Can be set for procedures only.
+            values:
+              - :IN
+              - :OUT
+              - :INOUT
+          - !ruby/object:Api::Type::String
+            # This is a string instead of a NestedObject because schemas contain ColumnSchemas,
+            # which can contain nested StandardSqlDataType.
+            # We'll have people provide the json blob for the schema instead.
+            name: 'dataType'
+            description: |
+              A JSON schema for the data type. Required unless argumentKind = ANY_TYPE.
+              ~>**NOTE**: Because this field expects a JSON string, any changes to the string
+              will create a diff, even if the JSON itself hasn't changed. If the API returns
+              a different value for the same schema, e.g. it switched the order of values
+              or replaced STRUCT field type with RECORD field type, we currently cannot
+              suppress the recurring diff this causes. As a workaround, we recommend using
+              the schema as returned by the API.
+    - !ruby/object:Api::Type::String
+      name: 'returnType'
+      description: |
+        A JSON schema for the return type. Optional if language = "SQL"; required otherwise.
+        If absent, the return type is inferred from definitionBody at query time in each query
+        that references this routine. If present, then the evaluated result will be cast to
+        the specified returned type at query time. ~>**NOTE**: Because this field expects a JSON
+        string, any changes to the string will create a diff, even if the JSON itself hasn't
+        changed. If the API returns a different value for the same schema, e.g. it switche
+        d the order of values or replaced STRUCT field type with RECORD field type, we currently
+        cannot suppress the recurring diff this causes. As a workaround, we recommend using
+        the schema as returned by the API.
+    - !ruby/object:Api::Type::String
+      name: 'returnTableType'
+      description: |
+        Optional. Can be set only if routineType = "TABLE_VALUED_FUNCTION".
+
+        If absent, the return table type is inferred from definitionBody at query time in each query
+        that references this routine. If present, then the columns in the evaluated table result will
+        be cast to match the column types specificed in return table type, at query time.
+    - !ruby/object:Api::Type::Array
+      name: 'importedLibraries'
+      description: |
+        Optional. If language = "JAVASCRIPT", this field stores the path of the
+        imported JAVASCRIPT libraries.
+      item_type: Api::Type::String
+    - !ruby/object:Api::Type::String
+      name: 'definitionBody'
+      required: true
+      description: |
+        The body of the routine. For functions, this is the expression in the AS clause.
+        If language=SQL, it is the substring inside (but excluding) the parentheses.
+    - !ruby/object:Api::Type::String
+      name: 'description'
+      description: The description of the routine if defined.
+    - !ruby/object:Api::Type::Enum
+      name: 'determinismLevel'
+      description: The determinism level of the JavaScript UDF if defined.
+      values:
+        - :DETERMINISM_LEVEL_UNSPECIFIED
+        - :DETERMINISTIC
+        - :NOT_DETERMINISTIC
+    - !ruby/object:Api::Type::String
+      name: 'id'
+      output: true
+      description: |
+        The fully-qualified unique name of the routine in the format
+        projectId:datasetId:routineId. The routine name without the project name is
+        given in the routineId field

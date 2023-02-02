@@ -1,0 +1,102 @@
+--- !ruby/object:Api::Resource
+  name: 'VpnGateway'
+  kind: 'compute#vpnGateway'
+  base_url: projects/{{project}}/regions/{{region}}/vpnGateways
+  collection_url_key: 'items'
+  input: true
+  has_self_link: true
+  description: |
+    Represents a VPN gateway running in GCP. This virtual device is managed
+    by Google, but used only by you. This type of VPN Gateway allows for the creation
+    of VPN solutions with higher availability than classic Target VPN Gateways.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Choosing a VPN': https://cloud.google.com/vpn/docs/how-to/choosing-a-vpn
+      'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/vpnGateways
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      kind: 'compute#operation'
+      path: 'name'
+      base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'targetLink'
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'status'
+      complete: 'DONE'
+      allowed:
+        - 'PENDING'
+        - 'RUNNING'
+        - 'DONE'
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error/errors'
+      message: 'message'
+  parameters:
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'region'
+      resource: 'Region'
+      imports: 'name'
+      description: |
+        The region this gateway should sit in.
+      required: true
+  properties:
+    - !ruby/object:Api::Type::Time
+      name: 'creationTimestamp'
+      description: 'Creation timestamp in RFC3339 text format.'
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'description'
+      description: 'An optional description of this resource.'
+      input: true
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        Name of the resource. Provided by the client when the resource is
+        created. The name must be 1-63 characters long, and comply with
+        RFC1035.  Specifically, the name must be 1-63 characters long and
+        match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
+        the first character must be a lowercase letter, and all following
+        characters must be a dash, lowercase letter, or digit, except the last
+        character, which cannot be a dash.
+      required: true
+      input: true
+    - !ruby/object:Api::Type::Integer
+      name: 'id'
+      description: 'The unique identifier for the resource.'
+      output: true
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'network'
+      resource: 'Network'
+      imports: 'selfLink'
+      description: |
+        The network this VPN gateway is accepting traffic for.
+      required: true
+      input: true
+    - !ruby/object:Api::Type::Array
+      name: 'vpnInterfaces'
+      description: |
+        A list of interfaces on this VPN gateway.
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'id'
+            description: 'The numeric ID of this VPN gateway interface.'
+          - !ruby/object:Api::Type::String
+            name: 'ipAddress'
+            description: 'The external IP address for this VPN gateway interface.'
+            output: true
+          - !ruby/object:Api::Type::ResourceRef
+            name: 'interconnectAttachment'
+            resource: 'InterconnectAttachment'
+            imports: 'selfLink'
+            description: |
+                URL of the interconnect attachment resource. When the value
+                of this field is present, the VPN Gateway will be used for
+                IPsec-encrypted Cloud Interconnect; all Egress or Ingress
+                traffic for this VPN Gateway interface will go through the
+                specified interconnect attachment resource.
+
+                Not currently available publicly.
+            input: true
+

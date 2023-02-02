@@ -1,0 +1,85 @@
+--- !ruby/object:Api::Resource
+  name: 'AppConnector'
+  description: |
+    A BeyondCorp AppConnector resource represents an application facing component deployed proximal to 
+    and with direct access to the application instances. It is used to establish connectivity between the 
+    remote enterprise environment and GCP. It initiates connections to the applications and can proxy the 
+    data from users over the connection.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation': 'https://cloud.google.com/beyondcorp-enterprise/docs/enable-app-connector'
+    api: 'https://cloud.google.com/beyondcorp/docs/reference/rest#rest-resource:-v1.projects.locations.appconnectors'
+  base_url: projects/{{project}}/locations/{{region}}/appConnectors
+  self_link: projects/{{project}}/locations/{{region}}/appConnectors/{{name}}
+  create_url: projects/{{project}}/locations/{{region}}/appConnectors?app_connector_id={{name}}
+  update_verb: :PATCH
+  update_mask: true
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: true
+      allowed:
+        - true
+        - false
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error'
+      message: 'message'
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      required: true
+      input: true
+      description: |
+        ID of the AppConnector.
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: 'region'
+      description: |
+        The region of the AppConnector.
+      input: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: 'displayName'
+      description: |
+        An arbitrary user-provided name for the AppConnector.
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'labels'
+      description: |
+        Resource labels to represent user provided metadata.
+    - !ruby/object:Api::Type::NestedObject
+      name: 'principalInfo'
+      description: |
+        Principal information about the Identity of the AppConnector.
+      required: true
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: 'serviceAccount'
+          description: |
+            ServiceAccount represents a GCP service account.
+          required: true
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'email'
+              description: |
+                Email address of the service account.
+              required: true
+    - !ruby/object:Api::Type::Enum
+      name: 'state'
+      output: true
+      description: |
+         Represents the different states of a AppConnector.
+      values:
+        - :STATE_UNSPECIFIED
+        - :CREATING
+        - :CREATED
+        - :UPDATING
+        - :DELETING
+        - :DOWN
+
