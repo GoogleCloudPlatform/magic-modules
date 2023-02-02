@@ -10,8 +10,6 @@ import (
 )
 
 func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
-	t.Parallel()
-
 	context := map[string]interface{}{
 		"org_id": getTestOrgFromEnv(t),
 	}
@@ -37,15 +35,15 @@ func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
 func testAccAccessContextManagerAuthorizedOrgsDesc_accessContextManagerAuthorizedOrgsDescBasicExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_access_context_manager_authorized_orgs_desc" "authorized-orgs-desc" {
-  parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}"
-  name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/authorizedOrgsDescs/fakeDescName"
+  parent = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/authorizedOrgsDescs/fakeDescName"
   authorization_type = "AUTHORIZATION_TYPE_TRUST"
   asset_type = "ASSET_TYPE_CREDENTIAL_STRENGTH"
   authorization_direction = "AUTHORIZATION_DIRECTION_TO"
   orgs = ["organizations/12345", "organizations/98765"]
 }
 
-resource "google_access_context_manager_access_policy" "access-policy" {
+resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%{org_id}"
   title  = "my policy"
 }
