@@ -1,0 +1,28 @@
+--- !ruby/object:Api::Resource
+  name: "Bucket"
+  min_version: beta
+  base_url: projects/{{project}}/buckets
+  self_link: projects/{{project}}/buckets/{{bucket_id}}
+  create_url: projects/{{project}}/buckets/{{bucket_id}}:addFirebase
+  delete_url: projects/{{project}}/buckets/{{bucket_id}}:removeFirebase
+  delete_verb: :POST
+  description: |
+    An association between a Firebase project and a Google Cloud Storage bucket.
+    This association enables integration of Cloud Storage buckets with Firebase such as Firebase SDKS, Authentication, and Security Rules.
+  input: true # Does not support update operation. There is nothing to update.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      "Official Documentation": "https://firebase.google.com/docs/storage/"
+    api: "https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets"
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: bucket_id
+      description: Required. Immutable. The ID of the underlying Google Cloud Storage bucket
+      input: true
+      url_param_only: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: name
+      pattern: projects/{{project}}/buckets/{{bucket_id}}
+      description: Resource name of the bucket in the format projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
+      output: true

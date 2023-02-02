@@ -1,0 +1,281 @@
+--- !ruby/object:Api::Resource
+  name: 'ManagedZone'
+  kind: 'dns#managedZone'
+  base_url: 'projects/{{project}}/managedZones'
+  update_verb: :PUT
+  description: |
+    A zone is a subtree of the DNS namespace under one administrative
+    responsibility. A ManagedZone is a resource that represents a DNS zone
+    hosted by the Cloud DNS service.
+  iam_policy: !ruby/object:Api::Resource::IamPolicy
+    exclude: false
+    method_name_separator: ':'
+    fetch_iam_policy_verb: :POST
+    parent_resource_attribute: 'managed_zone'
+    set_iam_policy_verb: :POST
+    import_format: ["projects/{{project}}/managedZones/{{managed_zone}}", "{{project}}/{{managed_zone}}"]
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'description'
+      description: |
+        A mutable string of at most 1024 characters associated with this
+        resource for the user's convenience. Has no effect on the managed
+        zone's function.
+      required: true
+    - !ruby/object:Api::Type::String
+      name: 'dnsName'
+      description: |
+        The DNS name of this managed zone, for instance "example.com.".
+      input: true
+      required: true
+    - !ruby/object:Api::Type::NestedObject
+      name: 'dnssecConfig'
+      description: DNSSEC configuration
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'kind'
+          at_least_one_of:
+            - dnssec_config.0.kind
+            - dnssec_config.0.non_existence
+            - dnssec_config.0.state
+            - dnssec_config.0.default_key_specs
+          description: Identifies what kind of resource this is
+          default_value: 'dns#managedZoneDnsSecConfig'
+        - !ruby/object:Api::Type::Enum
+          name: 'nonExistence'
+          at_least_one_of:
+            - dnssec_config.0.kind
+            - dnssec_config.0.non_existence
+            - dnssec_config.0.state
+            - dnssec_config.0.default_key_specs
+          description: |
+            Specifies the mechanism used to provide authenticated denial-of-existence responses.
+            non_existence can only be updated when the state is `off`.
+          values:
+            - "nsec"
+            - "nsec3"
+        - !ruby/object:Api::Type::Enum
+          name: 'state'
+          at_least_one_of:
+            - dnssec_config.0.kind
+            - dnssec_config.0.non_existence
+            - dnssec_config.0.state
+            - dnssec_config.0.default_key_specs
+          description: Specifies whether DNSSEC is enabled, and what mode it is in
+          values:
+            - "off"
+            - "on"
+            - "transfer"
+        - !ruby/object:Api::Type::Array
+          name: 'defaultKeySpecs'
+          at_least_one_of:
+            - dnssec_config.0.kind
+            - dnssec_config.0.non_existence
+            - dnssec_config.0.state
+            - dnssec_config.0.default_key_specs
+          description: |
+            Specifies parameters that will be used for generating initial DnsKeys
+            for this ManagedZone. If you provide a spec for keySigning or zoneSigning,
+            you must also provide one for the other.
+            default_key_specs can only be updated when the state is `off`.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::Enum
+                name: 'algorithm'
+                description:
+                  String mnemonic specifying the DNSSEC algorithm of this key
+                values:
+                  - "ecdsap256sha256"
+                  - "ecdsap384sha384"
+                  - "rsasha1"
+                  - "rsasha256"
+                  - "rsasha512"
+              - !ruby/object:Api::Type::Integer
+                name: 'keyLength'
+                description: Length of the keys in bits
+              - !ruby/object:Api::Type::Enum
+                name: 'keyType'
+                description: |
+                  Specifies whether this is a key signing key (KSK) or a zone
+                  signing key (ZSK). Key signing keys have the Secure Entry
+                  Point flag set and, when active, will only be used to sign
+                  resource record sets of type DNSKEY. Zone signing keys do
+                  not have the Secure Entry Point flag set and will be used
+                  to sign all other types of resource record sets.
+                values:
+                  - "keySigning"
+                  - "zoneSigning"
+              - !ruby/object:Api::Type::String
+                name: 'kind'
+                description: 'Identifies what kind of resource this is'
+                default_value: 'dns#dnsKeySpec'
+    - !ruby/object:Api::Type::Integer
+      name: 'id'
+      description: Unique identifier for the resource; defined by the server.
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        User assigned name for this resource.
+        Must be unique within the project.
+      input: true
+      required: true
+    - !ruby/object:Api::Type::Array
+      name: 'nameServers'
+      description: |
+        Delegate your managed_zone to these virtual name servers;
+        defined by the server
+      item_type: Api::Type::String
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'nameServerSet'
+      description: |
+        Optionally specifies the NameServerSet for this ManagedZone. A
+        NameServerSet is a set of DNS name servers that all host the same
+        ManagedZones. Most users will leave this field unset.
+      input: true
+    - !ruby/object:Api::Type::Time
+      name: 'creationTime'
+      description: |
+        The time that this resource was created on the server.
+        This is in RFC3339 text format.
+      output: true
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'labels'
+      description: |
+        A set of key/value label pairs to assign to this ManagedZone.
+    - !ruby/object:Api::Type::Enum
+      name: 'visibility'
+      input: true
+      description: |
+        The zone's visibility: public zones are exposed to the Internet,
+        while private zones are visible only to Virtual Private Cloud resources.
+      values:
+      - :private
+      - :public
+      default_value: :public
+    - !ruby/object:Api::Type::NestedObject
+      name: 'privateVisibilityConfig'
+      description: |
+        For privately visible zones, the set of Virtual Private Cloud
+        resources that the zone is visible from.
+      send_empty_value: true
+      properties:
+        - !ruby/object:Api::Type::Array
+          name: 'gkeClusters'
+          description: 'The list of Google Kubernetes Engine clusters that can see this zone.'
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'gkeClusterName'
+                description: |
+                  The resource name of the cluster to bind this ManagedZone to.  
+                  This should be specified in the format like  
+                  `projects/*/locations/*/clusters/*`
+                required: true
+        - !ruby/object:Api::Type::Array
+          name: 'networks'
+          description: 'The list of VPC networks that can see this zone.'
+          required: true
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+              # are possible.
+              - !ruby/object:Api::Type::String
+                name: 'networkUrl'
+                description: |
+                  The fully qualified URL of the VPC network to bind to.
+                  This should be formatted like
+                  `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+                required: true
+    - !ruby/object:Api::Type::NestedObject
+      name: 'forwardingConfig'
+      description: |
+        The presence for this field indicates that outbound forwarding is enabled
+        for this zone. The value of this field contains the set of destinations
+        to forward to.
+      properties:
+        - !ruby/object:Api::Type::Array
+          name: 'targetNameServers'
+          required: true
+          description: |
+            List of target name servers to forward to. Cloud DNS will
+            select the best available name server if more than
+            one target is given.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'ipv4Address'
+                required: true
+                description: 'IPv4 address of a target name server.'
+              - !ruby/object:Api::Type::Enum
+                name: 'forwardingPath'
+                description: |
+                  Forwarding path for this TargetNameServer. If unset or `default` Cloud DNS will make forwarding
+                  decision based on address ranges, i.e. RFC1918 addresses go to the VPC, Non-RFC1918 addresses go
+                  to the Internet. When set to `private`, Cloud DNS will always send queries through VPC for this target
+                values:
+                - :default
+                - :private
+    - !ruby/object:Api::Type::NestedObject
+      name: 'peeringConfig'
+      description: |
+        The presence of this field indicates that DNS Peering is enabled for this
+        zone. The value of this field contains the network to peer with.
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: 'targetNetwork'
+          required: true
+          description: 'The network with which to peer.'
+          properties:
+            # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+            # are possible.
+            - !ruby/object:Api::Type::String
+              name: 'networkUrl'
+              required: true
+              description: |
+                The fully qualified URL of the VPC network to forward queries to.
+                This should be formatted like
+                `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+    - !ruby/object:Api::Type::Boolean
+      name: 'reverseLookup'
+      api_name: reverseLookupConfig
+      min_version: beta
+      input: true
+      description: |
+        Specifies if this is a managed reverse lookup zone. If true, Cloud DNS will resolve reverse
+        lookup queries using automatically configured records for VPC resources. This only applies
+        to networks listed under `private_visibility_config`.
+    - !ruby/object:Api::Type::NestedObject
+      min_version: beta
+      input: true
+      name: 'serviceDirectoryConfig'
+      description:
+        The presence of this field indicates that this zone is backed by Service Directory. The value
+        of this field contains information related to the namespace associated with the zone.
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: 'namespace'
+          required: true
+          description: 'The namespace associated with the zone.'
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'namespaceUrl'
+              required: true
+              description: |
+                The fully qualified URL of the service directory namespace that should be
+                associated with the zone. Ignored for `public` visibility zones.
+    - !ruby/object:Api::Type::NestedObject
+      name: 'cloudLoggingConfig'
+      description: 'Cloud logging configuration'
+      properties:
+        - !ruby/object:Api::Type::Boolean
+          name: 'enableLogging'
+          required: true
+          description: 'If set, enable query logging for this ManagedZone. False by default, making logging opt-in.'
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Managing Zones':
+        'https://cloud.google.com/dns/zones/'
+    api: 'https://cloud.google.com/dns/api/v1/managedZones'
+

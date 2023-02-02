@@ -1,0 +1,29 @@
+--- !ruby/object:Api::Resource
+  name: 'Project'
+  min_version: beta
+  base_url: projects/{{project}}
+  self_link: projects/{{project}}
+  create_url: projects/{{project}}:addFirebase
+  input: true
+  description: |
+    A Google Cloud Firebase instance. This enables Firebase resources on a given google project.
+    Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
+    identifiers (most importantly, the projectId) as its own for easy interop with GCP APIs.
+    Once Firebase has been added to a Google Project it cannot be removed.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://firebase.google.com/'
+    api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects'
+  properties:
+    - !ruby/object:Api::Type::String
+      name: projectNumber
+      output: true
+      description: |
+        The number of the google project that firebase is enabled on.
+    - !ruby/object:Api::Type::String
+      name: displayName
+      output: true
+      description: |
+        The GCP project display name
+

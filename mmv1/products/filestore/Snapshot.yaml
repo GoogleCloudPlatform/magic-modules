@@ -1,0 +1,75 @@
+--- !ruby/object:Api::Resource
+  name: 'Snapshot'
+  create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots?snapshotId={{name}}
+  self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots/{{name}}
+  base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots
+  update_verb: :PATCH
+  update_mask: true
+  description: |
+    A Google Cloud Filestore snapshot.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://cloud.google.com/filestore/docs/snapshots'
+      'Creating Snapshots':
+        'https://cloud.google.com/filestore/docs/create-snapshots'
+    api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.snapshots'
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: 'location'
+      description: |
+        The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
+      input: true
+      required: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: 'instance'
+      description: |
+        The resource name of the filestore instance.
+      input: true
+      required: true
+      url_param_only: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        The resource name of the snapshot. The name must be unique within the specified instance.
+
+        The name must be 1-63 characters long, and comply with
+        RFC1035. Specifically, the name must be 1-63 characters long and match
+        the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+        first character must be a lowercase letter, and all following
+        characters must be a dash, lowercase letter, or digit, except the last
+        character, which cannot be a dash.
+      required: true
+      input: true
+      url_param_only: true
+      pattern: projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots/{{name}}
+    - !ruby/object:Api::Type::String
+      name: 'description'
+      description: |
+        A description of the snapshot with 2048 characters or less. Requests with longer descriptions will be rejected.
+    - !ruby/object:Api::Type::Enum
+      name: 'state'
+      description: |
+        The snapshot state.
+      values:
+        - :CREATING
+        - :READY
+        - :DELETING
+      output: true
+    - !ruby/object:Api::Type::Time
+      name: 'createTime'
+      description: |
+        The time when the snapshot was created in RFC3339 text format.
+      output: true
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'labels'
+      description: |
+        Resource labels to represent user-provided metadata.
+    - !ruby/object:Api::Type::String
+      name: 'filesystemUsedBytes'
+      description: |
+        The amount of bytes needed to allocate a full copy of the snapshot content.
+      output: true
+

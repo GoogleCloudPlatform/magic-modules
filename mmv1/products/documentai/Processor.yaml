@@ -1,0 +1,43 @@
+--- !ruby/object:Api::Resource
+  name: 'Processor'
+  base_url: 'projects/{{project}}/locations/{{location}}/processors'
+  input: true
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://cloud.google.com/document-ai/docs/overview'
+    api: 'https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors'
+  description: |
+    The first-class citizen for Document AI. Each processor defines how to extract structural information from a document.
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: location
+      description: |
+        The location of the resource.
+      input: true
+      url_param_only: true
+      required: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        The resource name of the processor.
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'type'
+      required: true
+      input: true
+      description: |
+        The type of processor. For possible types see the [official list](https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations/fetchProcessorTypes#google.cloud.documentai.v1.DocumentProcessorService.FetchProcessorTypes)
+    - !ruby/object:Api::Type::String
+      name: 'displayName'
+      required: true
+      input: true
+      description: |
+        The display name. Must be unique.
+    - !ruby/object:Api::Type::String
+      name: 'kmsKeyName'
+      input: true
+      description: |
+        The KMS key used for encryption/decryption in CMEK scenarios. See https://cloud.google.com/security-key-management.
+
