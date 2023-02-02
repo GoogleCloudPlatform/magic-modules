@@ -1130,7 +1130,9 @@ resource "google_compute_security_policy" "policy" {
 		rate_limit_options {
 			conform_action = "allow"
 			exceed_action = "redirect"
+
 			enforce_on_key = ""
+
 			enforce_on_key_configs {
 				enforce_on_key_type = "IP"
 			}

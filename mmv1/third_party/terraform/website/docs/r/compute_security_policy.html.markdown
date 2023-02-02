@@ -288,7 +288,7 @@ The following arguments are supported:
 
 * `enforce_on_key_configs` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) If specified, any combination of values of enforce_on_key_type/enforce_on_key_name is treated as the key on which ratelimit threshold/action is enforced. You can specify up to 3 enforce_on_key_configs. If enforce_on_key_configs is specified, enforce_on_key must not be specified. Structure is [documented below](#nested_enforce_on_key_configs).
 
-  **Note:** To avoid the conflict between `enforce_on_key` and `enforce_on_key_configs`, the field, `enforce_on_key` needs to be empty string.
+  **Note:** To avoid the conflict between `enforce_on_key` and `enforce_on_key_configs`, the field [`enforce_on_key`](#enforce_on_key) needs to be an empty string.
 
 <a name="nested_enforce_on_key_configs"></a>The `enforce_on_key_configs` block supports:
 

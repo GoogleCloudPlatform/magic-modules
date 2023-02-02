@@ -275,7 +275,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 									"enforce_on_key_configs": {
 										Type:        schema.TypeList,
 										Description: `Enforce On Key Config of this security policy`,
-										ForceNew: true
+										ForceNew:    true,
 										Optional:    true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
