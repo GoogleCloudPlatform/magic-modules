@@ -28,8 +28,6 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the security policy.
 
-- - -
-
 * `description` - (Optional) An optional description of this security policy. Max size is 2048.
 
 * `project` - (Optional) The project in which the resource belongs. If it
@@ -41,7 +39,7 @@ The following arguments are supported:
 
 * `region` - [Output Only] URL of the region where the resource resides. You must specify this field as part of the HTTP request URL. It is not settable as a field in the request body.
 
-* `securityPolicy` - (Optional) The resource URL for the network edge security service associated with this network edge security service. Structure is [documented below](#nested_rule).
+* `securityPolicy` - The resource URL for the network edge security service associated with this network edge security service. Structure is [documented below](#nested_rule).
 
 ## Attributes Reference
 
