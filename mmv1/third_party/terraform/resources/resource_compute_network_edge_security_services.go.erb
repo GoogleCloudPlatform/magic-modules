@@ -187,6 +187,8 @@ func resourceComputeNetworkEdgeSecurityServicesUpdate(d *schema.ResourceData, me
 		networkEdgeSecurityServices.ForceSendFields = append(networkEdgeSecurityServices.ForceSendFields, "SecurityPolicy")
 	}
 
+	
+	<% unless version == 'ga' -%>
 	if len(networkEdgeSecurityServices.ForceSendFields) > 0 {
 		client := config.NewComputeClient(userAgent)
 
@@ -201,6 +203,7 @@ func resourceComputeNetworkEdgeSecurityServicesUpdate(d *schema.ResourceData, me
 			return err
 		}
 	}
+	<% end -%>
 
 	return resourceComputeNetworkEdgeSecurityServicesRead(d, meta)
 }
