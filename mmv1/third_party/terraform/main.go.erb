@@ -11,12 +11,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server"
 	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+	ver "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/version"
 )
 
 var (
 	// these will be set by the goreleaser configuration
 	// to appropriate values for the compiled binary
-	version string = "dev"
+	version string = ver.ProviderVersion
 
 	// goreleaser can also pass the specific commit if you want
 	// commit  string = ""
