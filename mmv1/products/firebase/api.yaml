@@ -189,17 +189,6 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
-    parameters:
-      # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
-      - !ruby/object:Api::Type::String
-        name: 'deletion_policy'
-        description: |
-          (Optional) Set to `ABANDON` to allow the AndroidApp to be untracked from terraform state
-          rather than deleted upon `terraform destroy`. This is useful because the AndroidApp may be
-          serving traffic. Set to `DELETE` to delete the AndroidApp. Default to `DELETE`.
-        input: true
-        url_param_only: true
-        default_value: DELETE
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -272,17 +261,6 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
-    parameters:
-      # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
-      - !ruby/object:Api::Type::String
-        name: 'deletion_policy'
-        description: |
-          (Optional) Set to `ABANDON` to allow the AppleApp to be untracked from terraform state
-          rather than deleted upon `terraform destroy`. This is useful because the AppleApp may be
-          serving traffic. Set to `DELETE` to delete the AppleApp. Default to `DELETE`.
-        input: true
-        url_param_only: true
-        default_value: DELETE
     properties:
       - !ruby/object:Api::Type::String
         name: name
