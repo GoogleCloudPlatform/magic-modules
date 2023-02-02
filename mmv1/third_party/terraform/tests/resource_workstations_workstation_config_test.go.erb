@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccorkstationsWorkstationConfig_update(t *testing.T) {
+func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -30,7 +30,7 @@ func TestAccorkstationsWorkstationConfig_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"etag"},
 			},
 			{
-				Config: testAccorkstationsWorkstationConfig_update(context),
+				Config: TestAccWorkstationsWorkstationConfig_update(context),
 			},
 			{
 				ResourceName:            "google_workstations_workstation_cluster.default",
@@ -42,7 +42,7 @@ func TestAccorkstationsWorkstationConfig_update(t *testing.T) {
 	})
 }
 
-func testAccorkstationsWorkstationConfig_update(context map[string]interface{}) string {
+func TestAccWorkstationsWorkstationConfig_update(context map[string]interface{}) string {
 	return Nprintf(`
 data "google_project" "project" {
   provider = google-beta
