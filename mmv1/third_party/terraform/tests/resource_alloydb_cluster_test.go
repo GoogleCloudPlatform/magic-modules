@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -17,7 +15,7 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -40,7 +38,7 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
-			},			
+			},
 		},
 	})
 }
@@ -48,7 +46,6 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 func testAccAlloydbCluster_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_alloydb_cluster" "default" {
-  provider   = google-beta
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
@@ -63,13 +60,10 @@ resource "google_alloydb_cluster" "default" {
 }
 
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_compute_network" "default" {
-  provider = google-beta
   name = "tf-test-alloydb-cluster%{random_suffix}"
 }
 `, context)
 }
-<% end -%>
