@@ -112,7 +112,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
 			privateNetworkCustomizeDiff,
-			privatePathForGoogleCloudServicesSqlServerOnlyCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
 		),
 
@@ -892,17 +891,6 @@ func privateNetworkCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta
 		}
 	}
 
-	return nil
-}
-
-// The private path for Google Cloud Services option of the IP configuration is supported only on MySQL and PostgreSQL database types.
-// The API returns an invalid request error for an attempt to enable or explicitly disable this option on SQL Server type instances.
-func privatePathForGoogleCloudServicesSqlServerOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
-	enablePrivPath := diff.Get("settings.0.ip_configuration.0.enable_private_path_for_google_cloud_services").(bool)
-	dbVersion := diff.Get("database_version").(string)
-	if enablePrivPath && strings.Contains(dbVersion, "SQLSERVER") {
-		return fmt.Errorf("enable_private_path_for_google_cloud_services is not supported on SQL Server database types.")
-	}
 	return nil
 }
 
