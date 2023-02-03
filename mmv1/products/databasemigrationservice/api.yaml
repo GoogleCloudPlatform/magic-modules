@@ -30,7 +30,8 @@ objects:
     self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
     base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
     create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}'
-    update_verb: :PATCH
+    update_verb: :PATCH 
+    update_mask: true
     description: 'A connection profile definition.'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -447,10 +448,11 @@ objects:
                   Required. Input only. Initial user to setup during cluster creation.
                 properties: 
                   - !ruby/object:Api::Type::String
-                    name: 'username'
+                    name: 'user'
                     required: true
                     description: |
                       The database username.
+                  - !ruby/object:Api::Type::String
                     name: 'password'
                     required: true
                     description: |
