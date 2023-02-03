@@ -28,14 +28,14 @@ func dataSourceGoogleServiceAccountJwt() *schema.Resource {
 			"target_service_account": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
+				ValidateFunc: ValidateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
 			},
 			"delegates": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: validateRegexp(ServiceAccountLinkRegex),
+					ValidateFunc: ValidateRegexp(ServiceAccountLinkRegex),
 				},
 			},
 			"jwt": {
@@ -54,7 +54,7 @@ var (
 func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 
 	if err != nil {
 		return err

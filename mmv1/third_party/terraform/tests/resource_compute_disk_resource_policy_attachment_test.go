@@ -14,16 +14,16 @@ func TestAccComputeDiskResourcePolicyAttachment_update(t *testing.T) {
 	policyName := fmt.Sprintf("tf-test-policy-%s", randString(t, 10))
 	policyName2 := fmt.Sprintf("tf-test-policy-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDiskResourcePolicyAttachment_basic(diskName, policyName),
 			},
 			{
 				ResourceName: "google_compute_disk_resource_policy_attachment.foobar",
-				// ImportStateId:     fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", getTestProjectFromEnv(), "us-central1", policyName),
+				// ImportStateId:     fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", GetTestProjectFromEnv(), "us-central1", policyName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -32,7 +32,7 @@ func TestAccComputeDiskResourcePolicyAttachment_update(t *testing.T) {
 			},
 			{
 				ResourceName: "google_compute_disk_resource_policy_attachment.foobar",
-				// ImportStateId:     fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", getTestProjectFromEnv(), "us-central1", policyName),
+				// ImportStateId:     fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", GetTestProjectFromEnv(), "us-central1", policyName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

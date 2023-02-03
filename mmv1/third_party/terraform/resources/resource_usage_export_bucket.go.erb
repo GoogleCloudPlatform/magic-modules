@@ -56,7 +56,7 @@ func resourceProjectUsageBucket() *schema.Resource {
 
 func resourceProjectUsageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func resourceProjectUsageBucketRead(d *schema.ResourceData, meta interface{}) er
 
 	p, err := config.NewComputeClient(userAgent).Projects.Get(project).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project data for project %s", project))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Project data for project %s", project))
 	}
 
 	if p.UsageExportLocation == nil {
@@ -91,7 +91,7 @@ func resourceProjectUsageBucketRead(d *schema.ResourceData, meta interface{}) er
 
 func resourceProjectUsageBucketCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func resourceProjectUsageBucketCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceProjectUsageBucketDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

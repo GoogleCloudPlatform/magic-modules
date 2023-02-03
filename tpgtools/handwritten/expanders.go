@@ -13,7 +13,7 @@ func expandStringArray(v interface{}) []string {
 		return convertStringSet(arr)
 	}
 
-	arr = convertStringArr(v.([]interface{}))
+	arr = ConvertStringArr(v.([]interface{}))
 	if arr == nil {
 		// Send empty array specifically instead of nil
 		return make([]string, 0)

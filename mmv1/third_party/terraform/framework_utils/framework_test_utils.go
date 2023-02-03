@@ -30,9 +30,9 @@ func MuxedProviders(testName string) (func() tfprotov5.ProviderServer, error) {
 	return muxServer.ProviderServer, nil
 }
 
-// testExtractResourceAttr navigates a test's state to find the specified resource (or data source) attribute and makes the value
+// TestExtractResourceAttr navigates a test's state to find the specified resource (or data source) attribute and makes the value
 // accessible via the attributeValue string pointer.
-func testExtractResourceAttr(resourceName string, attributeName string, attributeValue *string) resource.TestCheckFunc {
+func TestExtractResourceAttr(resourceName string, attributeName string, attributeValue *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName] // To find a datasource, include `data.` at the start of the resourceName value
 
@@ -52,8 +52,8 @@ func testExtractResourceAttr(resourceName string, attributeName string, attribut
 	}
 }
 
-// testCheckAttributeValuesEqual compares two string pointers, which have been used to retrieve attribute values from the test's state.
-func testCheckAttributeValuesEqual(i *string, j *string) resource.TestCheckFunc {
+// TestCheckAttributeValuesEqual compares two string pointers, which have been used to retrieve attribute values from the test's state.
+func TestCheckAttributeValuesEqual(i *string, j *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if testStringValue(i) != testStringValue(j) {
 			return fmt.Errorf("attribute values are different, got %s and %s", testStringValue(i), testStringValue(j))
@@ -83,9 +83,9 @@ func protoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.Provide
 	}
 }
 
-// providerVersion450 returns information allowing tests to download TPG v4.50.0 from the Registry during `init`
+// ProviderVersion450 returns information allowing tests to download TPG v4.50.0 from the Registry during `init`
 // Used to set ExternalProviders in a resource.TestStep within an acceptance test.
-func providerVersion450() map[string]resource.ExternalProvider {
+func ProviderVersion450() map[string]resource.ExternalProvider {
 	return map[string]resource.ExternalProvider{
 		"google": {
 			VersionConstraint: "4.50.0",

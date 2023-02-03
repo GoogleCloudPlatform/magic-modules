@@ -15,7 +15,7 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 			"instance": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"project": {
 				Type:     schema.TypeString,
@@ -61,7 +61,7 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 
 func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

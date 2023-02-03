@@ -34,7 +34,7 @@ func dataSourceDNSKeys() *schema.Resource {
 			"managed_zone": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"project": {
 				Type:     schema.TypeString,
@@ -190,7 +190,7 @@ func flattenDigests(dnsKeyDigests []*dns.DnsKeyDigest) []map[string]interface{} 
 
 func dataSourceDNSKeysRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

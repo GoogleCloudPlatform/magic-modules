@@ -102,9 +102,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       destinationConfig.gcsDestinationConfig.fileRotationInterval: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       destinationConfig.destinationConnectionProfile: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: "projectNumberDiffSuppress"
+        diff_suppress_func: "ProjectNumberDiffSuppress"
       sourceConfig.sourceConnectionProfile: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: "projectNumberDiffSuppress"
+        diff_suppress_func: "ProjectNumberDiffSuppress"
       sourceConfig.mysqlSourceConfig.maxConcurrentCdcTasks: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         validation: !ruby/object:Provider::Terraform::Validation

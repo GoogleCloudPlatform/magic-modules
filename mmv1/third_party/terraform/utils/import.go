@@ -15,7 +15,7 @@ import (
 // - projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<name>[^/]+) (applied first)
 // - (?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+),
 // - (?P<name>[^/]+) (applied last)
-func parseImportId(idRegexes []string, d TerraformResourceData, config *Config) error {
+func ParseImportId(idRegexes []string, d TerraformResourceData, config *Config) error {
 	for _, idFormat := range idRegexes {
 		re, err := regexp.Compile(idFormat)
 
@@ -84,7 +84,7 @@ func setDefaultValues(idRegex string, d TerraformResourceData, config *Config) e
 		}
 	}
 	if _, ok := d.GetOk("region"); !ok && strings.Contains(idRegex, "?P<region>") {
-		region, err := getRegion(d, config)
+		region, err := GetRegion(d, config)
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ func setDefaultValues(idRegex string, d TerraformResourceData, config *Config) e
 		}
 	}
 	if _, ok := d.GetOk("zone"); !ok && strings.Contains(idRegex, "?P<zone>") {
-		zone, err := getZone(d, config)
+		zone, err := GetZone(d, config)
 		if err != nil {
 			return err
 		}
@@ -107,13 +107,13 @@ func setDefaultValues(idRegex string, d TerraformResourceData, config *Config) e
 // Parse an import id extracting field values using the given list of regexes.
 // They are applied in order. The first in the list is tried first.
 // This does not mutate any of the parameters, returning a map of matches
-// Similar to parseImportId in import.go, but less import specific
+// Similar to ParseImportId in import.go, but less import specific
 //
 // e.g:
 // - projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<name>[^/]+) (applied first)
 // - (?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+),
 // - (?P<name>[^/]+) (applied last)
-func getImportIdQualifiers(idRegexes []string, d TerraformResourceData, config *Config, id string) (map[string]string, error) {
+func GetImportIdQualifiers(idRegexes []string, d TerraformResourceData, config *Config, id string) (map[string]string, error) {
 	for _, idFormat := range idRegexes {
 		re, err := regexp.Compile(idFormat)
 
@@ -163,11 +163,11 @@ func getDefaultValues(idRegex string, d TerraformResourceData, config *Config) (
 		result["project"] = project
 	}
 	if _, ok := d.GetOk("region"); !ok && strings.Contains(idRegex, "?P<region>") {
-		region, _ := getRegion(d, config)
+		region, _ := GetRegion(d, config)
 		result["region"] = region
 	}
 	if _, ok := d.GetOk("zone"); !ok && strings.Contains(idRegex, "?P<zone>") {
-		zone, _ := getZone(d, config)
+		zone, _ := GetZone(d, config)
 		result["zone"] = zone
 	}
 	return result, nil

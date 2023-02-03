@@ -70,7 +70,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareResourceNames,
+				DiffSuppressFunc: CompareResourceNames,
 				Description:      `The name of the Bigtable instance.`,
 			},
 
@@ -131,7 +131,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 							Computed:     true,
 							ForceNew:     true,
 							Description:  `Duration before applying GC policy`,
-							ValidateFunc: validateDuration(),
+							ValidateFunc: ValidateDuration(),
 							ExactlyOneOf: []string{"max_age.0.days", "max_age.0.duration"},
 						},
 					},
@@ -180,7 +180,7 @@ func resourceBigtableGCPolicy() *schema.Resource {
 
 func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -221,7 +221,7 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 	// Mutations to gc policies can only happen one-at-a-time and take some amount of time.
 	// Use a fixed polling rate of 30s based on the RetryInfo returned by the server rather than
 	// the standard up-to-10s exponential backoff for those operations.
-	_, err = retryWithPolling(retryFunc, timeout, pollInterval, isBigTableRetryableError)
+	_, err = RetryWithPolling(retryFunc, timeout, pollInterval, isBigTableRetryableError)
 	if err != nil {
 		return err
 	}
@@ -242,7 +242,7 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -384,7 +384,7 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 		return nil
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -410,7 +410,7 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 	// The default delete timeout is 20 minutes.
 	timeout := d.Timeout(schema.TimeoutDelete)
 	pollInterval := time.Duration(30) * time.Second
-	_, err = retryWithPolling(retryFunc, timeout, pollInterval, isBigTableRetryableError)
+	_, err = RetryWithPolling(retryFunc, timeout, pollInterval, isBigTableRetryableError)
 	if err != nil {
 		return err
 	}

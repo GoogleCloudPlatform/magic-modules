@@ -127,5 +127,5 @@ var TagsLocationCustomEndpointEntry = &schema.Schema{
 
 func validateCustomEndpoint(v interface{}, k string) (ws []string, errors []error) {
 	re := `.*/[^/]+/$`
-	return validateRegexp(re)(v, k)
+	return ValidateRegexp(re)(v, k)
 }

@@ -77,7 +77,7 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) 
     if err != nil {
         return nil, err
 <%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%      else -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 <%      end -%>

@@ -14,12 +14,12 @@ func TestAccPrivatecaCaPoolIamMemberAllAuthenticatedUsersCasing(t *testing.T) {
 	t.Parallel()
 
 	capool := "tf-test-pool-iam-" + randString(t, 10)
-	project := getTestProjectFromEnv()
-	region := getTestRegionFromEnv()
+	project := GetTestProjectFromEnv()
+	region := GetTestRegionFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPrivatecaCaPoolIamMember_allAuthenticatedUsers(capool, region, project),
@@ -46,7 +46,7 @@ func testAccCheckPrivatecaCaPoolIam(t *testing.T, capool, region, project, role 
 			location: region,
 			caPool:   capool,
 			d:        d,
-			Config:   googleProviderConfig(t),
+			Config:   GoogleProviderConfig(t),
 		}
 		p, err := u.GetResourceIamPolicy()
 		if err != nil {

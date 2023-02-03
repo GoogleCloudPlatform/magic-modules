@@ -13,15 +13,15 @@ func TestAccDataSourceSecretManagerSecret_basic(t *testing.T) {
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSecretManagerSecretDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceSecretManagerSecret_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_secret_manager_secret.foo", "google_secret_manager_secret.bar"),
+					CheckDataSourceStateMatchesResourceState("data.google_secret_manager_secret.foo", "google_secret_manager_secret.bar"),
 				),
 			},
 		},

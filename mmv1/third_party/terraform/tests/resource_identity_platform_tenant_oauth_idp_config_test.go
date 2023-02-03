@@ -13,9 +13,9 @@ func TestAccIdentityPlatformTenantOauthIdpConfig_identityPlatformTenantOauthIdpC
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckIdentityPlatformTenantOauthIdpConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

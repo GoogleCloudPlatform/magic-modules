@@ -56,7 +56,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 						"instance_template": {
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The full URL to an instance template from which all new instances of this version will be created.`,
 						},
 
@@ -161,7 +161,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set:         selfLinkRelativePathHash,
+				Set:         SelfLinkRelativePathHash,
 				Description: `The full URL of all target pools to which new instances in the group are added. Updating the target pools attribute does not affect existing instances.`,
 			},
 			"target_size": {
@@ -211,7 +211,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 						"health_check": {
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The health check resource that signals autohealing.`,
 						},
 
@@ -234,7 +234,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Set:         hashZoneFromSelfLinkOrResourceName,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
-					DiffSuppressFunc: compareSelfLinkOrResourceName,
+					DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				},
 			},
 
@@ -340,14 +340,14 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"PROACTIVE", "NONE", ""}, false),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress("PROACTIVE"),
+							DiffSuppressFunc: EmptyOrDefaultStringSuppress("PROACTIVE"),
 							Description:      `The instance redistribution policy for regional managed instance groups. Valid values are: "PROACTIVE", "NONE". If PROACTIVE (default), the group attempts to maintain an even distribution of VM instances across zones in the region. If NONE, proactive redistribution is disabled.`,
 						},
 						"replacement_method": {
 							Type:             schema.TypeString,
 							Optional:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"RECREATE", "SUBSTITUTE", ""}, false),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress("SUBSTITUTE"),
+							DiffSuppressFunc: EmptyOrDefaultStringSuppress("SUBSTITUTE"),
 							Description:      `The instance replacement method for regional managed instance groups. Valid values are: "RECREATE", "SUBSTITUTE". If SUBSTITUTE (default), the group replaces VM instances with new instances that have randomly generated names. If RECREATE, instance names are preserved.  You must also set max_unavailable_fixed or max_unavailable_percent to be greater than 0.`,
 						},
 					},
@@ -525,7 +525,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 
 func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -535,7 +535,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -569,7 +569,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		return fmt.Errorf("Error creating RegionInstanceGroupManager: %s", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -620,12 +620,12 @@ func getRegionalManager(d *schema.ResourceData, meta interface{}) (*compute.Inst
 		return nil, err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -633,7 +633,7 @@ func getRegionalManager(d *schema.ResourceData, meta interface{}) (*compute.Inst
 	name := d.Get("name").(string)
 	manager, err := config.NewComputeClient(userAgent).RegionInstanceGroupManagers.Get(project, region, name).Do()
 	if err != nil {
-		return nil, handleNotFoundError(err, d, fmt.Sprintf("Region Instance Manager %q", name))
+		return nil, HandleNotFoundError(err, d, fmt.Sprintf("Region Instance Manager %q", name))
 	}
 
 	return manager, nil
@@ -782,7 +782,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -792,7 +792,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -933,7 +933,7 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 		}
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -943,7 +943,7 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -1099,12 +1099,12 @@ func resourceRegionInstanceGroupManagerStateImporter(d *schema.ResourceData, met
 		return nil, fmt.Errorf("Error setting wait_for_instances_status: %s", err)
 	}
 	config := meta.(*Config)
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/instanceGroupManagers/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+	if err := ParseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/instanceGroupManagers/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

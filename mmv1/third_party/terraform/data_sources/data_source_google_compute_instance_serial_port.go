@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -37,7 +38,7 @@ func dataSourceGoogleComputeInstanceSerialPort() *schema.Resource {
 
 func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -49,7 +50,7 @@ func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) err
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}

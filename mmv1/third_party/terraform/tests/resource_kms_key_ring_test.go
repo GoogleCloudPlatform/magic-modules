@@ -72,13 +72,13 @@ func TestKeyRingIdParsing(t *testing.T) {
 
 func TestAccKmsKeyRing_basic(t *testing.T) {
 	projectId := fmt.Sprintf("tf-test-%d", randInt(t))
-	projectOrg := getTestOrgFromEnv(t)
-	projectBillingAccount := getTestBillingAccountFromEnv(t)
+	projectOrg := GetTestOrgFromEnv(t)
+	projectBillingAccount := GetTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleKmsKeyRingWasRemovedFromState("google_kms_key_ring.key_ring"),
 		Steps: []resource.TestStep{
 			{

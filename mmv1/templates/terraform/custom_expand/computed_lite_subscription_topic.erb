@@ -18,7 +18,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
                 return "", err
         }
 
-        zone, err := getZone(d, config)
+        zone, err := GetZone(d, config)
         if err != nil {
                 return nil, err
         }

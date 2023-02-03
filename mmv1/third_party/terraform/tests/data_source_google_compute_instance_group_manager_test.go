@@ -21,21 +21,21 @@ func TestAccDataSourceGoogleComputeInstanceGroupManager(t *testing.T) {
 		"autoHealName": "tf-tst-ah-name" + randString(t, 6),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleComputeInstanceGroupManager_basic1(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_compute_instance_group_manager.data_source", "project", getTestProjectFromEnv()),
+					resource.TestCheckResourceAttr("data.google_compute_instance_group_manager.data_source", "project", GetTestProjectFromEnv()),
 					resource.TestCheckResourceAttr("data.google_compute_instance_group_manager.data_source", "zone", zoneName),
 					resource.TestCheckResourceAttr("data.google_compute_instance_group_manager.data_source", "name", igmName)),
 			},
 			{
 				Config: testAccDataSourceGoogleComputeInstanceGroupManager_basic2(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_compute_instance_group_manager.data_source", "project", getTestProjectFromEnv()),
+					resource.TestCheckResourceAttr("data.google_compute_instance_group_manager.data_source", "project", GetTestProjectFromEnv()),
 					resource.TestCheckResourceAttr("data.google_compute_instance_group_manager.data_source", "zone", zoneName),
 					resource.TestCheckResourceAttr("data.google_compute_instance_group_manager.data_source", "name", igmName)),
 			},

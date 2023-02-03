@@ -33,9 +33,9 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckVertexAIEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -164,9 +164,9 @@ func testAccCheckVertexAIEndpointDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{VertexAIBasePath}}projects/{{project}}/locations/{{location}}/endpoints/{{name}}")
+			url, err := ReplaceVarsForTest(config, rs, "{{VertexAIBasePath}}projects/{{project}}/locations/{{location}}/endpoints/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -177,7 +177,7 @@ func testAccCheckVertexAIEndpointDestroyProducer(t *testing.T) func(s *terraform
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.userAgent, nil)
 			if err == nil {
 				return fmt.Errorf("VertexAIEndpoint still exists at %s", url)
 			}

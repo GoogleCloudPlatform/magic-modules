@@ -40,7 +40,7 @@ func dataSourceGoogleComputeNodeTypes() *schema.Resource {
 
 func dataSourceGoogleComputeNodeTypesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func dataSourceGoogleComputeNodeTypesRead(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return fmt.Errorf("Please specify zone to get appropriate node types for zone. Unable to get zone: %s", err)
 	}

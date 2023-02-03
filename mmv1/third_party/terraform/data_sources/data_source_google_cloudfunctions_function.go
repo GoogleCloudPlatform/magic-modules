@@ -6,13 +6,13 @@ import (
 
 func dataSourceGoogleCloudFunctionsFunction() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudFunctionsFunction().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceCloudFunctionsFunction().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project", "region")
+	AddOptionalFieldsToSchema(dsSchema, "project", "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudFunctionsFunctionRead,
@@ -28,7 +28,7 @@ func dataSourceGoogleCloudFunctionsFunctionRead(d *schema.ResourceData, meta int
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
 - type: DIFF_SUPPRESS_FUNC
   field: target_resources
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    diffsuppressfunc: CompareSelfLinkOrResourceName

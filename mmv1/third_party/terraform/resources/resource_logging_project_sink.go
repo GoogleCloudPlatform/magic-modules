@@ -42,7 +42,7 @@ func resourceLoggingProjectSink() *schema.Resource {
 
 func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func resourceLoggingProjectSinkCustomizeDiffFunc(diff TerraformResourceDiff) err
 
 func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 
 	sink, err := config.NewLoggingClient(userAgent).Projects.Sinks.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Logging Sink %s", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Project Logging Sink %s", d.Get("name").(string)))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -125,7 +125,7 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 
 func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

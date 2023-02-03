@@ -13,9 +13,9 @@ func TestAccDataCatalogEntryGroup_update(t *testing.T) {
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataCatalogEntryGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -12,9 +12,9 @@ func TestAccComputeRouterPeer_basic(t *testing.T) {
 	t.Parallel()
 
 	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -40,9 +40,9 @@ func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 	t.Parallel()
 
 	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -73,9 +73,9 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 	t.Parallel()
 
 	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -116,9 +116,9 @@ func TestAccComputeRouterPeer_bfd(t *testing.T) {
 	t.Parallel()
 
 	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -159,9 +159,9 @@ func TestAccComputeRouterPeer_routerApplianceInstance(t *testing.T) {
 	t.Parallel()
 
 	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -180,7 +180,7 @@ func TestAccComputeRouterPeer_routerApplianceInstance(t *testing.T) {
 
 func testAccCheckComputeRouterPeerDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		routersService := config.NewComputeClient(config.userAgent).Routers
 
@@ -215,7 +215,7 @@ func testAccCheckComputeRouterPeerDestroyProducer(t *testing.T) func(s *terrafor
 
 func testAccCheckComputeRouterPeerDelete(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		routersService := config.NewComputeClient(config.userAgent).Routers
 
@@ -267,7 +267,7 @@ func testAccCheckComputeRouterPeerExists(t *testing.T, n string) resource.TestCh
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		project, err := getTestProject(rs.Primary, config)
 		if err != nil {

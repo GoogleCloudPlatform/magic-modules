@@ -12,9 +12,9 @@ import (
 func TestAccMonitoringDashboard_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringDashboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -37,9 +37,9 @@ func TestAccMonitoringDashboard_basic(t *testing.T) {
 func TestAccMonitoringDashboard_gridLayout(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringDashboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -58,9 +58,9 @@ func TestAccMonitoringDashboard_gridLayout(t *testing.T) {
 func TestAccMonitoringDashboard_rowLayout(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringDashboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -79,9 +79,9 @@ func TestAccMonitoringDashboard_rowLayout(t *testing.T) {
 func TestAccMonitoringDashboard_update(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringDashboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -125,14 +125,14 @@ func testAccCheckMonitoringDashboardDestroyProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{MonitoringBasePath}}v1/{{name}}")
+			url, err := ReplaceVarsForTest(config, rs, "{{MonitoringBasePath}}v1/{{name}}")
 			if err != nil {
 				return err
 			}
 
-			_, err = sendRequest(config, "GET", "", url, config.userAgent, nil, isMonitoringConcurrentEditError)
+			_, err = SendRequest(config, "GET", "", url, config.userAgent, nil, isMonitoringConcurrentEditError)
 			if err == nil {
 				return fmt.Errorf("MonitoringDashboard still exists at %s", url)
 			}

@@ -86,7 +86,7 @@ func resourceLoggingExclusionRead(newUpdaterFunc newResourceLoggingExclusionUpda
 		exclusion, err := updater.ReadLoggingExclusion(d.Id())
 
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Logging Exclusion %s", d.Get("name").(string)))
+			return HandleNotFoundError(err, d, fmt.Sprintf("Logging Exclusion %s", d.Get("name").(string)))
 		}
 
 		if err := flattenResourceLoggingExclusion(d, exclusion); err != nil {

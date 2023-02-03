@@ -17,16 +17,16 @@ func TestAccDataSourceGoogleCloudFunctionsFunction_basic(t *testing.T) {
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleCloudFunctionsFunctionConfig(functionName,
 					bucketName, zipFilePath),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState(funcDataNameHttp,
+					CheckDataSourceStateMatchesResourceState(funcDataNameHttp,
 						"google_cloudfunctions_function.function_http"),
 				),
 			},

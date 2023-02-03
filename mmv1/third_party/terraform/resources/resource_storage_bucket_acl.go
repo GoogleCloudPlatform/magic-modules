@@ -108,7 +108,7 @@ func getRoleEntityPair(role_entity string) (*RoleEntity, error) {
 
 func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) er
 		default_acl = v.(string)
 	}
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}")
 	if err != nil {
 		return err
 	}
@@ -212,7 +212,7 @@ func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 		res, err := config.NewStorageClient(userAgent).BucketAccessControls.List(bucket).Do()
 
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Storage Bucket ACL for bucket %q", d.Get("bucket").(string)))
+			return HandleNotFoundError(err, d, fmt.Sprintf("Storage Bucket ACL for bucket %q", d.Get("bucket").(string)))
 		}
 		entities := make([]string, 0, len(res.Items))
 		for _, item := range res.Items {
@@ -255,14 +255,14 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
 
 	bucket := d.Get("bucket").(string)
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}")
 	if err != nil {
 		return err
 	}
@@ -353,14 +353,14 @@ func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
 
 	bucket := d.Get("bucket").(string)
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}")
 	if err != nil {
 		return err
 	}

@@ -370,7 +370,7 @@ func getRegionFromSchema(regionSchemaField, zoneSchemaField string, d TerraformR
 	if regionSchemaField == zoneSchemaField {
 		if v, ok := d.GetOk(regionSchemaField); ok {
 			if isZone(v.(string)) {
-				return getRegionFromZone(v.(string)), nil
+				return GetRegionFromZone(v.(string)), nil
 			}
 
 			return v.(string), nil
@@ -381,13 +381,13 @@ func getRegionFromSchema(regionSchemaField, zoneSchemaField string, d TerraformR
 		return GetResourceNameFromSelfLink(v.(string)), nil
 	}
 	if v, ok := d.GetOk(zoneSchemaField); ok && zoneSchemaField != "" {
-		return getRegionFromZone(v.(string)), nil
+		return GetRegionFromZone(v.(string)), nil
 	}
 	if config.Region != "" {
 		return config.Region, nil
 	}
 	if config.Zone != "" {
-		return getRegionFromZone(config.Zone), nil
+		return GetRegionFromZone(config.Zone), nil
 	}
 
 	return "", fmt.Errorf("Cannot determine region: set in this resource, or set provider-level 'region' or 'zone'.")

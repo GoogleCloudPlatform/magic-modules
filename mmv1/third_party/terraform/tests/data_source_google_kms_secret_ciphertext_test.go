@@ -15,9 +15,9 @@ func TestAccDataKmsSecretCiphertext_basic(t *testing.T) {
 
 	plaintext := fmt.Sprintf("secret-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsSecretCiphertext_datasource(kms.CryptoKey.Name, plaintext),

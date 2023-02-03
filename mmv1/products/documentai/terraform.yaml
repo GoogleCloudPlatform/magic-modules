@@ -36,7 +36,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       processor: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       version: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: projectNumberDiffSuppress
+        diff_suppress_func: ProjectNumberDiffSuppress
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "documentai_default_version"

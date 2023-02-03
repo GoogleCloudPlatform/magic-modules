@@ -33,4 +33,4 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           taxonomy: "taxonomy"
     properties:
       policyTag: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: "projectNumberDiffSuppress"
+        diff_suppress_func: "ProjectNumberDiffSuppress"

@@ -5,9 +5,9 @@ import (
 )
 
 func dataSourceGoogleKmsCryptoKey() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceKMSCryptoKey().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addRequiredFieldsToSchema(dsSchema, "key_ring")
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceKMSCryptoKey().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "key_ring")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleKmsCryptoKeyRead,

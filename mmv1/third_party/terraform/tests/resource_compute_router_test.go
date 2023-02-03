@@ -13,9 +13,9 @@ func TestAccComputeRouter_basic(t *testing.T) {
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
 	resourceRegion := "europe-west1"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -36,9 +36,9 @@ func TestAccComputeRouter_noRegion(t *testing.T) {
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
 	providerRegion := "us-central1"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -58,9 +58,9 @@ func TestAccComputeRouter_full(t *testing.T) {
 
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -80,10 +80,10 @@ func TestAccComputeRouter_update(t *testing.T) {
 
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
-	region := getTestRegionFromEnv()
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	region := GetTestRegionFromEnv()
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -119,10 +119,10 @@ func TestAccComputeRouter_updateAddRemoveBGP(t *testing.T) {
 
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
-	region := getTestRegionFromEnv()
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	region := GetTestRegionFromEnv()
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

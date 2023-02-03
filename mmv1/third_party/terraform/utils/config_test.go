@@ -10,12 +10,12 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
+const TestFakeCredentialsPath = "./test-fixtures/fake_account.json"
 const testOauthScope = "https://www.googleapis.com/auth/compute"
 
 func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
 	config := &Config{
-		Credentials: testFakeCredentialsPath,
+		Credentials: TestFakeCredentialsPath,
 		Project:     "my-gce-project",
 		Region:      "us-central1",
 	}
@@ -29,7 +29,7 @@ func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
 }
 
 func TestConfigLoadAndValidate_accountFileJSON(t *testing.T) {
-	contents, err := ioutil.ReadFile(testFakeCredentialsPath)
+	contents, err := ioutil.ReadFile(TestFakeCredentialsPath)
 	if err != nil {
 		t.Fatalf("error: %v", err)
 	}
@@ -65,10 +65,10 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	TestAccPreCheck(t)
 
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	config := &Config{
 		Credentials: creds,
@@ -93,11 +93,11 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	TestAccPreCheck(t)
 
-	serviceaccount := multiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	config := &Config{
 		Credentials:               creds,
@@ -123,11 +123,11 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	TestAccPreCheck(t)
 
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
-	serviceaccount := multiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
+	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), DefaultClientScopes...)
 	if err != nil {
@@ -163,10 +163,10 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	TestAccPreCheck(t)
 
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
 	if err != nil {
@@ -199,7 +199,7 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 
 func TestConfigLoadAndValidate_customScopes(t *testing.T) {
 	config := &Config{
-		Credentials: testFakeCredentialsPath,
+		Credentials: TestFakeCredentialsPath,
 		Project:     "my-gce-project",
 		Region:      "us-central1",
 		Scopes:      []string{"https://www.googleapis.com/auth/compute"},
@@ -222,12 +222,12 @@ func TestConfigLoadAndValidate_customScopes(t *testing.T) {
 
 func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 	// Use default batching config
-	batchCfg, err := expandProviderBatchingConfig(nil)
+	batchCfg, err := ExpandProviderBatchingConfig(nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	config := &Config{
-		Credentials:    testFakeCredentialsPath,
+		Credentials:    TestFakeCredentialsPath,
 		Project:        "my-gce-project",
 		Region:         "us-central1",
 		BatchingConfig: batchCfg,
@@ -247,7 +247,7 @@ func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 }
 
 func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
-	batchCfg, err := expandProviderBatchingConfig([]interface{}{
+	batchCfg, err := ExpandProviderBatchingConfig([]interface{}{
 		map[string]interface{}{
 			"send_after":      "1s",
 			"enable_batching": false,
@@ -264,7 +264,7 @@ func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 	}
 
 	config := &Config{
-		Credentials:    testFakeCredentialsPath,
+		Credentials:    TestFakeCredentialsPath,
 		Project:        "my-gce-project",
 		Region:         "us-central1",
 		BatchingConfig: batchCfg,

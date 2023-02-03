@@ -29,7 +29,7 @@ func dataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
 
 func dataSourceGoogleBigqueryDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func dataSourceGoogleBigqueryDefaultServiceAccountRead(d *schema.ResourceData, m
 
 	projectResource, err := config.NewBigQueryClient(userAgent).Projects.GetServiceAccount(project).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, "BigQuery service account not found")
+		return HandleNotFoundError(err, d, "BigQuery service account not found")
 	}
 
 	d.SetId(projectResource.Email)

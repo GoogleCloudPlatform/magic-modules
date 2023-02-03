@@ -12,13 +12,13 @@ func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRule
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
+		"org_id":        GetTestOrgFromEnv(t),
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeOrganizationSecurityPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

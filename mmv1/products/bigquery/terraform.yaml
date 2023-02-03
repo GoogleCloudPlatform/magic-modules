@@ -86,7 +86,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         input: true
         custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.erb
-        diff_suppress_func: 'caseDiffSuppress'
+        diff_suppress_func: 'CaseDiffSuppress'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       labels: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -294,7 +294,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       configuration.copy.sourceTables: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref_array.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_sourcetables.go.erb'
@@ -308,7 +308,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       configuration.load.destinationTable: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_load_destinationtable.go.erb'
@@ -322,7 +322,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       configuration.load.skipLeadingRows: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(0)'
@@ -347,7 +347,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       configuration.query.destinationTable: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_query_destinationtable.go.erb'
@@ -362,7 +362,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       configuration.query.defaultDataset: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_ref.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_ref.go.erb'
@@ -373,7 +373,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The dataset. Can be specified `{{dataset_id}}` if `project_id` is also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}` if not.
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       configuration.copy.destinationEncryptionConfiguration: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.erb'
       configuration.load.destinationEncryptionConfiguration: !ruby/object:Overrides::Terraform::PropertyOverride

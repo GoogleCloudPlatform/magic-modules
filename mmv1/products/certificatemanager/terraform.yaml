@@ -99,4 +99,4 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
           custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
         certificates: !ruby/object:Overrides::Terraform::PropertyOverride
-          diff_suppress_func: projectNumberDiffSuppress
+          diff_suppress_func: ProjectNumberDiffSuppress

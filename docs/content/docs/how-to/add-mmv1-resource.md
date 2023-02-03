@@ -289,7 +289,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # various overrides go here
     properties:
       myField: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'caseDiffSuppress'
+        diff_suppress_func: 'CaseDiffSuppress'
 ```
 
 The value of diff_suppress_func can be any valid DiffSuppressFunc, including the

@@ -8,9 +8,9 @@ import (
 
 func dataSourceGooglePubsubSubscription() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourcePubsubSubscription().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	dsSchema := DatasourceSchemaFromResourceSchema(resourcePubsubSubscription().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGooglePubsubSubscriptionRead,
@@ -21,7 +21,7 @@ func dataSourceGooglePubsubSubscription() *schema.Resource {
 func dataSourceGooglePubsubSubscriptionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/subscriptions/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/subscriptions/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

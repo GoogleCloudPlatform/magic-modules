@@ -68,7 +68,7 @@ func (w *SqlAdminOperationWaiter) QueryOp() (interface{}, error) {
 
 	var op interface{}
 	var err error
-	err = retryTimeDuration(
+	err = RetryTimeDuration(
 		func() error {
 			op, err = w.Service.Operations.Get(w.Project, w.Op.Name).Do()
 			return err

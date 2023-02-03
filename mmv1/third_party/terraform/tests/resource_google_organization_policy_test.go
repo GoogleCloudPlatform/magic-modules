@@ -43,9 +43,9 @@ func TestAccOrganizationPolicy(t *testing.T) {
 
 func testAccOrganizationPolicy_boolean(t *testing.T) {
 	org := getTestOrgTargetFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -84,9 +84,9 @@ func testAccOrganizationPolicy_boolean(t *testing.T) {
 
 func testAccOrganizationPolicy_list_allowAll(t *testing.T) {
 	org := getTestOrgTargetFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -104,10 +104,10 @@ func testAccOrganizationPolicy_list_allowAll(t *testing.T) {
 
 func testAccOrganizationPolicy_list_allowSome(t *testing.T) {
 	org := getTestOrgTargetFromEnv(t)
-	project := getTestProjectFromEnv()
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	project := GetTestProjectFromEnv()
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -125,9 +125,9 @@ func testAccOrganizationPolicy_list_allowSome(t *testing.T) {
 
 func testAccOrganizationPolicy_list_denySome(t *testing.T) {
 	org := getTestOrgTargetFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -145,9 +145,9 @@ func testAccOrganizationPolicy_list_denySome(t *testing.T) {
 
 func testAccOrganizationPolicy_list_update(t *testing.T) {
 	org := getTestOrgTargetFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -169,9 +169,9 @@ func testAccOrganizationPolicy_list_update(t *testing.T) {
 
 func testAccOrganizationPolicy_list_inheritFromParent(t *testing.T) {
 	org := getTestOrgTargetFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -188,9 +188,9 @@ func testAccOrganizationPolicy_list_inheritFromParent(t *testing.T) {
 
 func testAccOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 	org := getTestOrgTargetFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -208,7 +208,7 @@ func testAccOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 
 func testAccCheckGoogleOrganizationPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_organization_policy" {
@@ -328,7 +328,7 @@ func getGoogleOrganizationPolicyTestResource(t *testing.T, s *terraform.State, n
 		return nil, fmt.Errorf("No ID is set")
 	}
 
-	config := googleProviderConfig(t)
+	config := GoogleProviderConfig(t)
 
 	return config.NewResourceManagerClient(config.userAgent).Organizations.GetOrgPolicy("organizations/"+rs.Primary.Attributes["org_id"], &cloudresourcemanager.GetOrgPolicyRequest{
 		Constraint: rs.Primary.Attributes["constraint"],

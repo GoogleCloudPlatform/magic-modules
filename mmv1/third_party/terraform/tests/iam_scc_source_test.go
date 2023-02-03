@@ -14,12 +14,12 @@ func TestAccSecurityCenterSourceIamBinding(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
 		"role":          "roles/securitycenter.sourcesViewer",
-		"org_id":        getTestOrgFromEnv(t),
+		"org_id":        GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterSourceIamBinding_basic(context),
@@ -64,12 +64,12 @@ func TestAccSecurityCenterSourceIamMember(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
 		"role":          "roles/securitycenter.sourcesViewer",
-		"org_id":        getTestOrgFromEnv(t),
+		"org_id":        GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -98,12 +98,12 @@ func TestAccSecurityCenterSourceIamPolicy(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
 		"role":          "roles/securitycenter.sourcesViewer",
-		"org_id":        getTestOrgFromEnv(t),
+		"org_id":        GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterSourceIamPolicy_basic(context),

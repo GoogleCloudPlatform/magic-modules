@@ -16,11 +16,11 @@ func TestAccDataprocJobIamBinding(t *testing.T) {
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s",
-		getTestProjectFromEnv(), "us-central1", job, role)
+		GetTestProjectFromEnv(), "us-central1", job, role)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -55,15 +55,15 @@ func TestAccDataprocJobIamMember(t *testing.T) {
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s serviceAccount:%s",
-		getTestProjectFromEnv(),
+		GetTestProjectFromEnv(),
 		"us-central1",
 		job,
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -88,11 +88,11 @@ func TestAccDataprocJobIamPolicy(t *testing.T) {
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s",
-		getTestProjectFromEnv(), "us-central1", job)
+		GetTestProjectFromEnv(), "us-central1", job)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation

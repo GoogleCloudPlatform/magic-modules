@@ -41,7 +41,7 @@ func resourceLoggingFolderSink() *schema.Resource {
 
 func resourceLoggingFolderSinkCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -62,14 +62,14 @@ func resourceLoggingFolderSinkCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceLoggingFolderSinkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
 
 	sink, err := config.NewLoggingClient(userAgent).Folders.Sinks.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Folder Logging Sink %s", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Folder Logging Sink %s", d.Get("name").(string)))
 	}
 
 	if err := flattenResourceLoggingSink(d, sink); err != nil {
@@ -85,7 +85,7 @@ func resourceLoggingFolderSinkRead(d *schema.ResourceData, meta interface{}) err
 
 func resourceLoggingFolderSinkUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func resourceLoggingFolderSinkUpdate(d *schema.ResourceData, meta interface{}) e
 
 func resourceLoggingFolderSinkDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

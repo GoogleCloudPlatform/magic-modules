@@ -22,7 +22,7 @@ func TestConvertStringArr(t *testing.T) {
 	input[2] = "aaa"
 
 	expected := []string{"aaa", "bbb", "ccc"}
-	actual := convertStringArr(input)
+	actual := ConvertStringArr(input)
 
 	if reflect.DeepEqual(expected, actual) {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
@@ -50,7 +50,7 @@ func TestConvertStringMap(t *testing.T) {
 	input["three"] = "3"
 
 	expected := map[string]string{"one": "1", "two": "2", "three": "3"}
-	actual := convertStringMap(input)
+	actual := ConvertStringMap(input)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("%s did not match expected value: %s", actual, expected)
@@ -95,7 +95,7 @@ func TestIpCidrRangeDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if ipCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -138,7 +138,7 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 		},
 	}
 	for tn, tc := range cases {
-		if rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, '%s' => '%s' expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -152,21 +152,21 @@ func TestGetZone(t *testing.T) {
 	if err := d.Set("zone", "foo"); err != nil {
 		t.Fatalf("Cannot set zone: %s", err)
 	}
-	if zone, err := getZone(d, &config); err != nil || zone != "foo" {
+	if zone, err := GetZone(d, &config); err != nil || zone != "foo" {
 		t.Fatalf("Zone '%s' != 'foo', %s", zone, err)
 	}
 	config.Zone = "bar"
-	if zone, err := getZone(d, &config); err != nil || zone != "foo" {
+	if zone, err := GetZone(d, &config); err != nil || zone != "foo" {
 		t.Fatalf("Zone '%s' != 'foo', %s", zone, err)
 	}
 	if err := d.Set("zone", ""); err != nil {
 		t.Fatalf("Error setting zone: %s", err)
 	}
-	if zone, err := getZone(d, &config); err != nil || zone != "bar" {
+	if zone, err := GetZone(d, &config); err != nil || zone != "bar" {
 		t.Fatalf("Zone '%s' != 'bar', %s", zone, err)
 	}
 	config.Zone = ""
-	if zone, err := getZone(d, &config); err == nil || zone != "" {
+	if zone, err := GetZone(d, &config); err == nil || zone != "" {
 		t.Fatalf("Zone '%s' != '', err=%s", zone, err)
 	}
 }
@@ -176,10 +176,10 @@ func TestGetRegion(t *testing.T) {
 		"zone": "foo",
 	})
 	var config Config
-	barRegionName := getRegionFromZone("bar")
-	fooRegionName := getRegionFromZone("foo")
+	barRegionName := GetRegionFromZone("bar")
+	fooRegionName := GetRegionFromZone("foo")
 
-	if region, err := getRegion(d, &config); err != nil || region != fooRegionName {
+	if region, err := GetRegion(d, &config); err != nil || region != fooRegionName {
 		t.Fatalf("Zone '%s' != '%s', %s", region, fooRegionName, err)
 	}
 
@@ -187,11 +187,11 @@ func TestGetRegion(t *testing.T) {
 	if err := d.Set("zone", ""); err != nil {
 		t.Fatalf("Error setting zone: %s", err)
 	}
-	if region, err := getRegion(d, &config); err != nil || region != barRegionName {
+	if region, err := GetRegion(d, &config); err != nil || region != barRegionName {
 		t.Fatalf("Zone '%s' != '%s', %s", region, barRegionName, err)
 	}
 	config.Region = "something-else"
-	if region, err := getRegion(d, &config); err != nil || region != config.Region {
+	if region, err := GetRegion(d, &config); err != nil || region != config.Region {
 		t.Fatalf("Zone '%s' != '%s', %s", region, config.Region, err)
 	}
 }
@@ -409,15 +409,15 @@ func TestDatasourceSchemaFromResourceSchema(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := datasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("datasourceSchemaFromResourceSchema() = %#v, want %#v", got, tt.want)
+			if got := DatasourceSchemaFromResourceSchema(tt.args.rs); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DatasourceSchemaFromResourceSchema() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
 }
 
 func TestEmptyOrDefaultStringSuppress(t *testing.T) {
-	testFunc := emptyOrDefaultStringSuppress("default value")
+	testFunc := EmptyOrDefaultStringSuppress("default value")
 
 	cases := map[string]struct {
 		Old, New           string
@@ -496,7 +496,7 @@ func TestRetryTimeDuration(t *testing.T) {
 			Code: 500,
 		}
 	}
-	if err := retryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 500 {
+	if err := RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 500 {
 		t.Errorf("unexpected error retrying: %v", err)
 	}
 	if i < 2 {
@@ -513,7 +513,7 @@ func TestRetryTimeDuration_wrapped(t *testing.T) {
 		}
 		return errwrap.Wrapf("nested error: {{err}}", err)
 	}
-	if err := retryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil {
+	if err := RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil {
 		t.Errorf("unexpected nil error, expected an error")
 	} else {
 		innerErr := errwrap.GetType(err, &googleapi.Error{})
@@ -538,7 +538,7 @@ func TestRetryTimeDuration_noretry(t *testing.T) {
 			Code: 400,
 		}
 	}
-	if err := retryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 400 {
+	if err := RetryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 400 {
 		t.Errorf("unexpected error retrying: %v", err)
 	}
 	if i != 1 {
@@ -569,7 +569,7 @@ func TestRetryTimeDuration_URLTimeoutsShouldRetry(t *testing.T) {
 		}
 		return nil
 	}
-	err := retryTimeDuration(retryFunc, 1*time.Minute)
+	err := RetryTimeDuration(retryFunc, 1*time.Minute)
 	if err != nil {
 		t.Errorf("unexpected error: got '%v' want 'nil'", err)
 	}
@@ -587,7 +587,7 @@ func TestRetryWithPolling_noRetry(t *testing.T) {
 			Code: 400,
 		}
 	}
-	result, err := retryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond)
+	result, err := RetryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond)
 	if err == nil || err.(*googleapi.Error).Code != 400 || result.(string) != "" {
 		t.Errorf("unexpected error %v and result %v", err, result)
 	}
@@ -608,7 +608,7 @@ func TestRetryWithPolling_notRetryable(t *testing.T) {
 	isRetryableFunc := func(err error) (bool, string) {
 		return err.(*googleapi.Error).Code != 400, ""
 	}
-	result, err := retryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
+	result, err := RetryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
 	if err == nil || err.(*googleapi.Error).Code != 400 || result.(string) != "" {
 		t.Errorf("unexpected error %v and result %v", err, result)
 	}
@@ -634,7 +634,7 @@ func TestRetryWithPolling_retriedAndSucceeded(t *testing.T) {
 	isRetryableFunc := func(err error) (bool, string) {
 		return err.(*googleapi.Error).Code != 400, ""
 	}
-	result, err := retryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
+	result, err := RetryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
@@ -665,7 +665,7 @@ func TestRetryWithPolling_retriedAndFailed(t *testing.T) {
 	isRetryableFunc := func(err error) (bool, string) {
 		return err.(*googleapi.Error).Code != 400, ""
 	}
-	result, err := retryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
+	result, err := RetryWithPolling(retryFunc, time.Duration(1000)*time.Millisecond, time.Duration(100)*time.Millisecond, isRetryableFunc)
 	if err == nil || err.(*googleapi.Error).Code != 400 || result.(string) != "" {
 		t.Errorf("unexpected error %v and result %v", err, result)
 	}

@@ -8,14 +8,14 @@ import (
 
 func dataSourceGoogleRegionComputeSslCertificate() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeRegionSslCertificate().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeRegionSslCertificate().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "region")
 
 	return &schema.Resource{
 		Read:   dataSourceComputeRegionSslCertificateRead,

@@ -33,7 +33,7 @@ func dataSourceTpuTensorflowVersions() *schema.Resource {
 
 func dataSourceTpuTensorFlowVersionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -43,17 +43,17 @@ func dataSourceTpuTensorFlowVersionsRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{TPUBasePath}}projects/{{project}}/locations/{{zone}}/tensorflowVersions")
+	url, err := ReplaceVars(d, config, "{{TPUBasePath}}projects/{{project}}/locations/{{zone}}/tensorflowVersions")
 	if err != nil {
 		return err
 	}
 
-	versionsRaw, err := paginatedListRequest(project, url, userAgent, config, flattenTpuTensorflowVersions)
+	versionsRaw, err := PaginatedListRequest(project, url, userAgent, config, flattenTpuTensorflowVersions)
 	if err != nil {
 		return fmt.Errorf("Error listing TPU Tensorflow versions: %s", err)
 	}

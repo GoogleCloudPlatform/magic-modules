@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_name: :PROJECT_NAME
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       messageStoragePolicy: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -128,7 +128,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       topic: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/computed_subscription_topic.erb
       ackDeadlineSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -138,12 +138,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
       retryPolicy.minimumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        diff_suppress_func: 'durationDiffSuppress'
+        diff_suppress_func: 'DurationDiffSuppress'
       retryPolicy.maximumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        diff_suppress_func: 'durationDiffSuppress'
+        diff_suppress_func: 'DurationDiffSuppress'
       pushConfig.attributes: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'ignoreMissingKeyInMap("x-goog-version")'
+        diff_suppress_func: 'IgnoreMissingKeyInMap("x-goog-version")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subscription.go.erb
       encoder: templates/terraform/encoders/no_send_name.go.erb
@@ -169,7 +169,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_name: :PROJECT_NAME
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       # This can be changed once update is supported for schema definition

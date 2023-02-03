@@ -26,7 +26,7 @@ type OrganizationLoggingExclusionUpdater struct {
 func NewOrganizationLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (ResourceLoggingExclusionUpdater, error) {
 	organization := d.Get("org_id").(string)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return nil, err
 	}

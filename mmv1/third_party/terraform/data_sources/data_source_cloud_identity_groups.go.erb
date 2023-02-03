@@ -15,7 +15,7 @@ import (
 
 func dataSourceGoogleCloudIdentityGroups() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudIdentityGroup().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceCloudIdentityGroup().Schema)
 
 	return &schema.Resource{
 		Read: dataSourceGoogleCloudIdentityGroupsRead,
@@ -45,7 +45,7 @@ groups or customers/{customer_id} for Google Groups.`,
 
 func dataSourceGoogleCloudIdentityGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func dataSourceGoogleCloudIdentityGroupsRead(d *schema.ResourceData, meta interf
 		}
 
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
 
@@ -82,7 +82,7 @@ func dataSourceGoogleCloudIdentityGroupsRead(d *schema.ResourceData, meta interf
 		return nil
 	})
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("CloudIdentityGroups %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("CloudIdentityGroups %q", d.Id()))
 	}
 
 	if err := d.Set("groups", result); err != nil {

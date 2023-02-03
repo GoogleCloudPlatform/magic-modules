@@ -14,9 +14,9 @@ func TestAccArtifactRegistryRepository_update(t *testing.T) {
 
 	repositoryID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckArtifactRegistryRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -44,9 +44,9 @@ func TestAccArtifactRegistryRepository_create_mvn_snapshot(t *testing.T) {
 
 	repositoryID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckArtifactRegistryRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -66,9 +66,9 @@ func TestAccArtifactRegistryRepository_create_mvn_release(t *testing.T) {
 
 	repositoryID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckArtifactRegistryRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

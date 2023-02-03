@@ -74,7 +74,7 @@ The score values range from 0.0 (completely uncertain) to 1.0 (completely certai
 						"model_training_mode": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validateEnum([]string{"MODEL_TRAINING_MODE_AUTOMATIC", "MODEL_TRAINING_MODE_MANUAL", ""}),
+							ValidateFunc: ValidateEnum([]string{"MODEL_TRAINING_MODE_AUTOMATIC", "MODEL_TRAINING_MODE_MANUAL", ""}),
 							Description: `Indicates NLU model training mode.
 * MODEL_TRAINING_MODE_AUTOMATIC: NLU model training is automatically triggered when a flow gets modified. User can also manually trigger model training in this mode.
 * MODEL_TRAINING_MODE_MANUAL: User needs to manually trigger NLU model training. Best for large flows whose models take long time to train. Possible values: ["MODEL_TRAINING_MODE_AUTOMATIC", "MODEL_TRAINING_MODE_MANUAL"]`,
@@ -82,7 +82,7 @@ The score values range from 0.0 (completely uncertain) to 1.0 (completely certai
 						"model_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validateEnum([]string{"MODEL_TYPE_STANDARD", "MODEL_TYPE_ADVANCED", ""}),
+							ValidateFunc: ValidateEnum([]string{"MODEL_TYPE_STANDARD", "MODEL_TYPE_ADVANCED", ""}),
 							Description: `Indicates the type of NLU model.
 * MODEL_TYPE_STANDARD: Use standard NLU model.
 * MODEL_TYPE_ADVANCED: Use advanced NLU model. Possible values: ["MODEL_TYPE_STANDARD", "MODEL_TYPE_ADVANCED"]`,
@@ -105,7 +105,7 @@ The score values range from 0.0 (completely uncertain) to 1.0 (completely certai
 
 func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -114,17 +114,17 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	displayNameProp, err := expandDialogflowCXVersionDisplayName(d.Get("display_name"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("display_name"); !isEmptyValue(reflect.ValueOf(displayNameProp)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
+	} else if v, ok := d.GetOkExists("display_name"); !IsEmptyValue(reflect.ValueOf(displayNameProp)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
 		obj["displayName"] = displayNameProp
 	}
 	descriptionProp, err := expandDialogflowCXVersionDescription(d.Get("description"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	} else if v, ok := d.GetOkExists("description"); !IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions")
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
@@ -151,13 +151,13 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Version: %s", err)
 	}
 
 	// Store the ID now
-	id, err := replaceVars(d, config, "{{parent}}/versions/{{name}}")
+	id, err := ReplaceVars(d, config, "{{parent}}/versions/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -181,7 +181,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	// This may have caused the ID to update - update it if so.
-	id, err = replaceVars(d, config, "{{parent}}/versions/{{name}}")
+	id, err = ReplaceVars(d, config, "{{parent}}/versions/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -194,12 +194,12 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 
 func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -207,7 +207,7 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
@@ -225,9 +225,9 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("DialogflowCXVersion %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("DialogflowCXVersion %q", d.Id()))
 	}
 
 	if err := d.Set("name", flattenDialogflowCXVersionName(res["name"], d, config)); err != nil {
@@ -254,7 +254,7 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -265,17 +265,17 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 	displayNameProp, err := expandDialogflowCXVersionDisplayName(d.Get("display_name"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("display_name"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
+	} else if v, ok := d.GetOkExists("display_name"); !IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
 		obj["displayName"] = displayNameProp
 	}
 	descriptionProp, err := expandDialogflowCXVersionDescription(d.Get("description"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	} else if v, ok := d.GetOkExists("description"); !IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -290,9 +290,9 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 	if d.HasChange("description") {
 		updateMask = append(updateMask, "description")
 	}
-	// updateMask is a URL parameter but not present in the schema, so replaceVars
+	// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 	// won't set it
-	url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
 	}
@@ -313,11 +313,11 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return fmt.Errorf("Error updating Version %q: %s", d.Id(), err)
@@ -338,14 +338,14 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -369,13 +369,13 @@ func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{})
 	log.Printf("[DEBUG] Deleting Version %q", d.Id())
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, "Version")
+		return HandleNotFoundError(err, d, "Version")
 	}
 
 	err = dialogflowCXOperationWaitTime(
@@ -394,7 +394,7 @@ func resourceDialogflowCXVersionImport(d *schema.ResourceData, meta interface{})
 	config := meta.(*Config)
 
 	// current import_formats can't import fields with forward slashes in their value and parent contains slashes
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"(?P<parent>.+)/versions/(?P<name>[^/]+)",
 		"(?P<parent>.+)/(?P<name>[^/]+)",
 	}, d, config); err != nil {
@@ -402,7 +402,7 @@ func resourceDialogflowCXVersionImport(d *schema.ResourceData, meta interface{})
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "{{parent}}/versions/{{name}}")
+	id, err := ReplaceVars(d, config, "{{parent}}/versions/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

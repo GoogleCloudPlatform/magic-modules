@@ -13,11 +13,11 @@ import (
 
 func TestAccKmsSecret_basic(t *testing.T) {
 	// Nested tests confuse VCR
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	projectOrg := getTestOrgFromEnv(t)
-	projectBillingAccount := getTestBillingAccountFromEnv(t)
+	projectOrg := GetTestOrgFromEnv(t)
+	projectBillingAccount := GetTestBillingAccountFromEnv(t)
 
 	projectId := "tf-test-" + randString(t, 10)
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -27,9 +27,9 @@ func TestAccKmsSecret_basic(t *testing.T) {
 	aad := "plainaad"
 
 	// The first test creates resources needed to encrypt plaintext and produce ciphertext
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -41,9 +41,9 @@ func TestAccKmsSecret_basic(t *testing.T) {
 					}
 
 					// The second test asserts that the data source has the correct plaintext, given the created ciphertext
-					vcrTest(t, resource.TestCase{
-						PreCheck:  func() { testAccPreCheck(t) },
-						Providers: testAccProviders,
+					VcrTest(t, resource.TestCase{
+						PreCheck:  func() { TestAccPreCheck(t) },
+						Providers: TestAccProviders,
 						Steps: []resource.TestStep{
 							{
 								Config: testGoogleKmsSecret_datasource(cryptoKeyId.terraformId(), ciphertext),
@@ -66,9 +66,9 @@ func TestAccKmsSecret_basic(t *testing.T) {
 					}
 
 					// The second test asserts that the data source has the correct plaintext, given the created ciphertext
-					vcrTest(t, resource.TestCase{
-						PreCheck:  func() { testAccPreCheck(t) },
-						Providers: testAccProviders,
+					VcrTest(t, resource.TestCase{
+						PreCheck:  func() { TestAccPreCheck(t) },
+						Providers: TestAccProviders,
 						Steps: []resource.TestStep{
 							{
 								Config: testGoogleKmsSecret_aadDatasource(cryptoKeyId.terraformId(), ciphertext, base64.StdEncoding.EncodeToString([]byte(aad))),
@@ -85,7 +85,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 }
 
 func testAccEncryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cryptoKeyResourceName, plaintext, aad string) (string, *kmsCryptoKeyId, error) {
-	config := googleProviderConfig(t)
+	config := GoogleProviderConfig(t)
 
 	rs, ok := s.RootModule().Resources[cryptoKeyResourceName]
 	if !ok {

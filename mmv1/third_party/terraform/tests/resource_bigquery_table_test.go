@@ -397,9 +397,9 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -432,9 +432,9 @@ func TestAccBigQueryTable_Kms(t *testing.T) {
 	kms := BootstrapKMSKey(t)
 	cryptoKeyName := kms.CryptoKey.Name
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -456,9 +456,9 @@ func TestAccBigQueryTable_HourlyTimePartitioning(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -489,9 +489,9 @@ func TestAccBigQueryTable_MonthlyTimePartitioning(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -522,9 +522,9 @@ func TestAccBigQueryTable_YearlyTimePartitioning(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -556,9 +556,9 @@ func TestAccBigQueryTable_HivePartitioning(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -581,9 +581,9 @@ func TestAccBigQueryTable_HivePartitioningCustomSchema(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -607,9 +607,9 @@ func TestAccBigQueryTable_AvroPartitioning(t *testing.T) {
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	avroFilePath := "./test-fixtures/bigquerytable/avro-generated.avro"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -631,9 +631,9 @@ func TestAccBigQueryTable_RangePartitioning(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -655,9 +655,9 @@ func TestAccBigQueryTable_View(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -679,9 +679,9 @@ func TestAccBigQueryTable_updateView(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -712,9 +712,9 @@ func TestAccBigQueryTable_WithViewAndSchema(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -748,9 +748,9 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Basic(t *testing.
 	query := fmt.Sprintf("SELECT count(some_string) as count, some_int, ts FROM `%s.%s` WHERE DATE(ts) = '2019-01-01' GROUP BY some_int, ts", datasetID, tableID)
 	queryNew := strings.ReplaceAll(query, "2019", "2020")
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -799,9 +799,9 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Update(t *testing
 	enable_refresh := "false"
 	refresh_interval_ms := "3600000"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -847,9 +847,9 @@ func TestAccBigQueryExternalDataTable_parquet(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -868,9 +868,9 @@ func TestAccBigQueryExternalDataTable_CSV(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -895,11 +895,11 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	connectionID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	projectID := getTestProjectFromEnv()
+	projectID := GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -934,11 +934,11 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	connectionID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	projectID := getTestProjectFromEnv()
+	projectID := GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -981,9 +981,9 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateAllowQuotedNewlines(t
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1013,12 +1013,12 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 8),
-		"project":       getTestProjectFromEnv(),
+		"project":       GetTestProjectFromEnv(),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1041,9 +1041,9 @@ func TestAccBigQueryDataTable_sheet(t *testing.T) {
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1065,9 +1065,9 @@ func TestAccBigQueryDataTable_jsonEquivalency(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1098,9 +1098,9 @@ func TestAccBigQueryDataTable_canReorderParameters(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1124,9 +1124,9 @@ func TestAccBigQueryDataTable_expandArray(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1157,9 +1157,9 @@ func TestAccBigQueryTable_allowDestroy(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1189,9 +1189,9 @@ func TestAccBigQueryTable_emptySchema(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1397,7 +1397,7 @@ func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resourc
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 			dataset := rs.Primary.Attributes["dataset_id"]
 			table := rs.Primary.Attributes["table_id"]
 			res, err := config.NewBigQueryClient(config.userAgent).Tables.Get(config.Project, dataset, table).Do()
@@ -1425,7 +1425,7 @@ func testAccCheckBigQueryTableDestroyProducer(t *testing.T) func(s *terraform.St
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 			_, err := config.NewBigQueryClient(config.userAgent).Tables.Get(config.Project, rs.Primary.Attributes["dataset_id"], rs.Primary.Attributes["table_id"]).Do()
 			if err == nil {
 				return fmt.Errorf("Table still present")

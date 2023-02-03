@@ -16,9 +16,9 @@ import (
 func TestAccDataSourceGoogleComputeInstanceGroup_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckDataSourceGoogleComputeInstanceGroupConfig(randString(t, 10), randString(t, 10)),
@@ -33,9 +33,9 @@ func TestAccDataSourceGoogleComputeInstanceGroup_basic(t *testing.T) {
 func TestAccDataSourceGoogleComputeInstanceGroup_withNamedPort(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckDataSourceGoogleComputeInstanceGroupConfigWithNamedPort(randString(t, 10), randString(t, 10)),
@@ -50,9 +50,9 @@ func TestAccDataSourceGoogleComputeInstanceGroup_withNamedPort(t *testing.T) {
 func TestAccDataSourceGoogleComputeInstanceGroup_fromIGM(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckDataSourceGoogleComputeInstanceGroup_fromIGM(fmt.Sprintf("tf-test-igm-%d", randInt(t)), fmt.Sprintf("tf-test-igm-%d", randInt(t))),
@@ -97,7 +97,7 @@ func testAccCheckDataSourceGoogleComputeInstanceGroup(dataSourceName string) res
 			}
 		}
 
-		if !compareSelfLinkOrResourceName("", dsAttrs["self_link"], rsAttrs["self_link"], nil) && dsAttrs["self_link"] != rsAttrs["self_link"] {
+		if !CompareSelfLinkOrResourceName("", dsAttrs["self_link"], rsAttrs["self_link"], nil) && dsAttrs["self_link"] != rsAttrs["self_link"] {
 			return fmt.Errorf("self link does not match: %s vs %s", dsAttrs["self_link"], rsAttrs["self_link"])
 		}
 
@@ -187,7 +187,7 @@ func testAccCheckDataSourceGoogleComputeInstanceGroup(dataSourceName string) res
 
 		for k, dsAttr := range dsInstancesValues {
 			rsAttr := rsInstancesValues[k]
-			if !compareSelfLinkOrResourceName("", dsAttr, rsAttr, nil) && dsAttr != rsAttr {
+			if !CompareSelfLinkOrResourceName("", dsAttr, rsAttr, nil) && dsAttr != rsAttr {
 				return fmt.Errorf("instance expected value %s did not match real value %s. expected list of instances %v, received %v", rsAttr, dsAttr, rsInstancesValues, dsInstancesValues)
 			}
 		}

@@ -51,7 +51,7 @@ func resourceComputeSharedVpcServiceProject() *schema.Resource {
 
 func resourceComputeSharedVpcServiceProjectCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func resourceComputeSharedVpcServiceProjectCreate(d *schema.ResourceData, meta i
 
 func resourceComputeSharedVpcServiceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func resourceComputeSharedVpcServiceProjectDelete(d *schema.ResourceData, meta i
 }
 
 func disableXpnResource(d *schema.ResourceData, config *Config, hostProject, project string) error {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

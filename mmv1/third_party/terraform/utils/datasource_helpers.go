@@ -4,13 +4,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// datasourceSchemaFromResourceSchema is a recursive func that
+// DatasourceSchemaFromResourceSchema is a recursive func that
 // converts an existing Resource schema to a Datasource schema.
 // All schema elements are copied, but certain attributes are ignored or changed:
 // - all attributes have Computed = true
 // - all attributes have ForceNew, Required = false
 // - Validation funcs and attributes (e.g. MaxItems) are not copied
-func datasourceSchemaFromResourceSchema(rs map[string]*schema.Schema) map[string]*schema.Schema {
+func DatasourceSchemaFromResourceSchema(rs map[string]*schema.Schema) map[string]*schema.Schema {
 	ds := make(map[string]*schema.Schema, len(rs))
 	for k, v := range rs {
 		dv := &schema.Schema{
@@ -32,7 +32,7 @@ func datasourceSchemaFromResourceSchema(rs map[string]*schema.Schema) map[string
 			if elem, ok := v.Elem.(*schema.Resource); ok {
 				// handle the case where the Element is a sub-resource
 				dv.Elem = &schema.Resource{
-					Schema: datasourceSchemaFromResourceSchema(elem.Schema),
+					Schema: DatasourceSchemaFromResourceSchema(elem.Schema),
 				}
 			} else {
 				// handle simple primitive case
@@ -52,7 +52,7 @@ func datasourceSchemaFromResourceSchema(rs map[string]*schema.Schema) map[string
 
 // fixDatasourceSchemaFlags is a convenience func that toggles the Computed,
 // Optional + Required flags on a schema element. This is useful when the schema
-// has been generated (using `datasourceSchemaFromResourceSchema` above for
+// has been generated (using `DatasourceSchemaFromResourceSchema` above for
 // example) and therefore the attribute flags were not set appropriately when
 // first added to the schema definition. Currently only supports top-level
 // schema elements.
@@ -64,10 +64,10 @@ func fixDatasourceSchemaFlags(schema map[string]*schema.Schema, required bool, k
 	}
 }
 
-func addRequiredFieldsToSchema(schema map[string]*schema.Schema, keys ...string) {
+func AddRequiredFieldsToSchema(schema map[string]*schema.Schema, keys ...string) {
 	fixDatasourceSchemaFlags(schema, true, keys...)
 }
 
-func addOptionalFieldsToSchema(schema map[string]*schema.Schema, keys ...string) {
+func AddOptionalFieldsToSchema(schema map[string]*schema.Schema, keys ...string) {
 	fixDatasourceSchemaFlags(schema, false, keys...)
 }

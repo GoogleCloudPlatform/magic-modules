@@ -13,9 +13,9 @@ func TestAccPubsubLiteSubscription_pubsubLiteSubscription_deliveryRequirement_up
 	topic := fmt.Sprintf("tf-test-topic-foo-%s", randString(t, 10))
 	subscription := fmt.Sprintf("tf-test-topic-foo-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckPubsubLiteSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

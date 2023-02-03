@@ -11,9 +11,9 @@ func TestAccMonitoringService_basic(t *testing.T) {
 	t.Parallel()
 
 	randomSuffix := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -38,21 +38,21 @@ func GetBigtableInstanceApiObject(d TerraformResourceData, config *Config) (map[
 	nameProp, err := expandBigtableInstanceName(d.Get("name"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+	} else if v, ok := d.GetOkExists("name"); !IsEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
 		obj["name"] = nameProp
 	}
 
 	displayNameProp, err := expandBigtableDisplayName(d.Get("name"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(displayNameProp)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
+	} else if v, ok := d.GetOkExists("name"); !IsEmptyValue(reflect.ValueOf(displayNameProp)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
 		obj["name"] = nameProp
 	}
 
 	labelsProp, err := expandBigtableDisplayName(d.Get("labels"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(labelsProp)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+	} else if v, ok := d.GetOkExists("labels"); !IsEmptyValue(reflect.ValueOf(labelsProp)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
 		obj["labels"] = labelsProp
 	}
 
@@ -60,7 +60,7 @@ func GetBigtableInstanceApiObject(d TerraformResourceData, config *Config) (map[
 }
 
 func expandBigtableInstanceName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return replaceVars(d, config, "projects/{{project}}/instances/{{name}}")
+	return ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 }
 
 func expandBigtableDisplayName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {

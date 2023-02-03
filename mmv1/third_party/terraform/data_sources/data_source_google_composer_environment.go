@@ -7,13 +7,13 @@ import (
 )
 
 func dataSourceGoogleComposerEnvironment() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComposerEnvironment().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComposerEnvironment().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project", "region")
+	AddOptionalFieldsToSchema(dsSchema, "project", "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComposerEnvironmentRead,
@@ -27,7 +27,7 @@ func dataSourceGoogleComposerEnvironmentRead(d *schema.ResourceData, meta interf
 	if err != nil {
 		return err
 	}
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

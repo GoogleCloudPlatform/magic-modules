@@ -45,7 +45,7 @@ func dataSourceGoogleServiceAccount() *schema.Resource {
 
 func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}
 
 	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(serviceAccountName).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
 	}
 
 	d.SetId(sa.Name)

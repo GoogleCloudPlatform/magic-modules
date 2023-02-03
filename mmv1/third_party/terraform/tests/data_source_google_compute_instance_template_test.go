@@ -9,14 +9,14 @@ import (
 func TestAccInstanceTemplateDatasource_name(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_name(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccInstanceTemplate_name(GetTestProjectFromEnv(), randString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
 						"google_compute_instance_template.default",
 						map[string]struct{}{},
@@ -30,14 +30,14 @@ func TestAccInstanceTemplateDatasource_name(t *testing.T) {
 func TestAccInstanceTemplateDatasource_filter(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_filter(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccInstanceTemplate_filter(GetTestProjectFromEnv(), randString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
 						"google_compute_instance_template.c",
 						map[string]struct{}{},
@@ -51,14 +51,14 @@ func TestAccInstanceTemplateDatasource_filter(t *testing.T) {
 func TestAccInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_filter_mostRecent(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccInstanceTemplate_filter_mostRecent(GetTestProjectFromEnv(), randString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
 						"google_compute_instance_template.c",
 						map[string]struct{}{},

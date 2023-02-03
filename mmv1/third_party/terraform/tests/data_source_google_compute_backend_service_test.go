@@ -13,14 +13,14 @@ func TestAccDataSourceComputeBackendService_basic(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeBackendService_basic(serviceName, checkName),
-				Check:  checkDataSourceStateMatchesResourceState("data.google_compute_backend_service.baz", "google_compute_backend_service.foobar"),
+				Check:  CheckDataSourceStateMatchesResourceState("data.google_compute_backend_service.baz", "google_compute_backend_service.foobar"),
 			},
 		},
 	})

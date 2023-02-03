@@ -9,10 +9,10 @@ import (
 
 func dataSourceGoogleFirebaseAndroidApp() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceFirebaseAndroidApp().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceFirebaseAndroidApp().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "app_id")
+	AddRequiredFieldsToSchema(dsSchema, "app_id")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleFirebaseAndroidAppRead,

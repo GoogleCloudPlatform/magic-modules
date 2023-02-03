@@ -15,7 +15,7 @@
 // suppress changes on sample_rate if log_config is set to disabled.
 func suppressWhenDisabled(k, old, new string, d *schema.ResourceData) bool {
 	_, n := d.GetChange("log_config.0.enable")
-	if isEmptyValue(reflect.ValueOf(n)) {
+	if IsEmptyValue(reflect.ValueOf(n)) {
 		return true
 	}
 	return false
@@ -45,7 +45,7 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 	m := v.(map[string]interface{})
 	log.Printf("[DEBUG] hashing %v", m)
 
-	if group, err := getRelativePath(m["group"].(string)); err != nil {
+	if group, err := GetRelativePath(m["group"].(string)); err != nil {
 		log.Printf("[WARN] Error on retrieving relative path of instance group: %s", err)
 		buf.WriteString(fmt.Sprintf("%s-", m["group"].(string)))
 	} else {

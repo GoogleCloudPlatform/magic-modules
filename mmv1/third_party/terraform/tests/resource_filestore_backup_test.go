@@ -13,9 +13,9 @@ func TestAccFilestoreBackup_update(t *testing.T) {
 	instName := fmt.Sprintf("tf-fs-inst-%d", randInt(t))
 	bkupName := fmt.Sprintf("tf-fs-bkup-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckFilestoreBackupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

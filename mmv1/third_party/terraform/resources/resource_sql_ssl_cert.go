@@ -94,7 +94,7 @@ func resourceSqlSslCert() *schema.Resource {
 
 func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -160,7 +160,7 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 
 	sslCerts, err := config.NewSqlAdminClient(userAgent).SslCerts.Get(project, instance, fingerprint).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
+		return HandleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
 	}
 
 	if sslCerts == nil {
@@ -201,7 +201,7 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

@@ -15,14 +15,14 @@ func TestAccDatasourceGoogleServiceAccountKey_basic(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	serviceAccountName := fmt.Sprintf(
 		"projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com",
-		getTestProjectFromEnv(),
+		GetTestProjectFromEnv(),
 		account,
-		getTestProjectFromEnv(),
+		GetTestProjectFromEnv(),
 	)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatasourceGoogleServiceAccountKey(account),

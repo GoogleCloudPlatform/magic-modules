@@ -15,7 +15,7 @@ const DEFAULT_HEALTHCARE_TEST_LOCATION = "us-central1"
 func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 	t.Parallel()
 
-	projectId := getTestProjectFromEnv()
+	projectId := GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -26,9 +26,9 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 		Name:     datasetName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
@@ -64,7 +64,7 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 func TestAccHealthcareDatasetIamMember(t *testing.T) {
 	t.Parallel()
 
-	projectId := getTestProjectFromEnv()
+	projectId := GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "roles/healthcare.datasetViewer"
 	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -75,9 +75,9 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 		Name:     datasetName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -99,7 +99,7 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	projectId := getTestProjectFromEnv()
+	projectId := GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -110,9 +110,9 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 		Name:     datasetName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccHealthcareDatasetIamPolicy_basic(account, datasetName, roleId),
@@ -132,7 +132,7 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 
 func testAccCheckGoogleHealthcareDatasetIam(t *testing.T, datasetId, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		p, err := config.NewHealthcareClient(config.userAgent).Projects.Locations.Datasets.GetIamPolicy(datasetId).Do()
 		if err != nil {
 			return err

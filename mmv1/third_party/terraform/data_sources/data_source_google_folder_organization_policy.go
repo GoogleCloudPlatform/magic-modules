@@ -8,10 +8,10 @@ import (
 
 func dataSourceGoogleFolderOrganizationPolicy() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceGoogleFolderOrganizationPolicy().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceGoogleFolderOrganizationPolicy().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "folder")
-	addRequiredFieldsToSchema(dsSchema, "constraint")
+	AddRequiredFieldsToSchema(dsSchema, "folder")
+	AddRequiredFieldsToSchema(dsSchema, "constraint")
 
 	return &schema.Resource{
 		Read:   datasourceGoogleFolderOrganizationPolicyRead,

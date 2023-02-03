@@ -1,6 +1,6 @@
-config := googleProviderConfig(t)
+config := GoogleProviderConfig(t)
 
-url, err := replaceVarsForTest(config, rs, "{{IdentityPlatformBasePath}}projects/{{project}}/config")
+url, err := ReplaceVarsForTest(config, rs, "{{IdentityPlatformBasePath}}projects/{{project}}/config")
 if err != nil {
     return err
 }
@@ -11,7 +11,7 @@ if config.BillingProject != "" {
     billingProject = config.BillingProject
 }
 
-res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+res, err := SendRequest(config, "GET", billingProject, url, config.userAgent, nil)
 if err != nil {
     return fmt.Errorf("something went wrong trying to get the IdentityPlatformProjectDefaultConfig at %s", url)
 }

@@ -10,9 +10,9 @@ import (
 func TestAccNetworkServicesEdgeCacheOrigin_updateAndImport(t *testing.T) {
 	t.Parallel()
 	name := "tf-test-origin-" + randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckNetworkServicesEdgeCacheOriginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

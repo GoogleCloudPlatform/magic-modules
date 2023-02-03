@@ -1,11 +1,11 @@
-config := googleProviderConfig(t)
+config := GoogleProviderConfig(t)
 
-url, err := replaceVarsForTest(config, rs, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}")
+url, err := ReplaceVarsForTest(config, rs, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}")
 if err != nil {
 	return err
 }
 
-res, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
+res, err := SendRequest(config, "GET", "", url, config.userAgent, nil)
 if err != nil {
 	return nil
 }

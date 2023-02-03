@@ -18,7 +18,7 @@ import (
 )
 
 const maxBackoffSeconds = 30
-const iamPolicyVersion = 3
+const IamPolicyVersion = 3
 
 // These types are implemented per GCP resource type and specify how to do per-resource IAM operations.
 // They are used in the generic Terraform IAM resource definitions
@@ -64,7 +64,7 @@ func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.P
 
 	log.Printf("[DEBUG] Retrieving policy for %s\n", updater.DescribeResource())
 	var policy *cloudresourcemanager.Policy
-	err := retryTime(func() (perr error) {
+	err := RetryTime(func() (perr error) {
 		policy, perr = updater.GetResourceIamPolicy()
 		return perr
 	}, 10)
@@ -182,7 +182,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 }
 
 // Flattens a list of Bindings so each role+condition has a single Binding with combined members
-func mergeBindings(bindings []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
+func MergeBindings(bindings []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
 	bm := createIamBindingsMap(bindings)
 	return listFromIamBindingMap(bm)
 }
@@ -431,24 +431,24 @@ func compareIamPolicies(a, b *cloudresourcemanager.Policy) bool {
 		log.Printf("[DEBUG] policies version differ: %q vs %q", a.Version, b.Version)
 		return false
 	}
-	if !compareBindings(a.Bindings, b.Bindings) {
+	if !CompareBindings(a.Bindings, b.Bindings) {
 		log.Printf("[DEBUG] policies bindings differ: %#v vs %#v", a.Bindings, b.Bindings)
 		return false
 	}
-	if !compareAuditConfigs(a.AuditConfigs, b.AuditConfigs) {
+	if !CompareAuditConfigs(a.AuditConfigs, b.AuditConfigs) {
 		log.Printf("[DEBUG] policies audit configs differ: %#v vs %#v", a.AuditConfigs, b.AuditConfigs)
 		return false
 	}
 	return true
 }
 
-func compareBindings(a, b []*cloudresourcemanager.Binding) bool {
+func CompareBindings(a, b []*cloudresourcemanager.Binding) bool {
 	aMap := createIamBindingsMap(a)
 	bMap := createIamBindingsMap(b)
 	return reflect.DeepEqual(aMap, bMap)
 }
 
-func compareAuditConfigs(a, b []*cloudresourcemanager.AuditConfig) bool {
+func CompareAuditConfigs(a, b []*cloudresourcemanager.AuditConfig) bool {
 	aMap := createIamAuditConfigsMap(a)
 	bMap := createIamAuditConfigsMap(b)
 	return reflect.DeepEqual(aMap, bMap)

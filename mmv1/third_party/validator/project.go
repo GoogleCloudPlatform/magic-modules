@@ -65,7 +65,7 @@ func GetProjectApiObject(d TerraformResourceData, config *Config) (map[string]in
 	}
 
 	if _, ok := d.GetOk("labels"); ok {
-		project.Labels = expandLabels(d)
+		project.Labels = ExpandLabels(d)
 	}
 
 	return jsonMap(project)

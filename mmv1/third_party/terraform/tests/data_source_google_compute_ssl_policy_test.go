@@ -11,9 +11,9 @@ import (
 func TestAccDataSourceGoogleSslPolicy(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleSslPolicy(fmt.Sprintf("test-ssl-policy-%d", randInt(t))),

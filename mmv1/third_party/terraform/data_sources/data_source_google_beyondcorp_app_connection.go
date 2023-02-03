@@ -8,12 +8,12 @@ import (
 
 func dataSourceGoogleBeyondcorpAppConnection() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceBeyondcorpAppConnection().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceBeyondcorpAppConnection().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleBeyondcorpAppConnectionRead,
@@ -31,7 +31,7 @@ func dataSourceGoogleBeyondcorpAppConnectionRead(d *schema.ResourceData, meta in
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

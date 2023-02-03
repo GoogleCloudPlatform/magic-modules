@@ -9,8 +9,8 @@ import (
 
 func dataSourceGoogleComputeInstanceGroupManager() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeInstanceGroupManager().Schema)
-	addOptionalFieldsToSchema(dsSchema, "name", "self_link", "project", "zone")
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeInstanceGroupManager().Schema)
+	AddOptionalFieldsToSchema(dsSchema, "name", "self_link", "project", "zone")
 
 	return &schema.Resource{
 		Read:   dataSourceComputeInstanceGroupManagerRead,
@@ -36,7 +36,7 @@ func dataSourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta inte
 		}
 		d.SetId(fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s", parsed.Project, parsed.Zone, parsed.Name))
 	} else if name, ok := d.GetOk("name"); ok {
-		zone, err := getZone(d, config)
+		zone, err := GetZone(d, config)
 		if err != nil {
 			return err
 		}

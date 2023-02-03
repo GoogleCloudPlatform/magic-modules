@@ -76,7 +76,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				Computed:      true,
 				ForceNew:      true,
 				ConflictsWith: []string{"name_prefix"},
-				ValidateFunc:  validateGCEName,
+				ValidateFunc:  ValidateGCEName,
 				Description:   `The name of the instance template. If you leave this blank, Terraform will auto-generate a unique name.`,
 			},
 
@@ -281,7 +281,7 @@ Google Cloud KMS.`,
 										Type:             schema.TypeString,
 										Required:         true,
 										ForceNew:         true,
-										DiffSuppressFunc: compareSelfLinkRelativePaths,
+										DiffSuppressFunc: CompareSelfLinkOrResourceName,
 										Description:      `The self link of the encryption key that is stored in Google Cloud KMS.`,
 									},
 								},
@@ -296,7 +296,7 @@ Google Cloud KMS.`,
 							Description: `A list (short name or id) of resource policies to attach to this disk. Currently a max of 1 resource policy is supported.`,
 							Elem: &schema.Schema{
 								Type:             schema.TypeString,
-								DiffSuppressFunc: compareResourceNames,
+								DiffSuppressFunc: CompareResourceNames,
 							},
 						},
 					},
@@ -392,7 +392,7 @@ Google Cloud KMS.`,
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the network to attach this interface to. Use network attribute for Legacy or Auto subnetted networks and subnetwork for custom subnetted networks.`,
 						},
 
@@ -401,7 +401,7 @@ Google Cloud KMS.`,
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name of the subnetwork to attach this interface to. The subnetwork must exist in the same region this instance will be created in. Either network or subnetwork must be provided.`,
 						},
 
@@ -474,7 +474,7 @@ Google Cloud KMS.`,
 										Type:             schema.TypeString,
 										Required:         true,
 										ForceNew:         true,
-										DiffSuppressFunc: ipCidrRangeDiffSuppress,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
 										Description:      `The IP CIDR range represented by this alias IP range. This IP CIDR range must belong to the specified subnetwork and cannot contain IP addresses reserved by system or used by other network interfaces. At the time of writing only a netmask (e.g. /24) may be supplied, with a CIDR format resulting in an API error.`,
 									},
 									"subnetwork_range_name": {
@@ -600,7 +600,7 @@ Google Cloud KMS.`,
 							AtLeastOneOf:     schedulingInstTemplateKeys,
 							ForceNew:         true,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
+							DiffSuppressFunc: EmptyOrDefaultStringSuppress(""),
 							Description:      `Specifies node affinities or anti-affinities to determine which sole-tenant nodes your instances and managed instance groups will use as host systems.`,
 						},
 						"min_node_cpus": {
@@ -705,7 +705,7 @@ be from 0 to 999,999,999 inclusive.`,
 				// Since this block is used by the API based on which
 				// image being used, the field needs to be marked as Computed.
 				Computed:         true,
-				DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
+				DiffSuppressFunc: EmptyOrDefaultStringSuppress(""),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_secure_boot": {
@@ -803,7 +803,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:             schema.TypeString,
 							Required:         true,
 							ForceNew:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The accelerator type resource to expose to this instance. E.g. nvidia-tesla-k80.`,
 						},
 					},
@@ -985,7 +985,7 @@ func buildDisks(d *schema.ResourceData, config *Config) ([]*compute.AttachedDisk
 		return nil, err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -1137,7 +1137,7 @@ func expandInstanceTemplateGuestAccelerators(d TerraformResourceData, config *Co
 
 func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -1202,7 +1202,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	}
 
 	if _, ok := d.GetOk("labels"); ok {
-		instanceProperties.Labels = expandLabels(d)
+		instanceProperties.Labels = ExpandLabels(d)
 	}
 
 	var itName string
@@ -1458,7 +1458,7 @@ func flattenDisks(disks []*compute.AttachedDisk, d *schema.ResourceData, default
 
 func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -1471,7 +1471,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	splits := strings.Split(d.Id(), "/")
 	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
 	}
 
 	// Set the metadata fingerprint if there is one.
@@ -1627,7 +1627,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 
 func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -1679,12 +1679,12 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 
 func resourceComputeInstanceTemplateImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/global/instanceTemplates/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+	if err := ParseImportId([]string{"projects/(?P<project>[^/]+)/global/instanceTemplates/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/global/instanceTemplates/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/global/instanceTemplates/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

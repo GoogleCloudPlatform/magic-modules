@@ -92,7 +92,7 @@ func dataSourceGoogleComputeRegionInstanceGroup() *schema.Resource {
 
 func dataSourceComputeRegionInstanceGroupRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func dataSourceComputeRegionInstanceGroupRead(d *schema.ResourceData, meta inter
 	instanceGroup, err := config.NewComputeClient(userAgent).RegionInstanceGroups.Get(
 		project, region, name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Region Instance Group %q", name))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Region Instance Group %q", name))
 	}
 
 	members, err := config.NewComputeClient(userAgent).RegionInstanceGroups.ListInstances(

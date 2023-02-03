@@ -10,7 +10,7 @@ import (
 
 func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	suffix := randString(t, 10)
@@ -24,11 +24,11 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 		"config_name4":  fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
 	rigmId := fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s",
-		getTestProjectFromEnv(), getTestRegionFromEnv(), rigmName)
+		GetTestProjectFromEnv(), GetTestRegionFromEnv(), rigmName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Create one endpoint
@@ -97,9 +97,9 @@ func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 		"config_name":   fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Create one config

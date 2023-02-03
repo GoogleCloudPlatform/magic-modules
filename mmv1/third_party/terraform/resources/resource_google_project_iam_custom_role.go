@@ -26,7 +26,7 @@ func resourceGoogleProjectIamCustomRole() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				Description:  `The camel case role id to use for this role. Cannot contain - characters.`,
-				ValidateFunc: validateIAMCustomRoleID,
+				ValidateFunc: ValidateIAMCustomRoleID,
 			},
 			"title": {
 				Type:        schema.TypeString,
@@ -53,7 +53,7 @@ func resourceGoogleProjectIamCustomRole() *schema.Resource {
 				Default:          "GA",
 				Description:      `The current launch stage of the role. Defaults to GA.`,
 				ValidateFunc:     validation.StringInSlice([]string{"ALPHA", "BETA", "GA", "DEPRECATED", "DISABLED", "EAP"}, false),
-				DiffSuppressFunc: emptyOrDefaultStringSuppress("ALPHA"),
+				DiffSuppressFunc: EmptyOrDefaultStringSuppress("ALPHA"),
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -77,7 +77,7 @@ func resourceGoogleProjectIamCustomRole() *schema.Resource {
 
 func resourceGoogleProjectIamCustomRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func resourceGoogleProjectIamCustomRoleCreate(d *schema.ResourceData, meta inter
 			// If a role with same name exists and is enabled, just return error
 			return fmt.Errorf("Custom project role %s already exists and must be imported", roleId)
 		}
-	} else if err := handleNotFoundError(err, d, fmt.Sprintf("Custom Project Role %q", roleId)); err == nil {
+	} else if err := HandleNotFoundError(err, d, fmt.Sprintf("Custom Project Role %q", roleId)); err == nil {
 		// If no role is found, actually create a new role.
 		role, err := config.NewIamClient(userAgent).Projects.Roles.Create("projects/"+project, &iam.CreateRoleRequest{
 			RoleId: d.Get("role_id").(string),
@@ -133,7 +133,7 @@ func extractProjectFromProjectIamCustomRoleID(id string) string {
 
 func resourceGoogleProjectIamCustomRoleRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func resourceGoogleProjectIamCustomRoleRead(d *schema.ResourceData, meta interfa
 
 	role, err := config.NewIamClient(userAgent).Projects.Roles.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, d.Id())
+		return HandleNotFoundError(err, d, d.Id())
 	}
 
 	if err := d.Set("role_id", GetResourceNameFromSelfLink(role.Name)); err != nil {
@@ -175,7 +175,7 @@ func resourceGoogleProjectIamCustomRoleRead(d *schema.ResourceData, meta interfa
 
 func resourceGoogleProjectIamCustomRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func resourceGoogleProjectIamCustomRoleUpdate(d *schema.ResourceData, meta inter
 
 func resourceGoogleProjectIamCustomRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func resourceGoogleProjectIamCustomRoleDelete(d *schema.ResourceData, meta inter
 
 func resourceGoogleProjectIamCustomRoleImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/roles/(?P<role_id>[^/]+)",
 		"(?P<project>[^/]+)/(?P<role_id>[^/]+)",
 		"(?P<role_id>[^/]+)",
@@ -238,7 +238,7 @@ func resourceGoogleProjectIamCustomRoleImport(d *schema.ResourceData, meta inter
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/roles/{{role_id}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/roles/{{role_id}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

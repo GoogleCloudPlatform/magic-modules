@@ -11,9 +11,9 @@ import (
 func TestAccDataSourceGoogleSubnetwork(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleSubnetwork(fmt.Sprintf("tf-test-subnetwork-ds-%d", randInt(t)), fmt.Sprintf("tf-test-subnetwork-ds-%d", randInt(t))),
@@ -61,11 +61,11 @@ func testAccDataSourceGoogleSubnetworkCheck(data_source_name string, resource_na
 			}
 		}
 
-		if !compareSelfLinkOrResourceName("", ds_attr["network"], rs_attr["network"], nil) && ds_attr["network"] != rs_attr["network"] {
+		if !CompareSelfLinkOrResourceName("", ds_attr["network"], rs_attr["network"], nil) && ds_attr["network"] != rs_attr["network"] {
 			return fmt.Errorf("network does not match: %s vs %s", ds_attr["network"], rs_attr["network"])
 		}
 
-		if !compareSelfLinkOrResourceName("", ds_attr["self_link"], rs_attr["self_link"], nil) && ds_attr["self_link"] != rs_attr["self_link"] {
+		if !CompareSelfLinkOrResourceName("", ds_attr["self_link"], rs_attr["self_link"], nil) && ds_attr["self_link"] != rs_attr["self_link"] {
 			return fmt.Errorf("self link does not match: %s vs %s", ds_attr["self_link"], rs_attr["self_link"])
 		}
 

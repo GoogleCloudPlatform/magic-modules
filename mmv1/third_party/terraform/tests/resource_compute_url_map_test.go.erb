@@ -15,9 +15,9 @@ func TestAccComputeUrlMap_update_path_matcher(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
 	hcName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
 	umName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -42,9 +42,9 @@ func TestAccComputeUrlMap_update_path_matcher(t *testing.T) {
 func TestAccComputeUrlMap_advanced(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -69,9 +69,9 @@ func TestAccComputeUrlMap_advanced(t *testing.T) {
 func TestAccComputeUrlMap_defaultRouteActionPathUrlRewrite(t *testing.T) {
   t.Parallel()
 
-  vcrTest(t, resource.TestCase{
-    PreCheck:     func() { testAccPreCheck(t) },
-    Providers:    testAccProviders,
+  VcrTest(t, resource.TestCase{
+    PreCheck:     func() { TestAccPreCheck(t) },
+    Providers:    TestAccProviders,
     CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -95,9 +95,9 @@ func TestAccComputeUrlMap_defaultRouteActionPathUrlRewrite(t *testing.T) {
 func TestAccComputeUrlMap_defaultRouteActionUrlRewrite(t *testing.T) {
   t.Parallel()
 
-  vcrTest(t, resource.TestCase{
-    PreCheck:     func() { testAccPreCheck(t) },
-    Providers:    testAccProviders,
+  VcrTest(t, resource.TestCase{
+    PreCheck:     func() { TestAccPreCheck(t) },
+    Providers:    TestAccProviders,
     CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -125,9 +125,9 @@ func TestAccComputeUrlMap_noPathRulesWithUpdate(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
 	hcName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
 	umName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -159,7 +159,7 @@ func testAccCheckComputeUrlMapExists(t *testing.T, n string) resource.TestCheckF
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
 		found, err := config.NewComputeClient(config.userAgent).UrlMaps.Get(
@@ -183,9 +183,9 @@ func TestAccComputeUrlMap_defaultRouteActionTrafficDirectorPathUpdate(t *testing
   bsName := fmt.Sprintf("urlmap-test-%s", randString)
   hcName := fmt.Sprintf("urlmap-test-%s", randString)
   umName := fmt.Sprintf("urlmap-test-%s", randString)
-  vcrTest(t, resource.TestCase{
-    PreCheck:     func() { testAccPreCheck(t) },
-    Providers:    testAccProviders,
+  VcrTest(t, resource.TestCase{
+    PreCheck:     func() { TestAccPreCheck(t) },
+    Providers:    TestAccProviders,
     CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -216,9 +216,9 @@ func TestAccComputeUrlMap_defaultRouteActionTrafficDirectorUpdate(t *testing.T) 
   bsName := fmt.Sprintf("urlmap-test-%s", randString)
   hcName := fmt.Sprintf("urlmap-test-%s", randString)
   umName := fmt.Sprintf("urlmap-test-%s", randString)
-  vcrTest(t, resource.TestCase{
-    PreCheck:     func() { testAccPreCheck(t) },
-    Providers:    testAccProviders,
+  VcrTest(t, resource.TestCase{
+    PreCheck:     func() { TestAccPreCheck(t) },
+    Providers:    TestAccProviders,
     CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -249,9 +249,9 @@ func TestAccComputeUrlMap_trafficDirectorUpdate(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString)
 	hcName := fmt.Sprintf("urlmap-test-%s", randString)
 	umName := fmt.Sprintf("urlmap-test-%s", randString)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -282,9 +282,9 @@ func TestAccComputeUrlMap_trafficDirectorPathUpdate(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString)
 	hcName := fmt.Sprintf("urlmap-test-%s", randString)
 	umName := fmt.Sprintf("urlmap-test-%s", randString)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -315,9 +315,9 @@ func TestAccComputeUrlMap_trafficDirectorRemoveRouteRule(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString)
 	hcName := fmt.Sprintf("urlmap-test-%s", randString)
 	umName := fmt.Sprintf("urlmap-test-%s", randString)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -345,9 +345,9 @@ func TestAccComputeUrlMap_defaultUrlRedirect(t *testing.T) {
 
 	randomSuffix := randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -37,14 +37,14 @@ func dataSourceGoogleMonitoringUptimeCheckIps() *schema.Resource {
 
 func dataSourceGoogleMonitoringUptimeCheckIpsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
 
 	url := "https://monitoring.googleapis.com/v3/uptimeCheckIps"
 
-	uptimeCheckIps, err := paginatedListRequest("", url, userAgent, config, flattenUptimeCheckIpsList)
+	uptimeCheckIps, err := PaginatedListRequest("", url, userAgent, config, flattenUptimeCheckIpsList)
 	if err != nil {
 		return fmt.Errorf("Error retrieving monitoring uptime check ips: %s", err)
 	}

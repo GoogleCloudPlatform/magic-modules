@@ -78,7 +78,7 @@ func resourceSqlUser() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: emptyOrDefaultStringSuppress("BUILT_IN"),
+				DiffSuppressFunc: EmptyOrDefaultStringSuppress("BUILT_IN"),
 				Description: `The user type. It determines the method to authenticate the user during login.
                 The default is the database's built-in user type. Flags include "BUILT_IN", "CLOUD_IAM_USER", or "CLOUD_IAM_SERVICE_ACCOUNT".`,
 				ValidateFunc: validation.StringInSlice([]string{"BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", ""}, false),
@@ -208,7 +208,7 @@ func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolic
 
 func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -243,12 +243,12 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	if v, ok := d.GetOk("host"); ok {
 		if v.(string) != "" {
 			var fetchedInstance *sqladmin.DatabaseInstance
-			err = retryTimeDuration(func() (rerr error) {
+			err = RetryTimeDuration(func() (rerr error) {
 				fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
 				return rerr
 			}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
 			if err != nil {
-				return handleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("instance").(string)))
+				return HandleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("instance").(string)))
 			}
 			if !strings.Contains(fetchedInstance.DatabaseVersion, "MYSQL") {
 				return fmt.Errorf("Error: Host field is only supported for MySQL instances: %s", fetchedInstance.DatabaseVersion)
@@ -262,7 +262,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			user).Do()
 		return err
 	}
-	err = retryTimeDuration(insertFunc, d.Timeout(schema.TimeoutCreate))
+	err = RetryTimeDuration(insertFunc, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to insert "+
@@ -285,7 +285,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -301,12 +301,12 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 
 	var users *sqladmin.UsersListResponse
 	err = nil
-	err = retryTime(func() error {
+	err = RetryTime(func() error {
 		users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance).Do()
 		return err
 	}, 5)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
+		return HandleNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
 	}
 
 	var user *sqladmin.User
@@ -409,7 +409,7 @@ func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -438,7 +438,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
-		err = retryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
+		err = RetryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			return fmt.Errorf("Error, failed to update"+
@@ -467,7 +467,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -485,7 +485,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
 
 	var op *sqladmin.Operation
-	err = retryTimeDuration(func() error {
+	err = RetryTimeDuration(func() error {
 		op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
 		if err != nil {
 			return err

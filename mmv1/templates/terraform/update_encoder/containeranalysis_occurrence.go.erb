@@ -16,7 +16,7 @@
 noteNameProp, err := expandContainerAnalysisOccurrenceNoteName(d.Get("note_name"), d, meta.(*Config))
 if err != nil {
 	return nil, err
-} else if v, ok := d.GetOkExists("note_name"); !isEmptyValue(reflect.ValueOf(noteNameProp)) && (ok || !reflect.DeepEqual(v, noteNameProp)) {
+} else if v, ok := d.GetOkExists("note_name"); !IsEmptyValue(reflect.ValueOf(noteNameProp)) && (ok || !reflect.DeepEqual(v, noteNameProp)) {
 	obj["noteName"] = noteNameProp
 }
 

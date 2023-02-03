@@ -8,13 +8,13 @@ import (
 
 func dataSourceArtifactRegistryRepository() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceArtifactRegistryRepository().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceArtifactRegistryRepository().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "repository_id", "location")
+	AddRequiredFieldsToSchema(dsSchema, "repository_id", "location")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceArtifactRegistryRepositoryRead,
@@ -30,7 +30,7 @@ func dataSourceArtifactRegistryRepositoryRead(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}

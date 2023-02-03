@@ -8,12 +8,12 @@ import (
 
 func dataSourceSpannerInstance() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceSpannerInstance().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceSpannerInstance().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "config")       // not sure why this is configurable
-	addOptionalFieldsToSchema(dsSchema, "display_name") // not sure why this is configurable
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "config")       // not sure why this is configurable
+	AddOptionalFieldsToSchema(dsSchema, "display_name") // not sure why this is configurable
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceSpannerInstanceRead,
@@ -24,7 +24,7 @@ func dataSourceSpannerInstance() *schema.Resource {
 func dataSourceSpannerInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	id, err := replaceVars(d, config, "{{project}}/{{name}}")
+	id, err := ReplaceVars(d, config, "{{project}}/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

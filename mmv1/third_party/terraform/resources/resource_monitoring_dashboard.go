@@ -74,7 +74,7 @@ func resourceMonitoringDashboard() *schema.Resource {
 
 func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -89,11 +89,11 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{MonitoringBasePath}}v1/projects/{{project}}/dashboards")
+	url, err := ReplaceVars(d, config, "{{MonitoringBasePath}}v1/projects/{{project}}/dashboards")
 	if err != nil {
 		return err
 	}
-	res, err := sendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutCreate), isMonitoringConcurrentEditError)
+	res, err := SendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutCreate), isMonitoringConcurrentEditError)
 	if err != nil {
 		return fmt.Errorf("Error creating Dashboard: %s", err)
 	}
@@ -109,7 +109,7 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 
 func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -121,9 +121,9 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	res, err := sendRequest(config, "GET", project, url, userAgent, nil, isMonitoringConcurrentEditError)
+	res, err := SendRequest(config, "GET", project, url, userAgent, nil, isMonitoringConcurrentEditError)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -143,7 +143,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,7 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
-	_, err = sendRequestWithTimeout(config, "PATCH", project, url, userAgent, nObj, d.Timeout(schema.TimeoutUpdate), isMonitoringConcurrentEditError)
+	_, err = SendRequestWithTimeout(config, "PATCH", project, url, userAgent, nObj, d.Timeout(schema.TimeoutUpdate), isMonitoringConcurrentEditError)
 	if err != nil {
 		return fmt.Errorf("Error updating Dashboard %q: %s", d.Id(), err)
 	}
@@ -176,7 +176,7 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -188,9 +188,9 @@ func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	_, err = sendRequestWithTimeout(config, "DELETE", project, url, userAgent, nil, d.Timeout(schema.TimeoutDelete), isMonitoringConcurrentEditError)
+	_, err = SendRequestWithTimeout(config, "DELETE", project, url, userAgent, nil, d.Timeout(schema.TimeoutDelete), isMonitoringConcurrentEditError)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
 	}
 
 	return nil
@@ -200,7 +200,7 @@ func resourceMonitoringDashboardImport(d *schema.ResourceData, meta interface{})
 	config := meta.(*Config)
 
 	// current import_formats can't import fields with forward slashes in their value
-	parts, err := getImportIdQualifiers([]string{"projects/(?P<project>[^/]+)/dashboards/(?P<id>[^/]+)", "(?P<id>[^/]+)"}, d, config, d.Id())
+	parts, err := GetImportIdQualifiers([]string{"projects/(?P<project>[^/]+)/dashboards/(?P<id>[^/]+)", "(?P<id>[^/]+)"}, d, config, d.Id())
 	if err != nil {
 		return nil, err
 	}

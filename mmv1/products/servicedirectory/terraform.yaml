@@ -28,7 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       namespaceId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateRFC1035Name(2, 63)'
+          function: 'ValidateRFC1035Name(2, 63)'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/service_directory_namespace.go.erb
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -47,7 +47,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       serviceId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateRFC1035Name(2, 63)'
+          function: 'ValidateRFC1035Name(2, 63)'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/service_directory_service.go.erb
   Endpoint: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -76,10 +76,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       endpointId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateRFC1035Name(2, 63)'
+          function: 'ValidateRFC1035Name(2, 63)'
       address: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateIpAddress'
+          function: 'ValidateIpAddress'
       port: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0, 65535)'

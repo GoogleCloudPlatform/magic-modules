@@ -13,14 +13,14 @@ import (
 func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDnsManagedZone_basic(randString(t, 10)),
-				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
+				Check: CheckDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",
 					map[string]struct{}{
@@ -69,7 +69,7 @@ func testAccCheckDNSManagedZoneDestroyProducerFramework(t *testing.T) func(s *te
 
 			p := getTestFwProvider(t)
 
-			url, err := replaceVarsForFrameworkTest(&p.ProdProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
+			url, err := ReplaceVarsForFrameworkTest(&p.ProdProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
 			if err != nil {
 				return err
 			}

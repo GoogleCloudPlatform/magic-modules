@@ -7,13 +7,13 @@ import (
 )
 
 func dataSourceGoogleComputeBackendBucket() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeBackendBucket().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeBackendBucket().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceComputeBackendBucketRead,

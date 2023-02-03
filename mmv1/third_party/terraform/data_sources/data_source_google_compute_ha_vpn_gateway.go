@@ -7,14 +7,14 @@ import (
 )
 
 func dataSourceGoogleComputeHaVpnGateway() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeHaVpnGateway().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeHaVpnGateway().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeHaVpnGatewayRead,
@@ -32,7 +32,7 @@ func dataSourceGoogleComputeHaVpnGatewayRead(d *schema.ResourceData, meta interf
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

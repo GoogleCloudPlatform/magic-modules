@@ -8,9 +8,9 @@ import (
 
 func dataSourceVPCAccessConnector() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceVPCAccessConnector().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "project", "region")
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceVPCAccessConnector().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "project", "region")
 
 	return &schema.Resource{
 		Read:   dataSourceVPCAccessConnectorRead,
@@ -21,7 +21,7 @@ func dataSourceVPCAccessConnector() *schema.Resource {
 func dataSourceVPCAccessConnectorRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{region}}/connectors/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/connectors/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

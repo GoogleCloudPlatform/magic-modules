@@ -61,28 +61,28 @@ func expandBigtableClusters(v interface{}, d TerraformResourceData, config *Conf
 		transformedLocation, err := expandBigtableClusterLocation(original["zone"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedLocation); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedLocation); val.IsValid() && !IsEmptyValue(val) {
 			transformed["location"] = transformedLocation
 		}
 
 		transformedServerNodes, err := expandBigtableClusterServerNodes(original["num_nodes"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedServerNodes); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedServerNodes); val.IsValid() && !IsEmptyValue(val) {
 			transformed["serverNodes"] = transformedServerNodes
 		}
 
 		transformedStorageType, err := expandBigtableClusterDefaultStorageType(original["storage_type"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedStorageType); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedStorageType); val.IsValid() && !IsEmptyValue(val) {
 			transformed["defaultStorageType"] = transformedStorageType
 		}
 
 		transformedName, err := expandBigtableClusterName(original["cluster_id"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedName); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedName); val.IsValid() && !IsEmptyValue(val) {
 			transformed["name"] = transformedName
 		}
 		transformedEntries = append(transformedEntries, transformed)
@@ -104,7 +104,7 @@ func expandBigtableClusterDefaultStorageType(v interface{}, d TerraformResourceD
 }
 
 func expandBigtableClusterName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	cluster, err := replaceVars(d, config, "projects/{{project}}/instances/{{name}}/clusters/")
+	cluster, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}/clusters/")
 	if err != nil {
 		return nil, err
 	}

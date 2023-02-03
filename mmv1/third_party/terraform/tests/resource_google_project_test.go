@@ -30,7 +30,7 @@ func init() {
 }
 
 func testSweepProject(region string) error {
-	config, err := sharedConfigForRegion(region)
+	config, err := SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -75,15 +75,15 @@ func testSweepProject(region string) error {
 func TestAccProject_createWithoutOrg(t *testing.T) {
 	t.Parallel()
 
-	creds := multiEnvSearch(credsEnvVars)
+	creds := MultiEnvSearch(credsEnvVars)
 	if strings.Contains(creds, "iam.gserviceaccount.com") {
 		t.Skip("Service accounts cannot create projects without a parent. Requires user credentials.")
 	}
 
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
@@ -101,11 +101,11 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 func TestAccProject_create(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
@@ -122,14 +122,14 @@ func TestAccProject_create(t *testing.T) {
 // billing account
 func TestAccProject_billing(t *testing.T) {
 	t.Parallel()
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 	skipIfEnvNotSet(t, "GOOGLE_BILLING_ACCOUNT_2")
 	billingId2 := os.Getenv("GOOGLE_BILLING_ACCOUNT_2")
-	billingId := getTestBillingAccountFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project with a billing account
 			{
@@ -167,11 +167,11 @@ func TestAccProject_billing(t *testing.T) {
 func TestAccProject_labels(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_labels(pid, pname, org, map[string]string{"test": "that"}),
@@ -209,12 +209,12 @@ func TestAccProject_labels(t *testing.T) {
 func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
-	billingId := getTestBillingAccountFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	billingId := GetTestBillingAccountFromEnv(t)
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_deleteDefaultNetwork(pid, pname, org, billingId),
@@ -226,12 +226,12 @@ func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 func TestAccProject_parentFolder(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
 	folderDisplayName := testPrefix + randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_parentFolder(pid, pname, folderDisplayName, org),
@@ -243,12 +243,12 @@ func TestAccProject_parentFolder(t *testing.T) {
 func TestAccProject_migrateParent(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
 	folderDisplayName := testPrefix + randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_migrateParentFolder(pid, pname, folderDisplayName, org),
@@ -315,10 +315,10 @@ func testAccCheckGoogleProjectHasBillingAccount(t *testing.T, r, pid, billingId 
 
 		// Actual value in API should match state and expected
 		// Read the billing account
-		config := googleProviderConfig(t)
-		ba, err := config.NewBillingClient(config.userAgent).Projects.GetBillingInfo(prefixedProject(pid)).Do()
+		config := GoogleProviderConfig(t)
+		ba, err := config.NewBillingClient(config.userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 		if err != nil {
-			return fmt.Errorf("Error reading billing account for project %q: %v", prefixedProject(pid), err)
+			return fmt.Errorf("Error reading billing account for project %q: %v", PrefixedProject(pid), err)
 		}
 		if billingId != strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/") {
 			return fmt.Errorf("Billing ID returned by API (%s) did not match expected value (%s)", ba.BillingAccountName, billingId)
@@ -340,7 +340,7 @@ func testAccCheckGoogleProjectHasLabels(t *testing.T, r, pid string, expected ma
 		}
 
 		// Actual value in API should match state and expected
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		found, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(pid).Do()
 		if err != nil {
@@ -382,7 +382,7 @@ func testAccCheckGoogleProjectHasNoLabels(t *testing.T, r, pid string) resource.
 		}
 
 		// Actual value in API should match state and expected
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		found, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(pid).Do()
 		if err != nil {

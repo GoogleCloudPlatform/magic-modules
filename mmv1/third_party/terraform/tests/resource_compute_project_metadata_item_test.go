@@ -15,9 +15,9 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 	// Key must be unique to avoid concurrent tests interfering with each other
 	key := "myKey" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -34,7 +34,7 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 
 func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 	// Multiple fine grained items applied in same config
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	// Generate a config of two config keys
@@ -43,9 +43,9 @@ func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 	config := testAccProjectMetadataItem_basic("foobar", key1, "myValue") +
 		testAccProjectMetadataItem_basic("foobar2", key2, "myOtherValue")
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -71,9 +71,9 @@ func TestAccComputeProjectMetadataItem_basicWithEmptyVal(t *testing.T) {
 	// Key must be unique to avoid concurrent tests interfering with each other
 	key := "myKey" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -94,9 +94,9 @@ func TestAccComputeProjectMetadataItem_basicUpdate(t *testing.T) {
 	// Key must be unique to avoid concurrent tests interfering with each other
 	key := "myKey" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -126,9 +126,9 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 	key := "myKey" + randString(t, 10)
 	originalConfig := testAccProjectMetadataItem_basic("foobar", key, "myValue")
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -150,7 +150,7 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 
 func testAccCheckProjectMetadataItemDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		project, err := config.NewComputeClient(config.userAgent).Projects.Get(config.Project).Do()
 		if err != nil {

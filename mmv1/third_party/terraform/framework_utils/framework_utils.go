@@ -50,7 +50,7 @@ func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 	return res["email"].(string)
 }
 
-func generateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent string) string {
+func GenerateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent string) string {
 	if metaData != nil && !metaData.ModuleName.IsNull() && metaData.ModuleName.ValueString() != "" {
 		return strings.Join([]string{currUserAgent, metaData.ModuleName.ValueString()}, " ")
 	}
@@ -78,7 +78,7 @@ func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.S
 	return types.String{}
 }
 
-func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
+func HandleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
 	if isGoogleApiErrorWithCode(err, 404) {
 		tflog.Warn(ctx, fmt.Sprintf("Removing %s because it's gone", resource))
 		// The resource doesn't exist anymore

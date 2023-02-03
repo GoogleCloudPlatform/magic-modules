@@ -212,7 +212,7 @@ func getEndpointServiceGRPCConfigSource(serviceConfig, protoConfig string) *serv
 
 func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -287,7 +287,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	// we currently only support full rollouts - anyone trying to do incremental
 	// rollouts or A/B testing is going to need a more precise tool than this resource.
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -348,7 +348,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -366,7 +366,7 @@ func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) er
 
 func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

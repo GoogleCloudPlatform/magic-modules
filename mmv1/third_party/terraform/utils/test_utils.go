@@ -33,7 +33,7 @@ func (d *ResourceDataMock) Get(key string) interface{} {
 
 func (d *ResourceDataMock) GetOk(key string) (interface{}, bool) {
 	v, ok := d.GetOkExists(key)
-	if ok && !isEmptyValue(reflect.ValueOf(v)) {
+	if ok && !IsEmptyValue(reflect.ValueOf(v)) {
 		return v, true
 	} else {
 		return v, false
@@ -109,11 +109,11 @@ func (d *ResourceDiffMock) ForceNew(key string) error {
 	return nil
 }
 
-func checkDataSourceStateMatchesResourceState(dataSourceName, resourceName string) func(*terraform.State) error {
-	return checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName, map[string]struct{}{})
+func CheckDataSourceStateMatchesResourceState(dataSourceName, resourceName string) func(*terraform.State) error {
+	return CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName, map[string]struct{}{})
 }
 
-func checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName string, ignoreFields map[string]struct{}) func(*terraform.State) error {
+func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName string, ignoreFields map[string]struct{}) func(*terraform.State) error {
 	return func(s *terraform.State) error {
 		ds, ok := s.RootModule().Resources[dataSourceName]
 		if !ok {

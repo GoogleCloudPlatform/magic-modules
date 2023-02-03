@@ -267,7 +267,7 @@ func compareCryptoKeyVersions(_, old, new string, _ *schema.ResourceData) bool {
 
 func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -312,7 +312,7 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	if v, ok := d.GetOk("metadata"); ok {
-		object.Metadata = convertStringMap(v.(map[string]interface{}))
+		object.Metadata = ConvertStringMap(v.(map[string]interface{}))
 	}
 
 	if v, ok := d.GetOk("storage_class"); ok {
@@ -352,7 +352,7 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 
 func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -390,7 +390,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -409,7 +409,7 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	res, err := getCall.Do()
 
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Storage Bucket Object %q", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Storage Bucket Object %q", d.Get("name").(string)))
 	}
 
 	if err := d.Set("md5hash", res.Md5Hash); err != nil {
@@ -468,7 +468,7 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

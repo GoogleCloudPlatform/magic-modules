@@ -10,7 +10,7 @@ import (
 
 func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	suffix := randString(t, 10)
@@ -24,11 +24,11 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 		"config_name4":  fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
 	igmId := fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s",
-		getTestProjectFromEnv(), getTestZoneFromEnv(), igmName)
+		GetTestProjectFromEnv(), GetTestZoneFromEnv(), igmName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Create one endpoint
@@ -97,9 +97,9 @@ func TestAccComputePerInstanceConfig_update(t *testing.T) {
 		"config_name":   fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Create one config
@@ -311,10 +311,10 @@ func testAccCheckComputePerInstanceConfigDestroyed(t *testing.T, igmId, configNa
 }
 
 func testAccComputePerInstanceConfigListNames(t *testing.T, igmId string) (map[string]struct{}, error) {
-	config := googleProviderConfig(t)
+	config := GoogleProviderConfig(t)
 
 	url := fmt.Sprintf("%s%s/listPerInstanceConfigs", config.ComputeBasePath, igmId)
-	res, err := sendRequest(config, "POST", "", url, config.userAgent, nil)
+	res, err := SendRequest(config, "POST", "", url, config.userAgent, nil)
 	if err != nil {
 		return nil, err
 	}

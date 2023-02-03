@@ -100,7 +100,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
         custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.erb'
       subordinateConfig.certificateAuthority: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareResourceNames'
+        diff_suppress_func: 'CompareResourceNames'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/privateca_certificate_authority.go.erb'
       resource_definition: 'templates/terraform/resource_definition/privateca_certificate_authority.go.erb'
@@ -125,7 +125,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
         custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.erb'
       certificateTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareResourceNames'
+        diff_suppress_func: 'CompareResourceNames'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_config"
@@ -177,7 +177,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_509_config.go.erb'
         custom_expand: 'templates/terraform/custom_expand/privateca_certificate_509_config.go.erb'
       publishingOptions: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'emptyOrUnsetBlockDiffSuppress'
+        diff_suppress_func: 'EmptyOrUnsetBlockDiffSuppress'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/privateca.certificateManager'
       method_name_separator: ':'

@@ -29,7 +29,7 @@ func resourceLoggingBillingAccountSink() *schema.Resource {
 
 func resourceLoggingBillingAccountSinkCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -48,14 +48,14 @@ func resourceLoggingBillingAccountSinkCreate(d *schema.ResourceData, meta interf
 
 func resourceLoggingBillingAccountSinkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
 
 	sink, err := config.NewLoggingClient(userAgent).BillingAccounts.Sinks.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Billing Logging Sink %s", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Billing Logging Sink %s", d.Get("name").(string)))
 	}
 
 	if err := flattenResourceLoggingSink(d, sink); err != nil {
@@ -67,7 +67,7 @@ func resourceLoggingBillingAccountSinkRead(d *schema.ResourceData, meta interfac
 
 func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interf
 
 func resourceLoggingBillingAccountSinkDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

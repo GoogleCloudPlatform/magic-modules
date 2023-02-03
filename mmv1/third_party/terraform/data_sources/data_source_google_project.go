@@ -8,11 +8,11 @@ import (
 
 func dataSourceGoogleProject() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceGoogleProject().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceGoogleProject().Schema)
 
-	addOptionalFieldsToSchema(dsSchema, "project_id")
+	AddOptionalFieldsToSchema(dsSchema, "project_id")
 
-	dsSchema["project_id"].ValidateFunc = validateDSProjectID()
+	dsSchema["project_id"].ValidateFunc = ValidateDSProjectID()
 	return &schema.Resource{
 		Read:   datasourceGoogleProjectRead,
 		Schema: dsSchema,

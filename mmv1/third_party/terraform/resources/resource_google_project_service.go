@@ -99,7 +99,7 @@ func resourceGoogleProjectService() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareResourceNames,
+				DiffSuppressFunc: CompareResourceNames,
 			},
 
 			"disable_dependent_services": {
@@ -146,7 +146,7 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 	// Check if the service has already been enabled
 	servicesRaw, err := BatchRequestReadServices(project, d, config)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 	servicesList := servicesRaw.(map[string]struct{})
 	if _, ok := servicesList[srv]; ok {
@@ -171,7 +171,7 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -188,7 +188,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 		billingProject := project
 
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
 		projectGetCall.Header().Add("X-Goog-User-Project", billingProject)
@@ -196,19 +196,19 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	p, err := projectGetCall.Do()
 
 	if err == nil && p.LifecycleState == "DELETE_REQUESTED" {
-		// Construct a 404 error for handleNotFoundError
+		// Construct a 404 error for HandleNotFoundError
 		err = &googleapi.Error{
 			Code:    404,
 			Message: "Project deletion was requested",
 		}
 	}
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 
 	servicesRaw, err := BatchRequestReadServices(project, d, config)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 	servicesList := servicesRaw.(map[string]struct{})
 
@@ -246,7 +246,7 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 	service := d.Get("service").(string)
 	disableDependencies := d.Get("disable_dependent_services").(bool)
 	if err = disableServiceUsageProjectService(service, project, d, config, disableDependencies); err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 
 	d.SetId("")
@@ -261,9 +261,9 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 
 // Disables a project service.
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *Config, disableDependentServices bool) error {
-	err := retryTimeDuration(func() error {
+	err := RetryTimeDuration(func() error {
 		billingProject := project
-		userAgent, err := generateUserAgentString(d, config.userAgent)
+		userAgent, err := GenerateUserAgentString(d, config.userAgent)
 		if err != nil {
 			return err
 		}
@@ -273,7 +273,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 		})
 		if config.UserProjectOverride {
 			// err == nil indicates that the billing_project value was found
-			if bp, err := getBillingProject(d, config); err == nil {
+			if bp, err := GetBillingProject(d, config); err == nil {
 				billingProject = bp
 			}
 			servicesDisableCall.Header().Add("X-Goog-User-Project", billingProject)

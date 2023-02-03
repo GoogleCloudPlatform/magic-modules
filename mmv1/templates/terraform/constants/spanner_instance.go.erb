@@ -34,12 +34,12 @@ func deleteSpannerBackups(d *schema.ResourceData, config *Config, res map[string
 
 		path := "{{SpannerBasePath}}" + backupName
 
-		url, err := replaceVars(d, config, path)
+		url, err := ReplaceVars(d, config, path)
 		if err != nil {
 			return err
 		}
 
-		_, err = sendRequest(config, "DELETE", billingProject, url, userAgent, nil)
+		_, err = SendRequest(config, "DELETE", billingProject, url, userAgent, nil)
 		if err != nil {
 			return err
 		}

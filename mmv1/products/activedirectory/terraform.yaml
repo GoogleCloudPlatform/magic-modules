@@ -23,7 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       domainName: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateADDomainName()'
+          function: 'ValidateADDomainName()'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb   
     examples:

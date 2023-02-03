@@ -44,7 +44,7 @@ func dataSourceGoogleComposerImageVersions() *schema.Resource {
 
 func dataSourceGoogleComposerImageVersionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -54,17 +54,17 @@ func dataSourceGoogleComposerImageVersionsRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{ComposerBasePath}}projects/{{project}}/locations/{{region}}/imageVersions")
+	url, err := ReplaceVars(d, config, "{{ComposerBasePath}}projects/{{project}}/locations/{{region}}/imageVersions")
 	if err != nil {
 		return err
 	}
 
-	versions, err := paginatedListRequest(project, url, userAgent, config, flattenGoogleComposerImageVersions)
+	versions, err := PaginatedListRequest(project, url, userAgent, config, flattenGoogleComposerImageVersions)
 	if err != nil {
 		return fmt.Errorf("Error listing Composer image versions: %s", err)
 	}

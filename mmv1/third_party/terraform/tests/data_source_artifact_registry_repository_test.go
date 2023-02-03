@@ -14,15 +14,15 @@ func TestAccDataSourceGoogleArtifactRegistryRepositoryConfig(t *testing.T) {
 	}
 	funcDataName := "data.google_artifact_registry_repository.my-repo"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckArtifactRegistryRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleArtifactRegistryRepositoryConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState(funcDataName,
+					CheckDataSourceStateMatchesResourceState(funcDataName,
 						"google_artifact_registry_repository.my-repo"),
 				),
 			},

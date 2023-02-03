@@ -9,12 +9,12 @@ import (
 
 func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 	t.Parallel()
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 	host := "192.168.1.1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -43,11 +43,11 @@ func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 // updatable in place
 func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 	t.Parallel()
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -83,13 +83,13 @@ func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 
 func TestAccMonitoringUptimeCheckConfig_jsonPathUpdate(t *testing.T) {
 	t.Parallel()
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 	host := "192.168.1.1"
 	suffix := randString(t, 4)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -114,7 +114,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
         name: minReplicas
         # Even though this field isn't actually required by the API, it makes our
@@ -246,7 +246,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       edgeSecurityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
@@ -348,7 +348,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
         set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
       backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       backends.maxConnections: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       backends.maxConnectionsPerEndpoint: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -392,11 +392,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       customResponseHeaders: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
       healthChecks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-        set_hash_func: 'selfLinkRelativePathHash'
+        set_hash_func: 'SelfLinkRelativePathHash'
         custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
       iap: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
@@ -425,9 +425,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       securityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       edgeSecurityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -523,7 +523,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
         set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
       backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
       backends.failover: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -535,7 +535,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         send_empty_value: true
       healthChecks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-        set_hash_func: 'selfLinkRelativePathHash'
+        set_hash_func: 'SelfLinkRelativePathHash'
         custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -699,7 +699,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       diskEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         name: "kmsKeySelfLink"
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
@@ -708,7 +708,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
       sourceSnapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         name: "kmsKeySelfLink"
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
@@ -717,7 +717,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
       sourceImageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         name: "kmsKeySelfLink"
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
@@ -738,7 +738,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           [`google_compute_disk_resource_policy_attachment`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk_resource_policy_attachment)
           to allow for updating the resource policy attached to the disk.
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'alwaysDiffSuppress'
+        diff_suppress_func: 'AlwaysDiffSuppress'
       sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'sourceDiskDiffSupress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -826,7 +826,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           The name or self_link of the network to attach this firewall to.
@@ -985,7 +985,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       portRange: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'portRangeDiffSuppress'
+        diff_suppress_func: 'PortRangeDiffSuppress'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -993,7 +993,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         diff_suppress_func: 'internalIpDiffSuppress'
       IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'caseDiffSuppress'
+        diff_suppress_func: 'CaseDiffSuppress'
         default_from_api: true
       loadBalancingScheme: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :EXTERNAL
@@ -1010,7 +1010,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       networkTier: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       target: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
       ports: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
@@ -1019,7 +1019,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: false
       serviceLabel: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
   GlobalAddress: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1039,13 +1039,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       address: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       ipVersion: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'emptyOrDefaultStringSuppress("IPV4")'
+        diff_suppress_func: 'EmptyOrDefaultStringSuppress("IPV4")'
       labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       addressType: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'emptyOrDefaultStringSuppress("EXTERNAL")'
+        diff_suppress_func: 'EmptyOrDefaultStringSuppress("EXTERNAL")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
   GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1182,15 +1182,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         diff_suppress_func: 'internalIpDiffSuppress'
       IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'caseDiffSuppress'
+        diff_suppress_func: 'CaseDiffSuppress'
         default_from_api: true
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         min_version: beta
       portRange: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'portRangeDiffSuppress'
+        diff_suppress_func: 'PortRangeDiffSuppress'
       target: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
   HttpHealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1379,7 +1379,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       imageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.erb'
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         name: 'kmsKeySelfLink'
         description: |
           The self link of the encryption key that is stored in Google Cloud
@@ -1431,7 +1431,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           gke_cluster_name: "my-cluster"
     properties:
       group: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareResourceNames'
+        diff_suppress_func: 'CompareResourceNames'
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -1467,9 +1467,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
       router: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       interconnect: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       bandwidth: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       type: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1541,7 +1541,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       # We want this to be the smallest change possible, so exclude this for now.
@@ -1599,7 +1599,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
       networkEndpointGroup: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-        diff_suppress_func: compareResourceNames
+        diff_suppress_func: CompareResourceNames
       port: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/float64_to_int.go.erb
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1631,12 +1631,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
       subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareOptionalSubnet'
+        diff_suppress_func: 'CompareOptionalSubnet'
   GlobalNetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{global_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{global_network_endpoint_group}}
@@ -1657,7 +1657,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       globalNetworkEndpointGroup: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-        diff_suppress_func: compareResourceNames
+        diff_suppress_func: CompareResourceNames
       port: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/float64_to_int.go.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -1682,7 +1682,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
   RegionNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1725,7 +1725,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"
     import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
@@ -1848,7 +1848,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     parameters:
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateRFC1035Name(2, 63)'
+          function: 'ValidateRFC1035Name(2, 63)'
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: policy_id
@@ -1915,7 +1915,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       priority: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -2093,7 +2093,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
         name: minReplicas
         # Even though this field isn't actually required by the API, it makes our
@@ -2127,7 +2127,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: target
         required: true # See comment for minReplicas
       target: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -2160,7 +2160,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       interface: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'alwaysDiffSuppress'
+        diff_suppress_func: 'AlwaysDiffSuppress'
       sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'sourceDiskDiffSupress'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -2472,10 +2472,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       snapshotSchedulePolicy.schedule.dailySchedule.startTime: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateHourlyOnly'
+          function: 'ValidateHourlyOnly'
       snapshotSchedulePolicy.schedule.hourlySchedule.startTime: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateHourlyOnly'
+          function: 'ValidateHourlyOnly'
       snapshotSchedulePolicy.schedule.weeklySchedule.dayOfWeeks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       snapshotSchedulePolicy.snapshotProperties.storageLocations: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2558,14 +2558,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
       network: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       priority: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 1000
         send_empty_value: true
       nextHopIp: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       nextHopGateway: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_gateway.erb
         description: |+
           URL to a gateway that should handle matching packets.
@@ -2585,7 +2585,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * `zones/zone/instances/instance`
           * Just the instance name, with the zone in `next_hop_instance_zone`.
       nextHopIlb: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareIpAddressOrSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareIpAddressOrSelfLinkOrResourceName'
       tags: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/set_to_list.erb
         is_set: true
@@ -2621,10 +2621,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       bgp.asn: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateRFC6996Asn'
+          function: 'ValidateRFC6996Asn'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -2672,7 +2672,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateRFC1035Name(2, 63)'
+          function: 'ValidateRFC1035Name(2, 63)'
       natIps: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: computeRouterNatIPsHash
@@ -2763,7 +2763,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateRFC1035Name(2, 63)'
+          function: 'ValidateRFC1035Name(2, 63)'
       interfaceName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'interface'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2852,7 +2852,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       snapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "kmsKeySelfLink"
       sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       sourceDiskEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       sourceDiskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2918,7 +2918,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
           These are in the same namespace as the managed SSL certificates.
       managed.domains: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'absoluteDomainSuppress'
+        diff_suppress_func: 'AbsoluteDomainSuppress'
   SslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |
@@ -2957,7 +2957,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
         description: |
           {{description}}
 
@@ -2970,7 +2970,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
         ignore_read: true
         custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
-        diff_suppress_func: 'sha256DiffSuppress'
+        diff_suppress_func: 'Sha256DiffSuppress'
   RegionSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |
@@ -3016,7 +3016,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
         description: |
           {{description}}
 
@@ -3029,7 +3029,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
         ignore_read: true
         custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
-        diff_suppress_func: 'sha256DiffSuppress'
+        diff_suppress_func: 'Sha256DiffSuppress'
   SslPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -3115,7 +3115,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       secondaryIpRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         name: secondaryIpRange
         unordered_list: true
@@ -3131,10 +3131,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
       secondaryIpRanges.rangeName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       secondaryIpRanges.ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateIpCidrRange'
+          function: 'ValidateIpCidrRange'
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
         custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
@@ -3147,7 +3147,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateIpCidrRange'
+          function: 'ValidateIpCidrRange'
       privateIpGoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       privateIpv6GoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -3302,7 +3302,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         required: false # the provider-default value will be used if not specified
       instance:  !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
         description: |
           The Compute instance VM handling traffic for this target instance.
@@ -3445,7 +3445,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateGCEName'
+          function: 'ValidateGCEName'
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -3736,7 +3736,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetGrpcProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       urlMap: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_grpc_proxy_basic"

@@ -30,7 +30,7 @@ func NewProjectLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (
 		return nil, err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return nil, err
 	}

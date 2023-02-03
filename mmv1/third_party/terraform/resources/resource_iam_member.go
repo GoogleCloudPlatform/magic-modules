@@ -17,7 +17,7 @@ func iamMemberCaseDiffSuppress(k, old, new string, d *schema.ResourceData) bool 
 	if isCaseSensitive {
 		return old == new
 	}
-	return caseDiffSuppress(k, old, new, d)
+	return CaseDiffSuppress(k, old, new, d)
 }
 
 func validateIAMMember(i interface{}, k string) ([]string, []error) {
@@ -216,8 +216,8 @@ func resourceIamMemberCreate(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 		memberBind := getResourceIamMember(d)
 		modifyF := func(ep *cloudresourcemanager.Policy) error {
 			// Merge the bindings together
-			ep.Bindings = mergeBindings(append(ep.Bindings, memberBind))
-			ep.Version = iamPolicyVersion
+			ep.Bindings = MergeBindings(append(ep.Bindings, memberBind))
+			ep.Version = IamPolicyVersion
 			return nil
 		}
 		if enableBatching {
@@ -250,7 +250,7 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 		eCondition := conditionKeyFromCondition(eMember.Condition)
 		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Member: Role %q Member %q", updater.DescribeResource(), eMember.Role, eMember.Members[0]))
+			return HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Member: Role %q Member %q", updater.DescribeResource(), eMember.Role, eMember.Members[0]))
 		}
 		log.Print(spew.Sprintf("[DEBUG]: Retrieved policy for %s: %#v\n", updater.DescribeResource(), p))
 		log.Printf("[DEBUG]: Looking for binding with role %q and condition %#v", eMember.Role, eCondition)
@@ -321,7 +321,7 @@ func resourceIamMemberDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 			err = iamPolicyReadModifyWrite(updater, modifyF)
 		}
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %s for IAM Member (role %q, %q)", updater.GetResourceId(), memberBind.Members[0], memberBind.Role))
+			return HandleNotFoundError(err, d, fmt.Sprintf("Resource %s for IAM Member (role %q, %q)", updater.GetResourceId(), memberBind.Members[0], memberBind.Role))
 		}
 		return resourceIamMemberRead(newUpdaterFunc)(d, meta)
 	}

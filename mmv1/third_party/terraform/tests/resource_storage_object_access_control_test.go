@@ -17,14 +17,14 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck: func() {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			TestAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -56,14 +56,14 @@ func TestAccStorageObjectAccessControl_updateWithSlashes(t *testing.T) {
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck: func() {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			TestAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

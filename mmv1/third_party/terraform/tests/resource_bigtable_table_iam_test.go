@@ -9,7 +9,7 @@ import (
 
 func TestAccBigtableTableIamBinding(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	instance := "tf-bigtable-iam-" + randString(t, 10)
@@ -18,11 +18,11 @@ func TestAccBigtableTableIamBinding(t *testing.T) {
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s/tables/%s %s",
-		getTestProjectFromEnv(), instance, cluster, role)
+		GetTestProjectFromEnv(), instance, cluster, role)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -54,7 +54,7 @@ func TestAccBigtableTableIamBinding(t *testing.T) {
 
 func TestAccBigtableTableIamMember(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	instance := "tf-bigtable-iam-" + randString(t, 10)
@@ -63,15 +63,15 @@ func TestAccBigtableTableIamMember(t *testing.T) {
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s/tables/%s %s serviceAccount:%s",
-		getTestProjectFromEnv(),
+		GetTestProjectFromEnv(),
 		instance,
 		cluster,
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -95,7 +95,7 @@ func TestAccBigtableTableIamMember(t *testing.T) {
 
 func TestAccBigtableTableIamPolicy(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	instance := "tf-bigtable-iam-" + randString(t, 10)
@@ -104,11 +104,11 @@ func TestAccBigtableTableIamPolicy(t *testing.T) {
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s/tables/%s",
-		getTestProjectFromEnv(), instance, cluster)
+		GetTestProjectFromEnv(), instance, cluster)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation

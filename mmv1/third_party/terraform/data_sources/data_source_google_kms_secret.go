@@ -5,8 +5,9 @@ import (
 
 	"encoding/base64"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceGoogleKmsSecret() *schema.Resource {
@@ -36,7 +37,7 @@ func dataSourceGoogleKmsSecret() *schema.Resource {
 
 func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

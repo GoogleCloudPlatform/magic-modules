@@ -8,10 +8,10 @@ import (
 
 func dataSourceSqlDatabase() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceSQLDatabase().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addRequiredFieldsToSchema(dsSchema, "instance")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceSQLDatabase().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "instance")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceSqlDatabaseRead,

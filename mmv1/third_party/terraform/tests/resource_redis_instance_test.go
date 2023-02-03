@@ -12,9 +12,9 @@ func TestAccRedisInstance_update(t *testing.T) {
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -46,9 +46,9 @@ func TestAccRedisInstance_updateReadReplicasMode(t *testing.T) {
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -81,9 +81,9 @@ func TestAccRedisInstance_updateReadReplicasModeWithAutoSecondaryIp(t *testing.T
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -194,14 +194,14 @@ func TestAccRedisInstance_regionFromLocation(t *testing.T) {
 	// didn't fall back to that one.
 	region := "us-west1"
 	zone := "us-west1-a"
-	if getTestRegionFromEnv() == "us-west1" {
+	if GetTestRegionFromEnv() == "us-west1" {
 		region = "us-central1"
 		zone = "us-central1-a"
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -224,9 +224,9 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -295,9 +295,9 @@ func TestAccRedisInstance_downgradeRedisVersion(t *testing.T) {
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

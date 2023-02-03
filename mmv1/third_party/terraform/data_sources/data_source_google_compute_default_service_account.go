@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -36,7 +37,7 @@ func dataSourceGoogleComputeDefaultServiceAccount() *schema.Resource {
 
 func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -48,7 +49,7 @@ func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, me
 
 	projectCompResource, err := config.NewComputeClient(userAgent).Projects.Get(project).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, "GCE default service account")
+		return HandleNotFoundError(err, d, "GCE default service account")
 	}
 
 	serviceAccountName, err := serviceAccountFQN(projectCompResource.DefaultServiceAccount, d, config)
@@ -58,7 +59,7 @@ func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, me
 
 	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(serviceAccountName).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
 	}
 
 	d.SetId(sa.Name)

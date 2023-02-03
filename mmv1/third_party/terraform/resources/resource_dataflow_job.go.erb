@@ -163,14 +163,14 @@ func resourceDataflowJob() *schema.Resource {
 			"network": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				Description:      `The network to which VMs will be assigned. If it is not provided, "default" will be used.`,
 			},
 
 			"subnetwork": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				Description:      `The subnetwork to which VMs will be assigned. Should be of the form "regions/REGION/subnetworks/SUBNETWORK".`,
 			},
 
@@ -262,7 +262,7 @@ func shouldStopDataflowJobDeleteQuery(state string, skipWait bool) bool {
 
 func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -272,7 +272,7 @@ func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -302,7 +302,7 @@ func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -312,7 +312,7 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -321,7 +321,7 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 
 	job, err := resourceDataflowJobGetJob(config, project, region, userAgent, id)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Dataflow job %s", id))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Dataflow job %s", id))
 	}
 
 	if err := d.Set("job_id", job.Id); err != nil {
@@ -385,7 +385,7 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 	}
 
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -395,7 +395,7 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -417,7 +417,7 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 	}
 
 	var response *dataflow.LaunchTemplateResponse
-	err = retryTimeDuration(func() (updateErr error) {
+	err = RetryTimeDuration(func() (updateErr error) {
 		response, updateErr = resourceDataflowJobLaunchTemplate(config, project, region, userAgent, d.Get("template_gcs_path").(string), &request)
 		return updateErr
 	}, time.Minute*time.Duration(5), isDataflowJobUpdateRetryableError)
@@ -436,7 +436,7 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 
 func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -446,7 +446,7 @@ func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -556,7 +556,7 @@ func resourceDataflowJobLaunchTemplate(config *Config, project, region, userAgen
 }
 
 func resourceDataflowJobSetupEnv(d *schema.ResourceData, config *Config) (dataflow.RuntimeEnvironment, error) {
-	zone, _ := getZone(d, config)
+	zone, _ := GetZone(d, config)
 
 	labels := expandStringMap(d, "labels")
 
@@ -632,14 +632,14 @@ func waitForDataflowJobToBeUpdated(d *schema.ResourceData, config *Config, repla
 			return resource.NonRetryableError(err)
 		}
 
-		region, err := getRegion(d, config)
+		region, err := GetRegion(d, config)
 		if err != nil {
 			return resource.NonRetryableError(err)
 		}
 
 		replacementJob, err := resourceDataflowJobGetJob(config, project, region, userAgent, replacementJobID)
 		if err != nil {
-			if isRetryableError(err) {
+			if IsRetryableError(err) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)

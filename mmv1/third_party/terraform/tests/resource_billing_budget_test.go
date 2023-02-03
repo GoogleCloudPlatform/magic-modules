@@ -11,13 +11,13 @@ func TestAccBillingBudget_billingBudgetCurrencycode(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestBillingAccountFromEnv(t),
+		"billing_acct":  GetTestBillingAccountFromEnv(t),
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -69,13 +69,13 @@ func TestAccBillingBudget_billingBudgetUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestBillingAccountFromEnv(t),
+		"billing_acct":  GetTestBillingAccountFromEnv(t),
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -130,9 +130,9 @@ func TestAccBillingBudget_billingFilterSubaccounts(t *testing.T) {
 		"random_suffix":       randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -541,15 +541,15 @@ func TestAccBillingBudget_budgetFilterProjectsOrdering(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org":             getTestOrgFromEnv(t),
-		"billing_acct":    getTestBillingAccountFromEnv(t),
+		"org":             GetTestOrgFromEnv(t),
+		"billing_acct":    GetTestBillingAccountFromEnv(t),
 		"random_suffix_1": randString(t, 10),
 		"random_suffix_2": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

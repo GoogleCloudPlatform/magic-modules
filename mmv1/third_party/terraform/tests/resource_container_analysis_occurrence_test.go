@@ -29,7 +29,7 @@ func getTestOccurrenceAttestationPayload(t *testing.T) string {
 
 func getSignedTestOccurrenceAttestationPayload(
 	t *testing.T, config *Config,
-	signingKey bootstrappedKMS, rawPayload string) string {
+	signingKey BootstrappedKMS, rawPayload string) string {
 	pbytes := []byte(rawPayload)
 	ssum := sha512.Sum512(pbytes)
 	hashed := base64.StdEncoding.EncodeToString(ssum[:])
@@ -69,9 +69,9 @@ func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 		"signature":     base64.StdEncoding.EncodeToString([]byte(signed)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -121,9 +121,9 @@ func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 		"signature":     base64.StdEncoding.EncodeToString([]byte(signature1)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

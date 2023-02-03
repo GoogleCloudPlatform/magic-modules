@@ -27,7 +27,7 @@ func TestValidateGCEName(t *testing.T) {
 		{TestName: "too long", Value: "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoob", ExpectError: true},
 	}
 
-	es := testStringValidationCases(x, validateGCEName)
+	es := testStringValidationCases(x, ValidateGCEName)
 	if len(es) > 0 {
 		t.Errorf("Failed to validate GCP names: %v", es)
 	}
@@ -72,7 +72,7 @@ func TestValidateRFC3339Time(t *testing.T) {
 		{TestName: "not numbers", Value: "ab:cd", ExpectError: true},
 	}
 
-	es := testStringValidationCases(cases, validateRFC3339Time)
+	es := testStringValidationCases(cases, ValidateRFC3339Time)
 	if len(es) > 0 {
 		t.Errorf("Failed to validate RFC3339 times: %v", es)
 	}
@@ -102,7 +102,7 @@ func TestValidateRFC1035Name(t *testing.T) {
 			TestName:    c.TestName,
 			Value:       c.Value,
 			ExpectError: c.ExpectError,
-		}, validateRFC1035Name(c.Min, c.Max))
+		}, ValidateRFC1035Name(c.Min, c.Max))
 
 		if len(errors) > 0 {
 			t.Errorf("%s failed; %v", c.TestName, errors)
@@ -134,7 +134,7 @@ func TestValidateServiceAccountLink(t *testing.T) {
 		},
 	}
 
-	es := testStringValidationCases(cases, validateRegexp(ServiceAccountLinkRegex))
+	es := testStringValidationCases(cases, ValidateRegexp(ServiceAccountLinkRegex))
 	if len(es) > 0 {
 		t.Errorf("Failed to validate Service Account Links: %v", es)
 	}
@@ -186,7 +186,7 @@ func testRFC1918Networks(cases []RFC1918NetworkTestCase) []error {
 }
 
 func testRFC1918Network(testCase RFC1918NetworkTestCase) []error {
-	f := validateRFC1918Network(testCase.MinPrefix, testCase.MaxPrefix)
+	f := ValidateRFC1918Network(testCase.MinPrefix, testCase.MaxPrefix)
 	_, es := f(testCase.CIDR, testCase.TestName)
 	if testCase.ExpectError {
 		if len(es) > 0 {
@@ -239,7 +239,7 @@ func TestOrEmpty(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		validateFunc := orEmpty(validation.StringInSlice([]string{"valid"}, false))
+		validateFunc := OrEmpty(validation.StringInSlice([]string{"valid"}, false))
 		_, errors := validateFunc(tc.Value, tn)
 		if len(errors) > 0 && !tc.ExpectValidationErrors {
 			t.Errorf("%s: unexpected errors %s", tn, errors)
@@ -265,7 +265,7 @@ func TestValidateProjectID(t *testing.T) {
 		{TestName: "has a final hyphen", Value: "foo-bar-", ExpectError: true},
 	}
 
-	es := testStringValidationCases(x, validateProjectID())
+	es := testStringValidationCases(x, ValidateProjectID())
 	if len(es) > 0 {
 		t.Errorf("Failed to validate project ID's: %v", es)
 	}
@@ -288,7 +288,7 @@ func TestValidateDSProjectID(t *testing.T) {
 		{TestName: "has a final hyphen", Value: "foo-bar-", ExpectError: true},
 	}
 
-	es := testStringValidationCases(x, validateDSProjectID())
+	es := testStringValidationCases(x, ValidateDSProjectID())
 	if len(es) > 0 {
 		t.Errorf("Failed to validate project ID's: %v", es)
 	}
@@ -312,7 +312,7 @@ func TestValidateProjectName(t *testing.T) {
 		{TestName: "too long", Value: strings.Repeat("a", 31), ExpectError: true},
 	}
 
-	es := testStringValidationCases(x, validateProjectName())
+	es := testStringValidationCases(x, ValidateProjectName())
 	if len(es) > 0 {
 		t.Errorf("Failed to validate project ID's: %v", es)
 	}
@@ -340,7 +340,7 @@ func TestValidateIAMCustomRoleIDRegex(t *testing.T) {
 		{TestName: "too long", Value: strings.Repeat("f", 65), ExpectError: true},
 	}
 
-	es := testStringValidationCases(x, validateIAMCustomRoleID)
+	es := testStringValidationCases(x, ValidateIAMCustomRoleID)
 	if len(es) > 0 {
 		t.Errorf("Failed to validate IAMCustomRole IDs: %v", es)
 	}

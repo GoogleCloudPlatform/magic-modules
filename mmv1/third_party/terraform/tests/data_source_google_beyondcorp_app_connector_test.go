@@ -13,15 +13,15 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_basic(t *testing.T) {
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -35,15 +35,15 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProject(t *testing.T)
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_optionalProject(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -57,15 +57,15 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalRegion(t *testing.T) 
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_optionalRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -79,15 +79,15 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(t *test
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},

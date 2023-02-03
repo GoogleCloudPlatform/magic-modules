@@ -3,7 +3,7 @@
         return err
     }
 
-    url, err := replaceVars(d, config, "{{ActiveDirectoryBasePath}}projects/{{project}}/locations/global/domains/{{domain}}:detachTrust")
+    url, err := ReplaceVars(d, config, "{{ActiveDirectoryBasePath}}projects/{{project}}/locations/global/domains/{{domain}}:detachTrust")
     if err != nil {
         return err
     }
@@ -14,37 +14,37 @@
     targetDomainNameProp, err := expandNestedActiveDirectoryDomainTrustTargetDomainName(d.Get("target_domain_name"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("target_domain_name"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, targetDomainNameProp)) {
+    } else if v, ok := d.GetOkExists("target_domain_name"); !IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, targetDomainNameProp)) {
         obj["targetDomainName"] = targetDomainNameProp
     }
     trustTypeProp, err := expandNestedActiveDirectoryDomainTrustTrustType(d.Get("trust_type"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("trust_type"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustTypeProp)) {
+    } else if v, ok := d.GetOkExists("trust_type"); !IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustTypeProp)) {
         obj["trustType"] = trustTypeProp
     }
     trustDirectionProp, err := expandNestedActiveDirectoryDomainTrustTrustDirection(d.Get("trust_direction"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("trust_direction"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustDirectionProp)) {
+    } else if v, ok := d.GetOkExists("trust_direction"); !IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustDirectionProp)) {
         obj["trustDirection"] = trustDirectionProp
     }
     selectiveAuthenticationProp, err := expandNestedActiveDirectoryDomainTrustSelectiveAuthentication(d.Get("selective_authentication"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("selective_authentication"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, selectiveAuthenticationProp)) {
+    } else if v, ok := d.GetOkExists("selective_authentication"); !IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, selectiveAuthenticationProp)) {
         obj["selectiveAuthentication"] = selectiveAuthenticationProp
     }
     targetDnsIpAddressesProp, err := expandNestedActiveDirectoryDomainTrustTargetDnsIpAddresses(d.Get("target_dns_ip_addresses"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("target_dns_ip_addresses"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, targetDnsIpAddressesProp)) {
+    } else if v, ok := d.GetOkExists("target_dns_ip_addresses"); !IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, targetDnsIpAddressesProp)) {
         obj["targetDnsIpAddresses"] = targetDnsIpAddressesProp
     }
     trustHandshakeSecretProp, err := expandNestedActiveDirectoryDomainTrustTrustHandshakeSecret(d.Get("trust_handshake_secret"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("trust_handshake_secret"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustHandshakeSecretProp)) {
+    } else if v, ok := d.GetOkExists("trust_handshake_secret"); !IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustHandshakeSecretProp)) {
         obj["trustHandshakeSecret"] = trustHandshakeSecretProp
     }
 
@@ -55,9 +55,9 @@
 
     log.Printf("[DEBUG] Deleting DomainTrust %q", d.Id())
 
-    res, err := sendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+    res, err := SendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
     if err != nil {
-        return handleNotFoundError(err, d, "DomainTrust")
+        return HandleNotFoundError(err, d, "DomainTrust")
     }
 
     err = activeDirectoryOperationWaitTime(

@@ -55,7 +55,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 						"instance_template": {
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The full URL to an instance template from which all new instances of this version will be created.`,
 						},
 
@@ -159,7 +159,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set:         selfLinkRelativePathHash,
+				Set:         SelfLinkRelativePathHash,
 				Description: `The full URL of all target pools to which new instances in the group are added. Updating the target pools attribute does not affect existing instances.`,
 			},
 
@@ -188,7 +188,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 						"health_check": {
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The health check resource that signals autohealing.`,
 						},
 
@@ -275,7 +275,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"RECREATE", "SUBSTITUTE", ""}, false),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress("SUBSTITUTE"),
+							DiffSuppressFunc: EmptyOrDefaultStringSuppress("SUBSTITUTE"),
 							Description:      `The instance replacement method for managed instance groups. Valid values are: "RECREATE", "SUBSTITUTE". If SUBSTITUTE (default), the group replaces VM instances with new instances that have randomly generated names. If RECREATE, instance names are preserved.  You must also set max_unavailable_fixed or max_unavailable_percent to be greater than 0.`,
 						},
 					},
@@ -523,7 +523,7 @@ func getNamedPortsBeta(nps []interface{}) []*compute.NamedPort {
 
 func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -533,7 +533,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -571,7 +571,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 	}
 
 	// It probably maybe worked, so store the ID now
-	id, err := replaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -652,17 +652,17 @@ func getManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGrou
 		return nil, err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return nil, err
 	}
 
-	zone, _ := getZone(d, config)
+	zone, _ := GetZone(d, config)
 	name := d.Get("name").(string)
 
 	manager, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Get(project, zone, name).Do()
 	if err != nil {
-		return nil, handleNotFoundError(err, d, fmt.Sprintf("Instance Group Manager %q", name))
+		return nil, HandleNotFoundError(err, d, fmt.Sprintf("Instance Group Manager %q", name))
 	}
 
 	if manager == nil {
@@ -678,7 +678,7 @@ func getManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGrou
 
 func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -691,7 +691,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	operation := d.Get("operation").(string)
 	if operation != "" {
 		log.Printf("[DEBUG] in progress operation detected at %v, attempting to resume", operation)
-		zone, _ := getZone(d, config)
+		zone, _ := GetZone(d, config)
 		op := &compute.Operation{
 			Name: operation,
 			Zone: zone,
@@ -804,7 +804,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -814,7 +814,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -967,7 +967,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 		}
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -977,7 +977,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	zone, _ := getZone(d, config)
+	zone, _ := GetZone(d, config)
 	name := d.Get("name").(string)
 
 	op, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Delete(project, zone, name).Do()
@@ -1329,11 +1329,11 @@ func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.Ins
 	for _, raw := range new {
 		properties = &compute.InstancePropertiesPatch{}
 		data := raw.(map[string]interface{})
-		properties.Metadata = convertStringMap(data["metadata"].(map[string]interface{}))
+		properties.Metadata = ConvertStringMap(data["metadata"].(map[string]interface{}))
 		if len(properties.Metadata) == 0 {
 			properties.NullFields = append(properties.NullFields, "Metadata")
 		}
-		properties.Labels = convertStringMap(data["labels"].(map[string]interface{}))
+		properties.Labels = ConvertStringMap(data["labels"].(map[string]interface{}))
 		if len(properties.Labels) == 0 {
 			properties.NullFields = append(properties.NullFields, "Labels")
 		}
@@ -1440,12 +1440,12 @@ func resourceInstanceGroupManagerStateImporter(d *schema.ResourceData, meta inte
 		return nil, fmt.Errorf("Error setting wait_for_instances_status: %s", err)
 	}
 	config := meta.(*Config)
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instanceGroupManagers/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+	if err := ParseImportId([]string{"projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instanceGroupManagers/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

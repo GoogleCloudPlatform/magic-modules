@@ -15,16 +15,16 @@ func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", randInt(t))
 	zipFilePath := "./test-fixtures/cloudfunctions2/function-source.zip"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleCloudFunctions2FunctionConfig(functionName,
 					bucketName, zipFilePath),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(funcDataNameHttp,
+					CheckDataSourceStateMatchesResourceStateWithIgnores(funcDataNameHttp,
 						"google_cloudfunctions2_function.function_http_v2", map[string]struct{}{"build_config.0.source.0.storage_source.0.bucket": {}, "build_config.0.source.0.storage_source.0.object": {}}),
 				),
 			},

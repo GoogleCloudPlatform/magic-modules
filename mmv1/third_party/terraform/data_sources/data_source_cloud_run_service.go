@@ -8,9 +8,9 @@ import (
 
 func dataSourceGoogleCloudRunService() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudRunService().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name", "location")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceCloudRunService().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name", "location")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudRunServiceRead,
@@ -21,7 +21,7 @@ func dataSourceGoogleCloudRunService() *schema.Resource {
 func dataSourceGoogleCloudRunServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	id, err := replaceVars(d, config, "locations/{{location}}/namespaces/{{project}}/services/{{name}}")
+	id, err := ReplaceVars(d, config, "locations/{{location}}/namespaces/{{project}}/services/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

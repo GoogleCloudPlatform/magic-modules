@@ -15,9 +15,9 @@ func TestAccApiGatewayApiConfig_apigatewayApiConfigBasicExampleUpdated(t *testin
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckApiGatewayApiConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -32,16 +32,16 @@ func TestAccApiGatewayApiConfig_apigatewayApiConfigBasicExampleUpdated(t *testin
 
 func TestAccApiGatewayApiConfig_generatedPrefix(t *testing.T) {
 	// Random generated id within resource
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckApiGatewayApiConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

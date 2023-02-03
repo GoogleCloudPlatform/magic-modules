@@ -54,7 +54,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       charset: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        diff_suppress_func: 'caseDiffSuppress'
+        diff_suppress_func: 'CaseDiffSuppress'
     virtual_fields:
       # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
       - !ruby/object:Api::Type::String
@@ -81,7 +81,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         flatten_object: true
       onPremisesConfiguration.host: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateIpAddress'
+          function: 'ValidateIpAddress'
       onPremisesConfiguration.port: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0, 65535)'

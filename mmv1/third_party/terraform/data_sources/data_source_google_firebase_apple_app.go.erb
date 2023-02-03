@@ -9,10 +9,10 @@ import (
 
 func dataSourceGoogleFirebaseAppleApp() *schema.Resource {
         // Generate datasource schema from resource
-        dsSchema := datasourceSchemaFromResourceSchema(resourceFirebaseAppleApp().Schema)
+        dsSchema := DatasourceSchemaFromResourceSchema(resourceFirebaseAppleApp().Schema)
 
         // Set 'Required' schema elements
-        addRequiredFieldsToSchema(dsSchema, "app_id")
+        AddRequiredFieldsToSchema(dsSchema, "app_id")
 
         return &schema.Resource{
                 Read:   dataSourceGoogleFirebaseAppleAppRead,

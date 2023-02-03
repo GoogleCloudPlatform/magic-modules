@@ -8,13 +8,13 @@ import (
 
 func dataSourceGoogleCloudFunctions2Function() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudfunctions2function().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceCloudfunctions2function().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name", "location")
+	AddRequiredFieldsToSchema(dsSchema, "name", "location")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudFunctions2FunctionRead,

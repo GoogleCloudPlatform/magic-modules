@@ -98,7 +98,7 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 
 func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 
 	// Get the zone
-	z, err := getZone(d, config)
+	z, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}

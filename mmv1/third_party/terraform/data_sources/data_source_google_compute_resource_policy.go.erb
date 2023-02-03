@@ -8,11 +8,11 @@ import (
 )
 
 func dataSourceGoogleComputeResourcePolicy() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeResourcePolicy().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeResourcePolicy().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "region")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeResourcePolicyRead,
@@ -29,7 +29,7 @@ func dataSourceGoogleComputeResourcePolicyRead(d *schema.ResourceData, meta inte
 	if err != nil {
 		return err
 	}
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

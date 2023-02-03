@@ -18,11 +18,11 @@ func TestAccServiceAccount_basic(t *testing.T) {
 	displayName2 := "Terraform Test Update"
 	desc := "test description"
 	desc2 := ""
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// The first step creates a basic service account
 			{
@@ -93,11 +93,11 @@ func TestAccServiceAccount_Disabled(t *testing.T) {
 	uniqueId := ""
 	displayName := "Terraform Test"
 	desc := "test description"
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// The first step creates a basic service account
 			{

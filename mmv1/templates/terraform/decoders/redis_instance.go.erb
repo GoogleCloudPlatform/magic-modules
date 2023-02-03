@@ -1,13 +1,13 @@
 config := meta.(*Config)
 
-userAgent, err := generateUserAgentString(d, config.userAgent)
+userAgent, err := GenerateUserAgentString(d, config.userAgent)
 if err != nil {
   return nil, err
 }
 
 if v, ok := res["authEnabled"].(bool); ok {
 	if v {
-		url, err := replaceVars(d, config, "{{RedisBasePath}}projects/{{project}}/locations/{{region}}/instances/{{name}}/authString")
+		url, err := ReplaceVars(d, config, "{{RedisBasePath}}projects/{{project}}/locations/{{region}}/instances/{{name}}/authString")
 		if err != nil {
 			return nil, err
 		}
@@ -22,11 +22,11 @@ if v, ok := res["authEnabled"].(bool); ok {
 		billingProject = project
 
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
 
-		res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+		res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading AuthString: %s", err)
 		}

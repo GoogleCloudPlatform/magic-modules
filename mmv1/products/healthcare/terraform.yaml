@@ -147,7 +147,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       parserConfig.segmentTerminator: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'ValidateBase64String'
       parserConfig.schema: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
         custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
@@ -166,7 +166,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_consent_store_basic"
         primary_resource_id: "my-consent"
-        primary_resource_name: "fmt.Sprintf(\"projects/%s/locations/%s/datasets/tf-test-my-dataset%s\",  getTestProjectFromEnv(), getTestRegionFromEnv(), context[\"random_suffix\"]) , fmt.Sprintf(\"tf-test-my-consent-store%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"projects/%s/locations/%s/datasets/tf-test-my-dataset%s\",  GetTestProjectFromEnv(), GetTestRegionFromEnv(), context[\"random_suffix\"]) , fmt.Sprintf(\"tf-test-my-consent-store%s\", context[\"random_suffix\"])"
         vars:
           dataset_id: "my-dataset"
           consent_id: "my-consent-store"

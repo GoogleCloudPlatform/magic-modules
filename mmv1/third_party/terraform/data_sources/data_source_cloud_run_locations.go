@@ -28,7 +28,7 @@ func dataSourceGoogleCloudRunLocations() *schema.Resource {
 
 func dataSourceGoogleCloudRunLocationsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -38,12 +38,12 @@ func dataSourceGoogleCloudRunLocationsRead(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	url, err := replaceVars(d, config, "https://run.googleapis.com/v1/projects/{{project}}/locations")
+	url, err := ReplaceVars(d, config, "https://run.googleapis.com/v1/projects/{{project}}/locations")
 	if err != nil {
 		return err
 	}
 
-	res, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error listing Cloud Run Locations : %s", err)
 	}

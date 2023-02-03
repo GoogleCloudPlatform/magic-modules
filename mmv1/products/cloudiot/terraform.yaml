@@ -109,14 +109,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           The region in which the created registry should reside.
           If it is not provided, the provider region is used.
       logLevel: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'emptyOrDefaultStringSuppress("NONE")'
+        diff_suppress_func: 'EmptyOrDefaultStringSuppress("NONE")'
       eventNotificationConfigs: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       eventNotificationConfigs.subfolderMatches: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateCloudIotDeviceRegistrySubfolderMatch'
       eventNotificationConfigs.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       stateNotificationConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # Excluding this because the original (manually-generated) implementation
         # wrongly set this to be a Map, instead of a NestedObject. To avoid breaking

@@ -76,9 +76,9 @@ func TestAccHealthcareDataset_basic(t *testing.T) {
 	timeZone := "America/New_York"
 	resourceName := "google_healthcare_dataset.dataset"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckHealthcareDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -111,9 +111,9 @@ func testAccCheckGoogleHealthcareDatasetUpdate(t *testing.T, timeZone string) re
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
-			gcpResourceUri, err := replaceVarsForTest(config, rs, "projects/{{project}}/locations/{{location}}/datasets/{{name}}")
+			gcpResourceUri, err := ReplaceVarsForTest(config, rs, "projects/{{project}}/locations/{{location}}/datasets/{{name}}")
 			if err != nil {
 				return err
 			}

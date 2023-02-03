@@ -417,7 +417,7 @@ func resourceContainerCluster() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 										// We can't use a Terraform-level default because it won't be true when the block is disabled: true
-										DiffSuppressFunc: emptyOrDefaultStringSuppress("AUTH_NONE"),
+										DiffSuppressFunc: EmptyOrDefaultStringSuppress("AUTH_NONE"),
 										ValidateFunc:     validation.StringInSlice([]string{"AUTH_NONE", "AUTH_MUTUAL_TLS"}, false),
 										Description:      `The authentication type between services in Istio. Available options include AUTH_MUTUAL_TLS.`,
 									},
@@ -553,7 +553,7 @@ func resourceContainerCluster() *schema.Resource {
 									"min_cpu_platform": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										DiffSuppressFunc: emptyOrDefaultStringSuppress("automatic"),
+										DiffSuppressFunc: EmptyOrDefaultStringSuppress("automatic"),
 										Description:      `Minimum CPU platform to be used by this instance. The instance may be scheduled on the specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such as Intel Haswell.`,
 									},
 									"boot_disk_kms_key": {
@@ -743,7 +743,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
-				ValidateFunc:  orEmpty(validateRFC1918Network(8, 32)),
+				ValidateFunc:  OrEmpty(ValidateRFC1918Network(8, 32)),
 				ConflictsWith: []string{"ip_allocation_policy"},
 				Description:   `The IP address range of the Kubernetes pods in this cluster in CIDR notation (e.g. 10.96.0.0/14). Leave blank to have one automatically chosen or specify a /14 block in 10.0.0.0/8. This field will only work for routes-based clusters, where ip_allocation_policy is not defined.`,
 			},
@@ -942,8 +942,8 @@ func resourceContainerCluster() *schema.Resource {
 									"start_time": {
 										Type:             schema.TypeString,
 										Required:         true,
-										ValidateFunc:     validateRFC3339Time,
-										DiffSuppressFunc: rfc3339TimeDiffSuppress,
+										ValidateFunc:     ValidateRFC3339Time,
+										DiffSuppressFunc: Rfc3339TimeDiffSuppress,
 									},
 									"duration": {
 										Type:     schema.TypeString,
@@ -966,12 +966,12 @@ func resourceContainerCluster() *schema.Resource {
 									"start_time": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validateRFC3339Date,
+										ValidateFunc: ValidateRFC3339Date,
 									},
 									"end_time": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validateRFC3339Date,
+										ValidateFunc: ValidateRFC3339Date,
 									},
 									"recurrence": {
 										Type:             schema.TypeString,
@@ -995,12 +995,12 @@ func resourceContainerCluster() *schema.Resource {
 									"start_time": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validateRFC3339Date,
+										ValidateFunc: ValidateRFC3339Date,
 									},
 									"end_time": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ValidateFunc: validateRFC3339Date,
+										ValidateFunc: ValidateRFC3339Date,
 									},
 									"exclusion_options": {
 										Type:        schema.TypeList,
@@ -1222,7 +1222,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:         true,
 				Default:          "default",
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				Description:      `The name or self_link of the Google Compute Engine network to which the cluster is connected. For Shared VPC, set this to the self link of the shared network.`,
 			},
 
@@ -1245,7 +1245,7 @@ func resourceContainerCluster() *schema.Resource {
 							Default:          "PROVIDER_UNSPECIFIED",
 							Optional:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"PROVIDER_UNSPECIFIED", "CALICO"}, false),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress("PROVIDER_UNSPECIFIED"),
+							DiffSuppressFunc: EmptyOrDefaultStringSuppress("PROVIDER_UNSPECIFIED"),
 							Description:      `The selected network policy provider. Defaults to PROVIDER_UNSPECIFIED.`,
 						},
 					},
@@ -1337,7 +1337,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				Description:      `The name or self_link of the Google Compute Engine subnetwork in which the cluster's instances are launched.`,
 			},
 
@@ -1382,7 +1382,7 @@ func resourceContainerCluster() *schema.Resource {
 							Computed:         true,
 							ForceNew:         true,
 							ConflictsWith:    ipAllocationRangeFields,
-							DiffSuppressFunc: cidrOrSizeDiffSuppress,
+							DiffSuppressFunc: CidrOrSizeDiffSuppress,
 							Description:      `The IP address range for the cluster pod IPs. Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14) to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use.`,
 						},
 
@@ -1392,7 +1392,7 @@ func resourceContainerCluster() *schema.Resource {
 							Computed:         true,
 							ForceNew:         true,
 							ConflictsWith:    ipAllocationRangeFields,
-							DiffSuppressFunc: cidrOrSizeDiffSuppress,
+							DiffSuppressFunc: CidrOrSizeDiffSuppress,
 							Description:      `The IP address range of the services IPs in this cluster. Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14) to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use.`,
 						},
 
@@ -1469,7 +1469,7 @@ func resourceContainerCluster() *schema.Resource {
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: privateClusterConfigKeys,
-							ValidateFunc: orEmpty(validation.IsCIDRNetwork(28, 28)),
+							ValidateFunc: OrEmpty(validation.IsCIDRNetwork(28, 28)),
 							Description:  `The IP range in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. See Private Cluster Limitations for more details. This field only applies to private clusters, when enable_private_nodes is true.`,
 						},
 						"peering_name": {
@@ -1487,7 +1487,7 @@ func resourceContainerCluster() *schema.Resource {
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: privateClusterConfigKeys,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description: `Subnetwork in cluster's network where master's endpoint will be provisioned.`,
 						},
 						"public_endpoint": {
@@ -1723,7 +1723,7 @@ func resourceContainerCluster() *schema.Resource {
 				Computed:         true,
 				Description:      `The desired datapath provider for this cluster. By default, uses the IPTables-based kube-proxy implementation.`,
 				ValidateFunc:     validation.StringInSlice([]string{"DATAPATH_PROVIDER_UNSPECIFIED", "LEGACY_DATAPATH", "ADVANCED_DATAPATH"}, false),
-				DiffSuppressFunc: emptyOrDefaultStringSuppress("DATAPATH_PROVIDER_UNSPECIFIED"),
+				DiffSuppressFunc: EmptyOrDefaultStringSuppress("DATAPATH_PROVIDER_UNSPECIFIED"),
 			},
 
 			"enable_intranode_visibility": {
@@ -1909,7 +1909,7 @@ func resourceNodeConfigEmptyGuestAccelerator(_ context.Context, diff *schema.Res
 
 func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -1919,7 +1919,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -2129,7 +2129,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 	parent := fmt.Sprintf("projects/%s/locations/%s", project, location)
 	var op *container.Operation
-	err = retry(func() error {
+	err = Retry(func() error {
 		clusterCreateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Create(parent, req)
 		if config.UserProjectOverride {
 			clusterCreateCall.Header().Add("X-Goog-User-Project", project)
@@ -2186,7 +2186,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 	if d.Get("remove_default_node_pool").(bool) {
 		parent := fmt.Sprintf("%s/nodePools/%s", containerClusterFullName(project, location, clusterName), "default-pool")
-		err = retry(func() error {
+		err = Retry(func() error {
 			clusterNodePoolDeleteCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Delete(parent)
 			if config.UserProjectOverride {
 				clusterNodePoolDeleteCall.Header().Add("X-Goog-User-Project", project)
@@ -2221,7 +2221,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -2231,7 +2231,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -2280,7 +2280,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 
 	cluster, err := clusterGetCall.Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Container Cluster %q", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Container Cluster %q", d.Get("name").(string)))
 	}
 
 	if err := d.Set("name", cluster.Name); err != nil {
@@ -2294,7 +2294,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting location: %s", err)
 	}
 
-	locations := schema.NewSet(schema.HashString, convertStringArrToInterface(cluster.Locations))
+	locations := schema.NewSet(schema.HashString, ConvertStringArrToInterface(cluster.Locations))
 	locations.Remove(cluster.Zone) // Remove the original zone since we only store additional zones
 	if err := d.Set("node_locations", locations); err != nil {
 		return fmt.Errorf("Error setting node_locations: %s", err)
@@ -2521,7 +2521,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -2531,7 +2531,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -3438,7 +3438,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		resourceLabels := d.Get("resource_labels").(map[string]interface{})
 		labelFingerprint := d.Get("label_fingerprint").(string)
 		req := &container.SetLabelsRequest{
-			ResourceLabels:   convertStringMap(resourceLabels),
+			ResourceLabels:   ConvertStringMap(resourceLabels),
 			LabelFingerprint: labelFingerprint,
 		}
 		updateF := func() error {
@@ -3580,7 +3580,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
 				DesiredNodePoolAutoConfigNetworkTags: &container.NetworkTags{
-					Tags:            convertStringArr(tags),
+					Tags:            ConvertStringArr(tags),
 					ForceSendFields: []string{"Tags"},
 				},
 			},
@@ -3641,7 +3641,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -3651,7 +3651,7 @@ func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -3722,12 +3722,12 @@ func cleanFailedContainerCluster(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -3742,7 +3742,7 @@ func cleanFailedContainerCluster(d *schema.ResourceData, meta interface{}) error
 	}
 	op, err := clusterDeleteCall.Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Container Cluster %q", d.Get("name").(string)))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Container Cluster %q", d.Get("name").(string)))
 	}
 
 	// Wait until it's deleted
@@ -3928,10 +3928,10 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	// at any other time, because the fingerprint update might happen between plan and apply.
 	// We can omit error checks, since to have gotten this far, a project is definitely configured.
 	project, _ := getProject(d, config)
-	location, _ := getLocation(d, config)
+	location, _ := GetLocation(d, config)
 	clusterName := d.Get("name").(string)
 	name := containerClusterFullName(project, location, clusterName)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return nil
 	}
@@ -4080,7 +4080,7 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	config := l[0].(map[string]interface{})
 
 	npd := &container.AutoprovisioningNodePoolDefaults{
-		OauthScopes:      convertStringArr(config["oauth_scopes"].([]interface{})),
+		OauthScopes:      ConvertStringArr(config["oauth_scopes"].([]interface{})),
 		ServiceAccount:   config["service_account"].(string),
 		DiskSizeGb:       int64(config["disk_size"].(int)),
 		DiskType:         config["disk_type"].(string),
@@ -4228,7 +4228,7 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 				filter := vv.([]interface{})[0].(map[string]interface{})
 				eventType := filter["event_type"].([]interface{})
 				nc.Pubsub.Filter = &container.Filter{
-					EventType: convertStringArr(eventType),
+					EventType: ConvertStringArr(eventType),
 				}
 			}
 
@@ -4581,7 +4581,7 @@ func expandContainerClusterLoggingConfig(configured interface{}) *container.Logg
 	var components []string
 	if l[0] != nil {
 		config := l[0].(map[string]interface{})
-		components = convertStringArr(config["enable_components"].([]interface{}))
+		components = ConvertStringArr(config["enable_components"].([]interface{}))
 	}
 
 	return &container.LoggingConfig{
@@ -4602,7 +4602,7 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	if v, ok := config["enable_components"]; ok {
 		enable_components := v.([]interface{})
 		mc.ComponentConfig = &container.MonitoringComponentConfig{
-			EnableComponents: convertStringArr(enable_components),
+			EnableComponents: ConvertStringArr(enable_components),
 		}
 	}
 	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
@@ -4698,7 +4698,7 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) *container.Netw
 	config := l[0].(map[string]interface{})
 
 	if v, ok := config["tags"]; ok && len(v.([]interface{})) > 0 {
-		nt.Tags = convertStringArr(v.([]interface{}))
+		nt.Tags = ConvertStringArr(v.([]interface{}))
 	}
 	return nt
 }
@@ -5414,12 +5414,12 @@ func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
+	if err := ParseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 	project, err := getProject(d, config)
@@ -5427,7 +5427,7 @@ func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interfac
 		return nil, err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -5460,7 +5460,7 @@ func extractNodePoolInformationFromCluster(d *schema.ResourceData, config *Confi
 		return nil, err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -5472,7 +5472,7 @@ func extractNodePoolInformationFromCluster(d *schema.ResourceData, config *Confi
 	}, nil
 }
 
-func cidrOrSizeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+func CidrOrSizeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// If the user specified a size and the API returned a full cidr block, suppress.
 	return strings.HasPrefix(new, "/") && strings.HasSuffix(old, new)
 }
@@ -5496,16 +5496,16 @@ func containerClusterAddedScopesSuppress(k, old, new string, d *schema.ResourceD
 	}
 
 	// combine what the default scopes are with what was passed
-	m := golangSetFromStringSlice(append(addedScopes, convertStringArr(n.([]interface{}))...))
+	m := golangSetFromStringSlice(append(addedScopes, ConvertStringArr(n.([]interface{}))...))
 	combined := stringSliceFromGolangSet(m)
 
 	// compare if the combined new scopes and default scopes differ from the old scopes
-	if len(combined) != len(convertStringArr(o.([]interface{}))) {
+	if len(combined) != len(ConvertStringArr(o.([]interface{}))) {
 		return false
 	}
 
 	for _, i := range combined {
-		if stringInSlice(convertStringArr(o.([]interface{})), i) {
+		if stringInSlice(ConvertStringArr(o.([]interface{})), i) {
 			continue
 		}
 

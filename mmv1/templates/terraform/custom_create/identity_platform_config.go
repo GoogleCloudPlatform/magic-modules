@@ -1,9 +1,9 @@
-userAgent, err := generateUserAgentString(d, config.userAgent)
+userAgent, err := GenerateUserAgentString(d, config.userAgent)
 if err != nil {
 	return err
 }
 
-url, err := replaceVars(d, config, "{{IdentityPlatformBasePath}}projects/{{project}}/identityPlatform:initializeAuth")
+url, err := ReplaceVars(d, config, "{{IdentityPlatformBasePath}}projects/{{project}}/identityPlatform:initializeAuth")
 if err != nil {
 	return err
 }
@@ -17,11 +17,11 @@ if err != nil {
 billingProject = project
 
 // err == nil indicates that the billing_project value was found
-if bp, err := getBillingProject(d, config); err == nil {
+if bp, err := GetBillingProject(d, config); err == nil {
 	billingProject = bp
 }
 
-res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
+res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
 if err != nil {
 	return fmt.Errorf("Error creating Config: %s", err)
 }
@@ -30,7 +30,7 @@ if err := d.Set("name", flattenIdentityPlatformConfigName(res["name"], d, config
 }
 
 // Store the ID now
-id, err := replaceVars(d, config, "projects/{{project}}/config")
+id, err := ReplaceVars(d, config, "projects/{{project}}/config")
 if err != nil {
 	return fmt.Errorf("Error constructing id: %s", err)
 }

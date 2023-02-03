@@ -52,7 +52,7 @@ func resourceGoogleProject() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateProjectID(),
+				ValidateFunc: ValidateProjectID(),
 				Description:  `The project ID. Changing this forces a new project to be created.`,
 			},
 			"skip_delete": {
@@ -70,7 +70,7 @@ func resourceGoogleProject() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validateProjectName(),
+				ValidateFunc: ValidateProjectName(),
 				Description:  `The display name of the project.`,
 			},
 			"org_id": {
@@ -109,7 +109,7 @@ func resourceGoogleProject() *schema.Resource {
 
 func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -132,11 +132,11 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if _, ok := d.GetOk("labels"); ok {
-		project.Labels = expandLabels(d)
+		project.Labels = ExpandLabels(d)
 	}
 
 	var op *cloudresourcemanager.Operation
-	err = retryTimeDuration(func() (reqErr error) {
+	err = RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = config.NewResourceManagerClient(userAgent).Projects.Create(project).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutCreate))
@@ -188,7 +188,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 		billingProject := project.ProjectId
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
 
@@ -227,7 +227,7 @@ func resourceGoogleProjectCheckPreRequisites(config *Config, d *schema.ResourceD
 	if !d.Get("auto_create_network").(bool) {
 		call := config.NewServiceUsageClient(userAgent).Services.Get("projects/00000000000/services/serviceusage.googleapis.com")
 		if config.UserProjectOverride {
-			if billingProject, err := getBillingProject(d, config); err == nil {
+			if billingProject, err := GetBillingProject(d, config); err == nil {
 				call.Header().Add("X-Goog-User-Project", billingProject)
 			}
 		}
@@ -246,7 +246,7 @@ func resourceGoogleProjectCheckPreRequisites(config *Config, d *schema.ResourceD
 
 func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 403 && strings.Contains(gerr.Message, "caller does not have permission") {
 			return fmt.Errorf("the user does not have permission to access Project %q or it may not exist", pid)
 		}
-		return handleNotFoundError(err, d, fmt.Sprintf("Project %q", pid))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Project %q", pid))
 	}
 
 	// If the project has been deleted from outside Terraform, remove it from state file.
@@ -301,13 +301,13 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var ba *cloudbilling.ProjectBillingInfo
-	err = retryTimeDuration(func() (reqErr error) {
-		ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(prefixedProject(pid)).Do()
+	err = RetryTimeDuration(func() (reqErr error) {
+		ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutRead))
 	// Read the billing account
 	if err != nil && !isApiNotEnabledError(err) {
-		return fmt.Errorf("Error reading billing account for project %q: %v", prefixedProject(pid), err)
+		return fmt.Errorf("Error reading billing account for project %q: %v", PrefixedProject(pid), err)
 	} else if isApiNotEnabledError(err) {
 		log.Printf("[WARN] Billing info API not enabled, please enable it to read billing info about project %q: %s", pid, err.Error())
 	} else if ba.BillingAccountName != "" {
@@ -319,7 +319,7 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		// recognize.
 		_ba := strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/")
 		if ba.BillingAccountName == _ba {
-			return fmt.Errorf("Error parsing billing account for project %q. Expected value to begin with 'billingAccounts/' but got %s", prefixedProject(pid), ba.BillingAccountName)
+			return fmt.Errorf("Error parsing billing account for project %q. Expected value to begin with 'billingAccounts/' but got %s", PrefixedProject(pid), ba.BillingAccountName)
 		}
 		if err := d.Set("billing_account", _ba); err != nil {
 			return fmt.Errorf("Error setting billing_account: %s", err)
@@ -329,7 +329,7 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func prefixedProject(pid string) string {
+func PrefixedProject(pid string) string {
 	return "projects/" + pid
 }
 
@@ -368,7 +368,7 @@ func parseFolderId(v interface{}) string {
 
 func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -420,7 +420,7 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 
 	// Project Labels have changed
 	if ok := d.HasChange("labels"); ok {
-		p.Labels = expandLabels(d)
+		p.Labels = ExpandLabels(d)
 
 		// Do Update on project
 		if p, err = updateProject(config, d, project_name, userAgent, p); err != nil {
@@ -434,7 +434,7 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 
 func updateProject(config *Config, d *schema.ResourceData, projectName, userAgent string, desiredProject *cloudresourcemanager.Project) (*cloudresourcemanager.Project, error) {
 	var newProj *cloudresourcemanager.Project
-	if err := retryTimeDuration(func() (updateErr error) {
+	if err := RetryTimeDuration(func() (updateErr error) {
 		newProj, updateErr = config.NewResourceManagerClient(userAgent).Projects.Update(desiredProject.ProjectId, desiredProject).Do()
 		return updateErr
 	}, d.Timeout(schema.TimeoutUpdate)); err != nil {
@@ -445,7 +445,7 @@ func updateProject(config *Config, d *schema.ResourceData, projectName, userAgen
 
 func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -453,11 +453,11 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 	if !d.Get("skip_delete").(bool) {
 		parts := strings.Split(d.Id(), "/")
 		pid := parts[len(parts)-1]
-		if err := retryTimeDuration(func() error {
+		if err := RetryTimeDuration(func() error {
 			_, delErr := config.NewResourceManagerClient(userAgent).Projects.Delete(pid).Do()
 			return delErr
 		}, d.Timeout(schema.TimeoutDelete)); err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Project %s", pid))
+			return HandleNotFoundError(err, d, fmt.Sprintf("Project %s", pid))
 		}
 	}
 	d.SetId("")
@@ -490,7 +490,7 @@ func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*sc
 
 // Delete a compute network along with the firewall rules inside it.
 func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId, networkName string) error {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -540,27 +540,27 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *Config, userAge
 		ba.BillingAccountName = "billingAccounts/" + name
 	}
 	updateBillingInfoFunc := func() error {
-		_, err := config.NewBillingClient(userAgent).Projects.UpdateBillingInfo(prefixedProject(pid), ba).Do()
+		_, err := config.NewBillingClient(userAgent).Projects.UpdateBillingInfo(PrefixedProject(pid), ba).Do()
 		return err
 	}
-	err := retryTimeDuration(updateBillingInfoFunc, d.Timeout(schema.TimeoutUpdate))
+	err := RetryTimeDuration(updateBillingInfoFunc, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		if err := d.Set("billing_account", ""); err != nil {
 			return fmt.Errorf("Error setting billing_account: %s", err)
 		}
 		if _err, ok := err.(*googleapi.Error); ok {
-			return fmt.Errorf("Error setting billing account %q for project %q: %v", name, prefixedProject(pid), _err)
+			return fmt.Errorf("Error setting billing account %q for project %q: %v", name, PrefixedProject(pid), _err)
 		}
-		return fmt.Errorf("Error setting billing account %q for project %q: %v", name, prefixedProject(pid), err)
+		return fmt.Errorf("Error setting billing account %q for project %q: %v", name, PrefixedProject(pid), err)
 	}
 	for retries := 0; retries < 3; retries++ {
 		var ba *cloudbilling.ProjectBillingInfo
-		err = retryTimeDuration(func() (reqErr error) {
-			ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(prefixedProject(pid)).Do()
+		err = RetryTimeDuration(func() (reqErr error) {
+			ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 			return reqErr
 		}, d.Timeout(schema.TimeoutRead))
 		if err != nil {
-			return fmt.Errorf("Error getting billing info for project %q: %v", prefixedProject(pid), err)
+			return fmt.Errorf("Error getting billing info for project %q: %v", PrefixedProject(pid), err)
 		}
 		baName := strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/")
 		if baName == name {
@@ -591,7 +591,7 @@ func readGoogleProject(d *schema.ResourceData, config *Config, userAgent string)
 	// Read the project
 	parts := strings.Split(d.Id(), "/")
 	pid := parts[len(parts)-1]
-	err := retryTimeDuration(func() (reqErr error) {
+	err := RetryTimeDuration(func() (reqErr error) {
 		p, reqErr = config.NewResourceManagerClient(userAgent).Projects.Get(pid).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutRead))
@@ -627,7 +627,7 @@ func enableServiceUsageProjectServices(services []string, project, billingProjec
 func doEnableServicesRequest(services []string, project, billingProject, userAgent string, config *Config, timeout time.Duration) error {
 	var op *serviceusage.Operation
 	var call ServicesCall
-	err := retryTimeDuration(func() error {
+	err := RetryTimeDuration(func() error {
 		var rerr error
 		if len(services) == 1 {
 			// BatchEnable returns an error for a single item, so just enable
@@ -668,7 +668,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 func listCurrentlyEnabledServices(project, billingProject, userAgent string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
 	log.Printf("[DEBUG] Listing enabled services for project %s", project)
 	apiServices := make(map[string]struct{})
-	err := retryTimeDuration(func() error {
+	err := RetryTimeDuration(func() error {
 		ctx := context.Background()
 		call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project))
 		if config.UserProjectOverride && billingProject != "" {
@@ -708,7 +708,7 @@ func waitForServiceUsageEnabledServices(services []string, project, billingProje
 	missing := make([]string, 0, len(services))
 	delay := time.Duration(0)
 	interval := time.Second
-	err := retryTimeDuration(func() error {
+	err := RetryTimeDuration(func() error {
 		// Get the list of services that are enabled on the project
 		enabledServices, err := listCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 		if err != nil {
@@ -727,7 +727,7 @@ func waitForServiceUsageEnabledServices(services []string, project, billingProje
 			delay += interval
 			interval += delay
 
-			// Spoof a googleapi Error so retryTime will try again
+			// Spoof a googleapi Error so RetryTime will try again
 			return &googleapi.Error{
 				Code:    503,
 				Message: fmt.Sprintf("The service(s) %q are still being enabled for project %s. This isn't a real API error, this is just eventual consistency.", missing, project),

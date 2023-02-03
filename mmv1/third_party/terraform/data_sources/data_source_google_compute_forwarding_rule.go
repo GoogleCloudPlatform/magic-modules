@@ -7,14 +7,14 @@ import (
 )
 
 func dataSourceGoogleComputeForwardingRule() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeForwardingRule().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeForwardingRule().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeForwardingRuleRead,
@@ -32,7 +32,7 @@ func dataSourceGoogleComputeForwardingRuleRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

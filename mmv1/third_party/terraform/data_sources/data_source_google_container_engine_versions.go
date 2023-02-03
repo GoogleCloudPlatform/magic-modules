@@ -62,7 +62,7 @@ func dataSourceGoogleContainerEngineVersions() *schema.Resource {
 
 func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}

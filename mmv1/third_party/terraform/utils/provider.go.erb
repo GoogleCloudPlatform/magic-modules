@@ -94,7 +94,7 @@ func Provider() *schema.Provider {
 						"send_after": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ValidateFunc: validateNonNegativeDuration(),
+							ValidateFunc: ValidateNonNegativeDuration(),
 						},
 						"enable_batching": {
 							Type:     schema.TypeBool,
@@ -571,13 +571,13 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// only check environment variables if neither value was set in config- this
 	// means config beats env var in all cases.
 	if config.AccessToken == "" && config.Credentials == "" {
-		config.Credentials = multiEnvSearch([]string{
+		config.Credentials = MultiEnvSearch([]string{
 			"GOOGLE_CREDENTIALS",
 			"GOOGLE_CLOUD_KEYFILE_JSON",
 			"GCLOUD_KEYFILE_JSON",
 		})
 
-		config.AccessToken = multiEnvSearch([]string{
+		config.AccessToken = MultiEnvSearch([]string{
 			"GOOGLE_OAUTH_ACCESS_TOKEN",
 		})
 	}
@@ -604,7 +604,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.Scopes[i] = scope.(string)
 	}
 
-	batchCfg, err := expandProviderBatchingConfig(d.Get("batching"))
+	batchCfg, err := ExpandProviderBatchingConfig(d.Get("batching"))
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}

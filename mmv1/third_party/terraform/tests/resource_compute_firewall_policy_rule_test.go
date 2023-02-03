@@ -12,12 +12,12 @@ func TestAccComputeFirewallPolicyRule_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"org_name":      fmt.Sprintf("organizations/%s", getTestOrgFromEnv(t)),
+		"org_name":      fmt.Sprintf("organizations/%s", GetTestOrgFromEnv(t)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeFirewallPolicyRule_start(context),
@@ -226,12 +226,12 @@ func TestAccComputeFirewallPolicyRule_multipleRules(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"org_name":      fmt.Sprintf("organizations/%s", getTestOrgFromEnv(t)),
+		"org_name":      fmt.Sprintf("organizations/%s", GetTestOrgFromEnv(t)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeFirewallPolicyRule_multiple(context),

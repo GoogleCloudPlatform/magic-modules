@@ -35,7 +35,7 @@ func dataSourceGoogleStorageProjectServiceAccount() *schema.Resource {
 
 func dataSourceGoogleStorageProjectServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func dataSourceGoogleStorageProjectServiceAccountRead(d *schema.ResourceData, me
 
 	serviceAccount, err := serviceAccountGetRequest.Do()
 	if err != nil {
-		return handleNotFoundError(err, d, "GCS service account not found")
+		return HandleNotFoundError(err, d, "GCS service account not found")
 	}
 
 	if err := d.Set("project", project); err != nil {

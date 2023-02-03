@@ -91,7 +91,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainImport(d *schema.ResourceData
 
 func resourceGoogleServiceNetworkingPeeredDNSDomainCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainCreate(d *schema.ResourceData
 
 func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, 
 
 func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -218,11 +218,11 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData
 	apiService := config.NewServiceNetworkingClient(userAgent)
 	peeredDnsDomainsService := servicenetworking.NewServicesProjectsGlobalNetworksPeeredDnsDomainsService(apiService)
 
-	if err := retryTimeDuration(func() error {
+	if err := RetryTimeDuration(func() error {
 		_, delErr := peeredDnsDomainsService.Delete(d.Id()).Do()
 		return delErr
 	}, d.Timeout(schema.TimeoutDelete)); err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Peered DNS domain %s", name))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Peered DNS domain %s", name))
 	}
 
 	d.SetId("")
@@ -236,7 +236,7 @@ func getProjectNumber(d *schema.ResourceData, config *Config, project, userAgent
 	log.Printf("[DEBUG] Retrieving project number by doing a GET with the project id, as required by service networking")
 	// err == nil indicates that the billing_project value was found
 	billingProject := project
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 

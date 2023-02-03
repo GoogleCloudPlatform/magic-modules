@@ -10,8 +10,8 @@ import (
 )
 
 // This function isn't a test of transport.go; instead, it is used as an alternative
-// to replaceVars inside tests.
-func replaceVarsForTest(config *Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
+// to ReplaceVars inside tests.
+func ReplaceVarsForTest(config *Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string
 
@@ -56,7 +56,7 @@ func replaceVarsForTest(config *Config, rs *terraform.ResourceState, linkTmpl st
 
 // This function isn't a test of transport.go; instead, it is used as an alternative
 // to replaceVars inside tests.
-func replaceVarsForFrameworkTest(prov *frameworkProvider, rs *terraform.ResourceState, linkTmpl string) (string, error) {
+func ReplaceVarsForFrameworkTest(prov *frameworkProvider, rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string
 
@@ -208,7 +208,7 @@ func TestReplaceVars(t *testing.T) {
 			config = &Config{}
 		}
 
-		v, err := replaceVars(d, config, tc.Template)
+		v, err := ReplaceVars(d, config, tc.Template)
 
 		if err != nil {
 			if !tc.ExpectedError {

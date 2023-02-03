@@ -4,7 +4,7 @@ if err != nil {
   return nil, err
 }
 
-zone, err := getZone(d, config)
+zone, err := GetZone(d, config)
 if err != nil {
 	return nil, err
 }
@@ -15,7 +15,7 @@ if zone == "" {
 // resourcePolicies are referred to by region but affixed to zonal disks.
 // We construct the regional name from the zone:
 //   projects/{project}/regions/{region}/resourcePolicies/{resourceId}
-region := getRegionFromZone(zone)
+region := GetRegionFromZone(zone)
 if region == "" {
 	return nil, fmt.Errorf("invalid zone %q, unable to infer region from zone", zone)
 }

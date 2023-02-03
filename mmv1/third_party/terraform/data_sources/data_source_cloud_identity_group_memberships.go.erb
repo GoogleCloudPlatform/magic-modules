@@ -15,7 +15,7 @@ import (
 
 func dataSourceGoogleCloudIdentityGroupMemberships() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudIdentityGroupMembership().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceCloudIdentityGroupMembership().Schema)
 
 	return &schema.Resource{
 		Read: dataSourceGoogleCloudIdentityGroupMembershipsRead,
@@ -33,7 +33,7 @@ func dataSourceGoogleCloudIdentityGroupMemberships() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				Description:      `The name of the Group to get memberships from.`,
 			},
 		},
@@ -42,7 +42,7 @@ func dataSourceGoogleCloudIdentityGroupMemberships() *schema.Resource {
 
 func dataSourceGoogleCloudIdentityGroupMembershipsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func dataSourceGoogleCloudIdentityGroupMembershipsRead(d *schema.ResourceData, m
 		}
 
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
 
@@ -81,7 +81,7 @@ func dataSourceGoogleCloudIdentityGroupMembershipsRead(d *schema.ResourceData, m
 		return nil
 	})
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("CloudIdentityGroupMemberships %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("CloudIdentityGroupMemberships %q", d.Id()))
 	}
 
 	if err := d.Set("memberships", result); err != nil {

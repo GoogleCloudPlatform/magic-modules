@@ -9,10 +9,10 @@ import (
 
 func dataSourceGoogleComputeInstance() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeInstance().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeInstance().Schema)
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "name", "self_link", "project", "zone")
+	AddOptionalFieldsToSchema(dsSchema, "name", "self_link", "project", "zone")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeInstanceRead,
@@ -22,7 +22,7 @@ func dataSourceGoogleComputeInstance() *schema.Resource {
 
 func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", name))
+		return HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", name))
 	}
 
 	md := flattenMetadataBeta(instance.Metadata)
@@ -85,7 +85,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		if err := d.Set("tags_fingerprint", instance.Tags.Fingerprint); err != nil {
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
-		if err := d.Set("tags", convertStringArrToInterface(instance.Tags.Items)); err != nil {
+		if err := d.Set("tags", ConvertStringArrToInterface(instance.Tags.Items)); err != nil {
 			return fmt.Errorf("Error setting tags: %s", err)
 		}
 	}

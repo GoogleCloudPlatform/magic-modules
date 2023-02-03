@@ -63,7 +63,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "ignore_warnings"
     properties:
       instance: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: compareResourceNames
+        diff_suppress_func: CompareResourceNames
       multiClusterRoutingUseAny: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigtable_app_profile_routing.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.erb'

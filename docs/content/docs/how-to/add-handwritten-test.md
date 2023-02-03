@@ -63,9 +63,9 @@ func TestAccComputeFirewall_noSource(t *testing.T) {
     networkName := fmt.Sprintf("tf-test-firewall-%s", randString(t, 10))
     firewallName := fmt.Sprintf("tf-test-firewall-%s", randString(t, 10))
 
-    vcrTest(t, resource.TestCase{
-        PreCheck:     func() { testAccPreCheck(t) },
-        Providers:    testAccProviders,
+    VcrTest(t, resource.TestCase{
+        PreCheck:     func() { TestAccPreCheck(t) },
+        Providers:    TestAccProviders,
         CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
         Steps: []resource.TestStep{
             {
@@ -127,9 +127,9 @@ func TestAccComputeFirewall_disabled(t *testing.T) {
     networkName := fmt.Sprintf("tf-test-firewall-%s", randString(t, 10))
     firewallName := fmt.Sprintf("tf-test-firewall-%s", randString(t, 10))
 
-    vcrTest(t, resource.TestCase{
-        PreCheck:     func() { testAccPreCheck(t) },
-        Providers:    testAccProviders,
+    VcrTest(t, resource.TestCase{
+        PreCheck:     func() { TestAccPreCheck(t) },
+        Providers:    TestAccProviders,
         CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
         Steps: []resource.TestStep{
             {

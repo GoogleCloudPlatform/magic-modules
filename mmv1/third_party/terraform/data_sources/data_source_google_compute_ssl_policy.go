@@ -8,13 +8,13 @@ import (
 
 func dataSourceGoogleComputeSslPolicy() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeSslPolicy().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeSslPolicy().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   datasourceComputeSslPolicyRead,

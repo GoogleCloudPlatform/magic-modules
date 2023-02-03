@@ -8,10 +8,10 @@ import (
 
 func dataSourceGoogleProjectOrganizationPolicy() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceGoogleProjectOrganizationPolicy().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceGoogleProjectOrganizationPolicy().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "project")
-	addRequiredFieldsToSchema(dsSchema, "constraint")
+	AddRequiredFieldsToSchema(dsSchema, "project")
+	AddRequiredFieldsToSchema(dsSchema, "constraint")
 
 	return &schema.Resource{
 		Read:   datasourceGoogleProjectOrganizationPolicyRead,

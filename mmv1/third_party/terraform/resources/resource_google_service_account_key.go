@@ -95,7 +95,7 @@ func resourceGoogleServiceAccountKey() *schema.Resource {
 
 func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 
 func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 	// Confirm the service account key exists
 	sak, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Get(d.Id()).PublicKeyType(publicKeyType).Do()
 	if err != nil {
-		if err = handleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", d.Id())); err == nil {
+		if err = HandleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", d.Id())); err == nil {
 			return nil
 		} else {
 			// This resource also returns 403 when it's not found.
@@ -185,7 +185,7 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 
 func resourceGoogleServiceAccountKeyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -193,7 +193,7 @@ func resourceGoogleServiceAccountKeyDelete(d *schema.ResourceData, meta interfac
 	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Delete(d.Id()).Do()
 
 	if err != nil {
-		if err = handleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", d.Id())); err == nil {
+		if err = HandleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", d.Id())); err == nil {
 			return nil
 		} else {
 			// This resource also returns 403 when it's not found.

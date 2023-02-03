@@ -13,9 +13,9 @@ func TestAccTPUNode_tpuNodeBUpdateTensorFlowVersion(t *testing.T) {
 
 	nodeId := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckTPUNodeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

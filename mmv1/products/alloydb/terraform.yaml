@@ -23,7 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       initialUser.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       network: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: "projectNumberDiffSuppress"
+        diff_suppress_func: "ProjectNumberDiffSuppress"
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -65,7 +65,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     properties:
       clusterName: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: "projectNumberDiffSuppress"
+        diff_suppress_func: "ProjectNumberDiffSuppress"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "alloydb_backup_basic"

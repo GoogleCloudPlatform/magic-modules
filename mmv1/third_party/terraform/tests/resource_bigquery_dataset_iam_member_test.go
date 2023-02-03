@@ -15,12 +15,12 @@ func TestAccBigqueryDatasetIamMember_basic(t *testing.T) {
 
 	expected := map[string]interface{}{
 		"role":        "roles/viewer",
-		"userByEmail": fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saID, getTestProjectFromEnv()),
+		"userByEmail": fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saID, GetTestProjectFromEnv()),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDatasetIamMember_basic(datasetID, saID),

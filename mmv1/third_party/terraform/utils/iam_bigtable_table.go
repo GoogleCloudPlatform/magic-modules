@@ -59,7 +59,7 @@ func NewBigtableTableUpdater(d TerraformResourceData, config *Config) (ResourceI
 func BigtableTableIdParseFunc(d *schema.ResourceData, config *Config) error {
 	values := make(map[string]string)
 
-	m, err := getImportIdQualifiers([]string{"projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)/tables/(?P<table>[^/]+)"}, d, config, d.Id())
+	m, err := GetImportIdQualifiers([]string{"projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)/tables/(?P<table>[^/]+)"}, d, config, d.Id())
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func BigtableTableIdParseFunc(d *schema.ResourceData, config *Config) error {
 func (u *BigtableTableIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
 	req := &bigtableadmin.GetIamPolicyRequest{}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := GenerateUserAgentString(u.d, u.Config.userAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (u *BigtableTableIamUpdater) SetResourceIamPolicy(policy *cloudresourcemana
 
 	req := &bigtableadmin.SetIamPolicyRequest{Policy: bigtablePolicy}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := GenerateUserAgentString(u.d, u.Config.userAgent)
 	if err != nil {
 		return err
 	}

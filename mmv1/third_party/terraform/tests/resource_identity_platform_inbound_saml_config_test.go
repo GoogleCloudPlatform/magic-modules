@@ -13,9 +13,9 @@ func TestAccIdentityPlatformInboundSamlConfig_inboundSamlConfigUpdate(t *testing
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckIdentityPlatformInboundSamlConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

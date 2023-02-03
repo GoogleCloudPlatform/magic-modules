@@ -9,13 +9,13 @@ import (
 
 func dataSourceGoogleComputeNetworkEndpointGroup() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeNetworkEndpointGroup().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeNetworkEndpointGroup().Schema)
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "zone")
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "self_link")
+	AddOptionalFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "zone")
+	AddOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "self_link")
 
 	return &schema.Resource{
 		Read:   dataSourceComputeNetworkEndpointGroupRead,
@@ -30,7 +30,7 @@ func dataSourceComputeNetworkEndpointGroupRead(d *schema.ResourceData, meta inte
 		if err != nil {
 			return err
 		}
-		zone, err := getZone(d, config)
+		zone, err := GetZone(d, config)
 		if err != nil {
 			return err
 		}

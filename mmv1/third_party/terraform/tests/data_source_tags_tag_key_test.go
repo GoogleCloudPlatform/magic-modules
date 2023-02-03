@@ -9,14 +9,14 @@ import (
 )
 
 func TestAccDataSourceGoogleTagsTagKey_default(t *testing.T) {
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
 	shortName := "tf-test-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleTagsTagKeyConfig(parent, shortName),
@@ -29,14 +29,14 @@ func TestAccDataSourceGoogleTagsTagKey_default(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleTagsTagKey_dot(t *testing.T) {
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
 	shortName := "terraform.test." + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleTagsTagKeyConfig(parent, shortName),

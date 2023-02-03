@@ -12,9 +12,9 @@ func TestAccAppEngineDomainMapping_update(t *testing.T) {
 
 	domainName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAppEngineDomainMappingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -18,7 +18,7 @@ func dataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 			"target_service_account": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
+				ValidateFunc: ValidateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
 			},
 			"access_token": {
 				Type:      schema.TypeString,
@@ -41,13 +41,13 @@ func dataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: validateRegexp(ServiceAccountLinkRegex),
+					ValidateFunc: ValidateRegexp(ServiceAccountLinkRegex),
 				},
 			},
 			"lifetime": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validateDuration(), // duration <=3600s; TODO: support validateDuration(min,max)
+				ValidateFunc: ValidateDuration(), // duration <=3600s; TODO: support ValidateDuration(min,max)
 				Default:      "3600s",
 			},
 		},
@@ -56,7 +56,7 @@ func dataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 
 func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

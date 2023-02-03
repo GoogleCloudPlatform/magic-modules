@@ -396,7 +396,7 @@ func (p Property) DefaultDiffSuppress() *string {
 	case SchemaTypeString:
 		// Field is reference to another resource
 		if _, ok := p.typ.Extension["x-dcl-references"]; ok {
-			dsf := "compareSelfLinkOrResourceName"
+			dsf := "CompareSelfLinkOrResourceName"
 			return &dsf
 		}
 	}
@@ -629,7 +629,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				i := Type{typ: v.Items}
 				e := fmt.Sprintf("&schema.Schema{Type: schema.%s}", i.String())
 				if _, ok := v.Extension["x-dcl-references"]; ok {
-					e = fmt.Sprintf("&schema.Schema{Type: schema.%s, DiffSuppressFunc: compareSelfLinkOrResourceName, }", i.String())
+					e = fmt.Sprintf("&schema.Schema{Type: schema.%s, DiffSuppressFunc: CompareSelfLinkOrResourceName, }", i.String())
 				}
 				p.Elem = &e
 				p.ElemIsBasicType = true

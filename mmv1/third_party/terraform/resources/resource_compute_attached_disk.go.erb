@@ -38,14 +38,14 @@ func resourceComputeAttachedDisk() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				Description:      `name or self_link of the disk that will be attached.`,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"instance": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				Description:      `name or self_link of the compute instance that the disk will be attached to. If the self_link is provided then zone and project are extracted from the self link. If only the name is used then zone and project must be defined as properties on the resource or provider.`,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"project": {
 				Type:        schema.TypeString,
@@ -83,7 +83,7 @@ func resourceComputeAttachedDisk() *schema.Resource {
 
 func resourceAttachedDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func resourceAttachedDiskCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(zv.Project, zv.Zone, zv.Name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("AttachedDisk %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("AttachedDisk %q", d.Id()))
 	}
 
 	// Iterate through the instance's attached disks as this is the only way to
@@ -171,14 +171,14 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Force the referenced resources to a self-link in state because it's more specific then name.
-	instancePath, err := getRelativePath(instance.SelfLink)
+	instancePath, err := GetRelativePath(instance.SelfLink)
 	if err != nil {
 		return err
 	}
 	if err := d.Set("instance", instancePath); err != nil {
 		return fmt.Errorf("Error setting instance: %s", err)
 	}
-	diskPath, err := getRelativePath(ad.Source)
+	diskPath, err := GetRelativePath(ad.Source)
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceAttachedDiskDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -232,14 +232,14 @@ func resourceAttachedDiskDelete(d *schema.ResourceData, meta interface{}) error 
 func resourceAttachedDiskImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 
-	err := parseImportId(
+	err := ParseImportId(
 		[]string{"projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instances/(?P<instance>[^/]+)/(?P<disk>[^/]+)",
 			"(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<instance>[^/]+)/(?P<disk>[^/]+)"}, d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instances/{{instance}}/{{disk}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instances/{{instance}}/{{disk}}")
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +250,7 @@ func resourceAttachedDiskImport(d *schema.ResourceData, meta interface{}) ([]*sc
 
 func findDiskByName(disks []*compute.AttachedDisk, id string) *compute.AttachedDisk {
 	for _, disk := range disks {
-		if compareSelfLinkOrResourceName("", disk.Source, id, nil) {
+		if CompareSelfLinkOrResourceName("", disk.Source, id, nil) {
 			return disk
 		}
 	}

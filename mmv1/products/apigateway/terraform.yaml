@@ -88,7 +88,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       openapiDocuments.document.contents: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'ValidateBase64String'
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       gatewayConfig: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -101,10 +101,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       grpcServices.fileDescriptorSet.contents: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'ValidateBase64String'
       grpcServices.source.contents: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'ValidateBase64String'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_schema_entry: templates/terraform/extra_schema_entry/api_config.erb
       encoder: 'templates/terraform/encoders/api_config.go.erb'
@@ -133,7 +133,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           name: "api-gw"
     properties:
       apiConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: compareResourceNames
+        diff_suppress_func: CompareResourceNames
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride

@@ -10,16 +10,16 @@ import (
 func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 	t.Parallel()
 	region := "us-central1"
-	if getTestRegionFromEnv() == region {
+	if GetTestRegionFromEnv() == region {
 		// Make sure we choose a region that isn't the provider default
 		// in order to test getting the region from the gateway and not the
 		// provider.
 		region = "us-west1"
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -29,7 +29,7 @@ func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateIdPrefix:     fmt.Sprintf("%s/%s/", getTestProjectFromEnv(), region),
+				ImportStateIdPrefix:     fmt.Sprintf("%s/%s/", GetTestProjectFromEnv(), region),
 				ImportStateVerifyIgnore: []string{"shared_secret", "detailed_status"},
 			},
 		},
@@ -40,9 +40,9 @@ func TestAccComputeVpnTunnel_router(t *testing.T) {
 	t.Parallel()
 
 	router := fmt.Sprintf("tf-test-tunnel-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -61,9 +61,9 @@ func TestAccComputeVpnTunnel_router(t *testing.T) {
 func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

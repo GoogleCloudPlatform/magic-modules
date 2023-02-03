@@ -9,8 +9,8 @@ import (
 )
 
 func TestAccComputeSharedVpc_basic(t *testing.T) {
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
 
 	hostProject := fmt.Sprintf("tf-test-h-%d", randInt(t))
 	serviceProject := fmt.Sprintf("tf-test-s-%d", randInt(t))
@@ -18,9 +18,9 @@ func TestAccComputeSharedVpc_basic(t *testing.T) {
 	hostProjectResourceName := "google_compute_shared_vpc_host_project.host"
 	serviceProjectResourceName := "google_compute_shared_vpc_service_project.service"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSharedVpc_basic(hostProject, serviceProject, org, billingId),
@@ -54,7 +54,7 @@ func TestAccComputeSharedVpc_basic(t *testing.T) {
 
 func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		found, err := config.NewComputeClient(config.userAgent).Projects.Get(hostProject).Do()
 		if err != nil {
@@ -75,7 +75,7 @@ func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, e
 
 func testAccCheckComputeSharedVpcServiceProject(t *testing.T, hostProject, serviceProject string, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		serviceHostProject, err := config.NewComputeClient(config.userAgent).Projects.GetXpnHost(serviceProject).Do()
 		if err != nil {
 			if enabled {

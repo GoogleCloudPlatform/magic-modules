@@ -64,7 +64,7 @@ func resourceComputeProjectMetadataItem() *schema.Resource {
 
 func resourceComputeProjectMetadataItemCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func resourceComputeProjectMetadataItemCreate(d *schema.ResourceData, meta inter
 
 func resourceComputeProjectMetadataItemRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func resourceComputeProjectMetadataItemRead(d *schema.ResourceData, meta interfa
 
 func resourceComputeProjectMetadataItemUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func resourceComputeProjectMetadataItemUpdate(d *schema.ResourceData, meta inter
 
 func resourceComputeProjectMetadataItemDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

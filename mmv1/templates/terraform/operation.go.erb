@@ -37,7 +37,7 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   url := fmt.Sprintf("%s<%= [async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s')-%>", w.Config.<%= product_name -%>BasePath, w.CommonOperationWaiter.Op.Name)
   <% end -%>
 
-  return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  return SendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
 <%  if object.__product.operation_retry -%>

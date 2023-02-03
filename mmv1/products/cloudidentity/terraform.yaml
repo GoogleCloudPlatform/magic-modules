@@ -42,7 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/set_computed_name.erb
       custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
   GroupMembership: !ruby/object:Overrides::Terraform::ResourceOverride
-    read_error_transform: "transformCloudIdentityGroupMembershipReadError"
+    read_error_transform: "TransformCloudIdentityGroupMembershipReadError"
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,

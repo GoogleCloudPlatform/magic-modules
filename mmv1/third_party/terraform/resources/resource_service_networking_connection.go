@@ -35,7 +35,7 @@ func resourceServiceNetworkingConnection() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				Description:      `Name of VPC network connected with service producers using VPC peering.`,
 			},
 			// NOTE(craigatgoogle): This field is weird, it's required to make the Insert/List calls as a parameter
@@ -67,7 +67,7 @@ func resourceServiceNetworkingConnection() *schema.Resource {
 
 func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 
 	connection := &servicenetworking.Connection{
 		Network:               serviceNetworkingNetworkName,
-		ReservedPeeringRanges: convertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
+		ReservedPeeringRanges: ConvertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
 	}
 
 	networkFieldValue, err := ParseNetworkFieldValue(network, d, config)
@@ -106,7 +106,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 	// the connection name.
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		project = bp
 	}
 
@@ -134,7 +134,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 
 func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 	project := networkFieldValue.Project
 
 	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		project = bp
 	}
 
@@ -202,7 +202,7 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 
 func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -223,7 +223,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 
 		connection := &servicenetworking.Connection{
 			Network:               serviceNetworkingNetworkName,
-			ReservedPeeringRanges: convertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
+			ReservedPeeringRanges: ConvertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
 		}
 
 		networkFieldValue, err := ParseNetworkFieldValue(network, d, config)
@@ -236,7 +236,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 		// and it's easier than grabbing the connection name.
 
 		// err == nil indicates that the billing_project value was found
-		if bp, err := getBillingProject(d, config); err == nil {
+		if bp, err := GetBillingProject(d, config); err == nil {
 			project = bp
 		}
 
@@ -257,7 +257,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 
 func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -279,9 +279,9 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 	}
 
 	project := networkFieldValue.Project
-	res, err := sendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("ServiceNetworkingConnection %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("ServiceNetworkingConnection %q", d.Id()))
 	}
 
 	op := &compute.Operation{}
@@ -371,7 +371,7 @@ func retrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *Config
 	log.Printf("[DEBUG] Retrieving project number by doing a GET with the project id, as required by service networking")
 	// err == nil indicates that the billing_project value was found
 	billingProject := pid
-	if bp, err := getBillingProject(d, config); err == nil {
+	if bp, err := GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 

@@ -9,15 +9,15 @@ import (
 
 func TestAccDataSourceGoogleFolderOrganizationPolicy_basic(t *testing.T) {
 	folder := fmt.Sprintf("tf-test-%d", randInt(t))
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleFolderOrganizationPolicy_basic(org, folder),
-				Check: checkDataSourceStateMatchesResourceState(
+				Check: CheckDataSourceStateMatchesResourceState(
 					"data.google_folder_organization_policy.data",
 					"google_folder_organization_policy.resource",
 				),

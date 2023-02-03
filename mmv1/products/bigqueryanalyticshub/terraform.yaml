@@ -40,5 +40,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           description: "example data exchange"
     properties:
       bigqueryDataset.dataset: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: "projectNumberDiffSuppress"                
+        diff_suppress_func: "ProjectNumberDiffSuppress"                
 

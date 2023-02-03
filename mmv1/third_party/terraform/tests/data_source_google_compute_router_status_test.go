@@ -14,9 +14,9 @@ func TestAccDataSourceComputeRouterStatus(t *testing.T) {
 		"region": "us-central1",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},

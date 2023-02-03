@@ -40,7 +40,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateGCEName,
+				ValidateFunc: ValidateGCEName,
 				Description:  `The name of the security policy.`,
 			},
 
@@ -564,7 +564,7 @@ func rulesCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interfac
 
 func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -610,7 +610,7 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 		return errwrap.Wrapf("Error creating SecurityPolicy: {{err}}", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -626,7 +626,7 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 
 func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -642,7 +642,7 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 
 	securityPolicy, err := client.SecurityPolicies.Get(project, sp).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("SecurityPolicy %q", d.Id()))
+		return HandleNotFoundError(err, d, fmt.Sprintf("SecurityPolicy %q", d.Id()))
 	}
 
 	if err := d.Set("name", securityPolicy.Name); err != nil {
@@ -683,7 +683,7 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 
 func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -826,7 +826,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 
 func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -899,7 +899,7 @@ func expandSecurityPolicyMatchConfig(configured []interface{}) *compute.Security
 
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyRuleMatcherConfig{
-		SrcIpRanges: convertStringArr(data["src_ip_ranges"].(*schema.Set).List()),
+		SrcIpRanges: ConvertStringArr(data["src_ip_ranges"].(*schema.Set).List()),
 	}
 }
 
@@ -946,7 +946,7 @@ func expandSecurityPolicyRulePreconfiguredWafConfigExclusion(raw interface{}) *c
 		RequestUrisToExclude:        expandSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParams(data["request_uri"].([]interface{})),
 		RequestQueryParamsToExclude: expandSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParams(data["request_query_param"].([]interface{})),
 		TargetRuleSet:               data["target_rule_set"].(string),
-		TargetRuleIds:               convertStringArr(data["target_rule_ids"].(*schema.Set).List()),
+		TargetRuleIds:               ConvertStringArr(data["target_rule_ids"].(*schema.Set).List()),
 	}
 }
 
@@ -1008,7 +1008,7 @@ func flattenMatchConfig(conf *compute.SecurityPolicyRuleMatcherConfig) []map[str
 	}
 
 	data := map[string]interface{}{
-		"src_ip_ranges": schema.NewSet(schema.HashString, convertStringArrToInterface(conf.SrcIpRanges)),
+		"src_ip_ranges": schema.NewSet(schema.HashString, ConvertStringArrToInterface(conf.SrcIpRanges)),
 	}
 
 	return []map[string]interface{}{data}
@@ -1052,7 +1052,7 @@ func flattenPreconfiguredWafConfigExclusions(exclusions []*compute.SecurityPolic
 			"request_uri":         flattenPreconfiguredWafConfigExclusionField(exclusion.RequestUrisToExclude),
 			"request_query_param": flattenPreconfiguredWafConfigExclusionField(exclusion.RequestQueryParamsToExclude),
 			"target_rule_set":     exclusion.TargetRuleSet,
-			"target_rule_ids":     schema.NewSet(schema.HashString, convertStringArrToInterface(exclusion.TargetRuleIds)),
+			"target_rule_ids":     schema.NewSet(schema.HashString, ConvertStringArrToInterface(exclusion.TargetRuleIds)),
 		}
 
 		exclusionsSchema = append(exclusionsSchema, data)
@@ -1108,7 +1108,7 @@ func expandSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(configured []inte
 
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyAdvancedOptionsConfigJsonCustomConfig{
-		ContentTypes: convertStringArr(data["content_types"].(*schema.Set).List()),
+		ContentTypes: ConvertStringArr(data["content_types"].(*schema.Set).List()),
 	}
 }
 
@@ -1118,7 +1118,7 @@ func flattenSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(conf *compute.Se
 	}
 
 	data := map[string]interface{}{
-		"content_types": schema.NewSet(schema.HashString, convertStringArrToInterface(conf.ContentTypes)),
+		"content_types": schema.NewSet(schema.HashString, ConvertStringArrToInterface(conf.ContentTypes)),
 	}
 
 	return []map[string]interface{}{data}
@@ -1395,12 +1395,12 @@ func flattenSecurityPolicyRequestHeader(conf *compute.SecurityPolicyRuleHttpHead
 
 func resourceSecurityPolicyStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/global/securityPolicies/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+	if err := ParseImportId([]string{"projects/(?P<project>[^/]+)/global/securityPolicies/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/global/securityPolicies/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

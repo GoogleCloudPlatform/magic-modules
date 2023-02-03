@@ -35,7 +35,7 @@ func dataSourceGoogleContainerAwsVersions() *schema.Resource {
 
 func dataSourceGoogleContainerAwsVersionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func dataSourceGoogleContainerAwsVersionsRead(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -53,11 +53,11 @@ func dataSourceGoogleContainerAwsVersionsRead(d *schema.ResourceData, meta inter
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
-	url, err := replaceVars(d, config, "{{ContainerAwsBasePath}}projects/{{project}}/locations/{{location}}/awsServerConfig")
+	url, err := ReplaceVars(d, config, "{{ContainerAwsBasePath}}projects/{{project}}/locations/{{location}}/awsServerConfig")
 	if err != nil {
 		return err
 	}
-	res, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return err
 	}

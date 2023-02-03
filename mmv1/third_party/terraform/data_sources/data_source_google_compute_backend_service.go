@@ -7,13 +7,13 @@ import (
 )
 
 func dataSourceGoogleComputeBackendService() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeBackendService().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeBackendService().Schema)
 
 	// Set 'Required' schema elements
-	addRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "name")
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "project")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceComputeBackendServiceRead,

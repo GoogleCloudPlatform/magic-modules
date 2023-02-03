@@ -24,7 +24,7 @@ func (w *DatastreamOperationWaiter) QueryOp() (interface{}, error) {
 	// Returns the proper get.
 	url := fmt.Sprintf("%s%s", w.Config.DatastreamBasePath, w.Op.Name)
 
-	return sendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
+	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
 func (w *DatastreamOperationWaiter) Error() error {

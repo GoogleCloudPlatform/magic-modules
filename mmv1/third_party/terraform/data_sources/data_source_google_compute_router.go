@@ -5,11 +5,11 @@ import (
 )
 
 func dataSourceGoogleComputeRouter() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeRouter().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addRequiredFieldsToSchema(dsSchema, "network")
-	addOptionalFieldsToSchema(dsSchema, "region")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceComputeRouter().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "network")
+	AddOptionalFieldsToSchema(dsSchema, "region")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceComputeRouterRead,

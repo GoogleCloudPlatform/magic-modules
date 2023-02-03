@@ -1,9 +1,9 @@
 // ----------------------------------------------------------------------------
 //
-//     This file is copied here by Magic Modules. The code for building up a
-//     sql database instance object is copied from the manually implemented
-//     provider file:
-//     third_party/terraform/resources/resource_sql_database_instance.go.erb.go
+//	This file is copied here by Magic Modules. The code for building up a
+//	sql database instance object is copied from the manually implemented
+//	provider file:
+//	third_party/terraform/resources/resource_sql_database_instance.go.erb.go
 //
 // ----------------------------------------------------------------------------
 package google
@@ -53,7 +53,7 @@ func GetSQLDatabaseInstanceApiObject(d TerraformResourceData, config *Config) (m
 		return nil, err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 		DataDiskSizeGb:      int64(_settings["disk_size"].(int)),
 		DataDiskType:        _settings["disk_type"].(string),
 		PricingPlan:         _settings["pricing_plan"].(string),
-		UserLabels:          convertStringMap(_settings["user_labels"].(map[string]interface{})),
+		UserLabels:          ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration: expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:       expandDatabaseFlags(_settings["database_flags"].([]interface{})),
 		IpConfiguration:     expandIpConfiguration(_settings["ip_configuration"].([]interface{})),

@@ -16,7 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Environment: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       location: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     examples:
@@ -82,14 +82,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       dataDiskType: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       diskEncryption: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'emptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
+        diff_suppress_func: 'EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
       instanceOwners: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: NotebooksInstanceLabelDiffSuppress
       machineType: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride
         # This is not a traditional ignore_read. Metadata is returned from the API,
@@ -99,12 +99,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       network: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: compareSelfLinkOrResourceName
+        diff_suppress_func: CompareSelfLinkOrResourceName
         default_from_api: true
       serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       subnet: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: compareSelfLinkOrResourceName
+        diff_suppress_func: CompareSelfLinkOrResourceName
         default_from_api: true
       updateTime: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

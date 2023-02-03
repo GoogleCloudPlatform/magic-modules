@@ -14,9 +14,9 @@ func TestAccLoggingMetric_update(t *testing.T) {
 	filter := "resource.type=gae_app AND severity>=ERROR"
 	updatedFilter := "resource.type=gae_app AND severity=ERROR"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -45,9 +45,9 @@ func TestAccLoggingMetric_explicitBucket(t *testing.T) {
 	suffix := randString(t, 10)
 	filter := "resource.type=gae_app AND severity>=ERROR"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -66,12 +66,12 @@ func TestAccLoggingMetric_loggingBucket(t *testing.T) {
 	t.Parallel()
 
 	filter := "resource.type=gae_app AND severity>=ERROR"
-	project_id := getTestProjectFromEnv()
+	project_id := GetTestProjectFromEnv()
 	suffix := randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -107,9 +107,9 @@ func TestAccLoggingMetric_descriptionUpdated(t *testing.T) {
 
 	suffix := randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

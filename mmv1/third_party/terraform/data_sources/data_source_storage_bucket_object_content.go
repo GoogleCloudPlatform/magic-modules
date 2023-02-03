@@ -11,11 +11,11 @@ import (
 
 func dataSourceGoogleStorageBucketObjectContent() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceStorageBucketObject().Schema)
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceStorageBucketObject().Schema)
 
-	addRequiredFieldsToSchema(dsSchema, "bucket")
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addOptionalFieldsToSchema(dsSchema, "content")
+	AddRequiredFieldsToSchema(dsSchema, "bucket")
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddOptionalFieldsToSchema(dsSchema, "content")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleStorageBucketObjectContentRead,
@@ -25,7 +25,7 @@ func dataSourceGoogleStorageBucketObjectContent() *schema.Resource {
 
 func dataSourceGoogleStorageBucketObjectContentRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := GenerateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}

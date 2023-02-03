@@ -5,10 +5,10 @@ import (
 )
 
 func dataSourceGoogleKmsKeyRing() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceKMSKeyRing().Schema)
-	addRequiredFieldsToSchema(dsSchema, "name")
-	addRequiredFieldsToSchema(dsSchema, "location")
-	addOptionalFieldsToSchema(dsSchema, "project")
+	dsSchema := DatasourceSchemaFromResourceSchema(resourceKMSKeyRing().Schema)
+	AddRequiredFieldsToSchema(dsSchema, "name")
+	AddRequiredFieldsToSchema(dsSchema, "location")
+	AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleKmsKeyRingRead,

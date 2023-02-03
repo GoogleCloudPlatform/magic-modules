@@ -23,9 +23,9 @@ func TestAccActiveDirectoryDomain_update(t *testing.T) {
 
 	resourceName := Nprintf("google_active_directory_domain.%{resource_name}", context)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckActiveDirectoryDomainDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -94,9 +94,9 @@ func testAccCheckActiveDirectoryDomainDestroyProducer(t *testing.T) func(s *terr
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}{{name}}")
+			url, err := ReplaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}{{name}}")
 			if err != nil {
 				return err
 			}
@@ -107,7 +107,7 @@ func testAccCheckActiveDirectoryDomainDestroyProducer(t *testing.T) func(s *terr
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.userAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ActiveDirectoryDomain still exists at %s", url)
 			}

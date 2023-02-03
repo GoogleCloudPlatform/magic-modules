@@ -16,7 +16,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 	// we flattened the original["enum_value"]["display_name"] object to be just original["enum_value"] so here,
 	// v is the value we want from the config
 	transformed := make(map[string]interface{})
-	if val := reflect.ValueOf(v); val.IsValid() && !isEmptyValue(val) {
+	if val := reflect.ValueOf(v); val.IsValid() && !IsEmptyValue(val) {
 		transformed["displayName"] = v
 	}
 

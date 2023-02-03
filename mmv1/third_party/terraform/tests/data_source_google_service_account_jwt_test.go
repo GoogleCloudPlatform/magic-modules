@@ -97,7 +97,7 @@ func TestAccDataSourceGoogleServiceAccountJwt(t *testing.T) {
 
 	resourceName := "data.google_service_account_jwt.default"
 	serviceAccount := getTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := BootstrapServiceAccount(t, getTestProjectFromEnv(), serviceAccount)
+	targetServiceAccountEmail := BootstrapServiceAccount(t, GetTestProjectFromEnv(), serviceAccount)
 
 	staticTime := time.Now()
 
@@ -107,8 +107,8 @@ func TestAccDataSourceGoogleServiceAccountJwt(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleServiceAccountJwt(targetServiceAccountEmail),

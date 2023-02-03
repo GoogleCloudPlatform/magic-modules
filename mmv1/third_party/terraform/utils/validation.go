@@ -82,15 +82,15 @@ var rfc1918Networks = []string{
 	"192.168.0.0/16",
 }
 
-// validateGCEName ensures that a field matches the requirements for Compute Engine resource names
+// ValidateGCEName ensures that a field matches the requirements for Compute Engine resource names
 // https://cloud.google.com/compute/docs/naming-resources#resource-name-format
-func validateGCEName(v interface{}, k string) (ws []string, errors []error) {
+func ValidateGCEName(v interface{}, k string) (ws []string, errors []error) {
 	re := `^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$`
-	return validateRegexp(re)(v, k)
+	return ValidateRegexp(re)(v, k)
 }
 
 // Ensure that the BGP ASN value of Cloud Router is a valid value as per RFC6996 or a value of 16550
-func validateRFC6996Asn(v interface{}, k string) (ws []string, errors []error) {
+func ValidateRFC6996Asn(v interface{}, k string) (ws []string, errors []error) {
 	value := int64(v.(int))
 	if !(value >= Rfc6996Asn16BitMin && value <= Rfc6996Asn16BitMax) &&
 		!(value >= Rfc6996Asn32BitMin && value <= Rfc6996Asn32BitMax) &&
@@ -102,7 +102,7 @@ or be the value of [%d], got %d`, k, GcpRouterPartnerAsn, value))
 	return
 }
 
-func validateRegexp(re string) schema.SchemaValidateFunc {
+func ValidateRegexp(re string) schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		value := v.(string)
 		if !regexp.MustCompile(re).MatchString(value) {
@@ -114,11 +114,11 @@ func validateRegexp(re string) schema.SchemaValidateFunc {
 	}
 }
 
-func validateEnum(values []string) schema.SchemaValidateFunc {
+func ValidateEnum(values []string) schema.SchemaValidateFunc {
 	return validation.StringInSlice(values, false)
 }
 
-func validateRFC1918Network(min, max int) schema.SchemaValidateFunc {
+func ValidateRFC1918Network(min, max int) schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 
 		s, es = validation.IsCIDRNetwork(min, max)(i, k)
@@ -140,7 +140,7 @@ func validateRFC1918Network(min, max int) schema.SchemaValidateFunc {
 	}
 }
 
-func validateRFC3339Time(v interface{}, k string) (warnings []string, errors []error) {
+func ValidateRFC3339Time(v interface{}, k string) (warnings []string, errors []error) {
 	time := v.(string)
 	if len(time) != 5 || time[2] != ':' {
 		errors = append(errors, fmt.Errorf("%q (%q) must be in the format HH:mm (RFC3339)", k, time))
@@ -157,7 +157,7 @@ func validateRFC3339Time(v interface{}, k string) (warnings []string, errors []e
 	return
 }
 
-func validateRFC1035Name(min, max int) schema.SchemaValidateFunc {
+func ValidateRFC1035Name(min, max int) schema.SchemaValidateFunc {
 	if min < 2 || max < min {
 		return func(i interface{}, k string) (s []string, errors []error) {
 			if min < 2 {
@@ -170,10 +170,10 @@ func validateRFC1035Name(min, max int) schema.SchemaValidateFunc {
 		}
 	}
 
-	return validateRegexp(fmt.Sprintf("^"+RFC1035NameTemplate+"$", min-2, max-2))
+	return ValidateRegexp(fmt.Sprintf("^"+RFC1035NameTemplate+"$", min-2, max-2))
 }
 
-func validateIpCidrRange(v interface{}, k string) (warnings []string, errors []error) {
+func ValidateIpCidrRange(v interface{}, k string) (warnings []string, errors []error) {
 	_, _, err := net.ParseCIDR(v.(string))
 	if err != nil {
 		errors = append(errors, fmt.Errorf("%q is not a valid IP CIDR range: %s", k, err))
@@ -181,7 +181,7 @@ func validateIpCidrRange(v interface{}, k string) (warnings []string, errors []e
 	return
 }
 
-func validateIAMCustomRoleID(v interface{}, k string) (warnings []string, errors []error) {
+func ValidateIAMCustomRoleID(v interface{}, k string) (warnings []string, errors []error) {
 	value := v.(string)
 	if !regexp.MustCompile(IAMCustomRoleIDRegex).MatchString(value) {
 		errors = append(errors, fmt.Errorf(
@@ -190,7 +190,7 @@ func validateIAMCustomRoleID(v interface{}, k string) (warnings []string, errors
 	return
 }
 
-func orEmpty(f schema.SchemaValidateFunc) schema.SchemaValidateFunc {
+func OrEmpty(f schema.SchemaValidateFunc) schema.SchemaValidateFunc {
 	return func(i interface{}, k string) ([]string, []error) {
 		v, ok := i.(string)
 		if ok && v == "" {
@@ -200,7 +200,7 @@ func orEmpty(f schema.SchemaValidateFunc) schema.SchemaValidateFunc {
 	}
 }
 
-func validateProjectID() schema.SchemaValidateFunc {
+func ValidateProjectID() schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		value := v.(string)
 
@@ -212,7 +212,7 @@ func validateProjectID() schema.SchemaValidateFunc {
 	}
 }
 
-func validateDSProjectID() schema.SchemaValidateFunc {
+func ValidateDSProjectID() schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		value := v.(string)
 		ids := strings.Split(value, "/")
@@ -226,7 +226,7 @@ func validateDSProjectID() schema.SchemaValidateFunc {
 	}
 }
 
-func validateProjectName() schema.SchemaValidateFunc {
+func ValidateProjectName() schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		value := v.(string)
 
@@ -238,7 +238,7 @@ func validateProjectName() schema.SchemaValidateFunc {
 	}
 }
 
-func validateDuration() schema.SchemaValidateFunc {
+func ValidateDuration() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)
 		if !ok {
@@ -255,7 +255,7 @@ func validateDuration() schema.SchemaValidateFunc {
 	}
 }
 
-func validateNonNegativeDuration() schema.SchemaValidateFunc {
+func ValidateNonNegativeDuration() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)
 		if !ok {
@@ -278,7 +278,7 @@ func validateNonNegativeDuration() schema.SchemaValidateFunc {
 	}
 }
 
-func validateIpAddress(i interface{}, val string) ([]string, []error) {
+func ValidateIpAddress(i interface{}, val string) ([]string, []error) {
 	ip := net.ParseIP(i.(string))
 	if ip == nil {
 		return nil, []error{fmt.Errorf("could not parse %q to IP address", val)}
@@ -286,7 +286,7 @@ func validateIpAddress(i interface{}, val string) ([]string, []error) {
 	return nil, nil
 }
 
-func validateBase64String(i interface{}, val string) ([]string, []error) {
+func ValidateBase64String(i interface{}, val string) ([]string, []error) {
 	_, err := base64.StdEncoding.DecodeString(i.(string))
 	if err != nil {
 		return nil, []error{fmt.Errorf("could not decode %q as a valid base64 value. Please use the terraform base64 functions such as base64encode() or filebase64() to supply a valid base64 string", val)}
@@ -317,7 +317,7 @@ func StringNotInSlice(invalid []string, ignoreCase bool) schema.SchemaValidateFu
 }
 
 // Ensure that hourly timestamp strings "HH:MM" have the minutes zeroed out for hourly only inputs
-func validateHourlyOnly(val interface{}, key string) (warns []string, errs []error) {
+func ValidateHourlyOnly(val interface{}, key string) (warns []string, errs []error) {
 	v := val.(string)
 	parts := strings.Split(v, ":")
 	if len(parts) != 2 {
@@ -336,7 +336,7 @@ func validateHourlyOnly(val interface{}, key string) (warns []string, errs []err
 	return
 }
 
-func validateRFC3339Date(v interface{}, k string) (warnings []string, errors []error) {
+func ValidateRFC3339Date(v interface{}, k string) (warnings []string, errors []error) {
 	_, err := time.Parse(time.RFC3339, v.(string))
 	if err != nil {
 		errors = append(errors, err)
@@ -344,7 +344,7 @@ func validateRFC3339Date(v interface{}, k string) (warnings []string, errors []e
 	return
 }
 
-func validateADDomainName() schema.SchemaValidateFunc {
+func ValidateADDomainName() schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		value := v.(string)
 
