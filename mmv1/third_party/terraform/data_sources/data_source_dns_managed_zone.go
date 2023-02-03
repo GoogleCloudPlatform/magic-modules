@@ -47,27 +47,27 @@ func (d *GoogleDnsManagedZoneDataSource) Schema(ctx context.Context, req datasou
 
 		Attributes: map[string]schema.Attribute{
 			"dns_name": schema.StringAttribute{
-				Description: "The fully qualified DNS name of this zone.",
+				Description:         "The fully qualified DNS name of this zone.",
 				MarkdownDescription: "The fully qualified DNS name of this zone.",
-				Computed: true,
+				Computed:            true,
 			},
 
 			"name": schema.StringAttribute{
-				Description: "A unique name for the resource.",
+				Description:         "A unique name for the resource.",
 				MarkdownDescription: "A unique name for the resource.",
-				Required: true,
+				Required:            true,
 			},
 
 			"description": schema.StringAttribute{
-				Description: "A textual description field.",
+				Description:         "A textual description field.",
 				MarkdownDescription: "A textual description field.",
-				Computed: true,
+				Computed:            true,
 			},
 
 			"managed_zone_id": schema.Int64Attribute{
-				Description: "Unique identifier for the resource; defined by the server.",
+				Description:         "Unique identifier for the resource; defined by the server.",
 				MarkdownDescription: "Unique identifier for the resource; defined by the server.",
-				Computed:    true,
+				Computed:            true,
 			},
 
 			"name_servers": schema.ListAttribute{
@@ -83,20 +83,20 @@ func (d *GoogleDnsManagedZoneDataSource) Schema(ctx context.Context, req datasou
 
 			"visibility": schema.StringAttribute{
 				Description: "The zone's visibility: public zones are exposed to the Internet, " +
-					"while private zones are visible only to Virtual Private Cloud resources."
+					"while private zones are visible only to Virtual Private Cloud resources.",
 				MarkdownDescription: "The zone's visibility: public zones are exposed to the Internet, " +
-					"while private zones are visible only to Virtual Private Cloud resources."
+					"while private zones are visible only to Virtual Private Cloud resources.",
 				Computed: true,
 			},
 
 			// Google Cloud DNS ManagedZone resources do not have a SelfLink attribute.
 			"project": schema.StringAttribute{
-				Description: "The ID of the project for the Google Cloud.",
+				Description:         "The ID of the project for the Google Cloud.",
 				MarkdownDescription: "The ID of the project for the Google Cloud.",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{
-				Description: "DNS managed zone identifier",
+				Description:         "DNS managed zone identifier",
 				MarkdownDescription: "DNS managed zone identifier",
 				Computed:            true,
 			},
