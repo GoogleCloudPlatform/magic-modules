@@ -297,25 +297,18 @@ module Provider
 
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
-    def properties_by_custom_update(properties, behavior = :new)
+    def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
 
-      # TODO(rambleraptor): Add support to Ansible for one-at-a-time updates.
-      if behavior == :old
-        update_props.group_by do |p|
-          { update_url: p.update_url, update_verb: p.update_verb, fingerprint: p.fingerprint_name }
-        end
-      else
-        update_props.group_by do |p|
-          {
-            update_url: p.update_url,
-            update_verb: p.update_verb,
-            update_id: p.update_id,
-            fingerprint_name: p.fingerprint_name
-          }
-        end
+      update_props.group_by do |p|
+        {
+          update_url: p.update_url,
+          update_verb: p.update_verb,
+          update_id: p.update_id,
+          fingerprint_name: p.fingerprint_name
+        }
       end
     end
 
