@@ -21,7 +21,6 @@ func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion st
 		add = strings.TrimSpace(add)
 		if len(add) > 0 {
 			ua += " " + add
-
 			tflog.Debug(ctx, fmt.Sprintf("Using modified User-Agent: %s", ua))
 		}
 	}
