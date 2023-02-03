@@ -1,6 +1,8 @@
 <% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -147,3 +149,5 @@ resource "google_compute_network_edge_security_services" "services" {
 }
 `, spName, polLink)
 }
+
+<% end -%>
