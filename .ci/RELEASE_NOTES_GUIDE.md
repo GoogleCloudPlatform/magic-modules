@@ -1,4 +1,5 @@
-# Release Notes for Terraform/Magic Modules Auto-CHANGELOG
+
+ # Release Notes for Terraform/Magic Modules Auto-CHANGELOG
 
 ## Background
 
@@ -6,11 +7,10 @@ The Magician bot has the ability to copy specifically formatted release notes
 from upstream Magic-Modules PRs to downstream PRs that have CHANGELOGS, namely
 PRs generated in the Terraform providers (GA, beta).
 
-Code lives in magic-modules/downstream_changelog_metadata.py
-
 This guide discusses the style and format of release notes to add
 in PR descriptions so they will be copied downstream and used
-in CHANGELOGs.
+in CHANGELOGs ([GA provider changelog](https://github.com/hashicorp/terraform-provider-google/blob/main/CHANGELOG.md), 
+[beta provider changelog](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/CHANGELOG.md)).
 
 ## Expected Format
 
@@ -18,142 +18,145 @@ The description should have Markdown-formatted code blocks with language
 headings (i.e. text right after the three ticks) like this:
 
 ~~~
-PR Description
+<PR Description
 
-...
+...>
 
-```release-note:enhancement
-compute: Fixed permadiff for `bar` in `google_compute_foo`
+```release-note:enhancement  <-- change type
+compute: added `foo_bar` field to `google_compute_foo` resource <-- change description
 ```
 ~~~
 
-You can have multiple code blocks to have multiple release notes per PR, i.e.
+All pull requests need to include release-note block and **change type** (`release-note:REPLACEME` in the PR template) should be replaced with one of the following [headings](#headings), while **change description** can be omitted from some PRs with non-user-facing changes
 
-~~~
+### Headings
 
-PR Description
+Release notes should be formatted with one of the following headings (See [examples](#examples) below for good release notes for each change type):
+| Headings                       | Usage                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------------------- |
+| `release-note:enhancement`     | adding fields or new features to existing resources                                 |
+| `release-note:bug`             | fixing existing resources                                                           |
+| `release-note:note`            | things that don’t have changes in provider but may be important to users            |
+| `release-note:new-resource`    | adding new resources                                                                |
+| `release-note:new-datasource`  | adding new datasources                                                              |
+| `release-note:deprecation`     | announcing deprecations when fields/resources are marked as deprecated, not removed |
+| `release-note:breaking-change` | changes to existing resources that may require users to change their config         | 
+| `release-note:none`            | changes that don't have any impact on users                                         | 
 
-...
-
-```release-note:deprecation
-container: Deprecated `region` for `google_container_cluster` - use location instead.
-```
-
-```release-note:enhancement
-container: Added general field `location` to `google_container_cluster`
-```
-~~~
-
-
-Do not indent the block and make sure to leave newlines, so you don't confuse
-the Markdown parser. 
-
-To qualify that a change is specific to the beta provider add `(beta)`
-at the end of the release note.\
-This will omit the note from changelogs for the ga release.
-
-~~~
-
-```release-note:enhancement
-compute: added field `multiwriter` to resource `disk` (beta)
-```
-~~~
-
-
-## Headings
-
-Release notes should be formatted with one of the following headings:
-- `release-note:enhancement`
-- `release-note:bug`
-- `release-note:note`
-- `release-note:new-resource`
-- `release-note:new-datasource`
-- `release-note:deprecation`
-- `release-note:breaking-change`
-- `release-note:none`
-
-However, any note with a language heading starting with ```release-note:... will get copied.
-
-## Non-User-Facing PRs
-
-Any PR that should not have any impact on users (test fixes, code generation, website updates,
-CI changes, etc.) should use a `release-note:none` block. It can be left empty, or can be
-optionally filled with an explanation of why the PR is not user-facing.
-
-By including this block explicitly, it lets whoever is generating the changelog know that
-a release note was explicitly omitted, not just forgotten. It'll also let your PR pass any
-future automation around release note correctness checking.
-
-## Release Note Style Guide (Terraform-specific)
+### Release Note Style Guide (Terraform-specific)
 
 Notes SHOULD:
 - Start with a verb
 - Use past tense (added/fixed/resolved) as much as possible
 - Only use present tense to suggest future behavior, i.e. for breaking
   changes, deprecations, or new behavior.
+- Not be capitalized            
 - Impersonal third person (no “I”, “you”, etc.)
-- Start with {{service}} if changing an existing resource (see below)
+- Start with {{service}} if changing an existing resource
 
-Notes, breaking changes, and features are exceptions. These are more free-form and left to
-the discretion of the PR author and reviewer. The overarching goal should be a good user
-experience when reading the changelog.
-
-See examples below for good release notes.
+Notes, breaking changes are exceptions. These are more free-form and left to the discretion of the PR author and reviewer. The overarching goal should be a good user experience when reading the changelog.
 
 ### Examples:
-
-**Enhancements:** adding fields or new features to existing resources
-
+* `release-note:enhancement`
 ~~~
 ```release-note:enhancement
-compute: added `foo_bar` field to `google_compute_foo` resource
+compute: added `foo_bar` field to `google_compute_foo`
 ```
 ~~~
-**Bugs:** fixing existing resources
 
+* `release-note:bug`
 ~~~
 ```release-note:bug
-container: fixed perma-diff in `google_container_cluster`
+compute: fixed perma-diff on `region` field in `google_compute_foo` resource
 ```
 ~~~
 
-**Breaking Changes:** changes to existing resources that may require users to change their config
-
+* `release-note:note`
 ~~~
-```release-note:breaking-change
-project: made `iam_policy` authoritative
+```release-note:note
+updated Bigtable go client version from 1.13 to 1.16
 ```
 ~~~
 
-**Deprecations:** Announce deprecations when fields/resources are marked as deprecated, not removed
-
-~~~
-``` release-note:deprecation
-container: deprecated `region` and `zone` on `google_container_unicorn`. Use `location` instead.
-```
-~~~
-
-**New Resources And Datasources:**
-(note no service name or *New Resource* tag)
-
+* `release-note:new-resource`
 ~~~
 ```release-note:new-resource
 `google_compute_new_resource`
 ```
 ~~~
 
+* `release-note:new-datasource`
 ~~~
-```release-note:new-datasource
+```release-note:new-resource
 `google_compute_new_datasource`
 ```
 ~~~
 
-**Notes:** General tag for things that don’t have changes in provider but may be important to users. Syntax is slightly more flexible here. 
-
-```release-note:note
-Starting on Nov 1, 2019, Cloud Functions API will be private by default. Add appropriate bindings through `google_cloud_function_iam_*` resources to manage privileges for `google_cloud_function` resources created by Terraform.
+* `release-note:deprecation`
+~~~
+```release-note:deprecation
+compute: deprecated `region` field for `google_compute_foo` - use location instead.
 ```
-### Counter-examples:
+~~~
+
+* `release-note:breaking-change`
+~~~
+```release-note:breaking-change
+`google_compute_new_datasource`
+```
+~~~
+
+* `release-note:none`  
+~~~
+```release-note:none
+(change description can be left empty, or can be optionally filled with an explanation of why the PR is not user-facing)
+```
+~~~
+
+### Beta-only changes
+
+To qualify that a change is specific to the beta provider add `(beta)`
+at the end of the release note.
+This will notify whoever is generating the release notes omit the note from changelogs for the ga release.
+
+~~~
+```release-note:enhancement
+container: compute: added `foo_bar` field to `google_compute_foo` (beta)
+```
+~~~
+
+### Revert changes
+
+Copy the original PR release note block and add `(revert)` at the end.
+This will let whoever is generating the release notes omit the original PR note from chagnelogs
+
+~~~
+```release-note:enhancement
+container: compute: added `foo_bar` field to `google_compute_foo` (revert)
+```
+~~~
+
+### Multiple code blocks per PR
+
+You can have multiple code blocks to have multiple release notes per PR, i.e.
+~~~
+<PR Description
+
+...>
+
+```release-note:enhancement
+compute: added `foo_bar` field to `google_compute_foo`
+```
+
+```release-note:deprecation
+compute: deprecated `region` field for `google_compute_foo` - use location instead.
+```
+~~~
+
+Do not indent the block and make sure to leave newlines, so you don't confuse
+the Markdown parser.
+
+### Counter-examples (Common Mistakes):
 
 The following changelog entries are not ideal.
 
@@ -279,3 +282,4 @@ Better:
 compute: Fixed permadiff on description for `google_compute_instance`
 ```
 ~~~
+
