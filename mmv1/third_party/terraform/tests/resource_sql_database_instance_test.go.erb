@@ -1541,16 +1541,49 @@ func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_5_7", "ALWAYS"),
+				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_5_7", "ALWAYS", true),
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_5_7", "NEVER"),
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_0_18", "ALWAYS"),
+				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_5_7", "NEVER", true),
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_0_26", "NEVER"),
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_0_18", "ALWAYS", true),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_0_26", "NEVER", true),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_0_26", "ALWAYS", false),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
 			},
 		},
 	})
@@ -3460,17 +3493,17 @@ resource "google_sql_database_instance" "main" {
 }`, instance, databaseVersion, rootPassword)
 }
 
-func testGoogleSqlDatabaseInstance_activationPolicy(instance, databaseVersion, activationPolicy string) string {
+func testGoogleSqlDatabaseInstance_activationPolicy(instance, databaseVersion, activationPolicy string, deletionProtection bool) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
   region              = "us-central1"
   database_version    = "%s"
-  deletion_protection = false
+  deletion_protection = %t
   settings {
     tier              = "db-f1-micro"
     activation_policy = "%s"
   }
 }
-`, instance, databaseVersion, activationPolicy)
+`, instance, databaseVersion, deletionProtection, activationPolicy)
 }
