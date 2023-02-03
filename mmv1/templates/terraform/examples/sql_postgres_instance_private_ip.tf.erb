@@ -36,9 +36,8 @@ resource "google_sql_database_instance" "<%= ctx[:primary_resource_id] %>" {
   settings {
     tier = "db-custom-2-7680"
     ip_configuration {
-      ipv4_enabled                                  = "false"
-      private_network                               = google_compute_network.private_network.id
-      enable_private_path_for_google_cloud_services = true
+      ipv4_enabled    = "false"
+      private_network = google_compute_network.private_network.id
     }
   }
   deletion_protection = "false"
