@@ -1,3 +1,16 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 --- !ruby/object:Api::Resource
   name: 'Group'
   base_url: 'groups?initialGroupConfig={{initial_group_config}}'
@@ -126,8 +139,8 @@
         Google Groups are the default type of group and have a label with a key of cloudidentity.googleapis.com/groups.discussion_forum and an empty value.
 
         Existing Google Groups can have an additional label with a key of cloudidentity.googleapis.com/groups.security and an empty value added to them. This is an immutable change and the security label cannot be removed once added.
-        
+
         Dynamic groups have a label with a key of cloudidentity.googleapis.com/groups.dynamic.
-        
+
         Identity-mapped groups for Cloud Search have a label with a key of system/groups/external and an empty value.
 

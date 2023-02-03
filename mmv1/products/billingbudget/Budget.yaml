@@ -1,3 +1,16 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 --- !ruby/object:Api::Resource
   name: Budget
   base_url: billingAccounts/{{billing_account}}/budgets
@@ -46,7 +59,7 @@
             - budget_filter.0.subaccounts
             - budget_filter.0.labels
             - budget_filter.0.calendarPeriod
-            - budget_filter.0.customPeriod              
+            - budget_filter.0.customPeriod
           description: |
             A set of projects of the form projects/{project_number},
             specifying that usage from only this set of projects should be
@@ -89,7 +102,7 @@
             - budget_filter.0.subaccounts
             - budget_filter.0.labels
             - budget_filter.0.calendarPeriod
-            - budget_filter.0.customPeriod              
+            - budget_filter.0.customPeriod
         - !ruby/object:Api::Type::Array
           name: creditTypes
           description: |
@@ -106,7 +119,7 @@
             - budget_filter.0.subaccounts
             - budget_filter.0.labels
             - budget_filter.0.calendarPeriod
-            - budget_filter.0.customPeriod            
+            - budget_filter.0.customPeriod
         - !ruby/object:Api::Type::Array
           name: subaccounts
           description: |
@@ -197,7 +210,7 @@
             - !ruby/object:Api::Type::NestedObject
               name: endDate
               description: |
-                Optional. The end date of the time period. Budgets with elapsed end date won't be processed. 
+                Optional. The end date of the time period. Budgets with elapsed end date won't be processed.
                 If unset, specifies to track all usage incurred since the startDate.
               properties:
                 - !ruby/object:Api::Type::Integer

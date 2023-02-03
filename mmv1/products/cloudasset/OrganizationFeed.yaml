@@ -1,3 +1,16 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 --- !ruby/object:Api::Resource
   name: OrganizationFeed
   base_url: "organizations/{{org_id}}/feeds"
@@ -29,7 +42,7 @@
       url_param_only: true
       description: |
         The project whose identity will be used when sending messages to the
-        destination pubsub topic. It also specifies the project for API 
+        destination pubsub topic. It also specifies the project for API
         enablement check, quota, and billing.
     - !ruby/object:Api::Type::String
       name: name
@@ -47,7 +60,7 @@
       name: assetNames
       item_type: Api::Type::String
       description: |
-        A list of the full names of the assets to receive updates. You must specify either or both of 
+        A list of the full names of the assets to receive updates. You must specify either or both of
         assetNames and assetTypes. Only asset updates matching specified assetNames and assetTypes are
         exported to the feed. For example: //compute.googleapis.com/projects/my_project_123/zones/zone1/instances/instance1.
         See https://cloud.google.com/apis/design/resourceNames#fullResourceName for more info.
@@ -114,5 +127,5 @@
         - !ruby/object:Api::Type::String
           name: location
           description: |
-            String indicating the location of the expression for error reporting, e.g. a file 
+            String indicating the location of the expression for error reporting, e.g. a file
             name and a position in the file.
