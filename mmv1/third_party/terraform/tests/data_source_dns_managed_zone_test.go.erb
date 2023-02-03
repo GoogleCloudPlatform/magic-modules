@@ -22,7 +22,7 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 				return provider(), err
 			},
 		},
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
+		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDnsManagedZone_basic(randString(t, 10)),
