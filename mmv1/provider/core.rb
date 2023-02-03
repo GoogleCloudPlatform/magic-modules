@@ -67,8 +67,7 @@ module Provider
     # Main entry point for generation.
     def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs)
       generate_objects(output_folder, types, generate_code, generate_docs)
-      copy_files(output_folder) \
-        unless @config.files.nil? || @config.files.copy.nil?
+
       # Compilation has to be the last step, as some files (e.g.
       # CONTRIBUTING.md) may depend on the list of all files previously copied
       # or compiled.
@@ -82,8 +81,6 @@ module Provider
       pwd = Dir.pwd
       if generate_code
         Dir.chdir output_folder
-        generate_datasources(pwd, output_folder, types) \
-          unless @config.datasources.nil?
 
         generate_operation(pwd, output_folder, types)
         Dir.chdir pwd
@@ -103,10 +100,6 @@ module Provider
     end
 
     def generate_operation(pwd, output_folder, types); end
-
-    def copy_files(output_folder)
-      copy_file_list(output_folder, @config.files.copy)
-    end
 
     # generate_code and generate_docs are actually used because all of the variables
     # in scope in this method are made available within the templates by the compile call.
@@ -244,39 +237,6 @@ module Provider
 
     # Generate files at a per-resource basis.
     def generate_resource_files(pwd, data) end
-
-    def generate_datasources(pwd, output_folder, types)
-      # We need to apply overrides for datasources
-      @api = Overrides::Runner.build(@api, @config.datasources,
-                                     @config.resource_override,
-                                     @config.property_override)
-      @api.validate
-
-      @api.set_properties_based_on_version(@version)
-      @api.objects.each do |object|
-        if !types.empty? && !types.include?(object.name)
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per user request"
-          )
-        elsif types.empty? && object.exclude
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per API catalog"
-          )
-        elsif types.empty? && object.not_in_version?(@version)
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per API version"
-          )
-        else
-          generate_datasource(pwd, object, output_folder)
-        end
-      end
-    end
-
-    def generate_datasource(pwd, object, output_folder)
-      data = build_object_data(pwd, object, output_folder, @target_version_name)
-
-      compile_datasource(pwd, data.clone)
-    end
 
     def build_object_data(_pwd, object, output_folder, version)
       ProductFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
