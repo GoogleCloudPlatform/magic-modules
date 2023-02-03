@@ -82,27 +82,32 @@ func (d *GoogleDnsKeysDataSource) Schema(ctx context.Context, req datasource.Sch
 
 		Attributes: map[string]schema.Attribute{
 			"managed_zone": schema.StringAttribute{
+				Description:         "The Name of the zone.",
 				MarkdownDescription: "The Name of the zone.",
 				Required:            true,
 				// 				DiffSuppressFunc: compareSelfLinkOrResourceName,
 			},
 			"project": schema.StringAttribute{
+				Description:         "The ID of the project for the Google Cloud.",
 				MarkdownDescription: "The ID of the project for the Google Cloud.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "DNS record set identifier",
+				Description:         "DNS keys identifier",
+				MarkdownDescription: "DNS keys identifier",
 				Computed:            true,
 			},
 		},
 		Blocks: map[string]schema.Block{
 			"zone_signing_keys": schema.ListNestedBlock{
-				MarkdownDescription: "The string data for the records in this record set.",
+				Description:         "A list of Zone-signing key (ZSK) records.",
+				MarkdownDescription: "A list of Zone-signing key (ZSK) records.",
 				NestedObject:        dnsKeyObject(),
 			},
 			"key_signing_keys": schema.ListNestedBlock{
-				MarkdownDescription: "The string data for the records in this record set.",
+				Description:         "A list of Key-signing key (KSK) records.",
+				MarkdownDescription: "A list of Key-signing key (KSK) records.",
 				NestedObject:        kskObject(),
 			},
 		},
@@ -199,39 +204,71 @@ func dnsKeyObject() schema.NestedBlockObject {
 	return schema.NestedBlockObject{
 		Attributes: map[string]schema.Attribute{
 			"algorithm": schema.StringAttribute{
-				Computed: true,
+				Description:         "String mnemonic specifying the DNSSEC algorithm of this key. Immutable after creation time. " +
+					"Possible values are `ecdsap256sha256`, `ecdsap384sha384`, `rsasha1`, `rsasha256`, and `rsasha512`.",
+				MarkdownDescription: "String mnemonic specifying the DNSSEC algorithm of this key. Immutable after creation time. " +
+					" Possible values are `ecdsap256sha256`, `ecdsap384sha384`, `rsasha1`, `rsasha256`, and `rsasha512`.",
+				Computed:            true,
 			},
 			"creation_time": schema.StringAttribute{
-				Computed: true,
+				Description:         "The time that this resource was created in the control plane. This is in RFC3339 text format.",
+				MarkdownDescription: "The time that this resource was created in the control plane. This is in RFC3339 text format.",
+				Computed:            true,
 			},
 			"description": schema.StringAttribute{
-				Computed: true,
+				Description:         "A mutable string of at most 1024 characters associated with this resource for the user's convenience.",
+				MarkdownDescription: "A mutable string of at most 1024 characters associated with this resource for the user's convenience.",
+				Computed:            true,
 			},
 			"id": schema.StringAttribute{
-				Computed: true,
+				Description:         "Unique identifier for the resource; defined by the server.",
+				MarkdownDescription: "Unique identifier for the resource; defined by the server.",
+				Computed:            true,
 			},
 			"is_active": schema.BoolAttribute{
-				Computed: true,
+				Description:         "Active keys will be used to sign subsequent changes to the ManagedZone. " +
+					"Inactive keys will still be present as DNSKEY Resource Records for the use of resolvers validating existing signatures.",
+				MarkdownDescription: "Active keys will be used to sign subsequent changes to the ManagedZone. " +
+					"Inactive keys will still be present as DNSKEY Resource Records for the use of resolvers validating existing signatures.",
+				Computed:            true,
 			},
 			"key_length": schema.Int64Attribute{
-				Computed: true,
+				Description:         "Length of the key in bits. Specified at creation time then immutable.",
+				MarkdownDescription: "Length of the key in bits. Specified at creation time then immutable.",
+				Computed:            true,
 			},
 			"key_tag": schema.Int64Attribute{
-				Computed: true,
+				Description:         "The key tag is a non-cryptographic hash of the a DNSKEY resource record associated with this DnsKey. " +
+					"The key tag can be used to identify a DNSKEY more quickly (but it is not a unique identifier). " +
+					"In particular, the key tag is used in a parent zone's DS record to point at the DNSKEY in this child ManagedZone. " +
+					"The key tag is a number in the range [0, 65535] and the algorithm to calculate it is specified in RFC4034 Appendix B.",
+				MarkdownDescription: "The key tag is a non-cryptographic hash of the a DNSKEY resource record associated with this DnsKey. " +
+					"The key tag can be used to identify a DNSKEY more quickly (but it is not a unique identifier). " +
+					"In particular, the key tag is used in a parent zone's DS record to point at the DNSKEY in this child ManagedZone. " +
+					"The key tag is a number in the range [0, 65535] and the algorithm to calculate it is specified in RFC4034 Appendix B.",
+				Computed:            true,
 			},
 			"public_key": schema.StringAttribute{
-				Computed: true,
+				Description:         "Base64 encoded public half of this key.",
+				MarkdownDescription: "Base64 encoded public half of this key.",
+				Computed:            true,
 			},
 		},
 		Blocks: map[string]schema.Block{
 			"digests": schema.ListNestedBlock{
+				Description:         "A list of cryptographic hashes of the DNSKEY resource record associated with this DnsKey. These digests are needed to construct a DS record that points at this DNS key.",
+				MarkdownDescription: "A list of cryptographic hashes of the DNSKEY resource record associated with this DnsKey. These digests are needed to construct a DS record that points at this DNS key.",
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						"digest": schema.StringAttribute{
-							Computed: true,
+							Description:         "The base-16 encoded bytes of this digest. Suitable for use in a DS resource record.",
+							MarkdownDescription: "The base-16 encoded bytes of this digest. Suitable for use in a DS resource record.",
+							Computed:            true,
 						},
 						"type": schema.StringAttribute{
-							Computed: true,
+							Description:         "Specifies the algorithm used to calculate this digest. Possible values are `sha1`, `sha256` and `sha384`",
+							MarkdownDescription: "Specifies the algorithm used to calculate this digest. Possible values are `sha1`, `sha256` and `sha384`",
+							Computed:            true,
 						},
 					},
 				},
@@ -245,7 +282,9 @@ func kskObject() schema.NestedBlockObject {
 	nbo := dnsKeyObject()
 
 	nbo.Attributes["ds_record"] = schema.StringAttribute{
-		Computed: true,
+		Description:         "The DS record based on the KSK record.",
+		MarkdownDescription: "The DS record based on the KSK record.",
+		Computed:            true,
 	}
 
 	return nbo
