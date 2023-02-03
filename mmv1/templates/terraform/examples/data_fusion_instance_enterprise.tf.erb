@@ -3,8 +3,5 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
   region = "us-central1"
   type = "ENTERPRISE"
   enable_rbac = true
-  # Mark for testing to avoid service networking connection usage that is not cleaned up
-  options = {
-    prober_test_run = "true"
-  }
+  <%= ctx[:vars]['prober_test_run'] %>
 }
