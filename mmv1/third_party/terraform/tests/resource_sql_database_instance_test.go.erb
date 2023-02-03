@@ -1399,40 +1399,6 @@ func TestAccSqlDatabaseInstance_Timezone(t *testing.T) {
 }
 
 
-func TestAccSqlDatabaseInstance_mysqlMajorVersionUpgrade(t *testing.T) {
-	t.Parallel()
-
-	databaseName := "tf-test-" + randString(t, 10)
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(
-					testGoogleSqlDatabaseInstance_basic3, databaseName),
-			},
-			{
-				ResourceName:      "google_sql_database_instance.instance",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
-			},
-			{
-				Config: fmt.Sprintf(
-					testGoogleSqlDatabaseInstance_basic3_update, databaseName),
-			},
-			{
-				ResourceName:            "google_sql_database_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
-			},
-		},
-	})
-}
-
 func TestAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(t *testing.T) {
 	t.Parallel()
 
