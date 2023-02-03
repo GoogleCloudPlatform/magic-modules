@@ -1,4 +1,5 @@
 <% autogen_exception -%>
+<% unless version == 'ga' -%>
 package google
 
 import (
@@ -15,7 +16,6 @@ import (
 <% end -%>
 )
 
-<% unless version == 'ga' -%>
 func resourceComputeNetworkEdgeSecurityServices() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeNetworkEdgeSecurityServicesCreate,
