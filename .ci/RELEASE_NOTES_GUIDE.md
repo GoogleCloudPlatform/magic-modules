@@ -1,5 +1,4 @@
-
- # Release Notes for Terraform/Magic Modules Auto-CHANGELOG
+# Release Notes for Terraform/Magic Modules Auto-CHANGELOG
 
 ## Background
 
@@ -52,7 +51,10 @@ Notes SHOULD:
   changes, deprecations, or new behavior.
 - Not be capitalized            
 - Impersonal third person (no “I”, “you”, etc.)
-- Start with {{service}} if changing an existing resource
+- Start with {{service}} if changing an existing resource (i.e. for `enhancement` and `bug`)
+- Include provider resource name (with `google_` prefix) if changing an existing resource
+- Use \`\` marks around the resource and field names
+- Use user-centric language for description
 
 Notes, breaking changes are exceptions. These are more free-form and left to the discretion of the PR author and reviewer. The overarching goal should be a good user experience when reading the changelog.
 
@@ -102,7 +104,7 @@ compute: deprecated `region` field for `google_compute_foo` - use location inste
 * `release-note:breaking-change`
 ~~~
 ```release-note:breaking-change
-`google_compute_new_datasource`
+compute: changeed `region` field for `google_compute_foo` to be required
 ```
 ~~~
 
@@ -121,7 +123,7 @@ This will notify whoever is generating the release notes omit the note from chan
 
 ~~~
 ```release-note:enhancement
-container: compute: added `foo_bar` field to `google_compute_foo` (beta)
+compute: added `foo_bar` field to `google_compute_foo` (beta)
 ```
 ~~~
 
@@ -132,7 +134,7 @@ This will let whoever is generating the release notes omit the original PR note 
 
 ~~~
 ```release-note:enhancement
-container: compute: added `foo_bar` field to `google_compute_foo` (revert)
+compute: added `foo_bar` field to `google_compute_foo` (revert)
 ```
 ~~~
 
@@ -164,7 +166,7 @@ The following changelog entries are not ideal.
 
 ~~~
 ```release-note:REPLACEME
-compute: fixed permadiff on description for `google_compute_instance`
+compute: fixed permadiff on `description` for `google_compute_instance`
 ```
 ~~~
 
@@ -174,15 +176,15 @@ Better:
 
 ~~~
 ```release-note:bug
-compute: fixed permadiff on description for `google_compute_instance`
+compute: fixed permadiff on `description` for `google_compute_instance`
 ```
 ~~~
 
-### Not Past Tense
+#### Not Past Tense
 
 ~~~
 ```release-note:bug
-compute: Fix permadiff on description for `google_compute_instance`
+compute: fix permadiff on description for `google_compute_instance`
 ```
 ~~~
 
@@ -194,15 +196,15 @@ Better:
 
 ~~~
 ```release-note:bug
-compute: Fixed permadiff for `google_compute_instance`
+compute: fixed permadiff on `description` for `google_compute_instance`
 ```
 ~~~
 
-### No Service
+#### No Service
 
 ~~~
 ```release-note:bug
-Fixed permadiff on description for `google_compute_instance`
+fixed permadiff on description for `google_compute_instance`
 ```
 ~~~
 
@@ -214,26 +216,7 @@ Better:
 
 ~~~
 ```release-note:bug
-compute: Fixed permadiff on description for `google_compute_instance`
-```
-~~~
-
-### Not User-Centric
-
-~~~
-```release-note:bug
-compute: made description Computed for `google_compute_instance`
-```
-~~~
-
-This isn't written for the right audience; our users don't all, or even mostly, know what Computed
-means, and shouldn't have to. Instead, describe the impact that this will have on them.
-
-Better:
-
-~~~
-```release-note:bug
-compute: fixed permadiff on description for `google_compute_instance`
+compute: fixed permadiff on `description` for `google_compute_instance`
 ```
 ~~~
 
@@ -241,7 +224,7 @@ compute: fixed permadiff on description for `google_compute_instance`
 
 ~~~
 ```release-note:bug
-compute_instance: Fixed permadiff on description for `google_compute_instance`
+compute_instance: fixed permadiff on `description` for `google_compute_instance`
 ```
 ~~~
 
@@ -251,7 +234,7 @@ Better:
 
 ~~~
 ```release-note:bug
-compute: Fixed permadiff on description for `google_compute_instance`
+compute: fixed permadiff on `description` for `google_compute_instance`
 ```
 ~~~
 
@@ -264,22 +247,41 @@ resource's APIs is implemented in (`resourcemanager`, for `google_project`) is a
 Not every change applies only to one resource. Judgment is best here. When in doubt, `provider` is
 a good way to indicate sweeping changes that are likely to impact most users.
 
-### Unticked Resource Names
+#### Not User-Centric
 
 ~~~
 ```release-note:bug
-compute: Fixed permadiff on description for google_compute_instance
+compute: made `description` Computed for `google_compute_instance`
 ```
 ~~~
 
-This doesn't have \`\` marks around the resource name, which by convention we do. This sets the resource
-name apart, making it easer to notice.
+This isn't written for the right audience; our users don't all, or even mostly, know what Computed
+means, and shouldn't have to. Instead, describe the impact that this will have on them.
 
 Better:
 
 ~~~
 ```release-note:bug
-compute: Fixed permadiff on description for `google_compute_instance`
+compute: fixed permadiff on `description` for `google_compute_instance`
+```
+~~~
+
+#### Unticked Resource/ Field Names
+
+~~~
+```release-note:bug
+compute: fixed permadiff on description for google_compute_instance
+```
+~~~
+
+This doesn't have \`\` marks around the resource name `google_compute_instance` and field name `description`, which by convention we do. This sets the resource
+name and field name apart, making them easer to notice.
+
+Better:
+
+~~~
+```release-note:bug
+compute: fixed permadiff on `description` for `google_compute_instance`
 ```
 ~~~
 
