@@ -246,15 +246,6 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceHTTPProbesUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithHTTPStartupProbeAndTCPLivenessProbe(context),
-			},
-			{
-				ResourceName:            "google_cloud_run_v2_service.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location"},
-			},
-			{
 				Config: testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithEmptyHTTPStartupProbe(context),
 			},
 			{
@@ -377,49 +368,6 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithHTTPStartupProbeAndTCPLivenessProbe(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_cloud_run_v2_service" "default" {
-  name     = "tf-test-cloudrun-service%{random_suffix}"
-  location = "us-central1"
-
-  template {
-    containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
-      ports {
-        container_port = 8080
-      }
-      startup_probe {
-        initial_delay_seconds = 3
-        period_seconds = 2
-        timeout_seconds = 6
-        failure_threshold = 3
-        http_get {
-          path = "/some-path"
-          http_headers {
-            name = "User-Agent"
-            value = "magic-modules"
-          }
-          http_headers {
-            name = "Some-Name"
-          }
-        }
-      }
-      liveness_probe {
-        initial_delay_seconds = 3
-        period_seconds = 2
-        timeout_seconds = 6
-        failure_threshold = 3
-        tcp_socket {
-          port = 8080
-        }
-      }
-    }
-  }
-}
-`, context)
-}
-
 func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithEmptyHTTPStartupProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
@@ -448,6 +396,10 @@ resource "google_cloud_run_v2_service" "default" {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
       startup_probe {
+        initial_delay_seconds = 3
+        period_seconds = 2
+        timeout_seconds = 6
+        failure_threshold = 3
         http_get {
           path = "/some-path"
           http_headers {

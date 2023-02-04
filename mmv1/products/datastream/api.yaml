@@ -722,6 +722,14 @@ objects:
                         description: |
                           If supplied, every created dataset will have its name prefixed by the provided value.
                           The prefix and name will be separated by an underscore. i.e. _.
+                      - !ruby/object:Api::Type::String
+                        name: 'kmsKeyName'
+                        input: true
+                        description: |
+                          Describes the Cloud KMS encryption key that will be used to protect destination BigQuery
+                          table. The BigQuery Service Account associated with your project requires access to this
+                          encryption key. i.e. projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{cryptoKey}.
+                          See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
       - !ruby/object:Api::Type::String
         name: 'state'
         description: The state of the stream.
@@ -819,3 +827,9 @@ objects:
         description: |
           Backfill strategy to disable automatic backfill for the Stream's objects.
         properties: []
+      - !ruby/object:Api::Type::String
+        name: 'customerManagedEncryptionKey'
+        input: true
+        description: |
+          A reference to a KMS encryption key. If provided, it will be used to encrypt the data. If left blank, data
+          will be encrypted using an internal Stream-specific encryption key provisioned through KMS.

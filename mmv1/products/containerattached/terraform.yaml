@@ -31,6 +31,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "primary"
         vars:
           name: "basic"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "container_attached_cluster_ignore_errors"
+        primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
+        primary_resource_id: "primary"
+        vars:
+          name: "basic"
+        ignore_read_extra:
+          - "deletion_policy"
     properties:
       # The proto format of the authorization field is cumbersome to express in TF, so use a custom expander
       # and flattener to massage the data.
@@ -59,6 +67,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/containerattached_cluster_diff.go
       pre_update: templates/terraform/pre_update/containerattached_update.go.erb
+      pre_delete: templates/terraform/pre_delete/container_attached_deletion_policy.go.erb
+    virtual_fields:
+      - !ruby/object:Api::Type::Enum
+        name: 'deletion_policy'
+        description: 'Policy to determine what flags to send on delete.'
+        values:
+          - :DELETE
+          - :DELETE_IGNORE_ERRORS
+        default_value: :DELETE
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
