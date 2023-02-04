@@ -204,11 +204,11 @@ func dnsKeyObject() schema.NestedBlockObject {
 	return schema.NestedBlockObject{
 		Attributes: map[string]schema.Attribute{
 			"algorithm": schema.StringAttribute{
-				Description:         "String mnemonic specifying the DNSSEC algorithm of this key. Immutable after creation time. " +
+				Description: "String mnemonic specifying the DNSSEC algorithm of this key. Immutable after creation time. " +
 					"Possible values are `ecdsap256sha256`, `ecdsap384sha384`, `rsasha1`, `rsasha256`, and `rsasha512`.",
 				MarkdownDescription: "String mnemonic specifying the DNSSEC algorithm of this key. Immutable after creation time. " +
-					" Possible values are `ecdsap256sha256`, `ecdsap384sha384`, `rsasha1`, `rsasha256`, and `rsasha512`.",
-				Computed:            true,
+					"Possible values are `ecdsap256sha256`, `ecdsap384sha384`, `rsasha1`, `rsasha256`, and `rsasha512`.",
+				Computed: true,
 			},
 			"creation_time": schema.StringAttribute{
 				Description:         "The time that this resource was created in the control plane. This is in RFC3339 text format.",
@@ -226,11 +226,11 @@ func dnsKeyObject() schema.NestedBlockObject {
 				Computed:            true,
 			},
 			"is_active": schema.BoolAttribute{
-				Description:         "Active keys will be used to sign subsequent changes to the ManagedZone. " +
+				Description: "Active keys will be used to sign subsequent changes to the ManagedZone. " +
 					"Inactive keys will still be present as DNSKEY Resource Records for the use of resolvers validating existing signatures.",
 				MarkdownDescription: "Active keys will be used to sign subsequent changes to the ManagedZone. " +
 					"Inactive keys will still be present as DNSKEY Resource Records for the use of resolvers validating existing signatures.",
-				Computed:            true,
+				Computed: true,
 			},
 			"key_length": schema.Int64Attribute{
 				Description:         "Length of the key in bits. Specified at creation time then immutable.",
@@ -238,7 +238,7 @@ func dnsKeyObject() schema.NestedBlockObject {
 				Computed:            true,
 			},
 			"key_tag": schema.Int64Attribute{
-				Description:         "The key tag is a non-cryptographic hash of the a DNSKEY resource record associated with this DnsKey. " +
+				Description: "The key tag is a non-cryptographic hash of the a DNSKEY resource record associated with this DnsKey. " +
 					"The key tag can be used to identify a DNSKEY more quickly (but it is not a unique identifier). " +
 					"In particular, the key tag is used in a parent zone's DS record to point at the DNSKEY in this child ManagedZone. " +
 					"The key tag is a number in the range [0, 65535] and the algorithm to calculate it is specified in RFC4034 Appendix B.",
@@ -246,7 +246,7 @@ func dnsKeyObject() schema.NestedBlockObject {
 					"The key tag can be used to identify a DNSKEY more quickly (but it is not a unique identifier). " +
 					"In particular, the key tag is used in a parent zone's DS record to point at the DNSKEY in this child ManagedZone. " +
 					"The key tag is a number in the range [0, 65535] and the algorithm to calculate it is specified in RFC4034 Appendix B.",
-				Computed:            true,
+				Computed: true,
 			},
 			"public_key": schema.StringAttribute{
 				Description:         "Base64 encoded public half of this key.",
