@@ -1,7 +1,10 @@
 package google
 
 import (
+	"fmt"
+	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -270,8 +273,9 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceHTTPProbesUpdate(t *testing.T) {
 func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 	t.Parallel()
 
+  serviceName := fmt.Sprintf("tf-test-cloudrun-service%s", randString(t, 10))
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"service_name": serviceName,
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -280,7 +284,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCLivenessProbe(context),
+				Config:    testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCLivenessProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
@@ -297,8 +301,50 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
+      // The following test steps of gRPC startup probe are expected to fail with startup probe check failures.
+      // This is because, due to the unavailability of ready-to-use container images of a gRPC service that
+      // implements the standard gRPC health check protocol, we compromise and use a container image of an
+      // ordinary HTTP service to deploy the gRPC service, which never passes startup probes.
+      // So we only check that the `startup.grpc {}` block and its properties are accepted by the APIs.
+			{
+				Config:      testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCStartupProbe(context),
+				ExpectError: regexp.MustCompile(fmt.Sprintf(`Revision '%s-.*' is not ready and cannot serve traffic\. The user-provided container failed the configured startup probe checks\.`, serviceName)),
+			},
+			{
+				PreConfig:   testAccCheckCloudRunV2ServiceDestroyByNameProducer(t, serviceName),
+				Config:      testAccCloudRunV2Service_cloudRunServiceUpdateWithNamedServiceGRPCStartupProbe(context),
+				ExpectError: regexp.MustCompile(fmt.Sprintf(`Revision '%s-.*' is not ready and cannot serve traffic\. The user-provided container failed the configured startup probe checks\.`, serviceName)),
+			},
+			{
+				PreConfig:   testAccCheckCloudRunV2ServiceDestroyByNameProducer(t, serviceName),
+				Config:      testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessAndStartupProbes(context),
+				ExpectError: regexp.MustCompile(fmt.Sprintf(`Revision '%s-.*' is not ready and cannot serve traffic\. The user-provided container failed the configured startup probe checks\.`, serviceName)),
+			},
+			{
+				PreConfig:          testAccCheckCloudRunV2ServiceDestroyByNameProducer(t, serviceName),
+				Config:             testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessAndStartupProbes(context),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
 		},
 	})
+}
+
+func testAccCheckCloudRunV2ServiceDestroyByNameProducer(t *testing.T, serviceName string) func() {
+	return func() {
+		config := googleProviderConfig(t)
+		service := config.NewCloudRunV2Client(config.userAgent).Projects.Locations.Services
+		qualifiedServiceName := fmt.Sprintf("projects/%s/locations/%s/services/%s", config.Project, config.Region, serviceName)
+		op, err := service.Delete(qualifiedServiceName).Do()
+		if err != nil {
+			t.Errorf("Error while deleting the Cloud Run service: %s", err)
+			return
+		}
+		err = runAdminV2OperationWaitTime(config, op, config.Project, "Waiting for Cloud Run service to be deleted", config.userAgent, 5*time.Minute)
+		if err != nil {
+			t.Errorf("Error while waiting for Cloud Run service delete operation to complete: %s", err.Error())
+		}
+	}
 }
 
 func testAccCloudRunV2Service_cloudrunv2ServiceWithEmptyTCPStartupProbeAndHTTPLivenessProbe(context map[string]interface{}) string {
@@ -420,7 +466,7 @@ resource "google_cloud_run_v2_service" "default" {
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCLivenessProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
-  name     = "tf-test-cloudrun-service%{random_suffix}"
+  name     ="%{service_name}"
   location = "us-central1"
 
   template {
@@ -443,7 +489,7 @@ resource "google_cloud_run_v2_service" "default" {
 func testAccCloudRunV2Service_cloudRunServiceUpdateWithNamedServiceGRPCLivenessProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
-  name     = "tf-test-cloudrun-service%{random_suffix}"
+  name     = "%{service_name}"
   location = "us-central1"
 
   template {
@@ -453,6 +499,83 @@ resource "google_cloud_run_v2_service" "default" {
         container_port = 8080
       }
       liveness_probe {
+        grpc {
+          port = 8080
+          service = "grpc.health.v1.Health"
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCStartupProbe(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "%{service_name}"
+  location = "us-central1"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+      startup_probe {
+        grpc {
+          port = 8080
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithNamedServiceGRPCStartupProbe(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "%{service_name}"
+  location = "us-central1"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+      startup_probe {
+        grpc {
+          port = 8080
+          service = "grpc.health.v1.Health"
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessAndStartupProbes(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "%{service_name}"
+  location = "us-central1"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+      liveness_probe {
+        grpc {
+          port = 8080
+          service = "grpc.health.v1.Health"
+        }
+      }
+      startup_probe {
         grpc {
           port = 8080
           service = "grpc.health.v1.Health"
