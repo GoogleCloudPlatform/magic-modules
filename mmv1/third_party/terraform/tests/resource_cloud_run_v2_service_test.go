@@ -280,7 +280,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context),
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCLivenessProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
@@ -289,7 +289,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
 			{
-				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(context),
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithNamedServiceGRPCLivenessProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
@@ -417,7 +417,7 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context map[string]interface{}) string {
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCLivenessProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
@@ -430,7 +430,9 @@ resource "google_cloud_run_v2_service" "default" {
         container_port = 8080
       }
       liveness_probe {
-        grpc {}
+        grpc {
+          port = 8080
+        }
       }
     }
   }
@@ -438,7 +440,7 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(context map[string]interface{}) string {
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithNamedServiceGRPCLivenessProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "tf-test-cloudrun-service%{random_suffix}"
