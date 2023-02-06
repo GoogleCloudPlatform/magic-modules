@@ -139,9 +139,9 @@ func TestAccDataprocCluster_missingZoneGlobalRegion1(t *testing.T) {
 	t.Parallel()
 
 	rnd := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckDataproc_missingZoneGlobalRegion1(rnd),
@@ -155,9 +155,9 @@ func TestAccDataprocCluster_missingZoneGlobalRegion2(t *testing.T) {
 	t.Parallel()
 
 	rnd := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckDataproc_missingZoneGlobalRegion2(rnd),
@@ -172,9 +172,9 @@ func TestAccDataprocCluster_basic(t *testing.T) {
 
 	var cluster dataproc.Cluster
 	rnd := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -225,9 +225,9 @@ func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 	pid := getTestProjectFromEnv()
 	version := "3.1-dataproc-7"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -265,9 +265,9 @@ func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 	acceleratorType := "nvidia-tesla-k80"
 	zone := "us-central1-c"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -323,9 +323,9 @@ func TestAccDataprocCluster_withInternalIpOnlyTrueAndShieldedConfig(t *testing.T
 
 	var cluster dataproc.Cluster
 	rnd := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -349,9 +349,9 @@ func TestAccDataprocCluster_withMetadataAndTags(t *testing.T) {
 
 	var cluster dataproc.Cluster
 	rnd := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -373,9 +373,9 @@ func TestAccDataprocCluster_withReservationAffinity(t *testing.T) {
 
 	var cluster dataproc.Cluster
 	rnd := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -397,9 +397,9 @@ func TestAccDataprocCluster_withDataprocMetricConfig(t *testing.T) {
 
 	var cluster dataproc.Cluster
 	rnd := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -422,9 +422,9 @@ func TestAccDataprocCluster_withNodeGroupAffinity(t *testing.T) {
 
 	var cluster dataproc.Cluster
 	rnd := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -444,9 +444,9 @@ func TestAccDataprocCluster_singleNodeCluster(t *testing.T) {
 
 	rnd := randString(t, 10)
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -471,9 +471,9 @@ func TestAccDataprocCluster_updatable(t *testing.T) {
 	rnd := randString(t, 10)
 	var cluster dataproc.Cluster
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -508,9 +508,9 @@ func TestAccDataprocCluster_nonPreemptibleSecondary(t *testing.T) {
 
 	rnd := randString(t, 10)
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -529,9 +529,9 @@ func TestAccDataprocCluster_spotSecondary(t *testing.T) {
 
 	rnd := randString(t, 10)
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -553,9 +553,9 @@ func TestAccDataprocCluster_withStagingBucket(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-dproc-%s", rnd)
 	bucketName := fmt.Sprintf("%s-bucket", clusterName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -585,9 +585,9 @@ func TestAccDataprocCluster_withTempBucket(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-dproc-%s", rnd)
 	bucketName := fmt.Sprintf("%s-temp-bucket", clusterName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -615,9 +615,9 @@ func TestAccDataprocCluster_withInitAction(t *testing.T) {
 	var cluster dataproc.Cluster
 	bucketName := fmt.Sprintf("tf-test-dproc-%s-init-bucket", rnd)
 	objectName := "msg.txt"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -638,9 +638,9 @@ func TestAccDataprocCluster_withConfigOverrides(t *testing.T) {
 
 	rnd := randString(t, 10)
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -663,9 +663,9 @@ func TestAccDataprocCluster_withServiceAcc(t *testing.T) {
 
 	var cluster dataproc.Cluster
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -693,9 +693,9 @@ func TestAccDataprocCluster_withImageVersion(t *testing.T) {
 	version := "2.0.35-debian10"
 
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -714,9 +714,9 @@ func TestAccDataprocCluster_withOptionalComponents(t *testing.T) {
 
 	rnd := randString(t, 10)
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -735,9 +735,9 @@ func TestAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(t *testing.T) {
 
 	rnd := randString(t, 10)
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -758,7 +758,7 @@ func TestAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(t *testing.T) {
 
 func TestAccDataprocCluster_withLifecycleConfigAutoDeletion(t *testing.T) {
 	// Uses time.Now
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	rnd := randString(t, 10)
@@ -766,9 +766,9 @@ func TestAccDataprocCluster_withLifecycleConfigAutoDeletion(t *testing.T) {
 	fmtString := "2006-01-02T15:04:05.072Z"
 
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -792,9 +792,9 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 
 	rnd := randString(t, 10)
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -813,15 +813,15 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 
 func TestAccDataprocCluster_withNetworkRefs(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	var c1, c2 dataproc.Cluster
 	rnd := randString(t, 10)
 	netName := fmt.Sprintf(`dproc-cluster-test-%s-net`, rnd)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -841,9 +841,9 @@ func TestAccDataprocCluster_withEndpointConfig(t *testing.T) {
 
 	var cluster dataproc.Cluster
 	rnd := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -865,9 +865,9 @@ func TestAccDataprocCluster_KMS(t *testing.T) {
 	pid := getTestProjectFromEnv()
 
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -887,9 +887,9 @@ func TestAccDataprocCluster_withKerberos(t *testing.T) {
 	kms := BootstrapKMSKey(t)
 
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -908,9 +908,9 @@ func TestAccDataprocCluster_withAutoscalingPolicy(t *testing.T) {
 	rnd := randString(t, 10)
 
 	var cluster dataproc.Cluster
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -942,9 +942,9 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 	
 	var cluster dataproc.Cluster
 	clusterName := "tf-test-" + randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
@@ -969,7 +969,7 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 
 func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_dataproc_cluster" {
@@ -1046,7 +1046,7 @@ func validateBucketExists(bucket string, config *Config) (bool, error) {
 func testAccCheckDataprocStagingBucketExists(t *testing.T, bucketName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		exists, err := validateBucketExists(bucketName, config)
 		if err != nil {
@@ -1062,7 +1062,7 @@ func testAccCheckDataprocStagingBucketExists(t *testing.T, bucketName string) re
 func testAccCheckDataprocTempBucketExists(t *testing.T, bucketName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		exists, err := validateBucketExists(bucketName, config)
 		if err != nil {
@@ -1091,7 +1091,7 @@ func testAccCheckDataprocClusterInitActionSucceeded(t *testing.T, bucket, object
 	// The init script will have created an object in the specified bucket.
 	// Ensure it exists
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		_, err := config.NewStorageClient(config.userAgent).Objects.Get(bucket, object).Do()
 		if err != nil {
 			return fmt.Errorf("Unable to verify init action success: Error reading object %s in bucket %s: %v", object, bucket, err)
@@ -1168,7 +1168,7 @@ func testAccCheckDataprocClusterExists(t *testing.T, n string, cluster *dataproc
 			return fmt.Errorf("No ID is set for Dataproc cluster")
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		project, err := getTestProject(rs.Primary, config)
 		if err != nil {
 			return err

@@ -10,9 +10,9 @@ import (
 func TestAccContainerClusterDatasource_zonal(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerClusterDatasource_zonal(randString(t, 10)),
@@ -36,9 +36,9 @@ func TestAccContainerClusterDatasource_zonal(t *testing.T) {
 func TestAccContainerClusterDatasource_regional(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerClusterDatasource_regional(randString(t, 10)),

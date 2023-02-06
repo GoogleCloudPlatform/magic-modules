@@ -14,9 +14,9 @@ func TestAccProjectIamCustomRole_basic(t *testing.T) {
 	project := getTestProjectFromEnv()
 	roleId := "tfIamCustomRole" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -57,9 +57,9 @@ func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 
 	roleId := "tfIamCustomRole" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -96,9 +96,9 @@ func TestAccProjectIamCustomRole_createAfterDestroy(t *testing.T) {
 	t.Parallel()
 
 	roleId := "tfIamCustomRole" + randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -129,7 +129,7 @@ func TestAccProjectIamCustomRole_createAfterDestroy(t *testing.T) {
 
 func testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_project_iam_custom_role" {
@@ -163,7 +163,7 @@ func testAccCheckGoogleProjectIamCustomRoleDeletionStatus(t *testing.T, n string
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		role, err := config.NewIamClient(config.userAgent).Projects.Roles.Get(rs.Primary.ID).Do()
 
 		if err != nil {

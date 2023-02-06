@@ -21,9 +21,9 @@ func TestAccLoggingFolderSink_basic(t *testing.T) {
 
 	var sink logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -49,9 +49,9 @@ func TestAccLoggingFolderSink_described(t *testing.T) {
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	folderName := "tf-test-folder-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -73,9 +73,9 @@ func TestAccLoggingFolderSink_disabled(t *testing.T) {
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	folderName := "tf-test-folder-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -97,9 +97,9 @@ func TestAccLoggingFolderSink_removeOptionals(t *testing.T) {
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	folderName := "tf-test-folder-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -132,9 +132,9 @@ func TestAccLoggingFolderSink_folderAcceptsFullFolderPath(t *testing.T) {
 
 	var sink logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -164,9 +164,9 @@ func TestAccLoggingFolderSink_update(t *testing.T) {
 
 	var sinkBefore, sinkAfter logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -207,9 +207,9 @@ func TestAccLoggingFolderSink_updateBigquerySink(t *testing.T) {
 	bqDatasetID := "tf_test_sink_" + randString(t, 10)
 	folderName := "tf-test-folder-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -242,9 +242,9 @@ func TestAccLoggingFolderSink_heredoc(t *testing.T) {
 
 	var sink logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -264,7 +264,7 @@ func TestAccLoggingFolderSink_heredoc(t *testing.T) {
 
 func testAccCheckLoggingFolderSinkDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetgoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_folder_sink" {
@@ -289,7 +289,7 @@ func testAccCheckLoggingFolderSinkExists(t *testing.T, n string, sink *logging.L
 		if err != nil {
 			return err
 		}
-		config := googleProviderConfig(t)
+		config := GetgoogleProviderConfig(t)
 
 		si, err := config.NewLoggingClient(config.userAgent).Folders.Sinks.Get(attributes["id"]).Do()
 		if err != nil {

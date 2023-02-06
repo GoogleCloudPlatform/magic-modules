@@ -20,9 +20,9 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 		"display_name":  "Display Name N",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProvidersOiCS,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, ""),
@@ -79,9 +79,9 @@ func TestAccFirebaseWebApp_firebaseWebAppSkipDelete(t *testing.T) {
 		"display_name":  "Display Name N",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckFirebaseWebAppNotDestroyedProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -117,7 +117,7 @@ func testAccCheckFirebaseWebAppNotDestroyedProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{FirebaseBasePath}}{{name}}")
 			if err != nil {

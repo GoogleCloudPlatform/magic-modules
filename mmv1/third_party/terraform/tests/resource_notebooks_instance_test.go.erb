@@ -16,8 +16,8 @@ func TestAccNotebooksInstance_create_vm_image(t *testing.T) {
 	prefix := fmt.Sprintf("%d", randInt(t))
 	name := fmt.Sprintf("tf-%s", prefix)
 
-	vcrTest(t, resource.TestCase{
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNotebooksInstance_create_vm_image(name),
@@ -37,8 +37,8 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNotebooksInstance_basic(context),

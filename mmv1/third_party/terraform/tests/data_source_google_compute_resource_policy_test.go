@@ -19,9 +19,9 @@ func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	dsName := "my_policy_" + randomSuffix
 	dsFullName := fmt.Sprintf("data.google_compute_resource_policy.%s", dsName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataSourceComputeResourcePolicyDestroy(t, rsFullName),
 		Steps: []resource.TestStep{
 			{
@@ -43,7 +43,7 @@ func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name strin
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GetgoogleProviderConfig(t)
 
 			policyAttrs := rs.Primary.Attributes
 

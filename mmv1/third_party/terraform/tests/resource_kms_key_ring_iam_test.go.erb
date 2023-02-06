@@ -29,9 +29,9 @@ func TestAccKmsKeyRingIamBinding(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
@@ -82,9 +82,9 @@ func TestAccKmsKeyRingIamBinding_withCondition(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKmsKeyRingIamBinding_withCondition(projectId, orgId, billingAccount, account, keyRingName, roleId, conditionTitle),
@@ -116,9 +116,9 @@ func TestAccKmsKeyRingIamMember(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -155,9 +155,9 @@ func TestAccKmsKeyRingIamMember_withCondition(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKmsKeyRingIamMember_withCondition(projectId, orgId, billingAccount, account, keyRingName, roleId, conditionTitle),
@@ -189,9 +189,9 @@ func TestAccKmsKeyRingIamPolicy(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKmsKeyRingIamPolicy_basic(projectId, orgId, billingAccount, account, keyRingName, roleId),
@@ -227,9 +227,9 @@ func TestAccKmsKeyRingIamPolicy_withCondition(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKmsKeyRingIamPolicy_withCondition(projectId, orgId, billingAccount, account, keyRingName, roleId, conditionTitle),
@@ -247,7 +247,7 @@ func TestAccKmsKeyRingIamPolicy_withCondition(t *testing.T) {
 
 func testAccCheckGoogleKmsKeyRingIam(t *testing.T, keyRingId, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		p, err := config.NewKmsClient(config.userAgent).Projects.Locations.KeyRings.GetIamPolicy(keyRingId).Do()
 		if err != nil {
 			return err

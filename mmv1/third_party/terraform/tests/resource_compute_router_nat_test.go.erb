@@ -21,9 +21,9 @@ func TestAccComputeRouterNat_basic(t *testing.T) {
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -68,9 +68,9 @@ func TestAccComputeRouterNat_update(t *testing.T) {
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -123,9 +123,9 @@ func TestAccComputeRouterNat_removeLogConfig(t *testing.T) {
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -154,9 +154,9 @@ func TestAccComputeRouterNat_withManualIpAndSubnetConfiguration(t *testing.T) {
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -177,9 +177,9 @@ func TestAccComputeRouterNat_withPortAllocationMethods(t *testing.T) {
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
       {
@@ -241,9 +241,9 @@ func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 	testId := randString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			// (ERROR): Creation with drain nat IPs should fail
@@ -295,9 +295,9 @@ func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 	match := "inIpRange(destination.ip, '1.1.0.0/16') || inIpRange(destination.ip, '2.2.0.0/16')"
 	matchUpdate := "destination.ip == '1.1.0.1' || destination.ip == '8.8.8.8'"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -410,7 +410,7 @@ func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 
 func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		routersService := config.NewComputeClient(config.userAgent).Routers
 
@@ -444,7 +444,7 @@ func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform
 
 func testAccCheckComputeRouterNatDelete(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		routersService := config.NewComputeClient(config.userAgent).Routers
 

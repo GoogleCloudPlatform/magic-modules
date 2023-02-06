@@ -20,9 +20,9 @@ func TestAccDatasourceGoogleServiceAccountKey_basic(t *testing.T) {
 		getTestProjectFromEnv(),
 	)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatasourceGoogleServiceAccountKey(account),

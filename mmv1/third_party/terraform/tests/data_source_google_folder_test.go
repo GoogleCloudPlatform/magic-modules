@@ -15,9 +15,9 @@ func TestAccDataSourceGoogleFolder_byFullName(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "tf-test-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_byFullNameConfig(parent, displayName),
@@ -35,9 +35,9 @@ func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "tf-test-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_byShortNameConfig(parent, displayName),
@@ -55,9 +55,9 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "tf-test-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_lookupOrganizationConfig(parent, displayName),
@@ -73,9 +73,9 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 func TestAccDataSourceGoogleFolder_byFullNameNotFound(t *testing.T) {
 	name := "folders/" + randString(t, 16)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckGoogleFolder_byFullNameNotFoundConfig(name),

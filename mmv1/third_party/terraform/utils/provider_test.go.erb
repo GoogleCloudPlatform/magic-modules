@@ -34,11 +34,11 @@ import (
     "google.golang.org/api/serviceusage/v1"
 )
 
-var testAccProviders map[string]*schema.Provider
+var TestAccProviders map[string]*schema.Provider
 <% unless version == 'ga' -%>
-var testAccProvidersOiCS map[string]*schema.Provider
+var TestAccProvidersOiCS map[string]*schema.Provider
 <% end -%>
-var testAccProvider *schema.Provider
+var TestAccProvider *schema.Provider
 
 var credsEnvVars = []string{
 	"GOOGLE_CREDENTIALS",
@@ -122,29 +122,29 @@ var masterBillingAccountEnvVars = []string{
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
 }
 
-var configsLock = sync.RWMutex{}
+var ConfigsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
 
 func init() {
 	configs = make(map[string]*Config)
 	sources = make(map[string]VcrSource)
-	testAccProvider = Provider()
+	TestAccProvider = Provider()
 	<% if version == 'ga' -%>
-	testAccProviders = map[string]*schema.Provider{
-		"google": testAccProvider,
+	TestAccProviders = map[string]*schema.Provider{
+		"google": TestAccProvider,
 	}
 	<% else -%>
-	testAccProviders = map[string]*schema.Provider{
-		"google": testAccProvider,
+	TestAccProviders = map[string]*schema.Provider{
+		"google": TestAccProvider,
 	}
 
 	// The OiCS provider map is used to ensure that OiCS examples use `google-beta`
 	// if the example is versioned as beta; normal beta tests should continue to
 	// use the standard provider map.
-	testAccProvidersOiCS = map[string]*schema.Provider{
+	TestAccProvidersOiCS = map[string]*schema.Provider{
 <%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
 <% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
-		"google-<%= aliased_version -%>": testAccProvider,
+		"google-<%= aliased_version -%>": TestAccProvider,
 <% end -%>
 	}
 	<% end -%>
@@ -157,9 +157,9 @@ func init() {
 // VCR requires a single HTTP client to handle all interactions so it can record and replay responses so
 // this caches HTTP clients per test by replacing ConfigureFunc
 func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*Config, diag.Diagnostics) {
-	configsLock.RLock()
+	ConfigsLock.RLock()
 	v, ok := configs[testName]
-	configsLock.RUnlock()
+	ConfigsLock.RUnlock()
 	if ok {
 		return v, nil
 	}
@@ -186,7 +186,7 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 		log.Print("[DEBUG] No environment var set for VCR_PATH, skipping VCR")
 		return config, nil
 	}
-	path := filepath.Join(envPath, vcrFileName(testName))
+	path := filepath.Join(envPath, VcrFileName(testName))
 
 	rec, err := recorder.NewAsMode(path, vcrMode, config.client.Transport)
 	if err != nil {
@@ -235,20 +235,20 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 		return false
 	})
 	config.client.Transport = rec
-	configsLock.Lock()
+	ConfigsLock.Lock()
 	configs[testName] = config
-	configsLock.Unlock()
+	ConfigsLock.Unlock()
 	return config, nil
 }
 
 // We need to explicitly close the VCR recorder to save the cassette
 func closeRecorder(t *testing.T) {
-	configsLock.RLock()
+	ConfigsLock.RLock()
 	config, ok := configs[t.Name()]
-	configsLock.RUnlock()
+	ConfigsLock.RUnlock()
 	if ok {
 		// We did not cache the config if it does not use VCR
-		if !t.Failed() && isVcrEnabled() {
+		if !t.Failed() && IsVcrEnabled() {
 			// If a test succeeds, write new seed/yaml to files
 			err := config.client.Transport.(*recorder.Recorder).Stop()
 			if err != nil {
@@ -267,9 +267,9 @@ func closeRecorder(t *testing.T) {
 			}
 		}
 		// Clean up test config
-		configsLock.Lock()
+		ConfigsLock.Lock()
 		delete(configs, t.Name())
-		configsLock.Unlock()
+		ConfigsLock.Unlock()
 
 		sourcesLock.Lock()
 		delete(sources, t.Name())
@@ -277,19 +277,19 @@ func closeRecorder(t *testing.T) {
 	}
 }
 
-func googleProviderConfig(t *testing.T) *Config {
-	configsLock.RLock()
+func GetGoogleProviderConfig(t *testing.T) *Config {
+	ConfigsLock.RLock()
 	config, ok := configs[t.Name()]
-	configsLock.RUnlock()
+	ConfigsLock.RUnlock()
 	if ok {
 		return config
 	}
-	return testAccProvider.Meta().(*Config)
+	return TestAccProvider.Meta().(*Config)
 }
 
 func getTestAccProviders(testName string, c resource.TestCase) map[string]*schema.Provider {
 	prov := Provider()
-	if isVcrEnabled() {
+	if IsVcrEnabled() {
 		old := prov.ConfigureContextFunc
 		prov.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			return getCachedConfig(ctx, d, old, testName)
@@ -312,7 +312,7 @@ func getTestAccProviders(testName string, c resource.TestCase) map[string]*schem
 	return map[string]*schema.Provider{}
 }
 
-func isVcrEnabled() bool {
+func IsVcrEnabled() bool {
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
 	return envPath != "" && vcrMode != ""
@@ -320,8 +320,8 @@ func isVcrEnabled() bool {
 
 // Wrapper for resource.Test to swap out providers for VCR providers and handle VCR specific things
 // Can be called when VCR is not enabled, and it will behave as normal
-func vcrTest(t *testing.T, c resource.TestCase) {
-	if isVcrEnabled() {
+func VcrTest(t *testing.T, c resource.TestCase) {
+	if IsVcrEnabled() {
 		providers := getTestAccProviders(t.Name(), c)
 		c.Providers = providers
 		fwProviders := getTestAccFrameworkProviders(t.Name(), c)
@@ -337,10 +337,10 @@ func vcrTest(t *testing.T, c resource.TestCase) {
 // replaces all `/` characters that would cause filepath issues
 // This matters during tests that dispatch multiple tests, for example TestAccLoggingFolderExclusion
 func vcrSeedFile(path, name string) string {
-	return filepath.Join(path, fmt.Sprintf("%s.seed", vcrFileName(name)))
+	return filepath.Join(path, fmt.Sprintf("%s.seed", VcrFileName(name)))
 }
 
-func vcrFileName(name string) string {
+func VcrFileName(name string) string {
 	return strings.ReplaceAll(name, "/", "_")
 }
 
@@ -412,7 +412,7 @@ func writeSeedToFile(seed int64, fileName string) error {
 }
 
 func randString(t *testing.T, length int) string {
-	if !isVcrEnabled() {
+	if !IsVcrEnabled() {
 		return acctest.RandString(length)
 	}
 	envPath := os.Getenv("VCR_PATH")
@@ -433,7 +433,7 @@ func randString(t *testing.T, length int) string {
 }
 
 func randInt(t *testing.T) int {
-	if !isVcrEnabled() {
+	if !IsVcrEnabled() {
 		return acctest.RandInt()
 	}
 	envPath := os.Getenv("VCR_PATH")
@@ -464,7 +464,7 @@ func TestProvider_noDuplicatesInResourceMap(t *testing.T) {
 	}
 }
 
-func testAccPreCheck(t *testing.T) {
+func TestAccPreCheck(t *testing.T) {
 	if v := os.Getenv("GOOGLE_CREDENTIALS_FILE"); v != "" {
 		creds, err := ioutil.ReadFile(v)
 		if err != nil {
@@ -525,9 +525,9 @@ func TestProvider_loadCredentialsFromJSON(t *testing.T) {
 func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -545,9 +545,9 @@ func TestAccProviderBasePath_setBasePath(t *testing.T) {
 func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -562,9 +562,9 @@ func TestAccProviderMeta_setModuleName(t *testing.T) {
 	t.Parallel()
 
 	moduleName := "my-module"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -581,7 +581,7 @@ func TestAccProviderMeta_setModuleName(t *testing.T) {
 
 func TestAccProviderUserProjectOverride(t *testing.T) {
 	// Parallel fine-grained resource creation
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
@@ -595,9 +595,9 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 		t.Error(err)
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		// No TestDestroy since that's not really the point of this test
 		Steps: []resource.TestStep{
 			{
@@ -623,7 +623,7 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 // a reference to a different resource instead of a project field.
 func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 	// Parallel fine-grained resource creation
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
@@ -636,9 +636,9 @@ func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 		t.Error(err)
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		// No TestDestroy since that's not really the point of this test
 		Steps: []resource.TestStep{
 			{
@@ -783,17 +783,17 @@ func getTestProject(is *terraform.InstanceState, config *Config) (string, error)
 	return "", fmt.Errorf("%q: required field is not set", "project")
 }
 
-// testAccPreCheck ensures at least one of the project env variables is set.
+// TestAccPreCheck ensures at least one of the project env variables is set.
 func getTestProjectNumberFromEnv() string {
 	return multiEnvSearch(projectNumberEnvVars)
 }
 
-// testAccPreCheck ensures at least one of the project env variables is set.
+// TestAccPreCheck ensures at least one of the project env variables is set.
 func getTestProjectFromEnv() string {
 	return multiEnvSearch(projectEnvVars)
 }
 
-// testAccPreCheck ensures at least one of the credentials env variables is set.
+// TestAccPreCheck ensures at least one of the credentials env variables is set.
 func getTestCredsFromEnv() string {
 	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
 	if multiEnvSearch(credsEnvVars) == "true" {
@@ -802,7 +802,7 @@ func getTestCredsFromEnv() string {
 	return multiEnvSearch(credsEnvVars)
 }
 
-// testAccPreCheck ensures at least one of the region env variables is set.
+// TestAccPreCheck ensures at least one of the region env variables is set.
 func getTestRegionFromEnv() string {
 	return multiEnvSearch(regionEnvVars)
 }
@@ -861,13 +861,13 @@ func getTestServiceAccountFromEnv(t *testing.T) string {
 // Some tests fail during VCR. One common case is race conditions when creating resources.
 // If a test config adds two fine-grained resources with the same parent it is undefined
 // which will be created first, causing VCR to fail ~50% of the time
-func skipIfVcr(t *testing.T) {
-	if isVcrEnabled() {
+func SkipIfVcr(t *testing.T) {
+	if IsVcrEnabled() {
 		t.Skipf("VCR enabled, skipping test: %s", t.Name())
 	}
 }
 
-func sleepInSecondsForTest(t int) resource.TestCheckFunc {
+func SleepInSecondsForTest(t int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		time.Sleep(time.Duration(t) * time.Second)
 		return nil
@@ -1089,7 +1089,7 @@ func initializeReleaseDiffTest(c resource.TestCase) resource.TestCase {
 
 	localProviderName := "google-local"
 	localProvider := map[string]*schema.Provider{
-		localProviderName: testAccProvider,
+		localProviderName: TestAccProvider,
 	}
 	c.Providers = localProvider
 

@@ -19,9 +19,9 @@ func TestAccDialogflowCXVersion_update(t *testing.T) {
 		"random_suffix":   randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDialogflowCXVersion_basic(context),
@@ -120,9 +120,9 @@ func TestAccDialogflowCXVersion_dialogflowcxVersionFullExample(t *testing.T) {
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDialogflowCXVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -174,7 +174,7 @@ func testAccCheckDialogflowCXVersionDestroyProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
 			if err != nil {

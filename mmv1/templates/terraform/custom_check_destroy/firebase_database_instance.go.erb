@@ -1,4 +1,4 @@
-config := googleProviderConfig(t)
+config := GetGoogleProviderConfig(t)
 
 url, err := replaceVarsForTest(config, rs, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}")
 if err != nil {

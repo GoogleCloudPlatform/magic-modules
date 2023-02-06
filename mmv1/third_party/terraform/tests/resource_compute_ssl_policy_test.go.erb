@@ -21,9 +21,9 @@ func TestAccComputeSslPolicy_update(t *testing.T) {
 	var sslPolicy compute.SslPolicy
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeSslPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -68,9 +68,9 @@ func TestAccComputeSslPolicy_update_to_custom(t *testing.T) {
 	var sslPolicy compute.SslPolicy
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeSslPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -115,9 +115,9 @@ func TestAccComputeSslPolicy_update_from_custom(t *testing.T) {
 	var sslPolicy compute.SslPolicy
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeSslPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -167,7 +167,7 @@ func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *compu
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		project, err := getTestProject(rs.Primary, config)
 		if err != nil {

@@ -17,9 +17,9 @@ func TestAccDataSourceCloudIdentityGroupMemberships_basic(t *testing.T) {
 
 	memberId := Nprintf("%{identity_user}@%{org_domain}", context)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudIdentityGroupMembershipConfig(context),

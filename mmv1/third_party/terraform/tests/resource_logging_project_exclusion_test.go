@@ -34,9 +34,9 @@ func TestAccLoggingProjectExclusion(t *testing.T) {
 func testAccLoggingProjectExclusion_basic(t *testing.T) {
 	exclusionName := "tf-test-exclusion-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -54,9 +54,9 @@ func testAccLoggingProjectExclusion_basic(t *testing.T) {
 func testAccLoggingProjectExclusion_disablePreservesFilter(t *testing.T) {
 	exclusionName := "tf-test-exclusion-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -82,9 +82,9 @@ func testAccLoggingProjectExclusion_disablePreservesFilter(t *testing.T) {
 func testAccLoggingProjectExclusion_update(t *testing.T) {
 	exclusionName := "tf-test-exclusion-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -108,9 +108,9 @@ func testAccLoggingProjectExclusion_update(t *testing.T) {
 }
 
 func testAccLoggingProjectExclusion_multiple(t *testing.T) {
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -137,7 +137,7 @@ func testAccLoggingProjectExclusion_multiple(t *testing.T) {
 
 func testAccCheckLoggingProjectExclusionDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_project_exclusion" {

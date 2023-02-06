@@ -18,9 +18,9 @@ func TestAccLoggingBillingAccountSink_basic(t *testing.T) {
 
 	var sink logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -48,9 +48,9 @@ func TestAccLoggingBillingAccountSink_update(t *testing.T) {
 
 	var sinkBefore, sinkAfter logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -90,9 +90,9 @@ func TestAccLoggingBillingAccountSink_described(t *testing.T) {
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	billingAccount := getTestBillingAccountFromEnv(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -113,9 +113,9 @@ func TestAccLoggingBillingAccountSink_disabled(t *testing.T) {
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	billingAccount := getTestBillingAccountFromEnv(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -136,9 +136,9 @@ func TestAccLoggingBillingAccountSink_updateBigquerySink(t *testing.T) {
 	bqDatasetID := "tf_test_sink_" + randString(t, 10)
 	billingAccount := getTestBillingAccountFromEnv(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -170,9 +170,9 @@ func TestAccLoggingBillingAccountSink_heredoc(t *testing.T) {
 
 	var sink logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -192,7 +192,7 @@ func TestAccLoggingBillingAccountSink_heredoc(t *testing.T) {
 
 func testAccCheckLoggingBillingAccountSinkDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_billing_account_sink" {
@@ -217,7 +217,7 @@ func testAccCheckLoggingBillingAccountSinkExists(t *testing.T, n string, sink *l
 		if err != nil {
 			return err
 		}
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		si, err := config.NewLoggingClient(config.userAgent).BillingAccounts.Sinks.Get(attributes["id"]).Do()
 		if err != nil {

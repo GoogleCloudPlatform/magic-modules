@@ -24,9 +24,9 @@ func TestAccProjectIamAuditConfig_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	service := "cloudkms.googleapis.com"
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -53,9 +53,9 @@ func TestAccProjectIamAuditConfig_multiple(t *testing.T) {
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -81,7 +81,7 @@ func TestAccProjectIamAuditConfig_multiple(t *testing.T) {
 // Test that multiple IAM audit configs can be applied to a project all at once
 func TestAccProjectIamAuditConfig_multipleAtOnce(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
@@ -89,9 +89,9 @@ func TestAccProjectIamAuditConfig_multipleAtOnce(t *testing.T) {
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -118,9 +118,9 @@ func TestAccProjectIamAuditConfig_update(t *testing.T) {
 	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	service := "cloudkms.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -153,7 +153,7 @@ func TestAccProjectIamAuditConfig_update(t *testing.T) {
 // Test that an IAM audit config can be removed from a project
 func TestAccProjectIamAuditConfig_remove(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
@@ -161,9 +161,9 @@ func TestAccProjectIamAuditConfig_remove(t *testing.T) {
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -200,9 +200,9 @@ func TestAccProjectIamAuditConfig_addFirstExemptMember(t *testing.T) {
 	members := []string{}
 	members2 := []string{"user:gterraformtest1@gmail.com"}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -236,9 +236,9 @@ func TestAccProjectIamAuditConfig_removeLastExemptMember(t *testing.T) {
 	members2 := []string{}
 	members := []string{"user:gterraformtest1@gmail.com"}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -272,9 +272,9 @@ func TestAccProjectIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 	logType2 := "DATA_WRITE"
 	service := "cloudkms.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{

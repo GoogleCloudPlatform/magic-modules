@@ -13,7 +13,7 @@ import (
 
 func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
   // VCR fails to handle batched project services
-  skipIfVcr(t)
+  SkipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{
@@ -22,9 +22,9 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
     "billing_account": getTestBillingAccountFromEnv(t),
   }
 
-  vcrTest(t, resource.TestCase{
-    PreCheck:  func() { testAccPreCheck(t) },
-    Providers: testAccProvidersOiCS,
+  VcrTest(t, resource.TestCase{
+    PreCheck:  func() { TestAccPreCheck(t) },
+    Providers: TestAccProvidersOiCS,
     CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -169,7 +169,7 @@ resource "google_gke_hub_feature" "feature" {
 
 func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
   // VCR fails to handle batched project services
-  skipIfVcr(t)
+  SkipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{
@@ -178,9 +178,9 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
     "billing_account": getTestBillingAccountFromEnv(t),
   }
 
-  vcrTest(t, resource.TestCase{
-    PreCheck:  func() { testAccPreCheck(t) },
-    Providers: testAccProvidersOiCS,
+  VcrTest(t, resource.TestCase{
+    PreCheck:  func() { TestAccPreCheck(t) },
+    Providers: TestAccProvidersOiCS,
     CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
@@ -301,7 +301,7 @@ func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.St
         continue
       }
 
-      config := googleProviderConfig(t)
+      config := GetGoogleProviderConfig(t)
 
       url, err := replaceVarsForTest(config, rs, "{{GkeHubBasePath}}projects/{{project}}/locations/{{location}}/features/{{name}}")
       if err != nil {

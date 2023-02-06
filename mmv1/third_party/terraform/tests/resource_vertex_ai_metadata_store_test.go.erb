@@ -17,9 +17,9 @@ func TestAccVertexAIMetadataStore_vertexAiMetadataStoreExample(t *testing.T) {
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
 	name := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckVertexAIMetadataStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -58,7 +58,7 @@ func testAccCheckVertexAIMetadataStoreDestroyProducer(t *testing.T) func(s *terr
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{VertexAIBasePath}}{{name}}")
 			if err != nil {

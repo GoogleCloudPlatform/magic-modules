@@ -16,9 +16,9 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -41,9 +41,9 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -75,9 +75,9 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -103,7 +103,7 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 
 func testAccCheckComputeProjectMetadataDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_project_metadata" {

@@ -36,9 +36,9 @@ func testAccIAM2AccessBoundaryPolicy_iamAccessBoundaryPolicyBasic(t *testing.T) 
 		"random_suffix":   randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckIAM2AccessBoundaryPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -180,7 +180,7 @@ func testAccCheckIAM2AccessBoundaryPolicyDestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{IAM2BasePath}}policies/{{parent}}/accessboundarypolicies/{{name}}")
 			if err != nil {

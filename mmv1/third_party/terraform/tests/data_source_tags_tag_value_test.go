@@ -15,9 +15,9 @@ func TestAccDataSourceGoogleTagsTagValue_default(t *testing.T) {
 	keyShortName := "tf-testkey-" + randString(t, 10)
 	shortName := "tf-test-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleTagsTagValueConfig(parent, keyShortName, shortName),
@@ -36,9 +36,9 @@ func TestAccDataSourceGoogleTagsTagValue_dot(t *testing.T) {
 	keyShortName := "tf-testkey-" + randString(t, 10)
 	shortName := "terraform.test." + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleTagsTagValueConfig(parent, keyShortName, shortName),

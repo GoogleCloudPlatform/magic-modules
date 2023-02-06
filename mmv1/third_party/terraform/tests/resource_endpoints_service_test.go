@@ -13,14 +13,14 @@ import (
 
 func TestAccEndpointsService_basic(t *testing.T) {
 	// Uses random provider
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 	serviceId := "tf-test" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
 		CheckDestroy: testAccCheckEndpointServiceDestroyProducer(t),
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEndpointsService_basic(serviceId, getTestProjectFromEnv(), "1"),
@@ -42,9 +42,9 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 	t.Parallel()
 	serviceId := "tf-test" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckEndpointServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -180,7 +180,7 @@ EOF
 
 func testAccCheckEndpointExistsByName(t *testing.T, serviceId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		service, err := config.NewServiceManClient(config.userAgent).Services.GetConfig(
 			fmt.Sprintf("%s.endpoints.%s.cloud.goog", serviceId, config.Project)).Do()
 		if err != nil {
@@ -196,7 +196,7 @@ func testAccCheckEndpointExistsByName(t *testing.T, serviceId string) resource.T
 
 func testAccCheckEndpointServiceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for name, rs := range s.RootModule().Resources {
 			if strings.HasPrefix(name, "data.") {

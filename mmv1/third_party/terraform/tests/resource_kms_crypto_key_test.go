@@ -175,9 +175,9 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -209,7 +209,7 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 
 func TestAccKmsCryptoKey_rotation(t *testing.T) {
 	// when rotation is set, next rotation time is set using time.Now
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	projectId := fmt.Sprintf("tf-test-%d", randInt(t))
@@ -221,9 +221,9 @@ func TestAccKmsCryptoKey_rotation(t *testing.T) {
 	rotationPeriod := "100000s"
 	updatedRotationPeriod := "7776000s"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_rotation(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod),
@@ -274,9 +274,9 @@ func TestAccKmsCryptoKey_template(t *testing.T) {
 	algorithm := "EC_SIGN_P256_SHA256"
 	updatedAlgorithm := "EC_SIGN_P384_SHA384"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_template(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, algorithm),
@@ -317,9 +317,9 @@ func TestAccKmsCryptoKey_destroyDuration(t *testing.T) {
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_destroyDuration(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -352,9 +352,9 @@ func TestAccKmsCryptoKey_importOnly(t *testing.T) {
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_importOnly(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -396,7 +396,7 @@ func testAccCheckGoogleKmsCryptoKeyWasRemovedFromState(resourceName string) reso
 // sub-resources were scheduled to be destroyed, rendering the key itself inoperable.
 func testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t *testing.T, projectId, location, keyRingName, cryptoKeyName string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		gcpResourceUri := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", projectId, location, keyRingName, cryptoKeyName)
 
 		response, err := config.NewKmsClient(config.userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(gcpResourceUri).Do()
@@ -421,7 +421,7 @@ func testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t *testing.T, projectId, lo
 // was disabled to prevent more versions of the key from being created.
 func testAccCheckGoogleKmsCryptoKeyRotationDisabled(t *testing.T, projectId, location, keyRingName, cryptoKeyName string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		gcpResourceUri := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", projectId, location, keyRingName, cryptoKeyName)
 
 		response, err := config.NewKmsClient(config.userAgent).Projects.Locations.KeyRings.CryptoKeys.Get(gcpResourceUri).Do()
@@ -449,9 +449,9 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -477,9 +477,9 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -503,9 +503,9 @@ func TestAccKmsCryptoKeyVersion_patch(t *testing.T) {
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	state := "DISABLED"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_patchInitialize(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),

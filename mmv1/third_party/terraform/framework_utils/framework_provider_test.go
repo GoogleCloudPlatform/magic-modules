@@ -44,10 +44,10 @@ func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
 
 // Configure is here to overwrite the frameworkProvider configure function for VCR testing
 func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	if isVcrEnabled() {
-		configsLock.RLock()
+	if IsVcrEnabled() {
+		ConfigsLock.RLock()
 		_, ok := fwProviders[p.TestName]
-		configsLock.RUnlock()
+		ConfigsLock.RUnlock()
 		if ok {
 			return
 		}
@@ -73,7 +73,7 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 			tflog.Debug(ctx, "No environment var set for VCR_PATH, skipping VCR")
 			return
 		}
-		path := filepath.Join(envPath, vcrFileName(p.TestName))
+		path := filepath.Join(envPath, VcrFileName(p.TestName))
 
 		rec, err := recorder.NewAsMode(path, vcrMode, p.ProdProvider.client.Transport)
 		if err != nil {
@@ -123,9 +123,9 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 			return false
 		})
 		p.ProdProvider.client.Transport = rec
-		configsLock.Lock()
+		ConfigsLock.Lock()
 		fwProviders[p.TestName] = p
-		configsLock.Unlock()
+		ConfigsLock.Unlock()
 		return
 	} else {
 		tflog.Debug(ctx, "VCR_PATH or VCR_MODE not set, skipping VCR")
@@ -168,9 +168,9 @@ func getTestAccFrameworkProviders(testName string, c resource.TestCase) map[stri
 }
 
 func getTestFwProvider(t *testing.T) *frameworkTestProvider {
-	configsLock.RLock()
+	ConfigsLock.RLock()
 	fwProvider, ok := fwProviders[t.Name()]
-	configsLock.RUnlock()
+	ConfigsLock.RUnlock()
 	if ok {
 		return fwProvider
 	}
@@ -191,8 +191,8 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 	moduleName := "my-module"
 	managedZoneName := fmt.Sprintf("tf-test-zone-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck: func() { TestAccPreCheck(t) },
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"google": func() (tfprotov5.ProviderServer, error) {
 				provider, err := MuxedProviders(t.Name())

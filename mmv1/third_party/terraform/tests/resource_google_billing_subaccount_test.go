@@ -14,8 +14,8 @@ func TestAccBillingSubaccount_renameOnDestroy(t *testing.T) {
 
 	masterBilling := getTestMasterBillingAccountFromEnv(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleBillingSubaccountRenameOnDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -32,8 +32,8 @@ func TestAccBillingSubaccount_basic(t *testing.T) {
 
 	masterBilling := getTestMasterBillingAccountFromEnv(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Billing Subaccount creation
@@ -96,7 +96,7 @@ func testAccCheckGoogleBillingSubaccountExists(bindingResourceName string) resou
 			return fmt.Errorf("Not found: %s", bindingResourceName)
 		}
 
-		config := testAccProvider.Meta().(*Config)
+		config := TestAccProvider.Meta().(*Config)
 		_, err := config.NewBillingClient(config.userAgent).BillingAccounts.Get(subaccount.Primary.ID).Do()
 		if err != nil {
 			return err
@@ -115,7 +115,7 @@ func testAccCheckGoogleBillingSubaccountRenameOnDestroy(s *terraform.State) erro
 			continue
 		}
 
-		config := testAccProvider.Meta().(*Config)
+		config := TestAccProvider.Meta().(*Config)
 
 		res, err := config.NewBillingClient(config.userAgent).BillingAccounts.Get(rs.Primary.ID).Do()
 		if err != nil {

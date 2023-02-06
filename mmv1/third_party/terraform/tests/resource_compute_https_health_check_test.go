@@ -12,9 +12,9 @@ func TestAccComputeHttpsHealthCheck_update(t *testing.T) {
 
 	hhckName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeHttpsHealthCheckDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

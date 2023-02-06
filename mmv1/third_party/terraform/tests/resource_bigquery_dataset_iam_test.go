@@ -17,9 +17,9 @@ func TestAccBigqueryDatasetIamBinding(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/datasets/%s %s",
 		getTestProjectFromEnv(), dataset, role)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -62,9 +62,9 @@ func TestAccBigqueryDatasetIamMember(t *testing.T) {
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -96,9 +96,9 @@ func TestAccBigqueryDatasetIamPolicy(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/datasets/%s",
 		getTestProjectFromEnv(), dataset)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation

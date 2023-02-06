@@ -19,9 +19,9 @@ func TestAccKmsSecretCiphertext_basic(t *testing.T) {
 	plaintext := fmt.Sprintf("secret-%s", randString(t, 10))
 	aad := "plainaad"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsSecretCiphertext(kms.CryptoKey.Name, plaintext),
@@ -53,7 +53,7 @@ func TestAccKmsSecretCiphertext_basic(t *testing.T) {
 }
 
 func testAccDecryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cryptoKeyId string, secretCiphertextResourceName, aad string) (string, error) {
-	config := googleProviderConfig(t)
+	config := GetGoogleProviderConfig(t)
 	rs, ok := s.RootModule().Resources[secretCiphertextResourceName]
 	if !ok {
 		return "", fmt.Errorf("Resource not found: %s", secretCiphertextResourceName)

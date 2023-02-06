@@ -14,9 +14,9 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 	project := getTestProjectFromEnv()
 	name := "tftest-cloudrun-" + randString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_cloudRunServiceUpdate(name, project, "10", "600"),
@@ -47,9 +47,9 @@ func TestAccCloudRunService_foregroundDeletion(t *testing.T) {
 	project := getTestProjectFromEnv()
 	name := "tftest-cloudrun-" + randString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_cloudRunServiceUpdate(name, project, "10", "600"),
@@ -123,9 +123,9 @@ func TestAccCloudRunService_secretVolume(t *testing.T) {
 	project := getTestProjectFromEnv()
 	name := "tftest-cloudrun-" + randString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "secret-"+randString(t, 5), "secret-"+randString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
@@ -247,9 +247,9 @@ func TestAccCloudRunService_secretEnvironmentVariable(t *testing.T) {
 	project := getTestProjectFromEnv()
 	name := "tftest-cloudrun-" + randString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project, "secret-"+randString(t, 5), "secret-"+randString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
@@ -368,9 +368,9 @@ func TestAccCloudRunService_probes(t *testing.T) {
 	project := getTestProjectFromEnv()
 	name := "tftest-cloudrun-" + randString(t, 6)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunService_cloudRunServiceWithEmptyTCPStartupProbeAndHTTPLivenessProbe(name, project),

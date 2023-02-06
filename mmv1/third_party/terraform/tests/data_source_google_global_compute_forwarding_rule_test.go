@@ -13,9 +13,9 @@ func TestAccDataSourceGoogleGlobalForwardingRule(t *testing.T) {
 	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
 	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleGlobalForwardingRuleConfig(poolName, ruleName),

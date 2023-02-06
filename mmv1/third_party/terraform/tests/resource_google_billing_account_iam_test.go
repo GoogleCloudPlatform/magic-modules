@@ -12,15 +12,15 @@ import (
 
 func TestAccBillingAccountIam(t *testing.T) {
 	// Deletes two fine-grained resources in same step
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	billing := getTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/billing.viewer"
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
@@ -79,7 +79,7 @@ func testAccCheckGoogleBillingAccountIamBindingExists(t *testing.T, bindingResou
 			return fmt.Errorf("Not found: %s", bindingResourceName)
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		p, err := config.NewBillingClient(config.userAgent).BillingAccounts.GetIamPolicy("billingAccounts/" + bindingRs.Primary.Attributes["billing_account_id"]).Do()
 		if err != nil {
 			return err
@@ -109,7 +109,7 @@ func testAccCheckGoogleBillingAccountIamMemberExists(t *testing.T, n, role, memb
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		p, err := config.NewBillingClient(config.userAgent).BillingAccounts.GetIamPolicy("billingAccounts/" + rs.Primary.Attributes["billing_account_id"]).Do()
 		if err != nil {
 			return err

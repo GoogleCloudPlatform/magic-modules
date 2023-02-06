@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccComputeSharedReservation_update(t *testing.T) {
-	skipIfVcr(t) // large number of parallel resources.
+	SkipIfVcr(t) // large number of parallel resources.
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -17,9 +17,9 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 		"random_suffix":   randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

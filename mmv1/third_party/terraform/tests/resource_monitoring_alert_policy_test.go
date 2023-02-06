@@ -38,9 +38,9 @@ func testAccMonitoringAlertPolicy_basic(t *testing.T) {
 	conditionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	filter := `metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\"`
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -64,9 +64,9 @@ func testAccMonitoringAlertPolicy_update(t *testing.T) {
 	filter2 := `metric.type=\"compute.googleapis.com/instance/cpu/utilization\" AND resource.type=\"gce_instance\"`
 	aligner2 := "ALIGN_MAX"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -95,9 +95,9 @@ func testAccMonitoringAlertPolicy_full(t *testing.T) {
 	conditionName1 := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	conditionName2 := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -117,9 +117,9 @@ func testAccMonitoringAlertPolicy_mql(t *testing.T) {
 	alertName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	conditionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -139,9 +139,9 @@ func testAccMonitoringAlertPolicy_log(t *testing.T) {
 	alertName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	conditionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -158,7 +158,7 @@ func testAccMonitoringAlertPolicy_log(t *testing.T) {
 
 func testAccCheckAlertPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_monitoring_alert_policy" {

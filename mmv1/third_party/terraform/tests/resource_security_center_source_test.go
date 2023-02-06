@@ -13,9 +13,9 @@ func TestAccSecurityCenterSource_basic(t *testing.T) {
 	orgId := getTestOrgFromEnv(t)
 	suffix := randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterSource_sccSourceBasicExample(orgId, suffix, "My description"),

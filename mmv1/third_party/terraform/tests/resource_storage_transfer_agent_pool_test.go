@@ -16,9 +16,9 @@ func TestAccStorageTransferAgentPool_agentPoolUpdate(t *testing.T) {
 	displayName := fmt.Sprintf("tf-test-display-name-%s", randString(t, 10))
 	displayNameUpdate := fmt.Sprintf("tf-test-display-name-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckStorageTransferAgentPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -167,7 +167,7 @@ func testAccCheckStorageTransferAgentPoolDestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{StorageTransferBasePath}}projects/{{project}}/agentPools/{{name}}")
 			if err != nil {

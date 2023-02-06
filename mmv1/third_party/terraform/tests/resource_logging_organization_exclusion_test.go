@@ -35,9 +35,9 @@ func testAccLoggingOrganizationExclusion_basic(t *testing.T) {
 	exclusionName := "tf-test-exclusion-" + randString(t, 10)
 	description := "Description " + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -58,9 +58,9 @@ func testAccLoggingOrganizationExclusion_update(t *testing.T) {
 	descriptionBefore := "Basic Organization Logging Exclusion" + randString(t, 10)
 	descriptionAfter := "Updated Basic Organization Logging Exclusion" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -86,9 +86,9 @@ func testAccLoggingOrganizationExclusion_update(t *testing.T) {
 func testAccLoggingOrganizationExclusion_multiple(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -115,7 +115,7 @@ func testAccLoggingOrganizationExclusion_multiple(t *testing.T) {
 
 func testAccCheckLoggingOrganizationExclusionDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_organization_exclusion" {

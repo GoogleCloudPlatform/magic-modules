@@ -17,9 +17,9 @@ func TestAccDataSourceComputeGlobalAddress(t *testing.T) {
 	dsFullName := fmt.Sprintf("data.google_compute_global_address.%s", dsName)
 	addressName := fmt.Sprintf("tf-test-address-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeGlobalAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

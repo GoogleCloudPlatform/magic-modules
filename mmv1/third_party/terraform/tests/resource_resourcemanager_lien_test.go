@@ -17,9 +17,9 @@ func TestAccResourceManagerLien_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	var lien resourceManager.Lien
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckResourceManagerLienDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -56,7 +56,7 @@ func testAccCheckResourceManagerLienExists(t *testing.T, n, projectName string, 
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		found, err := config.NewResourceManagerClient(config.userAgent).Liens.List().Parent(fmt.Sprintf("projects/%s", projectName)).Do()
 		if err != nil {
@@ -74,7 +74,7 @@ func testAccCheckResourceManagerLienExists(t *testing.T, n, projectName string, 
 
 func testAccCheckResourceManagerLienDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_resource_manager_lien" {

@@ -16,9 +16,9 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 	database := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabaseIamBinding_basic(account, instance, database, role),
@@ -61,9 +61,9 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	conditionTitle := "Access only database one"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -92,9 +92,9 @@ func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 	database := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabaseIamPolicy_basic(account, instance, database, role),

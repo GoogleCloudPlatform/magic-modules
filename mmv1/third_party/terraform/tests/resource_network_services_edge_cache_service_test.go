@@ -12,9 +12,9 @@ func TestAccNetworkServicesEdgeCacheService_updateAndImport(t *testing.T) {
 	namebkt := "tf-test-bucket-" + randString(t, 10)
 	nameorigin := "tf-test-origin-" + randString(t, 10)
 	nameservice := "tf-test-service-" + randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckNetworkServicesEdgeCacheServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

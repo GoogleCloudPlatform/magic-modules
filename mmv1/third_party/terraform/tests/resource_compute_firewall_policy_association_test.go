@@ -15,9 +15,9 @@ func TestAccComputeFirewallPolicyAssociation_basic(t *testing.T) {
 		"org_name":      fmt.Sprintf("organizations/%s", getTestOrgFromEnv(t)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeFirewallPolicyAssociation_basic(context),

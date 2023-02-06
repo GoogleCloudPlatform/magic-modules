@@ -19,9 +19,9 @@ func TestAccComputeNodeGroup_updateNodeTemplate(t *testing.T) {
 	tmplPrefix := fmt.Sprintf("tmpl--%d", randInt(t))
 
 	var timeCreated time.Time
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeNodeGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

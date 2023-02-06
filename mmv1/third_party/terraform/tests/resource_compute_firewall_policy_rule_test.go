@@ -15,9 +15,9 @@ func TestAccComputeFirewallPolicyRule_update(t *testing.T) {
 		"org_name":      fmt.Sprintf("organizations/%s", getTestOrgFromEnv(t)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeFirewallPolicyRule_start(context),
@@ -229,9 +229,9 @@ func TestAccComputeFirewallPolicyRule_multipleRules(t *testing.T) {
 		"org_name":      fmt.Sprintf("organizations/%s", getTestOrgFromEnv(t)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeFirewallPolicyRule_multiple(context),

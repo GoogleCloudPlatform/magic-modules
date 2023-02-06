@@ -16,9 +16,9 @@ func TestAccServiceNetworkingPeeredDNSDomain_basic(t *testing.T) {
 	name := fmt.Sprintf("test-name-%d", randInt(t))
 	service := "servicenetworking.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceNetworkingPeeredDNSDomain_basic(project, org, billingId, name, service),

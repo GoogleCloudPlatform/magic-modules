@@ -17,9 +17,9 @@ func TestAccFirebaseHostingSite_firebasehostingSiteUpdate(t *testing.T) {
 		"site_id":       "tf-test-site-update-app",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckFirebaseHostingSiteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

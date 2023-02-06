@@ -17,9 +17,9 @@ func TestAccPubsubSubscriptionIamBinding(t *testing.T) {
 	subscription := "tf-test-sub-iam-" + randString(t, 10)
 	account := "tf-test-iam-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -54,9 +54,9 @@ func TestAccPubsubSubscriptionIamMember(t *testing.T) {
 	account := "tf-test-iam-" + randString(t, 10)
 	accountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", account, getTestProjectFromEnv())
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -82,9 +82,9 @@ func TestAccPubsubSubscriptionIamPolicy(t *testing.T) {
 	subscription := "tf-test-sub-iam-" + randString(t, 10)
 	account := "tf-test-iam-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscriptionIamPolicy_basic(subscription, topic, account, "roles/pubsub.subscriber"),
@@ -110,7 +110,7 @@ func TestAccPubsubSubscriptionIamPolicy(t *testing.T) {
 
 func testAccCheckPubsubSubscriptionIam(t *testing.T, subscription, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		p, err := config.NewPubsubClient(config.userAgent).Projects.Subscriptions.GetIamPolicy(getComputedSubscriptionName(getTestProjectFromEnv(), subscription)).Do()
 		if err != nil {
 			return err

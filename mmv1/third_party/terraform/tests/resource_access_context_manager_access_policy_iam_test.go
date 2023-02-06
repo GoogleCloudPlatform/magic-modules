@@ -8,15 +8,15 @@ import (
 )
 
 func TestAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 
 	org := getTestOrgFromEnv(t)
 	account := "tf-acm-iam-" + randString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -31,15 +31,15 @@ func TestAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
 }
 
 func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 
 	org := getTestOrgFromEnv(t)
 	account := "tf-acm-iam-" + randString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -56,15 +56,15 @@ func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
 }
 
 func TestAccAccessContextManagerAccessPolicyIamPolicy(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 
 	org := getTestOrgFromEnv(t)
 	account := "tf-acm-iam-" + randString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation

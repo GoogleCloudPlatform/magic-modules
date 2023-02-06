@@ -77,9 +77,9 @@ func TestAccHealthcareFhirStore_basic(t *testing.T) {
 	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 	resourceName := "google_healthcare_fhir_store.default"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckHealthcareFhirStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -172,7 +172,7 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(t *testing.T, pubsubTopic strin
 			}
 			foundResource = true
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
 			if err != nil {

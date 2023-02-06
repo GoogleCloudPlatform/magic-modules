@@ -79,9 +79,9 @@ func TestAccDataSourceComputeAddress(t *testing.T) {
 	dsName := "my_address"
 	dsFullName := fmt.Sprintf("data.google_compute_address.%s", dsName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataSourceComputeAddressDestroy(t, rsFullName),
 		Steps: []resource.TestStep{
 			{
@@ -148,7 +148,7 @@ func testAccCheckDataSourceComputeAddressDestroy(t *testing.T, name string) reso
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			addressId, err := parseComputeAddressId(rs.Primary.ID, nil)
 			if err != nil {

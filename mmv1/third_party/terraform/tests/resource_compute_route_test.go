@@ -10,9 +10,9 @@ import (
 func TestAccComputeRoute_defaultInternetGateway(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -31,9 +31,9 @@ func TestAccComputeRoute_hopInstance(t *testing.T) {
 	instanceName := "tf-test-" + randString(t, 10)
 	zone := "us-central1-b"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

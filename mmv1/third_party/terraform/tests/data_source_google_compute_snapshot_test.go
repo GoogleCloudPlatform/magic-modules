@@ -9,9 +9,9 @@ import (
 func TestAccSnapshotDatasource_name(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSnapshot_name(getTestProjectFromEnv(), randString(t, 10)),
@@ -30,9 +30,9 @@ func TestAccSnapshotDatasource_name(t *testing.T) {
 func TestAccSnapshotDatasource_filter(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSnapshot_filter(getTestProjectFromEnv(), randString(t, 10)),
@@ -51,9 +51,9 @@ func TestAccSnapshotDatasource_filter(t *testing.T) {
 func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSnapshot_filter_mostRecent(getTestProjectFromEnv(), randString(t, 10)),

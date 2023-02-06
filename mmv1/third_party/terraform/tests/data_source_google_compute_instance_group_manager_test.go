@@ -21,9 +21,9 @@ func TestAccDataSourceGoogleComputeInstanceGroupManager(t *testing.T) {
 		"autoHealName": "tf-tst-ah-name" + randString(t, 6),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleComputeInstanceGroupManager_basic1(context),

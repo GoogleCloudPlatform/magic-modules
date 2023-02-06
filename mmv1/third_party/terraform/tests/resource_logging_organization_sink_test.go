@@ -20,9 +20,9 @@ func TestAccLoggingOrganizationSink_basic(t *testing.T) {
 
 	var sink logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -50,9 +50,9 @@ func TestAccLoggingOrganizationSink_update(t *testing.T) {
 
 	var sinkBefore, sinkAfter logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -92,9 +92,9 @@ func TestAccLoggingOrganizationSink_described(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -115,9 +115,9 @@ func TestAccLoggingOrganizationSink_disabled(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -138,9 +138,9 @@ func TestAccLoggingOrganizationSink_updateBigquerySink(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bqDatasetID := "tf_test_sink_" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -172,9 +172,9 @@ func TestAccLoggingOrganizationSink_heredoc(t *testing.T) {
 
 	var sink logging.LogSink
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -194,7 +194,7 @@ func TestAccLoggingOrganizationSink_heredoc(t *testing.T) {
 
 func testAccCheckLoggingOrganizationSinkDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_organization_sink" {
@@ -219,7 +219,7 @@ func testAccCheckLoggingOrganizationSinkExists(t *testing.T, n string, sink *log
 		if err != nil {
 			return err
 		}
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		si, err := config.NewLoggingClient(config.userAgent).Organizations.Sinks.Get(attributes["id"]).Do()
 		if err != nil {

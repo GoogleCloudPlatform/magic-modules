@@ -12,9 +12,9 @@ func TestAccDataSourceGoogleOrganization_byFullName(t *testing.T) {
 	orgId := getTestOrgFromEnv(t)
 	name := "organizations/" + orgId
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleOrganization_byName(name),
@@ -31,9 +31,9 @@ func TestAccDataSourceGoogleOrganization_byShortName(t *testing.T) {
 	orgId := getTestOrgFromEnv(t)
 	name := "organizations/" + orgId
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleOrganization_byName(orgId),
@@ -49,9 +49,9 @@ func TestAccDataSourceGoogleOrganization_byShortName(t *testing.T) {
 func TestAccDataSourceGoogleOrganization_byDomain(t *testing.T) {
 	name := randString(t, 16) + ".com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckGoogleOrganization_byDomain(name),

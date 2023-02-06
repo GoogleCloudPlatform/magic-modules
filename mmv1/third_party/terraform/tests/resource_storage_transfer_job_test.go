@@ -19,9 +19,9 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 	testUpdatedTransferJobDescription := randString(t, 10)
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -83,9 +83,9 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 	testDataSinkName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -106,9 +106,9 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 	testDataSinkName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -129,9 +129,9 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 	testDataSourceName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -155,9 +155,9 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 	testOverwriteWhen := []string{"ALWAYS", "NEVER", "DIFFERENT"}
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -206,9 +206,9 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 	testPubSubTopicNameUpdate := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -257,7 +257,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 
 func testAccStorageTransferJobDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_storage_transfer_job" {

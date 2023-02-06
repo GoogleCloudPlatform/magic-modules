@@ -19,9 +19,9 @@ func TestAccFolder_rename(t *testing.T) {
 	parent := "organizations/" + org
 	folder := resourceManagerV3.Folder{}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -58,9 +58,9 @@ func TestAccFolder_moveParent(t *testing.T) {
 	folder1 := resourceManagerV3.Folder{}
 	folder2 := resourceManagerV3.Folder{}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -87,7 +87,7 @@ func TestAccFolder_moveParent(t *testing.T) {
 
 func testAccCheckGoogleFolderDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_folder" {
@@ -115,7 +115,7 @@ func testAccCheckGoogleFolderExists(t *testing.T, n string, folder *resourceMana
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		found, err := config.NewResourceManagerV3Client(config.userAgent).Folders.Get(rs.Primary.ID).Do()
 		if err != nil {

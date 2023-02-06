@@ -47,9 +47,9 @@ func testAccOrganizationIamBinding_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "tfIamTest" + randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
@@ -87,9 +87,9 @@ func testAccOrganizationIamBinding_condition(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "tfIamTest" + randString(t, 10)
 	conditionTitle := "expires_after_2019_12_31"
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
@@ -111,9 +111,9 @@ func testAccOrganizationIamBinding_condition(t *testing.T) {
 func testAccOrganizationIamMember_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -136,9 +136,9 @@ func testAccOrganizationIamMember_condition(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	conditionTitle := "expires_after_2019_12_31"
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -175,7 +175,7 @@ func testAccCheckGoogleOrganizationIamBindingExists(t *testing.T, bindingResourc
 			return fmt.Errorf("Not found: %s", roleResourceName)
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		p, err := config.NewResourceManagerClient(config.userAgent).Organizations.GetIamPolicy(
 			"organizations/"+bindingRs.Primary.Attributes["org_id"],
 			&cloudresourcemanager.GetIamPolicyRequest{
@@ -212,7 +212,7 @@ func testAccCheckGoogleOrganizationIamMemberExists(t *testing.T, n, role, member
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		p, err := config.NewResourceManagerClient(config.userAgent).Organizations.GetIamPolicy(
 			"organizations/"+rs.Primary.Attributes["org_id"],
 			&cloudresourcemanager.GetIamPolicyRequest{

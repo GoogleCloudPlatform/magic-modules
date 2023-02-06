@@ -15,9 +15,9 @@ func TestAccApiGatewayApi_apigatewayApiBasicExampleUpdated(t *testing.T) {
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckApiGatewayApiDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

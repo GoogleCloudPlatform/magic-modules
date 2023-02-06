@@ -14,9 +14,9 @@ import (
 func testAccAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerServicePerimeterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -34,9 +34,9 @@ func testAccAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
 func testAccAccessContextManagerServicePerimeter_updateTest(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerServicePerimeterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -90,7 +90,7 @@ func testAccCheckAccessContextManagerServicePerimeterDestroyProducer(t *testing.
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{name}}")
 			if err != nil {

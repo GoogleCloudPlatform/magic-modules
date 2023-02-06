@@ -16,9 +16,9 @@ func TestAccOrganizationIamCustomRole_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	roleId := "tfIamCustomRole" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -56,9 +56,9 @@ func TestAccOrganizationIamCustomRole_undelete(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	roleId := "tfIamCustomRole" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -86,9 +86,9 @@ func TestAccOrganizationIamCustomRole_createAfterDestroy(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	roleId := "tfIamCustomRole" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -123,7 +123,7 @@ func TestAccOrganizationIamCustomRole_createAfterDestroy(t *testing.T) {
 
 func testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_organization_iam_custom_role" {
@@ -157,7 +157,7 @@ func testAccCheckGoogleOrganizationIamCustomRole(t *testing.T, n, title, descrip
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		role, err := config.NewIamClient(config.userAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
 
 		if err != nil {
@@ -197,7 +197,7 @@ func testAccCheckGoogleOrganizationIamCustomRoleDeletionStatus(t *testing.T, n s
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		role, err := config.NewIamClient(config.userAgent).Organizations.Roles.Get(rs.Primary.ID).Do()
 
 		if err != nil {

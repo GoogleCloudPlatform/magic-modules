@@ -14,9 +14,9 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -45,9 +45,9 @@ func TestAccBigQueryDataset_datasetWithContents(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -71,9 +71,9 @@ func TestAccBigQueryDataset_access(t *testing.T) {
 	otherDatasetID := fmt.Sprintf("tf_test_other_%s", randString(t, 10))
 	otherTableID := fmt.Sprintf("tf_test_other_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -117,9 +117,9 @@ func TestAccBigQueryDataset_regionalLocation(t *testing.T) {
 
 	datasetID1 := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -141,9 +141,9 @@ func TestAccBigQueryDataset_cmek(t *testing.T) {
 	pid := getTestProjectFromEnv()
 	datasetID1 := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryDataset_cmek(pid, datasetID1, kms.CryptoKey.Name),
@@ -160,7 +160,7 @@ func TestAccBigQueryDataset_cmek(t *testing.T) {
 func testAccAddTable(t *testing.T, datasetID string, tableID string) resource.TestCheckFunc {
 	// Not actually a check, but adds a table independently of terraform
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		table := &bigquery.Table{
 			TableReference: &bigquery.TableReference{
 				DatasetId: datasetID,

@@ -15,9 +15,9 @@ func TestAccComputeAttachedDisk_basic(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-inst-%d", randInt(t))
 	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", getTestProjectFromEnv(), instanceName, diskName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -47,9 +47,9 @@ func TestAccComputeAttachedDisk_full(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%d", randInt(t))
 	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", getTestProjectFromEnv(), instanceName, diskName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -74,9 +74,9 @@ func TestAccComputeAttachedDisk_region(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%d", randInt(t))
 	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", getTestProjectFromEnv(), instanceName, diskName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -101,9 +101,9 @@ func TestAccComputeAttachedDisk_count(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%d", randInt(t))
 	count := 2
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
@@ -126,7 +126,7 @@ func TestAccComputeAttachedDisk_count(t *testing.T) {
 // situation where the detach fails but since the instance/disk get destroyed we wouldn't notice.
 func testCheckAttachedDiskIsNowDetached(t *testing.T, instanceName, diskName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		instance, err := config.NewComputeClient(config.userAgent).Instances.Get(getTestProjectFromEnv(), "us-central1-a", instanceName).Do()
 		if err != nil {
@@ -144,7 +144,7 @@ func testCheckAttachedDiskIsNowDetached(t *testing.T, instanceName, diskName str
 
 func testCheckAttachedDiskContainsManyDisks(t *testing.T, instanceName string, count int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		instance, err := config.NewComputeClient(config.userAgent).Instances.Get(getTestProjectFromEnv(), "us-central1-a", instanceName).Do()
 		if err != nil {

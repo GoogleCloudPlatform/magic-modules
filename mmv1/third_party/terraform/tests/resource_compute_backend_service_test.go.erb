@@ -15,9 +15,9 @@ func TestAccComputeBackendService_basic(t *testing.T) {
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	extraCheckName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -48,9 +48,9 @@ func TestAccComputeBackendService_withBackend(t *testing.T) {
 	igName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	itName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -80,9 +80,9 @@ func TestAccComputeBackendService_withBackendAndMaxUtilization(t *testing.T) {
 	igName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	itName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -118,9 +118,9 @@ func TestAccComputeBackendService_withBackendAndIAP(t *testing.T) {
 	igName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	itName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -152,9 +152,9 @@ func TestAccComputeBackendService_updatePreservesOptionalParameters(t *testing.T
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -185,9 +185,9 @@ func TestAccComputeBackendService_withConnectionDraining(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -208,9 +208,9 @@ func TestAccComputeBackendService_withConnectionDrainingAndUpdate(t *testing.T) 
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -239,9 +239,9 @@ func TestAccComputeBackendService_withHttpsHealthCheck(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -263,9 +263,9 @@ func TestAccComputeBackendService_withCdnPolicy(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -297,9 +297,9 @@ func TestAccComputeBackendService_withSecurityPolicy(t *testing.T) {
 	polName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	edgePolName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -328,9 +328,9 @@ func TestAccComputeBackendService_withCDNEnabled(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -352,9 +352,9 @@ func TestAccComputeBackendService_withSessionAffinity(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -385,9 +385,9 @@ func TestAccComputeBackendService_withAffinityCookieTtlSec(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -411,9 +411,9 @@ func TestAccComputeBackendService_withMaxConnections(t *testing.T) {
 	itName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -446,9 +446,9 @@ func TestAccComputeBackendService_withMaxConnectionsPerInstance(t *testing.T) {
 	itName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -483,9 +483,9 @@ func TestAccComputeBackendService_withMaxRatePerEndpoint(t *testing.T) {
 	network := fmt.Sprintf("tf-test-%s", randSuffix)
 	check := fmt.Sprintf("tf-test-%s", randSuffix)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -520,9 +520,9 @@ func TestAccComputeBackendService_withMaxConnectionsPerEndpoint(t *testing.T) {
 	network := fmt.Sprintf("tf-test-%s", randSuffix)
 	check := fmt.Sprintf("tf-test-%s", randSuffix)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -553,9 +553,9 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
@@ -580,7 +580,7 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 
 func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
 	// Instance template uses UniqueId in some cases
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	fr := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
@@ -589,9 +589,9 @@ func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
 	hc := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
 	urlmap := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -612,9 +612,9 @@ func TestAccComputeBackendService_withLogConfig(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -667,9 +667,9 @@ func TestAccComputeBackendService_trafficDirectorUpdateBasic(t *testing.T) {
 	backendName := fmt.Sprintf("foo-%s", randString(t, 10))
 	checkName := fmt.Sprintf("bar-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -698,9 +698,9 @@ func TestAccComputeBackendService_withCompressionMode(t *testing.T) {
 	backendName := fmt.Sprintf("foo-%s", randString(t, 10))
 	checkName := fmt.Sprintf("bar-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -737,9 +737,9 @@ func TestAccComputeBackendService_trafficDirectorUpdateLbPolicies(t *testing.T) 
 	backendName := fmt.Sprintf("foo-%s", randString(t, 10))
 	checkName := fmt.Sprintf("bar-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -769,9 +769,9 @@ func TestAccComputeBackendService_trafficDirectorUpdateFull(t *testing.T) {
 	backendName := fmt.Sprintf("foo-%s", randString(t, 10))
 	checkName := fmt.Sprintf("bar-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -801,9 +801,9 @@ func TestAccComputeBackendService_regionNegBackend(t *testing.T) {
 
 	suffix := randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

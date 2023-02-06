@@ -17,9 +17,9 @@ func TestAccDataprocClusterIamBinding(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s %s",
 		getTestProjectFromEnv(), "us-central1", cluster, role)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -63,9 +63,9 @@ func TestAccDataprocClusterIamMember(t *testing.T) {
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -97,9 +97,9 @@ func TestAccDataprocClusterIamPolicy(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s",
 		getTestProjectFromEnv(), "us-central1", cluster)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation

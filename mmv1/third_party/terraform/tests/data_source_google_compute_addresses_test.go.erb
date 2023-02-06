@@ -21,9 +21,9 @@ func TestAccDataSourceComputeAddresses(t *testing.T) {
 	dsAllName := "all_addresses"
 	dsAllFullName := fmt.Sprintf("data.google_compute_addresses.%s", dsAllName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeAddressesConfig(addressName, region, region_bis),

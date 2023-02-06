@@ -12,9 +12,9 @@ func TestAccStorageDefaultObjectAcl_basic(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -32,9 +32,9 @@ func TestAccStorageDefaultObjectAcl_noRoleEntity(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -49,9 +49,9 @@ func TestAccStorageDefaultObjectAcl_upgrade(t *testing.T) {
 
 	bucketName := testBucketName(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -87,9 +87,9 @@ func TestAccStorageDefaultObjectAcl_downgrade(t *testing.T) {
 
 	bucketName := testBucketName(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -126,9 +126,9 @@ func TestAccStorageDefaultObjectAcl_unordered(t *testing.T) {
 
 	bucketName := testBucketName(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -141,7 +141,7 @@ func TestAccStorageDefaultObjectAcl_unordered(t *testing.T) {
 func testAccCheckGoogleStorageDefaultObjectAcl(t *testing.T, bucket, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		roleEntity, _ := getRoleEntityPair(roleEntityS)
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		res, err := config.NewStorageClient(config.userAgent).DefaultObjectAccessControls.Get(bucket,
 			roleEntity.Entity).Do()
@@ -160,7 +160,7 @@ func testAccCheckGoogleStorageDefaultObjectAcl(t *testing.T, bucket, roleEntityS
 
 func testAccStorageDefaultObjectAclDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 
@@ -182,7 +182,7 @@ func testAccStorageDefaultObjectAclDestroyProducer(t *testing.T) func(s *terrafo
 func testAccCheckGoogleStorageDefaultObjectAclDelete(t *testing.T, bucket, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		roleEntity, _ := getRoleEntityPair(roleEntityS)
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 
 		_, err := config.NewStorageClient(config.userAgent).DefaultObjectAccessControls.Get(bucket, roleEntity.Entity).Do()
 

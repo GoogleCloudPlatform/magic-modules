@@ -14,9 +14,9 @@ func TestAccDataSourceGoogleFolders_basic(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "tf-test-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFoldersConfig(parent, displayName),

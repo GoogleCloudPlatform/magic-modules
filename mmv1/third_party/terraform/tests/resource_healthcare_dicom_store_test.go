@@ -77,9 +77,9 @@ func TestAccHealthcareDicomStore_basic(t *testing.T) {
 	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 	resourceName := "google_healthcare_dicom_store.default"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckHealthcareDicomStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -162,7 +162,7 @@ func testAccCheckGoogleHealthcareDicomStoreUpdate(t *testing.T, pubsubTopic stri
 			}
 			foundResource = true
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/dicomStores/{{name}}")
 			if err != nil {

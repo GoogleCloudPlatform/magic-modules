@@ -15,9 +15,9 @@ func TestAccServiceNetworkingConnection_create(t *testing.T) {
 	addr := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	service := "servicenetworking.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
 			{
@@ -40,9 +40,9 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 	addr2 := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	service := "servicenetworking.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
 			{
@@ -68,7 +68,7 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 
 func testServiceNetworkingConnectionDestroy(t *testing.T, parent, network string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		parentService := "services/" + parent
 		networkName := fmt.Sprintf("projects/%s/global/networks/%s", getTestProjectFromEnv(), network)
 		listCall := config.NewServiceNetworkingClient(config.userAgent).Services.Connections.List(parentService).Network(networkName)

@@ -14,9 +14,9 @@ func TestAccComputeDiskResourcePolicyAttachment_update(t *testing.T) {
 	policyName := fmt.Sprintf("tf-test-policy-%s", randString(t, 10))
 	policyName2 := fmt.Sprintf("tf-test-policy-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDiskResourcePolicyAttachment_basic(diskName, policyName),

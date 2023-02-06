@@ -17,8 +17,8 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 
 	managedZoneName := fmt.Sprintf("tf-test-zone-%s", randString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck: func() { TestAccPreCheck(t) },
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{

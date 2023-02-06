@@ -21,9 +21,9 @@ func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 		"account_id": accountId,
 	})
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -48,9 +48,9 @@ func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDeploymentManagerDestroyInvalidDeployment(t, deploymentName),
 		Steps: []resource.TestStep{
 			{
@@ -68,9 +68,9 @@ func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -96,9 +96,9 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 		"account_id": "{{ env['name'] }}",
 	})
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -125,9 +125,9 @@ func TestAccDeploymentManagerDeployment_update(t *testing.T) {
 	accountId := "tf-dm-first" + randStr
 	accountId2 := "tf-dm-second" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -352,7 +352,7 @@ EOF
 
 func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -366,7 +366,7 @@ func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, ac
 
 func testDeploymentManagerDeploymentVerifyServiceAccountExists(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -398,7 +398,7 @@ func testAccCheckDeploymentManagerDestroyInvalidDeployment(t *testing.T, deploym
 			}
 		}
 
-		config := googleProviderConfig(t)
+		config := GetGoogleProviderConfig(t)
 		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.DeploymentManagerBasePath, getTestProjectFromEnv(), deploymentName)
 		_, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
 		if !isGoogleApiErrorWithCode(err, 404) {
@@ -421,7 +421,7 @@ func testAccCheckDeploymentManagerDeploymentDestroyProducer(t *testing.T) func(s
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GetGoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{DeploymentManagerBasePath}}projects/{{project}}/global/deployments/{{name}}")
 			if err != nil {

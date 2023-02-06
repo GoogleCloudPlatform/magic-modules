@@ -14,9 +14,9 @@ func TestAccDataSourceGoogleActiveFolder_default(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "tf-test-" + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleActiveFolderConfig(parent, displayName),
@@ -34,9 +34,9 @@ func TestAccDataSourceGoogleActiveFolder_space(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "terraform test " + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleActiveFolderConfig(parent, displayName),
@@ -54,9 +54,9 @@ func TestAccDataSourceGoogleActiveFolder_dash(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "terraform - test " + randString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleActiveFolderConfig(parent, displayName),
