@@ -1,0 +1,78 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+  name: 'BackendServiceSignedUrlKey'
+  kind: 'compute#BackendServiceSignedUrlKey'
+  input: true
+  base_url: projects/{{project}}/global/backendServices/{{backend_service}}
+  create_url: projects/{{project}}/global/backendServices/{{backend_service}}/addSignedUrlKey
+  create_verb: :POST
+  delete_url: projects/{{project}}/global/backendServices/{{backend_service}}/deleteSignedUrlKey?keyName={{name}}
+  delete_verb: :POST
+  self_link: projects/{{project}}/global/backendServices/{{backend_service}}
+  identity:
+    - name
+  nested_query: !ruby/object:Api::Resource::NestedQuery
+    keys:
+      - cdnPolicy
+      - signedUrlKeyNames
+    is_list_of_ids: true
+  description: |
+    A key for signing Cloud CDN signed URLs for Backend Services.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Using Signed URLs': 'https://cloud.google.com/cdn/docs/using-signed-urls/'
+    api: 'https://cloud.google.com/compute/docs/reference/rest/v1/backendServices'
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      kind: 'compute#operation'
+      path: 'name'
+      base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'targetLink'
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'status'
+      complete: 'DONE'
+      allowed:
+        - 'PENDING'
+        - 'RUNNING'
+        - 'DONE'
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error/errors'
+      message: 'message'
+  parameters:
+    - !ruby/object:Api::Type::ResourceRef
+      name: 'backendService'
+      resource: 'BackendService'
+      imports: 'name'
+      description: |
+        The backend service this signed URL key belongs.
+      required: true
+      input: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      api_name: 'keyName'
+      description: |
+        Name of the signed URL key.
+      required: true
+      input: true
+    - !ruby/object:Api::Type::String
+      name: 'keyValue'
+      description: |
+        128-bit key value used for signing the URL. The key value must be a
+        valid RFC 4648 Section 5 base64url encoded string.
+      required: true
+      input: true
+
