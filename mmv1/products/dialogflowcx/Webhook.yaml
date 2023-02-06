@@ -1,0 +1,120 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+  name: 'Webhook'
+  base_url: "{{parent}}/webhooks"
+  update_verb: :PATCH
+  update_mask: true
+  description: |
+    Webhooks host the developer's business logic. During a session, webhooks allow the developer to use the data extracted by Dialogflow's natural language processing to generate dynamic responses, validate collected data, or trigger actions on the backend.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://cloud.google.com/dialogflow/cx/docs'
+    api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.webhooks'
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: parent
+      url_param_only: true
+      input: true
+      description: |
+        The agent to create a webhook for.
+        Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      output: true
+      description: |
+        The unique identifier of the webhook.
+        Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+    - !ruby/object:Api::Type::String
+      name: 'displayName'
+      description: |
+        The human-readable name of the webhook, unique within the agent.
+      required: true
+    - !ruby/object:Api::Type::String
+      name: 'timeout'
+      description: |
+        Webhook execution timeout.
+    - !ruby/object:Api::Type::Boolean
+      name: 'disabled'
+      description: |
+       Indicates whether the webhook is disabled.
+    - !ruby/object:Api::Type::NestedObject
+      name: 'genericWebService'
+      description: |
+        Configuration for a generic web service.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'uri'
+          description: |
+            Whether to use speech adaptation for speech recognition.
+          required: true
+        - !ruby/object:Api::Type::KeyValuePairs
+          name: 'requestHeaders'
+          description: |
+            The HTTP request headers to send together with webhook requests.
+          input: true
+        - !ruby/object:Api::Type::Array
+          name: 'allowedCaCerts'
+          description: |
+            Specifies a list of allowed custom CA certificates (in DER format) for HTTPS verification.
+          item_type: Api::Type::String
+    - !ruby/object:Api::Type::NestedObject
+      name: 'serviceDirectory'
+      description: |
+        Configuration for a Service Directory service.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'service'
+          description: |
+            The name of Service Directory service.
+          required: true
+        - !ruby/object:Api::Type::NestedObject
+          name: 'genericWebService'
+          description: |
+            The name of Service Directory service.
+          required: true
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'uri'
+              description: |
+                Whether to use speech adaptation for speech recognition.
+              required: true
+            - !ruby/object:Api::Type::KeyValuePairs
+              name: 'requestHeaders'
+              description: |
+                The HTTP request headers to send together with webhook requests.
+              input: true
+            - !ruby/object:Api::Type::Array
+              name: 'allowedCaCerts'
+              description: |
+                Specifies a list of allowed custom CA certificates (in DER format) for HTTPS verification.
+              item_type: Api::Type::String
+    - !ruby/object:Api::Type::String
+      name: 'startFlow'
+      output: true
+      description: |
+       Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+    - !ruby/object:Api::Type::String
+      name: 'securitySettings'
+      description: |
+       Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
+    - !ruby/object:Api::Type::Boolean
+      name: 'enableStackdriverLogging'
+      description: |
+       Determines whether this agent should log conversation queries.
+    - !ruby/object:Api::Type::Boolean
+      name: 'enableSpellCorrection'
+      description: |
+        Indicates if automatic spell correction is enabled in detect intent requests.
