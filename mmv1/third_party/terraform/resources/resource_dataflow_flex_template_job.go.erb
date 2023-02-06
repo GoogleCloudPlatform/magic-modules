@@ -29,7 +29,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 		Update: resourceDataflowFlexTemplateJobUpdate,
 		Delete: resourceDataflowFlexTemplateJobDelete,
 		CustomizeDiff: customdiff.All(
-			resourceDataflowJobTypeCustomizeDiff,
+			resourceDataflowFlexJobTypeCustomizeDiff,
 		),
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -575,6 +575,30 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 		return nil
 	}
 	return fmt.Errorf("Unable to cancel the dataflow job '%s' - final state was %q.", d.Id(), d.Get("state").(string))
+}
+
+func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	// All non-virtual fields are ForceNew for batch jobs
+	if d.Get("type") == "JOB_TYPE_BATCH" {
+		resourceSchema := resourceDataflowFlexTemplateJob().Schema
+		for field := range resourceSchema {
+			if field == "on_delete" {
+				continue
+			}
+			// Labels map will likely have suppressed changes, so we check each key instead of the parent field
+			if field == "labels" {
+				if err := resourceDataflowJobIterateMapForceNew(field, d); err != nil {
+					return err
+				}
+			} else if d.HasChange(field) {
+				if err := d.ForceNew(field); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 <% end -%>
