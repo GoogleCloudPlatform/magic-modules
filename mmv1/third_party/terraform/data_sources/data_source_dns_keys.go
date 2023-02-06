@@ -85,7 +85,6 @@ func (d *GoogleDnsKeysDataSource) Schema(ctx context.Context, req datasource.Sch
 				Description:         "The Name of the zone.",
 				MarkdownDescription: "The Name of the zone.",
 				Required:            true,
-				// 				DiffSuppressFunc: compareSelfLinkOrResourceName,
 			},
 			"project": schema.StringAttribute{
 				Description:         "The ID of the project for the Google Cloud.",
