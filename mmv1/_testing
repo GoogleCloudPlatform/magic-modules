@@ -1,0 +1,12 @@
+#!/bin/bash
+folder="products/"
+input="${folder}"
+name_line=false
+line_cache=()
+resource_name=""
+
+while IFS= read -r d; do 
+    echo $d
+done < <(find * -prune -type d)
+
+
