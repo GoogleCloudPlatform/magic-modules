@@ -71,6 +71,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_bitbucket_server_pull_request"
         primary_resource_id: "bbs-pull-request-trigger"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_github_enterprise"
+        primary_resource_id: "ghe-trigger"
+        skip_test: true
 
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
