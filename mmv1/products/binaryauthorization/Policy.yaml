@@ -1,0 +1,134 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+  name: 'Policy'
+  base_url: projects/{{project}}/policy
+  self_link: projects/{{project}}/policy
+  description: |
+    A policy for container image binary authorization.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://cloud.google.com/binary-authorization/'
+    api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
+  create_verb: :PUT
+  delete_verb: :PUT
+  properties:
+    - !ruby/object:Api::Type::String
+      name: description
+      description: A descriptive comment.
+    - !ruby/object:Api::Type::Enum
+      name: globalPolicyEvaluationMode
+      description: |
+        Controls the evaluation of a Google-maintained global admission policy
+        for common system-level images. Images not covered by the global
+        policy will be subject to the project admission policy.
+      values:
+        - :ENABLE
+        - :DISABLE
+    - !ruby/object:Api::Type::Array
+      name: admissionWhitelistPatterns
+      description: |
+        A whitelist of image patterns to exclude from admission rules. If an
+        image's name matches a whitelist pattern, the image's admission
+        requests will always be permitted regardless of your admission rules.
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::String
+            name: namePattern
+            required: true
+            description: |
+              An image name pattern to whitelist, in the form
+              `registry/path/to/image`. This supports a trailing * as a
+              wildcard, but this is allowed only in text after the registry/
+              part.
+    - !ruby/object:Api::Type::Map
+      name: clusterAdmissionRules
+      description: |
+        Per-cluster admission rules. An admission rule specifies either that
+        all container images used in a pod creation request must be attested
+        to by one or more attestors, that all pod creations will be allowed,
+        or that all pod creations will be denied. There can be at most one
+        admission rule per cluster spec.
+
+
+        Identifier format: `{{location}}.{{clusterId}}`.
+        A location is either a compute zone (e.g. `us-central1-a`) or a region
+        (e.g. `us-central1`).
+      key_name: cluster
+      value_type: !ruby/object:Api::Type::NestedObject
+        name: clusterAdmissionRule
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: evaluationMode
+            required: true
+            description: How this admission rule will be evaluated.
+            values:
+              - :ALWAYS_ALLOW
+              - :REQUIRE_ATTESTATION
+              - :ALWAYS_DENY
+          - !ruby/object:Api::Type::Array
+            name: requireAttestationsBy
+            description: |
+              The resource names of the attestors that must attest to a
+              container image, in the format `projects/*/attestors/*`. Each
+              attestor must exist before a policy can reference it. To add an
+              attestor to a policy the principal issuing the policy change
+              request must be able to read the attestor resource.
+
+              Note: this field must be non-empty when the evaluationMode field
+              specifies REQUIRE_ATTESTATION, otherwise it must be empty.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Enum
+            name: enforcementMode
+            required: true
+            description: |
+              The action when a pod creation is denied by the admission rule.
+            values:
+              - :ENFORCED_BLOCK_AND_AUDIT_LOG
+              - :DRYRUN_AUDIT_LOG_ONLY
+    - !ruby/object:Api::Type::NestedObject
+        name: defaultAdmissionRule
+        description: |
+          Default admission rule for a cluster without a per-cluster admission
+          rule.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: evaluationMode
+            description: How this admission rule will be evaluated.
+            required: true
+            values:
+              - :ALWAYS_ALLOW
+              - :REQUIRE_ATTESTATION
+              - :ALWAYS_DENY
+          - !ruby/object:Api::Type::Array
+            name: requireAttestationsBy
+            description: |
+              The resource names of the attestors that must attest to a
+              container image, in the format `projects/*/attestors/*`. Each
+              attestor must exist before a policy can reference it. To add an
+              attestor to a policy the principal issuing the policy change
+              request must be able to read the attestor resource.
+
+              Note: this field must be non-empty when the evaluationMode field
+              specifies REQUIRE_ATTESTATION, otherwise it must be empty.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Enum
+            name: enforcementMode
+            required: true
+            description: |
+              The action when a pod creation is denied by the admission rule.
+            values:
+              - :ENFORCED_BLOCK_AND_AUDIT_LOG
+              - :DRYRUN_AUDIT_LOG_ONLY
