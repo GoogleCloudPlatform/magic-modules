@@ -101,6 +101,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_job_trigger_bigquery_basic"
+        primary_resource_id: "bigquery_basic"
+        vars:
+          trigger: "trigger"
+        test_env_vars:
+          project: :PROJECT_NAME
+        skip_docs: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "dlp_job_trigger_bigquery_row_limit"
         primary_resource_id: "bigquery_row_limit"
         vars:
