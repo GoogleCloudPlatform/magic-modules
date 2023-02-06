@@ -249,19 +249,19 @@ objects:
                 name: 'googlePartitionCerts'
                 description: |
                   Google partition certificate chain corresponding to the attestation.
-          - !ruby/object:Api::Type::NestedObject
-            name: 'externalProtectionLevelOptions'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'externalProtectionLevelOptions'
+        description: |
+          ExternalProtectionLevelOptions stores a group of additional fields for configuring a CryptoKeyVersion that are specific to the EXTERNAL protection level and EXTERNAL_VPC protection levels.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'externalKeyUri'
             description: |
-              ExternalProtectionLevelOptions stores a group of additional fields for configuring a CryptoKeyVersion that are specific to the EXTERNAL protection level and EXTERNAL_VPC protection levels.
-            properties:
-              - !ruby/object:Api::Type::String
-                name: 'externalKeyUri'
-                description: |
-                  The URI for an external resource that this CryptoKeyVersion represents.
-              - !ruby/object:Api::Type::String
-                name: 'ekmConnectionKeyPath'
-                description: |
-                  The path to the external key material on the EKM when using EkmConnection e.g., "v0/my/key". Set this field instead of externalKeyUri when using an EkmConnection.
+              The URI for an external resource that this CryptoKeyVersion represents.
+          - !ruby/object:Api::Type::String
+            name: 'ekmConnectionKeyPath'
+            description: |
+              The path to the external key material on the EKM when using EkmConnection e.g., "v0/my/key". Set this field instead of externalKeyUri when using an EkmConnection.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides: 
         'Creating a key Version':
