@@ -4218,7 +4218,7 @@ objects:
         name: 'ipVersion'
         description: |
           The IP address version that will be used by this forwarding rule.
-          Valid options are IPV4 or IPV6.
+          Valid options are IPV4 and IPV6.
 
           If not set, the IPv4 address will be used by default.
         values:
