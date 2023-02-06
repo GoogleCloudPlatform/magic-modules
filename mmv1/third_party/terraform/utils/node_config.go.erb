@@ -777,7 +777,7 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		kConfig.CpuCfsQuotaPeriod = cpuCfsQuotaPeriod.(string)
 	}
 	if podPidsLimit, ok := cfg["pod_pids_limit"]; ok {
-		kConfig.PodPidsLimit = podPidsLimit.(int64)
+		kConfig.PodPidsLimit = int64(podPidsLimit.(int))
 	}
 	return kConfig
 }
