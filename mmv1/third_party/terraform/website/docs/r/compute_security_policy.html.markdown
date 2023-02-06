@@ -290,6 +290,88 @@ The following arguments are supported:
 
   **Note:** To avoid the conflict between `enforce_on_key` and `enforce_on_key_configs`, the field [`enforce_on_key`](#enforce_on_key) needs to be set to an empty string.
 
+	## Example Usage
+
+	**Scenario 01:** A scenario that will cause an conflit between `enforce_on_key` and `enforce_on_key_configs`, because `enforce_on_key` was not specified as an empty string and it will be insert with "ALL" value as default: 
+
+	```hcl
+	resource "google_compute_security_policy" "policy" {
+		name        = "%s"
+		description = "throttle rule with enforce_on_key_configs"
+
+		rule {
+			action   = "throttle"
+			priority = "2147483647"
+			match {
+				versioned_expr = "SRC_IPS_V1"
+				config {
+					src_ip_ranges = ["*"]
+				}
+			}
+			description = "default rule"
+
+			rate_limit_options {
+				conform_action = "allow"
+				exceed_action = "redirect"
+
+				enforce_on_key_configs {
+					enforce_on_key_type = "IP"
+				}
+				exceed_redirect_options {
+					type = "EXTERNAL_302"
+					target = "https://www.example.com"
+				}
+
+				rate_limit_threshold {
+					count = 10
+					interval_sec = 60
+				}
+			}
+		}
+	}
+	```
+
+	**Scenario 02:** A scenario that won't cause any conflict between `enforce_on_key` and `enforce_on_key_configs`, because `enforce_on_key` was specified as an empty string:
+
+	```hcl
+	resource "google_compute_security_policy" "policy" {
+		name        = "%s"
+		description = "throttle rule with enforce_on_key_configs"
+
+		rule {
+			action   = "throttle"
+			priority = "2147483647"
+			match {
+				versioned_expr = "SRC_IPS_V1"
+				config {
+					src_ip_ranges = ["*"]
+				}
+			}
+			description = "default rule"
+
+			rate_limit_options {
+				conform_action = "allow"
+				exceed_action = "redirect"
+
+				enforce_on_key = ""
+
+				enforce_on_key_configs {
+					enforce_on_key_type = "IP"
+				}
+				exceed_redirect_options {
+					type = "EXTERNAL_302"
+					target = "https://www.example.com"
+				}
+
+				rate_limit_threshold {
+					count = 10
+					interval_sec = 60
+				}
+			}
+		}
+	}
+	```
+
 <a name="nested_enforce_on_key_configs"></a>The `enforce_on_key_configs` block supports:
 
 * `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types: HTTP_HEADER: Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE: Name of the HTTP cookie whose value is taken as the key value.
