@@ -1,0 +1,1023 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: VertexAI
+display_name: Vertex AI
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://{{region}}-aiplatform.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://{{region}}-aiplatform.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+objects:
+# Vertex AI Tensorboards
+  - !ruby/object:Api::Resource
+    name: Tensorboard
+    base_url: projects/{{project}}/locations/{{region}}/tensorboards
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      Tensorboard is a physical database that stores users' training metrics. A default Tensorboard is provided in each region of a GCP project. If needed users can also create extra Tensorboards in their projects.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the tensorboard. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: Name of the Tensorboard.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: User provided name of this Tensorboard.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: Description of this Tensorboard.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionSpec'
+        input: true
+        description: |
+          Customer-managed encryption key spec for a Tensorboard. If set, this Tensorboard and all sub-resources of this Tensorboard will be secured by this key.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            required: true
+            description: |
+              The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+              Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+            input: true
+      - !ruby/object:Api::Type::String
+        name: 'blobStoragePathPrefix'
+        description: Consumer project Cloud Storage path prefix used to store blob data, which can either be a bucket or directory. Does not end with a '/'.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'runCount'
+        description: The number of Runs stored in this Tensorboard.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the Tensorboard was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the Tensorboard was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          The labels with user-defined metadata to organize your Tensorboards.
+# Vertex AI Datasets
+  - !ruby/object:Api::Resource
+    name: Dataset
+    base_url: projects/{{project}}/locations/{{region}}/datasets
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.datasets'
+    async: !ruby/object:Api::OpAsync
+      actions:
+        - create
+        - delete
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      A collection of DataItems and Annotations on them.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the dataset. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The resource name of the Dataset. This value is set by Google.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          The user-defined name of the Dataset. The name can be up to 128 characters long and can be consist of any UTF-8 characters.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the dataset was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the dataset was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to this Workflow.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionSpec'
+        input: true
+        description: |
+          Customer-managed encryption key spec for a Dataset. If set, this Dataset and all sub-resources of this Dataset will be secured by this key.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            description: |
+              Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+              Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+            input: true
+      - !ruby/object:Api::Type::String
+        name: 'metadataSchemaUri'
+        required: true
+        input: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing additional information about the Dataset. The schema is defined as an OpenAPI 3.0.2 Schema Object. The schema files that can be used here are found in gs://google-cloud-aiplatform/schema/dataset/metadata/.
+
+# Vertex AI Endpoints
+  - !ruby/object:Api::Resource
+    name: Endpoint
+    base_url: projects/{{project}}/locations/{{location}}/endpoints
+    create_url: projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}
+    self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints'
+    async: !ruby/object:Api::OpAsync
+      actions:
+        - create
+        - delete
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: "Models are deployed into it, and afterwards Endpoint is called to obtain predictions and explanations."
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: location
+        description: The location for the resource
+        url_param_only: true
+        required: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: The resource name of the Endpoint. The name must be numeric with no leading zeros and can be at most 10 digits.
+        url_param_only: true
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: Required. The display name of the Endpoint. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: description
+        description: The description of the Endpoint.
+      - !ruby/object:Api::Type::Array
+        name: deployedModels
+        description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively. Models can also be deployed and undeployed using the [Cloud Console](https://console.cloud.google.com/vertex-ai/).
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: deployedModels
+          description: Output only. The models deployed in this Endpoint. To add or remove DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel respectively. Models can also be deployed and undeployed using the [Cloud Console](https://console.cloud.google.com/vertex-ai/).
+          properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: dedicatedResources
+                description: A description of resources that are dedicated to the DeployedModel, and that need a higher degree of manual configuration.
+                output: true
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: machineSpec
+                    description: The specification of a single machine used by the prediction.
+                    output: true
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: machineType
+                        description: 'The type of the machine. See the [list of machine types supported for prediction](https://cloud.google.com/vertex-ai/docs/predictions/configure-compute#machine-types) See the [list of machine types supported for custom training](https://cloud.google.com/vertex-ai/docs/training/configure-compute#machine-types). For DeployedModel this field is optional, and the default value is `n1-standard-2`. For BatchPredictionJob or as part of WorkerPoolSpec this field is required. TODO(rsurowka): Try to better unify the required vs optional.'
+                        output: true
+                      - !ruby/object:Api::Type::String
+                        name: acceleratorType
+                        description: The type of accelerator(s) that may be attached to the machine as per accelerator_count. See possible values [here](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec#AcceleratorType).
+                        output: true
+                      - !ruby/object:Api::Type::Integer
+                        name: acceleratorCount
+                        description: The number of accelerators to attach to the machine.
+                        output: true
+                  - !ruby/object:Api::Type::Integer
+                    name: minReplicaCount
+                    description: The minimum number of machine replicas this DeployedModel will be always deployed on. This value must be greater than or equal to 1. If traffic against the DeployedModel increases, it may dynamically be deployed onto more replicas, and as traffic decreases, some of these extra replicas may be freed.
+                    output: true
+                  - !ruby/object:Api::Type::Integer
+                    name: maxReplicaCount
+                    description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases. If the requested value is too large, the deployment will error, but if deployment succeeds then the ability to scale the model to that many replicas is guaranteed (barring service outages). If traffic against the DeployedModel increases beyond what its replicas at maximum may handle, a portion of the traffic will be dropped. If this value is not provided, will use min_replica_count as the default value. The value of this field impacts the charge against Vertex CPU and GPU quotas. Specifically, you will be charged for max_replica_count * number of cores in the selected machine type) and (max_replica_count * number of GPUs per replica in the selected machine type).
+                    output: true
+                  - !ruby/object:Api::Type::Array
+                    name: autoscalingMetricSpecs
+                    description: The metric specifications that overrides a resource utilization metric (CPU utilization, accelerator's duty cycle, and so on) target value (default to 60 if not set). At most one entry is allowed per metric. If machine_spec.accelerator_count is above 0, the autoscaling will be based on both CPU utilization and accelerator's duty cycle metrics and scale up when either metrics exceeds its target value while scale down if both metrics are under their target value. The default target value is 60 for both metrics. If machine_spec.accelerator_count is 0, the autoscaling will be based on CPU utilization metric only with default target value 60 if not explicitly set. For example, in the case of Online Prediction, if you want to override target CPU utilization to 80, you should set autoscaling_metric_specs.metric_name to `aiplatform.googleapis.com/prediction/online/cpu/utilization` and autoscaling_metric_specs.target to `80`.
+                    output: true
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      name: autoscalingMetricSpecs
+                      description: The metric specifications that overrides a resource utilization metric (CPU utilization, accelerator's duty cycle, and so on) target value (default to 60 if not set). At most one entry is allowed per metric. If machine_spec.accelerator_count is above 0, the autoscaling will be based on both CPU utilization and accelerator's duty cycle metrics and scale up when either metrics exceeds its target value while scale down if both metrics are under their target value. The default target value is 60 for both metrics. If machine_spec.accelerator_count is 0, the autoscaling will be based on CPU utilization metric only with default target value 60 if not explicitly set. For example, in the case of Online Prediction, if you want to override target CPU utilization to 80, you should set autoscaling_metric_specs.metric_name to `aiplatform.googleapis.com/prediction/online/cpu/utilization` and autoscaling_metric_specs.target to `80`.
+                      properties:
+                          - !ruby/object:Api::Type::String
+                            name: metricName
+                            description: 'The resource metric name. Supported metrics: * For Online Prediction: * `aiplatform.googleapis.com/prediction/online/accelerator/duty_cycle` * `aiplatform.googleapis.com/prediction/online/cpu/utilization`'
+                            output: true
+                          - !ruby/object:Api::Type::Integer
+                            name: target
+                            description: The target resource utilization in percentage (1% - 100%) for the given metric; once the real usage deviates from the target by a certain percentage, the machine replicas change. The default value is 60 (representing 60%) if not provided.
+                            output: true
+              - !ruby/object:Api::Type::NestedObject
+                name: automaticResources
+                description: A description of resources that to large degree are decided by Vertex AI, and require only a modest additional configuration.
+                output: true
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: minReplicaCount
+                    description: The minimum number of replicas this DeployedModel will be always deployed on. If traffic against it increases, it may dynamically be deployed onto more replicas up to max_replica_count, and as traffic decreases, some of these extra replicas may be freed. If the requested value is too large, the deployment will error.
+                    output: true
+                  - !ruby/object:Api::Type::Integer
+                    name: maxReplicaCount
+                    description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases. If the requested value is too large, the deployment will error, but if deployment succeeds then the ability to scale the model to that many replicas is guaranteed (barring service outages). If traffic against the DeployedModel increases beyond what its replicas at maximum may handle, a portion of the traffic will be dropped. If this value is not provided, a no upper bound for scaling under heavy traffic will be assume, though Vertex AI may be unable to scale beyond certain replica number.
+                    output: true
+              - !ruby/object:Api::Type::String
+                name: id
+                description: The ID of the DeployedModel. If not provided upon deployment, Vertex AI will generate a value for this ID. This value should be 1-10 characters, and valid characters are /[0-9]/.
+                output: true
+              - !ruby/object:Api::Type::String
+                name: model
+                description: The name of the Model that this is the deployment of. Note that the Model may be in a different location than the DeployedModel's Endpoint.
+                output: true
+              - !ruby/object:Api::Type::String
+                name: modelVersionId
+                description: Output only. The version ID of the model that is deployed.
+                output: true
+              - !ruby/object:Api::Type::String
+                name: displayName
+                description: The display name of the DeployedModel. If not provided upon creation, the Model's display_name is used.
+                output: true
+              - !ruby/object:Api::Type::String
+                name: createTime
+                description: Output only. Timestamp when the DeployedModel was created.
+                output: true
+              - !ruby/object:Api::Type::String
+                name: serviceAccount
+                description: The service account that the DeployedModel's container runs as. Specify the email address of the service account. If this service account is not specified, the container runs as a service account that doesn't have access to the resource project. Users deploying the Model must have the `iam.serviceAccounts.actAs` permission on this service account.
+                output: true
+              - !ruby/object:Api::Type::Boolean
+                name: enableAccessLogging
+                description: These logs are like standard server access logs, containing information like timestamp and latency for each prediction request. Note that Stackdriver logs may incur a cost, especially if your project receives prediction requests at a high queries per second rate (QPS). Estimate your costs before enabling this option.
+                output: true
+              - !ruby/object:Api::Type::NestedObject
+                name: privateEndpoints
+                description: Output only. Provide paths for users to send predict/explain/health requests directly to the deployed model services running on Cloud via private services access. This field is populated if network is configured.
+                output: true
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: predictHttpUri
+                    description: Output only. Http(s) path to send prediction requests.
+                    output: true
+                  - !ruby/object:Api::Type::String
+                    name: explainHttpUri
+                    description: Output only. Http(s) path to send explain requests.
+                    output: true
+                  - !ruby/object:Api::Type::String
+                    name: healthHttpUri
+                    description: Output only. Http(s) path to send health check requests.
+                    output: true
+                  - !ruby/object:Api::Type::String
+                    name: serviceAttachment
+                    description: Output only. The name of the service attachment resource. Populated if private service connect is enabled.
+                    output: true
+              - !ruby/object:Api::Type::String
+                name: sharedResources
+                description: 'The resource name of the shared DeploymentResourcePool to deploy on. Format: projects/{project}/locations/{location}/deploymentResourcePools/{deployment_resource_pool}'
+                output: true
+              - !ruby/object:Api::Type::Boolean
+                name: enableContainerLogging
+                description: If true, the container of the DeployedModel instances will send `stderr` and `stdout` streams to Stackdriver Logging. Only supported for custom-trained Models and AutoML Tabular Models.
+                output: true
+      - !ruby/object:Api::Type::String
+        name: etag
+        description: Used to perform consistent read-modify-write updates. If not set, a blind "overwrite" update happens.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labels
+        description: The labels with user-defined metadata to organize your Endpoints. Label keys and values can be no longer than 64 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and dashes. International characters are allowed. See https://goo.gl/xmQnxf for more information and examples of labels.
+      - !ruby/object:Api::Type::String
+        name: createTime
+        description: Output only. Timestamp when this Endpoint was created.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: updateTime
+        description: Output only. Timestamp when this Endpoint was last updated.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: encryptionSpec
+        description: Customer-managed encryption key spec for an Endpoint. If set, this Endpoint and all sub-resources of this Endpoint will be secured by this key.
+        input: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: kmsKeyName
+            description: 'Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`. The key needs to be in the same region as where the compute resource is created.'
+            required: true
+            input: true
+      - !ruby/object:Api::Type::String
+        name: network
+        description: 'The full name of the Google Compute Engine [network](https://cloud.google.com//compute/docs/networks-and-firewalls#networks) to which the Endpoint should be peered. Private services access must already be configured for the network. If left unspecified, the Endpoint is not peered with any network. Only one of the fields, network or enable_private_service_connect, can be set. [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert): `projects/{project}/global/networks/{network}`. Where `{project}` is a project number, as in `12345`, and `{network}` is network name.'
+        input: true
+      - !ruby/object:Api::Type::String
+        name: modelDeploymentMonitoringJob
+        description: 'Output only. Resource name of the Model Monitoring job associated with this Endpoint if monitoring is enabled by CreateModelDeploymentMonitoringJob. Format: `projects/{project}/locations/{location}/modelDeploymentMonitoringJobs/{model_deployment_monitoring_job}`'
+        output: true
+
+# Vertex AI Featurestores
+  - !ruby/object:Api::Resource
+    name: Featurestore
+    base_url: projects/{{project}}/locations/{{region}}/featurestores
+    create_url: projects/{{project}}/locations/{{region}}/featurestores?featurestoreId={{name}}
+    self_link: 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: featurestore
+      import_format: ['projects/{{project}}/locations/{{region}}/featurestores/{{name}}']
+      example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore.tf.erb'
+      min_version: beta
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      A collection of DataItems and Annotations on them.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the dataset. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the Featurestore. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{region}}/featurestores/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: Used to perform consistent read-modify-write updates.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the featurestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to this Featurestore.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'onlineServingConfig'
+        description: |
+           Config for online serving resources.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'fixedNodeCount'
+            exactly_one_of:
+              - online_serving_config.0.fixed_node_count
+              - online_serving_config.0.scaling
+            description: |
+              The number of nodes for each cluster. The number of nodes will not scale automatically but can be scaled manually by providing different values when updating.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scaling'
+            exactly_one_of:
+              - online_serving_config.0.fixed_node_count
+              - online_serving_config.0.scaling
+            description: |
+              Online serving scaling configuration. Only one of fixedNodeCount and scaling can be set. Setting one will reset the other.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'minNodeCount'
+                required: true
+                description: |
+                  The minimum number of nodes to scale down to. Must be greater than or equal to 1.
+              - !ruby/object:Api::Type::Integer
+                name: 'maxNodeCount'
+                required: true
+                description: |
+                  The maximum number of nodes to scale up to. Must be greater than minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionSpec'
+        description: |
+           If set, both of the online and offline data storage will be secured by this key.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            required: true
+            description: |
+              The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the compute resource is created.
+
+# Vertex AI Featurestore Entity Type
+  - !ruby/object:Api::Resource
+    name: FeaturestoreEntitytype
+    base_url: '{{featurestore}}/entityTypes'
+    create_url: '{{featurestore}}/entityTypes?entityTypeId={{name}}'
+    self_link: '{{featurestore}}/entityTypes/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_type: featurestore
+      parent_resource_attribute: entitytype
+      import_format: ['{{%featurestore}}/entityTypes/{{name}}', '{{name}}']
+      example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore_entitytype.tf.erb'
+      min_version: beta
+    async: !ruby/object:Api::OpAsync
+      actions:
+        - create
+        - delete
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+      include_project: true
+    description: |-
+      An entity type is a type of object in a system that needs to be modeled and have stored information about. For example, driver is an entity type, and driver0 is an instance of an entity type driver.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: featurestore
+        description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}.
+        url_param_only: true
+        input: true
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the EntityType. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
+        input: true
+        url_param_only: true
+        pattern: '{featurestore}}/entityTypes/{{name}}'
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: Optional. Description of the EntityType.
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: Used to perform consistent read-modify-write updates.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the featurestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to this EntityType.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'monitoringConfig'
+        description: |
+          The default monitoring configuration for all Features under this EntityType.
+
+          If this is populated with [FeaturestoreMonitoringConfig.monitoring_interval] specified, snapshot analysis monitoring is enabled. Otherwise, snapshot analysis monitoring is disabled.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'snapshotAnalysis'
+            description: |
+              The config for Snapshot Analysis Based Feature Monitoring.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'disabled'
+                default_value: false
+                description: |
+                  The monitoring schedule for snapshot analysis. For EntityType-level config: unset / disabled = true indicates disabled by default for Features under it; otherwise by default enable snapshot analysis monitoring with monitoringInterval for Features under it.
+              - !ruby/object:Api::Type::String
+                name: 'monitoringInterval'
+                min_version: beta
+                deprecation_message: This field is unavailable in the GA provider and will be removed from the beta provider in a future release.
+                description: |
+                  Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
+
+                  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+              - !ruby/object:Api::Type::Integer
+                name: 'monitoringIntervalDays'
+                description: |
+                  Configuration of the snapshot analysis based monitoring pipeline running interval. The value indicates number of days. The default value is 1.
+                  If both FeaturestoreMonitoringConfig.SnapshotAnalysis.monitoring_interval_days and [FeaturestoreMonitoringConfig.SnapshotAnalysis.monitoring_interval][] are set when creating/updating EntityTypes/Features, FeaturestoreMonitoringConfig.SnapshotAnalysis.monitoring_interval_days will be used.
+                default_value: 1
+              - !ruby/object:Api::Type::Integer
+                name: 'stalenessDays'
+                description: |
+                  Customized export features time window for snapshot analysis. Unit is one day. The default value is 21 days. Minimum value is 1 day. Maximum value is 4000 days.
+                default_value: 21
+          - !ruby/object:Api::Type::NestedObject
+            name: 'importFeaturesAnalysis'
+            description: |
+              The config for ImportFeatures Analysis Based Feature Monitoring.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: state
+                description: |
+                  Whether to enable / disable / inherite default hebavior for import features analysis. The value must be one of the values below:
+                  * DEFAULT: The default behavior of whether to enable the monitoring. EntityType-level config: disabled.
+                  * ENABLED: Explicitly enables import features analysis. EntityType-level config: by default enables import features analysis for all Features under it.
+                  * DISABLED: Explicitly disables import features analysis. EntityType-level config: by default disables import features analysis for all Features under it.
+              - !ruby/object:Api::Type::String
+                name: 'anomalyDetectionBaseline'
+                description: |
+                  Defines the baseline to do anomaly detection for feature values imported by each [entityTypes.importFeatureValues][] operation. The value must be one of the values below:
+                  * LATEST_STATS: Choose the later one statistics generated by either most recent snapshot analysis or previous import features analysis. If non of them exists, skip anomaly detection and only generate a statistics.
+                  * MOST_RECENT_SNAPSHOT_STATS: Use the statistics generated by the most recent snapshot analysis if exists.
+                  * PREVIOUS_IMPORT_FEATURES_STATS: Use the statistics generated by the previous import features analysis if exists.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'numericalThresholdConfig'
+            description: |
+              Threshold for numerical features of anomaly detection. This is shared by all objectives of Featurestore Monitoring for numerical features (i.e. Features with type (Feature.ValueType) DOUBLE or INT64).
+            properties:
+              - !ruby/object:Api::Type::Double
+                name: 'value'
+                description: |
+                  Specify a threshold value that can trigger the alert. For numerical feature, the distribution distance is calculated by Jensen–Shannon divergence. Each feature must have a non-zero threshold if they need to be monitored. Otherwise no alert will be triggered for that feature. The default value is 0.3.
+                required: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'categoricalThresholdConfig'
+            description: |
+              Threshold for categorical features of anomaly detection. This is shared by all types of Featurestore Monitoring for categorical features (i.e. Features with type (Feature.ValueType) BOOL or STRING).
+            properties:
+              - !ruby/object:Api::Type::Double
+                name: 'value'
+                description: |
+                  Specify a threshold value that can trigger the alert. For categorical feature, the distribution distance is calculated by L-inifinity norm. Each feature must have a non-zero threshold if they need to be monitored. Otherwise no alert will be triggered for that feature. The default value is 0.3.
+                required: true
+
+
+# Vertex AI Featurestore Entity Type Feature
+  - !ruby/object:Api::Resource
+    name: FeaturestoreEntitytypeFeature
+    base_url: '{{entitytype}}/features'
+    create_url: '{{entitytype}}/features?featureId={{name}}'
+    self_link: '{{entitytype}}/features/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features'
+    async: !ruby/object:Api::OpAsync
+      actions:
+        - create
+        - delete
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+      include_project: true
+    description: |-
+      Feature Metadata information that describes an attribute of an entity type. For example, apple is an entity type, and color is a feature that describes apple.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: entitytype
+        description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}/entityTypes/{entitytype}.
+        url_param_only: true
+        input: true
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the feature. The feature can be up to 64 characters long and can consist only of ASCII Latin letters A-Z and a-z, underscore(_), and ASCII digits 0-9 starting with a letter. The value will be unique given an entity type.
+        input: true
+        url_param_only: true
+        pattern: '{{entitytype}}/features/{{name}}'
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: Used to perform consistent read-modify-write updates.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the entity type was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+           The timestamp when the entity type was most recently updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to the feature.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: Description of the feature.
+      - !ruby/object:Api::Type::String
+        name: 'valueType'
+        description: |
+          Type of Feature value. Immutable. https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features#ValueType
+        required: true
+        input: true
+# Vertex ML Metadata
+  - !ruby/object:Api::Resource
+    name: MetadataStore
+    base_url: projects/{{project}}/locations/{{region}}/metadataStores
+    self_link: 'projects/{{project}}/locations/{{region}}/metadataStores/{{name}}'
+    create_url: projects/{{project}}/locations/{{region}}/metadataStores?metadataStoreId={{name}}
+    min_version: beta
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/vertex-ai/docs'
+      api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.metadataStores'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      Instance of a metadata store. Contains a set of metadata that can be queried.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the Metadata Store. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the MetadataStore. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{region}}/metadataStores/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: Description of the MetadataStore.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the MetadataStore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionSpec'
+        input: true
+        description: |
+          Customer-managed encryption key spec for a MetadataStore. If set, this MetadataStore and all sub-resources of this MetadataStore will be secured by this key.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            description: |
+              Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+              Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+            input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'state'
+        output: true
+        description: |
+          State information of the MetadataStore.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'diskUtilizationBytes'
+            description: |
+              The disk utilization of the MetadataStore in bytes.
+            output: true
+# Vertex AI Matching Engine Index
+  - !ruby/object:Api::Resource
+    name: Index
+    base_url: projects/{{project}}/locations/{{region}}/indexes
+    create_url: projects/{{project}}/locations/{{region}}/indexes
+    self_link: projects/{{project}}/locations/{{region}}/indexes/{{name}}
+    update_verb: :PATCH
+    update_mask: true
+    create_verb: :POST
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexes/
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |-
+      A representation of a collection of database items organized in a way that allows for approximate nearest neighbor (a.k.a ANN) algorithms search.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region of the index. eg us-central1
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The resource name of the Index.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: The description of the Index.
+      # Please take a look at the following links for the original definition:
+        # https://cloud.google.com/vertex-ai/docs/matching-engine/create-manage-index#create_index-drest
+        # https://cloud.google.com/vertex-ai/docs/matching-engine/configuring-indexes
+      - !ruby/object:Api::Type::NestedObject
+        name: 'metadata'
+        description: An additional information about the Index
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'contentsDeltaUri'
+            description: |-
+              Allows inserting, updating  or deleting the contents of the Matching Engine Index.
+              The string must be a valid Cloud Storage directory path. If this
+              field is set when calling IndexService.UpdateIndex, then no other
+              Index field can be also updated as part of the same call.
+              The expected structure and format of the files this URI points to is
+              described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
+          - !ruby/object:Api::Type::Boolean
+            name: 'isCompleteOverwrite'
+            description: |-
+              If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
+              then existing content of the Index will be replaced by the data from the contentsDeltaUri.
+            default_value: false
+          - !ruby/object:Api::Type::NestedObject
+            name: 'config'
+            input: true
+            description: The configuration of the Matching Engine Index.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'dimensions'
+                description: The number of dimensions of the input vectors.
+                required: true
+              - !ruby/object:Api::Type::Integer
+                name: 'approximateNeighborsCount'
+                description: |-
+                  The default number of neighbors to find via approximate search before exact reordering is
+                  performed. Exact reordering is a procedure where results returned by an
+                  approximate search algorithm are reordered via a more expensive distance computation.
+                  Required if tree-AH algorithm is used.
+              - !ruby/object:Api::Type::String
+                name: 'distanceMeasureType'
+                description: |-
+                  The distance measure used in nearest neighbor search. The value must be one of the followings:
+                  * SQUARED_L2_DISTANCE: Euclidean (L_2) Distance
+                  * L1_DISTANCE: Manhattan (L_1) Distance
+                  * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
+                  * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
+                default_value: "DOT_PRODUCT_DISTANCE"
+              - !ruby/object:Api::Type::String
+                name: 'featureNormType'
+                description: |-
+                  Type of normalization to be carried out on each vector. The value must be one of the followings: 
+                  * UNIT_L2_NORM: Unit L2 normalization type
+                  * NONE: No normalization type is specified.
+                default_value: "NONE"
+              - !ruby/object:Api::Type::NestedObject
+                name: 'algorithmConfig'
+                description: The configuration with regard to the algorithms used for efficient search.
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'treeAhConfig'
+                    exactly_one_of:
+                      - treeAhConfig
+                      - bruteForceConfig
+                    description: |-
+                      Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
+                      Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+                    properties:
+                      - !ruby/object:Api::Type::Integer
+                        name: 'leafNodeEmbeddingCount'
+                        description: Number of embeddings on each leaf node. The default value is 1000 if not set.
+                        default_value: 1000
+                      - !ruby/object:Api::Type::Integer
+                        name: 'leafNodesToSearchPercent'
+                        description: |-
+                          The default percentage of leaf nodes that any query may be searched. Must be in
+                          range 1-100, inclusive. The default value is 10 (means 10%) if not set.
+                        default_value: 10
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'bruteForceConfig'
+                    allow_empty_object: true
+                    send_empty_value: true
+                    properties: []
+                    exactly_one_of:
+                      - treeAhConfig
+                      - bruteForceConfig
+                    description: |-
+                      Configuration options for using brute force search, which simply implements the
+                      standard linear search in the database for each query.
+      - !ruby/object:Api::Type::String
+        name: 'metadataSchemaUri'
+        description: |-
+         Points to a YAML file stored on Google Cloud Storage describing additional information about the Index, that is specific to it. Unset if the Index does not have any additional information.
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'deployedIndexes'
+        output: true
+        description: The pointers to DeployedIndexes created from this Index. An Index can be only deleted if all its DeployedIndexes had been undeployed first.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::String
+            name: 'indexEndpoint'
+            output: true
+            description: A resource name of the IndexEndpoint.
+          - !ruby/object:Api::Type::String
+            name: 'deployedIndexId'
+            output: true
+            description: The ID of the DeployedIndex in the above IndexEndpoint.
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: Used to perform consistent read-modify-write updates.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: The labels with user-defined metadata to organize your Indexes.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'indexStats'
+        output: true
+        description: Stats of the index resource.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'vectorsCount'
+            output: true
+            description: The number of vectors in the Index.
+          - !ruby/object:Api::Type::Integer
+            name: 'shardsCount'
+            output: true
+            description: The number of shards in the Index.
+      - !ruby/object:Api::Type::String
+        name: 'indexUpdateMethod'
+        input: true
+        default_value: BATCH_UPDATE
+        description: |-
+          The update method to use with this Index. The value must be the followings. If not set, BATCH_UPDATE will be used by default.
+          * BATCH_UPDATE: user can call indexes.patch with files on Cloud Storage of datapoints to update.
+          * STREAM_UPDATE: user can call indexes.upsertDatapoints/DeleteDatapoints to update the Index and the updates will be applied in corresponding DeployedIndexes in nearly real-time.
