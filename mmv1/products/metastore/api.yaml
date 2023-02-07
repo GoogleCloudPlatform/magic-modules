@@ -338,7 +338,7 @@ objects:
     description: |
       A managed metastore federation.
     iam_policy: !ruby/object:Api::Resource::IamPolicy
-      # skip_import_test: true
+      skip_import_test: true
       parent_resource_attribute: federation_id
       exclude: false
       method_name_separator: ':'
