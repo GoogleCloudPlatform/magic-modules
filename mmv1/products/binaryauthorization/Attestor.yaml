@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -98,7 +99,7 @@
                 # TODO (mbang): Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
                 description: |
                   A raw PKIX SubjectPublicKeyInfo format public key.
-                  
+
                   NOTE: id may be explicitly provided by the caller when using this
                   type of public key, but it MUST be a valid RFC3986 URI. If id is left
                   blank, a default one will be computed based on the digest of the DER
