@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -105,5 +106,5 @@
           input: true
           required: true
           description: |
-            A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://` and // be a valid 
+            A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://` and // be a valid
             with length <2000 characters. For example: `https://container.googleapis.com/v1/projects/my-project/locations/us-west1/clusters/my-cluster` (must be `locations` rather than `zones`). If the cluster is provisioned with Terraform, this is `"https://container.googleapis.com/v1/${google_container_cluster.my-cluster.id}"`.

@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,7 +31,7 @@
        Configuration related to local sign in methods.
       properties:
         - !ruby/object:Api::Type::NestedObject
-          name: email 
+          name: email
           description: |
             Configuration options related to authenticating a user by their email address.
           properties:
@@ -41,11 +42,11 @@
           - !ruby/object:Api::Type::Boolean
             name: 'passwordRequired'
             description: |
-              Whether a password is required for email auth or not. If true, both an email and 
-              password must be provided to sign in. If false, a user may sign in via either 
+              Whether a password is required for email auth or not. If true, both an email and
+              password must be provided to sign in. If false, a user may sign in via either
               email/password or email link.
         - !ruby/object:Api::Type::NestedObject
-          name: phoneNumber 
+          name: phoneNumber
           description: |
             Configuration options related to authenticated a user by their phone number.
           properties:
@@ -58,7 +59,7 @@
             description: |
               A map of <test phone number, fake code> that can be used for phone auth testing.
         - !ruby/object:Api::Type::NestedObject
-          name: anonymous 
+          name: anonymous
           description: |
             Configuration options related to authenticating an anonymous user.
           properties:
@@ -68,12 +69,12 @@
             description: |
               Whether anonymous user auth is enabled for the project or not.
         - !ruby/object:Api::Type::Boolean
-          name: allowDuplicateEmails 
+          name: allowDuplicateEmails
           description: |
             Whether to allow more than one account to have the same email.
         - !ruby/object:Api::Type::NestedObject
           name: hashConfig
-          output: true 
+          output: true
           description: |
             Output only. Hash config information.
           properties:

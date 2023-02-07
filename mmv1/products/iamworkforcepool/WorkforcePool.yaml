@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -86,7 +87,7 @@
       name: 'sessionDuration'
       description: |
         Duration that the Google Cloud access tokens, console sign-in sessions,
-        and `gcloud` sign-in sessions from this pool are valid.  
+        and `gcloud` sign-in sessions from this pool are valid.
         Must be greater than 15 minutes (900s) and less than 12 hours (43200s).
         If `sessionDuration` is not configured, minted credentials have a default duration of one hour (3600s).
         A duration in seconds with up to nine fractional digits, ending with '`s`'. Example: "`3.5s`".

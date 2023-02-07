@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -221,9 +222,9 @@
       min_version: beta
       item_type: !ruby/object:Api::Type::NestedObject
         properties:
-          - !ruby/object:Api::Type::String 
+          - !ruby/object:Api::Type::String
             name: pubsubTopic
-            required: true 
+            required: true
             description: |
               The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
               PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
@@ -235,9 +236,9 @@
             name: sendFullResource
             description: |
               Whether to send full FHIR resource to this Pub/Sub topic for Create and Update operation.
-              Note that setting this to true does not guarantee that all resources will be sent in the format of 
+              Note that setting this to true does not guarantee that all resources will be sent in the format of
               full FHIR resource. When a resource change is too large or during heavy traffic, only the resource name will be
-              sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether 
+              sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether
               it needs to fetch the full resource as a separate operation.
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
