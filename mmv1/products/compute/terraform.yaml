@@ -3472,6 +3472,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           external_gateway_name: "external-gateway"
           global_address_name: "global-address"
           router_name: "ha-vpn-router1"
+      - !ruby/object:Provider::Terraform::Examples
+        skip_docs: true
+        name: "only_external_vpn_gateway_full"
+        primary_resource_id: "external_gateway"
+        vars:
+          external_gateway_name: "external-gateway"
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
