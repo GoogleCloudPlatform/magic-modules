@@ -19,7 +19,7 @@ const TestEnvVar = "TF_ACC"
 // Global MutexKV
 var mutexKV = NewMutexKV()
 
-// Provider returns a *schema.Provider.
+// Provider returns a *schema.Provider
 func Provider() *schema.Provider {
 
 	// The mtls service client gives the type of endpoint (mtls/regular)
@@ -141,7 +141,7 @@ func Provider() *schema.Provider {
 			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
 			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
 			TagsLocationCustomEndpointEntryKey:           TagsLocationCustomEndpointEntry,
-			
+
 			// dcl
 			ContainerAwsCustomEndpointEntryKey:           ContainerAwsCustomEndpointEntry,
 			ContainerAzureCustomEndpointEntryKey:         ContainerAzureCustomEndpointEntry,
@@ -628,7 +628,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
 	config.TagsLocationBasePath = d.Get(TagsLocationCustomEndpointEntryKey).(string)
-	
+
 	// dcl
 	config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
 	config.ContainerAzureBasePath = d.Get(ContainerAzureCustomEndpointEntryKey).(string)
