@@ -1,0 +1,63 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+  name: 'Service'
+  base_url: '{{name}}'
+  create_url: '{{namespace}}/services?serviceId={{service_id}}'
+  self_link: '{{name}}'
+  update_verb: :PATCH
+  update_mask: true
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Configuring a service': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_service'
+    api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces.services'
+  iam_policy: !ruby/object:Api::Resource::IamPolicy
+    exclude: false
+    parent_resource_attribute: 'name'
+    method_name_separator: ':'
+    fetch_iam_policy_verb: :POST
+    set_iam_policy_verb: :POST
+  min_version: beta
+  description: |
+    An individual service. A service contains a name and optional metadata.
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: 'namespace'
+      description: |
+        The resource name of the namespace this service will belong to.
+      required: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: serviceId
+      description: |
+        The Resource ID must be 1-63 characters long, including digits,
+        lowercase letters or the hyphen character.
+      required: true
+      input: true
+      url_param_only: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        The resource name for the service in the
+        format `projects/*/locations/*/namespaces/*/services/*`.
+      output: true
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'metadata'
+      description: |
+        Metadata for the service. This data can be consumed
+        by service clients. The entire metadata dictionary may contain
+        up to 2000 characters, spread across all key-value pairs.
+        Metadata that goes beyond any these limits will be rejected.
+
