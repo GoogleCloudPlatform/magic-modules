@@ -475,7 +475,7 @@ resource "google_dataflow_flex_template_job" "job" {
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job) string {
+func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -510,7 +510,7 @@ resource "google_dataflow_flex_template_job" "job" {
 `, job)
 }
 
-func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job) string {
+func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
