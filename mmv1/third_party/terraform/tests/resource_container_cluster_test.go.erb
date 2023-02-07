@@ -4404,7 +4404,7 @@ func TestAccContainerCluster_failedCreation(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
 	project := BootstrapProject(t, "tf-fail-cluster-test", getTestBillingAccountFromEnv(t), []string{"container.googleapis.com"})
-	removeContainerServiceAgentRoleFromContainerEngineRobot(t, project)
+	RemoveContainerServiceAgentRoleFromContainerEngineRobot(t, project)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -6739,7 +6739,7 @@ func testAccContainerCluster_updateCostManagementConfig(projectID string, cluste
 	}`, projectID, clusterName, enabled)
 }
 
-func testAccContainerCluster_withDatabaseEncryption(clusterName string, kmsData bootstrappedKMS) string {
+func testAccContainerCluster_withDatabaseEncryption(clusterName string, kmsData BootstrappedKMS) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
 }

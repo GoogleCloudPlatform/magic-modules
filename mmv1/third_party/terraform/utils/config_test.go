@@ -238,10 +238,10 @@ func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expectedDur := time.Second * defaultBatchSendIntervalSec
+	expectedDur := time.Second * DefaultBatchSendIntervalSec
 	if config.requestBatcherServiceUsage.sendAfter != expectedDur {
 		t.Fatalf("expected sendAfter to be %d seconds, got %v",
-			defaultBatchSendIntervalSec,
+			DefaultBatchSendIntervalSec,
 			config.requestBatcherServiceUsage.sendAfter)
 	}
 }

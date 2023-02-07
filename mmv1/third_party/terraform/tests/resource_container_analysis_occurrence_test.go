@@ -29,7 +29,7 @@ func getTestOccurrenceAttestationPayload(t *testing.T) string {
 
 func getSignedTestOccurrenceAttestationPayload(
 	t *testing.T, config *Config,
-	signingKey bootstrappedKMS, rawPayload string) string {
+	signingKey BootstrappedKMS, rawPayload string) string {
 	pbytes := []byte(rawPayload)
 	ssum := sha512.Sum512(pbytes)
 	hashed := base64.StdEncoding.EncodeToString(ssum[:])

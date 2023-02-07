@@ -23,22 +23,22 @@ var SharedCryptoKey = map[string]string{
 	"ASYMMETRIC_DECRYPT": "tftest-shared-decrypt-key-1",
 }
 
-type bootstrappedKMS struct {
+type BootstrappedKMS struct {
 	*cloudkms.KeyRing
 	*cloudkms.CryptoKey
 }
 
-func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
+func BootstrapKMSKey(t *testing.T) BootstrappedKMS {
 	return BootstrapKMSKeyInLocation(t, "global")
 }
 
-func BootstrapKMSKeyInLocation(t *testing.T, locationID string) bootstrappedKMS {
+func BootstrapKMSKeyInLocation(t *testing.T, locationID string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", locationID)
 }
 
 // BootstrapKMSKeyWithPurpose returns a KMS key in the "global" location.
 // See BootstrapKMSKeyWithPurposeInLocation.
-func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) bootstrappedKMS {
+func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocation(t, purpose, "global")
 }
 
@@ -53,14 +53,14 @@ func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) bootstrappedKMS {
 * to incur the overhead of creating a new project for each test that needs to use
 * a KMS key.
 **/
-func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) bootstrappedKMS {
+func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocationAndName(t, purpose, locationID, SharedCryptoKey[purpose])
 }
 
-func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) bootstrappedKMS {
+func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) BootstrappedKMS {
 	config := BootstrapConfig(t)
 	if config == nil {
-		return bootstrappedKMS{
+		return BootstrappedKMS{
 			&cloudkms.KeyRing{},
 			&cloudkms.CryptoKey{},
 		}
@@ -124,7 +124,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 		t.Fatalf("Unable to bootstrap KMS key. CryptoKey is nil!")
 	}
 
-	return bootstrappedKMS{
+	return BootstrappedKMS{
 		keyRing,
 		cryptoKey,
 	}
@@ -136,7 +136,7 @@ var serviceAccountDisplay = "Bootstrapped Service Account for Terraform tests"
 // Some tests need a second service account, other than the test runner, to assert functionality on.
 // This provides a well-known service account that can be used when dynamically creating a service
 // account isn't an option.
-func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAccount, error) {
+func GetOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAccount, error) {
 	name := fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, serviceAccountEmail, project)
 	log.Printf("[DEBUG] Verifying %s as bootstrapped service account.\n", name)
 
@@ -199,7 +199,7 @@ func BootstrapServiceAccount(t *testing.T, project, testRunner string) string {
 		return ""
 	}
 
-	sa, err := getOrCreateServiceAccount(config, project)
+	sa, err := GetOrCreateServiceAccount(config, project)
 	if err != nil {
 		t.Fatalf("Bootstrapping failed. Cannot retrieve service account, %s", err)
 	}
@@ -359,7 +359,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	return projects
 }
 
-func removeContainerServiceAgentRoleFromContainerEngineRobot(t *testing.T, project *cloudresourcemanager.Project) {
+func RemoveContainerServiceAgentRoleFromContainerEngineRobot(t *testing.T, project *cloudresourcemanager.Project) {
 	config := BootstrapConfig(t)
 	if config == nil {
 		return
