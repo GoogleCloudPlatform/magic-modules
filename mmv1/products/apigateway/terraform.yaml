@@ -16,7 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Api: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
-      skip_import_test: true
       allowed_iam_role: 'roles/apigateway.viewer'
       method_name_separator: ':'
       parent_resource_attribute: 'api'
@@ -27,15 +26,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         name: "apigateway_api_basic"
         primary_resource_id: "api"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-api%s\", context[\"random_suffix\"])"
         vars:
-          name: "api"
+          api_id: "my-api"
       - !ruby/object:Provider::Terraform::Examples
         skip_docs: true
         min_version: beta
         name: "apigateway_api_full"
         primary_resource_id: "api"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-api%s\", context[\"random_suffix\"])"
         vars:
-          name: "api"
+          api_id: "my-api"
     properties:
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -60,23 +61,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         name: "apigateway_api_config_basic"
         primary_resource_id: "api_cfg"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-api%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-my-config%s\", context[\"random_suffix\"])" # Need to pass 2 ids into a Sprintf - parent resource id also needed to identify primary resource
         vars:
-          name: "api-cfg"
-          config: "cfg"
+          api_id: "my-api"
+          config_d: "my-config"
       - !ruby/object:Provider::Terraform::Examples
         skip_docs: true
         min_version: beta
         name: "apigateway_api_config_full"
         primary_resource_id: "api_cfg"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-api%s\", context[\"random_suffix\"])"
         vars:
-          name: "api-cfg"
+          api_id: "my-api"
+          config_id: "my-config"
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
         name: "apigateway_api_config_grpc"
         primary_resource_id: "api_cfg"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-api%s\", context[\"random_suffix\"])"
         vars:
-          name: "api-cfg"
-          config: "cfg"
+          api_id: "my-api"
+          config_id: "my-config"
         ignore_read_extra:
           - "grpc_services.0.file_descriptor_set"
       - !ruby/object:Provider::Terraform::Examples
@@ -84,9 +89,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         name: "apigateway_api_config_grpc_full"
         primary_resource_id: "api_cfg"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-config%s\", context[\"random_suffix\"])"
         vars:
-          name: "api-cfg"
-          config: "cfg"
+          api_id: "my-api"
+          config_id: "my-config"
     properties:
       openapiDocuments.document.contents: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -124,16 +130,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         name: "apigateway_gateway_basic"
         primary_resource_id: "api_gw"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-gateway%s\", context[\"random_suffix\"])"
         vars:
-          name: "api-gw"
-          config: "config"
+          api_id: "my-api"
+          config_id: "my-config"
+          gateway_id: "my-gateway"
       - !ruby/object:Provider::Terraform::Examples
         skip_docs: true
         min_version: beta
         name: "apigateway_gateway_full"
         primary_resource_id: "api_gw"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-gateway%s\", context[\"random_suffix\"])"
         vars:
-          name: "api-gw"
+          api_id: "my-api"
+          config_id: "my-config"
+          gateway_id: "my-gateway"
     properties:
       apiConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: compareResourceNames
