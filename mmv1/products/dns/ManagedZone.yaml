@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -181,8 +182,8 @@
               - !ruby/object:Api::Type::String
                 name: 'gkeClusterName'
                 description: |
-                  The resource name of the cluster to bind this ManagedZone to.  
-                  This should be specified in the format like  
+                  The resource name of the cluster to bind this ManagedZone to.
+                  This should be specified in the format like
                   `projects/*/locations/*/clusters/*`
                 required: true
         - !ruby/object:Api::Type::Array

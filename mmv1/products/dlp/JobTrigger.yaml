@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -281,21 +282,21 @@
                 - !ruby/object:Api::Type::Integer
                   name: 'rowsLimit'
                   description: |
-                    Max number of rows to scan. If the table has more rows than this value, the rest of the rows are omitted. 
-                    If not set, or if set to 0, all rows will be scanned. Only one of rowsLimit and rowsLimitPercent can be 
+                    Max number of rows to scan. If the table has more rows than this value, the rest of the rows are omitted.
+                    If not set, or if set to 0, all rows will be scanned. Only one of rowsLimit and rowsLimitPercent can be
                     specified. Cannot be used in conjunction with TimespanConfig.
                 - !ruby/object:Api::Type::Integer
                   name: 'rowsLimitPercent'
                   description: |
-                    Max percentage of rows to scan. The rest are omitted. The number of rows scanned is rounded down. 
-                    Must be between 0 and 100, inclusively. Both 0 and 100 means no limit. Defaults to 0. Only one of 
+                    Max percentage of rows to scan. The rest are omitted. The number of rows scanned is rounded down.
+                    Must be between 0 and 100, inclusively. Both 0 and 100 means no limit. Defaults to 0. Only one of
                     rowsLimit and rowsLimitPercent can be specified. Cannot be used in conjunction with TimespanConfig.
                 - !ruby/object:Api::Type::Enum
                   name: 'sampleMethod'
                   description: |
-                    How to sample rows if not all rows are scanned. Meaningful only when used in conjunction with either 
+                    How to sample rows if not all rows are scanned. Meaningful only when used in conjunction with either
                     rowsLimit or rowsLimitPercent. If not specified, rows are scanned in the order BigQuery reads them.
-                  values: 
+                  values:
                     - :TOP
                     - :RANDOM_START
                   default_value: :TOP

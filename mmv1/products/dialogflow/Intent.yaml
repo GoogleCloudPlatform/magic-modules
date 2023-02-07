@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,7 +29,7 @@
       name: 'name'
       output: true
       description: |
-        The unique identifier of this intent. 
+        The unique identifier of this intent.
         Format: projects/<Project ID>/agent/intents/<Intent ID>.
     - !ruby/object:Api::Type::String
       name: 'displayName'
@@ -73,7 +74,7 @@
       item_type: Api::Type::String
       description: |
        The collection of event names that trigger the intent. If the collection of input contexts is not empty, all of
-       the contexts must be present in the active user session for an event to trigger this intent. See the 
+       the contexts must be present in the active user session for an event to trigger this intent. See the
        [events reference](https://cloud.google.com/dialogflow/docs/events-overview) for more details.
     - !ruby/object:Api::Type::String
       name: 'action'
