@@ -13,7 +13,7 @@ timeout: 20000s
 
 availableSecrets:
   secretManager:
-    - versionName: projects/673497134629/secrets/github-magician-token
+    - versionName: projects/673497134629/secrets/github-magician-token/latest
       env: GITHUB_TOKEN
   inline:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/teamcity-token
