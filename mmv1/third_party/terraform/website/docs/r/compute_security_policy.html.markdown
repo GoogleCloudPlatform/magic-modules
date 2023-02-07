@@ -117,6 +117,48 @@ resource "google_compute_security_policy" "policy" {
 }
 ```
 
+## Example Usage - With `enforce_on_key` value as empty string
+A scenario example that won't cause any conflict between `enforce_on_key` and `enforce_on_key_configs`, because `enforce_on_key` was specified as an empty string:
+
+```hcl
+resource "google_compute_security_policy" "policy" {
+	name        = "%s"
+	description = "throttle rule with enforce_on_key_configs"
+
+	rule {
+		action   = "throttle"
+		priority = "2147483647"
+		match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = ["*"]
+			}
+		}
+		description = "default rule"
+
+		rate_limit_options {
+			conform_action = "allow"
+			exceed_action = "redirect"
+
+			enforce_on_key = ""
+
+			enforce_on_key_configs {
+				enforce_on_key_type = "IP"
+			}
+			exceed_redirect_options {
+				type = "EXTERNAL_302"
+				target = "<https://www.example.com>"
+			}
+
+			rate_limit_threshold {
+				count = 10
+				interval_sec = 60
+			}
+		}
+	}
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -289,88 +331,6 @@ The following arguments are supported:
 * `enforce_on_key_configs` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) If specified, any combination of values of enforce_on_key_type/enforce_on_key_name is treated as the key on which ratelimit threshold/action is enforced. You can specify up to 3 enforce_on_key_configs. If `enforce_on_key_configs` is specified, enforce_on_key must be set to an empty string. Structure is [documented below](#nested_enforce_on_key_configs).
 
   **Note:** To avoid the conflict between `enforce_on_key` and `enforce_on_key_configs`, the field [`enforce_on_key`](#enforce_on_key) needs to be set to an empty string.
-
-	## Example Usage
-
-	**Scenario 01:** A scenario that will cause an conflit between `enforce_on_key` and `enforce_on_key_configs`, because `enforce_on_key` was not specified as an empty string and it will be insert with "ALL" value as default: 
-
-	```hcl
-	resource "google_compute_security_policy" "policy" {
-		name        = "%s"
-		description = "throttle rule with enforce_on_key_configs"
-
-		rule {
-			action   = "throttle"
-			priority = "2147483647"
-			match {
-				versioned_expr = "SRC_IPS_V1"
-				config {
-					src_ip_ranges = ["*"]
-				}
-			}
-			description = "default rule"
-
-			rate_limit_options {
-				conform_action = "allow"
-				exceed_action = "redirect"
-
-				enforce_on_key_configs {
-					enforce_on_key_type = "IP"
-				}
-				exceed_redirect_options {
-					type = "EXTERNAL_302"
-					target = "https://www.example.com"
-				}
-
-				rate_limit_threshold {
-					count = 10
-					interval_sec = 60
-				}
-			}
-		}
-	}
-	```
-
-	**Scenario 02:** A scenario that won't cause any conflict between `enforce_on_key` and `enforce_on_key_configs`, because `enforce_on_key` was specified as an empty string:
-
-	```hcl
-	resource "google_compute_security_policy" "policy" {
-		name        = "%s"
-		description = "throttle rule with enforce_on_key_configs"
-
-		rule {
-			action   = "throttle"
-			priority = "2147483647"
-			match {
-				versioned_expr = "SRC_IPS_V1"
-				config {
-					src_ip_ranges = ["*"]
-				}
-			}
-			description = "default rule"
-
-			rate_limit_options {
-				conform_action = "allow"
-				exceed_action = "redirect"
-
-				enforce_on_key = ""
-
-				enforce_on_key_configs {
-					enforce_on_key_type = "IP"
-				}
-				exceed_redirect_options {
-					type = "EXTERNAL_302"
-					target = "https://www.example.com"
-				}
-
-				rate_limit_threshold {
-					count = 10
-					interval_sec = 60
-				}
-			}
-		}
-	}
-	```
 
 <a name="nested_enforce_on_key_configs"></a>The `enforce_on_key_configs` block supports:
 
