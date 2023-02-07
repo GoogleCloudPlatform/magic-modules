@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -67,10 +68,10 @@
       description: |
         The service account used for all user-controlled operations including
         triggers.patch, triggers.run, builds.create, and builds.cancel.
-        
+
         If no service account is set, then the standard Cloud Build service account
         ([PROJECT_NUM]@system.gserviceaccount.com) will be used instead.
-        
+
         Format: projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT_ID_OR_EMAIL}
     - !ruby/object:Api::Type::Enum
       name: 'includeBuildLogs'
@@ -88,7 +89,7 @@
         - build
         - git_file_source
       description: |
-        Path, from the source root, to a file whose contents is used for the template. 
+        Path, from the source root, to a file whose contents is used for the template.
         Either a filename or build template must be provided. Set this only when using trigger_template or github.
         When using Pub/Sub, Webhook or Manual set the file name using git_file_source instead.
     - !ruby/object:Api::Type::String
@@ -112,13 +113,13 @@
         - !ruby/object:Api::Type::String
           name: 'uri'
           description: |
-            The URI of the repo (optional). If unspecified, the repo from which the trigger 
+            The URI of the repo (optional). If unspecified, the repo from which the trigger
             invocation originated is assumed to be the repo from which to read the specified path.
         - !ruby/object:Api::Type::Enum
           name: 'repoType'
           required: true
           description: |
-            The type of the repo, since it may not be explicit from the repo field (e.g from a URL). 
+            The type of the repo, since it may not be explicit from the repo field (e.g from a URL).
             Values can be UNKNOWN, CLOUD_SOURCE_REPOSITORIES, GITHUB, BITBUCKET_SERVER
           values:
                 - :UNKNOWN
@@ -128,8 +129,8 @@
         - !ruby/object:Api::Type::String
           name: 'revision'
           description: |
-            The branch, tag, arbitrary ref, or SHA version of the repo to use when resolving the 
-            filename (optional). This field respects the same syntax/resolution as described here: https://git-scm.com/docs/gitrevisions 
+            The branch, tag, arbitrary ref, or SHA version of the repo to use when resolving the
+            filename (optional). This field respects the same syntax/resolution as described here: https://git-scm.com/docs/gitrevisions
             If unspecified, the revision from which the trigger invocation originated is assumed to be the revision from which to read the specified path.
         - !ruby/object:Api::Type::String
           name: 'githubEnterpriseConfig'
@@ -217,9 +218,9 @@
     - !ruby/object:Api::Type::NestedObject
       name: 'sourceToBuild'
       description: |
-        The repo and ref of the repository from which to build. 
-        This field is used only for those triggers that do not respond to SCM events. 
-        Triggers that respond to such events build source at whatever commit caused the event. 
+        The repo and ref of the repository from which to build.
+        This field is used only for those triggers that do not respond to SCM events.
+        Triggers that respond to such events build source at whatever commit caused the event.
         This field is currently only used by Webhook, Pub/Sub, Manual, and Cron triggers.
       at_least_one_of:
         - trigger_template
@@ -424,7 +425,7 @@
     - !ruby/object:Api::Type::NestedObject
       name: 'pubsubConfig'
       description: |
-        PubsubConfig describes the configuration of a trigger that creates 
+        PubsubConfig describes the configuration of a trigger that creates
         a build whenever a Pub/Sub message is published.
       at_least_one_of:
         - trigger_template
@@ -457,7 +458,7 @@
     - !ruby/object:Api::Type::NestedObject
       name: 'webhookConfig'
       description: |
-        WebhookConfig describes the configuration of a trigger that creates 
+        WebhookConfig describes the configuration of a trigger that creates
         a build whenever a webhook is sent to a trigger's webhook URL.
       at_least_one_of:
         - trigger_template
@@ -481,15 +482,15 @@
     - !ruby/object:Api::Type::NestedObject
       name: 'approvalConfig'
       description: |
-        Configuration for manual approval to start a build invocation of this BuildTrigger. 
-        Builds created by this trigger will require approval before they execute. 
+        Configuration for manual approval to start a build invocation of this BuildTrigger.
+        Builds created by this trigger will require approval before they execute.
         Any user with a Cloud Build Approver role for the project can approve a build.
       properties:
         - !ruby/object:Api::Type::Boolean
           name: 'approvalRequired'
           default_value: false
           description: |
-            Whether or not approval is needed. If this is set on a build, it will become pending when run, 
+            Whether or not approval is needed. If this is set on a build, it will become pending when run,
             and will need to be explicitly approved to start.
     - !ruby/object:Api::Type::NestedObject
       name: 'build'
@@ -524,7 +525,7 @@
                 - !ruby/object:Api::Type::String
                   name: 'generation'
                   description: |
-                    Google Cloud Storage generation for the object. 
+                    Google Cloud Storage generation for the object.
                     If the generation is omitted, the latest generation will be used
             - !ruby/object:Api::Type::NestedObject
               name: 'repoSource'
@@ -534,7 +535,7 @@
                 - !ruby/object:Api::Type::String
                   name: 'projectId'
                   description: |
-                    ID of the project that owns the Cloud Source Repository. 
+                    ID of the project that owns the Cloud Source Repository.
                     If omitted, the project ID requesting the build is assumed.
                 - !ruby/object:Api::Type::String
                   name: 'repoName'
@@ -545,7 +546,7 @@
                   name: 'dir'
                   description: |
                     Directory, relative to the source root, in which to run the build.
-                    This must be a relative path. If a step's dir is specified and is an absolute path, 
+                    This must be a relative path. If a step's dir is specified and is an absolute path,
                     this value is ignored for that step's execution.
                 - !ruby/object:Api::Type::Boolean
                   name: 'invertRegex'
@@ -559,7 +560,7 @@
                   name: 'branchName'
                   description: |
                     Regex matching branches to build. Exactly one a of branch name, tag, or commit SHA must be provided.
-                    The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
+                    The syntax of the regular expressions accepted is the syntax accepted by RE2 and
                     described at https://github.com/google/re2/wiki/Syntax
                   exactly_one_of:
                     - build.0.source.0.repo_source.0.branch_name
@@ -569,7 +570,7 @@
                   name: 'tagName'
                   description: |
                     Regex matching tags to build. Exactly one a of branch name, tag, or commit SHA must be provided.
-                    The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
+                    The syntax of the regular expressions accepted is the syntax accepted by RE2 and
                     described at https://github.com/google/re2/wiki/Syntax
                   exactly_one_of:
                     - build.0.source.0.repo_source.0.branch_name
@@ -603,14 +604,14 @@
         - !ruby/object:Api::Type::String
           name: 'queueTtl'
           description: |
-            TTL in queue for this build. If provided and the build is enqueued longer than this value, 
+            TTL in queue for this build. If provided and the build is enqueued longer than this value,
             the build will expire and the build status will be EXPIRED.
             The TTL starts ticking from createTime.
             A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
         - !ruby/object:Api::Type::String
           name: 'logsBucket'
           description: |
-            Google Cloud Storage bucket where logs should be written. 
+            Google Cloud Storage bucket where logs should be written.
             Logs file names will be of the format ${logsBucket}/log-${build_id}.txt.
         - !ruby/object:Api::Type::String
           name: 'timeout'
@@ -636,8 +637,8 @@
                 name: 'secretEnv'
                 description: |
                   Map of environment variable name to its encrypted value.
-                  Secret environment variables must be unique across all of a build's secrets, 
-                  and must be used by at least one build step. Values can be at most 64 KB in size. 
+                  Secret environment variables must be unique across all of a build's secrets,
+                  and must be used by at least one build step. Values can be at most 64 KB in size.
                   There can be at most 100 secret values across all of a build's secrets.
         - !ruby/object:Api::Type::NestedObject
           name: 'availableSecrets'
@@ -681,7 +682,7 @@
                   the builder service account's credentials if necessary.
 
                   The Docker daemon's cache will already have the latest versions of all of
-                  the officially supported build steps (see https://github.com/GoogleCloudPlatform/cloud-builders 
+                  the officially supported build steps (see https://github.com/GoogleCloudPlatform/cloud-builders
                   for images and examples).
                   The Docker daemon will also have cached many of the layers for some popular
                   images, like "ubuntu", "debian", but they will be refreshed at the time
@@ -796,8 +797,8 @@
                   have completed successfully.
               - !ruby/object:Api::Type::String
                 name: 'script'
-                description: | 
-                  A shell script to be executed in the step. 
+                description: |
+                  A shell script to be executed in the step.
                   When script is provided, the user cannot specify the entrypoint or args.
         - !ruby/object:Api::Type::NestedObject
           name: 'artifacts'

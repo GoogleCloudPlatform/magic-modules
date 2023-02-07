@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -38,7 +39,7 @@
       resource_inside_response: true
     status: !ruby/object:Api::OpAsync::Status
       path: 'done'
-      complete: true 
+      complete: true
       allowed:
         - True
         - False
@@ -127,7 +128,7 @@
                 - !ruby/object:Api::Type::Integer
                   name: 'generation'
                   description: |
-                    Google Cloud Storage generation for the object. If the generation 
+                    Google Cloud Storage generation for the object. If the generation
                     is omitted, the latest generation will be used.
             - !ruby/object:Api::Type::NestedObject
               name: 'repoSource'
@@ -140,7 +141,7 @@
                   name: 'projectId'
                   input: true
                   description: |
-                    ID of the project that owns the Cloud Source Repository. If omitted, the 
+                    ID of the project that owns the Cloud Source Repository. If omitted, the
                     project ID requesting the build is assumed.
                 - !ruby/object:Api::Type::String
                   name: 'repoName'
@@ -173,7 +174,7 @@
                 - !ruby/object:Api::Type::Boolean
                   name: 'invertRegex'
                   description: |
-                    Only trigger a build if the revision regex does 
+                    Only trigger a build if the revision regex does
                     NOT match the revision regex.
         - !ruby/object:Api::Type::String
           name: 'workerPool'
@@ -190,17 +191,17 @@
       name: 'serviceConfig'
       description: 'Describes the Service being deployed.'
       properties:
-        - !ruby/object:Api::Type::String 
+        - !ruby/object:Api::Type::String
           name: 'service'
           description: |
             Name of the service associated with a Function.
-        - !ruby/object:Api::Type::Integer 
+        - !ruby/object:Api::Type::Integer
           name: 'timeoutSeconds'
           description: |
             The function execution timeout. Execution is considered failed and
             can be terminated if the function is not completed at the end of the
             timeout period. Defaults to 60 seconds.
-        - !ruby/object:Api::Type::String 
+        - !ruby/object:Api::Type::String
           name: 'availableMemory'
           description: |
             The amount of memory available for a function.
@@ -215,17 +216,17 @@
         - !ruby/object:Api::Type::KeyValuePairs
           name: 'environmentVariables'
           description: 'Environment variables that shall be available during function execution.'
-        - !ruby/object:Api::Type::Integer 
+        - !ruby/object:Api::Type::Integer
           name: 'maxInstanceCount'
           description: |
             The limit on the maximum number of function instances that may coexist at a
             given time.
-        - !ruby/object:Api::Type::Integer 
+        - !ruby/object:Api::Type::Integer
           name: 'minInstanceCount'
           description: |
             The limit on the minimum number of function instances that may coexist at a
             given time.
-        - !ruby/object:Api::Type::String 
+        - !ruby/object:Api::Type::String
           name: 'vpcConnector'
           description: 'The Serverless VPC Access connector that this cloud function can connect to.'
         - !ruby/object:Api::Type::Enum
@@ -254,7 +255,7 @@
         - !ruby/object:Api::Type::String
           name: 'serviceAccountEmail'
           description: 'The email of the service account for this function.'
-        - !ruby/object:Api::Type::Boolean 
+        - !ruby/object:Api::Type::Boolean
           name: 'allTrafficOnLatestRevision'
           description: 'Whether 100% of traffic is routed to the latest revision. Defaults to true.'
           default_value: true
@@ -272,12 +273,12 @@
                 name: projectId
                 description: |
                   Project identifier (preferrably project number but can also be the project ID) of the project that contains the secret. If not set, it will be populated with the function's project assuming that the secret exists in the same project as of the function.
-                required: true  
+                required: true
               - !ruby/object:Api::Type::String
                 name: secret
                 description: |
                   Name of the secret in secret manager (not the full resource name).
-                required: true  
+                required: true
               - !ruby/object:Api::Type::String
                 name: version
                 description: |
@@ -297,12 +298,12 @@
                 name: projectId
                 description: |
                   Project identifier (preferrably project number but can also be the project ID) of the project that contains the secret. If not set, it will be populated with the function's project assuming that the secret exists in the same project as of the function.
-                required: true  
+                required: true
               - !ruby/object:Api::Type::String
                 name: secret
                 description: |
                   Name of the secret in secret manager (not the full resource name).
-                required: true  
+                required: true
               - !ruby/object:Api::Type::Array
                 name: 'versions'
                 description: List of secret versions to mount for this secret. If empty, the latest version of the secret will be made available in a file named after the secret under the mount point.'
@@ -317,7 +318,7 @@
                       name: path
                       description: |
                         Relative path of the file under the mount path where the secret value for this version will be fetched and made available. For example, setting the mountPath as '/etc/secrets' and path as secret_foo would mount the secret value file at /etc/secrets/secret_foo.
-                      required: true                                
+                      required: true
     - !ruby/object:Api::Type::NestedObject
       name: 'eventTrigger'
       description: |

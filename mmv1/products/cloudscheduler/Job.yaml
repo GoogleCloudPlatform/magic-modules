@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,7 +42,7 @@
     - !ruby/object:Api::Type::String
       name: description
       description: |
-        A human-readable description for the job. 
+        A human-readable description for the job.
         This string must not contain more than 500 characters.
       required: false
     - !ruby/object:Api::Type::String
@@ -81,15 +82,15 @@
     - !ruby/object:Api::Type::NestedObject
       name: retryConfig
       description: |
-        By default, if a job does not complete successfully, 
-        meaning that an acknowledgement is not received from the handler, 
+        By default, if a job does not complete successfully,
+        meaning that an acknowledgement is not received from the handler,
         then it will be retried with exponential backoff according to the settings
       required: false
       properties:
         - !ruby/object:Api::Type::Integer
           name: retryCount
           description: |
-            The number of attempts that the system will make to run a 
+            The number of attempts that the system will make to run a
             job using the exponential backoff procedure described by maxDoublings.
             Values greater than 5 and negative values are not allowed.
           required: false
@@ -102,7 +103,7 @@
         - !ruby/object:Api::Type::String
           name: maxRetryDuration
           description: |
-            The time limit for retrying a failed job, measured from time when an execution was first attempted. 
+            The time limit for retrying a failed job, measured from time when an execution was first attempted.
             If specified with retryCount, the job will be retried until both limits are reached.
             A duration in seconds with up to nine fractional digits, terminated by 's'.
           required: false
@@ -140,8 +141,8 @@
           name: maxDoublings
           description: |
             The time between retries will double maxDoublings times.
-            A job's retry interval starts at minBackoffDuration, 
-            then doubles maxDoublings times, then increases linearly, 
+            A job's retry interval starts at minBackoffDuration,
+            then doubles maxDoublings times, then increases linearly,
             and finally retries retries at intervals of maxBackoffDuration up to retryCount times.
           required: false
           at_least_one_of:
@@ -187,7 +188,7 @@
       name: appEngineHttpTarget
       description: |
         App Engine HTTP target.
-        If the job providers a App Engine HTTP target the cron will 
+        If the job providers a App Engine HTTP target the cron will
         send a request to the service instance
       exactly_one_of:
         - pubsub_target
@@ -239,16 +240,16 @@
           name: relativeUri
           description: |
             The relative URI.
-            The relative URL must begin with "/" and must be a valid HTTP relative URL. 
-            It can contain a path, query string arguments, and \# fragments. 
-            If the relative URL is empty, then the root path "/" will be used. 
+            The relative URL must begin with "/" and must be a valid HTTP relative URL.
+            It can contain a path, query string arguments, and \# fragments.
+            If the relative URL is empty, then the root path "/" will be used.
             No spaces are allowed, and the maximum length allowed is 2083 characters
           required: true
         - !ruby/object:Api::Type::String
           name: body
           description: |
-            HTTP request body. 
-            A request body is allowed only if the HTTP method is POST or PUT. 
+            HTTP request body.
+            A request body is allowed only if the HTTP method is POST or PUT.
             It will result in invalid argument error to set a body on a job with an incompatible HttpMethod.
 
             A base64-encoded string.
@@ -257,14 +258,14 @@
           name: headers
           description: |
             HTTP request headers.
-            This map contains the header field names and values. 
+            This map contains the header field names and values.
             Headers can be set when the job is created.
           required: false
     - !ruby/object:Api::Type::NestedObject
       name: httpTarget
       description: |
         HTTP target.
-        If the job providers a http_target the cron will 
+        If the job providers a http_target the cron will
         send a request to the targeted url
       exactly_one_of:
         - pubsub_target
@@ -284,8 +285,8 @@
         - !ruby/object:Api::Type::String
           name: body
           description: |
-            HTTP request body. 
-            A request body is allowed only if the HTTP method is POST, PUT, or PATCH. 
+            HTTP request body.
+            A request body is allowed only if the HTTP method is POST, PUT, or PATCH.
             It is an error to set body on a job with an incompatible HttpMethod.
 
             A base64-encoded string.
@@ -293,7 +294,7 @@
         - !ruby/object:Api::Type::KeyValuePairs
           name: headers
           description: |
-            This map contains the header field names and values. 
+            This map contains the header field names and values.
             Repeated headers are not supported, but a header value can contain commas.
           required: false
         - !ruby/object:Api::Type::NestedObject
