@@ -1,0 +1,557 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+  name: 'CertificateAuthority'
+  description: |
+      A CertificateAuthority represents an individual Certificate Authority. A
+      CertificateAuthority can be used to create Certificates.
+  base_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities
+  create_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities?certificateAuthorityId={{certificate_authority_id}}
+  self_link: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}
+  delete_url: projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}?ignoreActiveCertificates={{ignore_active_certificates_on_deletion}}&skipGracePeriod={{skip_grace_period}}
+  update_verb: :PATCH
+  update_mask: true
+  async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        base_url: '{{op_id}}'
+        path: 'name'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://cloud.google.com/certificate-authority-service'
+    api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest'
+  properties:
+    - !ruby/object:Api::Type::String
+      name: pem_ca_certificate
+      description: |
+        The signed CA certificate issued from the subordinated CA's CSR. This is needed when activating the subordiante CA with a third party issuer.
+      url_param_only: true
+    - !ruby/object:Api::Type::Boolean
+      name: 'ignore_active_certificates_on_deletion'
+      default_value: false
+      url_param_only: true
+      description: |
+        This field allows the CA to be deleted even if the CA has active certs. Active certs include both unrevoked and unexpired certs.
+        Use with care. Defaults to `false`.
+    - !ruby/object:Api::Type::Boolean
+      name: 'skip_grace_period'
+      default_value: false
+      url_param_only: true
+      description: |
+        If this flag is set, the Certificate Authority will be deleted as soon as
+        possible without a 30-day grace period where undeletion would have been
+        allowed. If you proceed, there will be no way to recover this CA.
+        Use with care. Defaults to `false`.
+    - !ruby/object:Api::Type::String
+      name: location
+      description:  |
+        Location of the CertificateAuthority. A full list of valid locations can be found by
+        running `gcloud privateca locations list`.
+      required: true
+      input: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: certificateAuthorityId
+      description: The user provided Resource ID for this Certificate Authority.
+      required: true
+      input: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: pool
+      description: The name of the CaPool this Certificate Authority belongs to.
+      required: true
+      input: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+          The resource name for this CertificateAuthority in the format
+          projects/*/locations/*/certificateAuthorities/*.
+      output: true
+    - !ruby/object:Api::Type::Enum
+      name: 'type'
+      description: The Type of this CertificateAuthority.
+      input: true
+      values:
+        - :SELF_SIGNED
+        - :SUBORDINATE
+      default_value: :SELF_SIGNED
+    - !ruby/object:Api::Type::NestedObject
+      name: 'config'
+      description: The config used to create a self-signed X.509 certificate or CSR.
+      required: true
+      input: true
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: 'x509Config'
+          required: true
+          input: true
+          description: |
+             Describes how some of the technical X.509 fields in a certificate should be populated.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'additionalExtensions'
+              input: true
+              description: |
+                Specifies an X.509 extension, which may be used in different parts of X.509 objects like certificates, CSRs, and CRLs.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'critical'
+                    input: true
+                    required: true
+                    description: |
+                      Indicates whether or not this extension is critical (i.e., if the client does not know how to
+                      handle this extension, the client should consider this to be an error).
+                  - !ruby/object:Api::Type::String
+                    name: 'value'
+                    input: true
+                    required: true
+                    description: |
+                      The value of this X.509 extension. A base64-encoded string.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'objectId'
+                    input: true
+                    required: true
+                    description: |
+                      Describes values that are relevant in a CA certificate.
+                    properties:
+                      - !ruby/object:Api::Type::Array
+                        name: 'objectIdPath'
+                        input: true
+                        required: true
+                        item_type: Api::Type::Integer
+                        description: |
+                          An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
+            - !ruby/object:Api::Type::Array
+              name: 'policyIds'
+              input: true
+              description: |
+                Describes the X.509 certificate policy object identifiers, per https://tools.ietf.org/html/rfc5280#section-4.2.1.4.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'objectIdPath'
+                    input: true
+                    required: true
+                    item_type: Api::Type::Integer
+                    description: |
+                      An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
+            - !ruby/object:Api::Type::Array
+              name: 'aiaOcspServers'
+              input: true
+              item_type: Api::Type::String
+              description: |
+                Describes Online Certificate Status Protocol (OCSP) endpoint addresses that appear in the
+                "Authority Information Access" extension in the certificate.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'caOptions'
+              input: true
+              required: true
+              description: |
+                Describes values that are relevant in a CA certificate.
+              properties:
+                - !ruby/object:Api::Type::Boolean
+                  name: 'isCa'
+                  input: true
+                  required: true
+                  description: |
+                    When true, the "CA" in Basic Constraints extension will be set to true.
+                - !ruby/object:Api::Type::Boolean
+                  name: 'nonCa'
+                  input: true
+                  url_param_only: true
+                  description: |
+                    When true, the "CA" in Basic Constraints extension will be set to false.
+                    If both `is_ca` and `non_ca` are unset, the extension will be omitted from the CA certificate.
+                - !ruby/object:Api::Type::Integer
+                  name: 'maxIssuerPathLength'
+                  input: true
+                  description: |
+                    Refers to the "path length constraint" in Basic Constraints extension. For a CA certificate, this value describes the depth of
+                    subordinate CA certificates that are allowed. If this value is less than 0, the request will fail. Setting the value to 0
+                    requires setting `zero_max_issuer_path_length = true`.
+                - !ruby/object:Api::Type::Boolean
+                  name: 'zeroMaxIssuerPathLength'
+                  input: true
+                  url_param_only: true
+                  description: |
+                    When true, the "path length constraint" in Basic Constraints extension will be set to 0.
+                    If both `max_issuer_path_length` and `zero_max_issuer_path_length` are unset,
+                    the max path length will be omitted from the CA certificate.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'keyUsage'
+              input: true
+              required: true
+              description: |
+                Indicates the intended use for keys that correspond to a certificate.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'baseKeyUsage'
+                  input: true
+                  required: true
+                  description: |
+                    Describes high-level ways in which a key may be used.
+                  properties:
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'digitalSignature'
+                      input: true
+                      description: |
+                        The key may be used for digital signatures.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'contentCommitment'
+                      input: true
+                      description: |
+                        The key may be used for cryptographic commitments. Note that this may also be referred to as "non-repudiation".
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'keyEncipherment'
+                      input: true
+                      description: |
+                        The key may be used to encipher other keys.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'dataEncipherment'
+                      input: true
+                      description: |
+                        The key may be used to encipher data.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'keyAgreement'
+                      input: true
+                      description: |
+                        The key may be used in a key agreement protocol.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'certSign'
+                      input: true
+                      description: |
+                        The key may be used to sign certificates.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'crlSign'
+                      input: true
+                      description: |
+                        The key may be used sign certificate revocation lists.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'encipherOnly'
+                      input: true
+                      description: |
+                        The key may be used to encipher only.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'decipherOnly'
+                      input: true
+                      description: |
+                        The key may be used to decipher only.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'extendedKeyUsage'
+                  input: true
+                  required: true
+                  description: |
+                    Describes high-level ways in which a key may be used.
+                  properties:
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'serverAuth'
+                      input: true
+                      description: |
+                        Corresponds to OID 1.3.6.1.5.5.7.3.1. Officially described as "TLS WWW server authentication", though regularly used for non-WWW TLS.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'clientAuth'
+                      input: true
+                      description: |
+                        Corresponds to OID 1.3.6.1.5.5.7.3.2. Officially described as "TLS WWW client authentication", though regularly used for non-WWW TLS.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'codeSigning'
+                      input: true
+                      description: |
+                        Corresponds to OID 1.3.6.1.5.5.7.3.3. Officially described as "Signing of downloadable executable code client authentication".
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'emailProtection'
+                      input: true
+                      description: |
+                        Corresponds to OID 1.3.6.1.5.5.7.3.4. Officially described as "Email protection".
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'timeStamping'
+                      input: true
+                      description: |
+                        Corresponds to OID 1.3.6.1.5.5.7.3.8. Officially described as "Binding the hash of an object to a time".
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'ocspSigning'
+                      input: true
+                      description: |
+                        Corresponds to OID 1.3.6.1.5.5.7.3.9. Officially described as "Signing OCSP responses".
+                - !ruby/object:Api::Type::Array
+                  name: 'unknownExtendedKeyUsages'
+                  input: true
+                  description: |
+                    An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::Array
+                        name: 'objectIdPath'
+                        input: true
+                        required: true
+                        item_type: Api::Type::Integer
+                        description: |
+                          An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'subjectConfig'
+          input: true
+          description: |
+              Specifies some of the values in a certificate that are related to the subject.
+          required: true
+          properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'subject'
+            input: true
+            description: Contains distinguished name fields such as the location and organization.
+            required: true
+            properties:
+            - !ruby/object:Api::Type::String
+              name: 'countryCode'
+              description: The country code of the subject.
+              input: true
+            - !ruby/object:Api::Type::String
+              name: 'organization'
+              description: The organization of the subject.
+              input: true
+              required: true
+            - !ruby/object:Api::Type::String
+              name: 'organizationalUnit'
+              description: The organizational unit of the subject.
+              input: true
+            - !ruby/object:Api::Type::String
+              name: 'locality'
+              description: The locality or city of the subject.
+              input: true
+            - !ruby/object:Api::Type::String
+              name: 'province'
+              description: The province, territory, or regional state of the subject.
+              input: true
+            - !ruby/object:Api::Type::String
+              name: 'streetAddress'
+              description: The street address of the subject.
+              input: true
+            - !ruby/object:Api::Type::String
+              name: 'postalCode'
+              description: The postal code of the subject.
+              input: true
+            - !ruby/object:Api::Type::String
+              name: 'commonName'
+              description: The common name of the distinguished name.
+              input: true
+              required: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'subjectAltName'
+            description: The subject alternative name fields.
+            input: true
+            properties:
+            - !ruby/object:Api::Type::Array
+              name: 'dnsNames'
+              description: Contains only valid, fully-qualified host names.
+              input: true
+              item_type: Api::Type::String
+              at_least_one_of:
+              - config.0.subject_config.0.subject_alt_name.0.dns_names
+              - config.0.subject_config.0.subject_alt_name.0.uris
+              - config.0.subject_config.0.subject_alt_name.0.email_addresses
+              - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+            - !ruby/object:Api::Type::Array
+              name: 'uris'
+              description: Contains only valid RFC 3986 URIs.
+              input: true
+              item_type: Api::Type::String
+              at_least_one_of:
+              - config.0.subject_config.0.subject_alt_name.0.dns_names
+              - config.0.subject_config.0.subject_alt_name.0.uris
+              - config.0.subject_config.0.subject_alt_name.0.email_addresses
+              - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+            - !ruby/object:Api::Type::Array
+              name: 'emailAddresses'
+              description: Contains only valid RFC 2822 E-mail addresses.
+              input: true
+              item_type: Api::Type::String
+              at_least_one_of:
+              - config.0.subject_config.0.subject_alt_name.0.dns_names
+              - config.0.subject_config.0.subject_alt_name.0.uris
+              - config.0.subject_config.0.subject_alt_name.0.email_addresses
+              - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+            - !ruby/object:Api::Type::Array
+              name: 'ipAddresses'
+              description: Contains only valid 32-bit IPv4 addresses or RFC 4291 IPv6 addresses.
+              input: true
+              item_type: Api::Type::String
+              at_least_one_of:
+              - config.0.subject_config.0.subject_alt_name.0.dns_names
+              - config.0.subject_config.0.subject_alt_name.0.uris
+              - config.0.subject_config.0.subject_alt_name.0.email_addresses
+              - config.0.subject_config.0.subject_alt_name.0.ip_addresses
+    - !ruby/object:Api::Type::String
+      name: 'lifetime'
+      description: |
+        The desired lifetime of the CA certificate. Used to create the "notBeforeTime" and
+        "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
+        fractional digits, terminated by 's'. Example: "3.5s".
+      default_value: 315360000s  # 10 years
+      input: true
+    - !ruby/object:Api::Type::NestedObject
+      name: 'keySpec'
+      description: |
+        Used when issuing certificates for this CertificateAuthority. If this CertificateAuthority
+        is a self-signed CertificateAuthority, this key is also used to sign the self-signed CA
+        certificate. Otherwise, it is used to sign a CSR.
+      required: true
+      input: true
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'cloudKmsKeyVersion'
+          description: |
+            The resource name for an existing Cloud KMS CryptoKeyVersion in the format
+            `projects/*/locations/*/keyRings/*/cryptoKeys/*/cryptoKeyVersions/*`.
+          input: true
+          exactly_one_of:
+          - key_spec.0.cloud_kms_key_version
+          - key_spec.0.algorithm
+        - !ruby/object:Api::Type::Enum
+          name: 'algorithm'
+          description: |
+            The algorithm to use for creating a managed Cloud KMS key for a for a simplified
+            experience. All managed keys will be have their ProtectionLevel as HSM.
+          input: true
+          values:
+            - :SIGN_HASH_ALGORITHM_UNSPECIFIED
+            - :RSA_PSS_2048_SHA256
+            - :RSA_PSS_3072_SHA256
+            - :RSA_PSS_4096_SHA256
+            - :RSA_PKCS1_2048_SHA256
+            - :RSA_PKCS1_3072_SHA256
+            - :RSA_PKCS1_4096_SHA256
+            - :EC_P256_SHA256
+            - :EC_P384_SHA384
+          exactly_one_of:
+          - key_spec.0.cloud_kms_key_version
+          - key_spec.0.algorithm
+    - !ruby/object:Api::Type::NestedObject
+      name: 'subordinateConfig'
+      description: |
+        If this is a subordinate CertificateAuthority, this field will be set
+        with the subordinate configuration, which describes its issuers.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'certificateAuthority'
+          description: |
+            This can refer to a CertificateAuthority that was used to create a
+            subordinate CertificateAuthority. This field is used for information
+            and usability purposes only. The resource name is in the format
+            `projects/*/locations/*/caPools/*/certificateAuthorities/*`.
+          exactly_one_of:
+            - subordinate_config.0.certificate_authority
+            - subordinate_config.0.pem_issuer_chain
+        - !ruby/object:Api::Type::NestedObject
+          name: 'pemIssuerChain'
+          description: |
+            Contains the PEM certificate chain for the issuers of this CertificateAuthority,
+            but not pem certificate for this CA itself.
+          exactly_one_of:
+            - subordinate_config.0.certificate_authority
+            - subordinate_config.0.pem_issuer_chain
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'pemCertificates'
+              description: |
+                Expected to be in leaf-to-root order according to RFC 5246.
+              item_type: Api::Type::String
+    - !ruby/object:Api::Type::Enum
+      name: 'state'
+      description: The State for this CertificateAuthority.
+      output: true
+      values:
+        - :STATE_UNSPECIFIED
+        - :ENABLED
+        - :DISABLED
+        - :STAGED
+        - :AWAITING_USER_ACTIVATION
+        - :PENDING_DELETION
+    - !ruby/object:Api::Type::Array
+      name: 'pemCaCertificates'
+      description: |
+        This CertificateAuthority's certificate chain, including the current
+        CertificateAuthority's certificate. Ordered such that the root issuer is the final
+        element (consistent with RFC 5246). For a self-signed CA, this will only list the current
+        CertificateAuthority's certificate.
+      item_type: Api::Type::String
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'gcsBucket'
+      description: |
+        The name of a Cloud Storage bucket where this CertificateAuthority will publish content,
+        such as the CA certificate and CRLs. This must be a bucket name, without any prefixes
+        (such as `gs://`) or suffixes (such as `.googleapis.com`). For example, to use a bucket named
+        my-bucket, you would simply specify `my-bucket`. If not specified, a managed bucket will be
+        created.
+      input: true
+    - !ruby/object:Api::Type::NestedObject
+      name: 'accessUrls'
+      description: |
+        URLs for accessing content published by this CA, such as the CA certificate and CRLs.
+      output: true
+      properties:
+      - !ruby/object:Api::Type::String
+        name: 'caCertificateAccessUrl'
+        description: |
+          The URL where this CertificateAuthority's CA certificate is published. This will only be
+          set for CAs that have been activated.
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'crlAccessUrls'
+        description: |
+          The URL where this CertificateAuthority's CRLs are published. This will only be set for
+          CAs that have been activated.
+        item_type: Api::Type::String
+        output: true
+    - !ruby/object:Api::Type::String
+      name: 'createTime'
+      description: |
+        The time at which this CertificateAuthority was created.
+
+        A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+        fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'updateTime'
+      description: |
+        The time at which this CertificateAuthority was updated.
+
+        A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+        fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      output: true
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: labels
+      description: |
+        Labels with user-defined metadata.
+
+        An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
+        "1.3kg", "count": "3" }.
+
+
+# Certificate
+
