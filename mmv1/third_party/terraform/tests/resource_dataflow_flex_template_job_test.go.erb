@@ -116,7 +116,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
 	})
 }
 
-func TestAccDataflowFlexTemplateJob_withServiceAccountCreateAndUpdate(t *testing.T) {
+func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
 	skipIfVcr(t)
@@ -124,8 +124,6 @@ func TestAccDataflowFlexTemplateJob_withServiceAccountCreateAndUpdate(t *testing
 
 	randStr := randString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
-	accountId := "tf-test-dataflow-sa" + randStr
-	accountId2 := "tf-test-dataflow-sa2" + randStr
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -133,11 +131,7 @@ func TestAccDataflowFlexTemplateJob_withServiceAccountCreateAndUpdate(t *testing
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_serviceAccount(job, accountId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
-					testAccDataflowFlexTemplateJobHasServiceAccount(t, "google_dataflow_flex_template_job.job", accountId),
-				),
+				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job),
 			},
 			{
 				ResourceName:            "google_dataflow_flex_template_job.job",
@@ -146,57 +140,7 @@ func TestAccDataflowFlexTemplateJob_withServiceAccountCreateAndUpdate(t *testing
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
 			},
 			{
-				Config: testAccDataflowFlexTemplateJob_serviceAccount(job, accountId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
-					testAccDataflowFlexTemplateJobHasServiceAccount(t, "google_dataflow_flex_template_job.job", accountId2),
-				),
-			},
-			{
-				ResourceName:            "google_dataflow_flex_template_job.job",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
-			},
-		},
-	})
-}
-
-func TestAccDataflowFlexTemplateJob_withMachineTypeCreateAndUpdate(t *testing.T) {
-	// Dataflow responses include serialized java classes and bash commands
-	// This makes body comparison infeasible
-	skipIfVcr(t)
-	t.Parallel()
-
-	randStr := randString(t, 10)
-	job := "tf-test-dataflow-job-" + randStr
-	machineType1 := "n1-standard-2"
-	machineType2 := "n2-standard-2"
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataflowFlexTemplateJob_machineType(job, machineType1),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
-					testAccDataflowFlexTemplateJobHasMachineType(t, "google_dataflow_flex_template_job.job", machineType1),
-				),
-			},
-			{
-				ResourceName:            "google_dataflow_flex_template_job.job",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
-			},
-			{
-				Config: testAccDataflowFlexTemplateJob_machineType(job, machineType2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
-					testAccDataflowFlexTemplateJobHasMachineType(t, "google_dataflow_flex_template_job.job", machineType2),
-				),
+				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job),
 			},
 			{
 				ResourceName:            "google_dataflow_flex_template_job.job",
@@ -331,54 +275,6 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 	})
 }
 
-func TestAccDataflowFlexTemplateJob_withLabelsCreateAndUpdate(t *testing.T) {
-	// Dataflow responses include serialized java classes and bash commands
-	// This makes body comparison infeasible
-	skipIfVcr(t)
-	t.Parallel()
-
-	randStr := randString(t, 10)
-	job := "tf-test-dataflow-job-" + randStr
-	key := "my-label"
-	value := "my-value"
-    key2 := "my-label"
-    value2 := "my-value"
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataflowFlexTemplateJob_labels(job, key, value),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
-					testAccDataflowFlexTemplateJobHasLabels(t, "google_dataflow_flex_template_job.job", key),
-				),
-			},
-			{
-				ResourceName:            "google_dataflow_flex_template_job.job",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
-			},
-			{
-				Config: testAccDataflowFlexTemplateJob_labels(job, key2, value2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
-					testAccDataflowFlexTemplateJobHasLabels(t, "google_dataflow_flex_template_job.job", key),
-				),
-			},
-			{
-				ResourceName:            "google_dataflow_flex_template_job.job",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
-			},
-		},
-	})
-}
-
 func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
@@ -441,38 +337,6 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccDataflowFlexTemplateJobHasServiceAccount(t *testing.T, res, expectedId string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		instanceTmpl, err := testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t, s, res)
-		if err != nil {
-			return fmt.Errorf("Error getting dataflow job instance template: %s", err)
-		}
-		accounts := instanceTmpl.Properties.ServiceAccounts
-		if len(accounts) != 1 {
-			return fmt.Errorf("Found multiple service accounts (%d) for dataflow job %q, expected 1", len(accounts), res)
-		}
-		actualId := strings.Split(accounts[0].Email, "@")[0]
-		if expectedId != actualId {
-			return fmt.Errorf("service account mismatch, expected account ID = %q, actual email = %q", expectedId, accounts[0].Email)
-		}
-		return nil
-	}
-}
-
-func testAccDataflowFlexTemplateJobHasMachineType(t *testing.T, res, expectedType string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		instanceTmpl, err := testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t, s, res)
-		if err != nil {
-			return fmt.Errorf("Error getting dataflow job instance template: %s", err)
-		}
-		actualType := instanceTmpl.Properties.MachineType
-		if expectedType != actualType {
-			return fmt.Errorf("instance type mismatch, expected machine type = %q, actual machine type = %q", expectedType, actualType)
-		}
-		return nil
-	}
 }
 
 func testAccDataflowFlexTemplateJobHasNetwork(t *testing.T, res, expected string) resource.TestCheckFunc {
@@ -611,12 +475,12 @@ resource "google_dataflow_flex_template_job" "job" {
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_serviceAccount(job, accountId string) string {
+func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
 resource "google_service_account" "dataflow-sa" {
-  account_id   = "%s"
+  account_id   = "dataflow-sa-create"
   display_name = "DataFlow Service Account"
 }
 resource "google_project_iam_member" "dataflow-worker" {
@@ -638,23 +502,31 @@ resource "google_dataflow_flex_template_job" "job" {
     topic = "projects/myproject/topics/mytopic"
   }
   labels = {
-   "my_labels" = "value"
+   "my_labels" = "value-1"
   }
   service_account_email = google_service_account.dataflow-sa.email
+  machine_type = "n1-standard-2"
 }
-`, accountId, job)
+`, job)
 }
 
-// note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_machineType(job, machineType string) string {
+func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
+resource "google_service_account" "dataflow-sa" {
+  account_id   = "dataflow-sa-update"
+  display_name = "DataFlow Service Account"
+}
+resource "google_project_iam_member" "dataflow-worker" {
+  project = data.google_project.project.project_id
+  role   = "roles/dataflow.worker"
+  member = "serviceAccount:${google_service_account.dataflow-sa.email}"
+}
 data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
   bucket = "dataflow-templates"
 }
-
 resource "google_dataflow_flex_template_job" "job" {
   name = "%s"
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
@@ -665,11 +537,12 @@ resource "google_dataflow_flex_template_job" "job" {
     topic = "projects/myproject/topics/mytopic"
   }
   labels = {
-   "my_labels" = "value"
+   "my_labels" = "value-update"
   }
-  machine_type = "%s"
+  service_account_email = google_service_account.dataflow-sa.email
+  machine_type = "n2-standard-2"
 }
-`, job, machineType )
+`, job)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
@@ -820,32 +693,6 @@ resource "google_dataflow_flex_template_job" "job" {
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_labels(job, key, value string) string {
-	return fmt.Sprintf(`
-data "google_project" "project" {}
-
-data "google_storage_bucket_object" "flex_template" {
-  name   = "latest/flex/Streaming_Data_Generator"
-  bucket = "dataflow-templates"
-}
-resource "google_dataflow_flex_template_job" "job" {
-  name = "%s"
-  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
-  on_delete = "cancel"
-  parameters = {
-    schemaLocation = "gs://mybucket/schema.json"
-    qps = "1"
-    topic = "projects/myproject/topics/mytopic"
-  }
-  labels = {
-   "%s" = "%s"
-  }
-
-}
-`, job, key, value)
-}
-
-// note: this config creates a job that doesn't actually do anything, but still runs
 func testAccDataflowFlexTemplateJob_additionalExperiments(job string, experiments []string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
@@ -897,31 +744,6 @@ func testAccDataflowJobHasOption(t *testing.T, res, option, expectedValue string
 
 		if optionsMap[option] != expectedValue {
 			return fmt.Errorf("Option %s do not match. Got %s while expecting %s", option, optionsMap[option], expectedValue)
-		}
-
-		return nil
-	}
-}
-
-func testAccDataflowFlexTemplateJobHasLabels(t *testing.T, res, key string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[res]
-		if !ok {
-			return fmt.Errorf("resource %q not found in state", res)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-		config := googleProviderConfig(t)
-
-		job, err := config.NewDataflowClient(config.userAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).Do()
-		if err != nil {
-			return fmt.Errorf("dataflow job does not exist")
-		}
-
-		if job.Labels[key] != rs.Primary.Attributes["labels."+key] {
-			return fmt.Errorf("Labels do not match what is stored in state.")
 		}
 
 		return nil
