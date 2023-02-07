@@ -1538,6 +1538,10 @@ resource "google_compute_instance_group_manager" "igm-basic" {
     device_name = "my-stateful-disk"
     delete_rule = "NEVER"
   }
+  stateful_disk {
+    device_name = "my-stateful-disk2"
+    delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
+  }
 
 <% unless version == "ga" -%>
   stateful_internal_ip {
