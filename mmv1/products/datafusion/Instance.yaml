@@ -1,3 +1,4 @@
+# Copyright 2021 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,7 +26,7 @@
   iam_policy: !ruby/object:Api::Resource::IamPolicy
     parent_resource_attribute: 'name'
     method_name_separator: ':'
-    import_format: ["projects/{{project}}/locations/{{location}}/instances/{{name}}", "{{name}}"]         
+    import_format: ["projects/{{project}}/locations/{{location}}/instances/{{name}}", "{{name}}"]
   parameters:
     - !ruby/object:Api::Type::String
       name: 'region'
@@ -57,7 +58,7 @@
         - ENTERPRISE: Enterprise Data Fusion instance. In Enterprise type, the user will have more features
         available, such as support for streaming pipelines, higher number of concurrent pipelines, etc.
         - DEVELOPER: Developer Data Fusion instance. In Developer type, the user will have all features available but
-        with restrictive capabilities. This is to help enterprises design and develop their data ingestion and integration 
+        with restrictive capabilities. This is to help enterprises design and develop their data ingestion and integration
         pipelines at low cost.
       values:
         - :BASIC
@@ -225,4 +226,4 @@
           description: |
             The resource name of the Pub/Sub topic. Format: projects/{projectId}/topics/{topic_id}
           required: true
-          input: true            
+          input: true
