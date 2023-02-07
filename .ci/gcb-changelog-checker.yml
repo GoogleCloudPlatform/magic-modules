@@ -13,5 +13,5 @@ steps:
 
 availableSecrets:
   secretManager:
-    - versionName: projects/673497134629/secrets/github-magician-token/latest
+    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
       env: GITHUB_TOKEN
