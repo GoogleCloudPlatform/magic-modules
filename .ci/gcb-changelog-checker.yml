@@ -11,7 +11,7 @@ steps:
   args:
     - $_PR_NUMBER
 
-secrets:
-    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
-      secretEnv:
-          GITHUB_TOKEN: CiQADkR4Nt6nHLI52Kc1W55OwpLdc4vjBfVR0SGQNzm6VSVj9lUSUQBfF82vVhn43A1jNYOv8ScoWgrZONwNrUabHfGjkvl+IZxcii0JlOVUawbscs4OJga0eitNNlagAOruLs6C926X20ZZPqWtH97ui6CKNvxgkQ==
+availableSecrets:
+  secretManager:
+    - versionName: projects/673497134629/secrets/github-magician-token
+      env: GITHUB_TOKEN
