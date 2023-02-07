@@ -1,3 +1,4 @@
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -166,7 +167,7 @@
             The protocol to use for the metastore service endpoint. If unspecified, defaults to `THRIFT`.
           values:
             - :THRIFT
-            - :GRPC         
+            - :GRPC
         - !ruby/object:Api::Type::String
           name: 'version'
           input: true
@@ -296,7 +297,7 @@
               name: 'enabled'
               required: true
               description: |
-                Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.      
+                Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.
     - !ruby/object:Api::Type::NestedObject
       name: "telemetryConfig"
       description: |

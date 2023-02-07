@@ -1,3 +1,4 @@
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -605,11 +606,11 @@
                                   name: tokenTtl
                                   description: |
                                     The duration the token is valid starting from the moment the token is first generated.
-                                    
+
                                     Defaults to `86400s` (1 day).
 
                                     The TTL must be >= 0 and <= 604,800 seconds (1 week).
-                                    
+
                                     This field may only be specified when the GENERATE_COOKIE or GENERATE_TOKEN_HLS_COOKIELESS actions are specified.
 
                                     A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
@@ -617,7 +618,7 @@
                                   name: 'tokenQueryParameter'
                                   description: |
                                     The query parameter in which to put the generated token.
-                                    
+
                                     If not specified, defaults to `edge-cache-token`.
 
                                     If specified, the name must be 1-64 characters long and match the regular expression `[a-zA-Z]([a-zA-Z0-9_-])*` which means the first character must be a letter, and all following characters must be a dash, underscore, letter or digit.

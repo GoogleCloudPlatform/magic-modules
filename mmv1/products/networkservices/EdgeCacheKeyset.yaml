@@ -1,3 +1,4 @@
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -106,7 +107,7 @@
             required: true
             description: |
               The name of the secret version in Secret Manager.
-              
+
               The resource name of the secret version must be in the format `projects/*/secrets/*/versions/*` where the `*` values are replaced by the secrets themselves.
               The secrets must be at least 16 bytes large.  The recommended secret size depends on the signature algorithm you are using.
               * If you are using HMAC-SHA1, we suggest 20-byte secrets.

@@ -1,3 +1,4 @@
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +16,7 @@
   min_version: beta
   base_url: "projects/{{project}}/locations/{{location}}/federations"
   create_url: 'projects/{{project}}/locations/{{location}}/federations?federationId={{federation_id}}'
-  self_link: "projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"    
+  self_link: "projects/{{project}}/locations/{{location}}/federations/{{federation_id}}"
   update_verb: :PATCH
   update_mask: true
   description: |

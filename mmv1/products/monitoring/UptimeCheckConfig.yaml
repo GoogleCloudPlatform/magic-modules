@@ -1,3 +1,4 @@
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -105,7 +106,7 @@
   - !ruby/object:Api::Type::Enum
     name: checkerType
     input: true
-    description: The checker type to use for the check. If the monitored resource type 
+    description: The checker type to use for the check. If the monitored resource type
       is servicedirectory_service, checkerType must be set to VPC_CHECKERS.
     values:
       - :STATIC_IP_CHECKERS
@@ -193,7 +194,7 @@
       default_value: "/"
       description: The path to the page to run the check against. Will be combined
         with the host (specified within the MonitoredResource) and port to construct
-        the full URL. If the provided path does not begin with "/", a "/" will be prepended 
+        the full URL. If the provided path does not begin with "/", a "/" will be prepended
         automatically. Optional (defaults to "/").
     - !ruby/object:Api::Type::Boolean
       name: useSsl
@@ -240,9 +241,9 @@
         properties:
         - !ruby/object:Api::Type::Integer
           name: statusValue
-          description: A status code to accept.        
+          description: A status code to accept.
         - !ruby/object:Api::Type::Enum
-          name: statusClass          
+          name: statusClass
           description: A class of status codes to accept.
           values:
             - :STATUS_CLASS_1XX
@@ -250,7 +251,7 @@
             - :STATUS_CLASS_3XX
             - :STATUS_CLASS_4XX
             - :STATUS_CLASS_5XX
-            - :STATUS_CLASS_ANY       
+            - :STATUS_CLASS_ANY
   - !ruby/object:Api::Type::NestedObject
     name: tcpCheck
     description: Contains information needed to make a TCP check.
@@ -296,7 +297,7 @@
     input: true
     description: 'The monitored resource (https://cloud.google.com/monitoring/api/resources)
       associated with the configuration. The following monitored resource types are
-      supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance 
+      supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance
       aws_elb_load_balancer  k8s_service  servicedirectory_service'
     exactly_one_of:
       - monitored_resource

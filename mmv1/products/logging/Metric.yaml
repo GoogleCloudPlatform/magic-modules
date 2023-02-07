@@ -1,3 +1,4 @@
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -126,8 +127,8 @@
         - !ruby/object:Api::Type::String
           name: displayName
           description: |
-            A concise name for the metric, which can be displayed in user interfaces. Use sentence case 
-            without an ending period, for example "Request count". This field is optional but it is 
+            A concise name for the metric, which can be displayed in user interfaces. Use sentence case
+            without an ending period, for example "Request count". This field is optional but it is
             recommended to be set for any metrics associated with user-visible concepts, such as Quota.
         - !ruby/object:Api::Type::String
           name: type
