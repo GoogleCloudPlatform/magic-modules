@@ -150,7 +150,7 @@ options:
 
 availableSecrets:
   secretManager:
-    - versionName: projects/673497134629/secrets/github-magician-token
+    - versionName: projects/673497134629/secrets/github-magician-token/latest
       env: GITHUB_TOKEN
   inline:
 # This is the ciphertext of the token, encrypted using the above KMS key.
