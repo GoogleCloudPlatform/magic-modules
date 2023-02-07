@@ -1,0 +1,31 @@
+	// Store the name as ID
+	d.SetId(res["name"].(string))
+
+	if err = d.Set("version_id", GetResourceNameFromSelfLink(res["name"].(string))); err != nil {
+		return fmt.Errorf("Error setting version_id: %s", err)
+	}
+
+	obj = make(map[string]interface{})
+	obj["status"] = "FINALIZED"
+
+	url, err = replaceVars(d, config, "{{FirebaseHostingBasePath}}{{name}}")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Updating Version %q: %#v", d.Id(), obj)
+	updateMask := []string{}
+
+ 	updateMask = append(updateMask, "status")
+	url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	if err != nil {
+		return err
+	}
+
+	res, err = sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+
+	if err != nil {
+		return fmt.Errorf("Error finalizing Version %q: %s", d.Id(), err)
+	} else {
+		log.Printf("[DEBUG] Finished finalizing Version %q: %#v", d.Id(), res)
+	}
