@@ -235,14 +235,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       serviceLevelIndicator.basicSli.availability: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/monitoring_slo_availability_sli.go.erb'
-      serviceLevelIndicator.basicSli.availability.enabled: !ruby/object:Overrides::Terraform::PropertyOverride  
+      serviceLevelIndicator.basicSli.availability.enabled: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: validateAvailabilitySli
       serviceLevelIndicator.windowsBasedSli.goodTotalRatioThreshold.basicSliPerformance.availability: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/monitoring_slo_availability_sli.go.erb'
-      serviceLevelIndicator.windowsBasedSli.goodTotalRatioThreshold.basicSliPerformance.availability.enabled: !ruby/object:Overrides::Terraform::PropertyOverride  
+      serviceLevelIndicator.windowsBasedSli.goodTotalRatioThreshold.basicSliPerformance.availability.enabled: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: validateAvailabilitySli    
+          function: validateAvailabilitySli
       serviceLevelIndicator.requestBasedSli: !ruby/object:Overrides::Terraform::PropertyOverride
         # Force update all nested fields to allow for unsetting values.
         update_mask_fields:
@@ -298,7 +298,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           display_name: "http-uptime-check"
         test_env_vars:
-          project_id: :PROJECT_NAME        
+          project_id: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "uptime_check_config_https"
         primary_resource_id: "https"
@@ -368,7 +368,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           type: "daily_sales"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
-    
+
 
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
