@@ -16392,8 +16392,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/load-balancing/docs/tcp/internal-proxy'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/targetTcpProxies'
-    min_version: beta
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetTcpProxies'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -17122,6 +17121,9 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: 'Labels for the external VPN gateway resource.'
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
