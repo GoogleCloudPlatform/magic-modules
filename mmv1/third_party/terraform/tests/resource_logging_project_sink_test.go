@@ -352,19 +352,19 @@ func testAccCheckLoggingProjectSinkDestroyProducer(t *testing.T) func(s *terrafo
 
 			attributes := rs.Primary.Attributes
 
-			reserved := false
+			reservedName := false
 			for _, reserved := range ReservedLoggingProjectSinks {
-				if name == reserved {
-					reserved = true
+				if attributes["name"] == reserved {
+					reservedName = true
 					break
 				}
 			}
 
 			_, err := config.NewLoggingClient(config.userAgent).Projects.Sinks.Get(attributes["id"]).Do()
-			if reserved && isGoogleApiErrorWithCode(err, 404) {
+			if reservedName && isGoogleApiErrorWithCode(err, 404) {
 				return fmt.Errorf("reserved log sinks should not be deleted")
 			}
-			if !reserved && err == nil {
+			if !reservedName && err == nil {
 				return fmt.Errorf("project sink still exists")
 			}
 		}
