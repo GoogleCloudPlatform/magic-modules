@@ -55,9 +55,6 @@ module Provider
         ctx.local_variable_set(name[1..-1], instance_variable_get(name))
       end
 
-      # This variable is used in ansible/resource.erb
-      ctx.local_variable_set('file_relative',
-                             relative_path(@output_folder + '/' + path, @output_folder).to_s)
       ctx.local_variable_set('pwd', pwd)
 
       # check if the parent folder exists, and make it if not
