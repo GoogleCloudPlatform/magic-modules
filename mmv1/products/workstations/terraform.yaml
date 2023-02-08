@@ -62,7 +62,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "workstation_config_container"
         min_version: beta
         primary_resource_id: "default"
-        skip_test: true
         vars:
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"
@@ -70,7 +69,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "workstation_config_persistent_directories"
         min_version: beta
         primary_resource_id: "default"
-        skip_test: true
         vars:
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"
@@ -78,7 +76,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "workstation_config_shielded_instance_config"
         min_version: beta
         primary_resource_id: "default"
-        skip_test: true
         vars:
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"
