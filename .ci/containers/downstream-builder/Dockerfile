@@ -70,4 +70,8 @@ RUN wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_
 RUN unzip terraform_0.13.7_linux_amd64.zip && rm terraform_0.13.7_linux_amd64.zip
 RUN mv ./terraform /bin/terraform
 
+RUN wget https://github.com/hashicorp/copywrite/releases/download/v0.16.0/copywrite_0.16.0_linux_x86_64.tar.gz
+RUN tar -xf copywrite_0.16.0_linux_x86_64.tar.gz
+RUN mv ./copywrite /bin/copywrite
+
 ENTRYPOINT ["/generate_downstream.sh"]
