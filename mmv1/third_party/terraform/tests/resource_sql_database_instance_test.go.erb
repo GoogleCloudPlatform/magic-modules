@@ -1577,7 +1577,6 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSuccessful(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNamePresent(t *testing.T) {
 	t.Parallel()
-
 	databaseName := "sql-instance-test-" + randString(t, 10)
 	failoverName := "sql-instance-test-failover-" + randString(t, 10)
 	vcrTest(t, resource.TestCase{
