@@ -1,0 +1,106 @@
+--- !ruby/object:Api::Resource
+  name: 'Instance'
+  base_url: 'instances'
+  create_url: '{{org_id}}/instances'
+  self_link: '{{org_id}}/instances/{{name}}'
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: True
+      allowed:
+        - True
+        - False
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error'
+      message: 'message'
+  input: true
+  description: |
+    An `Instance` is the runtime dataplane in Apigee.
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: 'orgId'
+      description: |
+        The Apigee Organization associated with the Apigee instance,
+        in the format `organizations/{{org_name}}`.
+      required: true
+      input: true
+      url_param_only: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        Resource ID of the instance.
+      required: true
+    - !ruby/object:Api::Type::String
+      name: 'location'
+      description: |
+        Required. Compute Engine location where the instance resides.
+      required: true
+    - !ruby/object:Api::Type::String
+      name: 'peeringCidrRange'
+      description: |
+        The size of the CIDR block range that will be reserved by the instance. For valid values,
+        see [CidrRange](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances#CidrRange) on the documentation.
+    - !ruby/object:Api::Type::String
+      name: 'ipRange'
+      description: |
+        IP range represents the customer-provided CIDR block of length 22 that will be used for
+        the Apigee instance creation. This optional range, if provided, should be freely
+        available as part of larger named range the customer has allocated to the Service
+        Networking peering. If this is not provided, Apigee will automatically request for any
+        available /22 CIDR block from Service Networking. The customer should use this CIDR block
+        for configuring their firewall needs to allow traffic from Apigee.
+        Input format: "a.b.c.d/22"
+    - !ruby/object:Api::Type::String
+      name: 'description'
+      description: |
+        Description of the instance.
+    - !ruby/object:Api::Type::String
+      name: 'displayName'
+      description: |
+        Display name of the instance.
+    - !ruby/object:Api::Type::String
+      name: 'diskEncryptionKeyName'
+      description: |
+        Customer Managed Encryption Key (CMEK) used for disk and volume encryption. Required for Apigee paid subscriptions only.
+        Use the following format: `projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)/cryptoKeys/([^/]+)`
+      input: true
+    - !ruby/object:Api::Type::String
+      name: 'host'
+      description: |
+        Output only. Hostname or IP address of the exposed Apigee endpoint used by clients to connect to the service.
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'port'
+      description: |
+        Output only. Port number of the exposed Apigee endpoint.
+      output: true
+    - !ruby/object:Api::Type::Array
+      name: 'consumerAcceptList'
+      description: |
+        Optional. Customer accept list represents the list of projects (id/number) on customer
+        side that can privately connect to the service attachment. It is an optional field
+        which the customers can provide during the instance creation. By default, the customer
+        project associated with the Apigee organization will be included to the list.
+      required: false
+      item_type: Api::Type::String
+    - !ruby/object:Api::Type::String
+      name: 'serviceAttachment'
+      description: |
+        Output only. Resource name of the service attachment created for the instance in
+        the format: projects/*/regions/*/serviceAttachments/* Apigee customers can privately
+        forward traffic to this service attachment using the PSC endpoints.
+      output: true
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Creating a runtime instance':
+        'https://cloud.google.com/apigee/docs/api-platform/get-started/create-instance'
+    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/create'
+

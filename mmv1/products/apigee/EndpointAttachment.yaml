@@ -1,0 +1,74 @@
+--- !ruby/object:Api::Resource
+  name: 'EndpointAttachment'
+  base_url: 'endpointAttachments'
+  create_url: '{{org_id}}/endpointAttachments?endpointAttachmentId={{endpoint_attachment_id}}'
+  self_link: '{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}'
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: True
+      allowed:
+        - True
+        - False
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error'
+      message: 'message'
+  input: true
+  description: |
+    Apigee Endpoint Attachment.
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: 'orgId'
+      description: |
+        The Apigee Organization associated with the Apigee instance,
+        in the format `organizations/{{org_name}}`.
+      required: true
+      input: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: 'endpointAttachmentId'
+      description: |
+        ID of the endpoint attachment.
+      required: true
+      input: true
+      url_param_only: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        Name of the Endpoint Attachment in the following format:
+        organizations/{organization}/endpointAttachments/{endpointAttachment}.
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'location'
+      description: |
+        Location of the endpoint attachment.
+      required: true
+    - !ruby/object:Api::Type::String
+      name: 'host'
+      description: |
+        Host that can be used in either HTTP Target Endpoint directly, or as the host in Target Server.
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'serviceAttachment'
+      description: |
+        Format: projects/*/regions/*/serviceAttachments/*
+      required: true
+    - !ruby/object:Api::Type::String
+      name: 'connectionState'
+      description: |
+        State of the endpoint attachment connection to the service attachment.
+      output: true
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Creating an environment':
+        'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
+    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.endpointAttachments/create'
+

@@ -1,0 +1,51 @@
+--- !ruby/object:Api::Resource
+  name: 'EnvgroupAttachment'
+  base_url: '{{envgroup_id}}/attachments'
+  create_url: '{{envgroup_id}}/attachments'
+  delete_url: '{{envgroup_id}}/attachments/{{name}}'
+  self_link: '{{envgroup_id}}/attachments/{{name}}'
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: True
+      allowed:
+        - True
+        - False
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error'
+      message: 'message'
+  input: true
+  description: |
+    An `Environment Group attachment` in Apigee.
+  parameters:
+   - !ruby/object:Api::Type::String
+      name: 'envgroupId'
+      description: |
+        The Apigee environment group associated with the Apigee environment,
+        in the format `organizations/{{org_name}}/envgroups/{{envgroup_name}}`.
+      required: true
+      url_param_only: true
+  properties:
+   - !ruby/object:Api::Type::String
+      name: 'environment'
+      description: |
+        The resource ID of the environment.
+      required: true
+   - !ruby/object:Api::Type::String
+      name: 'name'
+      description: |
+        The name of the newly created  attachment (output parameter).
+      output: true
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Creating an environment':
+        'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
+    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups.attachments/create'
+
