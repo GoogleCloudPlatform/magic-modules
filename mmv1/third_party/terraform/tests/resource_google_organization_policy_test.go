@@ -42,7 +42,7 @@ func TestAccOrganizationPolicy(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_boolean(t *testing.T) {
-	org := getTestOrgTargetFromEnv(t)
+	org := google.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -83,7 +83,7 @@ func testAccOrganizationPolicy_boolean(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_allowAll(t *testing.T) {
-	org := getTestOrgTargetFromEnv(t)
+	org := google.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -103,7 +103,7 @@ func testAccOrganizationPolicy_list_allowAll(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_allowSome(t *testing.T) {
-	org := getTestOrgTargetFromEnv(t)
+	org := google.GetTestOrgTargetFromEnv(t)
 	project := GetTestProjectFromEnv()
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -124,7 +124,7 @@ func testAccOrganizationPolicy_list_allowSome(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_denySome(t *testing.T) {
-	org := getTestOrgTargetFromEnv(t)
+	org := google.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -144,7 +144,7 @@ func testAccOrganizationPolicy_list_denySome(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_update(t *testing.T) {
-	org := getTestOrgTargetFromEnv(t)
+	org := google.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -168,7 +168,7 @@ func testAccOrganizationPolicy_list_update(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_list_inheritFromParent(t *testing.T) {
-	org := getTestOrgTargetFromEnv(t)
+	org := google.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -187,7 +187,7 @@ func testAccOrganizationPolicy_list_inheritFromParent(t *testing.T) {
 }
 
 func testAccOrganizationPolicy_restore_defaultTrue(t *testing.T) {
-	org := getTestOrgTargetFromEnv(t)
+	org := google.GetTestOrgTargetFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

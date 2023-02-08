@@ -12,8 +12,8 @@ func TestAccDataSourceGoogleTagsTagValue_default(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	keyShortName := "tf-testkey-" + RandString(t, 10)
-	shortName := "tf-test-" + RandString(t, 10)
+	keyShortName := "tf-testkey-" + google.RandString(t, 10)
+	shortName := "tf-test-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -33,8 +33,8 @@ func TestAccDataSourceGoogleTagsTagValue_dot(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	keyShortName := "tf-testkey-" + RandString(t, 10)
-	shortName := "terraform.test." + RandString(t, 10)
+	keyShortName := "tf-testkey-" + google.RandString(t, 10)
+	shortName := "terraform.test." + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

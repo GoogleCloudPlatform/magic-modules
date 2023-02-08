@@ -84,11 +84,11 @@ func (d *GoogleDnsRecordSetDataSource) Configure(ctx context.Context, req dataso
 		return
 	}
 
-	p, ok := req.ProviderData.(*frameworkProvider)
+	p, ok := req.ProviderData.(*FrameworkProvider)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *frameworkProvider, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *FrameworkProvider, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}

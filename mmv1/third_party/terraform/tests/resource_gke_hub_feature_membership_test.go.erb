@@ -19,7 +19,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureAcmUpdate(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix":   RandString(t, 10),
+    "random_suffix":   google.RandString(t, 10),
     "org_id":          GetTestOrgFromEnv(t),
     "billing_account": GetTestBillingAccountFromEnv(t),
   }
@@ -329,7 +329,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureAcmAllFields(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix":   RandString(t, 10),
+    "random_suffix":   google.RandString(t, 10),
     "org_id":          GetTestOrgFromEnv(t),
     "billing_account": GetTestBillingAccountFromEnv(t),
   }
@@ -588,7 +588,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureAcmOci(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "random_suffix":   RandString(t, 10),
+    "random_suffix":   google.RandString(t, 10),
     "org_id":          GetTestOrgFromEnv(t),
     "billing_account": GetTestBillingAccountFromEnv(t),
   }
@@ -786,7 +786,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureMesh(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   google.RandString(t, 10),
 		"org_id":          GetTestOrgFromEnv(t),
 		"billing_account": GetTestBillingAccountFromEnv(t),
 	}

@@ -16,13 +16,13 @@ func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
 	projectId := GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.fhirStoreAdmin"
-	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	datasetId := &healthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
-	fhirStoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	fhirStoreName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -65,13 +65,13 @@ func TestAccHealthcareFhirStoreIamMember(t *testing.T) {
 	projectId := GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.fhirResourceEditor"
-	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	datasetId := &healthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
-	fhirStoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	fhirStoreName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -100,13 +100,13 @@ func TestAccHealthcareFhirStoreIamPolicy(t *testing.T) {
 	projectId := GetTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.fhirResourceEditor"
-	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	datasetId := &healthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
-	fhirStoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	fhirStoreName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

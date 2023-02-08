@@ -59,7 +59,7 @@ import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.b
 func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context_service.go.erb')) -%>
 
 	provider.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { provider.TestAccPreCheck(t) },
@@ -105,7 +105,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context_service.go.erb')) -%>
 
 	provider.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { provider.TestAccPreCheck(t) },
@@ -142,9 +142,9 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := getTestServiceAccountFromEnv(t)
+	sa := google.GetTestServiceAccountFromEnv(t)
 <% end -%>
-<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context_service.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	context["service_account"] = sa
 <% end -%>
@@ -193,7 +193,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context_service.go.erb')) -%>
 
 	provider.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { provider.TestAccPreCheck(t) },
@@ -229,7 +229,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context_service.go.erb')) -%>
 
 	provider.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { provider.TestAccPreCheck(t) },
@@ -279,7 +279,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context_service.go.erb')) -%>
 
 	provider.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { provider.TestAccPreCheck(t) },
@@ -315,7 +315,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context_service.go.erb')) -%>
 
 	provider.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { provider.TestAccPreCheck(t) },
@@ -367,9 +367,9 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := getTestServiceAccountFromEnv(t)
+	sa := google.GetTestServiceAccountFromEnv(t)
 <% end -%>
-<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context_service.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	context["service_account"] = sa
 <% end -%>

@@ -58,7 +58,7 @@ module Api
 
     attr_reader :async
 
-    attr_reader :isMigrated
+    attr_reader :IsMigrated
 
     def validate
       super

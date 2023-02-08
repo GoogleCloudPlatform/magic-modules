@@ -11,7 +11,7 @@ import (
 func TestAccCloudTasksQueue_update(t *testing.T) {
 	t.Parallel()
 
-	name := "cloudtasksqueuetest-" + RandString(t, 10)
+	name := "cloudtasksqueuetest-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -42,7 +42,7 @@ func TestAccCloudTasksQueue_update(t *testing.T) {
 func TestAccCloudTasksQueue_update2Basic(t *testing.T) {
 	t.Parallel()
 
-	name := "cloudtasksqueuetest-" + RandString(t, 10)
+	name := "cloudtasksqueuetest-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -72,7 +72,7 @@ func TestAccCloudTasksQueue_update2Basic(t *testing.T) {
 
 func TestAccCloudTasksQueue_MaxRetryDiffSuppress0s(t *testing.T) {
 	t.Parallel()
-	testID := RandString(t, 10)
+	testID := google.RandString(t, 10)
 	cloudTaskName := fmt.Sprintf("tf-test-%s", testID)
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

@@ -13,8 +13,8 @@ import (
 func TestAccContainerNodePool_basic(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -36,8 +36,8 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 func TestAccContainerNodePool_basicWithClusterId(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -60,9 +60,9 @@ func TestAccContainerNodePool_basicWithClusterId(t *testing.T) {
 func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
-	network := fmt.Sprintf("tf-test-net-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -84,9 +84,9 @@ func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
-	network := fmt.Sprintf("tf-test-net-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -110,7 +110,7 @@ func TestAccContainerNodePool_namePrefix(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -135,7 +135,7 @@ func TestAccContainerNodePool_noName(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -157,8 +157,8 @@ func TestAccContainerNodePool_noName(t *testing.T) {
 func TestAccContainerNodePool_withLoggingVariantUpdates(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	nodePool := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	nodePool := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -196,8 +196,8 @@ func TestAccContainerNodePool_withLoggingVariantUpdates(t *testing.T) {
 func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	nodePool := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	nodePool := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -233,8 +233,8 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 func TestAccContainerNodePool_withReservationAffinity(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -262,9 +262,9 @@ func TestAccContainerNodePool_withReservationAffinity(t *testing.T) {
 func TestAccContainerNodePool_withReservationAffinitySpecific(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	reservation := fmt.Sprintf("tf-test-reservation-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	reservation := fmt.Sprintf("tf-test-reservation-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -299,8 +299,8 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
 
 	pid := GetTestProjectFromEnv()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -339,8 +339,8 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -393,8 +393,8 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -434,8 +434,8 @@ func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 	// Unit test, no interactions
 	provider.SkipIfVcr(t)
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -453,8 +453,8 @@ func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -485,9 +485,9 @@ func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
-	network := fmt.Sprintf("tf-test-net-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -517,9 +517,9 @@ func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 func TestAccContainerNodePool_withEnablePrivateNodesToggle(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
-	network := fmt.Sprintf("tf-test-net-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -613,8 +613,8 @@ func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -637,8 +637,8 @@ func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -692,8 +692,8 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 func TestAccContainerNodePool_withGPU(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -715,8 +715,8 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 func TestAccContainerNodePool_withManagement(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	nodePool := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	nodePool := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 	management := `
 	management {
 		auto_repair = "false"
@@ -767,8 +767,8 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 func TestAccContainerNodePool_withNodeConfigScopeAlias(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -791,8 +791,8 @@ func TestAccContainerNodePool_withNodeConfigScopeAlias(t *testing.T) {
 func TestAccContainerNodePool_regionalAutoscaling(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -846,8 +846,8 @@ func TestAccContainerNodePool_regionalAutoscaling(t *testing.T) {
 func TestAccContainerNodePool_totalSize(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -902,8 +902,8 @@ func TestAccContainerNodePool_totalSize(t *testing.T) {
 func TestAccContainerNodePool_autoscaling(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -956,8 +956,8 @@ func TestAccContainerNodePool_autoscaling(t *testing.T) {
 func TestAccContainerNodePool_resize(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -993,8 +993,8 @@ func TestAccContainerNodePool_resize(t *testing.T) {
 
 func TestAccContainerNodePool_version(t *testing.T) {
 	t.Parallel()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1032,8 +1032,8 @@ func TestAccContainerNodePool_version(t *testing.T) {
 func TestAccContainerNodePool_regionalClusters(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1055,8 +1055,8 @@ func TestAccContainerNodePool_regionalClusters(t *testing.T) {
 func TestAccContainerNodePool_012_ConfigModeAttr(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1086,8 +1086,8 @@ func TestAccContainerNodePool_012_ConfigModeAttr(t *testing.T) {
 func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1131,8 +1131,8 @@ func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
 func TestAccContainerNodePool_shieldedInstanceConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1155,9 +1155,9 @@ func TestAccContainerNodePool_shieldedInstanceConfig(t *testing.T) {
 func TestAccContainerNodePool_concurrent(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np1 := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
-	np2 := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np1 := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
+	np2 := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1198,8 +1198,8 @@ func TestAccContainerNodePool_concurrent(t *testing.T) {
 func TestAccContainerNodePool_ephemeralStorageConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1246,8 +1246,8 @@ resource "google_container_node_pool" "np" {
 func TestAccContainerNodePool_gcfsConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1294,8 +1294,8 @@ resource "google_container_node_pool" "np" {
 func TestAccContainerNodePool_gvnic(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1342,8 +1342,8 @@ resource "google_container_node_pool" "np" {
 func TestAccContainerNodePool_compactPlacement(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

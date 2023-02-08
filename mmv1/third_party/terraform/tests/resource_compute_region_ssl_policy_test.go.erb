@@ -20,7 +20,7 @@ func TestAccComputeRegionSslPolicy_update(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy compute.SslPolicy
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -67,7 +67,7 @@ func TestAccComputeRegionSslPolicy_update_to_custom(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy compute.SslPolicy
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -114,7 +114,7 @@ func TestAccComputeRegionSslPolicy_update_from_custom(t *testing.T) {
 	t.Parallel()
 
 	var sslPolicy compute.SslPolicy
-	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", RandString(t, 10))
+	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

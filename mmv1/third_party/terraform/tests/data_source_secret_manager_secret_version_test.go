@@ -12,7 +12,7 @@ import (
 func TestAccDatasourceSecretManagerSecretVersion_basic(t *testing.T) {
 	t.Parallel()
 
-	randomString := RandString(t, 10)
+	randomString := google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -32,7 +32,7 @@ func TestAccDatasourceSecretManagerSecretVersion_basic(t *testing.T) {
 func TestAccDatasourceSecretManagerSecretVersion_latest(t *testing.T) {
 	t.Parallel()
 
-	randomString := RandString(t, 10)
+	randomString := google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

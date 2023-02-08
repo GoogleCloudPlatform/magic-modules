@@ -13,7 +13,7 @@ func TestAccPrivatecaCertificate_privatecaCertificateUpdate(t *testing.T) {
 		"pool_name":           BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location":       "us-central1",
 		"deletion_protection": false,
-		"random_suffix":       RandString(t, 10),
+		"random_suffix":       google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

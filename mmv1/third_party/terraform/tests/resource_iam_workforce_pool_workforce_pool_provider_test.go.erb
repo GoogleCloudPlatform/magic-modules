@@ -11,7 +11,7 @@ import (
 func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 	t.Parallel()
 
-    random_suffix := RandString(t, 10)
+    random_suffix := google.RandString(t, 10)
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
 		"random_suffix": random_suffix,
@@ -59,7 +59,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 func TestAccIAMWorkforcePoolWorkforcePoolProvider_saml(t *testing.T) {
 	t.Parallel()
 
-    random_suffix := RandString(t, 10)
+    random_suffix := google.RandString(t, 10)
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
 		"random_suffix": random_suffix,

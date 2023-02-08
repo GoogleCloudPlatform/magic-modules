@@ -346,7 +346,7 @@ func TestAccComputeDisk_timeout(t *testing.T) {
 func TestAccComputeDisk_update(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -375,9 +375,9 @@ func TestAccComputeDisk_update(t *testing.T) {
 func TestAccComputeDisk_fromSnapshot(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	firstDiskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	snapshotName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	firstDiskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	snapshotName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	projectName := GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
@@ -408,7 +408,7 @@ func TestAccComputeDisk_fromSnapshot(t *testing.T) {
 func TestAccComputeDisk_encryption(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	var disk compute.Disk
 
 	VcrTest(t, resource.TestCase{
@@ -434,7 +434,7 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 
 	kms := BootstrapKMSKey(t)
 	pid := GetTestProjectFromEnv()
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
 	var disk compute.Disk
 
@@ -465,8 +465,8 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 func TestAccComputeDisk_deleteDetach(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -502,9 +502,9 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	diskName2 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	mgrName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	diskName2 := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	mgrName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -556,7 +556,7 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 func TestAccComputeDisk_pdExtremeImplicitProvisionedIops(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -578,8 +578,8 @@ func TestAccComputeDisk_pdExtremeImplicitProvisionedIops(t *testing.T) {
 func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	policyName := fmt.Sprintf("tf-test-policy-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	policyName := fmt.Sprintf("tf-test-policy-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -601,8 +601,8 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 <% unless version == 'ga' -%>
 func TestAccComputeDisk_multiWriter(t *testing.T) {
 	t.Parallel()
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	diskName := fmt.Sprintf("tf-testd-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	diskName := fmt.Sprintf("tf-testd-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -671,7 +671,7 @@ func testAccCheckEncryptionKey(t *testing.T, n string, disk *compute.Disk) resou
 func TestAccComputeDisk_cloneDisk(t *testing.T) {
 	t.Parallel()
 	pid := GetTestProjectFromEnv()
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	var disk compute.Disk
 

@@ -11,7 +11,7 @@ import (
 func TestAccDataSourceGoogleVpnGateway(t *testing.T) {
 	t.Parallel()
 
-	vpnGatewayName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	vpnGatewayName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
 		Providers: TestAccProviders,

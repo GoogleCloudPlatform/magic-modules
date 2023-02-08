@@ -256,7 +256,10 @@ func buildGetter(p Property, rawGetter string) string {
 			return fmt.Sprintf("%s.%sEnumRef(%s.(string))", p.resource.Package(), p.ObjectType(), rawGetter)
 		}
 		if p.EnumBool {
-			return fmt.Sprintf("expandEnumBool(%s.(string))", rawGetter)
+			if p.resource.IsMigrated {
+				return fmt.Sprintf("google.ExpandEnumBool(%s.(string))", rawGetter)
+			}
+			return fmt.Sprintf("ExpandEnumBool(%s.(string))", rawGetter)
 		}
 		if p.Computed {
 			return fmt.Sprintf("dcl.StringOrNil(%s.(string))", rawGetter)
@@ -273,17 +276,20 @@ func buildGetter(p Property, rawGetter string) string {
 		}
 		return fmt.Sprintf("dcl.Int64(int64(%s.(int)))", rawGetter)
 	case SchemaTypeMap:
-		return fmt.Sprintf("checkStringMap(%s)", rawGetter)
+		if p.resource.IsMigrated {
+			return fmt.Sprintf("google.CheckStringMap(%s)", rawGetter)
+		}
+		return fmt.Sprintf("CheckStringMap(%s)", rawGetter)
 	case SchemaTypeList, SchemaTypeSet:
 		if p.Type.IsEnumArray() {
 			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
 		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "string" {
-			return fmt.Sprintf("expandStringArray(%s)", rawGetter)
+			return fmt.Sprintf("ExpandStringArray(%s)", rawGetter)
 		}
 
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "integer" {
-			return fmt.Sprintf("expandIntegerArray(%s)", rawGetter)
+			return fmt.Sprintf("ExpandIntegerArray(%s)", rawGetter)
 		}
 
 		if p.Type.typ.Items != nil && len(p.Properties) > 0 {
@@ -397,6 +403,9 @@ func (p Property) DefaultDiffSuppress() *string {
 		// Field is reference to another resource
 		if _, ok := p.typ.Extension["x-dcl-references"]; ok {
 			dsf := "CompareSelfLinkOrResourceName"
+			if p.resource.IsMigrated {
+				dsf = "google.CompareSelfLinkOrResourceName"
+			}
 			return &dsf
 		}
 	}
@@ -698,6 +707,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 					propertyName = p.customName
 				}
 				ig := fmt.Sprintf("Get%s(d, config)", renderSnakeAsTitle(miscellaneousNameSnakeCase(propertyName)))
+				if p.resource.IsMigrated {
+					ig = fmt.Sprintf("google.Get%s(d, config)", renderSnakeAsTitle(miscellaneousNameSnakeCase(propertyName)))
+				}
 				if cigOk {
 					ig = fmt.Sprintf("%s(d, config)", cig.Function)
 				}
@@ -839,7 +851,10 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 			enumBoolSS := fmt.Sprintf("d.Set(%q, flattenEnumBool(%s.%s))", p.Name(), parent, p.PackageName)
 			p.StateSetter = &enumBoolSS
-			enumBoolSG := fmt.Sprintf("expandEnumBool(d.Get(%q))", p.Name())
+			enumBoolSG := fmt.Sprintf("ExpandEnumBool(d.Get(%q))", p.Name())
+			if p.resource.IsMigrated {
+				enumBoolSG = fmt.Sprintf("google.ExpandEnumBool(d.Get(%q))", p.Name())
+			}
 			p.StateGetter = &enumBoolSG
 		}
 

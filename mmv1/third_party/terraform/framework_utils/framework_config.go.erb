@@ -29,7 +29,7 @@ import (
 
 // ConfigureWithData handles the bulk of configuring the provider
 // it is pulled out so that we can manually call this from our testing provider as well
-func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data ProviderModel, tfVersion string, diags *diag.Diagnostics) {
+func (p *FrameworkProvider) ConfigureWithData(ctx context.Context, data ProviderModel, tfVersion string, diags *diag.Diagnostics) {
 	// Set defaults if needed
 	p.HandleDefaults(ctx, &data, diags)
 	if diags.HasError() {
@@ -154,7 +154,7 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 }
 
 // HandleDefaults will handle all the defaults necessary in the provider
-func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderModel, diags *diag.Diagnostics) {
+func (p *FrameworkProvider) HandleDefaults(ctx context.Context, data *ProviderModel, diags *diag.Diagnostics) {
 	if data.AccessToken.IsNull() && data.Credentials.IsNull() {
 		credentials := MultiEnvDefault([]string{
 			"GOOGLE_CREDENTIALS",
@@ -480,7 +480,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 	}
 }
 
-func (p *frameworkProvider) SetupClient(ctx context.Context, data ProviderModel, diags *diag.Diagnostics) {
+func (p *FrameworkProvider) SetupClient(ctx context.Context, data ProviderModel, diags *diag.Diagnostics) {
 	tokenSource := GetTokenSource(ctx, data, false, diags)
 	if diags.HasError() {
 		return
@@ -536,7 +536,7 @@ func (p *frameworkProvider) SetupClient(ctx context.Context, data ProviderModel,
 	p.client = client
 }
 
-func (p *frameworkProvider) SetupGrpcLogging() {
+func (p *FrameworkProvider) SetupGrpcLogging() {
 	logger := logrus.StandardLogger()
 
     logrus.SetLevel(logrus.DebugLevel)
@@ -556,7 +556,7 @@ func (p *frameworkProvider) SetupGrpcLogging() {
     )
 }
 
-func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data ProviderModel, diags *diag.Diagnostics) {
+func (p *FrameworkProvider) logGoogleIdentities(ctx context.Context, data ProviderModel, diags *diag.Diagnostics) {
 	if data.ImpersonateServiceAccount.IsNull() {
 
 		tokenSource := GetTokenSource(ctx, data, true, diags)

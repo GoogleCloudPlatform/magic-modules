@@ -68,7 +68,7 @@ mmv1:
 tpgtools:
 	make serialize
 	cd tpgtools;\
-		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile) --logtostderr
 
 validator:
 	cd mmv1;\

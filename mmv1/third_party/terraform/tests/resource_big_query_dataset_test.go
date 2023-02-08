@@ -12,7 +12,7 @@ import (
 func TestAccBigQueryDataset_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -42,8 +42,8 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 func TestAccBigQueryDataset_datasetWithContents(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", google.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -67,9 +67,9 @@ func TestAccBigQueryDataset_datasetWithContents(t *testing.T) {
 func TestAccBigQueryDataset_access(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_access_%s", RandString(t, 10))
-	otherDatasetID := fmt.Sprintf("tf_test_other_%s", RandString(t, 10))
-	otherTableID := fmt.Sprintf("tf_test_other_%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_access_%s", google.RandString(t, 10))
+	otherDatasetID := fmt.Sprintf("tf_test_other_%s", google.RandString(t, 10))
+	otherTableID := fmt.Sprintf("tf_test_other_%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -115,7 +115,7 @@ func TestAccBigQueryDataset_access(t *testing.T) {
 func TestAccBigQueryDataset_regionalLocation(t *testing.T) {
 	t.Parallel()
 
-	datasetID1 := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID1 := fmt.Sprintf("tf_test_%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -139,7 +139,7 @@ func TestAccBigQueryDataset_cmek(t *testing.T) {
 
 	kms := BootstrapKMSKeyInLocation(t, "us")
 	pid := GetTestProjectFromEnv()
-	datasetID1 := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	datasetID1 := fmt.Sprintf("tf_test_%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

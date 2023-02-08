@@ -10,7 +10,7 @@ import (
 func TestAccVertexAITensorboard_Update(t *testing.T) {
 	t.Parallel()
 
-	random_suffix := "tf-test-" + RandString(t, 10)
+	random_suffix := "tf-test-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

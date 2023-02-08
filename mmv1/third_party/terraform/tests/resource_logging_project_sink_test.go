@@ -11,8 +11,8 @@ import (
 func TestAccLoggingProjectSink_basic(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -34,8 +34,8 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 func TestAccLoggingProjectSink_described(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -57,8 +57,8 @@ func TestAccLoggingProjectSink_described(t *testing.T) {
 func TestAccLoggingProjectSink_described_update(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -88,8 +88,8 @@ func TestAccLoggingProjectSink_described_update(t *testing.T) {
 func TestAccLoggingProjectSink_disabled(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -111,9 +111,9 @@ func TestAccLoggingProjectSink_disabled(t *testing.T) {
 func TestAccLoggingProjectSink_updatePreservesUniqueWriter(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	updatedBucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
+	updatedBucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -143,8 +143,8 @@ func TestAccLoggingProjectSink_updatePreservesUniqueWriter(t *testing.T) {
 func TestAccLoggingProjectSink_updateBigquerySink(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bqDatasetID := "tf_test_sink_" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bqDatasetID := "tf_test_sink_" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -174,8 +174,8 @@ func TestAccLoggingProjectSink_updateBigquerySink(t *testing.T) {
 func TestAccLoggingProjectSink_heredoc(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -197,7 +197,7 @@ func TestAccLoggingProjectSink_heredoc(t *testing.T) {
 func TestAccLoggingProjectSink_loggingbucket(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -275,8 +275,8 @@ func TestLoggingProjectSink_bigqueryOptionCustomizedDiff(t *testing.T) {
 func TestAccLoggingProjectSink_disabled_update(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

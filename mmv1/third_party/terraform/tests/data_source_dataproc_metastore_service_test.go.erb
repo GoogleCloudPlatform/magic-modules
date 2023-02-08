@@ -11,7 +11,7 @@ import (
 func TestAccDataprocMetastoreServiceDatasource_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-test-" + RandString(t, 10)
+	name := "tf-test-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

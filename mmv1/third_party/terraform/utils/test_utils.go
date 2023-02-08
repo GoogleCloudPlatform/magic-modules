@@ -16,7 +16,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
 var ProjectEnvVars = []string{
@@ -49,38 +49,45 @@ var ZoneEnvVars = []string{
 	"CLOUDSDK_COMPUTE_ZONE",
 }
 
-var Sources map[string]VcrSource
-
-func init() {
-	Sources = make(map[string]VcrSource)
+var projectNumberEnvVars = []string{
+	"GOOGLE_PROJECT_NUMBER",
 }
 
-// TestAccPreCheck ensures at least one of the project env variables is set.
-func GetTestProjectFromEnv() string {
-	return MultiEnvSearch(ProjectEnvVars)
+// This value is the Customer ID of the GOOGLE_ORG_DOMAIN workspace.
+// See https://admin.com/ac/accountsettings when logged into an org admin for the value.
+var custIdEnvVars = []string{
+	"GOOGLE_CUST_ID",
 }
 
-func GetTestOrgFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, orgEnvVars...)
-	return MultiEnvSearch(orgEnvVars)
+// This value is the username of an identity account within the GOOGLE_ORG_DOMAIN workspace.
+// For example in the org example.com with a user "foo@example.com", this would be set to "foo".
+// See https://admin.google.com/ac/users when logged into an org admin for a list.
+var identityUserEnvVars = []string{
+	"GOOGLE_IDENTITY_USER",
 }
 
-// TestAccPreCheck ensures at least one of the credentials env variables is set.
-func GetTestCredsFromEnv() string {
-	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
-	if MultiEnvSearch(CredsEnvVars) == "true" {
-		return ""
-	}
-	return MultiEnvSearch(CredsEnvVars)
+var firestoreProjectEnvVars = []string{
+	"GOOGLE_FIRESTORE_PROJECT",
 }
 
-// TestAccPreCheck ensures at least one of the region env variables is set.
-func GetTestRegionFromEnv() string {
-	return MultiEnvSearch(RegionEnvVars)
+var orgTargetEnvVars = []string{
+	"GOOGLE_ORG_2",
 }
 
-func GetTestZoneFromEnv() string {
-	return MultiEnvSearch(ZoneEnvVars)
+var billingAccountEnvVars = []string{
+	"GOOGLE_BILLING_ACCOUNT",
+}
+
+var masterBillingAccountEnvVars = []string{
+	"GOOGLE_MASTER_BILLING_ACCOUNT",
+}
+
+var serviceAccountEnvVars = []string{
+	"GOOGLE_SERVICE_ACCOUNT",
+}
+
+var orgEnvDomainVars = []string{
+	"GOOGLE_ORG_DOMAIN",
 }
 
 var (
@@ -93,6 +100,18 @@ type ResourceDataMock struct {
 	FieldsInSchema      map[string]interface{}
 	FieldsWithHasChange []string
 	id                  string
+}
+
+// A source for a given VCR test with the value that seeded it
+type VcrSource struct {
+	Seed   int64
+	Source rand.Source
+}
+
+var Sources map[string]VcrSource
+
+func init() {
+	Sources = make(map[string]VcrSource)
 }
 
 func (d *ResourceDataMock) HasChange(key string) bool {
@@ -237,6 +256,34 @@ func checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 	}
 }
 
+// TestAccPreCheck ensures at least one of the project env variables is set.
+func GetTestProjectNumberFromEnv() string {
+	return MultiEnvSearch(projectNumberEnvVars)
+}
+
+// TestAccPreCheck ensures at least one of the project env variables is set.
+func GetTestProjectFromEnv() string {
+	return MultiEnvSearch(ProjectEnvVars)
+}
+
+// TestAccPreCheck ensures at least one of the credentials env variables is set.
+func GetTestCredsFromEnv() string {
+	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
+	if MultiEnvSearch(CredsEnvVars) == "true" {
+		return ""
+	}
+	return MultiEnvSearch(CredsEnvVars)
+}
+
+// TestAccPreCheck ensures at least one of the region env variables is set.
+func GetTestRegionFromEnv() string {
+	return MultiEnvSearch(RegionEnvVars)
+}
+
+func GetTestZoneFromEnv() string {
+	return MultiEnvSearch(ZoneEnvVars)
+}
+
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {
 	if t == nil {
 		log.Printf("[DEBUG] Not running inside of test - skip skipping")
@@ -251,37 +298,57 @@ func SkipIfEnvNotSet(t *testing.T, envs ...string) {
 	}
 }
 
-func RandString(t *testing.T, length int) string {
-	if !IsVcrEnabled() {
-		return acctest.RandString(length)
-	}
-	envPath := os.Getenv("VCR_PATH")
-	vcrMode := os.Getenv("VCR_MODE")
-	s, err := CreateVcrSource(t, envPath, vcrMode)
-	if err != nil {
-		// At this point we haven't created any resources, so fail fast
-		t.Fatal(err)
-	}
+func GetTestCustIdFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, custIdEnvVars...)
+	return MultiEnvSearch(custIdEnvVars)
+}
 
-	r := rand.New(s.Source)
-	result := make([]byte, length)
-	set := "abcdefghijklmnopqrstuvwxyz012346789"
-	for i := 0; i < length; i++ {
-		result[i] = set[r.Intn(len(set))]
-	}
-	return string(result)
+func GetTestIdentityUserFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, identityUserEnvVars...)
+	return MultiEnvSearch(identityUserEnvVars)
+}
+
+// Firestore can't be enabled at the same time as Datastore, so we need a new
+// project to manage it until we can enable Firestore programmatically.
+func GetTestFirestoreProjectFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, firestoreProjectEnvVars...)
+	return MultiEnvSearch(firestoreProjectEnvVars)
+}
+
+func GetTestOrgFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, orgEnvVars...)
+	return MultiEnvSearch(orgEnvVars)
+}
+
+func GetTestOrgDomainFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, orgEnvDomainVars...)
+	return MultiEnvSearch(orgEnvDomainVars)
+}
+
+func GetTestOrgTargetFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, orgTargetEnvVars...)
+	return MultiEnvSearch(orgTargetEnvVars)
+}
+
+func GetTestBillingAccountFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, billingAccountEnvVars...)
+	return MultiEnvSearch(billingAccountEnvVars)
+}
+
+func getTestMasterBillingAccountFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, masterBillingAccountEnvVars...)
+	return MultiEnvSearch(masterBillingAccountEnvVars)
+}
+
+func GetTestServiceAccountFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, serviceAccountEnvVars...)
+	return MultiEnvSearch(serviceAccountEnvVars)
 }
 
 func IsVcrEnabled() bool {
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
 	return envPath != "" && vcrMode != ""
-}
-
-// A source for a given VCR test with the value that seeded it
-type VcrSource struct {
-	Seed   int64
-	Source rand.Source
 }
 
 var SourcesLock = sync.RWMutex{}
@@ -302,6 +369,17 @@ func readSeedFromFile(fileName string) (int64, error) {
 	data = bytes.Trim(data, "\x00")
 	seed := string(data)
 	return StringToFixed64(seed)
+}
+
+// Retrieves a unique test name used for writing files
+// replaces all `/` characters that would cause filepath issues
+// This matters during tests that dispatch multiple tests, for example TestAccLoggingFolderExclusion
+func VcrSeedFile(path, name string) string {
+	return filepath.Join(path, fmt.Sprintf("%s.Seed", VcrFileName(name)))
+}
+
+func VcrFileName(name string) string {
+	return strings.ReplaceAll(name, "/", "_")
 }
 
 // Produces a rand.Source for VCR testing based on the given mode.
@@ -340,13 +418,38 @@ func CreateVcrSource(t *testing.T, path, mode string) (*VcrSource, error) {
 	}
 }
 
-// Retrieves a unique test name used for writing files
-// replaces all `/` characters that would cause filepath issues
-// This matters during tests that dispatch multiple tests, for example TestAccLoggingFolderExclusion
-func VcrSeedFile(path, name string) string {
-	return filepath.Join(path, fmt.Sprintf("%s.Seed", VcrFileName(name)))
+func RandString(t *testing.T, length int) string {
+	if !IsVcrEnabled() {
+		return acctest.RandString(length)
+	}
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	s, err := CreateVcrSource(t, envPath, vcrMode)
+	if err != nil {
+		// At this point we haven't created any resources, so fail fast
+		t.Fatal(err)
+	}
+
+	r := rand.New(s.Source)
+	result := make([]byte, length)
+	set := "abcdefghijklmnopqrstuvwxyz012346789"
+	for i := 0; i < length; i++ {
+		result[i] = set[r.Intn(len(set))]
+	}
+	return string(result)
 }
 
-func VcrFileName(name string) string {
-	return strings.ReplaceAll(name, "/", "_")
+func RandInt(t *testing.T) int {
+	if !IsVcrEnabled() {
+		return acctest.RandInt()
+	}
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	s, err := CreateVcrSource(t, envPath, vcrMode)
+	if err != nil {
+		// At this point we haven't created any resources, so fail fast
+		t.Fatal(err)
+	}
+
+	return rand.New(s.Source).Int()
 }

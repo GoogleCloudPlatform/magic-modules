@@ -14,7 +14,7 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 		"project":         GetTestProjectFromEnv(),
 		"org_id":          GetTestOrgFromEnv(t),
 		"billing_account": GetTestBillingAccountFromEnv(t),
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

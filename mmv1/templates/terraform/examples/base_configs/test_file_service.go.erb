@@ -56,7 +56,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
   t.Parallel()
 
 	context := map[string]interface{} {
-<%= lines(indent(compile(pwd + '/templates/terraform/env_var_context.go.erb'), 4)) -%>
+<%= lines(indent(compile(pwd + '/templates/terraform/env_var_context_service.go.erb'), 4)) -%>
 	<% unless example.test_vars_overrides.nil? -%>
 	<% example.test_vars_overrides.each do |var_name, override| -%>
 			"<%= var_name %>": <%= override %>,

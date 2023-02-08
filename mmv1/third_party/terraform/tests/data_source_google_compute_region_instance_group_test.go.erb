@@ -12,7 +12,7 @@ func TestAccDataSourceRegionInstanceGroup(t *testing.T) {
 	// Randomness in instance template
 	provider.SkipIfVcr(t)
 	t.Parallel()
-	name := "tf-test-" + RandString(t, 6)
+	name := "tf-test-" + google.RandString(t, 6)
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
 		Providers: TestAccProviders,

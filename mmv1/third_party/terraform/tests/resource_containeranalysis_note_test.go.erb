@@ -12,8 +12,8 @@ import (
 func TestAccContainerAnalysisNote_basic(t *testing.T) {
 	t.Parallel()
 
-	name := RandString(t, 10)
-	readableName := RandString(t, 10)
+	name := google.RandString(t, 10)
+	readableName := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -34,9 +34,9 @@ func TestAccContainerAnalysisNote_basic(t *testing.T) {
 func TestAccContainerAnalysisNote_update(t *testing.T) {
 	t.Parallel()
 
-	name := RandString(t, 10)
-	readableName := RandString(t, 10)
-	readableName2 := RandString(t, 10)
+	name := google.RandString(t, 10)
+	readableName := google.RandString(t, 10)
+	readableName2 := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

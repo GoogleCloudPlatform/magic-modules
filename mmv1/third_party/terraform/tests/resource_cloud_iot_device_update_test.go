@@ -10,8 +10,8 @@ import (
 func TestAccCloudIoTDevice_update(t *testing.T) {
 	t.Parallel()
 
-	registryName := fmt.Sprintf("psregistry-test-%s", RandString(t, 10))
-	deviceName := fmt.Sprintf("psdevice-test-%s", RandString(t, 10))
+	registryName := fmt.Sprintf("psregistry-test-%s", google.RandString(t, 10))
+	deviceName := fmt.Sprintf("psdevice-test-%s", google.RandString(t, 10))
 	resourceName := fmt.Sprintf("google_cloudiot_device.%s", deviceName)
 
 	VcrTest(t, resource.TestCase{

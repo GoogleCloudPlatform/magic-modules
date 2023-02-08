@@ -65,7 +65,7 @@ func TestAccDataSourceGoogleBillingAccount_byFullNameClosed(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleBillingAccount_byDisplayName(t *testing.T) {
-	name := RandString(t, 16)
+	name := google.RandString(t, 16)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

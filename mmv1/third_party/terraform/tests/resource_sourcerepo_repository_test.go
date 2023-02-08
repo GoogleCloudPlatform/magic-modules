@@ -10,7 +10,7 @@ import (
 func TestAccSourceRepoRepository_basic(t *testing.T) {
 	t.Parallel()
 
-	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", RandString(t, 10))
+	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -31,9 +31,9 @@ func TestAccSourceRepoRepository_basic(t *testing.T) {
 func TestAccSourceRepoRepository_update(t *testing.T) {
 	t.Parallel()
 
-	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", RandString(t, 10))
-	accountId := fmt.Sprintf("account-id-%s", RandString(t, 10))
-	topicName := fmt.Sprintf("topic-name-%s", RandString(t, 10))
+	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", google.RandString(t, 10))
+	accountId := fmt.Sprintf("account-id-%s", google.RandString(t, 10))
+	topicName := fmt.Sprintf("topic-name-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

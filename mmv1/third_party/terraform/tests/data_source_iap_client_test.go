@@ -11,8 +11,8 @@ func TestAccIapClient_Datasource_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
-		"org_domain":    getTestOrgDomainFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_domain":    google.GetTestOrgDomainFromEnv(t),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

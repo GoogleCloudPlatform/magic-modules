@@ -10,7 +10,7 @@ import (
 func TestAccPubsubTopic_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -44,7 +44,7 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 
 	kms := BootstrapKMSKey(t)
 	pid := GetTestProjectFromEnv()
-	topicName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	topicName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

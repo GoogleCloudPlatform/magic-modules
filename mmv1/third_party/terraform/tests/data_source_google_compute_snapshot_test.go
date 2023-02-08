@@ -14,7 +14,7 @@ func TestAccSnapshotDatasource_name(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_name(GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccSnapshot_name(GetTestProjectFromEnv(), google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
@@ -35,7 +35,7 @@ func TestAccSnapshotDatasource_filter(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_filter(GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccSnapshot_filter(GetTestProjectFromEnv(), google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
@@ -56,7 +56,7 @@ func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_filter_mostRecent(GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccSnapshot_filter_mostRecent(GetTestProjectFromEnv(), google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",

@@ -12,9 +12,9 @@ import (
 func TestAccComputeRegionBackendService_basic(t *testing.T) {
 	t.Parallel()
 
-	serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	extraCheckName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	serviceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	extraCheckName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -45,10 +45,10 @@ func TestAccComputeRegionBackendService_basic(t *testing.T) {
 func TestAccComputeRegionBackendService_withBackendInternal(t *testing.T) {
   t.Parallel()
 
-  serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-  igName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-  itName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-  checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+  serviceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+  igName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+  itName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+  checkName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
   VcrTest(t, resource.TestCase{
     PreCheck:     func() { TestAccPreCheck(t) },
     Providers:    TestAccProviders,
@@ -84,9 +84,9 @@ func TestAccComputeRegionBackendService_withBackendInternal(t *testing.T) {
 func TestAccComputeRegionBackendService_withBackendInternalManaged(t *testing.T) {
   t.Parallel()
 
-  serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-  igmName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-  hcName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+  serviceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+  igmName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+  hcName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
   VcrTest(t, resource.TestCase{
     PreCheck:     func() { TestAccPreCheck(t) },
     Providers:    TestAccProviders,
@@ -107,12 +107,12 @@ func TestAccComputeRegionBackendService_withBackendInternalManaged(t *testing.T)
 func TestAccComputeRegionBackendService_withBackendMultiNic(t *testing.T) {
         t.Parallel()
 
-        serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-        net1Name := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-        net2Name := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-        igName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-        itName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-        checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+        serviceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+        net1Name := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+        net2Name := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+        igName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+        itName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+        checkName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
         VcrTest(t, resource.TestCase{
                 PreCheck:     func() { TestAccPreCheck(t) },
                 Providers:    TestAccProviders,
@@ -134,8 +134,8 @@ func TestAccComputeRegionBackendService_withBackendMultiNic(t *testing.T) {
 func TestAccComputeRegionBackendService_withConnectionDrainingAndUpdate(t *testing.T) {
 	t.Parallel()
 
-	serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	checkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	serviceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -165,8 +165,8 @@ func TestAccComputeRegionBackendService_withConnectionDrainingAndUpdate(t *testi
 func TestAccComputeRegionBackendService_ilbUpdateBasic(t *testing.T) {
 	t.Parallel()
 
-	backendName := fmt.Sprintf("foo-%s", RandString(t, 10))
-	checkName := fmt.Sprintf("bar-%s", RandString(t, 10))
+	backendName := fmt.Sprintf("foo-%s", google.RandString(t, 10))
+	checkName := fmt.Sprintf("bar-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -197,12 +197,12 @@ func TestAccComputeRegionBackendService_ilbUpdateBasic(t *testing.T) {
 func TestAccComputeRegionBackendService_ilbUpdateFull(t *testing.T) {
 	t.Parallel()
 
-  RandString := RandString(t, 10)
+  randString := google.RandString(t, 10)
 
-	backendName := fmt.Sprintf("foo-%s", RandString)
-	checkName := fmt.Sprintf("bar-%s", RandString)
-  igName := fmt.Sprintf("tf-test-%s", RandString)
-  instanceName := fmt.Sprintf("tf-test-%s", RandString)
+	backendName := fmt.Sprintf("foo-%s", randString)
+	checkName := fmt.Sprintf("bar-%s", randString)
+  igName := fmt.Sprintf("tf-test-%s", randString)
+  instanceName := fmt.Sprintf("tf-test-%s", randString)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -231,8 +231,8 @@ func TestAccComputeRegionBackendService_ilbUpdateFull(t *testing.T) {
 <% end -%>
 
 func TestAccComputeRegionBackendService_withBackendAndIAP(t *testing.T) {
-	backendName := fmt.Sprintf("foo-%s", RandString(t, 10))
-	checkName := fmt.Sprintf("bar-%s", RandString(t, 10))
+	backendName := fmt.Sprintf("foo-%s", google.RandString(t, 10))
+	checkName := fmt.Sprintf("bar-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -264,10 +264,10 @@ func TestAccComputeRegionBackendService_withBackendAndIAP(t *testing.T) {
 func TestAccComputeRegionBackendService_subsettingUpdate(t *testing.T) {
 	t.Parallel()
 
-	RandString := RandString(t, 10)
+	randString := google.RandString(t, 10)
 
-	backendName := fmt.Sprintf("foo-%s", RandString)
-	checkName := fmt.Sprintf("bar-%s", RandString)
+	backendName := fmt.Sprintf("foo-%s", randString)
+	checkName := fmt.Sprintf("bar-%s", randString)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

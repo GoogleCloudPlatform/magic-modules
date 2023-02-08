@@ -11,7 +11,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample(t *testing.T
 
 	context := map[string]interface{}{
 		"project":       GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -46,7 +46,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample2(t *testing.
 
 	context := map[string]interface{}{
 		"project":       getTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

@@ -17,7 +17,7 @@ func TestAccComputeTargetPool_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeTargetPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeTargetPool_basic(RandString(t, 10)),
+				Config: testAccComputeTargetPool_basic(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeTargetPoolExists(
 						t, "google_compute_target_pool.foo"),
@@ -39,9 +39,9 @@ func TestAccComputeTargetPool_basic(t *testing.T) {
 func TestAccComputeTargetPool_update(t *testing.T) {
 	t.Parallel()
 
-	tpname := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	name1 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	name2 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	tpname := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	name1 := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	name2 := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

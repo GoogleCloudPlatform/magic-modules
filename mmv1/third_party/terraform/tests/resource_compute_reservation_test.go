@@ -10,7 +10,7 @@ import (
 func TestAccComputeReservation_update(t *testing.T) {
 	t.Parallel()
 
-	reservationName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	reservationName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

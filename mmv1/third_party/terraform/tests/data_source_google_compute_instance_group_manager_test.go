@@ -10,15 +10,15 @@ func TestAccDataSourceGoogleComputeInstanceGroupManager(t *testing.T) {
 	t.Parallel()
 
 	zoneName := "us-central1-a"
-	igmName := "tf-tst-igm" + RandString(t, 6)
+	igmName := "tf-tst-igm" + google.RandString(t, 6)
 
 	context := map[string]interface{}{
 		"zoneName":     zoneName,
 		"igmName":      igmName,
-		"baseName":     "tf-tst-igm-base" + RandString(t, 6),
-		"poolName":     "tf-tst-pool" + RandString(t, 6),
-		"templateName": "tf-tst-templt" + RandString(t, 6),
-		"autoHealName": "tf-tst-ah-name" + RandString(t, 6),
+		"baseName":     "tf-tst-igm-base" + google.RandString(t, 6),
+		"poolName":     "tf-tst-pool" + google.RandString(t, 6),
+		"templateName": "tf-tst-templt" + google.RandString(t, 6),
+		"autoHealName": "tf-tst-ah-name" + google.RandString(t, 6),
 	}
 
 	VcrTest(t, resource.TestCase{

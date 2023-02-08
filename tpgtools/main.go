@@ -357,21 +357,40 @@ func loadOverrides(packagePath Filepath, fileName string) Overrides {
 	return overrides
 }
 
+func getParentDir(res *Resource) string {
+	dirPath := path.Join(*oPath, terraformResourceDirectory)
+
+	if !res.IsMigrated {
+		return dirPath
+	}
+
+	servicePath := path.Join(dirPath, "service", string(res.Package()))
+	if err := os.MkdirAll(servicePath, os.ModePerm); err != nil {
+		glog.Error(fmt.Errorf("error creating Terraform service directory %v: %v", servicePath, err))
+	}
+	return servicePath
+}
+
 func generateResourceFile(res *Resource) {
 	// Generate resource file
 	tmplInput := ResourceInput{
 		Resource: *res,
 	}
 
-	tmpl, err := template.New("resource.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/resource.go.tmpl",
+	templateFile := "resource.go.tmpl"
+	if res.IsMigrated {
+		templateFile = "resource_service.go.tmpl"
+	}
+
+	tmpl, err := template.New(templateFile).Funcs(TemplateFunctions).ParseFiles(
+		"templates/" + templateFile,
 	)
 	if err != nil {
 		glog.Exit(err)
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, "resource.go.tmpl", tmplInput); err != nil {
+	if err = tmpl.ExecuteTemplate(&contents, templateFile, tmplInput); err != nil {
 		glog.Exit(err)
 	}
 
@@ -388,7 +407,8 @@ func generateResourceFile(res *Resource) {
 		fmt.Printf("%v", string(formatted))
 	} else {
 		outname := fmt.Sprintf("resource_%s_%s.go", res.ProductName(), res.Name())
-		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		parentDir := getParentDir(res)
+		err = ioutil.WriteFile(path.Join(parentDir, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -404,15 +424,20 @@ func generateSweeperFile(res *Resource) {
 		Resource: *res,
 	}
 
-	tmpl, err := template.New("sweeper.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/sweeper.go.tmpl",
+	templateFile := "sweeper.go.tmpl"
+	if res.IsMigrated {
+		templateFile = "sweeper_service.go.tmpl"
+	}
+
+	tmpl, err := template.New(templateFile).Funcs(TemplateFunctions).ParseFiles(
+		"templates/" + templateFile,
 	)
 	if err != nil {
 		glog.Exit(err)
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, "sweeper.go.tmpl", tmplInput); err != nil {
+	if err = tmpl.ExecuteTemplate(&contents, templateFile, tmplInput); err != nil {
 		glog.Exit(err)
 	}
 
@@ -429,7 +454,8 @@ func generateSweeperFile(res *Resource) {
 		fmt.Printf("%v", string(formatted))
 	} else {
 		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.ProductName(), res.Name())
-		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		parentDir := getParentDir(res)
+		err := ioutil.WriteFile(path.Join(parentDir, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -445,15 +471,19 @@ func generateResourceTestFile(res *Resource) {
 		Resource: *res,
 	}
 
-	tmpl, err := template.New("test_file.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/test_file.go.tmpl",
+	templateFile := "test_file.go.tmpl"
+	if res.IsMigrated {
+		templateFile = "test_file_service.go.tmpl"
+	}
+	tmpl, err := template.New(templateFile).Funcs(TemplateFunctions).ParseFiles(
+		"templates/" + templateFile,
 	)
 	if err != nil {
 		glog.Exit(err)
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, "test_file.go.tmpl", tmplInput); err != nil {
+	if err = tmpl.ExecuteTemplate(&contents, templateFile, tmplInput); err != nil {
 		fmt.Println(contents.String())
 		glog.Exit(err)
 	}
@@ -471,7 +501,8 @@ func generateResourceTestFile(res *Resource) {
 		fmt.Printf("%v", string(formatted))
 	} else {
 		outname := fmt.Sprintf("resource_%s_%s_generated_test.go", res.ProductName(), res.Name())
-		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		parentDir := getParentDir(res)
+		err := ioutil.WriteFile(path.Join(parentDir, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -498,7 +529,7 @@ func generateProviderResourcesFile(resources []*Resource) {
 
 	if oPath == nil || *oPath == "" {
 		fmt.Print(string(formatted))
-	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider_dcl_resources.go"), formatted, 0644); err != nil {
+	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider", "provider_dcl_resources.go"), formatted, 0644); err != nil {
 		glog.Exit(err)
 	}
 }

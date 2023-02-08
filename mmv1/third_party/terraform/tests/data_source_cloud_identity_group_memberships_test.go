@@ -9,10 +9,10 @@ import (
 func TestAccDataSourceCloudIdentityGroupMemberships_basic(t *testing.T) {
 
 	context := map[string]interface{}{
-		"org_domain":    getTestOrgDomainFromEnv(t),
-		"cust_id":       getTestCustIdFromEnv(t),
-		"identity_user": getTestIdentityUserFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_domain":    google.GetTestOrgDomainFromEnv(t),
+		"cust_id":       google.GetTestCustIdFromEnv(t),
+		"identity_user": google.GetTestIdentityUserFromEnv(t),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	memberId := Nprintf("%{identity_user}@%{org_domain}", context)

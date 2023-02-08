@@ -12,7 +12,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	context := map[string]interface{}{
 
 		"organization":  GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
@@ -399,7 +399,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	context := map[string]interface{}{
 		"organization":  GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 

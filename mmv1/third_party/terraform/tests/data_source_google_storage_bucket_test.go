@@ -10,7 +10,7 @@ import (
 func TestAccDataSourceGoogleStorageBucket_basic(t *testing.T) {
 	t.Parallel()
 
-	bucket := "tf-bucket-" + RandString(t, 10)
+	bucket := "tf-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

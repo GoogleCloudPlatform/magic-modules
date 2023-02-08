@@ -72,9 +72,9 @@ func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
 func TestAccHealthcareDicomStore_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetName := fmt.Sprintf("tf-test-dataset-%s", RandString(t, 10))
-	dicomStoreName := fmt.Sprintf("tf-test-dicom-store-%s", RandString(t, 10))
-	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", google.RandString(t, 10))
+	dicomStoreName := fmt.Sprintf("tf-test-dicom-store-%s", google.RandString(t, 10))
+	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
 	resourceName := "google_healthcare_dicom_store.default"
 
 	VcrTest(t, resource.TestCase{

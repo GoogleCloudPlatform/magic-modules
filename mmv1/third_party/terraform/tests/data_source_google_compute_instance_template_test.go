@@ -14,7 +14,7 @@ func TestAccInstanceTemplateDatasource_name(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_name(GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccInstanceTemplate_name(GetTestProjectFromEnv(), google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
@@ -35,7 +35,7 @@ func TestAccInstanceTemplateDatasource_filter(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_filter(GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccInstanceTemplate_filter(GetTestProjectFromEnv(), google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
@@ -56,7 +56,7 @@ func TestAccInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_filter_mostRecent(GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccInstanceTemplate_filter_mostRecent(GetTestProjectFromEnv(), google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",

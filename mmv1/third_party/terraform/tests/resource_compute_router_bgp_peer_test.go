@@ -11,7 +11,7 @@ import (
 func TestAccComputeRouterPeer_basic(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -39,7 +39,7 @@ func TestAccComputeRouterPeer_basic(t *testing.T) {
 func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -72,7 +72,7 @@ func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 func TestAccComputeRouterPeer_enable(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -115,7 +115,7 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 func TestAccComputeRouterPeer_bfd(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -158,7 +158,7 @@ func TestAccComputeRouterPeer_bfd(t *testing.T) {
 func TestAccComputeRouterPeer_routerApplianceInstance(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

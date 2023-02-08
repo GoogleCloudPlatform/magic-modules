@@ -11,7 +11,7 @@ import (
 func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 	t.Parallel()
 
-	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", RandString(t, 10))
+	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", google.RandString(t, 10))
 
 	var kskDigest1, kskDigest2, zskPubKey1, zskPubKey2, kskAlg1, kskAlg2 string
 
@@ -20,7 +20,7 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
+				ExternalProviders: ProviderVersion450(),
 				Config:            testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
@@ -28,24 +28,24 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "zone_signing_keys.#", "1"),
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.#", "1"),
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.#", "1"),
-					testExtractResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.0.digests.0.digest", &kskDigest1),
-					testExtractResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.0.public_key", &zskPubKey1),
-					testExtractResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.0.algorithm", &kskAlg1),
+					TestExtractResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.0.digests.0.digest", &kskDigest1),
+					TestExtractResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.0.public_key", &zskPubKey1),
+					TestExtractResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.0.algorithm", &kskAlg1),
 				),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config:                   testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "1"),
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "zone_signing_keys.#", "1"),
-					testExtractResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.0.digests.0.digest", &kskDigest2),
-					testExtractResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.0.public_key", &zskPubKey2),
-					testExtractResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.0.algorithm", &kskAlg2),
-					testCheckAttributeValuesEqual(&kskDigest1, &kskDigest2),
-					testCheckAttributeValuesEqual(&zskPubKey1, &zskPubKey2),
-					testCheckAttributeValuesEqual(&kskAlg1, &kskAlg2),
+					TestExtractResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.0.digests.0.digest", &kskDigest2),
+					TestExtractResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.0.public_key", &zskPubKey2),
+					TestExtractResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.0.algorithm", &kskAlg2),
+					TestCheckAttributeValuesEqual(&kskDigest1, &kskDigest2),
+					TestCheckAttributeValuesEqual(&zskPubKey1, &zskPubKey2),
+					TestCheckAttributeValuesEqual(&kskAlg1, &kskAlg2),
 				),
 			},
 		},
@@ -55,14 +55,14 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 	t.Parallel()
 
-	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", RandString(t, 10))
+	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
+				ExternalProviders: ProviderVersion450(),
 				Config:            testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "0"),
@@ -70,7 +70,7 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 				),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config:                   testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "0"),

@@ -19,7 +19,7 @@ func TestAccEventarcChannel_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"region":        GetTestRegionFromEnv(),
 		"project_name":  GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -52,7 +52,7 @@ func TestAccEventarcChannel_cryptoKeyUpdate(t *testing.T) {
 		"key_ring":      GetResourceNameFromSelfLink(key1.KeyRing.Name),
 		"key1":          GetResourceNameFromSelfLink(key1.CryptoKey.Name),
 		"key2":          GetResourceNameFromSelfLink(key2.CryptoKey.Name),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

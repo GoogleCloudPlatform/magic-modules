@@ -19,7 +19,7 @@ import (
 func TestAccComputeRegionDisk_basic(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	var disk compute.Disk
 
@@ -59,7 +59,7 @@ func TestAccComputeRegionDisk_basic(t *testing.T) {
 func TestAccComputeRegionDisk_basicUpdate(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	var disk compute.Disk
 
@@ -103,7 +103,7 @@ func TestAccComputeRegionDisk_basicUpdate(t *testing.T) {
 func TestAccComputeRegionDisk_encryption(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	var disk compute.Disk
 
 	VcrTest(t, resource.TestCase{
@@ -127,10 +127,10 @@ func TestAccComputeRegionDisk_encryption(t *testing.T) {
 func TestAccComputeRegionDisk_deleteDetach(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	regionDiskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	regionDiskName2 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	regionDiskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	regionDiskName2 := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	var disk compute.Disk
 
 	VcrTest(t, resource.TestCase{
@@ -183,7 +183,7 @@ func TestAccComputeRegionDisk_deleteDetach(t *testing.T) {
 func TestAccComputeRegionDisk_cloneDisk(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	var disk compute.Disk
 

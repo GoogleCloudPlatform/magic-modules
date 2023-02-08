@@ -11,7 +11,7 @@ import (
 func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-test-metastore-" + RandString(t, 10)
+	name := "tf-test-metastore-" + google.RandString(t, 10)
 	tier := [2]string{"DEVELOPER", "ENTERPRISE"}
 
 	VcrTest(t, resource.TestCase{
@@ -57,7 +57,7 @@ func TestAccDataprocMetastoreService_PrivateServiceConnect(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

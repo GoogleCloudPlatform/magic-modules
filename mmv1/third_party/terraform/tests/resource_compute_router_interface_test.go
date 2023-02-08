@@ -11,7 +11,7 @@ import (
 func TestAccComputeRouterInterface_basic(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -39,7 +39,7 @@ func TestAccComputeRouterInterface_basic(t *testing.T) {
 func TestAccComputeRouterInterface_redundant(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -62,7 +62,7 @@ func TestAccComputeRouterInterface_redundant(t *testing.T) {
 func TestAccComputeRouterInterface_withTunnel(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -85,7 +85,7 @@ func TestAccComputeRouterInterface_withTunnel(t *testing.T) {
 func TestAccComputeRouterInterface_withPrivateIpAddress(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	routerName := fmt.Sprintf("tf-test-router-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

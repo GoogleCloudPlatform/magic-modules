@@ -19,13 +19,13 @@ func TestAccKmsCryptoKeyIamBinding(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyDecrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	keyRingId := &kmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -71,13 +71,13 @@ func TestAccKmsCryptoKeyIamBinding_withCondition(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyDecrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	keyRingId := &kmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	conditionTitle := "expires_after_2019_12_31"
 
 	VcrTest(t, resource.TestCase{
@@ -106,13 +106,13 @@ func TestAccKmsCryptoKeyIamMember(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	keyRingId := &kmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -144,13 +144,13 @@ func TestAccKmsCryptoKeyIamMember_withCondition(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	keyRingId := &kmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	conditionTitle := "expires_after_2019_12_31"
 
 	VcrTest(t, resource.TestCase{
@@ -179,14 +179,14 @@ func TestAccKmsCryptoKeyIamPolicy(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	keyRingId := &kmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -217,14 +217,14 @@ func TestAccKmsCryptoKeyIamPolicy_withCondition(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	keyRingId := &kmsKeyRingId{
 		Project:  projectId,
 		Location: DEFAULT_KMS_TEST_LOCATION,
 		Name:     keyRingName,
 	}
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	conditionTitle := "expires_after_2019_12_31"
 
 	VcrTest(t, resource.TestCase{

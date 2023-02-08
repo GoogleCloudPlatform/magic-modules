@@ -17,9 +17,9 @@ func TestAccBigtableGCPolicy_basic(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -42,9 +42,9 @@ func TestAccBigtableGCPolicy_abandoned(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -75,9 +75,9 @@ func TestAccBigtableGCPolicy_swapOffDeprecated(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -113,9 +113,9 @@ func TestAccBigtableGCPolicy_union(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -139,9 +139,9 @@ func TestAccBigtableGCPolicy_multiplePolicies(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -167,9 +167,9 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	familyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	gcRulesOriginal := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}"
 	gcRulesUpdate := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"16h\"},{\"max_version\":1}]}"

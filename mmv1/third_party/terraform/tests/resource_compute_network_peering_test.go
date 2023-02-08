@@ -21,7 +21,7 @@ func TestAccComputeNetworkPeering_basic(t *testing.T) {
 		CheckDestroy: testAccComputeNetworkPeeringDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetworkPeering_basic(primaryNetworkName, peeringName, RandString(t, 10)),
+				Config: testAccComputeNetworkPeering_basic(primaryNetworkName, peeringName, google.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_network_peering.foo",
@@ -47,7 +47,7 @@ func TestAccComputeNetworkPeering_subnetRoutes(t *testing.T) {
 		CheckDestroy: testAccComputeNetworkPeeringDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetworkPeering_subnetRoutes(primaryNetworkName, peeringName, RandString(t, 10)),
+				Config: testAccComputeNetworkPeering_subnetRoutes(primaryNetworkName, peeringName, google.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_network_peering.bar",
@@ -65,7 +65,7 @@ func TestAccComputeNetworkPeering_customRoutesUpdate(t *testing.T) {
 	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", RandInt(t))
 	peeringName := fmt.Sprintf("peering-test-%d", RandInt(t))
 	importId := fmt.Sprintf("%s/%s/%s", GetTestProjectFromEnv(), primaryNetworkName, peeringName)
-	suffix := RandString(t, 10)
+	suffix := google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

@@ -16,7 +16,7 @@ func TestAccFolderIamBinding_basic(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
+	fname := "tf-test-" + google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
 		Providers: TestAccProviders,
@@ -49,7 +49,7 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
+	fname := "tf-test-" + google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
 		Providers: TestAccProviders,
@@ -96,7 +96,7 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
+	fname := "tf-test-" + google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
 		Providers: TestAccProviders,
@@ -131,7 +131,7 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
+	fname := "tf-test-" + google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
 		Providers: TestAccProviders,
@@ -184,7 +184,7 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + RandString(t, 10)
+	fname := "tf-test-" + google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
 		Providers: TestAccProviders,

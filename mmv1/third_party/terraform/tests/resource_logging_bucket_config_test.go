@@ -11,8 +11,8 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
-		"folder_name":   "tf-test-" + RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
+		"folder_name":   "tf-test-" + google.RandString(t, 10),
 		"org_id":        GetTestOrgFromEnv(t),
 	}
 
@@ -46,8 +46,8 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
-		"project_name":  "tf-test-" + RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
+		"project_name":  "tf-test-" + google.RandString(t, 10),
 		"org_id":        GetTestOrgFromEnv(t),
 	}
 
@@ -90,15 +90,15 @@ func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":    "tf-test-" + RandString(t, 10),
+		"project_name":    "tf-test-" + google.RandString(t, 10),
 		"org_id":          GetTestOrgFromEnv(t),
 		"billing_account": GetTestBillingAccountFromEnv(t),
 	}
 
-	bucketId := fmt.Sprintf("tf-test-bucket-%s", RandString(t, 10))
-	keyRingName := fmt.Sprintf("tf-test-key-ring-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-crypto-key-%s", RandString(t, 10))
-	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", RandString(t, 10))
+	bucketId := fmt.Sprintf("tf-test-bucket-%s", google.RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-key-ring-%s", google.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-crypto-key-%s", google.RandString(t, 10))
+	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -130,7 +130,7 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":        RandString(t, 10),
+		"random_suffix":        google.RandString(t, 10),
 		"billing_account_name": "billingAccounts/" + GetTestBillingAccountFromEnv(t),
 		"org_id":               GetTestOrgFromEnv(t),
 	}
@@ -165,7 +165,7 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"org_id":        GetTestOrgFromEnv(t),
 	}
 
@@ -322,11 +322,11 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":        RandString(t, 10),
+		"random_suffix":        google.RandString(t, 10),
 		"billing_account_name": GetTestBillingAccountFromEnv(t),
 		"org_id":               GetTestOrgFromEnv(t),
-		"project_name":         "tf-test-" + RandString(t, 10),
-		"bucket_id":            "tf-test-bucket-" + RandString(t, 10),
+		"project_name":         "tf-test-" + google.RandString(t, 10),
+		"bucket_id":            "tf-test-bucket-" + google.RandString(t, 10),
 	}
 
 	configList := getLoggingBucketConfigs(context)

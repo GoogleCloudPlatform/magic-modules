@@ -10,8 +10,8 @@ import (
 func TestAccDataprocClusterIamBinding(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-" + RandString(t, 10)
-	account := "tf-dataproc-iam-" + RandString(t, 10)
+	cluster := "tf-dataproc-iam-" + google.RandString(t, 10)
+	account := "tf-dataproc-iam-" + google.RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s %s",
@@ -52,8 +52,8 @@ func TestAccDataprocClusterIamBinding(t *testing.T) {
 func TestAccDataprocClusterIamMember(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-" + RandString(t, 10)
-	account := "tf-dataproc-iam-" + RandString(t, 10)
+	cluster := "tf-dataproc-iam-" + google.RandString(t, 10)
+	account := "tf-dataproc-iam-" + google.RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s %s serviceAccount:%s",
@@ -90,8 +90,8 @@ func TestAccDataprocClusterIamMember(t *testing.T) {
 func TestAccDataprocClusterIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-" + RandString(t, 10)
-	account := "tf-dataproc-iam-" + RandString(t, 10)
+	cluster := "tf-dataproc-iam-" + google.RandString(t, 10)
+	account := "tf-dataproc-iam-" + google.RandString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s",

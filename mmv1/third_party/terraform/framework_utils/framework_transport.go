@@ -11,11 +11,11 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-func sendFrameworkRequest(p *frameworkProvider, method, project, rawurl, userAgent string, body map[string]interface{}, errorRetryPredicates ...RetryErrorPredicateFunc) (map[string]interface{}, diag.Diagnostics) {
+func sendFrameworkRequest(p *FrameworkProvider, method, project, rawurl, userAgent string, body map[string]interface{}, errorRetryPredicates ...RetryErrorPredicateFunc) (map[string]interface{}, diag.Diagnostics) {
 	return sendFrameworkRequestWithTimeout(p, method, project, rawurl, userAgent, body, DefaultRequestTimeout, errorRetryPredicates...)
 }
 
-func sendFrameworkRequestWithTimeout(p *frameworkProvider, method, project, rawurl, userAgent string, body map[string]interface{}, timeout time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) (map[string]interface{}, diag.Diagnostics) {
+func sendFrameworkRequestWithTimeout(p *FrameworkProvider, method, project, rawurl, userAgent string, body map[string]interface{}, timeout time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) (map[string]interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	reqHeaders := make(http.Header)
@@ -39,7 +39,7 @@ func sendFrameworkRequestWithTimeout(p *frameworkProvider, method, project, rawu
 	}
 
 	var res *http.Response
-	err := retryTimeDuration(
+	err := RetryTimeDuration(
 		func() error {
 			var buf bytes.Buffer
 			if body != nil {
@@ -49,7 +49,7 @@ func sendFrameworkRequestWithTimeout(p *frameworkProvider, method, project, rawu
 				}
 			}
 
-			u, err := addQueryParams(rawurl, map[string]string{"alt": "json"})
+			u, err := AddQueryParams(rawurl, map[string]string{"alt": "json"})
 			if err != nil {
 				return err
 			}

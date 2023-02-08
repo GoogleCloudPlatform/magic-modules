@@ -12,7 +12,7 @@ func TestAccBillingBudget_billingBudgetCurrencycode(t *testing.T) {
 
 	context := map[string]interface{}{
 		"billing_acct":  getTestMasterBillingAccountFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -70,7 +70,7 @@ func TestAccBillingBudget_billingBudgetUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"billing_acct":  getTestMasterBillingAccountFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -127,7 +127,7 @@ func TestAccBillingBudget_billingFilterSubaccounts(t *testing.T) {
 
 	context := map[string]interface{}{
 		"master_billing_acct": getTestMasterBillingAccountFromEnv(t),
-		"random_suffix":       RandString(t, 10),
+		"random_suffix":       google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -543,8 +543,8 @@ func TestAccBillingBudget_budgetFilterProjectsOrdering(t *testing.T) {
 	context := map[string]interface{}{
 		"org":             GetTestOrgFromEnv(t),
 		"billing_acct":    getTestMasterBillingAccountFromEnv(t),
-		"random_suffix_1": RandString(t, 10),
-		"random_suffix_2": RandString(t, 10),
+		"random_suffix_1": google.RandString(t, 10),
+		"random_suffix_2": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

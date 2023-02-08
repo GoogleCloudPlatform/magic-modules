@@ -67,7 +67,7 @@ func testSweepContainerClusters(region string) error {
 func TestAccContainerCluster_basic(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
 		Providers:	  TestAccProviders,
@@ -104,7 +104,7 @@ func TestAccContainerCluster_basic(t *testing.T) {
 func TestAccContainerCluster_networkingModeRoutes(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
 		Providers:	  TestAccProviders,
@@ -125,7 +125,7 @@ func TestAccContainerCluster_networkingModeRoutes(t *testing.T) {
 func TestAccContainerCluster_misc(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
 		Providers:	  TestAccProviders,
@@ -160,7 +160,7 @@ func TestAccContainerCluster_misc(t *testing.T) {
 func TestAccContainerCluster_withAddons(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	pid := GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
@@ -204,9 +204,9 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
-	newTopic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
+	newTopic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -252,9 +252,9 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 func TestAccContainerCluster_withFilteredNotificationConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
-	newTopic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
+	newTopic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -292,8 +292,8 @@ func TestAccContainerCluster_withFilteredNotificationConfig(t *testing.T) {
 func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -331,8 +331,8 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -370,7 +370,7 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -394,8 +394,8 @@ func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 
 func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	orgDomain := getTestOrgDomainFromEnv(t)
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	orgDomain := google.GetTestOrgDomainFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -444,7 +444,7 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -515,7 +515,7 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 
 func TestAccContainerCluster_withReleaseChannelEnabled(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -547,7 +547,7 @@ func TestAccContainerCluster_withReleaseChannelEnabled(t *testing.T) {
 
 func TestAccContainerCluster_withReleaseChannelEnabledDefaultVersion(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -591,7 +591,7 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 	// This is essentially a unit test, no interactions
 	provider.SkipIfVcr(t)
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -608,7 +608,7 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -652,7 +652,7 @@ func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -715,7 +715,7 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 func TestAccContainerCluster_withGcpPublicCidrsAccessEnabledToggle(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -790,7 +790,7 @@ resource "google_container_cluster" "with_gcp_public_cidrs_access_enabled" {
 func TestAccContainerCluster_regional(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -812,8 +812,8 @@ func TestAccContainerCluster_regional(t *testing.T) {
 func TestAccContainerCluster_regionalWithNodePool(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", google.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -835,7 +835,7 @@ func TestAccContainerCluster_regionalWithNodePool(t *testing.T) {
 func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -866,8 +866,8 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 func TestAccContainerCluster_withTpu(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -893,8 +893,8 @@ func TestAccContainerCluster_withTpu(t *testing.T) {
 func TestAccContainerCluster_withPrivateClusterConfigBasic(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -924,8 +924,8 @@ func TestAccContainerCluster_withPrivateClusterConfigBasic(t *testing.T) {
 func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -943,8 +943,8 @@ func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(t *testing
 func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock_withAutopilot(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -966,7 +966,7 @@ func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock_withAutopi
 func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -1002,7 +1002,7 @@ func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 func TestAccContainerCluster_withVersion(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1025,7 +1025,7 @@ func TestAccContainerCluster_withVersion(t *testing.T) {
 func TestAccContainerCluster_updateVersion(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1057,7 +1057,7 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1086,7 +1086,7 @@ func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 
 func TestAccContainerCluster_withLoggingVariantInNodeConfig(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -1106,8 +1106,8 @@ func TestAccContainerCluster_withLoggingVariantInNodeConfig(t *testing.T) {
 
 func TestAccContainerCluster_withLoggingVariantInNodePool(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -1127,7 +1127,7 @@ func TestAccContainerCluster_withLoggingVariantInNodePool(t *testing.T) {
 
 func TestAccContainerCluster_withLoggingVariantUpdates(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -1164,7 +1164,7 @@ func TestAccContainerCluster_withLoggingVariantUpdates(t *testing.T) {
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
         t.Parallel()
-        clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+        clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
         VcrTest(t, resource.TestCase{
                 PreCheck:         func() { TestAccPreCheck(t) },
                 Providers:        TestAccProviders,
@@ -1219,7 +1219,7 @@ func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
 func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1241,7 +1241,7 @@ func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1263,7 +1263,7 @@ func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) 
 func TestAccContainerCluster_withNodeConfigReservationAffinity(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1291,8 +1291,8 @@ func TestAccContainerCluster_withNodeConfigReservationAffinity(t *testing.T) {
 func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testing.T) {
 	t.Parallel()
 
-    reservationName := fmt.Sprintf("tf-test-reservation-%s", RandString(t, 10))
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+    reservationName := fmt.Sprintf("tf-test-reservation-%s", google.RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1326,7 +1326,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testin
 func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1354,7 +1354,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1410,7 +1410,7 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
 
 	VcrTest(t, resource.TestCase{
@@ -1434,8 +1434,8 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 func TestAccContainerCluster_network(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	network := fmt.Sprintf("tf-test-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1462,7 +1462,7 @@ func TestAccContainerCluster_network(t *testing.T) {
 func TestAccContainerCluster_backend(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1484,8 +1484,8 @@ func TestAccContainerCluster_backend(t *testing.T) {
 func TestAccContainerCluster_withNodePoolBasic(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1507,8 +1507,8 @@ func TestAccContainerCluster_withNodePoolBasic(t *testing.T) {
 func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1540,8 +1540,8 @@ func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 func TestAccContainerCluster_withNodePoolResize(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
 		Providers:	  TestAccProviders,
@@ -1576,8 +1576,8 @@ func TestAccContainerCluster_withNodePoolResize(t *testing.T) {
 func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1627,8 +1627,8 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 func TestAccContainerCluster_withNodePoolCIA(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1691,7 +1691,7 @@ func TestAccContainerCluster_withNodePoolNamePrefix(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	npNamePrefix := "tf-test-np-"
 
 	VcrTest(t, resource.TestCase{
@@ -1715,7 +1715,7 @@ func TestAccContainerCluster_withNodePoolNamePrefix(t *testing.T) {
 func TestAccContainerCluster_withNodePoolMultiple(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	npNamePrefix := "tf-test-np-"
 
 	VcrTest(t, resource.TestCase{
@@ -1738,7 +1738,7 @@ func TestAccContainerCluster_withNodePoolMultiple(t *testing.T) {
 func TestAccContainerCluster_withNodePoolConflictingNameFields(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	npPrefix := "tf-test-np"
 
 	VcrTest(t, resource.TestCase{
@@ -1757,8 +1757,8 @@ func TestAccContainerCluster_withNodePoolConflictingNameFields(t *testing.T) {
 func TestAccContainerCluster_withNodePoolNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -1780,7 +1780,7 @@ func TestAccContainerCluster_withNodePoolNodeConfig(t *testing.T) {
 func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_window"
 
 	VcrTest(t, resource.TestCase{
@@ -1817,7 +1817,7 @@ func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
 
 func TestAccContainerCluster_withRecurringMaintenanceWindow(t *testing.T) {
 	t.Parallel()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	resourceName := "google_container_cluster.with_recurring_maintenance_window"
 
 	VcrTest(t, resource.TestCase{
@@ -1862,7 +1862,7 @@ func TestAccContainerCluster_withRecurringMaintenanceWindow(t *testing.T) {
 
 func TestAccContainerCluster_withMaintenanceExclusionWindow(t *testing.T) {
 	t.Parallel()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_window"
 
 	VcrTest(t, resource.TestCase{
@@ -1894,7 +1894,7 @@ func TestAccContainerCluster_withMaintenanceExclusionWindow(t *testing.T) {
 
 func TestAccContainerCluster_withMaintenanceExclusionOptions(t *testing.T) {
 	t.Parallel()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 
 	VcrTest(t, resource.TestCase{
@@ -1924,7 +1924,7 @@ func TestAccContainerCluster_withMaintenanceExclusionOptions(t *testing.T) {
 
 func TestAccContainerCluster_deleteMaintenanceExclusionOptions(t *testing.T) {
 	t.Parallel()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 
 	VcrTest(t, resource.TestCase{
@@ -1970,7 +1970,7 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions(t *testing.T) {
 
 func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 	t.Parallel()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 
 	// step1: create a new cluster and initialize the maintenceExclusion without exclusion scopes,
@@ -2036,7 +2036,7 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 
 func TestAccContainerCluster_deleteExclusionWindow(t *testing.T) {
 	t.Parallel()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_window"
 
 	VcrTest(t, resource.TestCase{
@@ -2078,8 +2078,8 @@ func TestAccContainerCluster_deleteExclusionWindow(t *testing.T) {
 func TestAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
 		Providers:	  TestAccProviders,
@@ -2100,8 +2100,8 @@ func TestAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(t *t
 func TestAccContainerCluster_withIPAllocationPolicy_specificIPRanges(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
 		Providers:	  TestAccProviders,
@@ -2122,8 +2122,8 @@ func TestAccContainerCluster_withIPAllocationPolicy_specificIPRanges(t *testing.
 func TestAccContainerCluster_withIPAllocationPolicy_specificSizes(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
 		Providers:	  TestAccProviders,
@@ -2144,7 +2144,7 @@ func TestAccContainerCluster_withIPAllocationPolicy_specificSizes(t *testing.T) 
 func TestAccContainerCluster_nodeAutoprovisioning(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -2184,7 +2184,7 @@ func TestAccContainerCluster_nodeAutoprovisioning(t *testing.T) {
 func TestAccContainerCluster_nodeAutoprovisioningDefaults(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	includeMinCpuPlatform := true
 
 	VcrTest(t, resource.TestCase{
@@ -2235,7 +2235,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaults(t *testing.T) {
 func TestAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -2270,7 +2270,7 @@ func TestAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(t *testing.
 func TestAccContainerCluster_nodeAutoprovisioningNetworkTags(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -2298,7 +2298,7 @@ func TestAccContainerCluster_nodeAutoprovisioningNetworkTags(t *testing.T) {
 func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -2329,8 +2329,8 @@ func TestAccContainerCluster_withAutopilot(t *testing.T) {
 	t.Parallel()
 
 	pid := GetTestProjectFromEnv()
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -2354,9 +2354,9 @@ func TestAccContainerClusterCustomServiceAccount_withAutopilot(t *testing.T) {
 	t.Parallel()
 
 	pid := GetTestProjectFromEnv()
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	serviceAccountName := fmt.Sprintf("tf-test-sa-%s", RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	serviceAccountName := fmt.Sprintf("tf-test-sa-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -2389,8 +2389,8 @@ func TestAccContainerCluster_errorAutopilotLocation(t *testing.T) {
 	t.Parallel()
 
 	pid := GetTestProjectFromEnv()
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -2410,8 +2410,8 @@ func TestAccContainerCluster_withAutopilotNetworkTags(t *testing.T) {
 	t.Parallel()
 
 	pid := GetTestProjectFromEnv()
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -2435,7 +2435,7 @@ func TestAccContainerCluster_withAutopilotNetworkTags(t *testing.T) {
 func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	pid := GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
@@ -2478,7 +2478,7 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 func TestAccContainerCluster_withIdentityServiceConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -2524,7 +2524,7 @@ func TestAccContainerCluster_withIdentityServiceConfig(t *testing.T) {
 func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -2577,7 +2577,7 @@ func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -2665,7 +2665,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 func TestAccContainerCluster_withSoleTenantGroup(t *testing.T) {
 	t.Parallel()
 
-	resourceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	resourceName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -2689,7 +2689,7 @@ func TestAccContainerCluster_withSoleTenantGroup(t *testing.T) {
 
 func TestAccContainerCluster_withAutoscalingProfile(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("cluster-test-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("cluster-test-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -2721,7 +2721,7 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 	// This is essentially a unit test, no interactions
 	provider.SkipIfVcr(t)
 	t.Parallel()
-	clusterName := fmt.Sprintf("cluster-test-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("cluster-test-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -2740,11 +2740,11 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	org := GetTestOrgFromEnv(t)
 	billingId := GetTestBillingAccountFromEnv(t)
-	projectName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	suffix := RandString(t, 10)
+	projectName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	suffix := google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -2767,7 +2767,7 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 func TestAccContainerCluster_withBinaryAuthorizationEnabledBool(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -2798,7 +2798,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEnabledBool(t *testing.T) {
 func TestAccContainerCluster_withBinaryAuthorizationEnabledBoolLegacy(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -2830,7 +2830,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEnabledBoolLegacy(t *testing
 func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeAutopilot(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -2860,7 +2860,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeAutopilot(t *t
 func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeClassic(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -2890,8 +2890,8 @@ func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeClassic(t *tes
 func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -2914,7 +2914,7 @@ func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskSizeGb(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	includeDiskSizeGb := true
 
 	VcrTest(t, resource.TestCase{
@@ -2947,7 +2947,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskSizeGb(t *testing.T
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskType(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	includeDiskType := true
 
 	VcrTest(t, resource.TestCase{
@@ -2980,7 +2980,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskType(t *testing.T) 
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsImageType(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	includeImageType := true
 
 	VcrTest(t, resource.TestCase{
@@ -3013,7 +3013,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsImageType(t *testing.T)
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsBootDiskKmsKey(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
 
 	VcrTest(t, resource.TestCase{
@@ -3037,7 +3037,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsBootDiskKmsKey(t *testi
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsShieldedInstance(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -3060,7 +3060,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsShieldedInstance(t *tes
 func TestAccContainerCluster_autoprovisioningDefaultsManagement(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -3092,10 +3092,10 @@ func TestAccContainerCluster_autoprovisioningDefaultsManagement(t *testing.T) {
 func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 	t.Parallel()
 
-	prefix := RandString(t, 10)
+	prefix := google.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", prefix)
 	clusterNameError := fmt.Sprintf("tf-test-cluster-err-%s", prefix)
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 
 	initConfig := testAccContainerCluster_withInitialCIDR(containerNetName, clusterName)
 	overlapConfig := testAccContainerCluster_withCIDROverlap(initConfig, clusterNameError)
@@ -3146,7 +3146,7 @@ func TestAccContainerCluster_errorNoClusterCreated(t *testing.T) {
 func TestAccContainerCluster_withExternalIpsConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	pid := GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
@@ -3177,7 +3177,7 @@ func TestAccContainerCluster_withExternalIpsConfig(t *testing.T) {
 func TestAccContainerCluster_withMeshCertificatesConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	pid := GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
@@ -3219,7 +3219,7 @@ func TestAccContainerCluster_withMeshCertificatesConfig(t *testing.T) {
 func TestAccContainerCluster_withCostManagementConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	pid := GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
@@ -3250,7 +3250,7 @@ func TestAccContainerCluster_withCostManagementConfig(t *testing.T) {
 func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	// Use the bootstrapped KMS key so we can avoid creating keys needlessly
 	// as they will pile up in the project because they can not be completely
@@ -3287,7 +3287,7 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 func TestAccContainerCluster_withAdvancedDatapath(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -3309,7 +3309,7 @@ func TestAccContainerCluster_withAdvancedDatapath(t *testing.T) {
 func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 	t.Parallel()
 
-	suffix := RandString(t, 10)
+	suffix := google.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
 	datesetId := fmt.Sprintf("tf_test_cluster_resource_usage_%s", suffix)
 
@@ -3349,8 +3349,8 @@ func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 func TestAccContainerCluster_withMasterAuthorizedNetworksDisabled(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -3375,8 +3375,8 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksDisabled(t *testing.T) 
 func TestAccContainerCluster_withEnableKubernetesAlpha(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	npName := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-np-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -3398,7 +3398,7 @@ func TestAccContainerCluster_withEnableKubernetesAlpha(t *testing.T) {
 func TestAccContainerCluster_withIPv4Error(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -3415,8 +3415,8 @@ func TestAccContainerCluster_withIPv4Error(t *testing.T) {
 func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	domainName := fmt.Sprintf("tf-test-domain-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	domainName := fmt.Sprintf("tf-test-domain-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -3436,7 +3436,7 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 
 func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -3472,8 +3472,8 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 func TestAccContainerCluster_withTPUConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -4287,7 +4287,7 @@ resource "google_container_cluster" "regional" {
 func TestAccContainerCluster_withPrivateEndpointSubnetwork(t *testing.T) {
 	t.Parallel()
 
-	r := RandString(t, 10)
+	r := google.RandString(t, 10)
 
 	subnet1Name := fmt.Sprintf("tf-test-container-subnetwork1-%s", r)
 	subnet1Cidr := "10.0.36.0/24"
@@ -4295,7 +4295,7 @@ func TestAccContainerCluster_withPrivateEndpointSubnetwork(t *testing.T) {
 	subnet2Name := fmt.Sprintf("tf-test-container-subnetwork2-%s", r)
 	subnet2Cidr := "10.9.26.0/24"
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 	containerNetName := fmt.Sprintf("tf-test-container-net-%s", r)
 
 	VcrTest(t, resource.TestCase{
@@ -4358,7 +4358,7 @@ resource "google_container_cluster" "with_private_endpoint_subnetwork" {
 func TestAccContainerCluster_withEnablePrivateEndpointToggle(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { TestAccPreCheck(t) },
@@ -4401,7 +4401,7 @@ func TestAccContainerCluster_failedCreation(t *testing.T) {
 	skipIfVcr(t)
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", google.RandString(t, 10))
 
 	project := BootstrapProject(t, "tf-fail-cluster-test", getTestBillingAccountFromEnv(t), []string{"container.googleapis.com"})
 	removeContainerServiceAgentRoleFromContainerEngineRobot(t, project)

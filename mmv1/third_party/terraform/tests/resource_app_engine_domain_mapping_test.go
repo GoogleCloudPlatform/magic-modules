@@ -10,7 +10,7 @@ import (
 func TestAccAppEngineDomainMapping_update(t *testing.T) {
 	t.Parallel()
 
-	domainName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	domainName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

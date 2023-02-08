@@ -11,7 +11,7 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeUpdate(t *testing.
 
 	context := map[string]interface{}{
 		"project":       GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

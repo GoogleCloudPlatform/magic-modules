@@ -12,8 +12,8 @@ func TestAccFirebaseAndroidApp_update(t *testing.T) {
 	t.Parallel()
         context := map[string]interface{}{
                 "project_id": GetTestProjectFromEnv(),
-                "package_name":  "android.package.app" + RandString(t, 4),
-                "random_suffix": RandString(t, 10),
+                "package_name":  "android.package.app" + google.RandString(t, 4),
+                "random_suffix": google.RandString(t, 10),
 		"display_name":  "Display Name N",
 	}
 	VcrTest(t, resource.TestCase{

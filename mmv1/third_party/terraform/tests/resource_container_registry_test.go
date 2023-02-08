@@ -23,7 +23,7 @@ func TestAccContainerRegistry_basic(t *testing.T) {
 
 func TestAccContainerRegistry_iam(t *testing.T) {
 	t.Parallel()
-	account := RandString(t, 10)
+	account := google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

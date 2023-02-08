@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccDataSourceComputeInstanceSerialPort_basic(t *testing.T) {
-	instanceName := fmt.Sprintf("tf-test-serial-data-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-serial-data-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
 		Providers: TestAccProviders,

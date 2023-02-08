@@ -10,7 +10,7 @@ import (
 func TestAccMonitoringService_basic(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := RandString(t, 10)
+	randomSuffix := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

@@ -11,7 +11,7 @@ import (
 func TestAccSqlClientCert_mysql(t *testing.T) {
 	t.Parallel()
 
-	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -31,7 +31,7 @@ func TestAccSqlClientCert_mysql(t *testing.T) {
 func TestAccSqlClientCert_postgres(t *testing.T) {
 	t.Parallel()
 
-	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

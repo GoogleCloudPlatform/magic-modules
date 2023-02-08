@@ -15,7 +15,7 @@ func TestAccEndpointsService_basic(t *testing.T) {
 	// Uses random provider
 	provider.SkipIfVcr(t)
 	t.Parallel()
-	serviceId := "tf-test" + RandString(t, 10)
+	serviceId := "tf-test" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -40,7 +40,7 @@ func TestAccEndpointsService_basic(t *testing.T) {
 
 func TestAccEndpointsService_grpc(t *testing.T) {
 	t.Parallel()
-	serviceId := "tf-test" + RandString(t, 10)
+	serviceId := "tf-test" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

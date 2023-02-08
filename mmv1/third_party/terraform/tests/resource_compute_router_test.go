@@ -10,7 +10,7 @@ import (
 func TestAccComputeRouter_basic(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := google.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
 	resourceRegion := "europe-west1"
 	VcrTest(t, resource.TestCase{
@@ -33,7 +33,7 @@ func TestAccComputeRouter_basic(t *testing.T) {
 func TestAccComputeRouter_noRegion(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := google.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
 	providerRegion := "us-central1"
 	VcrTest(t, resource.TestCase{
@@ -56,7 +56,7 @@ func TestAccComputeRouter_noRegion(t *testing.T) {
 func TestAccComputeRouter_full(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := google.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -78,7 +78,7 @@ func TestAccComputeRouter_full(t *testing.T) {
 func TestAccComputeRouter_update(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := google.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
 	region := GetTestRegionFromEnv()
 	VcrTest(t, resource.TestCase{
@@ -117,7 +117,7 @@ func TestAccComputeRouter_update(t *testing.T) {
 func TestAccComputeRouter_updateAddRemoveBGP(t *testing.T) {
 	t.Parallel()
 
-	testId := RandString(t, 10)
+	testId := google.RandString(t, 10)
 	routerName := fmt.Sprintf("tf-test-router-%s", testId)
 	region := GetTestRegionFromEnv()
 	VcrTest(t, resource.TestCase{

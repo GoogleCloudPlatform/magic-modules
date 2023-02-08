@@ -12,7 +12,7 @@ func TestAccProjectIamCustomRole_basic(t *testing.T) {
 	t.Parallel()
 
 	project := GetTestProjectFromEnv()
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -55,7 +55,7 @@ func TestAccProjectIamCustomRole_basic(t *testing.T) {
 func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 	t.Parallel()
 
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -95,7 +95,7 @@ func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 func TestAccProjectIamCustomRole_createAfterDestroy(t *testing.T) {
 	t.Parallel()
 
-	roleId := "tfIamCustomRole" + RandString(t, 10)
+	roleId := "tfIamCustomRole" + google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

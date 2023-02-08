@@ -10,7 +10,7 @@ import (
 func TestAccStorageBucketIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	serviceAcct := getTestServiceAccountFromEnv(t)
+	serviceAcct := google.GetTestServiceAccountFromEnv(t)
 	bucket := fmt.Sprintf("tf-test-%d", RandInt(t))
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 

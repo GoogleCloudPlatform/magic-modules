@@ -10,9 +10,9 @@ import (
 func TestAccComputeDiskResourcePolicyAttachment_update(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	policyName := fmt.Sprintf("tf-test-policy-%s", RandString(t, 10))
-	policyName2 := fmt.Sprintf("tf-test-policy-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	policyName := fmt.Sprintf("tf-test-policy-%s", google.RandString(t, 10))
+	policyName2 := fmt.Sprintf("tf-test-policy-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

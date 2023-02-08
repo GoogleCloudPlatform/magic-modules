@@ -188,9 +188,9 @@ module Provider
     def generate_resource(pwd, data, generate_code, generate_docs)
       if generate_code        
         product_name = @api.api_name
-        Google::LOGGER.info "Generating resource product_name #{product_name} is #{@api.isMigrated}"
+        Google::LOGGER.info "Generating resource product_name #{product_name} is #{@api.IsMigrated}"
 
-        if @api.isMigrated
+        if @api.IsMigrated
           target_folder = File.join(folder_name(data.version), 'service', product_name)
           FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
           data.generate(pwd,
@@ -230,7 +230,7 @@ module Provider
 
       product_name = @api.api_name
 
-      if @api.isMigrated
+      if @api.IsMigrated
         target_folder = File.join(folder_name(data.version), 'service', product_name)
         FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
         data.generate(
@@ -259,7 +259,7 @@ module Provider
 
 
       product_name = @api.api_name
-      if @api.isMigrated
+      if @api.IsMigrated
         target_folder = File.join(folder_name(data.version), 'service', product_name)
         FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
         data.generate(
@@ -291,7 +291,7 @@ module Provider
       product_name = @api.api_name
       product_name_underscore = @api.name.underscore
       
-      if @api.isMigrated
+      if @api.IsMigrated
         target_folder = File.join(folder_name(data.version), 'service', product_name)
         FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
         data.generate(
@@ -318,7 +318,8 @@ module Provider
         && (!data.object.iam_policy.min_version \
         || data.object.iam_policy.min_version >= data.version)
 
-        if @api.isMigrated
+
+        if @api.IsMigrated
           target_folder = File.join(folder_name(data.version), 'service', product_name)
           FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
           data.generate(pwd,
@@ -336,7 +337,7 @@ module Provider
         # Only generate test if testable examples exist.
         unless data.object.examples.reject(&:skip_test).empty?
 
-          if @api.isMigrated
+          if @api.IsMigrated
             target_folder = File.join(folder_name(data.version), 'service', product_name)
             FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
             data.generate(

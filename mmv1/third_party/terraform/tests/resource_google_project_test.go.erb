@@ -122,7 +122,7 @@ func TestAccProject_create(t *testing.T) {
 func TestAccProject_billing(t *testing.T) {
 	t.Parallel()
 	org := GetTestOrgFromEnv(t)
-	provider.SkipIfEnvNotSet(t, "GOOGLE_BILLING_ACCOUNT_2")
+	google.SkipIfEnvNotSet(t, "GOOGLE_BILLING_ACCOUNT_2")
 	billingId2 := os.Getenv("GOOGLE_BILLING_ACCOUNT_2")
 	billingId := GetTestBillingAccountFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, provider.RandInt(t))
@@ -227,7 +227,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 
 	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, provider.RandInt(t))
-	folderDisplayName := testPrefix + RandString(t, 10)
+	folderDisplayName := testPrefix + google.RandString(t, 10)
 	provider.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { provider.TestAccPreCheck(t) },
 		Providers: provider.TestAccProviders,
@@ -244,7 +244,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 
 	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, provider.RandInt(t))
-	folderDisplayName := testPrefix + RandString(t, 10)
+	folderDisplayName := testPrefix + google.RandString(t, 10)
 	provider.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { provider.TestAccPreCheck(t) },
 		Providers: provider.TestAccProviders,

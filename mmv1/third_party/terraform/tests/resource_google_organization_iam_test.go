@@ -46,7 +46,7 @@ func TestAccOrganizationIamMembersAndBindings(t *testing.T) {
 func testAccOrganizationIamBinding_basic(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
-	roleId := "tfIamTest" + RandString(t, 10)
+	roleId := "tfIamTest" + google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
 		Providers: TestAccProviders,
@@ -85,7 +85,7 @@ func testAccOrganizationIamBinding_basic(t *testing.T) {
 func testAccOrganizationIamBinding_condition(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
-	roleId := "tfIamTest" + RandString(t, 10)
+	roleId := "tfIamTest" + google.RandString(t, 10)
 	conditionTitle := "expires_after_2019_12_31"
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

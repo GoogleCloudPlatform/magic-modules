@@ -44,7 +44,7 @@ func TestAccTags(t *testing.T) {
 func testAccTagsTagKey_tagKeyBasic(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -73,7 +73,7 @@ resource "google_tags_tag_key" "key" {
 func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -111,7 +111,7 @@ resource "google_tags_tag_key" "key" {
 func testAccTagsTagKey_tagKeyUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -197,7 +197,7 @@ func testAccCheckTagsTagKeyDestroyProducer(t *testing.T) func(s *terraform.State
 func testAccTagsTagValue_tagValueBasic(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -233,7 +233,7 @@ resource "google_tags_tag_value" "value" {
 func testAccTagsTagValue_tagValueUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -335,8 +335,8 @@ func testAccTagsTagBinding_tagBindingBasic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
-		"project_id":    "tf-test-" + RandString(t, 10),
-		"random_suffix": RandString(t, 10),
+		"project_id":    "tf-test-" + google.RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -418,11 +418,11 @@ func testAccTagsTagKeyIamBinding(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"role":          "roles/viewer",
 		"org_id":        GetTestOrgFromEnv(t),
 
-		"short_name": "tf-test-key-" + RandString(t, 10),
+		"short_name": "tf-test-key-" + google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -444,11 +444,11 @@ func testAccTagsTagKeyIamMember(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"role":          "roles/viewer",
 		"org_id":        GetTestOrgFromEnv(t),
 
-		"short_name": "tf-test-key-" + RandString(t, 10),
+		"short_name": "tf-test-key-" + google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -467,11 +467,11 @@ func testAccTagsTagKeyIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"role":          "roles/viewer",
 		"org_id":        GetTestOrgFromEnv(t),
 
-		"short_name": "tf-test-key-" + RandString(t, 10),
+		"short_name": "tf-test-key-" + google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -585,12 +585,12 @@ func testAccTagsTagValueIamBinding(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"role":          "roles/viewer",
 		"org_id":        GetTestOrgFromEnv(t),
 
-		"key_short_name":   "tf-test-key-" + RandString(t, 10),
-		"value_short_name": "tf-test-value-" + RandString(t, 10),
+		"key_short_name":   "tf-test-key-" + google.RandString(t, 10),
+		"value_short_name": "tf-test-value-" + google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -612,12 +612,12 @@ func testAccTagsTagValueIamMember(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"role":          "roles/viewer",
 		"org_id":        GetTestOrgFromEnv(t),
 
-		"key_short_name":   "tf-test-key-" + RandString(t, 10),
-		"value_short_name": "tf-test-value-" + RandString(t, 10),
+		"key_short_name":   "tf-test-key-" + google.RandString(t, 10),
+		"value_short_name": "tf-test-value-" + google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -636,12 +636,12 @@ func testAccTagsTagValueIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"role":          "roles/viewer",
 		"org_id":        GetTestOrgFromEnv(t),
 
-		"key_short_name":   "tf-test-key-" + RandString(t, 10),
-		"value_short_name": "tf-test-value-" + RandString(t, 10),
+		"key_short_name":   "tf-test-key-" + google.RandString(t, 10),
+		"value_short_name": "tf-test-value-" + google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

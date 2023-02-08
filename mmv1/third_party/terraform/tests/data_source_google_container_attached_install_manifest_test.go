@@ -16,7 +16,7 @@ func TestAccDataSourceGoogleContainerAttachedInstallManifest(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleContainerAttachedInstallManifestConfig(RandString(t, 10)),
+				Config: testAccDataSourceGoogleContainerAttachedInstallManifestConfig(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceGoogleContainerAttachedInstallManifestCheck("data.google_container_attached_install_manifest.manifest"),
 				),

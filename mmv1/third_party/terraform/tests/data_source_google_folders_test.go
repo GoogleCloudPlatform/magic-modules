@@ -12,7 +12,7 @@ func TestAccDataSourceGoogleFolders_basic(t *testing.T) {
 
 	org := GetTestOrgFromEnv(t)
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + RandString(t, 10)
+	displayName := "tf-test-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

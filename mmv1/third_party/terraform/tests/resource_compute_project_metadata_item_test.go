@@ -13,7 +13,7 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + RandString(t, 10)
+	key := "myKey" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -38,8 +38,8 @@ func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 	t.Parallel()
 
 	// Generate a config of two config keys
-	key1 := "myKey" + RandString(t, 10)
-	key2 := "myKey" + RandString(t, 10)
+	key1 := "myKey" + google.RandString(t, 10)
+	key2 := "myKey" + google.RandString(t, 10)
 	config := testAccProjectMetadataItem_basic("foobar", key1, "myValue") +
 		testAccProjectMetadataItem_basic("foobar2", key2, "myOtherValue")
 
@@ -69,7 +69,7 @@ func TestAccComputeProjectMetadataItem_basicWithEmptyVal(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + RandString(t, 10)
+	key := "myKey" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -92,7 +92,7 @@ func TestAccComputeProjectMetadataItem_basicUpdate(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + RandString(t, 10)
+	key := "myKey" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -123,7 +123,7 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 	t.Parallel()
 
 	// Key must be unique to avoid concurrent tests interfering with each other
-	key := "myKey" + RandString(t, 10)
+	key := "myKey" + google.RandString(t, 10)
 	originalConfig := testAccProjectMetadataItem_basic("foobar", key, "myValue")
 
 	VcrTest(t, resource.TestCase{

@@ -15,7 +15,7 @@ func TestAccDialogflowCXEnvironment_update(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":          GetTestOrgFromEnv(t),
 		"billing_account": GetTestBillingAccountFromEnv(t),
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -134,7 +134,7 @@ func TestAccDialogflowCXEnvironment_dialogflowcxEnvironmentFullExample(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -193,7 +193,7 @@ func TestAccDialogflowCXEnvironment_dialogflowcxEnvironmentRegional(t *testing.T
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

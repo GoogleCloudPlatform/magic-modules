@@ -11,7 +11,7 @@ func TestAccDataCatalogTag_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"force_delete":  true,
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

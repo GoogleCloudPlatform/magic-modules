@@ -18,8 +18,8 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
-				Config:            testAccDataSourceDnsManagedZone_basic(RandString(t, 10)),
+				ExternalProviders: ProviderVersion450(),
+				Config:            testAccDataSourceDnsManagedZone_basic(google.RandString(t, 10)),
 				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",
@@ -41,7 +41,7 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 				),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config: testAccDataSourceDnsManagedZone_basic(randString(t, 10)),
 				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
@@ -93,9 +93,9 @@ func testAccCheckDNSManagedZoneDestroyProducerFramework(t *testing.T) func(s *te
 				continue
 			}
 
-			p := getTestFwProvider(t)
+			p := GetTestFwProvider(t)
 
-			url, err := replaceVarsForFrameworkTest(&p.ProdProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
+			url, err := ReplaceVarsForFrameworkTest(&p.ProdProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
 			if err != nil {
 				return err
 			}

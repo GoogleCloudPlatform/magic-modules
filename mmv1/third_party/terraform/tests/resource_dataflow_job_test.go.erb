@@ -30,7 +30,7 @@ func TestAccDataflowJob_basic(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	zone := "us-central1-f"
@@ -62,7 +62,7 @@ func TestAccDataflowJobSkipWait_basic(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	zone := "us-central1-f"
@@ -94,7 +94,7 @@ func TestAccDataflowJob_withRegion(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 
@@ -125,7 +125,7 @@ func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	accountId := "tf-test-dataflow-sa" + randStr
@@ -158,7 +158,7 @@ func TestAccDataflowJob_withNetwork(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
@@ -191,7 +191,7 @@ func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
@@ -225,7 +225,7 @@ func TestAccDataflowJob_withLabels(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	key := "my-label"
@@ -259,7 +259,7 @@ func TestAccDataflowJob_withIpConfig(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 
@@ -290,7 +290,7 @@ func TestAccDataflowJob_withKmsKey(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	key_ring := "tf-test-dataflow-kms-ring-" + randStr
 	crypto_key := "tf-test-dataflow-kms-key-" + randStr
 	bucket := "tf-test-dataflow-gcs-" + randStr
@@ -323,7 +323,7 @@ func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := RandString(t, 10)
+	randStr := google.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	additionalExperiments := []string{"enable_stackdriver_agent_metrics", "shuffle_mode=service"}
@@ -356,7 +356,7 @@ func TestAccDataflowJob_streamUpdate(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	suffix := RandString(t, 10)
+	suffix := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -390,7 +390,7 @@ func TestAccDataflowJob_virtualUpdate(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	suffix := RandString(t, 10)
+	suffix := google.RandString(t, 10)
 
 	// If the update is virtual-only, the ID should remain the same after updating.
 	var id string

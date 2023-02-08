@@ -16,7 +16,7 @@ func TestAccComputeSubnetworkIamPolicy(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/compute.networkUser"
 	region := GetTestRegionFromEnv()
-	subnetwork := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	subnetwork := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

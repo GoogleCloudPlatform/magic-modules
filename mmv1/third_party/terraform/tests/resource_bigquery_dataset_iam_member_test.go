@@ -10,8 +10,8 @@ import (
 func TestAccBigqueryDatasetIamMember_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
-	saID := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", google.RandString(t, 10))
+	saID := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	expected := map[string]interface{}{
 		"role":        "roles/viewer",

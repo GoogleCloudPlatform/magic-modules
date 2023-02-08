@@ -21,7 +21,7 @@ func TestAccKmsKeyRingIamBinding(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyDecrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	keyRingId := &kmsKeyRingId{
 		Project:  projectId,
@@ -73,7 +73,7 @@ func TestAccKmsKeyRingIamBinding_withCondition(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyDecrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	conditionTitle := "expires_after_2019_12_31"
 
 	keyRingId := &kmsKeyRingId{
@@ -108,7 +108,7 @@ func TestAccKmsKeyRingIamMember(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	keyRingId := &kmsKeyRingId{
 		Project:  projectId,
@@ -146,7 +146,7 @@ func TestAccKmsKeyRingIamMember_withCondition(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	conditionTitle := "expires_after_2019_12_31"
 
 	keyRingId := &kmsKeyRingId{
@@ -181,7 +181,7 @@ func TestAccKmsKeyRingIamPolicy(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	keyRingId := &kmsKeyRingId{
 		Project:  projectId,
@@ -218,7 +218,7 @@ func TestAccKmsKeyRingIamPolicy_withCondition(t *testing.T) {
 	billingAccount := GetTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/cloudkms.cryptoKeyEncrypter"
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	conditionTitle := "expires_after_2019_12_31"
 
 	keyRingId := &kmsKeyRingId{

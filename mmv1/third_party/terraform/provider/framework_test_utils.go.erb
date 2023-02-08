@@ -1,0 +1,256 @@
+<% autogen_exception -%>
+package provider
+
+import (
+	"context"
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+)
+
+// General test utils
+func MuxedProviders(testName string) (func() tfprotov5.ProviderServer, error) {
+	ctx := context.Background()
+
+	providers := []func() tfprotov5.ProviderServer{
+		providerserver.NewProtocol5(google.New("test")), // framework provider
+		Provider().GRPCProvider,                         // sdk provider
+	}
+
+	muxServer, err := tf5muxserver.NewMuxServer(ctx, providers...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return muxServer.ProviderServer, nil
+}
+
+// TestExtractResourceAttr navigates a test's state to find the specified resource (or data source) attribute and makes the value
+// accessible via the attributeValue string pointer.
+func TestExtractResourceAttr(resourceName string, attributeName string, attributeValue *string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName] // To find a datasource, include `data.` at the start of the resourceName value
+
+		if !ok {
+			return fmt.Errorf("resource name %s not found in state", resourceName)
+		}
+
+		attrValue, ok := rs.Primary.Attributes[attributeName]
+
+		if !ok {
+			return fmt.Errorf("attribute %s not found in resource %s state", attributeName, resourceName)
+		}
+
+		*attributeValue = attrValue
+
+		return nil
+	}
+}
+
+// TestCheckAttributeValuesEqual compares two string pointers, which have been used to retrieve attribute values from the test's state.
+func TestCheckAttributeValuesEqual(i *string, j *string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if testStringValue(i) != testStringValue(j) {
+			return fmt.Errorf("attribute values are different, got %s and %s", testStringValue(i), testStringValue(j))
+		}
+
+		return nil
+	}
+}
+
+// testStringValue returns string values from string pointers, handling nil pointers.
+func testStringValue(sPtr *string) string {
+	if sPtr == nil {
+		return ""
+	}
+
+	return *sPtr
+}
+
+// ProtoV5ProviderFactories returns a muxed ProviderServer that uses the provider code from this repo (SDK and plugin-framework).
+// Used to set ProtoV5ProviderFactories in a resource.TestStep within an acceptance test.
+func ProtoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.ProviderServer, error) {
+	return map[string]func() (tfprotov5.ProviderServer, error){
+		"google": func() (tfprotov5.ProviderServer, error) {
+			provider, err := MuxedProviders(t.Name())
+			return provider(), err
+		},
+	}
+}
+
+// ProviderVersion450 returns information allowing tests to download TPG v4.50.0 from the Registry during `init`
+// Used to set ExternalProviders in a resource.TestStep within an acceptance test.
+func ProviderVersion450() map[string]resource.ExternalProvider {
+	return map[string]resource.ExternalProvider{
+		"google": {
+			VersionConstraint: "4.50.0",
+			Source:            "hashicorp/google",
+		},
+	}
+}
+
+var fwProviders map[string]*frameworkTestProvider
+
+type frameworkTestProvider struct {
+	ProdProvider google.FrameworkProvider
+	TestName     string
+}
+
+func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
+	return &frameworkTestProvider{
+		ProdProvider: google.FrameworkProvider{
+			version: "test",
+		},
+		TestName: testName,
+	}
+}
+
+// Configure is here to overwrite the google.FrameworkProvider configure function for VCR testing
+func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	if google.IsVcrEnabled() {
+		configsLock.RLock()
+		_, ok := fwProviders[p.TestName]
+		configsLock.RUnlock()
+		if ok {
+			return
+		}
+		p.ProdProvider.Configure(ctx, req, resp)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		var vcrMode recorder.Mode
+		switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
+		case "RECORDING":
+			vcrMode = recorder.ModeRecording
+		case "REPLAYING":
+			vcrMode = recorder.ModeReplaying
+			// When replaying, set the poll interval low to speed up tests
+			p.ProdProvider.pollInterval = 10 * time.Millisecond
+		default:
+			tflog.Debug(ctx, fmt.Sprintf("No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv))
+			return
+		}
+
+		envPath := os.Getenv("VCR_PATH")
+		if envPath == "" {
+			tflog.Debug(ctx, "No environment var set for VCR_PATH, skipping VCR")
+			return
+		}
+		path := filepath.Join(envPath, vcrFileName(p.TestName))
+
+		rec, err := recorder.NewAsMode(path, vcrMode, p.ProdProvider.client.Transport)
+		if err != nil {
+			resp.Diagnostics.AddError("error creating record as new mode", err.Error())
+			return
+		}
+		// Defines how VCR will match requests to responses.
+		rec.SetMatcher(func(r *http.Request, i cassette.Request) bool {
+			// Default matcher compares method and URL only
+			if !cassette.DefaultMatcher(r, i) {
+				return false
+			}
+			if r.Body == nil {
+				return true
+			}
+			contentType := r.Header.Get("Content-Type")
+			// If body contains media, don't try to compare
+			if strings.Contains(contentType, "multipart/related") {
+				return true
+			}
+
+			var b bytes.Buffer
+			if _, err := b.ReadFrom(r.Body); err != nil {
+				tflog.Debug(ctx, fmt.Sprintf("Failed to read request body from cassette: %v", err))
+				return false
+			}
+			r.Body = ioutil.NopCloser(&b)
+			reqBody := b.String()
+			// If body matches identically, we are done
+			if reqBody == i.Body {
+				return true
+			}
+
+			// JSON might be the same, but reordered. Try parsing json and comparing
+			if strings.Contains(contentType, "application/json") {
+				var reqJson, cassetteJson interface{}
+				if err := json.Unmarshal([]byte(reqBody), &reqJson); err != nil {
+					tflog.Debug(ctx, fmt.Sprintf("Failed to unmarshall request json: %v", err))
+					return false
+				}
+				if err := json.Unmarshal([]byte(i.Body), &cassetteJson); err != nil {
+					tflog.Debug(ctx, fmt.Sprintf("Failed to unmarshall cassette json: %v", err))
+					return false
+				}
+				return reflect.DeepEqual(reqJson, cassetteJson)
+			}
+			return false
+		})
+		p.ProdProvider.client.Transport = rec
+		configsLock.Lock()
+		fwProviders[p.TestName] = p
+		configsLock.Unlock()
+		return
+	} else {
+		tflog.Debug(ctx, "VCR_PATH or VCR_MODE not set, skipping VCR")
+	}
+}
+
+func configureApiClient(ctx context.Context, p *frameworkTestProvider, diags *diag.Diagnostics) {
+	var data ProviderModel
+	var d diag.Diagnostics
+
+	// Set defaults if needed - the only attribute without a default is ImpersonateServiceAccountDelegates
+	// this is a bit of a hack, but we'll just initialize it here so that it's been initialized at least
+	data.ImpersonateServiceAccountDelegates, d = types.ListValue(types.StringType, []attr.Value{})
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	p.ProdProvider.ConfigureWithData(ctx, data, "test", diags)
+}
+
+func GetTestAccFrameworkProviders(testName string, c resource.TestCase) map[string]func() (tfprotov5.ProviderServer, error) {
+	myFunc := func() (tfprotov5.ProviderServer, error) {
+		prov, err := MuxedProviders(testName)
+		return prov(), err
+	}
+
+	var testProvider string
+	providerMapKeys := reflect.ValueOf(c.ProtoV5ProviderFactories).MapKeys()
+	if len(providerMapKeys) > 0. {
+		if strings.Contains(providerMapKeys[0].String(), "google-beta") {
+			testProvider = "google-beta"
+		} else {
+			testProvider = "google"
+		}
+		return map[string]func() (tfprotov5.ProviderServer, error){
+			testProvider: myFunc,
+		}
+	}
+	return map[string]func() (tfprotov5.ProviderServer, error){}
+}
+
+func GetTestFwProvider(t *testing.T) *frameworkTestProvider {
+	configsLock.RLock()
+	fwProvider, ok := fwProviders[t.Name()]
+	configsLock.RUnlock()
+	if ok {
+		return fwProvider
+	}
+
+	var diags diag.Diagnostics
+	p := NewFrameworkTestProvider(t.Name())
+	configureApiClient(context.Background(), p, &diags)
+	if diags.HasError() {
+		log.Fatalf("%d errors when configuring test provider client: first is %s", diags.ErrorsCount(), diags.Errors()[0].Detail())
+	}
+
+	return p
+}

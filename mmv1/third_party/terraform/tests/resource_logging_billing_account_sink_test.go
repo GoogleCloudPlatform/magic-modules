@@ -12,8 +12,8 @@ import (
 func TestAccLoggingBillingAccountSink_basic(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 	billingAccount := GetTestBillingAccountFromEnv(t)
 
 	var sink logging.LogSink
@@ -41,9 +41,9 @@ func TestAccLoggingBillingAccountSink_basic(t *testing.T) {
 func TestAccLoggingBillingAccountSink_update(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	updatedBucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
+	updatedBucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 	billingAccount := GetTestBillingAccountFromEnv(t)
 
 	var sinkBefore, sinkAfter logging.LogSink
@@ -86,8 +86,8 @@ func TestAccLoggingBillingAccountSink_update(t *testing.T) {
 func TestAccLoggingBillingAccountSink_described(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 	billingAccount := GetTestBillingAccountFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
@@ -109,8 +109,8 @@ func TestAccLoggingBillingAccountSink_described(t *testing.T) {
 func TestAccLoggingBillingAccountSink_disabled(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 	billingAccount := GetTestBillingAccountFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
@@ -132,8 +132,8 @@ func TestAccLoggingBillingAccountSink_disabled(t *testing.T) {
 func TestAccLoggingBillingAccountSink_updateBigquerySink(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bqDatasetID := "tf_test_sink_" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bqDatasetID := "tf_test_sink_" + google.RandString(t, 10)
 	billingAccount := GetTestBillingAccountFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
@@ -164,8 +164,8 @@ func TestAccLoggingBillingAccountSink_updateBigquerySink(t *testing.T) {
 func TestAccLoggingBillingAccountSink_heredoc(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 	billingAccount := GetTestBillingAccountFromEnv(t)
 
 	var sink logging.LogSink

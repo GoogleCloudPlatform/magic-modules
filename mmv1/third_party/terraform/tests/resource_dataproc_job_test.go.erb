@@ -44,7 +44,7 @@ func TestAccDataprocJob_updatable(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := google.RandString(t, 10)
 	jobId := fmt.Sprintf("dproc-update-job-id-%s", rnd)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -73,7 +73,7 @@ func TestAccDataprocJob_PySpark(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := google.RandString(t, 10)
 	jobId := fmt.Sprintf("dproc-custom-job-id-%s", rnd)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -112,7 +112,7 @@ func TestAccDataprocJob_Spark(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -144,7 +144,7 @@ func TestAccDataprocJob_Hadoop(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -176,7 +176,7 @@ func TestAccDataprocJob_Hive(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -208,7 +208,7 @@ func TestAccDataprocJob_Pig(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -240,7 +240,7 @@ func TestAccDataprocJob_SparkSql(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -272,7 +272,7 @@ func TestAccDataprocJob_Presto(t *testing.T) {
 	t.Parallel()
 
 	var job dataproc.Job
-	rnd := RandString(t, 10)
+	rnd := google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

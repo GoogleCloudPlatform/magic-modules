@@ -15,7 +15,7 @@ func TestAccContainerClusterDatasource_zonal(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerClusterDatasource_zonal(RandString(t, 10)),
+				Config: testAccContainerClusterDatasource_zonal(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_container_cluster.kubes",
@@ -41,7 +41,7 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerClusterDatasource_regional(RandString(t, 10)),
+				Config: testAccContainerClusterDatasource_regional(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_container_cluster.kubes",

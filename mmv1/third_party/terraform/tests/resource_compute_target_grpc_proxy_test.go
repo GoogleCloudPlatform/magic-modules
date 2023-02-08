@@ -10,11 +10,11 @@ import (
 func TestAccComputeTargetGrpcProxy_update(t *testing.T) {
 	t.Parallel()
 
-	proxy := fmt.Sprintf("tf-manual-proxy-%s", RandString(t, 10))
-	urlmap1 := fmt.Sprintf("tf-manual-urlmap1-%s", RandString(t, 10))
-	urlmap2 := fmt.Sprintf("tf-manual-urlmap2-%s", RandString(t, 10))
-	backend := fmt.Sprintf("tf-manual-backend-%s", RandString(t, 10))
-	healthcheck := fmt.Sprintf("tf-manual-healthcheck-%s", RandString(t, 10))
+	proxy := fmt.Sprintf("tf-manual-proxy-%s", google.RandString(t, 10))
+	urlmap1 := fmt.Sprintf("tf-manual-urlmap1-%s", google.RandString(t, 10))
+	urlmap2 := fmt.Sprintf("tf-manual-urlmap2-%s", google.RandString(t, 10))
+	backend := fmt.Sprintf("tf-manual-backend-%s", google.RandString(t, 10))
+	healthcheck := fmt.Sprintf("tf-manual-healthcheck-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

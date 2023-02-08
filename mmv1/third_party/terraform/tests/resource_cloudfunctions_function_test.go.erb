@@ -125,7 +125,7 @@ func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 	var function cloudfunctions.CloudFunction
 
 	funcResourceName := "google_cloudfunctions_function.function"
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
@@ -183,11 +183,11 @@ func TestAccCloudFunctionsFunction_update(t *testing.T) {
 	var function cloudfunctions.CloudFunction
 
 	funcResourceName := "google_cloudfunctions_function.function"
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	zipFileUpdatePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerUpdatePath)
-	random_suffix := RandString(t, 10)
+	random_suffix := google.RandString(t, 10)
 	defer os.Remove(zipFilePath) // clean up
 
 	VcrTest(t, resource.TestCase{
@@ -253,7 +253,7 @@ func TestAccCloudFunctionsFunction_buildworkerpool(t *testing.T) {
 	var function cloudfunctions.CloudFunction
 
 	funcResourceName := "google_cloudfunctions_function.function"
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
 	location := "us-central1"
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
@@ -292,9 +292,9 @@ func TestAccCloudFunctionsFunction_pubsub(t *testing.T) {
 	t.Parallel()
 
 	funcResourceName := "google_cloudfunctions_function.function"
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
-	topicName := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
+	topicName := fmt.Sprintf("tf-test-sub-%s", google.RandString(t, 10))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testPubSubTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
@@ -324,7 +324,7 @@ func TestAccCloudFunctionsFunction_pubsub(t *testing.T) {
 func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testBucketTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
@@ -360,8 +360,8 @@ func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
-	arRepoName := fmt.Sprintf("tf-ar-test-docker-repository-%s", RandString(t, 10))
-	functionName := fmt.Sprintf("tf-ar-test-%s", RandString(t, 10))
+	arRepoName := fmt.Sprintf("tf-ar-test-docker-repository-%s", google.RandString(t, 10))
+	functionName := fmt.Sprintf("tf-ar-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-ar-test-bucket-%d", RandInt(t))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
@@ -390,8 +390,8 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 	t.Parallel()
 	kmsKey := BootstrapKMSKeyInLocation(t, "us-central1")
 	funcResourceName := "google_cloudfunctions_function.function"
-	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", RandString(t, 10))
-	functionName := fmt.Sprintf("tf-cmek-test-%s", RandString(t, 10))
+	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", google.RandString(t, 10))
+	functionName := fmt.Sprintf("tf-cmek-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-cmek-test-bucket-%d", RandInt(t))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
@@ -418,7 +418,7 @@ func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
 func TestAccCloudFunctionsFunction_firestore(t *testing.T) {
 	t.Parallel()
 	funcResourceName := "google_cloudfunctions_function.function"
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testFirestoreTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
@@ -445,7 +445,7 @@ func TestAccCloudFunctionsFunction_sourceRepo(t *testing.T) {
 	t.Parallel()
 
 	funcResourceName := "google_cloudfunctions_function.function"
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	proj := GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
@@ -470,7 +470,7 @@ func TestAccCloudFunctionsFunction_serviceAccountEmail(t *testing.T) {
 	t.Parallel()
 
 	funcResourceName := "google_cloudfunctions_function.function"
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
@@ -497,10 +497,10 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 	t.Parallel()
 
 	funcResourceName := "google_cloudfunctions_function.function"
-	functionName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
 	networkName := fmt.Sprintf("tf-test-net-%d", RandInt(t))
-	vpcConnectorName := fmt.Sprintf("tf-test-conn-%s", RandString(t, 5))
+	vpcConnectorName := fmt.Sprintf("tf-test-conn-%s", google.RandString(t, 5))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
 	defer os.Remove(zipFilePath) // clean up
@@ -535,7 +535,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 func TestAccCloudFunctionsFunction_secretEnvVar(t *testing.T) {
 	t.Parallel()
 
-	randomSecretSuffix := RandString(t, 10)
+	randomSecretSuffix := google.RandString(t, 10)
 	accountId := fmt.Sprintf("tf-test-account-%s", randomSecretSuffix)
 	secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
 	versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)
@@ -577,7 +577,7 @@ func TestAccCloudFunctionsFunction_secretMount(t *testing.T) {
 	t.Parallel()
 
 	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
-	randomSecretSuffix := RandString(t, 10)
+	randomSecretSuffix := google.RandString(t, 10)
 	accountId := fmt.Sprintf("tf-test-account-%s", randomSecretSuffix)
 	secretName := fmt.Sprintf("tf-test-secret-%s", randomSecretSuffix)
 	versionName1 := fmt.Sprintf("tf-test-version1-%s", randomSecretSuffix)

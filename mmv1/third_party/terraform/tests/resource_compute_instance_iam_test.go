@@ -15,7 +15,7 @@ func TestAccComputeInstanceIamPolicy(t *testing.T) {
 	project := GetTestProjectFromEnv()
 	role := "roles/compute.osLogin"
 	zone := GetTestZoneFromEnv()
-	instanceName := fmt.Sprintf("tf-test-instance-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-instance-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

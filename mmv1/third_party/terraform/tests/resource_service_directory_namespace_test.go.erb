@@ -14,7 +14,7 @@ func TestAccServiceDirectoryNamespace_serviceDirectoryNamespaceUpdateExample(t *
 
 	project := GetTestProjectFromEnv()
 	location := "us-central1"
-	testId := fmt.Sprintf("tf-test-example-namespace%s", RandString(t, 10))
+	testId := fmt.Sprintf("tf-test-example-namespace%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

@@ -14,7 +14,7 @@ func TestAccServiceDirectoryEndpoint_serviceDirectoryEndpointUpdateExample(t *te
 
 	project := GetTestProjectFromEnv()
 	location := "us-central1"
-	testId := fmt.Sprintf("tf-test-example-endpoint%s", RandString(t, 10))
+	testId := fmt.Sprintf("tf-test-example-endpoint%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

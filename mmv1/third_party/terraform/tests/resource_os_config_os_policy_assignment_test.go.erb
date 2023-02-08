@@ -19,7 +19,7 @@ func TestAccOsConfigOsPolicyAssignment_basicOsPolicyAssignment(t *testing.T) {
 	context := map[string]interface{}{
 		"project_name":  GetTestProjectFromEnv(),
 		"zone":          GetTestZoneFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 		"org_id":        GetTestOrgFromEnv(t),
 		"billing_act":   GetTestBillingAccountFromEnv(t),
 	}

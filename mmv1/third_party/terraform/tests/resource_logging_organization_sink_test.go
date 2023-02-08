@@ -15,8 +15,8 @@ func TestAccLoggingOrganizationSink_basic(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	var sink logging.LogSink
 
@@ -44,9 +44,9 @@ func TestAccLoggingOrganizationSink_update(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
-	updatedBucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
+	updatedBucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	var sinkBefore, sinkAfter logging.LogSink
 
@@ -89,8 +89,8 @@ func TestAccLoggingOrganizationSink_described(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -112,8 +112,8 @@ func TestAccLoggingOrganizationSink_disabled(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -135,8 +135,8 @@ func TestAccLoggingOrganizationSink_updateBigquerySink(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bqDatasetID := "tf_test_sink_" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bqDatasetID := "tf_test_sink_" + google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -167,8 +167,8 @@ func TestAccLoggingOrganizationSink_heredoc(t *testing.T) {
 	t.Parallel()
 
 	org := GetTestOrgFromEnv(t)
-	sinkName := "tf-test-sink-" + RandString(t, 10)
-	bucketName := "tf-test-sink-bucket-" + RandString(t, 10)
+	sinkName := "tf-test-sink-" + google.RandString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + google.RandString(t, 10)
 
 	var sink logging.LogSink
 

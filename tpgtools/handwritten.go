@@ -73,6 +73,7 @@ func copyHandwrittenFiles(inPath string, outPath string) {
 			}
 		}
 
+		glog.Infof("copying handwritten file %s", path.Join(outPath, terraformResourceDirectory, f.Name()))
 		// Write copied file.
 		err = ioutil.WriteFile(path.Join(outPath, terraformResourceDirectory, f.Name()), b, 0644)
 		if err != nil {

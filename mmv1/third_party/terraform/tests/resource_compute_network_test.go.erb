@@ -26,7 +26,7 @@ func TestAccComputeNetwork_explicitAutoSubnet(t *testing.T) {
 		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetwork_basic(RandString(t, 10)),
+				Config: testAccComputeNetwork_basic(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkExists(
 						t, "google_compute_network.bar", &network),
@@ -54,7 +54,7 @@ func TestAccComputeNetwork_customSubnet(t *testing.T) {
 		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetwork_custom_subnet(RandString(t, 10)),
+				Config: testAccComputeNetwork_custom_subnet(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkExists(
 						t, "google_compute_network.baz", &network),
@@ -75,7 +75,7 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 	t.Parallel()
 
 	var network compute.Network
-	networkName := RandString(t, 10)
+	networkName := google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -118,7 +118,7 @@ func TestAccComputeNetwork_default_routing_mode(t *testing.T) {
 		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetwork_basic(RandString(t, 10)),
+				Config: testAccComputeNetwork_basic(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkExists(
 						t, "google_compute_network.bar", &network),
@@ -141,7 +141,7 @@ func TestAccComputeNetwork_networkDeleteDefaultRoute(t *testing.T) {
 		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetwork_deleteDefaultRoute(RandString(t, 10)),
+				Config: testAccComputeNetwork_deleteDefaultRoute(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkExists(
 						t, "google_compute_network.bar", &network),

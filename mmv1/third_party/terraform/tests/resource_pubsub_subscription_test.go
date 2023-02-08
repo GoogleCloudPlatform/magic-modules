@@ -11,8 +11,8 @@ import (
 func TestAccPubsubSubscription_emptyTTL(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
-	subscription := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-sub-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -35,8 +35,8 @@ func TestAccPubsubSubscription_emptyTTL(t *testing.T) {
 func TestAccPubsubSubscription_basic(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
-	subscription := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-sub-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -59,8 +59,8 @@ func TestAccPubsubSubscription_basic(t *testing.T) {
 func TestAccPubsubSubscription_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
-	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -92,9 +92,9 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 func TestAccPubsubSubscription_push(t *testing.T) {
 	t.Parallel()
 
-	topicFoo := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
-	subscription := fmt.Sprintf("tf-test-sub-foo-%s", RandString(t, 10))
-	saAccount := fmt.Sprintf("tf-test-pubsub-%s", RandString(t, 10))
+	topicFoo := fmt.Sprintf("tf-test-topic-foo-%s", google.RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-sub-foo-%s", google.RandString(t, 10))
+	saAccount := fmt.Sprintf("tf-test-pubsub-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -121,8 +121,8 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 func TestAccPubsubSubscription_pollOnCreate(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
-	subscription := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-foo-%s", google.RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-topic-foo-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

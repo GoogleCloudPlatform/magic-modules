@@ -12,7 +12,7 @@ func TestAccOSLoginSSHPublicKey_osLoginSshKeyExpiry(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   RandString(t, 10),
+		"random_suffix":   google.RandString(t, 10),
 		"org_id":          GetTestOrgFromEnv(t),
 		"billing_account": GetTestBillingAccountFromEnv(t),
 	}

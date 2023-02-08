@@ -17,9 +17,9 @@ func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 
 	context := map[string]interface{}{
 		"org_id":        GetTestOrgFromEnv(t),
-		"org_domain":    getTestOrgDomainFromEnv(t),
-		"cust_id":       getTestCustIdFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_domain":    google.GetTestOrgDomainFromEnv(t),
+		"cust_id":       google.GetTestCustIdFromEnv(t),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

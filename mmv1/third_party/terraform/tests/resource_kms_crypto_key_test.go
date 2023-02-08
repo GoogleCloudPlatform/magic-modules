@@ -172,8 +172,8 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 	projectOrg := GetTestOrgFromEnv(t)
 	location := GetTestRegionFromEnv()
 	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -216,8 +216,8 @@ func TestAccKmsCryptoKey_rotation(t *testing.T) {
 	projectOrg := GetTestOrgFromEnv(t)
 	location := GetTestRegionFromEnv()
 	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	rotationPeriod := "100000s"
 	updatedRotationPeriod := "7776000s"
 
@@ -269,8 +269,8 @@ func TestAccKmsCryptoKey_template(t *testing.T) {
 	projectOrg := GetTestOrgFromEnv(t)
 	location := GetTestRegionFromEnv()
 	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	algorithm := "EC_SIGN_P256_SHA256"
 	updatedAlgorithm := "EC_SIGN_P384_SHA384"
 
@@ -314,8 +314,8 @@ func TestAccKmsCryptoKey_destroyDuration(t *testing.T) {
 	projectOrg := GetTestOrgFromEnv(t)
 	location := GetTestRegionFromEnv()
 	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -349,8 +349,8 @@ func TestAccKmsCryptoKey_importOnly(t *testing.T) {
 	projectOrg := GetTestOrgFromEnv(t)
 	location := GetTestRegionFromEnv()
 	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -446,8 +446,8 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
 	projectOrg := GetTestOrgFromEnv(t)
 	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -474,8 +474,8 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
 	projectOrg := GetTestOrgFromEnv(t)
 	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },
@@ -499,8 +499,8 @@ func TestAccKmsCryptoKeyVersion_patch(t *testing.T) {
 	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
 	projectOrg := GetTestOrgFromEnv(t)
 	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 	state := "DISABLED"
 
 	VcrTest(t, resource.TestCase{

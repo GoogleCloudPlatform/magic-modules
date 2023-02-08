@@ -10,7 +10,7 @@ import (
 func TestAccPubsubLiteTopic_pubsubLiteTopic_count_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-foo-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

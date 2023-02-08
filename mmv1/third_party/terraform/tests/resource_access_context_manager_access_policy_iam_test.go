@@ -11,7 +11,7 @@ func TestAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
 	provider.SkipIfVcr(t)
 
 	org := GetTestOrgFromEnv(t)
-	account := "tf-acm-iam-" + RandString(t, 10)
+	account := "tf-acm-iam-" + google.RandString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
 	VcrTest(t, resource.TestCase{
@@ -34,7 +34,7 @@ func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
 	provider.SkipIfVcr(t)
 
 	org := GetTestOrgFromEnv(t)
-	account := "tf-acm-iam-" + RandString(t, 10)
+	account := "tf-acm-iam-" + google.RandString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
 	VcrTest(t, resource.TestCase{
@@ -59,7 +59,7 @@ func TestAccAccessContextManagerAccessPolicyIamPolicy(t *testing.T) {
 	provider.SkipIfVcr(t)
 
 	org := GetTestOrgFromEnv(t)
-	account := "tf-acm-iam-" + RandString(t, 10)
+	account := "tf-acm-iam-" + google.RandString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
 	VcrTest(t, resource.TestCase{
@@ -130,7 +130,7 @@ resource google_access_context_manager_access_policy_iam_policy policy {
 }
 
 func createScopedPolicy(t *testing.T, org string) string {
-	rand := RandString(t, 10)
+	rand := google.RandString(t, 10)
 	return fmt.Sprintf(`
 		resource "google_project" "project" {
 		project_id      = "acm-tf-test-%s"

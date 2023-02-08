@@ -28,11 +28,17 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var migratedResources = map[string]bool{
+	"lake": true,
+}
+
 const GoPkgTerraformSdkValidation = "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 // Resource is tpgtools' model of what a information is necessary to generate a
 // resource in TPG.
 type Resource struct {
+	IsMigrated bool
+
 	productMetadata *ProductMetadata
 
 	// ID is the Terraform resource id format as a pattern string. Additionally,
@@ -167,7 +173,7 @@ type Resource struct {
 	Samples []Sample
 
 	// Versions specific information about this resource
-	versionMetadata Version
+	VersionMetadata Version
 
 	// Reference points to the rest API
 	Reference *Link
@@ -378,7 +384,7 @@ func (r Resource) IDFunction() string {
 			return "ReplaceVars"
 		}
 	}
-	return "replaceVarsForId"
+	return "ReplaceVarsForId"
 }
 
 // ResourceInput is a Resource along with additional generation metadata.
@@ -403,17 +409,19 @@ func (r Resource) RegisterReusedType(p Property) []Property {
 func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *TypeFetcher, overrides Overrides, product *ProductMetadata, version Version, location string) (*Resource, error) {
 	resourceTitle := strings.Split(info.Title, "/")[1]
 
+	resourceName := jsonToSnakeCase(resourceTitle).snakecase()
 	res := Resource{
-		title:                SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
+		title:                SnakeCaseTerraformResourceName(resourceName),
 		dclStructName:        TitleCaseResourceName(schema.Title),
 		dclTitle:             TitleCaseResourceName(resourceTitle),
 		productMetadata:      product,
-		versionMetadata:      version,
+		VersionMetadata:      version,
 		Description:          info.Description,
 		location:             location,
 		InsertTimeoutMinutes: 20,
 		UpdateTimeoutMinutes: 20,
 		DeleteTimeoutMinutes: 20,
+		IsMigrated:           migratedResources[resourceName],
 	}
 
 	// Since the resource's "info" extension field can't be accessed, the relevant
@@ -787,7 +795,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			versionMatch = true
 		} else {
 			for _, v := range sample.Versions {
-				if v == r.versionMetadata.V {
+				if v == r.VersionMetadata.V {
 					versionMatch = true
 				}
 				if v == "ga" {
@@ -819,7 +827,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
-	version := r.versionMetadata.V
+	version := r.VersionMetadata.V
 	resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(string(sampleAccessoryFolder), "meta.yaml")
 	samples := []Sample{}

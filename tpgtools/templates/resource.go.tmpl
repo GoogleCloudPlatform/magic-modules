@@ -378,7 +378,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	res, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
 	if err != nil {
 		resourceName := fmt.Sprintf("{{$.PathType}} %q", d.Id())
-		return handleNotFoundDCLError(err, d, resourceName)
+		return HandleNotFoundDCLError(err, d, resourceName)
 	}
 
 {{ range $v := .Properties -}}

@@ -16,15 +16,15 @@ import (
 )
 
 func TestAccComputeTargetSslProxy_update(t *testing.T) {
-	target := fmt.Sprintf("tssl-test-%s", RandString(t, 10))
-	sslPolicy := fmt.Sprintf("tssl-test-%s", RandString(t, 10))
-	cert1 := fmt.Sprintf("tssl-test-%s", RandString(t, 10))
-	cert2 := fmt.Sprintf("tssl-test-%s", RandString(t, 10))
-	backend1 := fmt.Sprintf("tssl-test-%s", RandString(t, 10))
-	backend2 := fmt.Sprintf("tssl-test-%s", RandString(t, 10))
-	hc := fmt.Sprintf("tssl-test-%s", RandString(t, 10))
+	target := fmt.Sprintf("tssl-test-%s", google.RandString(t, 10))
+	sslPolicy := fmt.Sprintf("tssl-test-%s", google.RandString(t, 10))
+	cert1 := fmt.Sprintf("tssl-test-%s", google.RandString(t, 10))
+	cert2 := fmt.Sprintf("tssl-test-%s", google.RandString(t, 10))
+	backend1 := fmt.Sprintf("tssl-test-%s", google.RandString(t, 10))
+	backend2 := fmt.Sprintf("tssl-test-%s", google.RandString(t, 10))
+	hc := fmt.Sprintf("tssl-test-%s", google.RandString(t, 10))
 
-	resourceSuffix := RandString(t, 10)
+	resourceSuffix := google.RandString(t, 10)
 	var proxy compute.TargetSslProxy
 
 	VcrTest(t, resource.TestCase{

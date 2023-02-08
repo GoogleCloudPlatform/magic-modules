@@ -10,8 +10,8 @@ import (
 func TestAccDataSourceGoogleForwardingRule(t *testing.T) {
 	t.Parallel()
 
-	poolName := fmt.Sprintf("tf-%s", RandString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", RandString(t, 10))
+	poolName := fmt.Sprintf("tf-%s", google.RandString(t, 10))
+	ruleName := fmt.Sprintf("tf-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

@@ -65,46 +65,27 @@ func Provider() *schema.Provider {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_PROJECT",
-					"GOOGLE_CLOUD_PROJECT",
-					"GCLOUD_PROJECT",
-					"CLOUDSDK_CORE_PROJECT",
-				}, nil),
 			},
 
-			"billing_project": &schema.Schema{
+			"billing_project": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_BILLING_PROJECT",
-				}, nil),
 			},
 
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_REGION",
-					"GCLOUD_REGION",
-					"CLOUDSDK_COMPUTE_REGION",
-				}, nil),
 			},
 
-			"zone": &schema.Schema{
+			"zone": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_ZONE",
-					"GCLOUD_ZONE",
-					"CLOUDSDK_COMPUTE_ZONE",
-				}, nil),
 			},
 
-			"scopes": &schema.Schema{
+			"scopes": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -134,9 +115,6 @@ func Provider() *schema.Provider {
 			"user_project_override": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"USER_PROJECT_OVERRIDE",
-				}, nil),
 			},
 
 			"request_timeout": {
@@ -147,20 +125,14 @@ func Provider() *schema.Provider {
 			"request_reason": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"CLOUDSDK_CORE_REQUEST_REASON",
-				}, nil),
 			},
 
 			// Generated Products
 			<% products.each do |product| -%>
-			"<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.Schema{
+			"<%= product[:definitions].name.underscore -%>_custom_endpoint": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateCustomEndpoint,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
-				}, google.DefaultBasePaths[google.<%= product[:definitions].name -%>BasePathKey]),
 			},
 			<% end -%>
 
@@ -176,8 +148,6 @@ func Provider() *schema.Provider {
 			<% end -%>
 			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
 			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
-			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
-			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
 			TagsLocationCustomEndpointEntryKey:           TagsLocationCustomEndpointEntry,
 
 			// dcl
@@ -264,9 +234,6 @@ func Provider() *schema.Provider {
 			"google_container_registry_image":                  google.DataSourceGoogleContainerImage(),
 			"google_container_registry_repository":             google.DataSourceGoogleContainerRepo(),
 			"google_dataproc_metastore_service":                google.DataSourceDataprocMetastoreService(),
-			"google_dns_keys":                                  google.DataSourceDNSKeys(),
-			"google_dns_managed_zone":                          google.DataSourceDnsManagedZone(),
-			"google_dns_record_set":                            google.DataSourceDnsRecordSet(),
 			"google_game_services_game_server_deployment_rollout":  google.DataSourceGameServicesGameServerDeploymentRollout(),
 			"google_iam_policy":                                google.DataSourceGoogleIamPolicy(),
 			"google_iam_role":                                  google.DataSourceGoogleIamRole(),
@@ -388,7 +355,7 @@ products.each do |product|
 	terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
 -%>
 <% 	unless object&.exclude_resource -%>
-	"<%= terraform_name -%>": <%= product_definition.isMigrated ? product_definition.name.downcase + "service" : "google" -%>.Resource<%= product_definition.name + object.name -%>(),
+	"<%= terraform_name -%>": <%= product_definition.IsMigrated ? product_definition.name.downcase + "service" : "google" -%>.Resource<%= product_definition.name + object.name -%>(),
 <%  end -%>
 <%
 	iam_policy = object&.iam_policy
@@ -558,11 +525,14 @@ end     # products.each do
 				"google_service_account_iam_policy":            google.ResourceIamPolicy(google.IamServiceAccountSchema, google.NewServiceAccountIamUpdater, google.ServiceAccountIdParseFunc),
 				// ####### END non-generated IAM resources ###########
 			},
-			google.DclResources,
+			DclResources,
 		)
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
+	HandleSDKDefaults(d)
+	google.HandleDCLProviderDefaults(d)
+
 	config := google.Config{
 		Project:             d.Get("project").(string),
 		Region:              d.Get("region").(string),
@@ -680,7 +650,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		return nil, diag.FromErr(err)
 	}
 
-	return providerDCLConfigure(d, &config), nil
+	return google.ProviderDCLConfigure(d, &config), nil
 }
 
 func ValidateCredentials(v interface{}, k string) (warnings []string, errors []error) {
@@ -698,4 +668,138 @@ func ValidateCredentials(v interface{}, k string) (warnings []string, errors []e
 	}
 
 	return
+}
+
+func HandleSDKDefaults(d *schema.ResourceData) {
+	if d.Get("impersonate_service_account") == "" {
+		d.Set("impersonate_service_account", google.MultiEnvSearch([]string{
+			"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
+		}))
+	}
+
+	if d.Get("project") == "" {
+		d.Set("project", google.MultiEnvSearch([]string{
+			"GOOGLE_PROJECT",
+			"GOOGLE_CLOUD_PROJECT",
+			"GCLOUD_PROJECT",
+			"CLOUDSDK_CORE_PROJECT",
+		}))
+	}
+
+	if d.Get("billing_project") == "" {
+		d.Set("billing_project", google.MultiEnvSearch([]string{
+			"GOOGLE_BILLING_PROJECT",
+		}))
+	}
+
+	if d.Get("region") == "" {
+		d.Set("region", google.MultiEnvSearch([]string{
+			"GOOGLE_REGION",
+			"GCLOUD_REGION",
+			"CLOUDSDK_COMPUTE_REGION",
+		}))
+	}
+
+	if d.Get("zone") == "" {
+		d.Set("zone", google.MultiEnvSearch([]string{
+			"GOOGLE_ZONE",
+			"GCLOUD_ZONE",
+			"CLOUDSDK_COMPUTE_ZONE",
+		}))
+	}
+
+	if d.Get("user_project_override") == "" {
+		d.Set("user_project_override", google.MultiEnvSearch([]string{
+			"USER_PROJECT_OVERRIDE",
+		}))
+	}
+
+	if d.Get("request_reason") == "" {
+		d.Set("request_reason", google.MultiEnvSearch([]string{
+			"CLOUDSDK_CORE_REQUEST_REASON",
+		}))
+	}
+
+	// Generated Products
+	<% products.each do |product| -%>
+	if d.Get("<%= product[:definitions].name.underscore -%>_custom_endpoint") == "" {
+		d.Set("<%= product[:definitions].name.underscore -%>_custom_endpoint", google.MultiEnvDefault([]string{
+			"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.<%= product[:definitions].name -%>BasePathKey]))
+	}
+	<% end -%>
+
+	if d.Get(CloudBillingCustomEndpointEntryKey) == "" {
+		d.Set(CloudBillingCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_CLOUD_BILLING_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.CloudBillingBasePathKey]))
+	}
+
+	if d.Get(ComposerCustomEndpointEntryKey) == "" {
+		d.Set(ComposerCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_COMPOSER_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.ComposerBasePathKey]))
+	}
+
+	if d.Get(ContainerCustomEndpointEntryKey) == "" {
+		d.Set(ContainerCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_CONTAINER_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.ContainerBasePathKey]))
+	}
+
+	if d.Get(DataflowCustomEndpointEntryKey) == "" {
+		d.Set(DataflowCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_DATAFLOW_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.DataflowBasePathKey]))
+	}
+
+	if d.Get(IamCredentialsCustomEndpointEntryKey) == "" {
+		d.Set(IamCredentialsCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_IAM_CREDENTIALS_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.IamCredentialsBasePathKey]))
+	}
+
+	if d.Get(ResourceManagerV3CustomEndpointEntryKey) == "" {
+		d.Set(ResourceManagerV3CustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_RESOURCE_MANAGER_V3_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.ResourceManagerV3BasePathKey]))
+	}
+
+	<% unless version == "ga" -%>
+	if d.Get(RuntimeConfigCustomEndpointEntryKey) == "" {
+		d.Set(RuntimeConfigCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_RUNTIMECONFIG_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.RuntimeConfigBasePathKey]))
+	}
+	<% end -%>
+
+	if d.Get(IAMCustomEndpointEntryKey) == "" {
+		d.Set(IAMCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_IAM_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.IAMBasePathKey]))
+	}
+
+	if d.Get(ServiceNetworkingCustomEndpointEntryKey) == "" {
+		d.Set(ServiceNetworkingCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_SERVICE_NETWORKING_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.ServiceNetworkingBasePathKey]))
+	}
+
+	if d.Get(TagsLocationCustomEndpointEntryKey) == "" {
+		d.Set(TagsLocationCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_TAGS_LOCATION_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.TagsLocationBasePathKey]))
+	}
+
+	if d.Get(ContainerAwsCustomEndpointEntryKey) == "" {
+		d.Set(ContainerAwsCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_CONTAINERAWS_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.ContainerAwsBasePathKey]))
+	}
+
+	if d.Get(ContainerAzureCustomEndpointEntryKey) == "" {
+		d.Set(ContainerAzureCustomEndpointEntryKey, google.MultiEnvDefault([]string{
+			"GOOGLE_CONTAINERAZURE_CUSTOM_ENDPOINT",
+		}, google.DefaultBasePaths[google.ContainerAzureBasePathKey]))
+	}
 }

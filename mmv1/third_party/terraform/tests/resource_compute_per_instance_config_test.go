@@ -13,15 +13,15 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 	provider.SkipIfVcr(t)
 	t.Parallel()
 
-	suffix := RandString(t, 10)
+	suffix := google.RandString(t, 10)
 	igmName := fmt.Sprintf("tf-test-igm-%s", suffix)
 	context := map[string]interface{}{
 		"igm_name":      igmName,
 		"random_suffix": suffix,
-		"config_name":   fmt.Sprintf("instance-%s", RandString(t, 10)),
-		"config_name2":  fmt.Sprintf("instance-%s", RandString(t, 10)),
-		"config_name3":  fmt.Sprintf("instance-%s", RandString(t, 10)),
-		"config_name4":  fmt.Sprintf("instance-%s", RandString(t, 10)),
+		"config_name":   fmt.Sprintf("instance-%s", google.RandString(t, 10)),
+		"config_name2":  fmt.Sprintf("instance-%s", google.RandString(t, 10)),
+		"config_name3":  fmt.Sprintf("instance-%s", google.RandString(t, 10)),
+		"config_name4":  fmt.Sprintf("instance-%s", google.RandString(t, 10)),
 	}
 	igmId := fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s",
 		GetTestProjectFromEnv(), GetTestZoneFromEnv(), igmName)
@@ -92,9 +92,9 @@ func TestAccComputePerInstanceConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
-		"igm_name":      fmt.Sprintf("tf-test-igm-%s", RandString(t, 10)),
-		"config_name":   fmt.Sprintf("instance-%s", RandString(t, 10)),
+		"random_suffix": google.RandString(t, 10),
+		"igm_name":      fmt.Sprintf("tf-test-igm-%s", google.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("instance-%s", google.RandString(t, 10)),
 	}
 
 	VcrTest(t, resource.TestCase{

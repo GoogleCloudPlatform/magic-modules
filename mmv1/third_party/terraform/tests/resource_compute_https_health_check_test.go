@@ -10,7 +10,7 @@ import (
 func TestAccComputeHttpsHealthCheck_update(t *testing.T) {
 	t.Parallel()
 
-	hhckName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	hhckName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

@@ -16,7 +16,7 @@ func testAccAccessContextManagerAccessLevelCondition_basicTest(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 	project := GetTestProjectFromEnv()
 
-	serviceAccountName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	serviceAccountName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
 
 	expected := map[string]interface{}{
 		"ipSubnetworks": []interface{}{"192.0.4.0/24"},

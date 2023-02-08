@@ -67,7 +67,7 @@ func TestAccCloudRunDomainMapping_foregroundDeletion(t *testing.T) {
 
 	context := map[string]interface{}{
 		"namespace":     GetTestProjectFromEnv(),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

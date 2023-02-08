@@ -23,7 +23,7 @@ func TestAccComputeTargetHttpsProxy_update(t *testing.T) {
 	t.Parallel()
 
 	var proxy compute.TargetHttpsProxy
-	resourceSuffix := RandString(t, 10)
+	resourceSuffix := google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
@@ -58,7 +58,7 @@ func TestAccComputeTargetHttpsProxy_certificateMap(t *testing.T) {
 	t.Parallel()
 
 	var proxy compute.TargetHttpsProxy
-	resourceSuffix := RandString(t, 10)
+	resourceSuffix := google.RandString(t, 10)
 
     VcrTest(t, resource.TestCase{
         PreCheck:     func() { TestAccPreCheck(t) },

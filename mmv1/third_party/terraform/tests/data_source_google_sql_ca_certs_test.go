@@ -11,7 +11,7 @@ import (
 func TestAccDataSourceGoogleSQLCaCerts_basic(t *testing.T) {
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("data-ssl-ca-cert-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("data-ssl-ca-cert-test-%s", google.RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

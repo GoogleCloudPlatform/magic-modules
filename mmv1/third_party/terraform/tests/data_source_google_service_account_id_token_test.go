@@ -70,7 +70,7 @@ func TestAccDataSourceGoogleServiceAccountIdToken_impersonation(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_service_account_id_token.default"
-	serviceAccount := getTestServiceAccountFromEnv(t)
+	serviceAccount := google.GetTestServiceAccountFromEnv(t)
 	targetServiceAccountEmail := BootstrapServiceAccount(t, GetTestProjectFromEnv(), serviceAccount)
 
 	resource.Test(t, resource.TestCase{

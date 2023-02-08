@@ -11,7 +11,7 @@ import (
 func TestAccDNSPolicy_update(t *testing.T) {
 	t.Parallel()
 
-	policySuffix := RandString(t, 10)
+	policySuffix := google.RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },

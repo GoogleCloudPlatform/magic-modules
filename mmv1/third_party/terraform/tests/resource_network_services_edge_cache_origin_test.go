@@ -9,7 +9,7 @@ import (
 
 func TestAccNetworkServicesEdgeCacheOrigin_updateAndImport(t *testing.T) {
 	t.Parallel()
-	name := "tf-test-origin-" + RandString(t, 10)
+	name := "tf-test-origin-" + google.RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { TestAccPreCheck(t) },
 		Providers:    TestAccProviders,

@@ -11,7 +11,7 @@ func TestAccFirestoreDocument_update(t *testing.T) {
 	t.Parallel()
 
 	name := fmt.Sprintf("tf-test-%d", RandInt(t))
-	project := getTestFirestoreProjectFromEnv(t)
+	project := google.GetTestFirestoreProjectFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

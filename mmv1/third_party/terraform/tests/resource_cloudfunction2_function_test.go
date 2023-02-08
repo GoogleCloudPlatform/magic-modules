@@ -11,7 +11,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source.zip",
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -180,7 +180,7 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"project":       GetTestProjectFromEnv(),
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

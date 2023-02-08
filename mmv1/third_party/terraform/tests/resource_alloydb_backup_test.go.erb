@@ -12,7 +12,7 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"network_name":  BootstrapSharedTestNetwork(t, "alloydb"),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

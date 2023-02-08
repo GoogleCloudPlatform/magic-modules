@@ -15,7 +15,7 @@ func TestAccVPCAccessConnectorDatasource_basic(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVPCAccessConnectorDatasourceConfig(RandString(t, 10)),
+				Config: testAccVPCAccessConnectorDatasourceConfig(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vpc_access_connector.connector",

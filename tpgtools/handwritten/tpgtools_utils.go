@@ -13,7 +13,7 @@ func oldValue(old, new interface{}) interface{} {
 	return old
 }
 
-func handleNotFoundDCLError(err error, d *schema.ResourceData, resourceName string) error {
+func HandleNotFoundDCLError(err error, d *schema.ResourceData, resourceName string) error {
 	if dcl.IsNotFound(err) {
 		log.Printf("[WARN] Removing %s because it's gone", resourceName)
 		// The resource doesn't exist anymore

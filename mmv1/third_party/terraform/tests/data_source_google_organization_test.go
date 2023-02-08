@@ -47,7 +47,7 @@ func TestAccDataSourceGoogleOrganization_byShortName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleOrganization_byDomain(t *testing.T) {
-	name := RandString(t, 16) + ".com"
+	name := google.RandString(t, 16) + ".com"
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { TestAccPreCheck(t) },

@@ -22,20 +22,20 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
+				ExternalProviders: ProviderVersion450(),
 				Config:            testAccDataSourceDnsRecordSet_basic(managedZoneName, randString(t, 10), randString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),
-					testExtractResourceAttr("data.google_dns_record_set.rs", "ttl", &ttl1),
+					TestExtractResourceAttr("data.google_dns_record_set.rs", "ttl", &ttl1),
 				),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config:                   testAccDataSourceDnsRecordSet_basic(managedZoneName, randString(t, 10), randString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),
-					testExtractResourceAttr("data.google_dns_record_set.rs", "ttl", &ttl2),
-					testCheckAttributeValuesEqual(&ttl1, &ttl2),
+					TestExtractResourceAttr("data.google_dns_record_set.rs", "ttl", &ttl2),
+					TestCheckAttributeValuesEqual(&ttl1, &ttl2),
 				),
 			},
 		},
@@ -79,9 +79,9 @@ func testAccCheckDnsRecordSetDestroyProducerFramework(t *testing.T) func(s *terr
 				continue
 			}
 
-			p := getTestFwProvider(t)
+			p := GetTestFwProvider(t)
 
-			url, err := replaceVarsForFrameworkTest(&p.ProdProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
+			url, err := ReplaceVarsForFrameworkTest(&p.ProdProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
 			if err != nil {
 				return err
 			}

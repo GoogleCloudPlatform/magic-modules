@@ -33,7 +33,7 @@ func main() {
 	// concat with sdkv2 provider
 	providers := []func() tfprotov5.ProviderServer{
 		providerserver.NewProtocol5(google.New(version)), // framework provider
-		google.Provider().GRPCProvider,                   // sdk provider
+		provider.Provider().GRPCProvider,                   // sdk provider
 	}
 
 	// use the muxer

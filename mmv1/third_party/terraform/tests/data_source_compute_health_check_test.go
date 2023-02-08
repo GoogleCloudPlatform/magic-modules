@@ -15,7 +15,7 @@ func TestAccComputeHealthCheckDatasource_basic(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheckDatasourceConfig(RandString(t, 10)),
+				Config: testAccComputeHealthCheckDatasourceConfig(google.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					CheckDataSourceStateMatchesResourceState("data.google_compute_health_check.hc", "google_compute_health_check.hc"),
 				),

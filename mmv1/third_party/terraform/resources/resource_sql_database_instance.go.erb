@@ -1631,7 +1631,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
         }
 
 	if promoteReadReplicaRequired {
-		err = retryTimeDuration(func() (rerr error) {
+		err = RetryTimeDuration(func() (rerr error) {
 			op, rerr = config.NewSqlAdminClient(userAgent).Instances.PromoteReplica(project, d.Get("name").(string)).Do()
 			return rerr
 		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)

@@ -30,7 +30,7 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 		"endpoint_name": fmt.Sprint(RandInt(t) % 9999999999),
 		"kms_key_name":  BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
 		"network_name":  BootstrapSharedTestNetwork(t, "vertex"),
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{

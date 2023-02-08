@@ -535,7 +535,7 @@ func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
 	return res["email"].(string), nil
 }
 
-func checkStringMap(v interface{}) map[string]string {
+func CheckStringMap(v interface{}) map[string]string {
 	m, ok := v.(map[string]string)
 	if ok {
 		return m

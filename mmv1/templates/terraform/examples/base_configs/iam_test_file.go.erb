@@ -142,7 +142,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := getTestServiceAccountFromEnv(t)
+	sa := google.GetTestServiceAccountFromEnv(t)
 <% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
@@ -367,7 +367,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := getTestServiceAccountFromEnv(t)
+	sa := google.GetTestServiceAccountFromEnv(t)
 <% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>

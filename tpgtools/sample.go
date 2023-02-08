@@ -221,7 +221,7 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 	dFileNameParts := strings.Split(fileName, "samples/")
 	fileName = dFileNameParts[len(dFileNameParts)-1]
 	dependencyBytes, err := ioutil.ReadFile(path.Join(string(s.SamplesPath), fileName))
-	version := s.resourceReference.versionMetadata.V
+	version := s.resourceReference.VersionMetadata.V
 	product := s.resourceReference.productMetadata.ProductName
 	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
 	if err != nil {
@@ -372,6 +372,18 @@ func (s Sample) ExpandContext() map[string]string {
 	return out
 }
 
+// ExpandContext expands the context model used in the generated tests
+func (s Sample) ExpandContextService() map[string]string {
+	out := map[string]string{}
+	for _, sub := range s.Variables {
+		translation, hasTranslation := translationMapService[sub.Type]
+		if hasTranslation {
+			out[translation.contextKey] = translation.contextValue
+		}
+	}
+	return out
+}
+
 type translationIndex struct {
 	docsValue    string
 	contextKey   string
@@ -387,7 +399,7 @@ var translationMap = map[string]translationIndex{
 	"org_name": {
 		docsValue:    "example.com",
 		contextKey:   "org_domain",
-		contextValue: "getTestOrgDomainFromEnv(t)",
+		contextValue: "GetTestOrgDomainFromEnv(t)",
 	},
 	"region": {
 		docsValue:    "us-west1",
@@ -402,7 +414,7 @@ var translationMap = map[string]translationIndex{
 	"org_target": {
 		docsValue:    "123456789",
 		contextKey:   "org_target",
-		contextValue: "getTestOrgTargetFromEnv(t)",
+		contextValue: "GetTestOrgTargetFromEnv(t)",
 	},
 	"billing_account": {
 		docsValue:    "000000-0000000-0000000-000000",
@@ -412,7 +424,7 @@ var translationMap = map[string]translationIndex{
 	"test_service_account": {
 		docsValue:    "emailAddress:my@service-account.com",
 		contextKey:   "service_acct",
-		contextValue: "getTestServiceAccountFromEnv(t)",
+		contextValue: "GetTestServiceAccountFromEnv(t)",
 	},
 	"project": {
 		docsValue:    "my-project-name",
@@ -422,12 +434,130 @@ var translationMap = map[string]translationIndex{
 	"project_number": {
 		docsValue:    "my-project-number",
 		contextKey:   "project_number",
-		contextValue: "getTestProjectNumberFromEnv()",
+		contextValue: "GetTestProjectNumberFromEnv.GetTestServiceAccountFromEnv()",
 	},
 	"customer_id": {
 		docsValue:    "A01b123xz",
 		contextKey:   "cust_id",
-		contextValue: "getTestCustIdFromEnv(t)",
+		contextValue: "GetTestCustIdFromEnv(t)",
+	},
+	// Begin a long list of multicloud-only values which are not going to see reuse.
+	// We can hardcode fake values because we are
+	// always going to use the no-provisioning mode for unit testing, of these resources
+	// where we don't have to actually have a real AWS account.
+
+	"aws_account_id": {
+		docsValue:    "012345678910",
+		contextKey:   "aws_acct_id",
+		contextValue: `"111111111111"`,
+	},
+	"aws_database_encryption_key": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "aws_db_key",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"aws_region": {
+		docsValue:    "my-aws-region",
+		contextKey:   "aws_region",
+		contextValue: `"us-west-2"`,
+	},
+	"aws_security_group": {
+		docsValue:    "sg-00000000000000000",
+		contextKey:   "aws_sg",
+		contextValue: `"sg-0b3f63cb91b247628"`,
+	},
+	"aws_volume_encryption_key": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "aws_vol_key",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"aws_vpc": {
+		docsValue:    "vpc-00000000000000000",
+		contextKey:   "aws_vpc",
+		contextValue: `"vpc-0b3f63cb91b247628"`,
+	},
+	"aws_subnet": {
+		docsValue:    "subnet-00000000000000000",
+		contextKey:   "aws_subnet",
+		contextValue: `"subnet-0b3f63cb91b247628"`,
+	},
+	"azure_application": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "azure_app",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"azure_subscription": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "azure_sub",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"azure_ad_tenant": {
+		docsValue:    "12345678-1234-1234-1234-123456789111",
+		contextKey:   "azure_tenant",
+		contextValue: `"00000000-0000-0000-0000-17aad2f0f61f"`,
+	},
+	"azure_proxy_config_secret_version": {
+		docsValue:    "0000000000000000000000000000000000",
+		contextKey:   "azure_config_secret",
+		contextValue: `"07d4b1f1a7cb4b1b91f070c30ae761a1"`,
+	},
+	"byo_multicloud_prefix": {
+		docsValue:    "my-",
+		contextKey:   "byo_prefix",
+		contextValue: `"mmv2"`,
+	},
+}
+
+var translationMapService = map[string]translationIndex{
+	"org_id": {
+		docsValue:    "123456789",
+		contextKey:   "org_id",
+		contextValue: "google.GetTestOrgFromEnv(t)",
+	},
+	"org_name": {
+		docsValue:    "example.com",
+		contextKey:   "org_domain",
+		contextValue: "google.GetTestOrgDomainFromEnv(t)",
+	},
+	"region": {
+		docsValue:    "us-west1",
+		contextKey:   "region",
+		contextValue: "google.GetTestRegionFromEnv()",
+	},
+	"zone": {
+		docsValue:    "us-west1-a",
+		contextKey:   "zone",
+		contextValue: "google.GetTestZoneFromEnv()",
+	},
+	"org_target": {
+		docsValue:    "123456789",
+		contextKey:   "org_target",
+		contextValue: "google.GetTestOrgTargetFromEnv(t)",
+	},
+	"billing_account": {
+		docsValue:    "000000-0000000-0000000-000000",
+		contextKey:   "billing_acct",
+		contextValue: "google.GetTestBillingAccountFromEnv(t)",
+	},
+	"test_service_account": {
+		docsValue:    "emailAddress:my@service-account.com",
+		contextKey:   "service_acct",
+		contextValue: "google.GetTestServiceAccountFromEnv(t)",
+	},
+	"project": {
+		docsValue:    "my-project-name",
+		contextKey:   "project_name",
+		contextValue: "google.GetTestProjectFromEnv()",
+	},
+	"project_number": {
+		docsValue:    "my-project-number",
+		contextKey:   "project_number",
+		contextValue: "google.GetTestProjectNumberFromEnv.GetTestServiceAccountFromEnv()",
+	},
+	"customer_id": {
+		docsValue:    "A01b123xz",
+		contextKey:   "cust_id",
+		contextValue: "google.GetTestCustIdFromEnv(t)",
 	},
 	// Begin a long list of multicloud-only values which are not going to see reuse.
 	// We can hardcode fake values because we are

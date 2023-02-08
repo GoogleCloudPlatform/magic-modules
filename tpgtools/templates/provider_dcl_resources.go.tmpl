@@ -26,16 +26,33 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	{{- range $res := . }}
+		{{- if not $res.SkipInProvider }}
+			{{- if $res.IsMigrated }}
+					{{- if eq $res.VersionMetadata.V "ga" }}
+						"github.com/hashicorp/terraform-provider-google/google/service/{{$res.Package}}"
+						"github.com/hashicorp/terraform-provider-google/google"
+					{{- else }}
+						"github.com/hashicorp/terraform-provider-google-beta/google-beta/service/{{$res.Package}}"
+						"github.com/hashicorp/terraform-provider-google-beta/google-beta"
+					{{ end -}}
+			{{- end }}
+		{{- end }}
+	{{- end }}
 )
 
 var DclResources = map[string]*schema.Resource{
 {{- range $res := . }}
 	{{- if not $res.SkipInProvider }}
-	"{{$res.TerraformName}}": Resource{{$res.PathType}}(),
+		{{- if $res.IsMigrated }}
+			"{{$res.TerraformName}}": {{$res.Package}}service.Resource{{$res.PathType}}(),
+		{{- else }}
+			"{{$res.TerraformName}}": google.Resource{{$res.PathType}}(),
+		{{- end }}
 	{{- end }}
 {{- end }}
 }

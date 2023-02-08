@@ -67,17 +67,17 @@ func GetTestRegionFromEnv() string {
 	return defaultRegion
 }
 
-func getTestCustIdFromEnv(t *testing.T) string {
+func google.GetTestCustIdFromEnv(t *testing.T) string {
 	return defaultCustId
 }
 
-func getTestIdentityUserFromEnv(t *testing.T) string {
+func GetTestIdentityUserFromEnv(t *testing.T) string {
 	return defaultIdentityUser
 }
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
-func getTestFirestoreProjectFromEnv(t *testing.T) string {
+func google.GetTestFirestoreProjectFromEnv(t *testing.T) string {
 	return defaultFirestoreProject
 }
 
@@ -91,11 +91,11 @@ func GetTestOrgFromEnv(t *testing.T) string {
 	return org
 }
 
-func getTestOrgDomainFromEnv(t *testing.T) string {
+func GetTestOrgDomainFromEnv(t *testing.T) string {
 	return defaultOrganizationDomain
 }
 
-func getTestOrgTargetFromEnv(t *testing.T) string {
+func google.GetTestOrgTargetFromEnv(t *testing.T) string {
 	return defaultOrganizationTarget
 }
 
@@ -103,7 +103,7 @@ func GetTestBillingAccountFromEnv(t *testing.T) string {
 	return defaultBillingAccount
 }
 
-func getTestServiceAccountFromEnv(t *testing.T) string {
+func google.GetTestServiceAccountFromEnv(t *testing.T) string {
 	return defaultServiceAccount
 }
 
