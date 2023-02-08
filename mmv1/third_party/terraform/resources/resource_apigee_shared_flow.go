@@ -138,9 +138,9 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 	tmpOrgId, _ := d.GetOk("org_id")
 	tmpBundle, _ := d.GetOk("config_bundle")
 	
-	fmt.Printf("[DEBUG] resourceApigeeSharedFlowCreate, name=			 	%s", tmpName)
-	fmt.Printf("[DEBUG] resourceApigeeSharedFlowCreate, org_id=, 			%s", tmpOrgId)
-	fmt.Printf("[DEBUG] resourceApigeeSharedFlowCreate, config_bundle=, 	%s", tmpBundle)
+	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, name=			 	%s", tmpName)
+	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, org_id=, 			%s", tmpOrgId)
+	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, config_bundle=, 	%s", tmpBundle)
 	//debug=================
 
 	config := meta.(*Config)
@@ -173,7 +173,7 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 		billingProject = bp
 	}
 
-	fmt.Printf("[DEBUG] resourceApigeeSharedFlowCreate, url=, 	%s", url)
+	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, url=, 	%s", url)
 	res, err := sendRequestRawBodyWithTimeout(config, "POST", billingProject, url, userAgent, file, "application/octet-stream", d.Timeout(schema.TimeoutCreate))
 
 	log.Printf("[DEBUG] sendRequestRawBodyWithTimeout Done")
@@ -224,7 +224,7 @@ func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) erro
 		billingProject = bp
 	}
 	log.Printf("[DEBUG] resourceApigeeSharedFlowRead sendRequest")
-	fmt.Printf("[DEBUG] resourceApigeeSharedFlowRead, url=, 	%s", url)
+	log.Printf("[DEBUG] resourceApigeeSharedFlowRead, url=, 	%s", url)
 	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ApigeeSharedFlow %q", d.Id()))
@@ -307,8 +307,8 @@ func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) er
 func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 	if err := parseImportId([]string{
-		"organizations/(?P<org_id>[^/]+)/sharedflows/(?P<name>[^/]+)/(?P<name>[^/]+)",
-		"(?P<org_id>[^/]+)/(?P<name>[^/]+)/(?P<name>[^/]+)",
+		"organizations/(?P<org_id>[^/]+)/sharedflows/(?P<name>[^/]+)",
+		"(?P<org_id>[^/]+)/(?P<name>[^/]+)",
 	}, d, config); err != nil {
 		return nil, err
 	}
@@ -320,7 +320,7 @@ func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-	fmt.Printf("[DEBUG] resourceApigeeSharedFlowImport, id=			 	%s", id)
+	log.Printf("[DEBUG] resourceApigeeSharedFlowImport, id=			 	%s", id)
 
 	return []*schema.ResourceData{d}, nil
 }
