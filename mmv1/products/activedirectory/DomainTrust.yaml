@@ -26,7 +26,6 @@
     identity:
     - targetDomainName
     nested_query: !ruby/object:Api::Resource::NestedQuery
-      kind: 'domain#trustList'
       keys: ['trusts']
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
