@@ -2069,7 +2069,7 @@ resource "google_sql_database_instance" "instance-failover" {
 }
 
 func googleSqlDatabaseInstance_replicaPromote(instanceName, failoverName string) string {
-	return fmt.Sprintf(`
+return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
   region              = "us-central1"
