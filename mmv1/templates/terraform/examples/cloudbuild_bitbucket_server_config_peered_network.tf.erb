@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    google = {}
-  }
-}
-
-provider "google" {}
-
 data "google_project" "project" {}
 
 resource "google_project_service" "servicenetworking" {

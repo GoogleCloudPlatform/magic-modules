@@ -108,11 +108,6 @@ objects:
             description: |
               Immutable. The resource name for the webhook secret's secret version. Once this field has been set, it cannot be changed.
               If you need to change it, please create another BitbucketServerConfig.
-      - !ruby/object:Api::Type::Time
-        name: 'createTime'
-        output: true
-        description: |
-          Time when the config was created.
       - !ruby/object:Api::Type::String
         name: 'username'
         required: true
@@ -135,9 +130,6 @@ objects:
         description: |
           Connected Bitbucket Server repositories for this config.
         item_type: !ruby/object:Api::Type::NestedObject
-          name: 'BitbucketServerRepositoryId'
-          description: |
-            BitbucketServerRepositoryId identifies a specific repository hosted on a Bitbucket Server.
           properties:
             - !ruby/object:Api::Type::String
               name: 'projectKey'
