@@ -1556,7 +1556,7 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSuccessful(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: googleSqlDatabaseInstanceConfigForReplicaPromote(databaseName, failoverName),
+				Config: googleSqlDatabaseInstance_replicaPromote(databaseName, failoverName),
 				Check:  resource.ComposeTestCheckFunc(checkPromoteReplicaConfigurations("google_sql_database_instance.instance-failover")),
 			},
 			{
@@ -1601,7 +1601,7 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNamePresen
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config:      googleSqlDatabaseInstanceConfigForReplicaPromoteWithMasterInstanceName(databaseName, failoverName),
+				Config:      googleSqlDatabaseInstance_replicaPromoteWithMasterInstanceName(databaseName, failoverName),
 				ExpectError: regexp.MustCompile("Replica promote configuration check failed. Please remove master_instance_name and try again."),
 				Check:       resource.ComposeTestCheckFunc(checkPromoteReplicaSkipConfigurations("google_sql_database_instance.instance-failover")),
 			},
@@ -1647,7 +1647,7 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithReplicaConfigurationPres
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config:      googleSqlDatabaseInstanceConfigForReplicaPromoteWithReplicaConfiguration(databaseName, failoverName),
+				Config:      googleSqlDatabaseInstance_replicaPromoteWithReplicaConfiguration(databaseName, failoverName),
 				ExpectError: regexp.MustCompile("Replica promote configuration check failed. Please remove replica_configuration and try again."),
 				Check:       resource.ComposeTestCheckFunc(checkPromoteReplicaSkipConfigurations("google_sql_database_instance.instance-failover")),
 			},
@@ -1693,7 +1693,7 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteFailedWithMasterInstanceNameAndRep
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config:      googleSqlDatabaseInstanceConfigForReplicaPromoteWithMasterInstanceNameAndReplicaConfiguration(databaseName, failoverName),
+				Config:      googleSqlDatabaseInstance_replicaPromoteWithMasterInstanceNameAndReplicaConfiguration(databaseName, failoverName),
 				ExpectError: regexp.MustCompile("Replica promote configuration check failed. Please remove master_instance_name and try again."),
 			},
 			{
@@ -1738,14 +1738,8 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: googleSqlDatabaseInstanceConfigForReplicaPromoteSkippedWithNoMasterInstanceNameAndNoReplicaConfiguration(databaseName, failoverName),
+				Config: googleSqlDatabaseInstance_replicaPromoteSkippedWithNoMasterInstanceNameAndNoReplicaConfiguration(databaseName, failoverName),
 				Check:  resource.ComposeTestCheckFunc(checkPromoteReplicaSkipConfigurations("google_sql_database_instance.instance-failover")),
-			},
-			{
-				ResourceName:            "google_sql_database_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -2074,7 +2068,7 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
-func googleSqlDatabaseInstanceConfigForReplicaPromote(instanceName, failoverName string) string {
+func googleSqlDatabaseInstance_replicaPromote(instanceName, failoverName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -2107,7 +2101,7 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
-func googleSqlDatabaseInstanceConfigForReplicaPromoteWithMasterInstanceName(instanceName, failoverName string) string {
+func googleSqlDatabaseInstance_replicaPromoteWithMasterInstanceName(instanceName, failoverName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -2129,10 +2123,10 @@ resource "google_sql_database_instance" "instance" {
 resource "google_sql_database_instance" "instance-failover" {
   name                 = "%s"
   region               = "us-central1"
-	master_instance_name = google_sql_database_instance.instance.name
+  master_instance_name = google_sql_database_instance.instance.name
   database_version     = "MYSQL_5_7"
   deletion_protection  = false
-	instance_type = "CLOUD_SQL_INSTANCE"
+  instance_type = "CLOUD_SQL_INSTANCE"
   settings {
     tier = "db-n1-standard-1"
   }
@@ -2140,7 +2134,7 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
-func googleSqlDatabaseInstanceConfigForReplicaPromoteWithMasterInstanceNameAndReplicaConfiguration(instanceName string, failoverName string) string {
+func googleSqlDatabaseInstance_replicaPromoteWithMasterInstanceNameAndReplicaConfiguration(instanceName string, failoverName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -2162,7 +2156,7 @@ resource "google_sql_database_instance" "instance" {
 resource "google_sql_database_instance" "instance-failover" {
   name                 = "%s"
   region               = "us-central1"
-	master_instance_name = google_sql_database_instance.instance.name
+  master_instance_name = google_sql_database_instance.instance.name
   database_version     = "MYSQL_5_7"
   deletion_protection  = false
 
@@ -2170,7 +2164,7 @@ resource "google_sql_database_instance" "instance-failover" {
     failover_target = "true"
   }
 
-	instance_type = "CLOUD_SQL_INSTANCE"
+  instance_type = "CLOUD_SQL_INSTANCE"
   settings {
     tier = "db-n1-standard-1"
   }
@@ -2178,7 +2172,7 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
-func googleSqlDatabaseInstanceConfigForReplicaPromoteSkippedWithNoMasterInstanceNameAndNoReplicaConfiguration(instanceName string, failoverName string) string {
+func googleSqlDatabaseInstance_replicaPromoteSkippedWithNoMasterInstanceNameAndNoReplicaConfiguration(instanceName string, failoverName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -2210,7 +2204,7 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
-func googleSqlDatabaseInstanceConfigForReplicaPromoteWithReplicaConfiguration(instanceName string, failoverName string) string {
+func googleSqlDatabaseInstance_replicaPromoteWithReplicaConfiguration(instanceName string, failoverName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -2239,7 +2233,7 @@ resource "google_sql_database_instance" "instance-failover" {
     failover_target = "true"
   }
 
-	instance_type = "CLOUD_SQL_INSTANCE"
+  instance_type = "CLOUD_SQL_INSTANCE"
   settings {
     tier = "db-n1-standard-1"
   }
