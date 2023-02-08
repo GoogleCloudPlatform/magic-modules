@@ -14,9 +14,7 @@
 
 $LOAD_PATH.unshift File.dirname(__FILE__)
 
-# Run from compiler dir so all references are relative to the compiler
-# executable. This allows the following command line:
-#   ruby compiler.rb -p products/compute -e ansible -o build/ansible
+# Run from compiler dir so all references are relative to compiler.rb
 Dir.chdir(File.dirname(__FILE__))
 
 # Our default timezone is UTC, to avoid local time compromise test code seed
