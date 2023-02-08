@@ -242,6 +242,8 @@ module Provider
                         'third_party/validator/project_service.go'],
                        ['converters/google/resources/monitoring_slo_helper.go',
                         'third_party/validator/monitoring_slo_helper.go'],
+                       ['converters/google/resources/service_account.go',
+                        'third_party/validator/service_account.go'],
                        ['converters/google/resources/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['converters/google/resources/import.go',

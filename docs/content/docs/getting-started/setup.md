@@ -80,7 +80,7 @@ To get started, you'll need:
 * Terraform
   * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 * If you are getting "Too many open files" ulimit needs to be raised.
-  * Mac OSX: `ulimit -n 1000`
+  * Mac OSX: `ulimit -n 8192`
 
 Now, you can verify you're ready with:
 
