@@ -183,8 +183,10 @@ COMMITTED=true
 git commit --signoff -m "$COMMIT_MESSAGE" || COMMITTED=false
 
 CHANGELOG=false
+COPYRIGHT=false
 if [ "$REPO" == "terraform" ]; then
   CHANGELOG=true
+  COPYRIGHT=true
 fi
 
 PR_NUMBER=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
@@ -199,6 +201,13 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG
         sed -e '/```release-note/,/```/!d' \
         > .changelog/$PR_NUMBER.txt
     git add .changelog
+    git commit --signoff --amend --no-edit
+fi
+
+if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$COPYRIGHT" == "true" ]; then
+    # Add copyright headers using copywrite CLI
+    copywrite headers --spdx 'MPL-2.0'
+    git add .
     git commit --signoff --amend --no-edit
 fi
 
