@@ -116,7 +116,7 @@ resource "google_compute_security_policy" "policy" {
 }
 ```
 
-## Example Usage - With `enforce_on_key` value as empty string
+## Example Usage - With enforceOnKey value as empty string
 A scenario example that won't cause any conflict between `enforce_on_key` and `enforce_on_key_configs`, because `enforce_on_key` was specified as an empty string:
 
 ```hcl
