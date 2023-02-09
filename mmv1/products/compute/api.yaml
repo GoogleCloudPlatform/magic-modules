@@ -9741,6 +9741,66 @@ objects:
                     - :NEVER
                     - :ON_PERMANENT_INSTANCE_DELETION
                   default_value: :NEVER
+          - !ruby/object:Api::Type::Map
+            name: 'internalIPs'
+            api_name: internalIPs
+            min_version: beta
+            key_name: "interface_name"
+            description: |
+              Preserved internal IPs defined for this instance. This map is keyed with the name of the network interface.
+            value_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: deleteRule
+                  description: |
+                    A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
+                    The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
+                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
+                    `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
+                    deleted from the instance group.
+                  values:
+                    - :NEVER
+                    - :ON_PERMANENT_INSTANCE_DELETION
+                  default_value: :NEVER
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'ipAddress'
+                  description: |
+                    Ip address representation
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'address'
+                      description: |
+                        The URL of the reservation for this IP address.
+          - !ruby/object:Api::Type::Map
+            name: 'externalIPs'
+            min_version: beta
+            api_name: externalIPs
+            key_name: "interface_name"
+            description: |
+              Preserved external IPs defined for this instance. This map is keyed with the name of the network interface.
+            value_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: deleteRule
+                  description: |
+                    A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
+                    The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
+                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
+                    `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
+                    deleted from the instance group.
+                  values:
+                    - :NEVER
+                    - :ON_PERMANENT_INSTANCE_DELETION
+                  default_value: :NEVER
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'ipAddress'
+                  description: |
+                    Ip address representation
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'address'
+                      description: |
+                        The URL of the reservation for this IP address.
   - !ruby/object:Api::Resource
     name: 'RegionPerInstanceConfig'
     base_url:  'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}'
@@ -9856,6 +9916,81 @@ objects:
                     - :NEVER
                     - :ON_PERMANENT_INSTANCE_DELETION
                   default_value: :NEVER
+          - !ruby/object:Api::Type::Array
+            name: 'internalIps'
+            api_name: internalIps
+            min_version: beta
+            description: |
+              Preserved internal IPs defined for this instance. This map is keyed with the name of the network interface.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: deleteRule
+                  description: |
+                    A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
+                    The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
+                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
+                    `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
+                    deleted from the instance group.
+                  values:
+                    - :NEVER
+                    - :ON_PERMANENT_INSTANCE_DELETION
+                  default_value: :NEVER
+                - !ruby/object:Api::Type::String
+                  name: 'interfaceName'
+                  required: true
+                  description: |
+                    The network interface name of the internal Ip.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'ipAddress'
+                  description: |
+                    Ip address representation
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'literal'
+                      description: |
+                        An IPv4 internal network address to assign to the instance for this network interface.
+                    - !ruby/object:Api::Type::String
+                      name: 'address'
+                      description: |
+                        The URL of the reservation for this IP address.
+          - !ruby/object:Api::Type::Array
+            name: 'externalIps'
+            api_name: externalIps
+            min_version: beta
+            description: |
+              Preserved external IPs defined for this instance. This map is keyed with the name of the network interface.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: deleteRule
+                  description: |
+                    A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
+                    The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
+                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
+                    `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
+                    deleted from the instance group.
+                  values:
+                  - :NEVER
+                  - :ON_PERMANENT_INSTANCE_DELETION
+                - !ruby/object:Api::Type::String
+                  name: 'interfaceName'
+                  required: true
+                  description: |
+                    The network interface name of the external Ip.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'ipAddress'
+                  description: |
+                    Ip address representation
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'literal'
+                      description: |
+                        An IPv4 external network address to assign to the instance for this network interface.
+                    - !ruby/object:Api::Type::String
+                      name: 'address'
+                      description: |
+                        The URL of the reservation for this IP address.
   - !ruby/object:Api::Resource
     name: 'ProjectInfo'
     base_url: projects
