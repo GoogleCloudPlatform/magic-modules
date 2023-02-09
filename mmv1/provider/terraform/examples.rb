@@ -63,6 +63,7 @@ module Provider
       #  - :ORG_ID
       #  - :ORG_TARGET
       #  - :BILLING_ACCT
+      #  - :MASTER_BILLING_ACCT
       #  - :SERVICE_ACCT
       #  - :CUST_ID
       #  - :IDENTITY_USER
@@ -158,6 +159,7 @@ module Provider
           ORG_DOMAIN: 'example.com',
           ORG_TARGET: '123456789',
           BILLING_ACCT: '000000-0000000-0000000-000000',
+          MASTER_BILLING_ACCT: '000000-0000000-0000000-000000',
           SERVICE_ACCT: 'emailAddress:my@service-account.com',
           CUST_ID: 'A01b123xz',
           IDENTITY_USER: 'cloud_identity_user'
