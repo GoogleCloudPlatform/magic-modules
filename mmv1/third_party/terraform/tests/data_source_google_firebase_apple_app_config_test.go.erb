@@ -25,6 +25,14 @@ func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
+				ExternalProviders: providerVersion450(),
+				Config: testAccDataSourceGoogleFirebaseAppleAppConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataSourceFirebaseAppleAppConfigCheck("data.google_firebase_apple_app_config.my_app_config"),
+				),
+			},
+			{
+				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
 				Config: testAccDataSourceGoogleFirebaseAppleAppConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceFirebaseAppleAppConfigCheck("data.google_firebase_apple_app_config.my_app_config"),

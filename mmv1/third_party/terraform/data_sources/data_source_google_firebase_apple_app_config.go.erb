@@ -1,55 +1,98 @@
 <% autogen_exception -%>
 package google
 <% unless version == 'ga' -%>
+
 import (
+	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/firebase/v1beta1"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 func DataSourceGoogleFirebaseAppleAppConfig() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleFirebaseAppleAppConfigRead,
 
-		Schema: map[string]*schema.Schema{
-			"app_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: `The id of the Firebase iOS App.`,
+func NewGoogleFirebaseAppleAppConfigDataSource() datasource.DataSource {
+	return &GoogleFirebaseAppleAppConfigDataSource{}
+}
+
+// GoogleFirebaseAppleAppConfigDataSource defines the data source implementation
+type GoogleFirebaseAppleAppConfigDataSource struct {
+	client  *firebase.Service
+	project types.String
+}
+
+type GoogleFirebaseAppleAppConfigModel struct {
+	Id                 types.String `tfsdk:"id"`
+	AppId              types.String `tfsdk:"app_id"`
+	ConfigFilename     types.String `tfsdk:"config_filename"`
+	ConfigFileContents types.String `tfsdk:"config_file_contents"`
+	Project            types.String `tfsdk:"project"`
+}
+
+func (d *GoogleFirebaseAppleAppConfigDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_firebase_apple_app_config"
+}
+
+func (d *GoogleFirebaseAppleAppConfigDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "A Google Cloud Firebase Apple application configuration",
+
+		Attributes: map[string]schema.Attribute{
+			"app_id": schema.StringAttribute{
+				Description:         "The id of the Firebase iOS App.",
+				MarkdownDescription: "The id of the Firebase iOS App.",
+				Required:            true,
 			},
-			"project": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: `The project id of the Firebase iOS App.`,
+
+			"config_filename": schema.StringAttribute{
+				Description:         "The filename that the configuration artifact for the IosApp is typically saved as.",
+				MarkdownDescription: "The filename that the configuration artifact for the IosApp is typically saved as.",
+				Computed:            true,
 			},
-			"config_filename": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `The filename that the configuration artifact for the IosApp is typically saved as.`,
+
+			"config_file_contents": schema.StringAttribute{
+				Description:         "The content of the XML configuration file as a base64-encoded string.",
+				MarkdownDescription: "The content of the XML configuration file as a base64-encoded string.",
+				Computed:            true,
 			},
-			"config_file_contents": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `The content of the XML configuration file as a base64-encoded string.`,
+
+			"project": schema.StringAttribute{
+				Description:         "The project id of the Firebase iOS App.",
+				MarkdownDescription: "The project id of the Firebase iOS App.",
+				Optional:            true,
+			},
+
+			"id": schema.StringAttribute{
+				Description:         "DNS managed zone identifier",
+				MarkdownDescription: "DNS managed zone identifier",
+				Computed:            true,
 			},
 		},
 	}
-
 }
 
 func dataSourceGoogleFirebaseAppleAppConfigRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
-		return err
+		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseAppleAppConfig %q", data.AppId.ValueString()), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
+	tflog.Trace(ctx, "read firebase apple app config data source")
 
-	id := fmt.Sprintf("projects/%s/iosApps/%s", project, d.Get("app_id").(string))
+	data.ConfigFilename = types.StringValue(clientResp.ConfigFilename)
+	data.ConfigFileContents = types.StringValue(clientResp.ConfigFileContents)
 
 	url, err := replaceVars(d, config, "{{FirebaseBasePath}}projects/{{project}}/iosApps/{{app_id}}/config")
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"google.golang.org/api/dns/v1"
+	firebase "google.golang.org/api/firebase/v1beta1"
 	"google.golang.org/api/option"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -31,4 +32,19 @@ func (p *frameworkProvider) NewDnsClient(userAgent string, diags *diag.Diagnosti
 	clientDns.BasePath = dnsClientBasePath
 
 	return clientDns
+}
+
+func (p *frameworkProvider) NewFirebaseClient(userAgent string, diags *diag.Diagnostics) *firebase.Service {
+	firebaseClientBasePath := removeBasePathVersion(p.FirebaseBasePath)
+	firebaseClientBasePath = strings.ReplaceAll(firebaseClientBasePath, "/firebase/", "")
+	tflog.Info(p.context, fmt.Sprintf("Instantiating Google Cloud firebase client for path %s", firebaseClientBasePath))
+	clientFirebase, err := firebase.NewService(p.context, option.WithHTTPClient(p.client))
+	if err != nil {
+		diags.AddWarning("error creating client firebase", err.Error())
+		return nil
+	}
+	clientFirebase.UserAgent = userAgent
+	clientFirebase.BasePath = firebaseClientBasePath
+
+	return clientFirebase
 }
