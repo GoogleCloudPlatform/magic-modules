@@ -99,6 +99,7 @@ func resourceGoogleProject() *schema.Resource {
 			"labels": {
 				Type:        schema.TypeMap,
 				Optional:    true,
+				Computed:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `A set of key/value label pairs to assign to the project.`,
 			},
