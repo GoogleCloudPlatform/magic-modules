@@ -272,6 +272,8 @@ objects:
                       name: "livenessProbe"
                       description: |-
                         Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                        This field is not supported in Cloud Run Job currently.
+                      deprecation_message: Cloud Run Job does not support liveness probe and `liveness_probe` field will be removed in a future major release.
                       properties:
                         - !ruby/object:Api::Type::Integer
                             name: "initialDelaySeconds"
@@ -343,6 +345,8 @@ objects:
                       name: "startupProbe"
                       description: |-
                         Startup probe of application within the container. All other probes are disabled if a startup probe is provided, until it succeeds. Container will not be added to service endpoints if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                        This field is not supported in Cloud Run Job currently.
+                      deprecation_message: Cloud Run Job does not support startup probe and `startup_probe` field will be removed in a future major release.
                       properties:
                         - !ruby/object:Api::Type::Integer
                             name: "initialDelaySeconds"
@@ -729,11 +733,10 @@ objects:
         name: "labels"
         description: |-
           Map of string keys and values that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component, environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels Cloud Run will populate some labels with 'run.googleapis.com' or 'serving.knative.dev' namespaces. Those labels are read-only, and user changes will not be preserved.
-      # Blocked on b/244872932 for implementation    
-      # - !ruby/object:Api::Type::KeyValuePairs
-      #   name: "annotations"
-      #   description: |-
-      #     Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects. Cloud Run will populate some annotations using 'run.googleapis.com' or 'serving.knative.dev' namespaces. This field follows Kubernetes annotations' namespacing, limits, and rules. More info: https://kubernetes.io/docs/user-guide/annotations
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "annotations"
+        description: |-
+          Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects. Cloud Run will populate some annotations using 'run.googleapis.com' or 'serving.knative.dev' namespaces. This field follows Kubernetes annotations' namespacing, limits, and rules. More info: https://kubernetes.io/docs/user-guide/annotations
       - !ruby/object:Api::Type::String
         name: "client"
         description: |
@@ -789,11 +792,10 @@ objects:
             name: "labels"
             description: |-
               KRM-style labels for the resource.
-          # Blocked on b/244872932 for implementation 
-          # - !ruby/object:Api::Type::KeyValuePairs
-          #   name: "annotations"
-          #   description: |-
-          #     KRM-style annotations for the resource.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: "annotations"
+            description: |-
+              KRM-style annotations for the resource.
           - !ruby/object:Api::Type::NestedObject
             name: "scaling"
             description: |
@@ -975,12 +977,9 @@ objects:
                     - !ruby/object:Api::Type::NestedObject
                         name: "httpGet"
                         description: |-
-                          HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
+                          HTTPGet specifies the http request to perform.
                         send_empty_value: true
                         allow_empty_object: true
-                        # exactly_one_of:
-                        #   - template.0.containers.0.livenessProbe.0.httpGet
-                        #   - template.0.containers.0.livenessProbe.0.tcpSocket
                         properties:
                           - !ruby/object:Api::Type::String
                             name: "path"
@@ -1007,12 +1006,10 @@ objects:
                     - !ruby/object:Api::Type::NestedObject
                         name: "tcpSocket"
                         description: |-
-                          TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
+                          TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
+                        deprecation_message: Cloud Run does not support tcp socket in liveness probe and `liveness_probe.tcp_socket` field will be removed in a future major release.
                         send_empty_value: true
                         allow_empty_object: true
-                        # exactly_one_of:
-                        #   - template.0.containers.0.livenessProbe.0.httpGet
-                        #   - template.0.containers.0.livenessProbe.0.tcpSocket
                         properties:
                           - !ruby/object:Api::Type::Integer
                             name: port

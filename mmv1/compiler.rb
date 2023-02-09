@@ -14,9 +14,7 @@
 
 $LOAD_PATH.unshift File.dirname(__FILE__)
 
-# Run from compiler dir so all references are relative to the compiler
-# executable. This allows the following command line:
-#   ruby compiler.rb -p products/compute -e ansible -o build/ansible
+# Run from compiler dir so all references are relative to compiler.rb
 Dir.chdir(File.dirname(__FILE__))
 
 # Our default timezone is UTC, to avoid local time compromise test code seed
@@ -29,8 +27,6 @@ require 'api/compiler'
 require 'google/logger'
 require 'optparse'
 require 'pathname'
-require 'provider/ansible'
-require 'provider/ansible_devel'
 require 'provider/inspec'
 require 'provider/terraform'
 require 'provider/terraform_kcc'
@@ -241,7 +237,6 @@ all_product_files.each do |product_name|
     override_providers = {
       'oics' => Provider::TerraformOiCS,
       'validator' => Provider::TerraformValidator,
-      'ansible_devel' => Provider::Ansible::Devel,
       'kcc' => Provider::TerraformKCC
     }
 
