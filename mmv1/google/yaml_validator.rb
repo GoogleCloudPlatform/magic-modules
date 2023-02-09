@@ -22,7 +22,7 @@ module Google
         # TODO(nelsonjr): Allow specifying which symbols to restrict it further.
         # But it requires inspecting all configuration files for symbol sources,
         # such as Enum values. Leaving it as a nice-to-have for the future.
-        YAML.safe_load(content, permitted_classes: allowed_classes)
+        YAML.safe_load(content, allowed_classes)
       end
 
       def allowed_classes
