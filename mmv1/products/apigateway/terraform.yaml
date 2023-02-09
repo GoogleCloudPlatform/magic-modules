@@ -60,7 +60,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "api_cfg"
         vars:
           name: "api-cfg"
-          config: "cfg"
+          config_prefix: "cfg-"
       - !ruby/object:Provider::Terraform::Examples
         skip_docs: true
         min_version: beta
