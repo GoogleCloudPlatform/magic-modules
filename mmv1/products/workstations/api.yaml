@@ -414,10 +414,12 @@ objects:
               name: "kmsKey"
               description: |
                 The name of the Google Cloud KMS encryption key.
+              required: true
             - !ruby/object:Api::Type::String
               name: "kmsKeyServiceAccount"
               description: |
                 The service account to use with the specified KMS key.
+              required: true
       - !ruby/object:Api::Type::Boolean
         name: "degraded"
         description: |
