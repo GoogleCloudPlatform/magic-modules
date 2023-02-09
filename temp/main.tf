@@ -2,10 +2,14 @@
 # This configuration is expected to be run locally by an administrator. It specifies the configuration needed for a
 # test environment where the full set of acceptance tests can be run.
 #
+# Googlers can find record of internal requests at b/268353203.
+#
 # Prerequisites:
 #   - An existing organization
 #   - An existing billing account where charges can be applied
-#   - A BeyondCorp subscription on the organization. Googlers can request this internally. See b/171604360
+#   - A second existing billing account where charges can be applied (used only for TestAccProject_billing)
+#   - An existing billing account where subaccounts can be created
+#   - A BeyondCorp subscription on the organization
 #
 # After applying this configuration:
 #   - Increase project quota for the new service account
@@ -36,6 +40,10 @@ data "google_organization" "org" {
 
 data "google_billing_account" "acct" {
   billing_account = var.billing_account_id
+}
+
+data "google_billing_account" "master_acct" {
+  billing_account = var.master_billing_account_id
 }
 
 resource "google_project" "proj" {
@@ -111,6 +119,12 @@ resource "google_organization_iam_member" "sa_orgpolicy_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_org_role_viewer" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/iam.organizationRoleViewer"
+  member = google_service_account.sa.member
+}
+
 resource "google_organization_iam_member" "sa_owner" {
   org_id = data.google_organization.org.org_id
   role   = "roles/owner"
@@ -149,6 +163,12 @@ resource "google_organization_iam_member" "sa_storage_admin" {
 
 resource "google_billing_account_iam_member" "sa_billing_admin" {
   billing_account_id = data.google_billing_account.acct.id
+  role               = "roles/billing.admin"
+  member             = google_service_account.sa.member
+}
+
+resource "google_billing_account_iam_member" "sa_master_billing_admin" {
+  billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
   member             = google_service_account.sa.member
 }
