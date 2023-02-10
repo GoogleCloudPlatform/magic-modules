@@ -100,3 +100,4 @@
     guides:
       'Creating an API organization':
         'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
+    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations#setaddons'
