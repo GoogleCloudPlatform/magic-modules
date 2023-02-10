@@ -153,14 +153,6 @@ module Compile
       indent_array(text, spaces, filler).join("\n")
     end
 
-    def indent_list(text, spaces, last_line_comma = false, filler = ' ')
-      if last_line_comma
-        [indent_array(text, spaces, filler).join(",\n"), ','].join
-      else
-        indent_array(text, spaces, filler).join(",\n")
-      end
-    end
-
     def indent_array(text, spaces, filler = ' ')
       return [] if text.nil?
 
@@ -252,9 +244,9 @@ module Compile
        'CONTRIBUTING.md located at the root of this package.']
     end
 
-    def get_helper_file(file, remove_copyright_notice = true)
+    def get_helper_file(file)
       content = IO.read(file)
-      remove_copyright_notice ? strip_copyright_notice(content) : content
+      strip_copyright_notice(content)
     end
 
     def strip_copyright_notice(content, comment_marker = '#')
