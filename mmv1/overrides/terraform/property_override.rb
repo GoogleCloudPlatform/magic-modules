@@ -48,10 +48,6 @@ module Overrides
       # without resorting to "instance_variable_get"
       attr_reader :description
 
-      def validate
-        super
-      end
-
       def apply(api_property)
         unless description.nil?
           @description = format_string(:description, @description,

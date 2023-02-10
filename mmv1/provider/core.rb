@@ -275,11 +275,9 @@ module Provider
     # Filter the properties to keep only the ones don't have custom update
     # method and group them by update url & verb.
     def properties_without_custom_update(properties)
-      update_props = properties.select do |p|
+      properties.select do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
-
-      update_props
     end
 
     # Takes a update_url and returns the list of custom updatable properties

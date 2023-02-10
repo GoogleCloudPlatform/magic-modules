@@ -13,7 +13,6 @@
 
 require 'provider/terraform_oics'
 require 'fileutils'
-require 'set'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
@@ -55,8 +54,7 @@ module Provider
 
     def retrieve_list_of_manually_defined_tests_from_file(file)
       content = File.read(file)
-      matches = content.scan(/\s*name\s*:\s*\"([^,]+)\"/).flatten(1)
-      matches
+      content.scan(/\s*name\s*:\s*"([^,]+)"/).flatten(1)
     end
 
     def retrieve_list_of_manually_defined_tests
@@ -72,17 +70,17 @@ module Provider
     end
 
     def validate_non_defined_tests(file_set, non_defined_tests)
-      if non_defined_tests.any? { |test| !file_set.member?(test + '.json') }
-        raise 'test file named ' + test + '.json expected but found none'
+      if non_defined_tests.any? { |test| !file_set.member?("#{test}.json") }
+        raise "test file named #{test}.json expected but found none"
       end
 
-      if non_defined_tests.any? { |test| !file_set.member?(test + '.tfplan.json') }
-        raise 'test file named ' + test + '.tfplan.json expected but found none'
+      if non_defined_tests.any? { |test| !file_set.member?("#{test}.tfplan.json") }
+        raise "test file named #{test}.tfplan.json expected but found none"
       end
 
-      return unless non_defined_tests.any? { |test| !file_set.member?(test + '.tf') }
+      return unless non_defined_tests.any? { |test| !file_set.member?("#{test}.tf") }
 
-      raise 'test file named ' + test + '.tf expected but found none'
+      raise "test file named #{test}.tf expected but found none"
     end
 
     def retrieve_full_list_of_test_files
@@ -94,7 +92,7 @@ module Provider
     def retrieve_full_list_of_test_files_with_location
       files = retrieve_full_list_of_test_files
       files.map do |file|
-        ['testdata/templates/' + file, 'third_party/validator/tests/data/' + file]
+        ["testdata/templates/#{file}", "third_party/validator/tests/data/#{file}"]
       end
     end
 
@@ -110,7 +108,7 @@ module Provider
     end
 
     def retrieve_test_source_files(path, suffix)
-      files = Dir[path + '**' + suffix]
+      files = Dir["#{path}**#{suffix}"]
       files = files.map { |file| file.split(path)[-1] }
       files.sort
     end
@@ -119,7 +117,7 @@ module Provider
       path = 'third_party/validator/tests/source/'
       files = retrieve_test_source_files(path, suffix)
       files.map do |file|
-        ['test/' + file, path + file]
+        ["test/#{file}", path + file]
       end
     end
 

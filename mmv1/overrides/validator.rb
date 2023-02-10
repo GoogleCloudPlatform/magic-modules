@@ -35,8 +35,8 @@ module Overrides
     # Verify all resources in overrides exist in api
     def verify_resources(objects)
       @overrides.instance_variables.reject { |i| i == :@product }.each do |var|
-        obj_array = objects.select { |o| o.name == var[1..-1] }
-        raise "#{var[1..-1]} not found" if obj_array.empty?
+        obj_array = objects.select { |o| o.name == var[1..] }
+        raise "#{var[1..]} not found" if obj_array.empty?
 
         verify_resource(obj_array.first, @overrides[var])
       end
@@ -47,7 +47,7 @@ module Overrides
       overrides.instance_variables.reject { |i| %i[@properties @parameters].include?(i) }
                .each do |field_name|
         # Check override object.
-        field_symbol = field_name[1..-1].to_sym
+        field_symbol = field_name[1..].to_sym
         next if check_if_exists(res, field_symbol, overrides.class.attributes)
 
         raise "#{field_name} does not exist on #{res.name}"
@@ -76,7 +76,7 @@ module Overrides
       prop = nil
       path.each do |part|
         available = properties.map { |p| prefix + p.name } unless properties.empty?
-        prefix = prefix + part + '.'
+        prefix = "#{prefix}#{part}."
 
         prop = properties.select { |o| o.name == part }.first
         properties = prop&.nested_properties || []
@@ -92,7 +92,7 @@ module Overrides
                .reject { |i| %i[@properties @item_type @type].include?(i) }
                .each do |field_name|
         # Check override object.
-        field_symbol = field_name[1..-1].to_sym
+        field_symbol = field_name[1..].to_sym
         next if check_if_exists(property, field_symbol, overrides.class.attributes,
                                 overrides['@type'])
 

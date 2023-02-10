@@ -266,7 +266,7 @@ module Api
     def lineage
       return name&.underscore if __parent.nil?
 
-      __parent.lineage + '.' + name&.underscore
+      "#{__parent.lineage}.#{name&.underscore}"
     end
 
     def to_json(opts = nil)
@@ -554,9 +554,10 @@ module Api
       end
 
       def property_class
-        if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)
+        case @item_type
+        when NestedObject, ResourceRef
           type = @item_type.property_class
-        elsif @item_type.is_a?(Enum)
+        when Enum
           raise 'aaaa'
         else
           type = property_ns_prefix
@@ -581,7 +582,7 @@ module Api
 
       def item_type_class
         return @item_type \
-          if @item_type.class == Class
+          if @item_type.instance_of?(Class)
 
         Object.const_get(@item_type)
       end

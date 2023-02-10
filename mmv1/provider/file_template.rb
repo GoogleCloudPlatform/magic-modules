@@ -52,7 +52,7 @@ module Provider
       # all of the variables in this object.
       ctx = provider.provider_binding
       instance_variables.each do |name|
-        ctx.local_variable_set(name[1..-1], instance_variable_get(name))
+        ctx.local_variable_set(name[1..], instance_variable_get(name))
       end
 
       ctx.local_variable_set('pwd', pwd)
@@ -62,14 +62,14 @@ module Provider
       FileUtils.mkdir_p(parent_path) unless File.directory?(parent_path)
 
       Google::LOGGER.debug "Generating #{path}"
-      File.open(path, 'w') { |f| f.puts compile_file(ctx, pwd + '/' + template) }
+      File.open(path, 'w') { |f| f.puts compile_file(ctx, "#{pwd}/#{template}") }
 
       # Files are often generated in parallel.
       # We can use thread-local variables to ensure that autogen checking
       # stays specific to the file each thred represents.
       raise "#{path} missing autogen" unless Thread.current[:autogen]
 
-      old_file_chmod_mode = File.stat(pwd + '/' + template).mode
+      old_file_chmod_mode = File.stat("#{pwd}/#{template}").mode
       FileUtils.chmod(old_file_chmod_mode, path)
 
       format_output_file(path, template)

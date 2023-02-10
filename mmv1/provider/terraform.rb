@@ -305,7 +305,7 @@ module Provider
     end
 
     def extract_identifiers(url)
-      url.scan(/\{\{\%?(\w+)\}\}/).flatten
+      url.scan(/\{\{%?(\w+)\}\}/).flatten
     end
 
     # Returns the id format of an object, or self_link_uri if none is explicitly defined

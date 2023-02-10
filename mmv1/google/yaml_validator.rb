@@ -123,7 +123,7 @@ module Google
 
     def check_extraneous_properties
       instance_variables.each do |variable|
-        var_name = variable.id2name[1..-1]
+        var_name = variable.id2name[1..]
         next if var_name.start_with?('__')
 
         Google::LOGGER.debug "Validating '#{var_name}' on #{object_display_name}"
