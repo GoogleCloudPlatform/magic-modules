@@ -107,7 +107,7 @@ module Provider
     attr_accessor :override_path
 
     def initialize(output_folder, version, env, products, override_path = nil)
-      super
+      super()
 
       @output_folder = output_folder
       @version = version
