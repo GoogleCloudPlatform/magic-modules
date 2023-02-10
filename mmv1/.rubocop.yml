@@ -1,4 +1,5 @@
 AllCops:
+  NewCops: enable
   Exclude:
     - 'build/**/*'
     # We do not validate the templates as they will have code that will only be
@@ -34,7 +35,7 @@ Naming/MemoizedInstanceVariableName:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 100
 
 Style/AccessorGrouping:

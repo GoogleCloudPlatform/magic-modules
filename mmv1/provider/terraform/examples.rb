@@ -273,7 +273,7 @@ module Provider
         )
       end
 
-      # rubocop:disable Metrics/LineLength
+      # rubocop:disable Layout/LineLength
       def substitute_test_paths(config)
         config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
         config.gsub!('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
@@ -291,7 +291,7 @@ module Provider
         config.gsub!('path/to/certificate.crt', '../static/ssl_cert/test.crt')
         config
       end
-      # rubocop:enable Metrics/LineLength
+      # rubocop:enable Layout/LineLength
       # rubocop:enable Style/FormatStringToken
 
       def validate
