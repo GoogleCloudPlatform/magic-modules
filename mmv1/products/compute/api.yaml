@@ -98,7 +98,7 @@ objects:
         values:
           - :INTERNAL
           - :EXTERNAL
-        default_value: :EXTERNAL
+        default_value: :INTERNAL
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
