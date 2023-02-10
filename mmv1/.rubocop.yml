@@ -44,5 +44,10 @@ Style/AccessorGrouping:
 Style/CommandLiteral:
   EnforcedStyle: percent_x
 
+# TODO: Turn this on and remove the usage at this point. It's not clear if this
+# makes sense to do at the moment.
+Style/OpenStructUse:
+  Enabled: false
+
 Metrics/ParameterLists:
   Enabled: false
