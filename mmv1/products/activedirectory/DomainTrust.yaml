@@ -1,0 +1,98 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+    name: 'DomainTrust'
+    kind: 'activedirectory#trust'
+    base_url: projects/{{project}}/locations/global/domains
+    create_url: projects/{{project}}/locations/global/domains/{{domain}}:attachTrust
+    update_verb: :POST
+    update_url: projects/{{project}}/locations/global/domains/{{domain}}:reconfigureTrust
+    delete_verb: :POST
+    # Resource custom delete function needs to be modified any time when the resource schema is edited
+    delete_url: projects/{{project}}/locations/global/domains/{{domain}}:detachTrust
+    self_link: projects/{{project}}/locations/global/domains/{{domain}}
+    description: Adds a trust between Active Directory domains
+    identity:
+    - targetDomainName
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys: ['trusts']
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Active Directory Trust': 'https://cloud.google.com/managed-microsoft-ad/docs/create-one-way-trust'
+      api: 'https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains/attachTrust'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: domain
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions, 
+          https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.  
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'targetDomainName'
+        required: true
+        description: 'The fully qualified target domain name which will be in trust with the current domain.'
+      - !ruby/object:Api::Type::Enum
+        name: 'trustType'
+        required: true
+        input: true
+        description: 'The type of trust represented by the trust resource.'
+        values:
+          - FOREST
+          - EXTERNAL
+      - !ruby/object:Api::Type::Enum
+        name: 'trustDirection'
+        required: true
+        input: true
+        description: 'The trust direction, which decides if the current domain is trusted, trusting, or both.'
+        values:
+          - INBOUND
+          - OUTBOUND
+          - BIDIRECTIONAL
+      - !ruby/object:Api::Type::Boolean
+          name: 'selectiveAuthentication'
+          input: true
+          description: |
+            Whether the trusted side has forest/domain wide access or selective access to an approved set of resources.
+      - !ruby/object:Api::Type::Array
+        name: 'targetDnsIpAddresses'
+        required: true
+        item_type: Api::Type::String
+        description: |
+          The target DNS server IP addresses which can resolve the remote domain involved in the trust.
+      - !ruby/object:Api::Type::String
+        name: 'trustHandshakeSecret'
+        required: true
+        input: true
+        description: |
+          The trust secret used for the handshake with the target domain. This will not be stored.
