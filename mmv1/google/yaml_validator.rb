@@ -28,7 +28,7 @@ module Google
       def allowed_classes
         ObjectSpace.each_object(Class).select do |klass|
           klass < Google::YamlValidator
-        end.concat([Time, Symbol])
+        end.push(Time, Symbol)
       end
     end
 

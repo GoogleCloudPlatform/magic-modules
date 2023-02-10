@@ -165,7 +165,7 @@ module Compile
         elsif line.strip.empty?
           ''
         else
-          ' ' * spaces + line.gsub(/\n/, "\n#{' ' * spaces}")
+          (' ' * spaces) + line.gsub(/\n/, "\n#{' ' * spaces}")
         end
       end
     end
@@ -245,7 +245,7 @@ module Compile
     end
 
     def get_helper_file(file)
-      content = IO.read(file)
+      content = File.read(file)
       strip_copyright_notice(content)
     end
 

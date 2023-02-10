@@ -219,11 +219,11 @@ module Provider
         end
 
         rand_vars = rand_vars.to_h
-        overrides = test_vars_overrides.map { |k, _| [k, "%{#{k}}"] }.to_h
+        overrides = test_vars_overrides.to_h { |k, _| [k, "%{#{k}}"] }
         body = lines(compile_file(
                        {
                          vars: rand_vars.merge(overrides),
-                         test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
+                         test_env_vars: test_env_vars.to_h { |k, _| [k, "%{#{k}}"] },
                          primary_resource_id:,
                          primary_resource_type:
                        },

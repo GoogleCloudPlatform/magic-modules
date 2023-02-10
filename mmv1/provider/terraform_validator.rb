@@ -347,7 +347,7 @@ module Provider
                 end
                     .empty?
 
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      FileUtils.mkpath folder_name(data.version)
       data.generate(
         pwd,
         'templates/validator/examples/base_configs/test_file.go.erb',
@@ -367,7 +367,7 @@ module Provider
       name = data.object.filename_override || data.object.name.underscore
       product_name = data.product.name.underscore
 
-      FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
+      FileUtils.mkpath target_folder
       data.generate(pwd,
                     'templates/validator/resource_converter_iam.go.erb',
                     "#{target_folder}/#{product_name}_#{name}_iam.go",

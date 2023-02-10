@@ -251,7 +251,7 @@ module Api
       check :custom_flatten, type: ::String
       check :custom_expand, type: ::String
 
-      raise "'default_value' and 'default_from_api' cannot be both set"  \
+      raise "'default_value' and 'default_from_api' cannot be both set" \
         if @default_from_api && !@default_value.nil?
     end
 
