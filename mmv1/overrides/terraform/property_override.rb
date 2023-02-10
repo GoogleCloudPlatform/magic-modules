@@ -48,10 +48,6 @@ module Overrides
       # without resorting to "instance_variable_get"
       attr_reader :description
 
-      def validate
-        super
-      end
-
       def apply(api_property)
         unless description.nil?
           @description = format_string(:description, @description,
@@ -59,8 +55,8 @@ module Overrides
         end
 
         if @flatten_object && !api_property.is_a?(Api::Type::NestedObject)
-          raise 'Only NestedObjects can be flattened with flatten_object. Type'\
-            " is #{api_property.class} for property #{api_property.name}"
+          raise 'Only NestedObjects can be flattened with flatten_object. Type ' \
+                "is #{api_property.class} for property #{api_property.name}"
         end
 
         unless api_property.is_a?(Api::Type::Array) ||
@@ -68,7 +64,7 @@ module Overrides
           if @is_set
             raise 'Set can only be specified for Api::Type::Array ' \
                   'or Api::Type:Map. ' \
-                  "Type is #{api_property.class} for property "\
+                  "Type is #{api_property.class} for property " \
                   "'#{api_property.name}'"
           end
 

@@ -28,7 +28,7 @@ module Google
       def allowed_classes
         ObjectSpace.each_object(Class).select do |klass|
           klass < Google::YamlValidator
-        end.concat([Time, Symbol])
+        end.push(Time, Symbol)
       end
     end
 
@@ -123,7 +123,7 @@ module Google
 
     def check_extraneous_properties
       instance_variables.each do |variable|
-        var_name = variable.id2name[1..-1]
+        var_name = variable.id2name[1..]
         next if var_name.start_with?('__')
 
         Google::LOGGER.debug "Validating '#{var_name}' on #{object_display_name}"

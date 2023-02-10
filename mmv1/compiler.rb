@@ -31,7 +31,6 @@ require 'provider/terraform'
 require 'provider/terraform_kcc'
 require 'provider/terraform_oics'
 require 'provider/terraform_validator'
-require 'pp' if ENV['COMPILER_DEBUG']
 
 products_to_generate = nil
 all_products = false
@@ -205,7 +204,7 @@ all_product_files.each do |product_name|
 
   if File.exist?(product_yaml_path) || File.exist?(product_override_path)
     resources = []
-    Dir[product_name + '/*'].each do |file_path|
+    Dir["#{product_name}/*"].each do |file_path|
       next if File.basename(file_path) == 'product.yaml' \
        || File.basename(file_path) == 'terraform.yaml'
 

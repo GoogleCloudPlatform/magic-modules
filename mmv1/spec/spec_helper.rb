@@ -55,6 +55,4 @@ RSpec::Matchers.define :contain_array do |expected|
   end
 end
 
-require 'pp'
-
 Google::LOGGER.info 'Running tests'

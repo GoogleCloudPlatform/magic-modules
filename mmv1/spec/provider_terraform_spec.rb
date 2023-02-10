@@ -259,7 +259,7 @@ describe Provider::Terraform do
   def named_property(name)
     Google::YamlValidator.parse(
       format("--- !ruby/object:Api::Object::Named\nname: '%<name>s'",
-             name: name)
+             name:)
     )
   end
 
