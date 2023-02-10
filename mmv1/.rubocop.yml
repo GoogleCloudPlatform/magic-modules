@@ -37,6 +37,9 @@ Style/FrozenStringLiteralComment:
 Metrics/LineLength:
   Max: 100
 
+Style/AccessorGrouping:
+  Enabled: false
+
 Style/CommandLiteral:
   EnforcedStyle: percent_x
 
