@@ -9,10 +9,12 @@ project_id=$6
 
 github_username=modular-magician
 
+set +e
 pushd $MM_LOCAL_PATH/tools/breaking-change-detector
-go test
+go test ./...
 exit_code=$?
 popd
+set -e
 
 
 if [ $exit_code -ne 0 ]; then
@@ -34,12 +36,12 @@ curl \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"
 
-build_step=$((build_step + 1))
-
+set +e
 pushd $MM_LOCAL_PATH/tools/missing-test-detector
 PROVIDER_DIR=$TPG_LOCAL_PATH go test
 exit_code=$?
 popd
+set -e
 
 
 if [ $exit_code -ne 0 ]; then

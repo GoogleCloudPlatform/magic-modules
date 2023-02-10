@@ -173,7 +173,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "22"  # Build step
+          - "20"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.12.31
@@ -190,7 +190,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "23"  # Build step
+          - "21"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.13.7
@@ -207,7 +207,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "24"  # Build step
+          - "22"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
@@ -220,7 +220,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "25"  # Build step
+          - "23"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpg-test
@@ -233,7 +233,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "26"  # Build step
+          - "24"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
       id: gcb-tpg-vcr-test
@@ -244,7 +244,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "27"  # Build step
+          - "25"  # Build step
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s
