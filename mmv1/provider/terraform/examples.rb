@@ -169,7 +169,7 @@ module Provider
         body = lines(compile_file(
                        {
                          vars:,
-                         test_env_vars: test_env_vars.transform_values { |v| docs_defaults[v] },
+                         test_env_vars: test_env_vars.to_h { |k, v| [k, docs_defaults[v]] },
                          primary_resource_id:
                        },
                        "#{pwd}/#{config_path}"
@@ -240,7 +240,7 @@ module Provider
         @vars ||= []
         @oics_vars_overrides ||= {}
 
-        rand_vars = vars.transform_values { |str| "#{str}-${local.name_suffix}" }
+        rand_vars = vars.to_h { |k, str| [k, "#{str}-${local.name_suffix}"] }
 
         # Examples with test_env_vars are skipped elsewhere
         body = lines(compile_file(

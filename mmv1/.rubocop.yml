@@ -49,5 +49,9 @@ Style/CommandLiteral:
 Style/OpenStructUse:
   Enabled: false
 
+# Seems to generate invalid code
+Style/HashTransformValues:
+  Enabled: false
+
 Metrics/ParameterLists:
   Enabled: false
