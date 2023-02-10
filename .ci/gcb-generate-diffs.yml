@@ -153,7 +153,7 @@ steps:
       env:
         - BUILD_ID=$BUILD_ID
         - PROJECT_ID=$PROJECT_ID
-        - BUILD_STEP="19" # also includes steps 20 and 21
+        - BUILD_STEP="19"
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
       args:
