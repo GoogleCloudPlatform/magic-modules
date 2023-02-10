@@ -142,7 +142,7 @@ module Provider
     end
 
     def initialize(output_folder, name, product, version, env)
-      super
+      super()
 
       @name = name
       @product = product
