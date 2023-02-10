@@ -476,6 +476,8 @@ module Api
     # Represents a string
     class String < Primitive
       def initialize(name = nil)
+        super
+
         @name = name
       end
 
