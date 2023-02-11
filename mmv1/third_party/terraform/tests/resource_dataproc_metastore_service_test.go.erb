@@ -131,6 +131,14 @@ func TestAccDataprocMetastoreService_protocol(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccDataprocMetastoreService_endpointProtocol(name, "THRIFT"),
+			},
+			{
+				ResourceName:      "google_dataproc_metastore_service.my_metastore",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},			
 		},
 	})
 }
@@ -142,10 +150,10 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 	service_id = "%s"
 	location   = "us-central1"
 
-	hive_metastore_config {
-	  version = "3.1.2"
+    hive_metastore_config {
+      version           = "3.1.2"
       endpoint_protocol = "%s"
-	}
+    }
 }
 `, name, protocol)
 }
