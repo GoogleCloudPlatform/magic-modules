@@ -223,6 +223,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: "location"
         input: true
+        required: true
         url_param_only: true
         description: |
           The location where the workstation cluster config should reside.
@@ -444,6 +445,7 @@ objects:
                 Human readable message indicating details about the current status.
             - !ruby/object:Api::Type::Array
               name: "details"
+              output: true
               description: |
                 A list of messages that carry the error details.
               item_type: Api::Type::KeyValuePairs
