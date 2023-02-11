@@ -15,7 +15,11 @@
 !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   WorkstationCluster: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}", "{{workstation_cluster_id}}"]
+    import_format:
+      [
+        "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}",
+        "{{workstation_cluster_id}}",
+      ]
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -31,24 +35,44 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           workstation_cluster_name: "workstation-cluster-private"
   WorkstationConfig: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}",  "{{workstation_cluster_id}}", "{{workstation_config_id}}"]
+    import_format:
+      [
+        "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}",
+        "{{workstation_cluster_id}}",
+        "{{workstation_config_id}}",
+      ]
     autogen_async: true
     properties:
-      host.gceInstance.poolSize: !ruby/object:Overrides::Terraform::PropertyOverride
+      host: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      host.gceInstance.bootDiskSizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+      host.gceInstance: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      host.gceInstance.poolSize:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      host.gceInstance.bootDiskSizeGb:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      host.gceInstance.machineType:
+        !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       container: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       container.image: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      persistentDirectories.gcePd: !ruby/object:Overrides::Terraform::PropertyOverride
+      persistentDirectories: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      persistentDirectories.gcePd.diskType: !ruby/object:Overrides::Terraform::PropertyOverride
+      persistentDirectories.gcePd:
+        !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      persistentDirectories.gcePd.fsType: !ruby/object:Overrides::Terraform::PropertyOverride
+      persistentDirectories.gcePd.diskType:
+        !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      persistentDirectories.gcePd.sizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+      persistentDirectories.gcePd.fsType:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories.gcePd.sizeGb:
+        !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
