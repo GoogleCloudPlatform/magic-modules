@@ -66,7 +66,7 @@ func testSweepFirebaseWebApp(region string) error {
 		return nil
 	}
 
-	resourceList, ok := res["webApps"]
+	resourceList, ok := res["apps"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil
@@ -79,14 +79,14 @@ func testSweepFirebaseWebApp(region string) error {
 	nonPrefixCount := 0
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
-		if obj["name"] == nil {
+		if obj["displayName"] == nil {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource name was nil", resourceName)
 			return nil
 		}
 
 		name := GetResourceNameFromSelfLink(obj["name"].(string))
 		// Skip resources that shouldn't be sweeped
-		if !isSweepableTestResource(name) {
+		if !isSweepableTestResource(obj["displayName"].(string)) {
 			nonPrefixCount++
 			continue
 		}

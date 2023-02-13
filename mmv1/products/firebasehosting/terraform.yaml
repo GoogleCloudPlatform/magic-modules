@@ -30,8 +30,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "full"
         vars:
           site_id: site-with-app
+          display_name: "Test web app for Firebase Hosting"
         test_env_vars:
           project_id: :PROJECT_NAME
+        test_vars_overrides:
+          display_name: "tf-test Test web app for Firebase Hosting"
   Channel: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ['sites/{{site_id}}/channels/{{channel_id}}']
     properties:
