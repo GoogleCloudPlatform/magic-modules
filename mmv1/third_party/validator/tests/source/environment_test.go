@@ -32,7 +32,7 @@ func Nprintf(format string, params map[string]interface{}) string {
 
 // testAccPreCheck ensures at least one of the project env variables is set.
 func getTestProjectFromEnv() string {
-	project := multiEnvSearch([]string{"TEST_PROJECT", "GOOGLE_PROJECT"})
+	project := MultiEnvSearch([]string{"TEST_PROJECT", "GOOGLE_PROJECT"})
 	if project == "" {
 		log.Printf("Missing required env var TEST_PROJECT. Default (%s) will be used.", defaultProject)
 		project = defaultProject
@@ -48,7 +48,7 @@ func getTestCredsFromEnv() string {
 		log.Fatalf("cannot get current directory: %v", err)
 	}
 
-	credentials := multiEnvSearch([]string{"TEST_CREDENTIALS", "GOOGLE_APPLICATION_CREDENTIALS"})
+	credentials := MultiEnvSearch([]string{"TEST_CREDENTIALS", "GOOGLE_APPLICATION_CREDENTIALS"})
 	if credentials != "" {
 		// Make credentials path relative to repo root rather than
 		// test/ dir if it is a relative path.
@@ -107,7 +107,7 @@ func getTestServiceAccountFromEnv(t *testing.T) string {
 	return defaultServiceAccount
 }
 
-func multiEnvSearch(ks []string) string {
+func MultiEnvSearch(ks []string) string {
 	for _, k := range ks {
 		if v := os.Getenv(k); v != "" {
 			return v
