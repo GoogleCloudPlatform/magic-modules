@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_quickstart"
         primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-example-zone-googlecloudexample%s\", context[\"random_suffix\"])"
         skip_docs: true
         vars:
           dns_compute_instance: "dns-compute-instance"

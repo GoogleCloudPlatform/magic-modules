@@ -134,7 +134,7 @@ func fieldRule_DefaultModification_func(old, new *schema.Schema, mc MessageConte
 	message := mc.message
 	if old.Default != new.Default {
 		oldDefault := fmt.Sprintf("%v", old.Default)
-		newDefault := fmt.Sprintf("%v", old.Default)
+		newDefault := fmt.Sprintf("%v", new.Default)
 		message = strings.ReplaceAll(message, "{{oldDefault}}", oldDefault)
 		message = strings.ReplaceAll(message, "{{newDefault}}", newDefault)
 		return populateMessageContext(message, mc)
@@ -224,7 +224,7 @@ func (fr FieldRule) IsRuleBreak(old, new *schema.Schema, mc MessageContext) stri
 		return ""
 	}
 	mc.identifier = fr.identifier
-	mc.message = fr.identifier
+	mc.message = fr.message
 	return fr.isRuleBreak(old, new, mc)
 }
 

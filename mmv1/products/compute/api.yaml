@@ -1435,7 +1435,7 @@ objects:
            For internal load balancing, a URL to a HealthCheck resource must be specified instead.
       - !ruby/object:Api::Type::Integer
         name: 'id'
-        description: 'The unique identifier for the resource.'
+        description: 'The unique identifier for the resource. This identifier is defined by the server.'
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'iap'
@@ -1526,6 +1526,103 @@ objects:
           Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
           by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
           field set to true.
+      - !ruby/object:Api::Type::Array
+        name: 'localityLbPolicies'
+        description: |
+          A list of locality load balancing policies to be used in order of
+          preference. Either the policy or the customPolicy field should be set.
+          Overrides any value set in the localityLbPolicy field.
+
+          localityLbPolicies is only supported when the BackendService is referenced
+          by a URL Map that is referenced by a target gRPC proxy that has the
+          validateForProxyless field set to true.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'localityLbPolicyConfig'
+          description: |
+            Container for either a built-in LB policy supported by gRPC or Envoy or
+            a custom one implemented by the end user.
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'policy'
+              exactly_one_of:
+                - policy
+                - customPolicy
+              description: |
+                The configuration for a built-in load balancing policy.
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'name'
+                  required: true
+                  values:
+                    - :ROUND_ROBIN
+                    - :LEAST_REQUEST
+                    - :RING_HASH
+                    - :RANDOM
+                    - :ORIGINAL_DESTINATION
+                    - :MAGLEV
+                  description: |
+                    The name of a locality load balancer policy to be used. The value
+                    should be one of the predefined ones as supported by localityLbPolicy,
+                    although at the moment only ROUND_ROBIN is supported.
+
+                    This field should only be populated when the customPolicy field is not
+                    used.
+
+                    Note that specifying the same policy more than once for a backend is
+                    not a valid configuration and will be rejected.
+
+                    The possible values are:
+
+                    * `ROUND_ROBIN`: This is a simple policy in which each healthy backend
+                                    is selected in round robin order.
+
+                    * `LEAST_REQUEST`: An O(1) algorithm which selects two random healthy
+                                      hosts and picks the host which has fewer active requests.
+
+                    * `RING_HASH`: The ring/modulo hash load balancer implements consistent
+                                  hashing to backends. The algorithm has the property that the
+                                  addition/removal of a host from a set of N hosts only affects
+                                  1/N of the requests.
+
+                    * `RANDOM`: The load balancer selects a random healthy host.
+
+                    * `ORIGINAL_DESTINATION`: Backend host is selected based on the client
+                                              connection metadata, i.e., connections are opened
+                                              to the same address as the destination address of
+                                              the incoming connection before the connection
+                                              was redirected to the load balancer.
+
+                    * `MAGLEV`: used as a drop in replacement for the ring hash load balancer.
+                                Maglev is not as stable as ring hash but has faster table lookup
+                                build times and host selection times. For more information about
+                                Maglev, refer to https://ai.google/research/pubs/pub44824
+            - !ruby/object:Api::Type::NestedObject
+              name: 'customPolicy'
+              exactly_one_of:
+                - policy
+                - customPolicy
+              description: |
+                The configuration for a custom policy implemented by the user and
+                deployed with the client.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  required: true
+                  description: |
+                    Identifies the custom policy.
+
+                    The value should match the type the custom implementation is registered
+                    with on the gRPC clients. It should follow protocol buffer
+                    message naming conventions and include the full path (e.g.
+                    myorg.CustomLbPolicy). The maximum length is 256 characters.
+
+                    Note that specifying the same custom policy more than once for a
+                    backend is not a valid configuration and will be rejected.
+                - !ruby/object:Api::Type::String
+                  name: 'data'
+                  description: |
+                    An optional, arbitrary JSON object with configuration data, understood
+                    by a locally installed custom policy implementation.          
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -1807,6 +1904,10 @@ objects:
         name: 'securityPolicy'
         description: |
           The security policy associated with this backend service.
+      - !ruby/object:Api::Type::String
+        name: 'edgeSecurityPolicy'
+        description: |
+          The resource URL for the edge security policy associated with this backend service.
       - !ruby/object:Api::Type::NestedObject
         name: 'securitySettings'
         description: |
@@ -3378,6 +3479,12 @@ objects:
               Specifies a 256-bit customer-supplied encryption key, encoded in
               RFC 4648 base64 to either encrypt or decrypt this resource.
           - !ruby/object:Api::Type::String
+            name: 'rsaEncryptedKey'
+            description: |
+              Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit 
+              customer-supplied encryption key to either encrypt or decrypt 
+              this resource. You can provide either the rawKey or the rsaEncryptedKey.
+          - !ruby/object:Api::Type::String
             name: 'sha256'
             description: |
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
@@ -3742,9 +3849,6 @@ objects:
           traffic that has destination IP address in these ranges. These ranges
           must be expressed in CIDR format. Only IPv4 is supported.
         item_type: Api::Type::String
-        conflicts:
-          - source_ranges
-          - source_tags
       - !ruby/object:Api::Type::Enum
         name: 'direction'
         description: |
@@ -3840,8 +3944,6 @@ objects:
           connection does not need to match both properties for the firewall to
           apply. Only IPv4 is supported. For INGRESS traffic, one of `source_ranges`,
           `source_tags` or `source_service_accounts` is required.
-        conflicts:
-          - destination_ranges
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sourceServiceAccounts'
@@ -3879,7 +3981,6 @@ objects:
         item_type: Api::Type::String
         conflicts:
           - source_service_accounts
-          - destination_ranges
           - target_service_accounts
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
@@ -6264,9 +6365,14 @@ objects:
           - !ruby/object:Api::Type::String
             # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
             name: 'kmsKeyName'
-            min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account being used for the encryption request for the
+              given KMS key. If absent, the Compute Engine default service
+              account is used.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: Labels to apply to this Image.
@@ -8190,8 +8296,11 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'mtu'
         description: |
-          Maximum Transmission Unit in bytes. The minimum value for this field is 1460
-          and the maximum value is 1500 bytes.
+          Maximum Transmission Unit in bytes. The default value is 1460 bytes. 
+          The minimum value for this field is 1300 and the maximum value is 8896 bytes (jumbo frames).
+          Note that packets larger than 1500 bytes (standard Ethernet) can be subject to TCP-MSS clamping or dropped
+          with an ICMP `Fragmentation-Needed` message if the packets are routed to the Internet or other VPCs 
+          with varying MTUs.
         input: true
       - !ruby/object:Api::Type::Boolean
         name: 'enableUlaInternalIpv6'
@@ -8903,6 +9012,35 @@ objects:
               Maximum size of the node group. Set to a value less than or equal
               to 100 and greater than or equal to min-nodes.
             required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'shareSettings'
+        description: |
+          Share settings for the node group.
+        properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'shareType'
+          required: true
+          description: |
+            Node group sharing type.
+          values:
+          - :ORGANIZATION
+          - :SPECIFIC_PROJECTS
+          - :LOCAL
+        - !ruby/object:Api::Type::Map
+          name: 'projectMap'
+          description: |
+            A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
+          key_name: id
+          key_description: |
+            The project ID.
+          value_type: !ruby/object:Api::Type::NestedObject
+            name: projectConfig
+            properties:
+            - !ruby/object:Api::Type::String
+              name: 'projectId'
+              required: true
+              description: |
+                The project id/number should be the same as the key of this project config in the project map.
   - !ruby/object:Api::Resource
     name: 'NetworkPeeringRoutesConfig'
     base_url:  'projects/{{project}}/global/networks/{{network}}'
@@ -14102,6 +14240,12 @@ objects:
           Timeout (in seconds) for TCP transitory connections.
           Defaults to 30s if not set.
         default_value: 30
+      - !ruby/object:Api::Type::Integer
+        name: tcpTimeWaitTimeoutSec
+        description: |
+          Timeout (in seconds) for TCP connections that are in TIME_WAIT state.
+          Defaults to 120s if not set.
+        default_value: 120
       - !ruby/object:Api::Type::NestedObject
         name: logConfig
         description: |
@@ -14401,6 +14545,15 @@ objects:
           If set to true, the peer connection can be established with routing information.
           The default is true.
         default_value: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'routerApplianceInstance'
+        resource: 'Instance'
+        imports: 'selfLink'
+        description: |
+          The URI of the VM instance that is used as third-party router appliances
+          such as Next Gen Firewalls, Virtual Routers, or Router Appliances.
+          The VM instance must be located in zones contained in the same region as
+          this Cloud Router. The VM instance is the peer side of the BGP session.
   - !ruby/object:Api::Resource
     name: 'SecurityPolicy'
     kind: 'compute#securityPolicy'
@@ -14569,8 +14722,19 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotEncryptionKey'
         description: |
-          The customer-supplied encryption key of the snapshot. Required if the
-          source snapshot is protected by a customer-supplied encryption key.
+          Encrypts the snapshot using a customer-supplied encryption key.
+
+          After you encrypt a snapshot using a customer-supplied key, you must
+          provide the same key if you use the snapshot later. For example, you
+          must provide the encryption key when you create a disk from the
+          encrypted snapshot in a future request.
+
+          Customer-supplied encryption keys do not protect access to metadata of
+          the snapshot.
+
+          If you do not provide an encryption key when creating the snapshot,
+          then the snapshot will be encrypted using an automatically generated
+          key and you do not need to provide a key to use the snapshot later.
         properties:
           - !ruby/object:Api::Type::String
             name: 'rawKey'
@@ -14750,6 +14914,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'expireTime'
+        output: true
+        description: 'Expire time of the certificate in RFC3339 text format.'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -14863,7 +15031,7 @@ objects:
       - !ruby/object:Api::Type::Time
         name: 'expireTime'
         description: |
-          Expire time of the certificate.
+          Expire time of the certificate in RFC3339 text format.
         output: true
   - !ruby/object:Api::Resource
     name: 'RegionSslCertificate'
@@ -14922,6 +15090,10 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'expireTime'
+        output: true
+        description: 'Expire time of the certificate in RFC3339 text format.'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -15802,6 +15974,9 @@ objects:
           If not specified IPV4_ONLY will be used.
       - !ruby/object:Api::Type::Enum
         name: 'ipv6AccessType'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        fingerprint_name: 'fingerprint'
         values:
           - :EXTERNAL
           - :INTERNAL
@@ -16226,8 +16401,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/load-balancing/docs/tcp/internal-proxy'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/targetTcpProxies'
-    min_version: beta
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetTcpProxies'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -16956,6 +17130,9 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: 'Labels for the external VPN gateway resource.'
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |

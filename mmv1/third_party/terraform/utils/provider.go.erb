@@ -51,9 +51,6 @@ func Provider() *schema.Provider {
 			"impersonate_service_account": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
-				}, nil),
 			},
 
 			"impersonate_service_account_delegates": {
@@ -62,46 +59,27 @@ func Provider() *schema.Provider {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_PROJECT",
-					"GOOGLE_CLOUD_PROJECT",
-					"GCLOUD_PROJECT",
-					"CLOUDSDK_CORE_PROJECT",
-				}, nil),
 			},
 
-			"billing_project": &schema.Schema{
+			"billing_project": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_BILLING_PROJECT",
-				}, nil),
 			},
 
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_REGION",
-					"GCLOUD_REGION",
-					"CLOUDSDK_COMPUTE_REGION",
-				}, nil),
 			},
 
-			"zone": &schema.Schema{
+			"zone": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_ZONE",
-					"GCLOUD_ZONE",
-					"CLOUDSDK_COMPUTE_ZONE",
-				}, nil),
 			},
 
-			"scopes": &schema.Schema{
+			"scopes": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -116,13 +94,11 @@ func Provider() *schema.Provider {
 						"send_after": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  "10s",
 							ValidateFunc: validateNonNegativeDuration(),
 						},
 						"enable_batching": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  true,
 						},
 					},
 				},
@@ -131,9 +107,6 @@ func Provider() *schema.Provider {
 			"user_project_override": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"USER_PROJECT_OVERRIDE",
-				}, nil),
 			},
 
 			"request_timeout": {
@@ -144,20 +117,14 @@ func Provider() *schema.Provider {
 			"request_reason": {
 				Type:     schema.TypeString,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"CLOUDSDK_CORE_REQUEST_REASON",
-				}, nil),
 			},
 
 			// Generated Products
 			<% products.each do |product| -%>
-			"<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.Schema{
+			"<%= product[:definitions].name.underscore -%>_custom_endpoint": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateCustomEndpoint,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
-				}, DefaultBasePaths[<%= product[:definitions].name -%>BasePathKey]),
 			},
 			<% end -%>
 
@@ -173,9 +140,8 @@ func Provider() *schema.Provider {
 			<% end -%>
 			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
 			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
-			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
-			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
-
+			TagsLocationCustomEndpointEntryKey:           TagsLocationCustomEndpointEntry,
+			
 			// dcl
 			ContainerAwsCustomEndpointEntryKey:           ContainerAwsCustomEndpointEntry,
 			ContainerAzureCustomEndpointEntryKey:         ContainerAzureCustomEndpointEntry,
@@ -196,10 +162,14 @@ func Provider() *schema.Provider {
 			"google_active_folder":                             dataSourceGoogleActiveFolder(),
 			"google_artifact_registry_repository":              dataSourceArtifactRegistryRepository(),
 			"google_app_engine_default_service_account":        dataSourceGoogleAppEngineDefaultServiceAccount(),
+			"google_beyondcorp_app_connection":                 dataSourceGoogleBeyondcorpAppConnection(),
+			"google_beyondcorp_app_connector":                  dataSourceGoogleBeyondcorpAppConnector(),
+			"google_beyondcorp_app_gateway":                    dataSourceGoogleBeyondcorpAppGateway(),
 			"google_billing_account":                           dataSourceGoogleBillingAccount(),
 			"google_bigquery_default_service_account":          dataSourceGoogleBigqueryDefaultServiceAccount(),
 			"google_client_config":                             dataSourceGoogleClientConfig(),
 			"google_client_openid_userinfo":                    dataSourceGoogleClientOpenIDUserinfo(),
+			"google_cloudbuild_trigger":                        dataSourceGoogleCloudBuildTrigger(),
 			"google_cloudfunctions_function":                   dataSourceGoogleCloudFunctionsFunction(),
 			"google_cloudfunctions2_function":                  dataSourceGoogleCloudFunctions2Function(),
 			<% unless version == 'ga' -%>
@@ -225,11 +195,13 @@ func Provider() *schema.Provider {
 			"google_compute_image":                             dataSourceGoogleComputeImage(),
 			"google_compute_instance":                          dataSourceGoogleComputeInstance(),
 			"google_compute_instance_group":                    dataSourceGoogleComputeInstanceGroup(),
+			"google_compute_instance_group_manager":            dataSourceGoogleComputeInstanceGroupManager(),
 			"google_compute_instance_serial_port":              dataSourceGoogleComputeInstanceSerialPort(),
 			"google_compute_instance_template":                 dataSourceGoogleComputeInstanceTemplate(),
 			"google_compute_lb_ip_ranges":                      dataSourceGoogleComputeLbIpRanges(),
 			"google_compute_network":                           dataSourceGoogleComputeNetwork(),
 			"google_compute_network_endpoint_group":            dataSourceGoogleComputeNetworkEndpointGroup(),
+			"google_compute_network_peering":                   dataSourceComputeNetworkPeering(),
 			"google_compute_node_types":                        dataSourceGoogleComputeNodeTypes(),
 			"google_compute_regions":                           dataSourceGoogleComputeRegions(),
 			"google_compute_region_network_endpoint_group":     dataSourceGoogleComputeRegionNetworkEndpointGroup(),
@@ -237,6 +209,7 @@ func Provider() *schema.Provider {
 			"google_compute_region_ssl_certificate":            dataSourceGoogleRegionComputeSslCertificate(),
 			"google_compute_resource_policy":                   dataSourceGoogleComputeResourcePolicy(),
 			"google_compute_router":                            dataSourceGoogleComputeRouter(),
+			"google_compute_router_nat":                        dataSourceGoogleComputeRouterNat(),
 			"google_compute_router_status":                     dataSourceGoogleComputeRouterStatus(),
 			"google_compute_snapshot":                          dataSourceGoogleComputeSnapshot(),
 			"google_compute_ssl_certificate":                   dataSourceGoogleComputeSslCertificate(),
@@ -246,14 +219,13 @@ func Provider() *schema.Provider {
 			"google_compute_zones":                             dataSourceGoogleComputeZones(),
 			"google_container_azure_versions":                  dataSourceGoogleContainerAzureVersions(),
 			"google_container_aws_versions":                    dataSourceGoogleContainerAwsVersions(),
+			"google_container_attached_versions":               dataSourceGoogleContainerAttachedVersions(),
+			"google_container_attached_install_manifest":       dataSourceGoogleContainerAttachedInstallManifest(),
 			"google_container_cluster":                         dataSourceGoogleContainerCluster(),
 			"google_container_engine_versions":                 dataSourceGoogleContainerEngineVersions(),
 			"google_container_registry_image":                  dataSourceGoogleContainerImage(),
 			"google_container_registry_repository":             dataSourceGoogleContainerRepo(),
 			"google_dataproc_metastore_service":                dataSourceDataprocMetastoreService(),
-			"google_dns_keys":                                  dataSourceDNSKeys(),
-			"google_dns_managed_zone":                          dataSourceDnsManagedZone(),
-			"google_dns_record_set":                            dataSourceDnsRecordSet(),
 			"google_game_services_game_server_deployment_rollout":  dataSourceGameServicesGameServerDeploymentRollout(),
 			"google_iam_policy":                                dataSourceGoogleIamPolicy(),
 			"google_iam_role":                                  dataSourceGoogleIamRole(),
@@ -269,8 +241,11 @@ func Provider() *schema.Provider {
 			"google_kms_secret":                                dataSourceGoogleKmsSecret(),
 			"google_kms_secret_ciphertext":                     dataSourceGoogleKmsSecretCiphertext(),
 			<% unless version == 'ga' -%>
-                        "google_kms_secret_asymmetric":                     dataSourceGoogleKmsSecretAsymmetric(),
-                        "google_firebase_android_app":                      dataSourceGoogleFirebaseAndroidApp(),
+			"google_kms_secret_asymmetric":                     dataSourceGoogleKmsSecretAsymmetric(),
+			"google_firebase_android_app":                      dataSourceGoogleFirebaseAndroidApp(),
+			"google_firebase_apple_app":                        dataSourceGoogleFirebaseAppleApp(),
+			"google_firebase_apple_app_config":                 dataSourceGoogleFirebaseAppleAppConfig(),
+			"google_firebase_hosting_channel":                  dataSourceGoogleFirebaseHostingChannel(),
 			"google_firebase_web_app":                          dataSourceGoogleFirebaseWebApp(),
 			"google_firebase_web_app_config":                   dataSourceGoogleFirebaseWebappConfig(),
 			<% end -%>
@@ -290,6 +265,8 @@ func Provider() *schema.Provider {
 			"google_project":                                   dataSourceGoogleProject(),
 			"google_projects":                                  dataSourceGoogleProjects(),
 			"google_project_organization_policy":               dataSourceGoogleProjectOrganizationPolicy(),
+			"google_project_service":                           dataSourceGoogleProjectService(),
+			"google_pubsub_subscription":                       dataSourceGooglePubsubSubscription(),
 			"google_pubsub_topic":                              dataSourceGooglePubsubTopic(),
 			<% unless version == 'ga' -%>
 			"google_runtimeconfig_config":                      dataSourceGoogleRuntimeconfigConfig(),
@@ -297,6 +274,7 @@ func Provider() *schema.Provider {
 			<% end -%>
 			"google_secret_manager_secret":                     dataSourceSecretManagerSecret(),
 			"google_secret_manager_secret_version":             dataSourceSecretManagerSecretVersion(),
+			"google_secret_manager_secret_version_access":      dataSourceSecretManagerSecretVersionAccess(),
 			"google_service_account":                           dataSourceGoogleServiceAccount(),
 			"google_service_account_access_token":              dataSourceGoogleServiceAccountAccessToken(),
 			"google_service_account_id_token":                  dataSourceGoogleServiceAccountIdToken(),
@@ -306,7 +284,9 @@ func Provider() *schema.Provider {
 			"google_spanner_instance":                          dataSourceSpannerInstance(),
 			"google_sql_ca_certs":                              dataSourceGoogleSQLCaCerts(),
 			"google_sql_backup_run":                            dataSourceSqlBackupRun(),
+			"google_sql_database":                              dataSourceSqlDatabase(),
 			"google_sql_database_instance":                     dataSourceSqlDatabaseInstance(),
+			"google_sql_database_instances":                    dataSourceSqlDatabaseInstances(),
 			"google_service_networking_peered_dns_domain":      dataSourceGoogleServiceNetworkingPeeredDNSDomain(),
 			"google_storage_bucket":                            dataSourceGoogleStorageBucket(),
 			"google_storage_bucket_object":                     dataSourceGoogleStorageBucketObject(),
@@ -471,6 +451,7 @@ end     # products.each do
 				"google_storage_default_object_acl":            resourceStorageDefaultObjectAcl(),
 				"google_storage_notification":                  resourceStorageNotification(),
 				"google_storage_transfer_job":                  resourceStorageTransferJob(),
+				"google_tags_location_tag_binding":             resourceTagsLocationTagBinding(),
 				// ####### END handwritten resources ###########
 			},
 			map[string]*schema.Resource{
@@ -542,6 +523,9 @@ end     # products.each do
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
+	HandleSDKDefaults(d)
+	HandleDCLProviderDefaults(d)
+
 	config := Config{
 		Project:             d.Get("project").(string),
 		Region:              d.Get("region").(string),
@@ -644,7 +628,8 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
-
+	config.TagsLocationBasePath = d.Get(TagsLocationCustomEndpointEntryKey).(string)
+	
 	// dcl
 	config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
 	config.ContainerAzureBasePath = d.Get(ContainerAzureCustomEndpointEntryKey).(string)

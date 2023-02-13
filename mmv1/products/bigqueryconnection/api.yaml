@@ -77,6 +77,7 @@ objects:
           True if the connection has credential assigned.
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudSql'
+        description: Connection properties specific to the Cloud SQL.
         exactly_one_of:
           - cloud_sql
           - aws
@@ -113,6 +114,10 @@ objects:
               - :DATABASE_TYPE_UNSPECIFIED
               - :POSTGRES
               - :MYSQL
+          - !ruby/object:Api::Type::String
+            name: 'serviceAccountId'
+            description: When the connection is used in the context of an operation in BigQuery, this service account will serve as the identity being used for connecting to the CloudSQL instance specified in this connection.
+            output: true              
       - !ruby/object:Api::Type::NestedObject
         name: aws
         description: Connection properties specific to Amazon Web Services.
@@ -163,9 +168,16 @@ objects:
             description: The id of customer's directory that host the data.
             required: true
           - !ruby/object:Api::Type::String
+            name: 'federatedApplicationClientId'
+            description: The Azure Application (client) ID where the federated credentials will be hosted.
+          - !ruby/object:Api::Type::String
             name: 'redirectUri'
             output: true
             description: The URL user will be redirected to after granting consent during connection setup.
+          - !ruby/object:Api::Type::String
+            name: 'identity'
+            description: A unique Google-owned and Google-generated identity for the Connection. This identity will be used to access the user's Azure Active Directory Application.
+            output: true
       - !ruby/object:Api::Type::NestedObject
         name: cloudSpanner
         description: Connection properties specific to Cloud Spanner
@@ -183,6 +195,9 @@ objects:
           - !ruby/object:Api::Type::Boolean
             name: 'useParallelism'
             description: If parallelism should be used when reading from Cloud Spanner
+          - !ruby/object:Api::Type::Boolean
+            name: 'useServerlessAnalytics'
+            description: If the serverless analytics service should be used to read data from Cloud Spanner. useParallelism must be set when using serverless analytics
       - !ruby/object:Api::Type::NestedObject
         name: cloudResource
         description: Container for connection properties for delegation of access to GCP resources.
