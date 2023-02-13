@@ -38,10 +38,6 @@ data "google_organization" "org" {
   organization = var.org_id
 }
 
-data "google_billing_account" "acct" {
-  billing_account = var.billing_account_id
-}
-
 data "google_billing_account" "master_acct" {
   billing_account = var.master_billing_account_id
 }
@@ -50,7 +46,7 @@ resource "google_project" "proj" {
   name            = var.project_id
   project_id      = var.project_id
   org_id          = data.google_organization.org.org_id
-  billing_account = data.google_billing_account.acct.id
+  billing_account = var.billing_account_id
 }
 
 resource "google_service_account" "sa" {
@@ -159,12 +155,6 @@ resource "google_organization_iam_member" "sa_storage_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/storage.admin"
   member = google_service_account.sa.member
-}
-
-resource "google_billing_account_iam_member" "sa_billing_admin" {
-  billing_account_id = data.google_billing_account.acct.id
-  role               = "roles/billing.admin"
-  member             = google_service_account.sa.member
 }
 
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
