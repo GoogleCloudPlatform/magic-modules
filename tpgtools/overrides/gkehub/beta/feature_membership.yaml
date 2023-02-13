@@ -20,3 +20,8 @@
 - type: CUSTOM_TERRAFORM_PRODUCT_NAME
   details:
     product: gke_hub
+- type: DEPRECATED
+  field: control_plane
+  details:
+    message: >-
+      Deprecated in favor of the `management` field
