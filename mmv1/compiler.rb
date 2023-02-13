@@ -137,6 +137,8 @@ start_time = Time.now
 Google::LOGGER.info "Generating MM output to '#{output_path}'"
 Google::LOGGER.info "Using #{version} version"
 
+allowed_classes = Google::YamlValidator::allowed_classes
+
 # products_for_version entries are a hash of product definitions (:definitions)
 # and provider config (:overrides) for the product
 products_for_version = []
@@ -163,18 +165,18 @@ all_product_files.each do |product_name|
 
   if File.exist?(api_override_path)
     result = if File.exist?(api_yaml_path)
-               YAML.load_file(api_yaml_path).merge(YAML.load_file(api_override_path))
+               YAML.load_file(api_yaml_path, permitted_classes: allowed_classes).merge(YAML.load_file(api_override_path, permitted_classes: allowed_classes))
              else
-               YAML.load_file(api_override_path)
+               YAML.load_file(api_override_path, permitted_classes: allowed_classes)
              end
     product_yaml = result.to_yaml
   elsif File.exist?(api_yaml_path)
     product_yaml = File.read(api_yaml_path)
   elsif File.exist?(product_override_path)
     result = if File.exist?(product_yaml_path)
-               YAML.load_file(product_yaml_path).merge(YAML.load_file(product_override_path))
+               YAML.load_file(product_yaml_pat, permitted_classes: allowed_classesh).merge(YAML.load_file(product_override_path, permitted_classes: allowed_classes))
              else
-               YAML.load_file(product_override_path)
+               YAML.load_file(product_override_path, permitted_classes: allowed_classes)
              end
     product_yaml = result.to_yaml
   elsif File.exist?(product_yaml_path)
