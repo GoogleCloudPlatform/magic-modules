@@ -389,6 +389,7 @@ objects:
                   The Google Cloud Platform zone where your Cloud SQL datdabse instance is located.
               - !ruby/object:Api::Type::String
                 name: 'sourceId'
+                required: true
                 description: |
                   The Database Migration Service source connection profile ID, in the format: projects/my_project_name/locations/us-central1/connectionProfiles/connection_profile_ID 
               - !ruby/object:Api::Type::String
