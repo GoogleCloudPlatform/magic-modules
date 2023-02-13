@@ -107,7 +107,7 @@ objects:
             input: true
             description: |
               Immutable. The resource name for the webhook secret's secret version. Once this field has been set, it cannot be changed.
-              If you need to change it, please create another BitbucketServerConfig.
+              Changing this field will result in deleting/ recreating the resource.
       - !ruby/object:Api::Type::String
         name: 'username'
         required: true
