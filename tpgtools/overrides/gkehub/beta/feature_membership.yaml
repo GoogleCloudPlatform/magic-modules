@@ -21,7 +21,7 @@
   details:
     product: gke_hub
 - type: DEPRECATED
-  field: control_plane
+  field: mesh.control_plane
   details:
     message: >-
       Deprecated in favor of the `management` field
