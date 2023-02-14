@@ -605,15 +605,6 @@ resource "google_project_iam_member" "pubsub" {
   member  = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
 }
 
-resource "google_storage_transfer_agent_pool" "foo" {
-  name         = "%s"
-  bandwidth_limit {
-    limit_mbps = "120"
-  }
-
-  depends_on = [google_project_iam_member.pubsub]
-}
-
 resource "google_storage_transfer_job" "transfer_job" {
   description = "%s"
   project     = "%s"
@@ -678,15 +669,6 @@ resource "google_project_iam_member" "pubsub" {
 	project = data.google_storage_transfer_project_service_account.default.project
   role    = "roles/pubsub.admin"
   member  = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
-}
-
-resource "google_storage_transfer_agent_pool" "foo" {
-  name         = "%s"
-  bandwidth_limit {
-    limit_mbps = "120"
-  }
-
-  depends_on = [google_project_iam_member.pubsub]
 }
 
 resource "google_storage_transfer_job" "transfer_job" {

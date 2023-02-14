@@ -1105,7 +1105,7 @@ func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.R
 		data["posix_data_source"] = flattenPosixData(transferSpec.PosixDataSource)
 	}
 
-	return []map[string][]map[string]interface{}{}
+	return []map[string][]map[string]interface{}{data}
 }
 
 func usingPosix(transferSpec *storagetransfer.TransferSpec) bool {
