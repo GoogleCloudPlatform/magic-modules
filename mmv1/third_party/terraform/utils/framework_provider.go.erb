@@ -32,7 +32,7 @@ var (
 // New is a helper function to simplify provider server and testing implementation.
 func New(version string) provider.ProviderWithMetaSchema {
     return &FrameworkProvider{
-        version: version,
+        Version: version,
     }
 }
 
@@ -50,7 +50,7 @@ type FrameworkProvider struct{
     scopes []string
     userAgent string
     userProjectOverride bool
-    version string
+    Version string
 
     // paths for client setup
     <% products.each do |product| -%>
@@ -61,7 +61,7 @@ type FrameworkProvider struct{
 // Metadata returns the provider type name.
 func (p *FrameworkProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
     resp.TypeName = "google"
-    resp.Version = p.version
+    resp.Version = p.Version
 }
 
 // MetaSchema returns the provider meta schema.

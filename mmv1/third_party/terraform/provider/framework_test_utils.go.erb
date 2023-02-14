@@ -2,10 +2,27 @@
 package provider
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
 	"testing"
+	"time"
 
+	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/dnaeon/go-vcr/recorder"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
@@ -106,7 +123,7 @@ type frameworkTestProvider struct {
 func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
 	return &frameworkTestProvider{
 		ProdProvider: google.FrameworkProvider{
-			version: "test",
+			Version: "test",
 		},
 		TestName: testName,
 	}
