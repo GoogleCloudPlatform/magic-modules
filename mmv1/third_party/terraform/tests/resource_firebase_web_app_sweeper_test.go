@@ -8,6 +8,7 @@ package google
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"testing"
@@ -84,20 +85,14 @@ func testSweepFirebaseWebApp(region string) error {
 			return nil
 		}
 
-		name := GetResourceNameFromSelfLink(obj["name"].(string))
 		// Skip resources that shouldn't be sweeped
 		if !isSweepableTestResource(obj["displayName"].(string)) {
 			nonPrefixCount++
 			continue
 		}
 
-		deleteTemplate := "https://firebase.googleapis.com/v1beta1/{{name}}:remove"
-		deleteUrl, err := replaceVars(d, config, deleteTemplate)
-		if err != nil {
-			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
-			return nil
-		}
-		deleteUrl = deleteUrl + name
+		name := obj["name"].(string)
+		deleteUrl := fmt.Sprintf("https://firebase.googleapis.com/v1beta1/%s:remove", name)
 
 		body := make(map[string]interface{})
 		body["immediate"] = true
