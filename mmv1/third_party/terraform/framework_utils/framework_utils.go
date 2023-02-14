@@ -29,7 +29,7 @@ func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion st
 	return ua
 }
 
-func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
+func getCurrUserEmail(ctx context.Context, p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
 	// When environment variables UserProjectOverride and BillingProject are set for the provider,
 	// the header X-Goog-User-Project is set for the API requests.
 	// But it causes an error when calling GetCurrUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".
@@ -41,7 +41,7 @@ func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagno
 	diags.Append(d...)
 
 	if diags.HasError() {
-		tflog.Info(p.context, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
+		tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 		return ""
 	}
 	if res["email"] == nil {
