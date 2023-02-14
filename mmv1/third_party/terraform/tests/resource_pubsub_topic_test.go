@@ -93,10 +93,6 @@ resource "google_pubsub_topic" "foo" {
 
 func testAccPubsubTopic_cmek(pid, topicName, kmsKey string) string {
 	return fmt.Sprintf(`
-data "google_project" "project" {
-  project_id = "%s"
-}
-
 resource "google_pubsub_topic" "topic" {
   name         = "%s"
   kms_key_name = "%s"
