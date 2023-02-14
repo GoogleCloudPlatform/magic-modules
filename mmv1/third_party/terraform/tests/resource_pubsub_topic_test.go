@@ -97,12 +97,6 @@ data "google_project" "project" {
   project_id = "%s"
 }
 
-resource "google_project_iam_member" "kms-project-binding" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
-
 resource "google_pubsub_topic" "topic" {
   name         = "%s"
   project      = google_project_iam_member.kms-project-binding.project
