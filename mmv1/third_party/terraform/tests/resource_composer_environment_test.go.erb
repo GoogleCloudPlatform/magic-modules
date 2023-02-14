@@ -1355,9 +1355,7 @@ resource "google_kms_crypto_key_iam_member" "iam" {
   member  = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 resource "google_composer_environment" "test" {
-  depends_on = [google_project_iam_member.kms-project-binding1, google_project_iam_member.kms-project-binding2,
-  google_project_iam_member.kms-project-binding3, google_project_iam_member.kms-project-binding4,
-  google_project_iam_member.kms-project-binding5, google_kms_crypto_key_iam_member.iam]
+  depends_on = [google_kms_crypto_key_iam_member.iam]
   name   = "%s"
   region = "us-central1"
   config {
