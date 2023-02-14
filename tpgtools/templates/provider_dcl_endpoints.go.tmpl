@@ -30,6 +30,8 @@ package google
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	framework_schema "github.com/hashicorp/terraform-plugin-framework/provider/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 // empty string is passed for dcl default since dcl
@@ -40,9 +42,6 @@ var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey = "{{$pkg.BasePathIdenti
 var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_{{$pkg.BasePathIdentifier.ToUpper}}_CUSTOM_ENDPOINT",
-	}, ""),
 }
 {{- end}}
 {{end}}
@@ -59,6 +58,32 @@ func configureDCLProvider(provider *schema.Provider) {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
 	provider.Schema[{{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey] = {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntry
+{{- end}}
+{{- end}}
+}
+
+func HandleDCLProviderDefaults(d *schema.ResourceData) {
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+	if d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey) == "" {
+		d.Set({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey, multiEnvSearch([]string{
+			"GOOGLE_{{$pkg.BasePathIdentifier.ToUpper}}_CUSTOM_ENDPOINT",
+		}))
+	}
+{{- end}}
+{{- end}}
+}
+
+// plugin-framework provider set-up
+func configureDCLFrameworkProvider(frameworkSchema *framework_schema.Schema) {
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+	frameworkSchema.Attributes["{{$pkg.BasePathIdentifier}}_custom_endpoint"] = framework_schema.StringAttribute{
+		Optional: true,
+        Validators: []validator.String{
+            CustomEndpointValidator(),
+        },
+	}
 {{- end}}
 {{- end}}
 }

@@ -29,10 +29,6 @@ module Overrides
       attr_reader(*attributes)
       attr_reader :description
 
-      def validate
-        super
-      end
-
       def apply(resource)
         unless description.nil?
           @description = format_string(:description, @description,

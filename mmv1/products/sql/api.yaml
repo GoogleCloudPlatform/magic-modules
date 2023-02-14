@@ -514,7 +514,6 @@ objects:
     base_url: projects/{{project}}/instances/{{instance}}/users
     self_link: 'projects/{{project}}/instances/{{instance}}/users?name={{name}}&host={{host}}'
     nested_query: !ruby/object:Api::Resource::NestedQuery
-      kind: 'sql#usersList'
       keys: ['items']
     collection_url_key: 'items'
     identity:
@@ -602,7 +601,6 @@ objects:
     base_url: flags
     self_link: flags
     nested_query: !ruby/object:Api::Resource::NestedQuery
-      kind: 'sql#flagsList'
       keys: ['items']
     readonly: true
     properties:
@@ -655,7 +653,6 @@ objects:
     base_url: projects/{{project}}/tiers
     self_link: projects/{{project}}/tiers
     nested_query: !ruby/object:Api::Resource::NestedQuery
-      kind: 'sql#tiersList'
       keys: ['items']
     identity:
       - tier

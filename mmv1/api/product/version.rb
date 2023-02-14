@@ -36,8 +36,7 @@ module Api
       end
 
       def to_s
-        str = "#{name}: #{base_url}"
-        str
+        "#{name}: #{base_url}"
       end
 
       def <=>(other)

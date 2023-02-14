@@ -11,6 +11,8 @@
 		"<%= var_name -%>": getTestOrgTargetFromEnv(t),
 	<% elsif var_type == :BILLING_ACCT -%>
 		"<%= var_name -%>": getTestBillingAccountFromEnv(t),
+	<% elsif var_type == :MASTER_BILLING_ACCT -%>
+		"<%= var_name -%>": getTestMasterBillingAccountFromEnv(t),
 	<% elsif var_type == :SERVICE_ACCT -%>
 		"<%= var_name -%>": getTestServiceAccountFromEnv(t),
 	<% elsif var_type == :PROJECT_NAME -%>

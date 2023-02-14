@@ -62,7 +62,7 @@ describe Provider::Terraform do
 
     def resource(*data)
       res = Google::YamlValidator.parse(['--- !ruby/object:Api::Resource']
-                                 .concat(["name: 'testobject'"])
+                                 .push("name: 'testobject'")
                                  .concat(data)
                                  .join("\n"))
       product.objects.append(res)
