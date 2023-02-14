@@ -90,7 +90,7 @@ resource "google_pubsub_topic" "foo" {
 `, topic, key, value, region)
 }
 
-func testAccPubsubTopic_cmek(pid, topicName, kmsKey string) string {
+func testAccPubsubTopic_cmek(topicName, kmsKey string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "topic" {
   name         = "%s"
