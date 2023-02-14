@@ -172,7 +172,6 @@ objects:
         name: updateTime
         description: |
           Output only. Update time.
-
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
         output: true
   - !ruby/object:Api::Resource
@@ -181,7 +180,6 @@ objects:
     self_link: "tagBindings/?parent={{parent}}&pageSize=300"
     delete_url: "tagBindings/{{name}}"
     nested_query: !ruby/object:Api::Resource::NestedQuery
-      kind: 'tags#tagBindingList'
       keys: ['tagBindings']
     input: true
     description: A TagBinding represents a connection between a TagValue and a cloud resource (currently project, folder, or organization). Once a TagBinding is created, the TagValue is applied to all the descendants of the cloud resource.

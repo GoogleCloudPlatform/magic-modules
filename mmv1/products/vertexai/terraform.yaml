@@ -94,6 +94,37 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
           - "force_destroy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_featurestore_with_beta_fields"
+        primary_resource_id: "featurestore"
+        primary_resource_name: "fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])"
+        vars:
+          name: "terraform2"
+          project: "appeng-flex"
+          kms_key_name: "kms-name"
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
+        test_vars_overrides:
+          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        ignore_read_extra:
+          - "force_destroy"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vertex_ai_featurestore_scaling"
+        primary_resource_id: "featurestore"
+        primary_resource_name: "fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])"
+        vars:
+          name: "terraform3"
+          project: "appeng-flex"
+          kms_key_name: "kms-name"
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
+        test_vars_overrides:
+          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        ignore_read_extra:
+          - "force_destroy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

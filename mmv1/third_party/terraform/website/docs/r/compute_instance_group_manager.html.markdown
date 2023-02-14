@@ -1,6 +1,5 @@
 ---
 subcategory: "Compute Engine"
-page_title: "Google: google_compute_instance_group_manager"
 description: |-
   Manages an Instance Group within GCE.
 ---
@@ -201,6 +200,18 @@ update_policy {
 * `replacement_method` - (Optional), The instance replacement method for managed instance groups. Valid values are: "RECREATE", "SUBSTITUTE". If SUBSTITUTE (default), the group replaces VM instances with new instances that have randomly generated names. If RECREATE, instance names are preserved.  You must also set max_unavailable_fixed or max_unavailable_percent to be greater than 0.
 - - -
 
+<a name="nested_instance_lifecycle_policy"></a>The `instance_lifecycle_policy` block supports:
+
+```hcl
+instance_lifecycle_policy {
+  force_update_on_repair = "YES"
+}
+```
+
+* `force_update_on_repair` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: `YES`, `NO`. If `YES` and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If `NO` (default), then updates are applied in accordance with the group's update policy type.
+
+- - -
+
 <a name="nested_all_instances_config"></a>The `all_instances_config` block supports:
 
 ```hcl
@@ -333,7 +344,7 @@ The `per_instance_configs` block holds:
 ## Timeouts
 
 This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
 - `create` - Default is 15 minutes.
 - `update` - Default is 15 minutes.

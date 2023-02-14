@@ -251,12 +251,13 @@ timeout: 20000s
 options:
     machineType: 'N1_HIGHCPU_32'
 
-secrets:
-    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
-      secretEnv:
-          GITHUB_TOKEN: CiQADkR4Nt6nHLI52Kc1W55OwpLdc4vjBfVR0SGQNzm6VSVj9lUSUQBfF82vVhn43A1jNYOv8ScoWgrZONwNrUabHfGjkvl+IZxcii0JlOVUawbscs4OJga0eitNNlagAOruLs6C926X20ZZPqWtH97ui6CKNvxgkQ==
+availableSecrets:
+  secretManager:
+    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
+      env: GITHUB_TOKEN
+  inline:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/environment-keyring/cryptoKeys/ci-project-key
-      secretEnv:
+      envMap:
           GOOGLE_BILLING_ACCOUNT: CiQAis6xrGyvnmGipEEjCQVUzu3o1H4XRJSsp/B8A0IFqwRwnogSPQDOc1nLdG/+VCWpKtYtbEl12+luWkHmOYn/VtkDuMkz3bCj2DNbcuLw2fgvmkha1IjnouGPIah0qLkDmTU=
           GOOGLE_CUST_ID: CiQAis6xrAfbX3gtctcnZnt8n5DDZjercDObUGlyN4CqIpWKu5kSMgDOc1nLhLObfpnlhaUxdZ6Aoo38TBtRXoXAW5W4dbdyP+8ILKjtx1+zVL5WV641NM90
           GOOGLE_FIRESTORE_PROJECT: CiQAis6xrGkbSHeyBpgJg7/DkxNbHgqVJn3iaMYL7ybzkvDUzLESQgDOc1nLn0yUyrqLVfEujlbJEO4HDsk+o+6w608UfOXExJ3v3CTL+DwVwhXqIK/Vbo7UIMUyuP+Lu497BlcDIYyOwQ==
