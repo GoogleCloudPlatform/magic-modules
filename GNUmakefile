@@ -75,6 +75,11 @@ validator:
 		bundle; \
 		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
 
+test:
+	cd mmv1; \
+		bundle; \
+		bundle exec rake test
+
 serialize:
 	cd tpgtools;\
 		cp -f serialization.go.base serialization.go &&\
@@ -102,5 +107,4 @@ validate_environment:
 doctor:
 	./scripts/doctor
 
-.PHONY: mmv1 tpgtools
-
+.PHONY: mmv1 tpgtools test

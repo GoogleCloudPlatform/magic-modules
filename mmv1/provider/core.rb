@@ -59,7 +59,7 @@ module Provider
         true
       else
         Google::LOGGER.warn 'Either gofmt or goimports is not installed; go ' \
-          'code will be poorly formatted and will likely not compile.'
+                            'code will be poorly formatted and will likely not compile.'
         false
       end
     end
@@ -67,8 +67,7 @@ module Provider
     # Main entry point for generation.
     def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs)
       generate_objects(output_folder, types, generate_code, generate_docs)
-      copy_files(output_folder) \
-        unless @config.files.nil? || @config.files.copy.nil?
+
       # Compilation has to be the last step, as some files (e.g.
       # CONTRIBUTING.md) may depend on the list of all files previously copied
       # or compiled.
@@ -78,12 +77,10 @@ module Provider
       compile_product_files(output_folder) \
         unless @config.files.nil? || @config.files.compile.nil?
 
-      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      FileUtils.mkpath output_folder
       pwd = Dir.pwd
       if generate_code
         Dir.chdir output_folder
-        generate_datasources(pwd, output_folder, types) \
-          unless @config.datasources.nil?
 
         generate_operation(pwd, output_folder, types)
         Dir.chdir pwd
@@ -103,10 +100,6 @@ module Provider
     end
 
     def generate_operation(pwd, output_folder, types); end
-
-    def copy_files(output_folder)
-      copy_file_list(output_folder, @config.files.copy)
-    end
 
     # generate_code and generate_docs are actually used because all of the variables
     # in scope in this method are made available within the templates by the compile call.
@@ -133,7 +126,7 @@ module Provider
           target_file = File.join(output_folder, target)
           target_dir = File.dirname(target_file)
           Google::LOGGER.debug "Copying #{source} => #{target}"
-          FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
+          FileUtils.mkpath target_dir
 
           # If we've modified a file since starting an MM run, it's a reasonable
           # assumption that it was this run that modified it.
@@ -181,7 +174,7 @@ module Provider
     end
 
     def compile_file_list(output_folder, files, file_template, pwd = Dir.pwd)
-      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      FileUtils.mkpath output_folder
       Dir.chdir output_folder
       files.map do |target, source|
         Thread.new do
@@ -219,7 +212,7 @@ module Provider
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
       unless object.exclude_resource
-        FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+        FileUtils.mkpath output_folder
         Dir.chdir output_folder
         Google::LOGGER.debug "Generating #{object.name} resource"
         generate_resource(pwd, data.clone, generate_code, generate_docs)
@@ -235,7 +228,7 @@ module Provider
       # if iam_policy is not defined or excluded, don't generate it
       return if object.iam_policy.nil? || object.iam_policy.exclude
 
-      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      FileUtils.mkpath output_folder
       Dir.chdir output_folder
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
       generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
@@ -244,39 +237,6 @@ module Provider
 
     # Generate files at a per-resource basis.
     def generate_resource_files(pwd, data) end
-
-    def generate_datasources(pwd, output_folder, types)
-      # We need to apply overrides for datasources
-      @api = Overrides::Runner.build(@api, @config.datasources,
-                                     @config.resource_override,
-                                     @config.property_override)
-      @api.validate
-
-      @api.set_properties_based_on_version(@version)
-      @api.objects.each do |object|
-        if !types.empty? && !types.include?(object.name)
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per user request"
-          )
-        elsif types.empty? && object.exclude
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per API catalog"
-          )
-        elsif types.empty? && object.not_in_version?(@version)
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per API version"
-          )
-        else
-          generate_datasource(pwd, object, output_folder)
-        end
-      end
-    end
-
-    def generate_datasource(pwd, object, output_folder)
-      data = build_object_data(pwd, object, output_folder, @target_version_name)
-
-      compile_datasource(pwd, data.clone)
-    end
 
     def build_object_data(_pwd, object, output_folder, version)
       ProductFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
@@ -297,36 +257,27 @@ module Provider
 
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
-    def properties_by_custom_update(properties, behavior = :new)
+    def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
 
-      # TODO(rambleraptor): Add support to Ansible for one-at-a-time updates.
-      if behavior == :old
-        update_props.group_by do |p|
-          { update_url: p.update_url, update_verb: p.update_verb, fingerprint: p.fingerprint_name }
-        end
-      else
-        update_props.group_by do |p|
-          {
-            update_url: p.update_url,
-            update_verb: p.update_verb,
-            update_id: p.update_id,
-            fingerprint_name: p.fingerprint_name
-          }
-        end
+      update_props.group_by do |p|
+        {
+          update_url: p.update_url,
+          update_verb: p.update_verb,
+          update_id: p.update_id,
+          fingerprint_name: p.fingerprint_name
+        }
       end
     end
 
     # Filter the properties to keep only the ones don't have custom update
     # method and group them by update url & verb.
     def properties_without_custom_update(properties)
-      update_props = properties.select do |p|
+      properties.select do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
-
-      update_props
     end
 
     # Takes a update_url and returns the list of custom updatable properties

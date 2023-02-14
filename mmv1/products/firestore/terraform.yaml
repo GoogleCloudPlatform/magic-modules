@@ -13,6 +13,41 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Database: !ruby/object:Overrides::Terraform::ResourceOverride
+    skip_delete: true
+    autogen_async: true
+    id_format: "projects/{{project}}/databases/{{name}}"
+    import_format:
+      - "projects/{{project}}/databases/{{name}}"
+      - "{{project}}/{{name}}"
+      - "{{name}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firestore_database"
+        primary_resource_id: "database"
+        pull_external: true
+        test_env_vars:
+          org_id: :ORG_ID
+        ignore_read_extra:
+          - project
+          - etag
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firestore_database_datastore_mode"
+        primary_resource_id: "datastore_mode_database"
+        pull_external: true
+        test_env_vars:
+          org_id: :ORG_ID
+        ignore_read_extra:
+          - project
+          - etag
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      appEngineIntegrationMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      concurrencyMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Index: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     # This resource is a child resource
