@@ -4,11 +4,3 @@ contact_links:
     url: https://github.com/hashicorp/terraform-provider-google/issues/new/choose
     about: |
       Terraform-specific issues or FRs
-  - name: Ansible Issue
-    url: https://github.com/ansible-collections/google.cloud/issues/new/choose
-    about: |
-      Ansible-specific issues or FRs
-  - name: InSpec Issue
-    url: https://github.com/inspec/inspec-gcp/issues/new/choose
-    about: |
-      InSpec-specific issues or FRs

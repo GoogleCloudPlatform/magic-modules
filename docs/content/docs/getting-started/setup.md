@@ -64,13 +64,12 @@ To get started, you'll need:
     instructions to set up Go: [YouTube video](https://www.youtube.com/watch?v=VQVyvulNnzs).
   * If you're using Cloud Shell, Go is already installed.
   * Currently it's recommended to use Go 1.18, Go 1.19 changed the gofmt rules which causes some gofmt issue and our CIs are all on 1.18.X
-* Ruby 2.6.0
+* Ruby 3.2.0
   * You can use [`rbenv`](https://github.com/rbenv/rbenv) to manage your Ruby version(s).
   * To install `rbenv`:
     * Homebrew: run `brew install rbenv ruby-build`
     * Debian, Ubuntu, and their derivatives: run `sudo apt install rbenv`
-  * Then run `rbenv install 2.6.0`.
-    * For M1 Mac users, run `RUBY_CFLAGS="-Wno-error=implicit-function-declaration" rbenv install 2.6.0`
+  * Then run `rbenv install 3.2.0`.
 * [`Bundler`](https://github.com/bundler/bundler)
   * This can be installed with `gem install bundler`
 * Gems for magic-modules
@@ -80,7 +79,7 @@ To get started, you'll need:
 * Terraform
   * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 * If you are getting "Too many open files" ulimit needs to be raised.
-  * Mac OSX: `ulimit -n 1000`
+  * Mac OSX: `ulimit -n 8192`
 
 Now, you can verify you're ready with:
 
@@ -94,7 +93,7 @@ make doctor
 Check for rbenv in path...
    found!
 Checking ruby version...
-2.6.0 (set by [PATH]/magic-modules/mmv1/.ruby-version)
+3.2.0 (set by [PATH]/magic-modules/mmv1/.ruby-version)
 Check for bundler in path...
    found!
 Check for go in path...

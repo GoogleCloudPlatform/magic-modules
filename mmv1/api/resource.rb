@@ -513,8 +513,8 @@ module Api
         json_out[v] = instance_variable_get(v) unless ignored_fields.include? v
       end
 
-      json_out.merge!(properties.map { |p| [p.name, p] }.to_h)
-      json_out.merge!(parameters.map { |p| [p.name, p] }.to_h)
+      json_out.merge!(properties.to_h { |p| [p.name, p] })
+      json_out.merge!(parameters.to_h { |p| [p.name, p] })
 
       JSON.generate(json_out, opts)
     end

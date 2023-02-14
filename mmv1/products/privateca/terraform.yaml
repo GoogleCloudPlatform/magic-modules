@@ -136,7 +136,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
         test_vars_overrides:
-          pool: "\"static-ca-pool\""
+          pool: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_with_template"
         primary_resource_id: "default"
@@ -147,7 +147,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
         test_vars_overrides:
-          pool: "\"static-ca-pool\""
+          pool: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_csr"
         primary_resource_id: "default"
@@ -157,7 +157,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
         test_vars_overrides:
-          pool: "\"static-ca-pool\""
+          pool: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_no_authority"
         primary_resource_id: "default"
@@ -167,7 +167,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
         test_vars_overrides:
-          pool: "\"static-ca-pool\""
+          pool: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/pre_create/privateca_certificate.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate.go.erb
