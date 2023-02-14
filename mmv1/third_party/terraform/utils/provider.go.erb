@@ -51,6 +51,9 @@ func Provider() *schema.Provider {
 			"impersonate_service_account": {
 				Type:     schema.TypeString,
 				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
+				}, nil),
 			},
 
 			"impersonate_service_account_delegates": {
@@ -59,27 +62,46 @@ func Provider() *schema.Provider {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"project": {
+			"project": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"GOOGLE_PROJECT",
+					"GOOGLE_CLOUD_PROJECT",
+					"GCLOUD_PROJECT",
+					"CLOUDSDK_CORE_PROJECT",
+				}, nil),
 			},
 
-			"billing_project": {
+			"billing_project": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"GOOGLE_BILLING_PROJECT",
+				}, nil),
 			},
 
-			"region": {
+			"region": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"GOOGLE_REGION",
+					"GCLOUD_REGION",
+					"CLOUDSDK_COMPUTE_REGION",
+				}, nil),
 			},
 
-			"zone": {
+			"zone": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"GOOGLE_ZONE",
+					"GCLOUD_ZONE",
+					"CLOUDSDK_COMPUTE_ZONE",
+				}, nil),
 			},
 
-			"scopes": {
+			"scopes": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -94,11 +116,13 @@ func Provider() *schema.Provider {
 						"send_after": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Default:  "10s",
 							ValidateFunc: validateNonNegativeDuration(),
 						},
 						"enable_batching": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  true,
 						},
 					},
 				},
@@ -107,6 +131,9 @@ func Provider() *schema.Provider {
 			"user_project_override": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"USER_PROJECT_OVERRIDE",
+				}, nil),
 			},
 
 			"request_timeout": {
@@ -117,14 +144,20 @@ func Provider() *schema.Provider {
 			"request_reason": {
 				Type:     schema.TypeString,
 				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"CLOUDSDK_CORE_REQUEST_REASON",
+				}, nil),
 			},
 
 			// Generated Products
 			<% products.each do |product| -%>
-			"<%= product[:definitions].name.underscore -%>_custom_endpoint": {
+			"<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateCustomEndpoint,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"GOOGLE_<%= product[:definitions].name.underscore.upcase -%>_CUSTOM_ENDPOINT",
+				}, DefaultBasePaths[<%= product[:definitions].name -%>BasePathKey]),
 			},
 			<% end -%>
 
@@ -140,6 +173,8 @@ func Provider() *schema.Provider {
 			<% end -%>
 			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
 			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
+			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
+			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
 			TagsLocationCustomEndpointEntryKey:           TagsLocationCustomEndpointEntry,
 			
 			// dcl
@@ -228,6 +263,7 @@ func Provider() *schema.Provider {
 			"google_dataproc_metastore_service":                dataSourceDataprocMetastoreService(),
 			"google_dns_keys":                                  dataSourceDNSKeys(),
 			"google_dns_managed_zone":                          dataSourceDnsManagedZone(),
+			"google_dns_record_set":                            dataSourceDnsRecordSet(),
 			"google_game_services_game_server_deployment_rollout":  dataSourceGameServicesGameServerDeploymentRollout(),
 			"google_iam_policy":                                dataSourceGoogleIamPolicy(),
 			"google_iam_role":                                  dataSourceGoogleIamRole(),
@@ -526,9 +562,6 @@ end     # products.each do
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
-	HandleSDKDefaults(d)
-	HandleDCLProviderDefaults(d)
-
 	config := Config{
 		Project:             d.Get("project").(string),
 		Region:              d.Get("region").(string),
