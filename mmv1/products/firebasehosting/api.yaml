@@ -270,7 +270,7 @@ objects:
                     - run
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: service_id
+                      name: serviceId
                       description: User-defined ID of the Cloud Run service.
                       required: true
                     - !ruby/object:Api::Type::String
