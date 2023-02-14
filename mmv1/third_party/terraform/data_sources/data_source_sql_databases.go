@@ -2,6 +2,8 @@ package google
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -53,8 +55,13 @@ func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Databases in %q instance", d.Get("instance").(string)))
 	}
+	flattenedDatabases := flattenDatabases(databases.Items)
 
-	if err := d.Set("databases", flattenDatabases(databases.Items)); err != nil {
+	//client-side sorting to provide consistent ordering of the databases
+	sort.SliceStable(flattenedDatabases, func(i, j int) bool {
+		return strings.Compare(flattenedDatabases[i]["name"].(string), flattenedDatabases[j]["name"].(string)) < 1
+	})
+	if err := d.Set("databases", flattenedDatabases); err != nil {
 		return fmt.Errorf("Error setting databases: %s", err)
 	}
 	d.SetId(fmt.Sprintf("project/%s/instance/%s/databases", project, d.Get("instance").(string)))
