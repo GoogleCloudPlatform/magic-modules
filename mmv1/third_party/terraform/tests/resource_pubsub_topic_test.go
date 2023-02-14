@@ -43,7 +43,6 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 	t.Parallel()
 
 	kms := BootstrapKMSKey(t)
-	pid := getTestProjectFromEnv()
 	topicName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
@@ -52,7 +51,7 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 		CheckDestroy: testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubTopic_cmek(pid, topicName, kms.CryptoKey.Name),
+				Config: testAccPubsubTopic_cmek(topicName, kms.CryptoKey.Name),
 			},
 			{
 				ResourceName:      "google_pubsub_topic.topic",
@@ -97,5 +96,5 @@ resource "google_pubsub_topic" "topic" {
   name         = "%s"
   kms_key_name = "%s"
 }
-`, pid, topicName, kmsKey)
+`, topicName, kmsKey)
 }
