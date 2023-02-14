@@ -2592,7 +2592,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_basic_1_23_8(clusterName),
+				Config: testAccContainerCluster_basic_1_24(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -2640,7 +2640,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 			},
 			// Back to basic settings to test setting Prometheus on its own
 			{
-				Config: testAccContainerCluster_basic_1_23_8(clusterName),
+				Config: testAccContainerCluster_basic_1_24(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -2658,7 +2658,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
-				Config: testAccContainerCluster_basic_1_23_8(clusterName),
+				Config: testAccContainerCluster_basic_1_24(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -7103,17 +7103,13 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
-func testAccContainerCluster_basic_1_23_8(name string) string {
+func testAccContainerCluster_basic_1_24(name string) string {
 	return fmt.Sprintf(`
-data "google_container_engine_versions" "uscentral1a" {
-  location = "us-central1-a"
-}
-
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  min_master_version = "1.24.0"
 }
 `, name)
 }
@@ -7128,7 +7124,7 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  min_master_version = "1.24.0"
   monitoring_config {
       enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER" ]
   }
@@ -7152,15 +7148,11 @@ resource "google_container_cluster" "primary" {
 <% if version == "beta" -%>
 func testAccContainerCluster_withMonitoringConfigUpdated(name string) string {
        return fmt.Sprintf(`
-data "google_container_engine_versions" "uscentral1a" {
-  location = "us-central1-a"
-}
-
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  min_master_version = "1.24.0"
   monitoring_config {
          enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER", "WORKLOADS" ]
   }
@@ -7171,15 +7163,11 @@ resource "google_container_cluster" "primary" {
 
 func testAccContainerCluster_withMonitoringConfigPrometheusUpdated(name string) string {
        return fmt.Sprintf(`
-data "google_container_engine_versions" "uscentral1a" {
-  location = "us-central1-a"
-}
-
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  min_master_version = "1.24.0"
   monitoring_config {
          enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER" ]
          managed_prometheus {
@@ -7192,15 +7180,11 @@ resource "google_container_cluster" "primary" {
 
 func testAccContainerCluster_withMonitoringConfigPrometheusOnly(name string) string {
        return fmt.Sprintf(`
-data "google_container_engine_versions" "uscentral1a" {
-  location = "us-central1-a"
-}
-
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  min_master_version = "1.24.0"
   monitoring_config {
 	     enable_components = []
          managed_prometheus {
