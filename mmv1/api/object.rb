@@ -58,7 +58,7 @@ module Api
         end
 
         other.instance_variables.each do |v|
-          if other.instance_variable_get(v).class == Array
+          if other.instance_variable_get(v).instance_of?(Array)
             result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
                                                        other.instance_variable_get(v)))
           else

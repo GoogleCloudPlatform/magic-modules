@@ -15,3 +15,10 @@
 if err := waitForDatastreamStreamReady(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
   return fmt.Errorf("Error waiting for Stream %q to be NOT_STARTED or RUNNING during creation: %q", d.Get("name").(string), err)
 }
+
+if d.Get("state") != d.Get("desired_state") {
+  log.Printf("[DEBUG] Desired state %s not equal to state = %s, updating stream %q", d.Get("desired_state"), d.Get("state"), d.Id())
+  if err = resourceDatastreamStreamUpdate(d, meta); err != nil {
+    return fmt.Errorf("Error updating Stream %q during creation: %q", d.Get("name").(string), err)
+  }
+}
