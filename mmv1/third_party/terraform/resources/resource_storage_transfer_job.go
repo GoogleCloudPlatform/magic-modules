@@ -82,18 +82,6 @@ func resourceStorageTransferJob() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"object_conditions": objectConditionsSchema(),
 						"transfer_options":  transferOptionsSchema(),
-						"source_agent_pool_name": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
-							Description: `Specifies the agent pool name associated with the posix data source. When unspecified, the default name is used.`,
-						},
-						"sink_agent_pool_name": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
-							Description: `Specifies the agent pool name associated with the posix data source. When unspecified, the default name is used.`,
-						},
 						"gcs_data_sink": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -1076,8 +1064,6 @@ func expandTransferSpecs(transferSpecs []interface{}) *storagetransfer.TransferS
 
 	transferSpec := transferSpecs[0].(map[string]interface{})
 	return &storagetransfer.TransferSpec{
-		SourceAgentPoolName:        transferSpec["source_agent_pool_name"].(string),
-		SinkAgentPoolName:          transferSpec["sink_agent_pool_name"].(string),
 		GcsDataSink:                expandGcsData(transferSpec["gcs_data_sink"].([]interface{})),
 		PosixDataSink:              expandPosixData(transferSpec["posix_data_sink"].([]interface{})),
 		ObjectConditions:           expandObjectConditions(transferSpec["object_conditions"].([]interface{})),
@@ -1090,13 +1076,8 @@ func expandTransferSpecs(transferSpecs []interface{}) *storagetransfer.TransferS
 	}
 }
 
-func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.ResourceData) []map[string]interface{} {
-
-	data := map[string]interface{}{}
-
-	data["sink_agent_pool_name"] = transferSpec.SinkAgentPoolName
-	data["source_agent_pool_name"] = transferSpec.SourceAgentPoolName
-
+func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.ResourceData) []map[string][]map[string]interface{} {
+	data := map[string][]map[string]interface{}{}
 	if transferSpec.GcsDataSink != nil {
 		data["gcs_data_sink"] = flattenGcsData(transferSpec.GcsDataSink)
 	}
@@ -1124,7 +1105,7 @@ func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.R
 		data["posix_data_source"] = flattenPosixData(transferSpec.PosixDataSource)
 	}
 
-	return []map[string]interface{}{data}
+	return []map[string][]map[string]interface{}{}
 }
 
 func usingPosix(transferSpec *storagetransfer.TransferSpec) bool {
