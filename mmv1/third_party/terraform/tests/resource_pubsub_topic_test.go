@@ -99,7 +99,6 @@ data "google_project" "project" {
 
 resource "google_pubsub_topic" "topic" {
   name         = "%s"
-  project      = google_project_iam_member.kms-project-binding.project
   kms_key_name = "%s"
 }
 `, pid, topicName, kmsKey)
