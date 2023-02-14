@@ -2592,7 +2592,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_basic_1_24(clusterName),
+				Config: testAccContainerCluster_basic_1_23_16(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -2640,7 +2640,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 			},
 			// Back to basic settings to test setting Prometheus on its own
 			{
-				Config: testAccContainerCluster_basic_1_24(clusterName),
+				Config: testAccContainerCluster_basic_1_23_16(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -2658,7 +2658,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
-				Config: testAccContainerCluster_basic_1_24(clusterName),
+				Config: testAccContainerCluster_basic_1_23_16(clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -7103,13 +7103,13 @@ resource "google_container_cluster" "primary" {
 `, name)
 }
 
-func testAccContainerCluster_basic_1_24(name string) string {
+func testAccContainerCluster_basic_1_23_16(name string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.24.0"
+  min_master_version = "1.23.16-gke.200"
 }
 `, name)
 }
@@ -7124,7 +7124,7 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.24.0"
+  min_master_version = "1.23.16-gke.200"
   monitoring_config {
       enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER" ]
   }
@@ -7152,7 +7152,7 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.24.0"
+  min_master_version = "1.23.16-gke.200"
   monitoring_config {
          enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER", "WORKLOADS" ]
   }
@@ -7167,7 +7167,7 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.24.0"
+  min_master_version = "1.23.16-gke.200"
   monitoring_config {
          enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER" ]
          managed_prometheus {
@@ -7184,7 +7184,7 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  min_master_version = "1.24.0"
+  min_master_version = "1.23.16-gke.200"
   monitoring_config {
 	     enable_components = []
          managed_prometheus {
