@@ -125,9 +125,11 @@ func (d *GoogleDnsRecordSetDataSource) Read(ctx context.Context, req datasource.
 	clientResp, err := d.client.ResourceRecordSets.List(data.Project.ValueString(), data.ManagedZone.ValueString()).Name(data.Name.ValueString()).Type(data.Type.ValueString()).Do()
 	if err != nil {
 		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceDnsRecordSet %q", data.Name.ValueString()), &resp.Diagnostics)
+		return
 	}
 	if len(clientResp.Rrsets) != 1 {
 		resp.Diagnostics.AddError("only expected 1 record set", fmt.Sprintf("%d record sets were returned", len(clientResp.Rrsets)))
+		return
 	}
 
 	tflog.Trace(ctx, "read dns record set data source")

@@ -151,6 +151,7 @@ func (d *GoogleDnsManagedZoneDataSource) Read(ctx context.Context, req datasourc
 	clientResp, err := d.client.ManagedZones.Get(data.Project.ValueString(), data.Name.ValueString()).Do()
 	if err != nil {
 		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceDnsManagedZone %q", data.Name.ValueString()), &resp.Diagnostics)
+		return
 	}
 
 	tflog.Trace(ctx, "read dns record set data source")
