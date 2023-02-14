@@ -443,6 +443,11 @@ objects:
                 exactly_one_of:
                   - github.0.push.0.branch
                   - github.0.push.0.tag
+          - !ruby/object:Api::Type::String
+            name: 'enterpriseConfigResourceName'
+            description: |
+                    The resource name of the github enterprise config that should be applied to this installation.
+                    For example: "projects/{$projectId}/locations/{$locationId}/githubEnterpriseConfigs/{$configId}"
       - !ruby/object:Api::Type::NestedObject
         name: "bitbucketServerTriggerConfig"
         description: |
