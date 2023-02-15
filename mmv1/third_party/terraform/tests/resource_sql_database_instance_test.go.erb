@@ -2563,6 +2563,7 @@ resource "google_sql_database_instance" "instance" {
     backup_configuration {
       enabled    = "true"
       start_time = "19:19"
+      binary_log_enabled = true
     }
 
     activation_policy = "ALWAYS"
