@@ -65,6 +65,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           installation_id: 31300675
           pat_secret: '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
           repo_uri: '"https://github.com/gcb-repos-robot/tf-demo.git"'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_bitbucket_server_push"
+        primary_resource_id: "bbs-push-trigger"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_bitbucket_server_pull_request"
+        primary_resource_id: "bbs-pull-request-trigger"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_github_enterprise"
+        primary_resource_id: "ghe-trigger"
+        skip_test: true
 
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride

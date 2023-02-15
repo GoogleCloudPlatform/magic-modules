@@ -1,0 +1,183 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+  name: 'ApiConfig'
+  min_version: beta
+  create_url: projects/{{project}}/locations/global/apis/{{api}}/configs?apiConfigId={{api_config_id}}
+  self_link: projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config_id}}
+  base_url: projects/{{project}}/locations/global/apis/{{api}}/configs
+  read_query_params: '?view=FULL'
+  update_verb: :PATCH
+  update_mask: true
+  description: |
+    An API Configuration is an association of an API Controller Config and a Gateway Config
+  identity:
+    - apiConfigId
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation':
+        'https://cloud.google.com/api-gateway/docs/creating-api-config'
+    api: 'https://cloud.google.com/api-gateway/docs/reference/rest/v1beta/projects.locations.apis.configs'
+  parameters:
+    - !ruby/object:Api::Type::String
+      name: api
+      description: |
+        The API to attach the config to.
+      required: true
+      input: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: apiConfigId
+      description: |
+        Identifier to assign to the API Config. Must be unique within scope of the parent resource(api).
+      input: true
+      url_param_only: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'name'
+      description: The resource name of the API Config.
+      output: true
+    - !ruby/object:Api::Type::String
+      name: 'displayName'
+      description: |
+        A user-visible name for the API.
+    - !ruby/object:Api::Type::String
+      name: 'serviceConfigId'
+      output: true
+      description: |
+        The ID of the associated Service Config (https://cloud.google.com/service-infrastructure/docs/glossary#config).
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'labels'
+      description: |
+        Resource labels to represent user-provided metadata.
+    - !ruby/object:Api::Type::NestedObject
+      name: 'gatewayConfig'
+      input: true
+      description: |
+        Immutable. Gateway specific configuration.
+        If not specified, backend authentication will be set to use OIDC authentication using the default compute service account
+      properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'backendConfig'
+        required: true
+        description: |
+          Backend settings that are applied to all backends of the Gateway.
+        properties:
+        - !ruby/object:Api::Type::String
+          name: 'googleServiceAccount'
+          input: true
+          required: true
+          description: |
+            Google Cloud IAM service account used to sign OIDC tokens for backends that have authentication configured
+            (https://cloud.google.com/service-infrastructure/docs/service-management/reference/rest/v1/services.configs#backend).
+    - !ruby/object:Api::Type::Array
+      name: 'openapiDocuments'
+      description: |
+        OpenAPI specification documents. If specified, grpcServices and managedServiceConfigs must not be included.
+      exactly_one_of:
+        - openapi_documents
+        - grpc_services
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'document'
+            required: true
+            description: The OpenAPI Specification document file.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'path'
+                required: true
+                input: true
+                description: |
+                  The file path (full or relative path). This is typically the path of the file when it is uploaded.
+              - !ruby/object:Api::Type::String
+                name: 'contents'
+                required: true
+                input: true
+                description: |
+                  Base64 encoded content of the file.
+    - !ruby/object:Api::Type::Array
+      name: 'grpcServices'
+      description: |
+        gRPC service definition files. If specified, openapiDocuments must not be included.
+      exactly_one_of:
+        - openapi_documents
+        - grpc_services
+      required_with:
+        - managed_service_configs
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'fileDescriptorSet'
+            required: true
+            input: true
+            description: |
+              Input only. File descriptor set, generated by protoc.
+              To generate, use protoc with imports and source info included. For an example test.proto file, the following command would put the value in a new file named out.pb.
+
+              $ protoc --include_imports --include_source_info test.proto -o out.pb
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'path'
+                required: true
+                input: true
+                description: |
+                  The file path (full or relative path). This is typically the path of the file when it is uploaded.
+              - !ruby/object:Api::Type::String
+                name: 'contents'
+                required: true
+                input: true
+                description: |
+                  Base64 encoded content of the file.
+          - !ruby/object:Api::Type::Array
+            name: 'source'
+            description: |
+              Uncompiled proto files associated with the descriptor set, used for display purposes (server-side compilation is not supported). These should match the inputs to 'protoc' command used to generate fileDescriptorSet.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'path'
+                  required: true
+                  input: true
+                  description: |
+                    The file path (full or relative path). This is typically the path of the file when it is uploaded.
+                - !ruby/object:Api::Type::String
+                  name: 'contents'
+                  required: true
+                  input: true
+                  description: |
+                    Base64 encoded content of the file.
+    - !ruby/object:Api::Type::Array
+      name: 'managedServiceConfigs'
+      description: |
+        Optional. Service Configuration files. At least one must be included when using gRPC service definitions. See https://cloud.google.com/endpoints/docs/grpc/grpc-service-config#service_configuration_overview for the expected file contents.
+        If multiple files are specified, the files are merged with the following rules: * All singular scalar fields are merged using "last one wins" semantics in the order of the files uploaded. * Repeated fields are concatenated. * Singular embedded messages are merged using these rules for nested fields.
+      required_with:
+        - grpc_services
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'path'
+            required: true
+            input: true
+            description: |
+              The file path (full or relative path). This is typically the path of the file when it is uploaded.
+          - !ruby/object:Api::Type::String
+            name: 'contents'
+            required: true
+            input: true
+            description: |
+              Base64 encoded content of the file.
+
+

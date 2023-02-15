@@ -42,7 +42,6 @@ objects:
         'Getting Started': 'https://cloud.google.com/service-usage/docs/manage-quota#create_consumer_quota_override'
         'REST API documentation': 'https://cloud.google.com/service-usage/docs/reference/rest/v1beta1/services.consumerQuotaMetrics.limits.adminOverrides'
     nested_query: !ruby/object:Api::Resource::NestedQuery
-      kind: 'serviceusage#overridesList'
       keys:
         - overrides
     identity:
@@ -132,7 +131,6 @@ objects:
         'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
         'REST API documentation': 'https://cloud.google.com/service-usage/docs/reference/rest/v1beta1/services.consumerQuotaMetrics.limits.consumerOverrides'
     nested_query: !ruby/object:Api::Resource::NestedQuery
-      kind: 'serviceusage#overridesList'
       keys:
         - overrides
     identity:
