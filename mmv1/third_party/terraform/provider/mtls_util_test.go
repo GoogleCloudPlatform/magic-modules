@@ -1,4 +1,4 @@
-package google
+package provider
 
 import (
 	"strings"
@@ -8,7 +8,7 @@ import (
 func TestUnitMtls_urlSwitching(t *testing.T) {
 	t.Parallel()
 	for key, bp := range DefaultBasePaths {
-		url := GetMtlsEndpoint(bp)
+		url := getMtlsEndpoint(bp)
 		if !strings.Contains(url, ".mtls.") {
 			t.Errorf("%s: mtls conversion unsuccessful preconv - %s postconv - %s", key, bp, url)
 		}

@@ -1,4 +1,4 @@
-package google
+package provider
 
 import (
 	"context"
@@ -14,9 +14,9 @@ import (
 // the user is within mtls mode or not. They do return the mtls endpoint if
 // it is enabled during client creation so we will use this logic to determine
 // the mode the user is in and throw away the client they give us back.
-func IsMtls() bool {
+func isMtls() bool {
 	regularEndpoint := "https://mockservice.googleapis.com/v1/"
-	mtlsEndpoint := GetMtlsEndpoint(regularEndpoint)
+	mtlsEndpoint := getMtlsEndpoint(regularEndpoint)
 	_, endpoint, err := transport.NewHTTPClient(context.Background(),
 		internaloption.WithDefaultEndpoint(regularEndpoint),
 		internaloption.WithDefaultMTLSEndpoint(mtlsEndpoint),
@@ -24,11 +24,11 @@ func IsMtls() bool {
 	if err != nil {
 		return false
 	}
-	IsMtls := endpoint == mtlsEndpoint
-	return IsMtls
+	isMtls := endpoint == mtlsEndpoint
+	return isMtls
 }
 
-func GetMtlsEndpoint(baseEndpoint string) string {
+func getMtlsEndpoint(baseEndpoint string) string {
 	u, err := url.Parse(baseEndpoint)
 	if err != nil {
 		if strings.Contains(baseEndpoint, ".googleapis") {

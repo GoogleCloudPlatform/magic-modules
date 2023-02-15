@@ -29,10 +29,10 @@ func Provider() *schema.Provider {
 	// at client creation. Since we use a shared client for requests we must
 	// rewrite the endpoints to be mtls endpoints for the scenario where
 	// mtls is enabled.
-	if google.IsMtls() {
+	if isMtls() {
 		// if mtls is enabled switch all default endpoints to use the mtls endpoint
 		for key, bp := range google.DefaultBasePaths {
-			google.DefaultBasePaths[key] = google.GetMtlsEndpoint(bp)
+			google.DefaultBasePaths[key] = google.getMtlsEndpoint(bp)
 		}
 	}
 
@@ -101,7 +101,7 @@ func Provider() *schema.Provider {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "10s",
-							ValidateFunc: google.ValidateNonNegativeDuration(),
+							ValidateFunc: validateNonNegativeDuration(),
 						},
 						"enable_batching": {
 							Type:     schema.TypeBool,
@@ -343,7 +343,7 @@ func ResourceMap() map[string]*schema.Resource {
 }
 
 func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
-	return google.MergeResourceMaps(
+	return mergeResourceMaps(
 			map[string]*schema.Resource{
 <%
 products.each do |product|
@@ -802,4 +802,26 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 			"GOOGLE_CONTAINERAZURE_CUSTOM_ENDPOINT",
 		}, google.DefaultBasePaths[google.ContainerAzureBasePathKey]))
 	}
+}
+
+func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
+	merged := make(map[string]*schema.Resource)
+	duplicates := []string{}
+
+	for _, m := range ms {
+		for k, v := range m {
+			if _, ok := merged[k]; ok {
+				duplicates = append(duplicates, k)
+			}
+
+			merged[k] = v
+		}
+	}
+
+	var err error
+	if len(duplicates) > 0 {
+		err = fmt.Errorf("saw duplicates in mergeResourceMaps: %v", duplicates)
+	}
+
+	return merged, err
 }

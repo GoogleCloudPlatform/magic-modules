@@ -305,28 +305,6 @@ func mergeSchemas(a, b map[string]*schema.Schema) map[string]*schema.Schema {
 	return merged
 }
 
-func MergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
-	merged := make(map[string]*schema.Resource)
-	duplicates := []string{}
-
-	for _, m := range ms {
-		for k, v := range m {
-			if _, ok := merged[k]; ok {
-				duplicates = append(duplicates, k)
-			}
-
-			merged[k] = v
-		}
-	}
-
-	var err error
-	if len(duplicates) > 0 {
-		err = fmt.Errorf("saw duplicates in MergeResourceMaps: %v", duplicates)
-	}
-
-	return merged, err
-}
-
 func StringToFixed64(v string) (int64, error) {
 	return strconv.ParseInt(v, 10, 64)
 }
