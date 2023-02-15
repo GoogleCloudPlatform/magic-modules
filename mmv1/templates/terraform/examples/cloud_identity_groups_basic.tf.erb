@@ -1,6 +1,7 @@
 resource "google_cloud_identity_group" "<%= ctx[:primary_resource_id] %>" {
   display_name         = "<%= ctx[:vars]['id_group'] %>"
   initial_group_config = "WITH_INITIAL_OWNER"
+  description = "test"
 
   parent = "customers/<%= ctx[:test_env_vars]['cust_id'] %>"
 
