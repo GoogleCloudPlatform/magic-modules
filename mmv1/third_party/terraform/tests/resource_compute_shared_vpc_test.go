@@ -22,6 +22,22 @@ func TestAccComputeSharedVpc_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
+			//Create resources with the deletion_policy flag
+			{
+				Config: testAccComputeSharedVpc_SharedVPCServiceProjectWithDeletionPolicy(hostProject, serviceProject, org, billingId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSharedVpcHostProject(t, hostProject, true),
+					testAccCheckComputeSharedVpcServiceProject(t, hostProject, serviceProject, true),
+				),
+			},
+			// Test that resource haven't been deleted after resource has been removed
+			{
+				Config: testAccComputeSharedVpc_SharedVPCServiceProjectWithDeletionPolicyDeleted(hostProject, serviceProject, org, billingId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSharedVpcHostProject(t, hostProject, true),
+					testAccCheckComputeSharedVpcServiceProject(t, hostProject, serviceProject, true),
+				),
+			},
 			{
 				Config: testAccComputeSharedVpc_basic(hostProject, serviceProject, org, billingId),
 				Check: resource.ComposeTestCheckFunc(
@@ -47,21 +63,7 @@ func TestAccComputeSharedVpc_basic(t *testing.T) {
 					testAccCheckComputeSharedVpcHostProject(t, hostProject, false),
 					testAccCheckComputeSharedVpcServiceProject(t, hostProject, serviceProject, false),
 				),
-			},
-			{
-				Config: testAccComputeSharedVpc_SharedVPCServiceProjectWithDeletionPolicy(hostProject, serviceProject, org, billingId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSharedVpcHostProject(t, hostProject, true),
-					testAccCheckComputeSharedVpcServiceProject(t, hostProject, serviceProject, true),
-				),
-			},
-			{
-				Config: testAccComputeSharedVpc_SharedVPCServiceProjectWithDeletionPolicyDeleted(hostProject, serviceProject, org, billingId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSharedVpcHostProject(t, hostProject, false),
-					testAccCheckComputeSharedVpcServiceProject(t, hostProject, serviceProject, false),
-				),
-			},
+			}
 		},
 	})
 }
