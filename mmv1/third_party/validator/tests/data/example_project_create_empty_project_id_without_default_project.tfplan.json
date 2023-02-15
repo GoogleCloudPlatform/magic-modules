@@ -78,12 +78,12 @@
         "before": null,
         "after": {
           "display_name": "Department 1",
-          "folder_id": "{{.FolderID}}",
-          "parent": "organizations/{{.OrgID}}",
+          "parent": "organizations/1234567",
           "timeouts": null
         },
         "after_unknown": {
           "create_time": true,
+          "folder_id": true,
           "id": true,
           "lifecycle_state": true,
           "name": true

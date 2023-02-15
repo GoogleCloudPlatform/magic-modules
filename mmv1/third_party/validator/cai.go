@@ -58,7 +58,7 @@ type Folder struct {
 	Parent      string `json:"parent"`
 	DisplayName string `json:"display_name"`
 	State string `json:"lifecycle_state"`
-	//CreateTime *Timestamp `json:"create_time,omitempty"`
+	CreateTime *Timestamp `json:"create_time,omitempty"`
 }
 
 type IAMPolicy struct {

@@ -52,7 +52,8 @@
         "before": null,
         "after": {
           "display_name": "Department 1",
-          "parent": "organizations/1234567",
+          "folder_id": "{{.FolderID}}",
+          "parent": "organizations/{{.OrgID}}",
           "timeouts": null
         },
         "after_unknown": {
