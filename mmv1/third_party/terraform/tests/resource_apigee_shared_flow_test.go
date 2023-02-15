@@ -114,7 +114,7 @@ resource "google_apigee_environment" "org" {
 }
 
 resource "google_apigee_shared_flow" "test_apigee_sharedflow" {
-  name            = "test-apigee-sharedflow"
+  name            = "tf-test-apigee-sharedflow"
   org_id          = google_project.project.project_id
   config_bundle   = "./test-fixtures/apigee/apigee_sharedflow_bundle.zip"
   depends_on      = [google_apigee_organization.apigee_org]
@@ -223,7 +223,7 @@ resource "google_apigee_environment" "org" {
 }
 
 resource "google_apigee_shared_flow" "test_apigee_sharedflow" {
-  name            = "test-apigee-sharedflow"
+  name            = "tf-test-apigee-sharedflow"
   org_id          = google_project.project.project_id
   config_bundle   = "./test-fixtures/apigee/apigee_sharedflow_bundle2.zip"
   depends_on      = [google_apigee_organization.apigee_org]

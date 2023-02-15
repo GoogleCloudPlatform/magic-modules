@@ -133,14 +133,10 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 	tflog.Info(ctx, "resourceApigeeSharedFlowCreate")
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate")
 
-	//print debug info======
-	tmpName, _ := d.GetOk("name")
-	tmpOrgId, _ := d.GetOk("org_id")
-	tmpBundle, _ := d.GetOk("config_bundle")
-	
-	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, name=			 	%s", tmpName)
-	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, org_id=, 			%s", tmpOrgId)
-	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, config_bundle=, 	%s", tmpBundle)
+	//print debug info======	
+	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, name=			 	%s", d.Get("name").(string))
+	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, org_id=, 			%s", d.Get("org_id").(string))
+	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, config_bundle=, 	%s", d.Get("config_bundle").(string))
 	//debug=================
 
 	config := meta.(*Config)

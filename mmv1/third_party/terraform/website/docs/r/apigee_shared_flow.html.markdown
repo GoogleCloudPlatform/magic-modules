@@ -51,8 +51,14 @@ In addition to the arguments listed above, the following computed attributes are
 * `revision` -
   A list of revisions of this shared flow.
 
-* `latest_revision_id` -
+* `latest_revision_id` - 
   The id of the most recently created revision for this shared flow.
+
+* `md5hash` - 
+  (Computed) Base 64 MD5 hash of the uploaded data. It is speculative as remote does not return hash of the bundle. Remote changes are detected using returned last_modified timestamp.
+
+* `detect_md5hash` - 
+  (Optional) Detect changes to local config bundle file or changes made outside of Terraform. MD5 hash of the data, encoded using base64. Hash is automatically computed without need for user input.
 
 
 <a name="nested_meta_data"></a>The `meta_data` block contains:
