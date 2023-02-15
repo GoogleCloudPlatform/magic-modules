@@ -49,7 +49,7 @@ resource "google_tpu_node" "tpu" {
   name = "%s"
   zone = "us-central1-c"
 
-  accelerator_type   = "v3-8"
+  accelerator_type   = "v2-8"
   tensorflow_version = data.google_tpu_tensorflow_versions.available.versions[%d]
 }
 `, nodeId, versionIdx)
