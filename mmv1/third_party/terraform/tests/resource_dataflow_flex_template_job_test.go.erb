@@ -191,7 +191,6 @@ func testAccDataflowFlexTemplateJobGetGeneratedInstance(t *testing.T, s *terrafo
 	return instance, nil
 }
 
-// note: this config creates a job that doesn't actually do anything, but still runs
 func testAccDataflowFlexTemplateJob_basic(job, topicName string) string {
 	topicField := ""
 	if topicName != "" {
@@ -207,7 +206,7 @@ resource "google_dataflow_flex_template_job" "job" {
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
   parameters = {
-    schemaLocation = "gs://mybucket/schema.json"
+    schemaLocation = "gs://tf-dataflow-testing/schema.json"
     qps = "1"
     %s
   }
@@ -218,7 +217,6 @@ resource "google_dataflow_flex_template_job" "job" {
 `, job, topicField)
 }
 
-// note: this config creates a job that doesn't actually do anything, but still runs
 func testAccDataflowFlexTemplateJob_serviceAccount(job, accountId, zone string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
@@ -241,7 +239,7 @@ resource "google_dataflow_flex_template_job" "job" {
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
   parameters = {
-    schemaLocation = "gs://mybucket/schema.json"
+    schemaLocation = "gs://tf-dataflow-testing/schema.json"
     qps = "1"
     topic = "projects/myproject/topics/mytopic"
     serviceAccount = google_service_account.dataflow-sa.email
