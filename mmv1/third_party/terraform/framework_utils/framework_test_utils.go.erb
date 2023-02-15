@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -89,7 +90,7 @@ func providerVersion450() map[string]resource.ExternalProvider {
 	return map[string]resource.ExternalProvider{
 		"google": {
 			VersionConstraint: "4.50.0",
-			Source:            "hashicorp/google",
+			Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
 		},
 	}
 }

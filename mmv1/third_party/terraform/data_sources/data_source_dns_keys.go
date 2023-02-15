@@ -164,12 +164,11 @@ func (d *GoogleDnsKeysDataSource) Read(ctx context.Context, req datasource.ReadR
 	tflog.Debug(ctx, fmt.Sprintf("fetching DNS keys from managed zone %s", data.ManagedZone.ValueString()))
 
 	clientResp, err := d.client.DnsKeys.List(data.Project.ValueString(), data.ManagedZone.ValueString()).Do()
-	if err != nil && !isGoogleApiErrorWithCode(err, 404) {
-		diags.AddError("error retrieving DNS keys", err.Error())
-		return
-	} else if isGoogleApiErrorWithCode(err, 404) {
-		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-		return
+	if err != nil {
+		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceDnsKeys %q", data.Id.ValueString()), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	tflog.Trace(ctx, "read dns keys data source")
