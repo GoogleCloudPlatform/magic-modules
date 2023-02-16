@@ -14,7 +14,8 @@ weight: 50
    * [`google-beta` provider](https://github.com/hashicorp/terraform-provider-google-beta)
    * [Hashicorp documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
    
-   If it exists, check the header of the downstream file to identify the type of tools used to generate the resource. For some resources, the code file,  the test file and the documentation file might not be generated via the same tools.
+   If it exists, check the header of the downstream file to identify the type of tools used to generate the resource.
+   For some resources, the code file, the test file and the documentation file might not be generated via the same tools.
       * Generated resources like [`google_compute_address`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) can be identified by looking in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_compute_address.go) for an `AUTO GENERATED CODE` header as well as a `Type`. "Generated resources" typically refers to just the `MMv1` type, and `DCL` type resources are considered "DCL-based". (Currently DCL-related contribution are not supported)
       * Handwritten resources like [`google_container_cluster`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster) can be identified if they have source code present under the [`mmv1/third_party/terraform/resources`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/resources) folder or by the absence of the `AUTO GENERATED CODE header` in their [`Go source`](https://github.com/hashicorp/terraform-provider-google/blob/main/google/resource_container_cluster.go).
    
@@ -45,4 +46,4 @@ weight: 50
    Where possible, take a look at the logs and see if you can figure out what needs to be fixed related to your change.
    The false positive rate on these tests is extremely high between changes in the API, Cloud Build bugs, and eventual consistency issues in test recordings so we don't expect contributors to wholly interpret the results — that's the responsibility of your reviewer.
 1. If your assigned reviewer does not reply / review within a week, gently ping them on GitHub.
-1. After your PR is merged, it will be released to customers in one to two weeks.
+1. After your PR is merged, it will be released to customers in around one to two weeks.
