@@ -196,7 +196,7 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: protoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
+		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, randString(t, 10)),
@@ -302,6 +302,10 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 				ImportState:              true,
 				ImportStateVerify:        true,
 			},
+			{
+				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				Config:                   testAccFrameworkProviderBasePath_setBasePathstep3("https://www.googleapis.com/dns/v1beta2/", randString(t, 10)),
+			},
 		},
 	})
 }
@@ -357,4 +361,20 @@ data "google_dns_managed_zone" "qa" {
 	provider    = "google.dns_custom_endpoint"
   name = google_dns_managed_zone.foo.name
 }`, endpoint, name, name)
+}
+
+func testAccFrameworkProviderBasePath_setBasePathstep3(endpoint, name string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  alias               = "dns_custom_endpoint"
+  dns_custom_endpoint = "%s"
+}
+
+resource "google_dns_managed_zone" "foo" {
+  provider    = google.dns_custom_endpoint
+  name        = "tf-test-zone-%s"
+  dns_name    = "tf-test-zone-%s.hashicorptest.com."
+  description = "QA DNS zone"
+}
+`, endpoint, name, name)
 }
