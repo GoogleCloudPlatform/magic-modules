@@ -273,7 +273,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceHTTPProbesUpdate(t *testing.T) {
 func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 	t.Parallel()
 
-  serviceName := fmt.Sprintf("tf-test-cloudrun-service%s", randString(t, 10))
+	serviceName := fmt.Sprintf("tf-test-cloudrun-service%s", randString(t, 10))
 	context := map[string]interface{}{
 		"service_name": serviceName,
 	}
@@ -284,7 +284,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:    testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCLivenessProbe(context),
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
@@ -293,7 +293,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
 			{
-				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithNamedServiceGRPCLivenessProbe(context),
+				Config: testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
@@ -301,18 +301,18 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceGRPCProbesUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "location"},
 			},
-      // The following test steps of gRPC startup probe are expected to fail with startup probe check failures.
-      // This is because, due to the unavailability of ready-to-use container images of a gRPC service that
-      // implements the standard gRPC health check protocol, we compromise and use a container image of an
-      // ordinary HTTP service to deploy the gRPC service, which never passes startup probes.
-      // So we only check that the `startup.grpc {}` block and its properties are accepted by the APIs.
+			// The following test steps of gRPC startup probe are expected to fail with startup probe check failures.
+			// This is because, due to the unavailability of ready-to-use container images of a gRPC service that
+			// implements the standard gRPC health check protocol, we compromise and use a container image of an
+			// ordinary HTTP service to deploy the gRPC service, which never passes startup probes.
+			// So we only check that the `startup.grpc {}` block and its properties are accepted by the APIs.
 			{
-				Config:      testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCStartupProbe(context),
+				Config:      testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCStartupProbe(context),
 				ExpectError: regexp.MustCompile(fmt.Sprintf(`Revision '%s-.*' is not ready and cannot serve traffic\. The user-provided container failed the configured startup probe checks\.`, serviceName)),
 			},
 			{
 				PreConfig:   testAccCheckCloudRunV2ServiceDestroyByNameProducer(t, serviceName),
-				Config:      testAccCloudRunV2Service_cloudRunServiceUpdateWithNamedServiceGRPCStartupProbe(context),
+				Config:      testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCStartupProbe(context),
 				ExpectError: regexp.MustCompile(fmt.Sprintf(`Revision '%s-.*' is not ready and cannot serve traffic\. The user-provided container failed the configured startup probe checks\.`, serviceName)),
 			},
 			{
@@ -463,7 +463,7 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-func testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCLivenessProbe(context map[string]interface{}) string {
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCLivenessProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     ="%{service_name}"
@@ -476,9 +476,7 @@ resource "google_cloud_run_v2_service" "default" {
         container_port = 8080
       }
       liveness_probe {
-        grpc {
-          port = 8080
-        }
+        grpc {}
       }
     }
   }
@@ -486,7 +484,7 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-func testAccCloudRunV2Service_cloudRunServiceUpdateWithNamedServiceGRPCLivenessProbe(context map[string]interface{}) string {
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCLivenessProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "%{service_name}"
@@ -510,7 +508,7 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-func testAccCloudRunV2Service_cloudRunServiceUpdateWithDefaultServiceGRPCStartupProbe(context map[string]interface{}) string {
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithEmptyGRPCStartupProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "%{service_name}"
@@ -523,9 +521,7 @@ resource "google_cloud_run_v2_service" "default" {
         container_port = 8080
       }
       startup_probe {
-        grpc {
-          port = 8080
-        }
+        grpc {}
       }
     }
   }
@@ -533,7 +529,7 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-func testAccCloudRunV2Service_cloudRunServiceUpdateWithNamedServiceGRPCStartupProbe(context map[string]interface{}) string {
+func testAccCloudRunV2Service_cloudRunServiceUpdateWithGRPCStartupProbe(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_run_v2_service" "default" {
   name     = "%{service_name}"
