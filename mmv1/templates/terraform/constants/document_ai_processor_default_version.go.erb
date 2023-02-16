@@ -1,0 +1,56 @@
+<%- # the license inside this block applies to this file
+	# Copyright 2023 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func documentAIProcessorDefaultVersionVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	// Do not suppress the diff if the configuration has a badly-formatted value
+	idRegex := regexp.MustCompile("^projects/[^/]+")
+	if !idRegex.MatchString(new) {
+		return false
+	}
+
+	// Do not suppress the diff if the API returned a project id
+	numberRegex := regexp.MustCompile("^projects/\\d+")
+
+	if !numberRegex.MatchString(old) {
+		return false
+	}
+
+	// Do not suppress the diff if the locations or processors have changed.
+	extractValuesRegex := regexp.MustCompile("^projects/[^/]+/locations/([^/]+)/processors/([^/]+)/processorVersions/([^/]+)$")
+	oldSubmatches := extractValuesRegex.FindStringSubmatch(old)
+	newSubmatches := extractValuesRegex.FindStringSubmatch(new)
+
+	if oldSubmatches[1] != newSubmatches[1] {
+		return false
+	}
+
+	if oldSubmatches[2] != newSubmatches[2] {
+		return false
+	}
+
+	// The API returns different values if the user sends a few predefined "channels". In those cases, suppress the diff.
+	channels := map[string]struct{}{
+		"stable": struct{}{},
+		"rc": struct{}{},
+		"pretrained": struct{}{},
+		"pretrained-next": struct{}{},
+	}
+	processorVersion := newSubmatches[3]
+	if _, ok := channels[processorVersion]; ok {
+		return true
+	}
+
+	// Suppress the diff if the processor versions are an exact match.
+	return oldSubmatches[3] == newSubmatches[3]
+}
