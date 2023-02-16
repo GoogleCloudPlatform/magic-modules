@@ -479,6 +479,10 @@ func (p *frameworkProvider) SetupGrpcLogging() {
 }
 
 func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data ProviderModel, diags *diag.Diagnostics) {
+	// getCurrUserEmail doesn't pass an error back from logGoogleIdentities, so we want
+	// a separate diagnostics here
+	var d diag.Diagnostics
+
 	if data.ImpersonateServiceAccount.IsNull() {
 
 		tokenSource := GetTokenSource(ctx, data, true, diags)
@@ -488,8 +492,8 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 
 		p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
 
-		email := getCurrUserEmail(p, p.userAgent, diags)
-		if diags.HasError() {
+		email := getCurrUserEmail(p, p.userAgent, &d)
+		if d.HasError() {
 			tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 		}
 
@@ -504,8 +508,8 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 	}
 
 	p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
-	email := getCurrUserEmail(p, p.userAgent, diags)
-	if diags.HasError() {
+	email := getCurrUserEmail(p, p.userAgent, &d)
+	if d.HasError() {
 		tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 	}
 
