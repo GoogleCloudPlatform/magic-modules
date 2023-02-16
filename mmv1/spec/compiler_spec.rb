@@ -13,6 +13,7 @@
 
 require 'spec_helper'
 require 'api/compiler'
+require 'active_support/inflector'
 
 describe Api::Compiler do
   context 'should fail if file does not exist' do
