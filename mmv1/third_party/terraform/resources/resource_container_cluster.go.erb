@@ -1036,14 +1036,14 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"workload_config": {
 							Type:        schema.TypeList,
-							Required:    true,
+							Optional:    true,
 							MaxItems:    1,
 							Description: `WorkloadConfig defines the flags to enable or disable the workload configurations for the cluster.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"audit_mode": {
 										Type:        schema.TypeString,
-										Required:    true,
+										Optional:    true,
 										Description: `Mode defines how to audit the workload configs. Accepted values are MODE_UNSPECIFIED, DISABLED, BASIC.`,
 									},
 								},
@@ -1051,7 +1051,7 @@ func resourceContainerCluster() *schema.Resource {
 						},
 						"workload_vulnerability_mode": {
 										Type:             schema.TypeString,
-										Required:         true,
+										Optional:         true,
 										Description: `WorkloadVulnerabilityMode defines mode to perform vulnerability scanning. Accepted values are WORKLOAD_VULNERABILITY_MODE_UNSPECIFIED, DISABLED, BASIC.`,
 									},
 					},
@@ -4262,7 +4262,7 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *container.Authenti
 func expandProtectConfig(configured interface{}) *container.ProtectConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		return &container.ProtectConfig{}
+		return nil
 	}
 
 	pc := &container.ProtectConfig{}
@@ -4277,7 +4277,7 @@ func expandProtectConfig(configured interface{}) *container.ProtectConfig {
 func expandProtectConfigWorkloadConfig(configured interface{}) *container.WorkloadConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		return &container.WorkloadConfig{}
+		return nil
 	}
 	workloadConfig := l[0].(map[string]interface{})
 	return &container.WorkloadConfig{
