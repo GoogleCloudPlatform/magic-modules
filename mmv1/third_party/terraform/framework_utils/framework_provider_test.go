@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -20,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -192,17 +194,113 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 	managedZoneName := fmt.Sprintf("tf-test-zone-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
-			"google": func() (tfprotov5.ProviderServer, error) {
-				provider, err := MuxedProviders(t.Name())
-				return provider(), err
-			},
-		},
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: protoV5ProviderFactories(t),
 		// CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, randString(t, 10)),
+			},
+		},
+	})
+}
+
+func TestFrameworkProvider_impl(t *testing.T) {
+	var _ provider.ProviderWithMetaSchema = New("test")
+}
+
+func TestFrameworkProvider_loadCredentialsFromFile(t *testing.T) {
+	cv := CredentialsValidator()
+
+	req := validator.StringRequest{
+		ConfigValue: types.StringValue(testFakeCredentialsPath),
+	}
+
+	resp := validator.StringResponse{
+		Diagnostics: diag.Diagnostics{},
+	}
+
+	cv.ValidateString(context.Background(), req, &resp)
+
+	if resp.Diagnostics.WarningsCount() > 0 {
+		t.Errorf("Expected 0 warnings, got %d", resp.Diagnostics.WarningsCount())
+	}
+	if resp.Diagnostics.HasError() {
+		t.Errorf("Expected 0 errors, got %d", resp.Diagnostics.ErrorsCount())
+	}
+}
+
+func TestFrameworkProvider_loadCredentialsFromJSON(t *testing.T) {
+	contents, err := ioutil.ReadFile(testFakeCredentialsPath)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	cv := CredentialsValidator()
+
+	req := validator.StringRequest{
+		ConfigValue: types.StringValue(string(contents)),
+	}
+
+	resp := validator.StringResponse{
+		Diagnostics: diag.Diagnostics{},
+	}
+
+	cv.ValidateString(context.Background(), req, &resp)
+	if resp.Diagnostics.WarningsCount() > 0 {
+		t.Errorf("Expected 0 warnings, got %d", resp.Diagnostics.WarningsCount())
+	}
+	if resp.Diagnostics.HasError() {
+		t.Errorf("Expected 0 errors, got %d", resp.Diagnostics.ErrorsCount())
+	}
+}
+
+func TestAccFrameworkProviderBasePath_setInvalidBasePath(t *testing.T) {
+	t.Parallel()
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				ExternalProviders: providerVersion450(),
+				Config:            testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", randString(t, 10)),
+				ExpectError:       regexp.MustCompile("got HTTP response code 404 with body"),
+			},
+			{
+				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				Config:                   testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", randString(t, 10)),
+				ExpectError:              regexp.MustCompile("got HTTP response code 404 with body"),
+			},
+		},
+	})
+}
+
+func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
+	t.Parallel()
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
+		Steps: []resource.TestStep{
+			{
+				ExternalProviders: providerVersion450(),
+				Config:            testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", randString(t, 10)),
+			},
+			{
+				ExternalProviders: providerVersion450(),
+				ResourceName:      "data.google_dns_managed_zone.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				Config:                   testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", randString(t, 10)),
+			},
+			{
+				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ResourceName:             "data.google_dns_managed_zone.foo",
+				ImportState:              true,
+				ImportStateVerify:        true,
 			},
 		},
 	})
@@ -239,4 +337,24 @@ data "google_dns_record_set" "rs" {
   name         = google_dns_record_set.rs.name
   type         = google_dns_record_set.rs.type
 }`, key, managedZoneName, recordSetName)
+}
+
+func testAccFrameworkProviderBasePath_setBasePath(endpoint, name string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  alias               = "dns_custom_endpoint"
+  dns_custom_endpoint = "%s"
+}
+
+resource "google_dns_managed_zone" "foo" {
+	provider    = "dns_custom_endpoint"
+  name        = "qa-zone-%s"
+  dns_name    = "dnssec.tf-test.club."
+  description = "QA DNS zone"
+}
+
+data "google_dns_managed_zone" "qa" {
+	provider    = "dns_custom_endpoint"
+  name = google_dns_managed_zone.foo.name
+}`, endpoint, name)
 }
