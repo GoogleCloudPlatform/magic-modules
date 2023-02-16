@@ -196,7 +196,7 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: protoV5ProviderFactories(t),
-		// CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, randString(t, 10)),
@@ -288,7 +288,7 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 			},
 			{
 				ExternalProviders: providerVersion450(),
-				ResourceName:      "data.google_dns_managed_zone.foo",
+				ResourceName:      "google_dns_managed_zone.foo",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -298,7 +298,7 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 			},
 			{
 				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
-				ResourceName:             "data.google_dns_managed_zone.foo",
+				ResourceName:             "google_dns_managed_zone.foo",
 				ImportState:              true,
 				ImportStateVerify:        true,
 			},
@@ -342,19 +342,19 @@ data "google_dns_record_set" "rs" {
 func testAccFrameworkProviderBasePath_setBasePath(endpoint, name string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  alias               = "dns-custom-endpoint"
+  alias               = "dns_custom_endpoint"
   dns_custom_endpoint = "%s"
 }
 
 resource "google_dns_managed_zone" "foo" {
-	provider    = "dns_custom_endpoint"
-  name        = "qa-zone-%s"
-  dns_name    = "dnssec.tf-test.club."
+	provider    = "google.dns_custom_endpoint"
+  name        = "tf-test-zone-%s"
+  dns_name    = "tf-test-zone-%s.hashicorptest.com."
   description = "QA DNS zone"
 }
 
 data "google_dns_managed_zone" "qa" {
-	provider    = "dns_custom_endpoint"
+	provider    = "google.dns_custom_endpoint"
   name = google_dns_managed_zone.foo.name
-}`, endpoint, name)
+}`, endpoint, name, name)
 }
