@@ -342,7 +342,7 @@ data "google_dns_record_set" "rs" {
 func testAccFrameworkProviderBasePath_setBasePath(endpoint, name string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  alias               = "dns_custom_endpoint"
+  alias               = "dns-custom-endpoint"
   dns_custom_endpoint = "%s"
 }
 
