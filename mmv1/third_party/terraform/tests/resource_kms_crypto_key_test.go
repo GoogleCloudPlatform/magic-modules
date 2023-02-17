@@ -493,6 +493,32 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 	})
 }
 
+func TestAccKmsCryptoKeyVersion_externalKeyUri(t *testing.T) {
+	t.Parallel()
+
+	projectId := fmt.Sprintf("tf-test-%d", randInt(t))
+	projectOrg := getTestOrgFromEnv(t)
+	projectBillingAccount := getTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	externalKeyUri := fmt.Sprintf("http://keys-provider.external/%s", randString(t, 20))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleKmsCryptoKeyVersion_externalKeyUri(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, externalKeyUri),
+			},
+			{
+				ResourceName:      "google_kms_crypto_key_version.crypto_key_version",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccKmsCryptoKeyVersion_patch(t *testing.T) {
 	t.Parallel()
 
@@ -832,6 +858,45 @@ resource "google_kms_crypto_key_version" "crypto_key_version" {
 }
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
+
+func testGoogleKmsCryptoKeyVersion_externalKeyUri(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, externalKeyUri string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+    name            = "%s"
+    project_id      = "%s"
+    org_id          = "%s"
+    billing_account = "%s"
+}
+
+resource "google_project_service" "acceptance" {
+    project = google_project.acceptance.project_id
+    service = "cloudkms.googleapis.com"
+}
+
+resource "google_kms_key_ring" "key_ring" {
+    project  = google_project_service.acceptance.project
+    name     = "%s"
+    location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+    name     = "%s"
+    key_ring = google_kms_key_ring.key_ring.id
+    labels = {
+        key = "value"
+    }
+    skip_initial_version_creation = true
+}
+
+resource "google_kms_crypto_key_version" "crypto_key_version" {
+    crypto_key = google_kms_crypto_key.crypto_key.id
+    external_protection_level_options {
+        external_key_uri = "%s"
+    }
+}
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, externalKeyUri)
+}
+
 func testGoogleKmsCryptoKeyVersion_patchInitialize(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
