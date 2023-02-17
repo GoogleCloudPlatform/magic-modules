@@ -92,6 +92,7 @@ func resourceStorageTransferJob() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
+							ForceNew:    true,
 							Description: `Specifies the agent pool name associated with the posix data source. When unspecified, the default name is used.`,
 						},
 						"gcs_data_sink": {
