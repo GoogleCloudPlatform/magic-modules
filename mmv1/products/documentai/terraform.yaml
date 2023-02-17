@@ -36,7 +36,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       processor: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       version: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: documentAIProcessorDefaultVersionVersionDiffSuppress
+        diff_suppress_func: projectNumberDiffSuppress
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "documentai_default_version"
@@ -44,7 +44,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           processor_name: "test-processor"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants: templates/terraform/constants/document_ai_processor_default_version.go.erb
       pre_create: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
       pre_update: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
       pre_delete: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb

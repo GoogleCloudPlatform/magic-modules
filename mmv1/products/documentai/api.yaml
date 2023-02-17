@@ -73,6 +73,8 @@ objects:
     base_url: '{{processor}}'
     create_url: '{{processor}}:setDefaultProcessorVersion'
     create_verb: :POST
+    update_url: '{{processor}}:setDefaultProcessorVersion'
+    update_verb: :POST
     self_link: '{{processor}}'
     identity:
       - processor
@@ -90,6 +92,7 @@ objects:
         name: 'version'
         api_name: 'defaultProcessorVersion'
         description: |
-          The version to set
+          The version to set. Using `stable` or `rc` will cause the API to return the latest version in that release channel.
+          Apply `lifecycle.ignore_changes` to the `version` field to suppress this diff.
         required: true
         input: true
