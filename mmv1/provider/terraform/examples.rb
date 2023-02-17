@@ -63,6 +63,7 @@ module Provider
       #  - :ORG_ID
       #  - :ORG_TARGET
       #  - :BILLING_ACCT
+      #  - :MASTER_BILLING_ACCT
       #  - :SERVICE_ACCT
       #  - :CUST_ID
       #  - :IDENTITY_USER
@@ -158,6 +159,7 @@ module Provider
           ORG_DOMAIN: 'example.com',
           ORG_TARGET: '123456789',
           BILLING_ACCT: '000000-0000000-0000000-000000',
+          MASTER_BILLING_ACCT: '000000-0000000-0000000-000000',
           SERVICE_ACCT: 'emailAddress:my@service-account.com',
           CUST_ID: 'A01b123xz',
           IDENTITY_USER: 'cloud_identity_user'
@@ -166,11 +168,11 @@ module Provider
         @test_env_vars ||= {}
         body = lines(compile_file(
                        {
-                         vars: vars,
-                         test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
-                         primary_resource_id: primary_resource_id
+                         vars:,
+                         test_env_vars: test_env_vars.to_h { |k, v| [k, docs_defaults[v]] },
+                         primary_resource_id:
                        },
-                       pwd + '/' + config_path
+                       "#{pwd}/#{config_path}"
                      ))
 
         # Remove region tags
@@ -178,7 +180,7 @@ module Provider
         body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
         lines(compile_file(
                 { content: body },
-                pwd + '/templates/terraform/examples/base_configs/documentation.tf.erb'
+                "#{pwd}/templates/terraform/examples/base_configs/documentation.tf.erb"
               ))
       end
 
@@ -188,7 +190,7 @@ module Provider
                 {
                   content: body
                 },
-                pwd + '/templates/terraform/examples/base_configs/test_body.go.erb'
+                "#{pwd}/templates/terraform/examples/base_configs/test_body.go.erb"
               ))
       end
 
@@ -217,15 +219,15 @@ module Provider
         end
 
         rand_vars = rand_vars.to_h
-        overrides = test_vars_overrides.map { |k, _| [k, "%{#{k}}"] }.to_h
+        overrides = test_vars_overrides.to_h { |k, _| [k, "%{#{k}}"] }
         body = lines(compile_file(
                        {
                          vars: rand_vars.merge(overrides),
-                         test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
-                         primary_resource_id: primary_resource_id,
-                         primary_resource_type: primary_resource_type
+                         test_env_vars: test_env_vars.to_h { |k, _| [k, "%{#{k}}"] },
+                         primary_resource_id:,
+                         primary_resource_type:
                        },
-                       pwd + '/' + config_path
+                       "#{pwd}/#{config_path}"
                      ))
 
         # Remove region tags
@@ -238,15 +240,15 @@ module Provider
         @vars ||= []
         @oics_vars_overrides ||= {}
 
-        rand_vars = vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h
+        rand_vars = vars.to_h { |k, str| [k, "#{str}-${local.name_suffix}"] }
 
         # Examples with test_env_vars are skipped elsewhere
         body = lines(compile_file(
                        {
                          vars: rand_vars.merge(oics_vars_overrides),
-                         primary_resource_id: primary_resource_id
+                         primary_resource_id:
                        },
-                       pwd + '/' + config_path
+                       "#{pwd}/#{config_path}"
                      ))
 
         # Remove region tags
@@ -271,7 +273,7 @@ module Provider
         )
       end
 
-      # rubocop:disable Metrics/LineLength
+      # rubocop:disable Layout/LineLength
       def substitute_test_paths(config)
         config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
         config.gsub!('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
@@ -289,7 +291,7 @@ module Provider
         config.gsub!('path/to/certificate.crt', '../static/ssl_cert/test.crt')
         config
       end
-      # rubocop:enable Metrics/LineLength
+      # rubocop:enable Layout/LineLength
       # rubocop:enable Style/FormatStringToken
 
       def validate
