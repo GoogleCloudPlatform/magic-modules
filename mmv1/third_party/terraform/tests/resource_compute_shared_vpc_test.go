@@ -63,7 +63,7 @@ func TestAccComputeSharedVpc_basic(t *testing.T) {
 					testAccCheckComputeSharedVpcHostProject(t, hostProject, false),
 					testAccCheckComputeSharedVpcServiceProject(t, hostProject, serviceProject, false),
 				),
-			}
+			},
 		},
 	})
 }
