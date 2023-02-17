@@ -73,8 +73,6 @@ objects:
     base_url: '{{processor}}'
     create_url: '{{processor}}:setDefaultProcessorVersion'
     create_verb: :POST
-    update_url: '{{processor}}:setDefaultProcessorVersion'
-    update_verb: :POST
     self_link: '{{processor}}'
     identity:
       - processor
