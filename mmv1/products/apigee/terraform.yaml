@@ -403,6 +403,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       delete_minutes: 30
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/apigee_environment_reference.go.erb
+  EnvKeystoreAliases: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    import_format: ["{{env_id}}/{{keystore_id}}/{{name}}", "{{env_id}}/{{name}}"]
+    delete_url: '{{env_id}}/{{keystore_id}}/{{name}}'
+    skip_sweeper: true
+    examples:
+    - !ruby/object:Provider::Terraform::Examples
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+      name: "apigee_env_keystore_aliases"
+      primary_resource_id: "apigee_environment_keystore"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      # Resource creation race
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 30
+      delete_minutes: 30
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/apigee_env_keystore_aliases.go.erb
+
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
