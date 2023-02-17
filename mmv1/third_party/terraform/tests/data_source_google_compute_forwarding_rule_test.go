@@ -10,12 +10,12 @@ import (
 func TestAccDataSourceGoogleForwardingRule(t *testing.T) {
 	t.Parallel()
 
-	poolName := fmt.Sprintf("tf-%s", google.RandString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", google.RandString(t, 10))
+	poolName := fmt.Sprintf("tf-%s", acctest.RandString(t, 10))
+	ruleName := fmt.Sprintf("tf-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleForwardingRuleConfig(poolName, ruleName),

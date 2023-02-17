@@ -17,16 +17,16 @@ func TestAccOsConfigOsPolicyAssignment_basicOsPolicyAssignment(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  GetTestProjectFromEnv(),
-		"zone":          GetTestZoneFromEnv(),
-		"random_suffix": google.RandString(t, 10),
-		"org_id":        GetTestOrgFromEnv(t),
-		"billing_act":   GetTestBillingAccountFromEnv(t),
+		"project_name":  acctest.GetTestProjectFromEnv(),
+		"zone":          acctest.GetTestZoneFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"billing_act":   acctest.GetTestBillingAccountFromEnv(t),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckOsConfigOsPolicyAssignmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -164,7 +164,7 @@ func testAccCheckOsConfigOsPolicyAssignmentDestroyProducer(t *testing.T) func(s 
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {

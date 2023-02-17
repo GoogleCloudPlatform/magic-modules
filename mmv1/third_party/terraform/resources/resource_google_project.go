@@ -197,7 +197,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		}
 
 		if err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default"); err != nil {
-			if isGoogleApiErrorWithCode(err, 404) {
+			if IsGoogleApiErrorWithCode(err, 404) {
 				log.Printf("[DEBUG] Default network not found for project %q, no need to delete it", project.ProjectId)
 			} else {
 				return errwrap.Wrapf(fmt.Sprintf("Error deleting default network in project %s: {{err}}", project.ProjectId), err)
@@ -381,7 +381,7 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	// because the API doesn't support patch, so we need the actual object
 	p, err := readGoogleProject(d, config, userAgent)
 	if err != nil {
-		if isGoogleApiErrorWithCode(err, 404) {
+		if IsGoogleApiErrorWithCode(err, 404) {
 			return fmt.Errorf("Project %q does not exist.", pid)
 		}
 		return fmt.Errorf("Error checking project %q: %s", pid, err)
@@ -517,7 +517,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
-			err = computeOperationWaitTime(config, op, projectId, "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
+			err = ComputeOperationWaitTime(config, op, projectId, "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
 			if err != nil {
 				return err
 			}
@@ -579,7 +579,7 @@ func deleteComputeNetwork(project, network, userAgent string, config *Config) er
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Deleting Network", userAgent, 10*time.Minute)
+	err = ComputeOperationWaitTime(config, op, project, "Deleting Network", userAgent, 10*time.Minute)
 	if err != nil {
 		return err
 	}
@@ -602,7 +602,7 @@ func readGoogleProject(d *schema.ResourceData, config *Config, userAgent string)
 func enableServiceUsageProjectServices(services []string, project, billingProject, userAgent string, config *Config, timeout time.Duration) error {
 	// ServiceUsage does not allow more than 20 services to be enabled per
 	// batchEnable API call. See
-	// https://cloud.google.com/service-usage/docs/reference/rest/v1/services/batchEnable
+	// https://cloud.com/service-usage/docs/reference/rest/v1/services/batchEnable
 	for i := 0; i < len(services); i += maxServiceUsageBatchSize {
 		j := i + maxServiceUsageBatchSize
 		if j > len(services) {
@@ -665,7 +665,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 // if a service has been renamed, this function will list both the old and new
 // forms of the service. LIST responses are expected to return only the old or
 // new form, but we'll always return both.
-func listCurrentlyEnabledServices(project, billingProject, userAgent string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
+func ListCurrentlyEnabledServices(project, billingProject, userAgent string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
 	log.Printf("[DEBUG] Listing enabled services for project %s", project)
 	apiServices := make(map[string]struct{})
 	err := RetryTimeDuration(func() error {
@@ -710,7 +710,7 @@ func waitForServiceUsageEnabledServices(services []string, project, billingProje
 	interval := time.Second
 	err := RetryTimeDuration(func() error {
 		// Get the list of services that are enabled on the project
-		enabledServices, err := listCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
+		enabledServices, err := ListCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 		if err != nil {
 			return err
 		}

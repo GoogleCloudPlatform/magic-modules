@@ -9,12 +9,12 @@ import (
 func TestAccSnapshotDatasource_name(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_name(GetTestProjectFromEnv(), google.RandString(t, 10)),
+				Config: testAccSnapshot_name(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
@@ -30,12 +30,12 @@ func TestAccSnapshotDatasource_name(t *testing.T) {
 func TestAccSnapshotDatasource_filter(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_filter(GetTestProjectFromEnv(), google.RandString(t, 10)),
+				Config: testAccSnapshot_filter(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
@@ -51,12 +51,12 @@ func TestAccSnapshotDatasource_filter(t *testing.T) {
 func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_filter_mostRecent(GetTestProjectFromEnv(), google.RandString(t, 10)),
+				Config: testAccSnapshot_filter_mostRecent(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",

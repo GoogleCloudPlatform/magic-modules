@@ -31,7 +31,7 @@ if err != nil {
 	return fmt.Errorf("Error updating PerInstanceConfig %q: %s", d.Id(), err)
 }
 
-err = computeOperationWaitTime(
+err = ComputeOperationWaitTime(
 	config, res, project, "Applying update to PerInstanceConfig", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 

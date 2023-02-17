@@ -30,7 +30,7 @@ func Nprintf(format string, params map[string]interface{}) string {
 	return google.Nprintf(format, params)
 }
 
-// TestAccPreCheck ensures at least one of the project env variables is set.
+// acctest.TestAccPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectFromEnv() string {
 	project := MultiEnvSearch([]string{"TEST_PROJECT", "GOOGLE_PROJECT"})
 	if project == "" {
@@ -41,7 +41,7 @@ func GetTestProjectFromEnv() string {
 	return project
 }
 
-// TestAccPreCheck ensures at least one of the credentials env variables is set.
+// acctest.TestAccPreCheck ensures at least one of the credentials env variables is set.
 func GetTestCredsFromEnv() string {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -62,12 +62,12 @@ func GetTestCredsFromEnv() string {
 	return credentials
 }
 
-// TestAccPreCheck ensures at least one of the region env variables is set.
-func GetTestRegionFromEnv() string {
+// acctest.TestAccPreCheck ensures at least one of the region env variables is set.
+func acctest.GetTestRegionFromEnv() string {
 	return defaultRegion
 }
 
-func google.GetTestCustIdFromEnv(t *testing.T) string {
+func acctest.GetTestCustIdFromEnv(t *testing.T) string {
 	return defaultCustId
 }
 
@@ -77,11 +77,11 @@ func GetTestIdentityUserFromEnv(t *testing.T) string {
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
-func google.GetTestFirestoreProjectFromEnv(t *testing.T) string {
+func GetTestFirestoreProjectFromEnv(t *testing.T) string {
 	return defaultFirestoreProject
 }
 
-func GetTestOrgFromEnv(t *testing.T) string {
+func acctest.GetTestOrgFromEnv(t *testing.T) string {
 	org, ok := os.LookupEnv("TEST_ORG_ID")
 	if !ok {
 		log.Printf("Missing required env var TEST_ORG_ID. Default (%s) will be used.", defaultOrganization)
@@ -95,7 +95,7 @@ func GetTestOrgDomainFromEnv(t *testing.T) string {
 	return defaultOrganizationDomain
 }
 
-func google.GetTestOrgTargetFromEnv(t *testing.T) string {
+func GetTestOrgTargetFromEnv(t *testing.T) string {
 	return defaultOrganizationTarget
 }
 
@@ -103,7 +103,7 @@ func GetTestBillingAccountFromEnv(t *testing.T) string {
 	return defaultBillingAccount
 }
 
-func google.GetTestServiceAccountFromEnv(t *testing.T) string {
+func GetTestServiceAccountFromEnv(t *testing.T) string {
 	return defaultServiceAccount
 }
 

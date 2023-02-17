@@ -11,13 +11,13 @@ func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
 	t.Parallel()
 
 	funcDataNameHttp := "data.google_cloudfunctions2_function.function_http_v2"
-	functionName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))
+	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 	zipFilePath := "./test-fixtures/cloudfunctions2/function-source.zip"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

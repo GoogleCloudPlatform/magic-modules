@@ -11,15 +11,15 @@ import (
 func TestAccComputeTargetHttpProxy_update(t *testing.T) {
 	t.Parallel()
 
-	target := fmt.Sprintf("thttp-test-%s", google.RandString(t, 10))
-	backend := fmt.Sprintf("thttp-test-%s", google.RandString(t, 10))
-	hc := fmt.Sprintf("thttp-test-%s", google.RandString(t, 10))
-	urlmap1 := fmt.Sprintf("thttp-test-%s", google.RandString(t, 10))
-	urlmap2 := fmt.Sprintf("thttp-test-%s", google.RandString(t, 10))
+	target := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
+	backend := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
+	urlmap1 := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
+	urlmap2 := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeTargetHttpProxyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -52,7 +52,7 @@ func testAccCheckComputeTargetHttpProxyExists(t *testing.T, n string) resource.T
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
 		found, err := config.NewComputeClient(config.UserAgent).TargetHttpProxies.Get(

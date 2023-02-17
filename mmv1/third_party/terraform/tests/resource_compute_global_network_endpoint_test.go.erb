@@ -11,16 +11,16 @@ func TestAccComputeGlobalNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": google.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"default_port":  90,
 		"modified_port": 100,
 	}
 	negId := fmt.Sprintf("projects/%s/global/networkEndpointGroups/neg-%s",
-		GetTestProjectFromEnv(), context["random_suffix"])
+		acctest.GetTestProjectFromEnv(), context["random_suffix"])
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Create one endpoint

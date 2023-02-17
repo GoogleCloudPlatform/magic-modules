@@ -149,7 +149,7 @@ func resourceComputeProjectMetadataSet(projectID, userAgent string, config *Conf
 		}
 
 		log.Printf("[DEBUG] SetCommonMetadata: %d (%s)", op.Id, op.SelfLink)
-		return computeOperationWaitTime(config, op, project.Name, "SetCommonMetadata", userAgent, timeout)
+		return ComputeOperationWaitTime(config, op, project.Name, "SetCommonMetadata", userAgent, timeout)
 	}
 
 	err := MetadataRetryWrapper(createMD)

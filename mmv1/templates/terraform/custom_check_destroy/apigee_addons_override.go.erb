@@ -1,4 +1,4 @@
-config := googleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
 url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org}}")
 if err != nil {
@@ -15,7 +15,7 @@ res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, ni
 
 if err != nil {
     // If the Apigee org doesn't exist, then a 403 can also be returned.
-    if isGoogleApiErrorWithCode(err, 403) || isGoogleApiErrorWithCode(err, 404) {
+    if IsGoogleApiErrorWithCode(err, 403) || IsGoogleApiErrorWithCode(err, 404) {
         return nil
     } else {
         return err

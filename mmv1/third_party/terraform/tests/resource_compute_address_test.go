@@ -10,13 +10,13 @@ import (
 func TestAccComputeAddress_networkTier(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
+		CheckDestroy: acctest.TestAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeAddress_networkTier(google.RandString(t, 10)),
+				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_address.foobar",
@@ -28,13 +28,13 @@ func TestAccComputeAddress_networkTier(t *testing.T) {
 }
 
 func TestAccComputeAddress_internal(t *testing.T) {
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
+		CheckDestroy: acctest.TestAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeAddress_internal(google.RandString(t, 10)),
+				Config: testAccComputeAddress_internal(acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_address.internal",

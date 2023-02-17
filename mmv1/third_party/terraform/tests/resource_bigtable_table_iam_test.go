@@ -9,20 +9,20 @@ import (
 
 func TestAccBigtableTableIamBinding(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + google.RandString(t, 10)
-	cluster := "c-" + google.RandString(t, 10)
-	account := "tf-bigtable-iam-" + google.RandString(t, 10)
+	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
+	cluster := "c-" + acctest.RandString(t, 10)
+	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s/tables/%s %s",
-		GetTestProjectFromEnv(), instance, cluster, role)
+		acctest.GetTestProjectFromEnv(), instance, cluster, role)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -54,24 +54,24 @@ func TestAccBigtableTableIamBinding(t *testing.T) {
 
 func TestAccBigtableTableIamMember(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + google.RandString(t, 10)
-	cluster := "c-" + google.RandString(t, 10)
-	account := "tf-bigtable-iam-" + google.RandString(t, 10)
+	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
+	cluster := "c-" + acctest.RandString(t, 10)
+	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s/tables/%s %s serviceAccount:%s",
-		GetTestProjectFromEnv(),
+		acctest.GetTestProjectFromEnv(),
 		instance,
 		cluster,
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -95,20 +95,20 @@ func TestAccBigtableTableIamMember(t *testing.T) {
 
 func TestAccBigtableTableIamPolicy(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + google.RandString(t, 10)
-	cluster := "c-" + google.RandString(t, 10)
-	account := "tf-bigtable-iam-" + google.RandString(t, 10)
+	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
+	cluster := "c-" + acctest.RandString(t, 10)
+	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s/tables/%s",
-		GetTestProjectFromEnv(), instance, cluster)
+		acctest.GetTestProjectFromEnv(), instance, cluster)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation

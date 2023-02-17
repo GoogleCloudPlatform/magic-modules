@@ -26,7 +26,7 @@
 		return HandleNotFoundError(err, d, "PerInstanceConfig")
 	}
 
-	err = computeOperationWaitTime(
+	err = ComputeOperationWaitTime(
 		config, res, project, "Deleting PerInstanceConfig", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
@@ -58,7 +58,7 @@
 			return fmt.Errorf("Error deleting PerInstanceConfig %q: %s", d.Id(), err)
 		}
 
-		err = computeOperationWaitTime(
+		err = ComputeOperationWaitTime(
 			config, res, project, "Applying update to PerInstanceConfig", userAgent,
 			d.Timeout(schema.TimeoutUpdate))
 		if err != nil {

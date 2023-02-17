@@ -14,16 +14,16 @@ import (
 func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 	t.Parallel()
 
-	randSuffix := google.RandString(t, 10)
+	randSuffix := acctest.RandString(t, 10)
 	deploymentId := "tf-dm-" + randSuffix
 	accountId := "tf-dm-account-" + randSuffix
 	yamlPath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yml.tmpl", map[string]interface{}{
 		"account_id": accountId,
 	})
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -44,13 +44,13 @@ func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 	t.Parallel()
 
-	randStr := google.RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckDeploymentManagerDestroyInvalidDeployment(t, deploymentName),
 		Steps: []resource.TestStep{
 			{
@@ -64,13 +64,13 @@ func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 	t.Parallel()
 
-	randStr := google.RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -89,16 +89,16 @@ func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 	t.Parallel()
 
-	randStr := google.RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 	importFilepath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yml.tmpl", map[string]interface{}{
 		"account_id": "{{ env['name'] }}",
 	})
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -120,14 +120,14 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 func TestAccDeploymentManagerDeployment_update(t *testing.T) {
 	t.Parallel()
 
-	randStr := google.RandString(t, 10)
+	randStr := acctest.RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-first" + randStr
 	accountId2 := "tf-dm-second" + randStr
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -352,7 +352,7 @@ EOF
 
 func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -366,7 +366,7 @@ func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, ac
 
 func testDeploymentManagerDeploymentVerifyServiceAccountExists(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -380,9 +380,9 @@ func testDeploymentManagerDeploymentVerifyServiceAccountExists(t *testing.T, acc
 
 func testCheckDeploymentServiceAccountExists(accountId string, config *Config) (exists bool, err error) {
 	_, err = config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Get(
-		fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", GetTestProjectFromEnv(), accountId, GetTestProjectFromEnv())).Do()
+		fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", acctest.GetTestProjectFromEnv(), accountId, acctest.GetTestProjectFromEnv())).Do()
 	if err != nil {
-		if isGoogleApiErrorWithCode(err, 404) {
+		if IsGoogleApiErrorWithCode(err, 404) {
 			return false, nil
 		}
 		return false, fmt.Errorf("unexpected error while trying to confirm deployment service account %q exists: %v", accountId, err)
@@ -398,10 +398,10 @@ func testAccCheckDeploymentManagerDestroyInvalidDeployment(t *testing.T, deploym
 			}
 		}
 
-		config := GoogleProviderConfig(t)
-		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.DeploymentManagerBasePath, GetTestProjectFromEnv(), deploymentName)
+		config := acctest.GoogleProviderConfig(t)
+		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.DeploymentManagerBasePath, acctest.GetTestProjectFromEnv(), deploymentName)
 		_, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
-		if !isGoogleApiErrorWithCode(err, 404) {
+		if !IsGoogleApiErrorWithCode(err, 404) {
 			return fmt.Errorf("Unexpected error while trying to confirm DeploymentManagerDeployment deleted: %v", err)
 		}
 		if err == nil {
@@ -421,7 +421,7 @@ func testAccCheckDeploymentManagerDeploymentDestroyProducer(t *testing.T) func(s
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := ReplaceVarsForTest(config, rs, "{{DeploymentManagerBasePath}}projects/{{project}}/global/deployments/{{name}}")
 			if err != nil {

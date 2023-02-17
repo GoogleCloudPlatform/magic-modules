@@ -72,14 +72,14 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 func TestAccHealthcareFhirStore_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetName := fmt.Sprintf("tf-test-dataset-%s", google.RandString(t, 10))
-	fhirStoreName := fmt.Sprintf("tf-test-fhir-store-%s", google.RandString(t, 10))
-	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", google.RandString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", acctest.RandString(t, 10))
+	fhirStoreName := fmt.Sprintf("tf-test-fhir-store-%s", acctest.RandString(t, 10))
+	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	resourceName := "google_healthcare_fhir_store.default"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckHealthcareFhirStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -172,7 +172,7 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(t *testing.T, pubsubTopic strin
 			}
 			foundResource = true
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			gcpResourceUri, err := ReplaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
 			if err != nil {

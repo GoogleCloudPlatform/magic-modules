@@ -364,7 +364,7 @@ func getParentDir(res *Resource) string {
 		return dirPath
 	}
 
-	servicePath := path.Join(dirPath, "service", string(res.Package()))
+	servicePath := path.Join(dirPath, "services", string(res.Package()))
 	if err := os.MkdirAll(servicePath, os.ModePerm); err != nil {
 		glog.Error(fmt.Errorf("error creating Terraform service directory %v: %v", servicePath, err))
 	}
@@ -561,7 +561,7 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 		fmt.Print(string(formatted))
 	} else {
 		outname := fileName + ".go"
-		if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644); err != nil {
+		if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "conns", outname), formatted, 0644); err != nil {
 			glog.Exit(err)
 		}
 	}

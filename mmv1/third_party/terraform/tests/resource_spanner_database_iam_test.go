@@ -10,15 +10,15 @@ import (
 func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 	t.Parallel()
 
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	role := "roles/spanner.databaseAdmin"
-	project := GetTestProjectFromEnv()
-	database := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	instance := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	project := acctest.GetTestProjectFromEnv()
+	database := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabaseIamBinding_basic(account, instance, database, role),
@@ -54,17 +54,17 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 func TestAccSpannerDatabaseIamMember(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	project := acctest.GetTestProjectFromEnv()
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	role := "roles/spanner.databaseAdmin"
 
-	database := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	instance := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	database := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	conditionTitle := "Access only database one"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -87,15 +87,15 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	project := acctest.GetTestProjectFromEnv()
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	role := "roles/spanner.databaseAdmin"
-	database := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	instance := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	database := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	instance := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerDatabaseIamPolicy_basic(account, instance, database, role),

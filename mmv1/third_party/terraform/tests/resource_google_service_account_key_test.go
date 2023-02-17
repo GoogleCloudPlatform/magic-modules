@@ -13,11 +13,11 @@ func TestAccServiceAccountKey_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + google.RandString(t, 10)
+	accountID := "a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceAccountKey(accountID, displayName),
@@ -37,11 +37,11 @@ func TestAccServiceAccountKey_fromEmail(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + google.RandString(t, 10)
+	accountID := "a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceAccountKey_fromEmail(accountID, displayName),
@@ -61,11 +61,11 @@ func TestAccServiceAccountKey_fromCertificate(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + google.RandString(t, 10)
+	accountID := "a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceAccountKey_fromCertificate(accountID, displayName),
@@ -92,7 +92,7 @@ func testAccCheckGoogleServiceAccountKeyExists(t *testing.T, r string) resource.
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		_, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Keys.Get(rs.Primary.ID).Do()
 		if err != nil {
@@ -111,7 +111,7 @@ resource "google_service_account" "acceptance" {
 }
 
 resource "google_service_account_key" "acceptance" {
-  service_account_id = google_service_account.acceptance.name
+  service_account_id = google_service_account.acctest.name
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 `, account, name)
@@ -125,7 +125,7 @@ resource "google_service_account" "acceptance" {
 }
 
 resource "google_service_account_key" "acceptance" {
-  service_account_id = google_service_account.acceptance.email
+  service_account_id = google_service_account.acctest.email
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 `, account, name)
@@ -139,7 +139,7 @@ resource "google_service_account" "acceptance" {
 }
 
 resource "google_service_account_key" "acceptance" {
-  service_account_id = google_service_account.acceptance.email
+  service_account_id = google_service_account.acctest.email
   public_key_data    = filebase64("test-fixtures/serviceaccount/public_key.pem")
 }
 `, account, name)

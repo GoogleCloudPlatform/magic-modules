@@ -191,7 +191,7 @@ module Provider
         Google::LOGGER.info "Generating resource product_name #{product_name} is #{@api.IsMigrated}"
 
         if @api.IsMigrated
-          target_folder = File.join(folder_name(data.version), 'service', product_name)
+          target_folder = File.join(folder_name(data.version), 'services', product_name)
           FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
           data.generate(pwd,
             '/templates/terraform/resource_service.erb',
@@ -231,7 +231,7 @@ module Provider
       product_name = @api.api_name
 
       if @api.IsMigrated
-        target_folder = File.join(folder_name(data.version), 'service', product_name)
+        target_folder = File.join(folder_name(data.version), 'services', product_name)
         FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
         data.generate(
           pwd,
@@ -260,7 +260,7 @@ module Provider
 
       product_name = @api.api_name
       if @api.IsMigrated
-        target_folder = File.join(folder_name(data.version), 'service', product_name)
+        target_folder = File.join(folder_name(data.version), 'services', product_name)
         FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
         data.generate(
           pwd,
@@ -292,7 +292,7 @@ module Provider
       product_name_underscore = @api.name.underscore
       
       if @api.IsMigrated
-        target_folder = File.join(folder_name(data.version), 'service', product_name)
+        target_folder = File.join(folder_name(data.version), 'services', product_name)
         FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
         data.generate(
           pwd,
@@ -320,7 +320,7 @@ module Provider
 
 
         if @api.IsMigrated
-          target_folder = File.join(folder_name(data.version), 'service', product_name)
+          target_folder = File.join(folder_name(data.version), 'services', product_name)
           FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
           data.generate(pwd,
             'templates/terraform/iam_policy.go.erb',
@@ -338,7 +338,7 @@ module Provider
         unless data.object.examples.reject(&:skip_test).empty?
 
           if @api.IsMigrated
-            target_folder = File.join(folder_name(data.version), 'service', product_name)
+            target_folder = File.join(folder_name(data.version), 'services', product_name)
             FileUtils.mkpath target_folder unless Dir.exist?(target_folder)
             data.generate(
               pwd,

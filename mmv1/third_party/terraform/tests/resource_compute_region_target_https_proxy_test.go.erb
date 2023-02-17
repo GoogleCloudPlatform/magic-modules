@@ -11,11 +11,11 @@ import (
 func TestAccComputeRegionTargetHttpsProxy_update(t *testing.T) {
 	t.Parallel()
 
-	resourceSuffix := google.RandString(t, 10)
+	resourceSuffix := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

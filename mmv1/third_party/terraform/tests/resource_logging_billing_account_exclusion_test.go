@@ -31,13 +31,13 @@ func TestAccLoggingBillingAccountExclusion(t *testing.T) {
 }
 
 func testAccLoggingBillingAccountExclusion_basic(t *testing.T) {
-	billingAccount := GetTestBillingAccountFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + google.RandString(t, 10)
-	description := "Description " + google.RandString(t, 10)
+	billingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
+	description := "Description " + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -53,14 +53,14 @@ func testAccLoggingBillingAccountExclusion_basic(t *testing.T) {
 }
 
 func testAccLoggingBillingAccountExclusion_update(t *testing.T) {
-	billingAccount := GetTestBillingAccountFromEnv(t)
-	exclusionName := "tf-test-exclusion-" + google.RandString(t, 10)
-	descriptionBefore := "Basic BillingAccount Logging Exclusion" + google.RandString(t, 10)
-	descriptionAfter := "Updated Basic BillingAccount Logging Exclusion" + google.RandString(t, 10)
+	billingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
+	descriptionBefore := "Basic BillingAccount Logging Exclusion" + acctest.RandString(t, 10)
+	descriptionAfter := "Updated Basic BillingAccount Logging Exclusion" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -84,15 +84,15 @@ func testAccLoggingBillingAccountExclusion_update(t *testing.T) {
 }
 
 func testAccLoggingBillingAccountExclusion_multiple(t *testing.T) {
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	billingAccount := acctest.GetTestBillingAccountFromEnv(t)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingBillingAccountExclusion_multipleCfg("tf-test-exclusion-"+google.RandString(t, 10), billingAccount),
+				Config: testAccLoggingBillingAccountExclusion_multipleCfg("tf-test-exclusion-"+acctest.RandString(t, 10), billingAccount),
 			},
 			{
 				ResourceName:      "google_logging_billing_account_exclusion.basic0",
@@ -115,7 +115,7 @@ func testAccLoggingBillingAccountExclusion_multiple(t *testing.T) {
 
 func testAccCheckLoggingBillingAccountExclusionDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_billing_account_exclusion" {
@@ -142,7 +142,7 @@ resource "google_logging_billing_account_exclusion" "basic" {
   description     = "%s"
   filter          = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, exclusionName, billingAccount, description, GetTestProjectFromEnv())
+`, exclusionName, billingAccount, description, acctest.GetTestProjectFromEnv())
 }
 
 func testAccLoggingBillingAccountExclusion_multipleCfg(exclusionName, billingAccount string) string {
@@ -155,7 +155,7 @@ resource "google_logging_billing_account_exclusion" "basic%d" {
 	description      = "Basic BillingAccount Logging Exclusion"
 	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, i, exclusionName, i, billingAccount, GetTestProjectFromEnv())
+`, i, exclusionName, i, billingAccount, acctest.GetTestProjectFromEnv())
 	}
 	return s
 }

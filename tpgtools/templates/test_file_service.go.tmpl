@@ -59,18 +59,18 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{} {
-		{{- range $contextkey, $contextvalue := $s.ExpandContextService }}
+		{{- range $contextkey, $contextvalue := $s.ExpandContext }}
 		  "{{$contextkey}}" : {{$contextvalue}},
 		{{- end }}
-			"random_suffix": google.RandString(t, 10),
+			"random_suffix": acctest.RandString(t, 10),
 	}
 
-	provider.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { provider.TestAccPreCheck(t) },
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
 	{{ if $s.HasGAEquivalent -}}
-		Providers: provider.TestAccProviders,
+		Providers: acctest.TestAccProviders,
 	{{- else }}
-		Providers: provider.TestAccProvidersOiCS,
+		Providers: acctest.TestAccProvidersOiCS,
 	{{- end }}
 	{{ if true -}}
 		CheckDestroy: testAccCheck{{$.PathType}}DestroyProducer(t),
@@ -126,7 +126,7 @@ func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := provider.GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {

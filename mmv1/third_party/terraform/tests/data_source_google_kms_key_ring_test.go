@@ -15,9 +15,9 @@ func TestAccDataSourceGoogleKmsKeyRing_basic(t *testing.T) {
 	keyParts := strings.Split(kms.KeyRing.Name, "/")
 	keyRingId := keyParts[len(keyParts)-1]
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleKmsKeyRing_basic(keyRingId),

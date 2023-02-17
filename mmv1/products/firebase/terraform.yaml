@@ -82,7 +82,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           project_id: :PROJECT_NAME
         test_vars_overrides:
-          package_name: '"android.package.app" + RandString(t, 4)'
+          package_name: '"android.package.app" + acctest.RandString(t, 4)'
         ignore_read_extra:
           - project
           - deletion_policy

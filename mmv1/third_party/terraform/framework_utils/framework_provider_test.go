@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"bytes"
@@ -31,20 +31,20 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 
 	moduleName := "my-module"
 
-	managedZoneName := fmt.Sprintf("tf-test-zone-%s", RandString(t, 10))
+	managedZoneName := fmt.Sprintf("tf-test-zone-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck: func() { TestAccPreCheck(t) },
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck: func() { acctest.TestAccPreCheck(t) },
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"google": func() (tfprotov5.ProviderServer, error) {
-				provider, err := MuxedProviders(t.Name())
+				provider, err := acctest.MuxedProviders(t.Name())
 				return provider(), err
 			},
 		},
-		// CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+		// CheckDestroy: acctest.TestAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, RandString(t, 10)),
+				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, acctest.RandString(t, 10)),
 			},
 		},
 	})

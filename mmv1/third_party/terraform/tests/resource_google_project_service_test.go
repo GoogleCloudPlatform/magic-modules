@@ -52,14 +52,14 @@ func TestProjectServiceServiceValidateFunc(t *testing.T) {
 func TestAccProjectService_basic(t *testing.T) {
 	t.Parallel()
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_basic(services, pid, Pname, org),
@@ -106,17 +106,17 @@ func TestAccProjectService_basic(t *testing.T) {
 
 func TestAccProjectService_disableDependentServices(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	billingId := GetTestBillingAccountFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	services := []string{"cloudbuild.googleapis.com", "containerregistry.googleapis.com"}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_disableDependentServices(services, pid, Pname, org, billingId, "false"),
@@ -151,12 +151,12 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 func TestAccProjectService_handleNotFound(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "iam.googleapis.com"
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_handleNotFound(service, pid, Pname, org),
@@ -185,11 +185,11 @@ func TestAccProjectService_renamedService(t *testing.T) {
 		newName = new
 	}
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectService_single(newName, pid, Pname, org),
@@ -206,8 +206,8 @@ func TestAccProjectService_renamedService(t *testing.T) {
 
 func testAccCheckProjectService(t *testing.T, services []string, pid string, expectEnabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
-		currentlyEnabled, err := listCurrentlyEnabledServices(pid, "", config.UserAgent, config, time.Minute*10)
+		config := acctest.GoogleProviderConfig(t)
+		currentlyEnabled, err := ListCurrentlyEnabledServices(pid, "", config.UserAgent, config, time.Minute*10)
 		if err != nil {
 			return fmt.Errorf("Error listing services for project %q: %v", pid, err)
 		}
@@ -240,12 +240,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "test" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
 }
 
 resource "google_project_service" "test2" {
-  project = google_project.acceptance.id
+  project = google_project.acctest.id
   service = "%s"
 }
 `, pid, name, org, services[0], services[1])
@@ -261,12 +261,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "test" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
 }
 
 resource "google_project_service" "test2" {
-  project                    = google_project.acceptance.project_id
+  project                    = google_project.acctest.project_id
   service                    = "%s"
   disable_dependent_services = %s
 }
@@ -283,7 +283,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "test" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
 }
 `, pid, name, org, billing, services[0])
@@ -298,13 +298,13 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "test" {
-  project            = google_project.acceptance.project_id
+  project            = google_project.acctest.project_id
   service            = "%s"
   disable_on_destroy = false
 }
 
 resource "google_project_service" "test2" {
-  project            = google_project.acceptance.project_id
+  project            = google_project.acctest.project_id
   service            = "%s"
   disable_on_destroy = false
 }
@@ -322,7 +322,7 @@ resource "google_project" "acceptance" {
 // by passing through locals, we break the dependency chain
 // see terraform-provider-google#1292
 locals {
-  project_id = google_project.acceptance.project_id
+  project_id = google_project.acctest.project_id
 }
 
 resource "google_project_service" "test" {
@@ -350,7 +350,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "test" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
 
   disable_dependent_services = true

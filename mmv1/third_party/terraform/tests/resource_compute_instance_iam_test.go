@@ -12,14 +12,14 @@ import (
 func TestAccComputeInstanceIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	role := "roles/compute.osLogin"
-	zone := GetTestZoneFromEnv()
-	instanceName := fmt.Sprintf("tf-test-instance-%s", google.RandString(t, 10))
+	zone := acctest.GetTestZoneFromEnv()
+	instanceName := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceIamPolicy_basic(zone, instanceName, role),

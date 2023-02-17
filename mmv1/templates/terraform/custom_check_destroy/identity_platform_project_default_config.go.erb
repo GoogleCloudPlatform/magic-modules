@@ -1,4 +1,4 @@
-config := GoogleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
 url, err := ReplaceVarsForTest(config, rs, "{{IdentityPlatformBasePath}}projects/{{project}}/config")
 if err != nil {

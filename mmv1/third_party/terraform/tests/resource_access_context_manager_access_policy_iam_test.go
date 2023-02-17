@@ -8,15 +8,15 @@ import (
 )
 
 func TestAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
-	org := GetTestOrgFromEnv(t)
-	account := "tf-acm-iam-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	account := "tf-acm-iam-" + acctest.RandString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -31,15 +31,15 @@ func TestAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
 }
 
 func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
-	org := GetTestOrgFromEnv(t)
-	account := "tf-acm-iam-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	account := "tf-acm-iam-" + acctest.RandString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -56,15 +56,15 @@ func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
 }
 
 func TestAccAccessContextManagerAccessPolicyIamPolicy(t *testing.T) {
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
-	org := GetTestOrgFromEnv(t)
-	account := "tf-acm-iam-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	account := "tf-acm-iam-" + acctest.RandString(t, 10)
 	role := "roles/accesscontextmanager.policyAdmin"
 	policy := createScopedPolicy(t, org)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -130,7 +130,7 @@ resource google_access_context_manager_access_policy_iam_policy policy {
 }
 
 func createScopedPolicy(t *testing.T, org string) string {
-	rand := google.RandString(t, 10)
+	rand := acctest.RandString(t, 10)
 	return fmt.Sprintf(`
 		resource "google_project" "project" {
 		project_id      = "acm-tf-test-%s"

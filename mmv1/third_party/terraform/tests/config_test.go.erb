@@ -9,10 +9,9 @@ import (
 	"time"
 
 	"golang.org/x/oauth2/google"
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/provider"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
 )
 
-const TestFakeCredentialsPath = "./test-fixtures/fake_account.json"
 const testOauthScope = "https://www.googleapis.com/auth/compute"
 
 func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
@@ -64,13 +63,13 @@ func TestConfigLoadAndValidate_accountFileJSONInvalid(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_credentials(t *testing.T) {
-	if os.Getenv(provider.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", provider.TestEnvVar)
+	if os.Getenv(acctest.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
 	}
-	provider.TestAccPreCheck(t)
+	acctest.TestAccPreCheck(t)
 
-	creds := GetTestCredsFromEnv()
-	proj := GetTestProjectFromEnv()
+	creds := acctest.GetTestCredsFromEnv()
+	proj := acctest.GetTestProjectFromEnv()
 
 	config := &Config{
 		Credentials: creds,
@@ -92,14 +91,14 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_impersonated(t *testing.T) {
-	if os.Getenv(provider.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", provider.TestEnvVar)
+	if os.Getenv(acctest.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
 	}
-	provider.TestAccPreCheck(t)
+	acctest.TestAccPreCheck(t)
 
-	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
-	creds := GetTestCredsFromEnv()
-	proj := GetTestProjectFromEnv()
+	serviceaccount := google.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	creds := acctest.GetTestCredsFromEnv()
+	proj := acctest.GetTestProjectFromEnv()
 
 	config := &Config{
 		Credentials:               creds,
@@ -122,14 +121,14 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
-	if os.Getenv(provider.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", provider.TestEnvVar)
+	if os.Getenv(acctest.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
 	}
-	provider.TestAccPreCheck(t)
+	acctest.TestAccPreCheck(t)
 
-	creds := GetTestCredsFromEnv()
-	proj := GetTestProjectFromEnv()
-	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	creds := acctest.GetTestCredsFromEnv()
+	proj := acctest.GetTestProjectFromEnv()
+	serviceaccount := google.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), DefaultClientScopes...)
 	if err != nil {
@@ -162,13 +161,13 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_accessToken(t *testing.T) {
-	if os.Getenv(provider.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", provider.TestEnvVar)
+	if os.Getenv(acctest.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
 	}
-	provider.TestAccPreCheck(t)
+	acctest.TestAccPreCheck(t)
 
-	creds := GetTestCredsFromEnv()
-	proj := GetTestProjectFromEnv()
+	creds := acctest.GetTestCredsFromEnv()
+	proj := acctest.GetTestProjectFromEnv()
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
 	if err != nil {

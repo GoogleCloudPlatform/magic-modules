@@ -9,15 +9,15 @@ import (
 )
 
 func TestAccDataSourceGoogleTagsTagValue_default(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	keyShortName := "tf-testkey-" + google.RandString(t, 10)
-	shortName := "tf-test-" + google.RandString(t, 10)
+	keyShortName := "tf-testkey-" + acctest.RandString(t, 10)
+	shortName := "tf-test-" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleTagsTagValueConfig(parent, keyShortName, shortName),
@@ -30,15 +30,15 @@ func TestAccDataSourceGoogleTagsTagValue_default(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleTagsTagValue_dot(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	keyShortName := "tf-testkey-" + google.RandString(t, 10)
-	shortName := "terraform.test." + google.RandString(t, 10)
+	keyShortName := "tf-testkey-" + acctest.RandString(t, 10)
+	shortName := "terraform.test." + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleTagsTagValueConfig(parent, keyShortName, shortName),

@@ -21,12 +21,12 @@ func projectIamAuditConfigImportStep(resourceName, pid, service string) resource
 func TestAccProjectIamAuditConfig_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -48,14 +48,14 @@ func TestAccProjectIamAuditConfig_basic(t *testing.T) {
 func TestAccProjectIamAuditConfig_multiple(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -81,17 +81,17 @@ func TestAccProjectIamAuditConfig_multiple(t *testing.T) {
 // Test that multiple IAM audit configs can be applied to a project all at once
 func TestAccProjectIamAuditConfig_multipleAtOnce(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -114,13 +114,13 @@ func TestAccProjectIamAuditConfig_multipleAtOnce(t *testing.T) {
 func TestAccProjectIamAuditConfig_update(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -153,17 +153,17 @@ func TestAccProjectIamAuditConfig_update(t *testing.T) {
 // Test that an IAM audit config can be removed from a project
 func TestAccProjectIamAuditConfig_remove(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -194,15 +194,15 @@ func TestAccProjectIamAuditConfig_remove(t *testing.T) {
 func TestAccProjectIamAuditConfig_addFirstExemptMember(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	members := []string{}
 	members2 := []string{"user:gterraformtest1@gmail.com"}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -230,15 +230,15 @@ func TestAccProjectIamAuditConfig_addFirstExemptMember(t *testing.T) {
 func TestAccProjectIamAuditConfig_removeLastExemptMember(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	service := "cloudkms.googleapis.com"
 	members2 := []string{}
 	members := []string{"user:gterraformtest1@gmail.com"}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -266,15 +266,15 @@ func TestAccProjectIamAuditConfig_removeLastExemptMember(t *testing.T) {
 func TestAccProjectIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	logType := "DATA_READ"
 	logType2 := "DATA_WRITE"
 	service := "cloudkms.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -307,7 +307,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"
@@ -329,7 +329,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"
@@ -341,7 +341,7 @@ resource "google_project_iam_audit_config" "acceptance" {
 }
 
 resource "google_project_iam_audit_config" "multiple" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
   audit_log_config {
     log_type = "DATA_WRITE"
@@ -359,7 +359,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
   audit_log_config {
     log_type = "DATA_WRITE"
@@ -381,7 +381,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"
@@ -409,7 +409,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"%s
@@ -427,7 +427,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
   audit_log_config {
     log_type = "%s"

@@ -127,6 +127,6 @@ func sendBatchFuncEnableServices(config *Config, userAgent, billingProject strin
 
 func sendListServices(config *Config, billingProject, userAgent string, timeout time.Duration) BatcherSendFunc {
 	return func(project string, _ interface{}) (interface{}, error) {
-		return listCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
+		return ListCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 	}
 }

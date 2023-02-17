@@ -16,12 +16,12 @@ import (
 func TestAccProjectIamPolicy_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	member := "user:evanbrown@google.com"
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -47,11 +47,11 @@ func TestAccProjectIamPolicy_basic(t *testing.T) {
 func TestAccProjectIamPolicy_emptyMembers(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectIamPolicyEmptyMembers(pid, Pname, org),
@@ -64,11 +64,11 @@ func TestAccProjectIamPolicy_emptyMembers(t *testing.T) {
 func TestAccProjectIamPolicy_expanded(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectAssociatePolicyExpanded(pid, Pname, org),
@@ -84,11 +84,11 @@ func TestAccProjectIamPolicy_expanded(t *testing.T) {
 func TestAccProjectIamPolicy_basicAuditConfig(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -114,11 +114,11 @@ func TestAccProjectIamPolicy_basicAuditConfig(t *testing.T) {
 func TestAccProjectIamPolicy_expandedAuditConfig(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectAssociatePolicyAuditConfigExpanded(pid, Pname, org),
@@ -133,11 +133,11 @@ func TestAccProjectIamPolicy_expandedAuditConfig(t *testing.T) {
 func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
@@ -163,12 +163,12 @@ func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 func TestAccProjectIamPolicy_invalidMembers(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectAssociatePolicyBasic(pid, Pname, org, "admin@hashicorptest.com"),
@@ -240,7 +240,7 @@ func testAccCheckGoogleProjectIamPolicyExists(projectRes, policyRes, pid string)
 // Confirm that a project has an IAM policy with at least 1 binding
 func testAccProjectExistingPolicy(t *testing.T, pid string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		c := GoogleProviderConfig(t)
+		c := acctest.GoogleProviderConfig(t)
 		var err error
 		originalPolicy, err = getProjectIamPolicy(pid, c)
 		if err != nil {
@@ -262,7 +262,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_policy" "acceptance" {
-  project     = google_project.acceptance.id
+  project     = google_project.acctest.id
   policy_data = data.google_iam_policy.admin.policy_data
 }
 
@@ -293,7 +293,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_policy" "acceptance" {
-  project     = google_project.acceptance.id
+  project     = google_project.acctest.id
   policy_data = data.google_iam_policy.admin.policy_data
 }
 
@@ -356,7 +356,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_policy" "acceptance" {
-  project     = google_project.acceptance.id
+  project     = google_project.acctest.id
   policy_data = data.google_iam_policy.expanded.policy_data
 }
 
@@ -378,7 +378,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_policy" "acceptance" {
-  project     = google_project.acceptance.id
+  project     = google_project.acctest.id
   policy_data = data.google_iam_policy.expanded.policy_data
 }
 
@@ -409,7 +409,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_policy" "acceptance" {
-  project     = google_project.acceptance.id
+  project     = google_project.acctest.id
   policy_data = data.google_iam_policy.expanded.policy_data
 }
 
@@ -462,7 +462,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_iam_policy" "acceptance" {
-    project     = google_project.acceptance.id
+    project     = google_project.acctest.id
     policy_data = data.google_iam_policy.admin.policy_data
 }
 

@@ -9,12 +9,12 @@ import (
 
 func TestAccNetworkServicesEdgeCacheService_updateAndImport(t *testing.T) {
 	t.Parallel()
-	namebkt := "tf-test-bucket-" + google.RandString(t, 10)
-	nameorigin := "tf-test-origin-" + google.RandString(t, 10)
-	nameservice := "tf-test-service-" + google.RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	namebkt := "tf-test-bucket-" + acctest.RandString(t, 10)
+	nameorigin := "tf-test-origin-" + acctest.RandString(t, 10)
+	nameservice := "tf-test-service-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckNetworkServicesEdgeCacheServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

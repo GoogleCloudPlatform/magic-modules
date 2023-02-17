@@ -9,18 +9,18 @@ import (
 
 func TestAccDataSourceComputeRouter(t *testing.T) {
 	t.Parallel()
-	name := fmt.Sprintf("tf-test-router-%d", RandInt(t))
+	name := fmt.Sprintf("tf-test-router-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeRouterConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_compute_router.myrouter", "id", name),
 					resource.TestCheckResourceAttr("data.google_compute_router.myrouter", "name", name),
-					resource.TestCheckResourceAttr("data.google_compute_router.myrouter", "network", fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", GetTestProjectFromEnv(), name)),
+					resource.TestCheckResourceAttr("data.google_compute_router.myrouter", "network", fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", acctest.GetTestProjectFromEnv(), name)),
 				),
 			},
 		},

@@ -12,12 +12,12 @@ import (
 func TestAccFolderIamAuditConfig_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
 	service := "cloudkms.googleapis.com"
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -37,17 +37,17 @@ func TestAccFolderIamAuditConfig_basic(t *testing.T) {
 // Test that multiple IAM audit configs can be applied to a folder, one at a time
 func TestAccFolderIamAuditConfig_multiple(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -71,17 +71,17 @@ func TestAccFolderIamAuditConfig_multiple(t *testing.T) {
 // Test that multiple IAM audit configs can be applied to a folder all at once
 func TestAccFolderIamAuditConfig_multipleAtOnce(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -102,13 +102,13 @@ func TestAccFolderIamAuditConfig_multipleAtOnce(t *testing.T) {
 func TestAccFolderIamAuditConfig_update(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -136,17 +136,17 @@ func TestAccFolderIamAuditConfig_update(t *testing.T) {
 // Test that an IAM audit config can be removed from a folder
 func TestAccFolderIamAuditConfig_remove(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -174,15 +174,15 @@ func TestAccFolderIamAuditConfig_remove(t *testing.T) {
 func TestAccFolderIamAuditConfig_addFirstExemptMember(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	members := []string{}
 	members2 := []string{"user:gterraformtest1@gmail.com"}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -207,15 +207,15 @@ func TestAccFolderIamAuditConfig_addFirstExemptMember(t *testing.T) {
 func TestAccFolderIamAuditConfig_removeLastExemptMember(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	members2 := []string{}
 	members := []string{"user:gterraformtest1@gmail.com"}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -240,15 +240,15 @@ func TestAccFolderIamAuditConfig_removeLastExemptMember(t *testing.T) {
 func TestAccFolderIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
 	logType := "DATA_READ"
 	logType2 := "DATA_WRITE"
 	service := "cloudkms.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -277,7 +277,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_audit_config" "acceptance" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"
@@ -298,7 +298,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_audit_config" "acceptance" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"
@@ -310,7 +310,7 @@ resource "google_folder_iam_audit_config" "acceptance" {
 }
 
 resource "google_folder_iam_audit_config" "multiple" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   service = "%s"
   audit_log_config {
     log_type = "DATA_WRITE"
@@ -327,7 +327,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_audit_config" "acceptance" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   service = "%s"
   audit_log_config {
     log_type = "DATA_WRITE"
@@ -348,7 +348,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_audit_config" "acceptance" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"
@@ -375,7 +375,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_audit_config" "acceptance" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"%s
@@ -392,7 +392,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_audit_config" "acceptance" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   service = "%s"
   audit_log_config {
     log_type = "%s"

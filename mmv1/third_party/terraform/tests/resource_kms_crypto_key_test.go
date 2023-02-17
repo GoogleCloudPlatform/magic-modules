@@ -168,16 +168,16 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 func TestAccKmsCryptoKey_basic(t *testing.T) {
 	t.Parallel()
 
-	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	location := GetTestRegionFromEnv()
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	location := acctest.GetTestRegionFromEnv()
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -209,21 +209,21 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 
 func TestAccKmsCryptoKey_rotation(t *testing.T) {
 	// when rotation is set, next rotation time is set using time.Now
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	location := GetTestRegionFromEnv()
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	location := acctest.GetTestRegionFromEnv()
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	rotationPeriod := "100000s"
 	updatedRotationPeriod := "7776000s"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_rotation(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod),
@@ -265,18 +265,18 @@ func TestAccKmsCryptoKey_rotation(t *testing.T) {
 func TestAccKmsCryptoKey_template(t *testing.T) {
 	t.Parallel()
 
-	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	location := GetTestRegionFromEnv()
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	location := acctest.GetTestRegionFromEnv()
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	algorithm := "EC_SIGN_P256_SHA256"
 	updatedAlgorithm := "EC_SIGN_P384_SHA384"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_template(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, algorithm),
@@ -310,16 +310,16 @@ func TestAccKmsCryptoKey_template(t *testing.T) {
 func TestAccKmsCryptoKey_destroyDuration(t *testing.T) {
 	t.Parallel()
 
-	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	location := GetTestRegionFromEnv()
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	location := acctest.GetTestRegionFromEnv()
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_destroyDuration(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -345,16 +345,16 @@ func TestAccKmsCryptoKey_destroyDuration(t *testing.T) {
 func TestAccKmsCryptoKey_importOnly(t *testing.T) {
 	t.Parallel()
 
-	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	location := GetTestRegionFromEnv()
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	location := acctest.GetTestRegionFromEnv()
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_importOnly(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -396,7 +396,7 @@ func testAccCheckGoogleKmsCryptoKeyWasRemovedFromState(resourceName string) reso
 // sub-resources were scheduled to be destroyed, rendering the key itself inoperable.
 func testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t *testing.T, projectId, location, keyRingName, cryptoKeyName string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		gcpResourceUri := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", projectId, location, keyRingName, cryptoKeyName)
 
 		response, err := config.NewKmsClient(config.UserAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(gcpResourceUri).Do()
@@ -421,7 +421,7 @@ func testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t *testing.T, projectId, lo
 // was disabled to prevent more versions of the key from being created.
 func testAccCheckGoogleKmsCryptoKeyRotationDisabled(t *testing.T, projectId, location, keyRingName, cryptoKeyName string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		gcpResourceUri := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", projectId, location, keyRingName, cryptoKeyName)
 
 		response, err := config.NewKmsClient(config.UserAgent).Projects.Locations.KeyRings.CryptoKeys.Get(gcpResourceUri).Do()
@@ -443,15 +443,15 @@ func testAccCheckGoogleKmsCryptoKeyRotationDisabled(t *testing.T, projectId, loc
 func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 	t.Parallel()
 
-	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -471,15 +471,15 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 	t.Parallel()
 
-	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_skipInitialVersion(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -496,16 +496,16 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 func TestAccKmsCryptoKeyVersion_patch(t *testing.T) {
 	t.Parallel()
 
-	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	state := "DISABLED"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKeyVersion_patchInitialize(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
@@ -542,12 +542,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = google_project_service.acceptance.project
+  project  = google_project_service.acctest.project
   name     = "%s"
   location = "us-central1"
 }
@@ -572,12 +572,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = google_project_service.acceptance.project
+  project  = google_project_service.acctest.project
   name     = "%s"
   location = "us-central1"
 }
@@ -600,12 +600,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = google_project_service.acceptance.project
+  project  = google_project_service.acctest.project
   name     = "%s"
   location = "us-central1"
 }
@@ -627,12 +627,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = google_project_service.acceptance.project
+  project  = google_project_service.acctest.project
   name     = "%s"
   location = "us-central1"
 }
@@ -659,12 +659,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = google_project_service.acceptance.project
+  project  = google_project_service.acctest.project
   name     = "%s"
   location = "us-central1"
 }
@@ -681,12 +681,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = google_project_service.acceptance.project
+  project  = google_project_service.acctest.project
   name     = "%s"
   location = "us-central1"
 }
@@ -712,12 +712,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = google_project_service.acceptance.project
+  project  = google_project_service.acctest.project
   name     = "%s"
   location = "us-central1"
 }
@@ -744,12 +744,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-	project = google_project.acceptance.project_id
+	project = google_project.acctest.project_id
 	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-	project  = google_project_service.acceptance.project
+	project  = google_project_service.acctest.project
 	name     = "%s"
 	location = "us-central1"
 }
@@ -778,12 +778,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-	project = google_project.acceptance.project_id
+	project = google_project.acctest.project_id
 	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-	project  = google_project_service.acceptance.project
+	project  = google_project_service.acctest.project
 	name     = "%s"
 	location = "us-central1"
 }
@@ -808,12 +808,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-	project = google_project.acceptance.project_id
+	project = google_project.acctest.project_id
 	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-	project  = google_project_service.acceptance.project
+	project  = google_project_service.acctest.project
 	name     = "%s"
 	location = "us-central1"
 }
@@ -842,12 +842,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-	project = google_project.acceptance.project_id
+	project = google_project.acctest.project_id
 	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-	project  = google_project_service.acceptance.project
+	project  = google_project_service.acctest.project
 	name     = "%s"
 	location = "us-central1"
 }
@@ -880,12 +880,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-	project = google_project.acceptance.project_id
+	project = google_project.acctest.project_id
 	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-	project  = google_project_service.acceptance.project
+	project  = google_project_service.acctest.project
 	name     = "%s"
 	location = "us-central1"
 }

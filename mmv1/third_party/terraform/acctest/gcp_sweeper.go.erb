@@ -1,4 +1,5 @@
-package google
+<% autogen_exception -%>
+package acctest
 
 import (
 	"fmt"
@@ -6,7 +7,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-)
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+	)
 
 // List of prefixes used for test resource names
 var testResourcePrefixes = []string{
@@ -27,25 +29,25 @@ func TestMain(m *testing.M) {
 	resource.TestMain(m)
 }
 
-// SharedConfigForRegion returns a common config setup needed for the sweeper
+// acctest.SharedConfigForRegion returns a common config setup needed for the sweeper
 // functions for a given region
-func SharedConfigForRegion(region string) (*Config, error) {
+func SharedConfigForRegion(region string) (*google.Config, error) {
 	project := GetTestProjectFromEnv()
 	if project == "" {
-		return nil, fmt.Errorf("set project using any of these env variables %v", ProjectEnvVars)
+		return nil, fmt.Errorf("set project using any of these env variables %v", projectEnvVars)
 	}
 
-	if v := MultiEnvSearch(CredsEnvVars); v == "" {
+	if v := google.MultiEnvSearch(CredsEnvVars); v == "" {
 		return nil, fmt.Errorf("set credentials using any of these env variables %v", CredsEnvVars)
 	}
 
-	conf := &Config{
+	conf := &google.Config{
 		Credentials: GetTestCredsFromEnv(),
 		Region:      region,
 		Project:     project,
 	}
 
-	ConfigureBasePaths(conf)
+	google.ConfigureBasePaths(conf)
 
 	return conf, nil
 }

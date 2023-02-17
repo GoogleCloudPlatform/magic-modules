@@ -10,12 +10,12 @@ import (
 func TestAccPubsubLiteSubscription_pubsubLiteSubscription_deliveryRequirement_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-foo-%s", google.RandString(t, 10))
-	subscription := fmt.Sprintf("tf-test-topic-foo-%s", google.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-foo-%s", acctest.RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-topic-foo-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckPubsubLiteSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -13,25 +13,25 @@ import (
 
 func TestAccEndpointsService_basic(t *testing.T) {
 	// Uses random provider
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
-	serviceId := "tf-test" + google.RandString(t, 10)
+	serviceId := "tf-test" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
 		CheckDestroy: testAccCheckEndpointServiceDestroyProducer(t),
-		Providers:    TestAccProviders,
+		Providers:    acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEndpointsService_basic(serviceId, GetTestProjectFromEnv(), "1"),
+				Config: testAccEndpointsService_basic(serviceId, acctest.GetTestProjectFromEnv(), "1"),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 			{
-				Config: testAccEndpointsService_basic(serviceId, GetTestProjectFromEnv(), "2"),
+				Config: testAccEndpointsService_basic(serviceId, acctest.GetTestProjectFromEnv(), "2"),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 			{
-				Config: testAccEndpointsService_basic(serviceId, GetTestProjectFromEnv(), "3"),
+				Config: testAccEndpointsService_basic(serviceId, acctest.GetTestProjectFromEnv(), "3"),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 		},
@@ -40,15 +40,15 @@ func TestAccEndpointsService_basic(t *testing.T) {
 
 func TestAccEndpointsService_grpc(t *testing.T) {
 	t.Parallel()
-	serviceId := "tf-test" + google.RandString(t, 10)
+	serviceId := "tf-test" + acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckEndpointServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEndpointsService_grpc(serviceId, GetTestProjectFromEnv()),
+				Config: testAccEndpointsService_grpc(serviceId, acctest.GetTestProjectFromEnv()),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 		},
@@ -180,7 +180,7 @@ EOF
 
 func testAccCheckEndpointExistsByName(t *testing.T, serviceId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		service, err := config.NewServiceManClient(config.UserAgent).Services.GetConfig(
 			fmt.Sprintf("%s.endpoints.%s.cloud.goog", serviceId, config.Project)).Do()
 		if err != nil {
@@ -196,7 +196,7 @@ func testAccCheckEndpointExistsByName(t *testing.T, serviceId string) resource.T
 
 func testAccCheckEndpointServiceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for name, rs := range s.RootModule().Resources {
 			if strings.HasPrefix(name, "data.") {
@@ -210,7 +210,7 @@ func testAccCheckEndpointServiceDestroyProducer(t *testing.T) func(s *terraform.
 			service, err := config.NewServiceManClient(config.UserAgent).Services.GetConfig(serviceName).Do()
 			if err != nil {
 				// ServiceManagement returns 403 if service doesn't exist.
-				if !isGoogleApiErrorWithCode(err, 403) {
+				if !IsGoogleApiErrorWithCode(err, 403) {
 					return err
 				}
 			}

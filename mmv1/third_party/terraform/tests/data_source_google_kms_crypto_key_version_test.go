@@ -12,9 +12,9 @@ func TestAccDataSourceGoogleKmsCryptoKeyVersion_basic(t *testing.T) {
 	asymDecrKey := BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_DECRYPT")
 	symKey := BootstrapKMSKey(t)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleKmsCryptoKeyVersion_basic(asymSignKey.CryptoKey.Name),

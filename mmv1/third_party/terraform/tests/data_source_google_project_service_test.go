@@ -11,12 +11,12 @@ import (
 func TestAccDataSourceGoogleProjectService_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleProjectService_basic(services, pid, Pname, org),
@@ -37,12 +37,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "foo" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "%s"
 }
 
 data "google_project_service" "foo" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = google_project_service.foo.service
 }
 `, pid, name, org, services[0])

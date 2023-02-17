@@ -12,11 +12,11 @@ import (
 func TestAccDatasourceSecretManagerSecretVersionAccess_basic(t *testing.T) {
 	t.Parallel()
 
-	randomString := google.RandString(t, 10)
+	randomString := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckSecretManagerSecretVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -32,11 +32,11 @@ func TestAccDatasourceSecretManagerSecretVersionAccess_basic(t *testing.T) {
 func TestAccDatasourceSecretManagerSecretVersionAccess_latest(t *testing.T) {
 	t.Parallel()
 
-	randomString := google.RandString(t, 10)
+	randomString := acctest.RandString(t, 10)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckSecretManagerSecretVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

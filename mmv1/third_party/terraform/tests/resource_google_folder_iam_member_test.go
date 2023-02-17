@@ -12,11 +12,11 @@ import (
 func TestAccFolderIamMember_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -41,14 +41,14 @@ func TestAccFolderIamMember_basic(t *testing.T) {
 
 // Test that multiple IAM bindings can be applied to a folder
 func TestAccFolderIamMember_multiple(t *testing.T) {
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -83,14 +83,14 @@ func TestAccFolderIamMember_multiple(t *testing.T) {
 
 // Test that an IAM binding can be removed from a folder
 func TestAccFolderIamMember_remove(t *testing.T) {
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -128,7 +128,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_member" "acceptance" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   member = "user:admin@hashicorptest.com"
   role   = "roles/compute.instanceAdmin"
 }
@@ -143,19 +143,19 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_member" "acceptance" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   member = "user:admin@hashicorptest.com"
   role   = "roles/compute.instanceAdmin"
 }
 
 resource "google_folder_iam_member" "multiple" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   member = "user:gterraformtest1@gmail.com"
   role   = "roles/compute.instanceAdmin"
 }
 
 resource "google_folder_iam_member" "condition" {
-  folder = google_folder.acceptance.name
+  folder = google_folder.acctest.name
   member = "user:gterraformtest1@gmail.com"
   role   = "roles/compute.instanceAdmin"
   condition {

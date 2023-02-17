@@ -51,15 +51,15 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 		{{- range $contextkey, $contextvalue := $s.ExpandContext }}
 		  "{{$contextkey}}" : {{$contextvalue}},
 		{{- end }}
-			"random_suffix": RandString(t, 10),
+			"random_suffix": acctest.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
 	{{ if $s.HasGAEquivalent -}}
-		Providers: TestAccProviders,
+		Providers: acctest.TestAccProviders,
 	{{- else }}
-		Providers: TestAccProvidersOiCS,
+		Providers: acctest.TestAccProvidersOiCS,
 	{{- end }}
 	{{ if true -}}
 		CheckDestroy: testAccCheck{{$.PathType}}DestroyProducer(t),
@@ -115,7 +115,7 @@ func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := GoogleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {

@@ -12,17 +12,17 @@ func TestAccDatasourceGoogleServiceAccountKey_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_service_account_key.acceptance"
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	serviceAccountName := fmt.Sprintf(
 		"projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com",
-		GetTestProjectFromEnv(),
+		acctest.GetTestProjectFromEnv(),
 		account,
-		GetTestProjectFromEnv(),
+		acctest.GetTestProjectFromEnv(),
 	)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatasourceGoogleServiceAccountKey(account),
@@ -45,12 +45,12 @@ resource "google_service_account" "acceptance" {
 }
 
 resource "google_service_account_key" "acceptance" {
-  service_account_id = google_service_account.acceptance.name
+  service_account_id = google_service_account.acctest.name
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
 data "google_service_account_key" "acceptance" {
-  name = google_service_account_key.acceptance.name
+  name = google_service_account_key.acctest.name
 }
 `, account)
 }

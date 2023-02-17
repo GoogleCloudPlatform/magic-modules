@@ -94,7 +94,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "iap_app_engine_version"
         primary_resource_id: "version"
-        primary_resource_name: "GetTestProjectFromEnv(), \"default\", context[\"random_suffix\"]"
+        primary_resource_name: "acctest.GetTestProjectFromEnv(), \"default\", context[\"random_suffix\"]"
   AppEngineService: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_validator: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy

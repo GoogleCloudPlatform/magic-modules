@@ -10,25 +10,25 @@ import (
 
 func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	suffix := google.RandString(t, 10)
+	suffix := acctest.RandString(t, 10)
 	rigmName := fmt.Sprintf("tf-test-rigm-%s", suffix)
 	context := map[string]interface{}{
 		"rigm_name":     rigmName,
 		"random_suffix": suffix,
-		"config_name":   fmt.Sprintf("instance-%s", google.RandString(t, 10)),
-		"config_name2":  fmt.Sprintf("instance-%s", google.RandString(t, 10)),
-		"config_name3":  fmt.Sprintf("instance-%s", google.RandString(t, 10)),
-		"config_name4":  fmt.Sprintf("instance-%s", google.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name2":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name3":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name4":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
 	}
 	rigmId := fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s",
-		GetTestProjectFromEnv(), GetTestRegionFromEnv(), rigmName)
+		acctest.GetTestProjectFromEnv(), acctest.GetTestRegionFromEnv(), rigmName)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Create one endpoint
@@ -92,14 +92,14 @@ func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": google.RandString(t, 10),
-		"rigm_name":     fmt.Sprintf("tf-test-rigm-%s", google.RandString(t, 10)),
-		"config_name":   fmt.Sprintf("instance-%s", google.RandString(t, 10)),
+		"random_suffix": acctest.RandString(t, 10),
+		"rigm_name":     fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Create one config

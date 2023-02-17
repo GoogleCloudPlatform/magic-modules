@@ -10,11 +10,11 @@ import (
 func TestAccAppEngineApplication_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAppEngineApplication_basic(pid, org),
@@ -46,12 +46,12 @@ func TestAccAppEngineApplication_basic(t *testing.T) {
 func TestAccAppEngineApplication_withIAP(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAppEngineApplication_withIAP(pid, org),
@@ -75,7 +75,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_app_engine_application" "acceptance" {
-  project        = google_project.acceptance.project_id
+  project        = google_project.acctest.project_id
   auth_domain    = "hashicorptest.com"
   location_id    = "us-central"
   serving_status = "SERVING"
@@ -98,7 +98,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_app_engine_application" "acceptance" {
-  project        = google_project.acceptance.project_id
+  project        = google_project.acctest.project_id
   auth_domain    = "hashicorptest.com"
   location_id    = "us-central"
   database_type  = "CLOUD_DATASTORE_COMPATIBILITY"
@@ -116,7 +116,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_app_engine_application" "acceptance" {
-  project        = google_project.acceptance.project_id
+  project        = google_project.acctest.project_id
   auth_domain    = "tf-test.club"
   location_id    = "us-central"
   database_type  = "CLOUD_DATASTORE_COMPATIBILITY"

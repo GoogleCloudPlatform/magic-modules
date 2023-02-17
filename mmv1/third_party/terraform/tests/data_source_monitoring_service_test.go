@@ -8,9 +8,9 @@ import (
 )
 
 func TestAccDataSourceMonitoringService_AppEngine(t *testing.T) {
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceMonitoringService_AppEngine(),
@@ -20,7 +20,7 @@ func TestAccDataSourceMonitoringService_AppEngine(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.google_monitoring_app_engine_service.default",
 						"telemetry.0.resource_name",
-						fmt.Sprintf("//appengine.googleapis.com/apps/%s/services/default", GetTestProjectFromEnv()),
+						fmt.Sprintf("//appengine.googleapis.com/apps/%s/services/default", acctest.GetTestProjectFromEnv()),
 					),
 				),
 			},

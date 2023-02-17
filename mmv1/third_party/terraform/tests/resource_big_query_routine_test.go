@@ -10,12 +10,12 @@ import (
 func TestAccBigQueryRoutine_bigQueryRoutine_Update(t *testing.T) {
 	t.Parallel()
 
-	dataset := fmt.Sprintf("tfmanualdataset%s", google.RandString(t, 10))
-	routine := fmt.Sprintf("tfmanualroutine%s", google.RandString(t, 10))
+	dataset := fmt.Sprintf("tfmanualdataset%s", acctest.RandString(t, 10))
+	routine := fmt.Sprintf("tfmanualroutine%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryRoutineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

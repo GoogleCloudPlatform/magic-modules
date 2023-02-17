@@ -10,13 +10,13 @@ func TestAccDataSourceComputeRouterStatus(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"suffix": google.RandString(t, 10),
+		"suffix": acctest.RandString(t, 10),
 		"region": "us-central1",
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},

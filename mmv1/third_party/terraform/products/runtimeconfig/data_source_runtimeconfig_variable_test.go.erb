@@ -9,18 +9,18 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/provider"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
 )
 
 func TestAccRuntimeconfigVariableDatasource_basic(t *testing.T) {
 	t.Parallel()
 
-	provider.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { provider.TestAccPreCheck(t) },
-		Providers: provider.TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRuntimeconfigDatasourceVariable(google.RandString(t, 10), google.RandString(t, 10), google.RandString(t, 10)),
+				Config: testAccRuntimeconfigDatasourceVariable(acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					google.CheckDataSourceStateMatchesResourceState("data.google_runtimeconfig_variable.default", "google_runtimeconfig_variable.default"),
 				),

@@ -71,14 +71,14 @@ func TestKeyRingIdParsing(t *testing.T) {
 }
 
 func TestAccKmsKeyRing_basic(t *testing.T) {
-	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", google.RandString(t, 10))
+	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
-		Providers:    TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleKmsKeyRingWasRemovedFromState("google_kms_key_ring.key_ring"),
 		Steps: []resource.TestStep{
 			{
@@ -125,12 +125,12 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = google_project_service.acceptance.project
+  project  = google_project_service.acctest.project
   name     = "%s"
   location = "us-central1"
 }
@@ -147,7 +147,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
+  project = google_project.acctest.project_id
   service = "cloudkms.googleapis.com"
 }
 `, projectId, projectId, projectOrg, projectBillingAccount)

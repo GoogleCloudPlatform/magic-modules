@@ -9,16 +9,16 @@ import (
 
 func TestAccServiceNetworkingPeeredDNSDomain_basic(t *testing.T) {
 	t.Parallel()
-	org := GetTestOrgFromEnv(t)
-	billingId := GetTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
-	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	name := fmt.Sprintf("test-name-%d", RandInt(t))
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	name := fmt.Sprintf("test-name-%d", acctest.RandInt(t))
 	service := "servicenetworking.googleapis.com"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceNetworkingPeeredDNSDomain_basic(project, org, billingId, name, service),

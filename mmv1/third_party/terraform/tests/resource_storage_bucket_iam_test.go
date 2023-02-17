@@ -10,13 +10,13 @@ import (
 func TestAccStorageBucketIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	serviceAcct := google.GetTestServiceAccountFromEnv(t)
-	bucket := fmt.Sprintf("tf-test-%d", RandInt(t))
-	account := fmt.Sprintf("tf-test-%d", RandInt(t))
+	serviceAcct := acctest.GetTestServiceAccountFromEnv(t)
+	bucket := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Policy creation

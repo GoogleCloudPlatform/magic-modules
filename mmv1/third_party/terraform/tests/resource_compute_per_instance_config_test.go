@@ -10,25 +10,25 @@ import (
 
 func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	suffix := google.RandString(t, 10)
+	suffix := acctest.RandString(t, 10)
 	igmName := fmt.Sprintf("tf-test-igm-%s", suffix)
 	context := map[string]interface{}{
 		"igm_name":      igmName,
 		"random_suffix": suffix,
-		"config_name":   fmt.Sprintf("instance-%s", google.RandString(t, 10)),
-		"config_name2":  fmt.Sprintf("instance-%s", google.RandString(t, 10)),
-		"config_name3":  fmt.Sprintf("instance-%s", google.RandString(t, 10)),
-		"config_name4":  fmt.Sprintf("instance-%s", google.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name2":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name3":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name4":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
 	}
 	igmId := fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s",
-		GetTestProjectFromEnv(), GetTestZoneFromEnv(), igmName)
+		acctest.GetTestProjectFromEnv(), acctest.GetTestZoneFromEnv(), igmName)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Create one endpoint
@@ -92,14 +92,14 @@ func TestAccComputePerInstanceConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": google.RandString(t, 10),
-		"igm_name":      fmt.Sprintf("tf-test-igm-%s", google.RandString(t, 10)),
-		"config_name":   fmt.Sprintf("instance-%s", google.RandString(t, 10)),
+		"random_suffix": acctest.RandString(t, 10),
+		"igm_name":      fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Create one config
@@ -311,7 +311,7 @@ func testAccCheckComputePerInstanceConfigDestroyed(t *testing.T, igmId, configNa
 }
 
 func testAccComputePerInstanceConfigListNames(t *testing.T, igmId string) (map[string]struct{}, error) {
-	config := GoogleProviderConfig(t)
+	config := acctest.GoogleProviderConfig(t)
 
 	url := fmt.Sprintf("%s%s/listPerInstanceConfigs", config.ComputeBasePath, igmId)
 	res, err := SendRequest(config, "POST", "", url, config.UserAgent, nil)

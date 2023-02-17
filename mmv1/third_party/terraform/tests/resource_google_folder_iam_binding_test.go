@@ -15,11 +15,11 @@ import (
 func TestAccFolderIamBinding_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -45,14 +45,14 @@ func TestAccFolderIamBinding_basic(t *testing.T) {
 // Test that multiple IAM bindings can be applied to a folder, one at a time
 func TestAccFolderIamBinding_multiple(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -92,14 +92,14 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 // Test that multiple IAM bindings can be applied to a folder all at once
 func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -130,11 +130,11 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 func TestAccFolderIamBinding_update(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -180,14 +180,14 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 // Test that an IAM binding can be removed from a folder
 func TestAccFolderIamBinding_remove(t *testing.T) {
 	// Multiple fine-grained resources
-	provider.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	fname := "tf-test-" + google.RandString(t, 10)
-	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
-		Providers: TestAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	fname := "tf-test-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -223,7 +223,7 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 
 func testAccCheckGoogleFolderIamBindingExists(t *testing.T, expected *cloudresourcemanager.Binding, org, fname string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := GoogleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		folderPolicy, err := getFolderIamPolicyByParentAndDisplayName("organizations/"+org, fname, config)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve IAM policy for folder %q: %s", fname, err)
@@ -300,7 +300,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_binding" "acceptance" {
-  folder  = google_folder.acceptance.name
+  folder  = google_folder.acctest.name
   members = ["user:admin@hashicorptest.com"]
   role    = "roles/compute.instanceAdmin"
 }
@@ -315,13 +315,13 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_binding" "acceptance" {
-  folder  = google_folder.acceptance.name
+  folder  = google_folder.acctest.name
   members = ["user:admin@hashicorptest.com"]
   role    = "roles/compute.instanceAdmin"
 }
 
 resource "google_folder_iam_binding" "multiple" {
-  folder  = google_folder.acceptance.name
+  folder  = google_folder.acctest.name
   members = ["user:gterraformtest1@gmail.com"]
   role    = "roles/viewer"
 }
@@ -336,7 +336,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_binding" "acceptance" {
-  folder  = google_folder.acceptance.name
+  folder  = google_folder.acctest.name
   members = ["user:admin@hashicorptest.com", "user:gterraformtest1@gmail.com"]
   role    = "roles/compute.instanceAdmin"
 }
@@ -351,7 +351,7 @@ resource "google_folder" "acceptance" {
 }
 
 resource "google_folder_iam_binding" "acceptance" {
-  folder  = google_folder.acceptance.name
+  folder  = google_folder.acctest.name
   members = ["user:gterraformtest1@gmail.com"]
   role    = "roles/compute.instanceAdmin"
 }
