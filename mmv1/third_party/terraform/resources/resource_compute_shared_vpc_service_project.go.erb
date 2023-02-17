@@ -132,7 +132,7 @@ func resourceComputeSharedVpcServiceProjectDelete(d *schema.ResourceData, meta i
 	hostProject := d.Get("host_project").(string)
 	serviceProject := d.Get("service_project").(string)
 	
-	if d.Get("deletion_policy").(string) == "ABANDON" {
+	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
 		log.Printf("[WARN] Shared VPC service project %q deletion_policy is set to 'ABANDON', skip disabling shared VPC service project", d.Id())
 		d.SetId("")
 		return nil
