@@ -1,0 +1,8 @@
+  // We're not allowed to set this label ourselves, but it does appear in the
+  // return value. Our solution is to hide it for the initial POST then put it
+  // back for diff purposes.
+  dynamic_label := "cloudidentity.googleapis.com/groups.dynamic"
+	dynamic_value, is_dynamic := labelsProp[dynamic_label]
+	if is_dynamic {
+		delete(labelsProp, dynamic_label)
+	}

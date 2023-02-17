@@ -11,24 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: 'Group'
-base_url: 'groups?initialGroupConfig={{initial_group_config}}'
-update_url: '{{name}}'
-self_link: '{{name}}'
+---
+!ruby/object:Api::Resource
+name: "Group"
+base_url: "groups?initialGroupConfig={{initial_group_config}}"
+update_url: "{{name}}"
+self_link: "{{name}}"
 update_verb: :PATCH
 update_mask: true
 description: |
   A Cloud Identity resource representing a Group.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://cloud.google.com/identity/docs/how-to/setup'
-  api: 'https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups'
+    "Official Documentation": "https://cloud.google.com/identity/docs/how-to/setup"
+  api: "https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups"
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: transport_tpg.PollCheckForExistenceWith403
   check_response_func_absence: transport_tpg.PollCheckForAbsenceWith403
   target_occurrences: 10
-  actions: ['create', 'update', 'delete']
+  actions: ["create", "update", "delete"]
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
@@ -36,26 +37,36 @@ docs: !ruby/object:Provider::Terraform::Docs
     in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-import_format: ['{{name}}']
+import_format: ["{{name}}"]
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name:
-      'cloud_identity_groups_basic'
+      "cloud_identity_groups_basic"
       # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
     skip_test: true
-    primary_resource_id: 'cloud_identity_group_basic'
+    primary_resource_id: "cloud_identity_group_basic"
     vars:
-      id_group: 'my-identity-group'
+      id_group: "my-identity-group"
+    test_env_vars:
+      org_domain: :ORG_DOMAIN
+      cust_id: :CUST_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloud_identity_groups_dynamic"
+    skip_test: true
+    primary_resource_id: "cloud_identity_groups_dynamic"
+    vars:
+      id_group: "my-identity-dynamic-group"
     test_env_vars:
       org_domain: :ORG_DOMAIN
       cust_id: :CUST_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/set_computed_name.erb
+  pre_create: templates/terraform/pre_create/hide_dynamic_label.erb
+  post_create: templates/terraform/post_create/unhide_dynamic_label.erb
   custom_import: templates/terraform/custom_import/cloud_identity_group_import.go.erb
 parameters:
   - !ruby/object:Api::Type::Enum
-    name: 'initialGroupConfig'
+    name: "initialGroupConfig"
     description: |
       The initial configuration options for creating a Group.
 
@@ -63,28 +74,28 @@ parameters:
       [API reference](https://cloud.google.com/identity/docs/reference/rest/v1beta1/groups/create#initialgroupconfig)
       for possible values.
     values:
-      - 'INITIAL_GROUP_CONFIG_UNSPECIFIED'
-      - 'WITH_INITIAL_OWNER'
-      - 'EMPTY'
+      - "INITIAL_GROUP_CONFIG_UNSPECIFIED"
+      - "WITH_INITIAL_OWNER"
+      - "EMPTY"
     default_value: :EMPTY
     url_param_only: true
     immutable: true
 properties:
   - !ruby/object:Api::Type::String
-    name: 'name'
+    name: "name"
     output: true
     description: |
       Resource name of the Group in the format: groups/{group_id}, where group_id
       is the unique ID assigned to the Group.
   - !ruby/object:Api::Type::NestedObject
-    name: 'groupKey'
+    name: "groupKey"
     required: true
     immutable: true
     description: |
       EntityKey of the Group.
     properties:
       - !ruby/object:Api::Type::String
-        name: 'id'
+        name: "id"
         required: true
         immutable: true
         description: |
@@ -98,7 +109,7 @@ properties:
 
           Must be unique within a namespace.
       - !ruby/object:Api::Type::String
-        name: 'namespace'
+        name: "namespace"
         immutable: true
         description: |
           The namespace in which the entity exists.
@@ -110,7 +121,7 @@ properties:
           The namespace must correspond to an identity source created in Admin Console
           and must be in the form of `identitysources/{identity_source_id}`.
   - !ruby/object:Api::Type::String
-    name: 'parent'
+    name: "parent"
     required: true
     immutable: true
     description: |
@@ -120,34 +131,126 @@ properties:
       Must be of the form identitysources/{identity_source_id} for external-identity-mapped
       groups or customers/{customer_id} for Google Groups.
   - !ruby/object:Api::Type::String
-    name: 'displayName'
+    name: "displayName"
     description: |
       The display name of the Group.
   - !ruby/object:Api::Type::String
-    name: 'description'
+    name: "description"
     description: |
       An extended description to help users determine the purpose of a Group.
       Must not be longer than 4,096 characters.
   - !ruby/object:Api::Type::String
-    name: 'createTime'
+    name: "createTime"
     output: true
     description: |
       The time when the Group was created.
   - !ruby/object:Api::Type::String
-    name: 'updateTime'
+    name: "updateTime"
     output: true
     description: |
       The time when the Group was last updated.
   - !ruby/object:Api::Type::KeyValuePairs
-    name: 'labels'
+    name: "labels"
     required: true
     description: |
-      One or more label entries that apply to the Group. Currently supported labels contain a key with an empty value.
+      Required. One or more label entries that apply to the Group.
+      [Currently supported labels] contain a key with an empty value.
 
-      Google Groups are the default type of group and have a label with a key of cloudidentity.googleapis.com/groups.discussion_forum and an empty value.
+      * Google Groups are the default type of group and have a label with a key of
+      `"cloudidentity.googleapis.com/groups.discussion_forum"` and an empty value.
 
-      Existing Google Groups can have an additional label with a key of cloudidentity.googleapis.com/groups.security and an empty value added to them. This is an immutable change and the security label cannot be removed once added.
+      * Existing Google Groups can have an additional label with a key of
+      `"cloudidentity.googleapis.com/groups.security"` and an empty value added to
+      them. Adding the Security label to a group makes it a [security group]. This
+      action is permanent and adds security features, but doesn’t remove any other
+      features of the original group.
 
-      Dynamic groups have a label with a key of cloudidentity.googleapis.com/groups.dynamic.
+      * [Dynamic groups] have a label with a key of
+      `"cloudidentity.googleapis.com/groups.dynamic"` automatically added by the API.
 
-      Identity-mapped groups for Cloud Search have a label with a key of system/groups/external and an empty value.
+      * [Identity-mapped groups] for Cloud Search have a label with a key of
+      `"system/groups/external"` and an empty value.
+
+      **Note**: The Identity API may add additional labels that were not provided in
+        your config. If terraform plan shows a diff where a label is added, you can
+        add it to your config or apply the `lifecycle.ignore_changes` rule to the
+        labels field.
+
+      [Currently supported labels]:
+        https://cloud.google.com/identity/docs/reference/rest/v1/groups#Group.FIELDS.labels
+      [security group]:
+        https://support.google.com/a/answer/10607394
+      [Dynamic groups]:
+        https://cloud.google.com/identity/docs/concepts/overview-dynamic-groups
+      [Identity-mapped groups]:
+        https://cloud.google.com/identity/docs/groups#group-types
+  - !ruby/object:Api::Type::NestedObject
+    name: "dynamicGroupMetadata"
+    immutable: true
+    description: |
+      Dynamic group metadata like queries and status.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: "queries"
+        description: |
+          Memberships will be the union of all queries. Only one entry with USER resource is currently supported. Customers can create up to 100 dynamic groups.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: "resourceType"
+              required: true
+              description: |
+                Resource type for the Dynamic Group Query
+              values:
+                - :USER
+            - !ruby/object:Api::Type::String
+              name: "query"
+              required: true
+              description: |
+                Query that determines the memberships of the dynamic group.
+
+                Examples:
+
+                  * All users with at least one organizations.department of engineering.
+
+                    ```
+                    user.organizations.exists(org, org.department=='engineering')
+                    ```
+
+                  * All users with at least one location that has area of foo and building_id of bar.
+
+                    ```
+                    user.locations.exists(loc, loc.area=='foo' && loc.building_id=='bar')
+                    ```
+
+                  * All users with any variation of the name John Doe (case-insensitive queries add
+                    equalsIgnoreCase() to the value being queried).
+
+                    ```
+                    user.name.value.equalsIgnoreCase('jOhn DoE')
+                    ```
+
+                **Note:** When using this field, Identity API will add
+                `"cloudidentity.googleapis.com/groups.dynamic"` to this group's labels.
+      - !ruby/object:Api::Type::NestedObject
+        name: "status"
+        output: true
+        description: |
+          The current status of a dynamic group along with timestamp.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: "status"
+            output: true
+            description: |
+              Status of the dynamic group.
+            values:
+              - :UP_TO_DATE
+              - :UPDATING_MEMBERSHIPS
+              - :INVALID_QUERY
+          - !ruby/object:Api::Type::Time
+            name: "statusTime"
+            output: true
+            description: |
+              The latest time at which the dynamic group is guaranteed to be in the given status. If status is UP_TO_DATE, the latest time at which the dynamic group was confirmed to be up-to-date. If status is UPDATING_MEMBERSHIPS, the time at which dynamic group was created.
+
+              A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
