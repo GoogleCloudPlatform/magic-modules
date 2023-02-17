@@ -133,6 +133,9 @@ func TestAccComputePerInstanceConfig_statefulIps(t *testing.T) {
 		"igm_name":      fmt.Sprintf("tf-test-igm-%s", randString(t, 10)),
 		"config_name":   fmt.Sprintf("instance-%s", randString(t, 10)),
 		"network":       fmt.Sprintf("tf-test-igm-%s", randString(t, 10)),
+		"subnetwork":    fmt.Sprintf("tf-test-igm-%s", randString(t, 10)),
+		"address1":      fmt.Sprintf("tf-test-igm-address%s", randString(t, 10)),
+		"address2":      fmt.Sprintf("tf-test-igm-address%s", randString(t, 10)),
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -336,23 +339,23 @@ resource "google_compute_instance_group_manager" "igm" {
 func testAccComputePerInstanceConfig_statefulIpsBasic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_network" "default" {
-	name = "my-network"
+	name = "%{network}"
 }
 
 resource "google_compute_subnetwork" "default" {
-	name          = "my-subnet"
+	name          = "%{subnetwork}"
 	ip_cidr_range = "10.0.0.0/16"
 	region        = "us-central1"
 	network       = google_compute_network.default.id
 }
 	
 resource "google_compute_address" "static_internal_ip" {
-	name         = "instance-1-address"
+	name         = "%{address1}"
 	address_type = "INTERNAL"
 }
 	
 resource "google_compute_address" "static_external_ip" {
-	name         = "instance-3-address"
+	name         = "%{address2}"
 	address_type = "EXTERNAL"
 }
 	  
@@ -411,23 +414,23 @@ resource "google_compute_disk" "disk1" {
 func testAccComputePerInstanceConfig_statefulIpsUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_network" "default" {
-	name = "my-network"
+	name = "%{network}"
 }
 
 resource "google_compute_subnetwork" "default" {
-	name          = "my-subnet"
+	name          = "%{subnetwork}"
 	ip_cidr_range = "10.0.0.0/16"
 	region        = "us-central1"
 	network       = google_compute_network.default.id
 }
 	
 resource "google_compute_address" "static_internal_ip" {
-	name         = "instance-1-address"
+	name         = "%{address1}"
 	address_type = "INTERNAL"
 }
 
 resource "google_compute_address" "static_external_ip" {
-	name         = "instance-3-address"
+	name         = "%{address2}"
 	address_type = "EXTERNAL"
 }
 		  

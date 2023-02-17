@@ -9762,11 +9762,7 @@ objects:
                 - !ruby/object:Api::Type::Enum
                   name: autoDelete
                   description: |
-                    A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
-                    The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
-                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
-                    `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
-                    deleted from the instance group.
+                    These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
                   values:
                     - :NEVER
                     - :ON_PERMANENT_INSTANCE_DELETION
@@ -9794,11 +9790,7 @@ objects:
                 - !ruby/object:Api::Type::Enum
                   name: autoDelete
                   description: |
-                    A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
-                    The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
-                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
-                    `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
-                    deleted from the instance group.
+                    These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
                   values:
                     - :NEVER
                     - :ON_PERMANENT_INSTANCE_DELETION
@@ -9941,11 +9933,7 @@ objects:
                 - !ruby/object:Api::Type::Enum
                   name: autoDelete
                   description: |
-                    A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
-                    The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
-                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
-                    `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
-                    deleted from the instance group.
+                    These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
                   values:
                     - :NEVER
                     - :ON_PERMANENT_INSTANCE_DELETION
@@ -9973,11 +9961,7 @@ objects:
                 - !ruby/object:Api::Type::Enum
                   name: autoDelete
                   description: |
-                    A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
-                    The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
-                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
-                    `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
-                    deleted from the instance group.
+                    These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
                   values:
                     - :NEVER
                     - :ON_PERMANENT_INSTANCE_DELETION
