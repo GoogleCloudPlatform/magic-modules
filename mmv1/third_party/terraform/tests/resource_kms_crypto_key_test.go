@@ -885,6 +885,10 @@ resource "google_kms_crypto_key" "crypto_key" {
     labels = {
         key = "value"
     }
+    version_template {
+        algorithm        = "EXTERNAL_SYMMETRIC_ENCRYPTION"
+        protection_level = "EXTERNAL"
+    }
     skip_initial_version_creation = true
 }
 
