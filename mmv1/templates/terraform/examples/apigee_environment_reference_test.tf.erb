@@ -69,6 +69,6 @@ resource "google_apigee_env_keystore" "apigee_environment_keystore_1" {
 resource "google_apigee_env_references" "reference_alias" {
   env_id         = google_apigee_environment.<%= ctx[:primary_resource_id] %>.id
   name           = "reference_test"
-  resourceType   = "KeyStore"
+  resource_type   = "KeyStore"
   refers         = google_apigee_env_keystore.apigee_environment_keystore_1.name
 }
