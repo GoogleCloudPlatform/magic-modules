@@ -41,6 +41,13 @@ resource "google_access_context_manager_authorized_orgs_desc" "authorized-orgs-d
   asset_type = "ASSET_TYPE_CREDENTIAL_STRENGTH"
   authorization_direction = "AUTHORIZATION_DIRECTION_TO"
   orgs = ["organizations/12345", "organizations/98765"]
+
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_project.project]
+  create_duration = "60s"
 }
 
 resource "google_access_context_manager_access_policy" "test-access" {
