@@ -27,6 +27,7 @@ func TestAccTags(t *testing.T) {
 		"tagValueIamMember":                 testAccTagsTagValueIamMember,
 		"tagValueIamPolicy":                 testAccTagsTagValueIamPolicy,
 		"tagsLocationTagBindingBasic":       testAccTagsLocationTagBinding_locationTagBindingbasic,
+		"tagsLocationTagBindingZonal":       testAccTagsLocationTagBinding_locationTagBindingzonal,
 	}
 
 	for name, tc := range testCases {
@@ -912,6 +913,8 @@ func testAccTagsLocationTagBinding_locationTagBindingzonal(t *testing.T) {
 
 func testAccTagsLocationTagBinding_locationTagBindingZonalExample(context map[string]interface{}) string {
 	return Nprintf(`
+data "google_project" "project" {
+}	
 resource "google_tags_tag_key" "key" {
 	parent = "organizations/%{org_id}"
 	short_name = "keyname%{random_suffix}"
@@ -944,7 +947,7 @@ resource "google_compute_instance" "default" {
   }
   
 resource "google_tags_location_tag_binding" "binding" {
-	parent = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
+    parent = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-central1-a/instances/${google_compute_instance.default.instance_id}"
 	tag_value = "tagValues/${google_tags_tag_value.value.name}"
 	location = "us-central1-a"
 }
