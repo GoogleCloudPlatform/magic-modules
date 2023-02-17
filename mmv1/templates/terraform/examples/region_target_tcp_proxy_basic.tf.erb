@@ -1,13 +1,11 @@
 # [START cloudloadbalancing_region_target_tcp_proxy_basic]
 resource "google_compute_region_target_tcp_proxy" "default" {
-  provider        = google-beta
   name            = "<%= ctx[:vars]['region_target_tcp_proxy_name'] %>"
   region          = "europe-west4"
   backend_service = google_compute_region_backend_service.default.id
 }
 
 resource "google_compute_region_backend_service" "default" {
-  provider    = google-beta
   name        = "<%= ctx[:vars]['region_backend_service_name'] %>"
   protocol    = "TCP"
   timeout_sec = 10
@@ -18,7 +16,6 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  provider           = google-beta
   name               = "<%= ctx[:vars]['health_check_name'] %>"
   region             = "europe-west4"
   timeout_sec        = 1

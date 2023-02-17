@@ -698,6 +698,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           These images can be referred by family name here.
       diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+      diskEncryptionKey.rsaEncryptedKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
       diskEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
         name: "kmsKeySelfLink"
@@ -3472,6 +3474,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           external_gateway_name: "external-gateway"
           global_address_name: "global-address"
           router_name: "ha-vpn-router1"
+      - !ruby/object:Provider::Terraform::Examples
+        skip_docs: true
+        name: "only_external_vpn_gateway_full"
+        primary_resource_id: "external_gateway"
+        vars:
+          external_gateway_name: "external-gateway"
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

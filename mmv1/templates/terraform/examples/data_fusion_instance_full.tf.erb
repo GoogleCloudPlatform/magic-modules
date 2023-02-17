@@ -19,10 +19,7 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
     ip_allocation = "${google_compute_global_address.private_ip_alloc.address}/${google_compute_global_address.private_ip_alloc.prefix_length}"
   }
 
-  # Mark for testing to avoid service networking connection usage that is not cleaned up
-  options = {
-    prober_test_run = "true"
-  }
+  <%= ctx[:vars]['prober_test_run'] %>
 }
 
 data "google_app_engine_default_service_account" "default" {

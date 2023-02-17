@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "bucket" {
-  name     = "<%= ctx[:test_env_vars]['project'] %>-<%= ctx[:vars]['bucket_name'] %>"  # Every bucket name must be globally unique
+  name     = "<%= ctx[:vars]['bucket_name'] %>"
   location = "us-central1"
   uniform_bucket_level_access = true
 }

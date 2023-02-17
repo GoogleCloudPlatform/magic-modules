@@ -33,21 +33,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           display_name: 'Example Billing Budget'
         test_env_vars:
-          billing_acct: :BILLING_ACCT
+          billing_acct: :MASTER_BILLING_ACCT
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_lastperiod'
         primary_resource_id: 'budget'
         vars:
           display_name: 'Example Billing Budget'
         test_env_vars:
-          billing_acct: :BILLING_ACCT
+          billing_acct: :MASTER_BILLING_ACCT
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_filter'
         primary_resource_id: 'budget'
         vars:
           display_name: 'Example Billing Budget'
         test_env_vars:
-          billing_acct: :BILLING_ACCT
+          billing_acct: :MASTER_BILLING_ACCT
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_notify'
         primary_resource_id: 'budget'
@@ -55,14 +55,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           budget_name: 'Example Billing Budget'
           channel_name: 'Example Notification Channel'
         test_env_vars:
-          billing_acct: :BILLING_ACCT
+          billing_acct: :MASTER_BILLING_ACCT
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_customperiod'
         primary_resource_id: 'budget'
         vars:
           display_name: 'Example Billing Budget'
         test_env_vars:
-          billing_acct: :BILLING_ACCT
+          billing_acct: :MASTER_BILLING_ACCT
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_optional'
         primary_resource_id: 'budget'
@@ -71,7 +71,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           display_name: 'Example Billing Budget'
           topic_name: "example-topic"
         test_env_vars:
-          billing_acct: :BILLING_ACCT          
+          billing_acct: :MASTER_BILLING_ACCT          
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'

@@ -279,10 +279,11 @@ func Provider() *schema.Provider {
 			"google_kms_secret":                                dataSourceGoogleKmsSecret(),
 			"google_kms_secret_ciphertext":                     dataSourceGoogleKmsSecretCiphertext(),
 			<% unless version == 'ga' -%>
-                        "google_kms_secret_asymmetric":                     dataSourceGoogleKmsSecretAsymmetric(),
-                        "google_firebase_android_app":                      dataSourceGoogleFirebaseAndroidApp(),
-      			"google_firebase_apple_app":                        dataSourceGoogleFirebaseAppleApp(),
+			"google_kms_secret_asymmetric":                     dataSourceGoogleKmsSecretAsymmetric(),
+			"google_firebase_android_app":                      dataSourceGoogleFirebaseAndroidApp(),
+			"google_firebase_apple_app":                        dataSourceGoogleFirebaseAppleApp(),
 			"google_firebase_apple_app_config":                 dataSourceGoogleFirebaseAppleAppConfig(),
+			"google_firebase_hosting_channel":                  dataSourceGoogleFirebaseHostingChannel(),
 			"google_firebase_web_app":                          dataSourceGoogleFirebaseWebApp(),
 			"google_firebase_web_app_config":                   dataSourceGoogleFirebaseWebappConfig(),
 			<% end -%>
@@ -290,6 +291,7 @@ func Provider() *schema.Provider {
 			"google_folders":                                   dataSourceGoogleFolders(),
 			"google_folder_organization_policy":                dataSourceGoogleFolderOrganizationPolicy(),
 			"google_logging_project_cmek_settings":             dataSourceGoogleLoggingProjectCmekSettings(),
+			"google_logging_sink":                              dataSourceGoogleLoggingSink(),
 			"google_monitoring_notification_channel":           dataSourceMonitoringNotificationChannel(),
 			"google_monitoring_cluster_istio_service":          dataSourceMonitoringServiceClusterIstio(),
 			"google_monitoring_istio_canonical_service":        dataSourceMonitoringIstioCanonicalService(),
@@ -321,6 +323,7 @@ func Provider() *schema.Provider {
 			"google_spanner_instance":                          dataSourceSpannerInstance(),
 			"google_sql_ca_certs":                              dataSourceGoogleSQLCaCerts(),
 			"google_sql_backup_run":                            dataSourceSqlBackupRun(),
+			"google_sql_databases":                             dataSourceSqlDatabases(),
 			"google_sql_database":                              dataSourceSqlDatabase(),
 			"google_sql_database_instance":                     dataSourceSqlDatabaseInstance(),
 			"google_sql_database_instances":                    dataSourceSqlDatabaseInstances(),
@@ -379,7 +382,8 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 products.each do |product|
   product_definition = product[:definitions]
   config = product[:overrides]
-  product_definition.objects.each do |object|
+  sorted =  product_definition.objects.sort_by { |obj| obj.name }
+  sorted.each do |object|
 	next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
 	tf_product = (config.legacy_name || product_definition.name).underscore
 	terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"

@@ -32,7 +32,10 @@ Choose your architecture below.
 First, you need to find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
 
 ```bash
-echo $GOPATH
+go env GOBIN
+
+# If the above returns nothing, then run the command below and add "/bin" to the end of the output path.
+go env GOPATH
 ```
 
 Next, create an empty configuration file. This could be in your `$HOME` directory or in a project directory; location does not matter. The extension `.tfrc` is required but the file name can be whatever you choose.
@@ -64,7 +67,9 @@ provider_installation {
 }
 ```
 
-Edit the file to replace `<REPLACE-ME>` with the output you saved from the first `echo` command, making sure to keep `/bin` at the end of the path. The full path is required and environment variables cannot be used. For example, `/Users/MyUserName/go/bin` is a valid path for a user called `MyUserName`.
+Edit the file to replace `<REPLACE-ME>` with the path you saved from the first step, making sure to keep `/bin` at the end of the path.
+
+**Please note**: the _full_ path is required and environment variables cannot be used. For example, `"/Users/MyUserName/go/bin"` is a valid path for a user called `MyUserName`, but `"~/go/bin"` or `"$HOME/go/bin"` will not work.
 
 Finally, save the file.
 
@@ -109,7 +114,9 @@ provider_installation {
 }
 ```
 
-Edit the file to replace `<REPLACE-ME>` with the output you saved from the first `echo` command, making sure to keep `\bin` at the end of the path. The full path is required and environment variables cannot be used. For example, `C:\Users\MyUserName\go\bin` is a valid path for a user called `MyUserName`.
+Edit the file to replace `<REPLACE-ME>` with the output you saved from the first step, making sure to keep `\bin` at the end of the path.
+
+**Please note**: The _full_ path is required and environment variables cannot be used. For example, `C:\Users\MyUserName\go\bin` is a valid path for a user called `MyUserName`.
 
 Finally, save the file.
 
