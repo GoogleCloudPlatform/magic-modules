@@ -17,6 +17,7 @@ module Google
     # Represents a Unicode value.
     class UnicodeString
       attr_reader :value
+
       def initialize(val)
         @value = val
       end
@@ -29,6 +30,7 @@ module Google
     # Represents a line of Python code
     class PythonCode
       attr_reader :value
+
       def initialize(val)
         @value = val
       end
@@ -37,6 +39,7 @@ module Google
         @value
       end
     end
+
     # Prints literal in Python
     #
     # For instance, an int is printed as-is and a string is quoted:
@@ -87,7 +90,7 @@ module Google
     private
 
     def array_format(values)
-      '[' + values.join(', ') + ']'
+      "[#{values.join(', ')}]"
     end
 
     def hash_format(value)
