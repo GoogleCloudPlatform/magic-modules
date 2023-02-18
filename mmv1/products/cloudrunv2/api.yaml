@@ -1019,6 +1019,8 @@ objects:
                       name: grpc
                       description: |-
                         GRPC specifies an action involving a GRPC port.
+                      send_empty_value: true
+                      allow_empty_object: true
                       properties:
                         - !ruby/object:Api::Type::Integer
                           name: port
@@ -1064,6 +1066,7 @@ objects:
                         # exactly_one_of:
                         #   - template.0.containers.0.startupProbe.0.httpGet
                         #   - template.0.containers.0.startupProbe.0.tcpSocket
+                        #   - template.0.containers.0.startupProbe.0.grpc
                         properties:
                           - !ruby/object:Api::Type::String
                             name: "path"
@@ -1096,6 +1099,7 @@ objects:
                         # exactly_one_of:
                         #   - template.0.containers.0.startupProbe.0.httpGet
                         #   - template.0.containers.0.startupProbe.0.tcpSocket
+                        #   - template.0.containers.0.startupProbe.0.grpc
                         properties:
                           - !ruby/object:Api::Type::Integer
                             name: port
@@ -1105,6 +1109,12 @@ objects:
                       name: grpc
                       description: |-
                         GRPC specifies an action involving a GRPC port.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      # exactly_one_of:
+                      #   - template.0.containers.0.startupProbe.0.httpGet
+                      #   - template.0.containers.0.startupProbe.0.tcpSocket
+                      #   - template.0.containers.0.startupProbe.0.grpc
                       properties:
                         - !ruby/object:Api::Type::Integer
                           name: port
