@@ -39,10 +39,10 @@ func New(version string) provider.ProviderWithMetaSchema {
 // FrameworkProvider is the provider implementation.
 type FrameworkProvider struct{
     billingProject types.String
-    client *http.Client
+    Client *http.Client
     context context.Context
     gRPCLoggingOptions []option.ClientOption
-    pollInterval time.Duration
+    PollInterval time.Duration
     project types.String
     region string
     requestBatcherIam *RequestBatcher

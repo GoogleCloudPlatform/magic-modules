@@ -50,7 +50,7 @@ func testSweep<%= sweeper_name -%>(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := provider.GetTestBillingAccountFromEnv(t)
+	billingId := google.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
 	d := &google.ResourceDataMock{

@@ -32,7 +32,7 @@ func Provider() *schema.Provider {
 	if isMtls() {
 		// if mtls is enabled switch all default endpoints to use the mtls endpoint
 		for key, bp := range google.DefaultBasePaths {
-			google.DefaultBasePaths[key] = google.getMtlsEndpoint(bp)
+			google.DefaultBasePaths[key] = getMtlsEndpoint(bp)
 		}
 	}
 

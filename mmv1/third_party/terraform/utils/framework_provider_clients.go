@@ -22,7 +22,7 @@ func (p *FrameworkProvider) NewDnsClient(userAgent string, diags *diag.Diagnosti
 	dnsClientBasePath := removeBasePathVersion(p.DNSBasePath)
 	dnsClientBasePath = strings.ReplaceAll(dnsClientBasePath, "/dns/", "")
 	tflog.Info(p.context, fmt.Sprintf("Instantiating Google Cloud DNS client for path %s", dnsClientBasePath))
-	clientDns, err := dns.NewService(p.context, option.WithHTTPClient(p.client))
+	clientDns, err := dns.NewService(p.context, option.WithHTTPClient(p.Client))
 	if err != nil {
 		diags.AddWarning("error creating client dns", err.Error())
 		return nil

@@ -149,7 +149,7 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 		case "REPLAYING":
 			vcrMode = recorder.ModeReplaying
 			// When replaying, set the poll interval low to speed up tests
-			p.ProdProvider.pollInterval = 10 * time.Millisecond
+			p.ProdProvider.PollInterval = 10 * time.Millisecond
 		default:
 			tflog.Debug(ctx, fmt.Sprintf("No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv))
 			return
@@ -160,9 +160,9 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 			tflog.Debug(ctx, "No environment var set for VCR_PATH, skipping VCR")
 			return
 		}
-		path := filepath.Join(envPath, vcrFileName(p.TestName))
+		path := filepath.Join(envPath, google.VcrFileName(p.TestName))
 
-		rec, err := recorder.NewAsMode(path, vcrMode, p.ProdProvider.client.Transport)
+		rec, err := recorder.NewAsMode(path, vcrMode, p.ProdProvider.Client.Transport)
 		if err != nil {
 			resp.Diagnostics.AddError("error creating record as new mode", err.Error())
 			return
@@ -209,7 +209,7 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 			}
 			return false
 		})
-		p.ProdProvider.client.Transport = rec
+		p.ProdProvider.Client.Transport = rec
 		configsLock.Lock()
 		fwProviders[p.TestName] = p
 		configsLock.Unlock()
@@ -220,7 +220,7 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 }
 
 func configureApiClient(ctx context.Context, p *frameworkTestProvider, diags *diag.Diagnostics) {
-	var data ProviderModel
+	var data google.ProviderModel
 	var d diag.Diagnostics
 
 	// Set defaults if needed - the only attribute without a default is ImpersonateServiceAccountDelegates

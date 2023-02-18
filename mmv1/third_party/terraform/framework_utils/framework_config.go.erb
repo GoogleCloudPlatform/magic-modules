@@ -147,7 +147,7 @@ func (p *FrameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 
 	p.context = ctx
 	p.region = data.Region.String()
-	p.pollInterval = 10 * time.Second
+	p.PollInterval = 10 * time.Second
 	p.project = data.Project
 	p.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, batchingConfig)
 	p.requestBatcherIam = NewRequestBatcher("IAM", ctx, batchingConfig)
@@ -533,7 +533,7 @@ func (p *FrameworkProvider) SetupClient(ctx context.Context, data ProviderModel,
 	}
 	client.Timeout = timeout
 
-	p.client = client
+	p.Client = client
 }
 
 func (p *FrameworkProvider) SetupGrpcLogging() {
@@ -564,7 +564,7 @@ func (p *FrameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 			return
 		}
 
-		p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
+		p.Client = oauth2.NewClient(ctx, tokenSource) // p.Client isn't initialised fully when this code is called.
 
 		email := getCurrUserEmail(p, p.userAgent, diags)
 		if diags.HasError() {
@@ -582,7 +582,7 @@ func (p *FrameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 		return
 	}
 
-	p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
+	p.Client = oauth2.NewClient(ctx, tokenSource) // p.Client isn't initialised fully when this code is called.
 	email := getCurrUserEmail(p, p.userAgent, diags)
 	if diags.HasError() {
 		tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
@@ -597,7 +597,7 @@ func (p *FrameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 		return
 	}
 
-	p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
+	p.Client = oauth2.NewClient(ctx, tokenSource) // p.Client isn't initialised fully when this code is called.
 
 	return
 }

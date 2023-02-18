@@ -59,7 +59,7 @@ func sendFrameworkRequestWithTimeout(p *FrameworkProvider, method, project, rawu
 			}
 
 			req.Header = reqHeaders
-			res, err = p.client.Do(req)
+			res, err = p.Client.Do(req)
 			if err != nil {
 				return err
 			}
