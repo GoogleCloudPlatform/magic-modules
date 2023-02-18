@@ -42,10 +42,7 @@
       "discovery_name": "Folder",
       "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
       "data": {
-        "create_time": {},
         "display_name": "Department 1",
-        "lifecycle_state": "",
-        "name": "",
         "parent": "organizations/{{.OrgID}}"
       }
     },

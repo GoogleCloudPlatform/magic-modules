@@ -40,7 +40,10 @@ func GetFolderApiObject(d TerraformResourceData, config *Config) (map[string]int
 		Parent:	d.Get("parent").(string),
 		DisplayName: d.Get("display_name").(string),
 		State: d.Get("lifecycle_state").(string), 
-		CreateTime: constructTime(d.Get("create_time").(string)),
+	}
+
+	if v, ok := d.GetOkExists("service"); ok {
+		folder.CreateTime = constructTime(v.(string))
 	}
 
 	return jsonMap(folder)

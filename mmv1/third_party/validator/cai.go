@@ -54,10 +54,10 @@ type AssetResource struct {
 }
 
 type Folder struct {
-	Name        string `json:"name"`
-	Parent      string `json:"parent"`
-	DisplayName string `json:"display_name"`
-	State string `json:"lifecycle_state"`
+	Name        string `json:"name,omitempty"`
+	Parent      string `json:"parent,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
+	State string `json:"state,omitempty"`
 	CreateTime *Timestamp `json:"create_time,omitempty"`
 }
 
