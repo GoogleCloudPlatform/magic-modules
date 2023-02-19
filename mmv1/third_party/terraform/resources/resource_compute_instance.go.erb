@@ -1950,7 +1950,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return errwrap.Wrapf("Error starting instance: {{err}}", err)
 				}
 			} else if desiredStatus == "TERMINATED" {
-				op, err = config.NewComputeClient(userAgent).Instances.Stop(project, zone, instance.Name).Do()
+				op, err = config.NewComputeClient(userAgent).Instances.Stop(project, zone, instance.Name).DiscardLocalSsd(true).Do()
 				if err != nil {
 					return err
 				}
@@ -1977,7 +1977,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		if statusBeforeUpdate != "TERMINATED" {
-			op, err := config.NewComputeClient(userAgent).Instances.Stop(project, zone, instance.Name).Do()
+			op, err := config.NewComputeClient(userAgent).Instances.Stop(project, zone, instance.Name).DiscardLocalSsd(true).Do()
 			if err != nil {
 				return errwrap.Wrapf("Error stopping instance: {{err}}", err)
 			}
