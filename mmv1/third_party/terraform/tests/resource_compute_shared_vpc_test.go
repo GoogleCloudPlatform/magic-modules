@@ -178,7 +178,6 @@ resource "google_project_service" "service" {
 `, hostProject, hostProject, org, billing, serviceProject, serviceProject, org, billing)
 }
 
-
 func testAccComputeSharedVpc_SharedVPCServiceProjectWithDeletionPolicy(hostProject, serviceProject, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "host" {
