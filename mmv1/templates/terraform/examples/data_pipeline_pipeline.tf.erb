@@ -1,0 +1,24 @@
+resource "google_data_pipeline_pipeline" "big_data_pipeline" {
+  name         = "my-job"
+  display_name = "my-job"
+  type         = "PIPELINE_TYPE_BATCH"
+  state        = "STATE_ACTIVE"
+
+  workload {
+    dataflow_flex_template_request {
+      project_id = "test"
+      launch_parameter {
+        job_name = "my-job"
+        environment {
+          temp_location = "gs://my-bucket/tmp_dir"
+        }
+        container_spec_gcs_path = "gs://my-bucket/templates/template_file"
+      }
+      location = "us-central1"
+    }
+  }
+
+  schedule_info {
+    schedule = "*/2 * * * *"
+  }
+}
