@@ -77,9 +77,7 @@ resource "google_workstations_workstation_config" "default" {
 }
 `, context)
 }
-<% end -%>
 
-<% unless version == "ga" -%>
 func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
 	t.Parallel()
 
@@ -153,9 +151,7 @@ resource "google_workstations_workstation_config" "default" {
 }
 `, context)
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 	t.Parallel()
 
