@@ -82,7 +82,15 @@ func validateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []s
 // based on compareSelfLinkOrResourceName, but less reusable and allows multi-/
 // strings in the new state (config) part
 func compareSelfLinkOrResourceNameWithMultipleParts(_, old, new string, _ *schema.ResourceData) bool {
-	return strings.HasSuffix(old, new)
+	if strings.HasPrefix(old, "projects/") {
+		olist := strings.Split(old, "/")
+		old = olist[len(olist)-1]
+	}
+	if strings.HasPrefix(new, "projects/") {
+		nlist := strings.Split(new, "/")
+		new = nlist[len(nlist)-1]
+	}
+	return strings.Compare(old, new) == 0
 }
 
 func ResourceCloudFunctionsFunction() *schema.Resource {
