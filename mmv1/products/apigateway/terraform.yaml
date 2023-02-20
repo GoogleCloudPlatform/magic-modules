@@ -49,7 +49,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
          specified prefix. If this and api_config_id are unspecified, a random value is chosen for the name.
     autogen_async: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
-      skip_import_test: true
       allowed_iam_role: 'roles/apigateway.viewer'
       parent_resource_attribute: api_config
       base_url: projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config}}
@@ -119,7 +118,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Gateway: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
-      skip_import_test: true
       allowed_iam_role: 'roles/apigateway.viewer'
       method_name_separator: ':'
       parent_resource_attribute: 'gateway'
