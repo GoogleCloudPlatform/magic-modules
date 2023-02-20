@@ -52,6 +52,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "fb-webapp-"
         test_env_vars:
           org_id: :ORG_ID
+        test_vars_overrides:
+          display_name: '"tf-test Display Name Basic"'
         ignore_read_extra:
           - project
           - deletion_policy
@@ -83,6 +85,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_id: :PROJECT_NAME
         test_vars_overrides:
           package_name: '"android.package.app" + randString(t, 4)'
+          display_name: '"tf-test Display Name Basic"'
         ignore_read_extra:
           - project
           - deletion_policy
@@ -113,6 +116,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
           project_id: :PROJECT_NAME
+        test_vars_overrides:
+          display_name: '"tf-test Display Name Basic"'
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_apple_app_full"
         min_version: "beta"
@@ -128,6 +133,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           app_store_id: "12345"
           team_id: "9987654321"
+          display_name: '"tf-test Display Name Full"'
         ignore_read_extra:
           - project
           - deletion_policy
