@@ -1154,15 +1154,6 @@ and all pods running on the nodes. Specified as a map from the key, such as
 
 * `auditMode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) WorkloadConfig defines the flags to enable or disable the workload configurations for the cluster. Accepted values are MODE_UNSPECIFIED, DISABLED, BASIC.
 
-```hcl
-protect_config {
-	workload_config {
-		audit_mode = "BASIC"
-	}
-	workload_vulnerability_mode = "BASIC"
-}
-```
-
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
