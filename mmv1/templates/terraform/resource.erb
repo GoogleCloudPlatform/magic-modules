@@ -63,7 +63,7 @@ import (
     timeouts ||= Api::Timeouts.new
 -%>
 
-func resource<%= resource_name -%>() *schema.Resource {
+func Resource<%= resource_name -%>() *schema.Resource {
     return &schema.Resource{
         Create: resource<%= resource_name -%>Create,
         Read: resource<%= resource_name -%>Read,

@@ -100,7 +100,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
               copy["require_attestations_by"] = schema.NewSet(selfLinkNameHash, convertStringArrToInterface(t))
             }
             var buf bytes.Buffer
-            schema.SerializeResourceForHash(&buf, copy, resourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
+            schema.SerializeResourceForHash(&buf, copy, ResourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
             return hashcode(buf.String())
           }
       clusterAdmissionRules.requireAttestationsBy: !ruby/object:Overrides::Terraform::PropertyOverride
