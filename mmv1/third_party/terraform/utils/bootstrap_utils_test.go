@@ -516,6 +516,64 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 	return project
 }
 
+// BootstrapProjectServiceAgentRoles ensures that the given project's IAM
+// policy grants the given service's agent the given roles.
+// (e.g. for service-<project_number>@gcp-sa-healthcare.iam.gserviceaccount.com,
+// agentName would be 'gcp-sa-healthcare')
+// This is important to bootstrap because using iam policy resources means that
+// deleting removes permissions for concurrent tests.
+func BootstrapProjectServiceAgentRoles(t *testing.T, projectID, agentName string, roles []string) {
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatalf("could not bootstrap a config for BootstrapProjectServiceAgentRoles")
+	}
+	client := config.NewResourceManagerClient(config.userAgent)
+
+	project, err := client.Projects.Get(projectID).Do()
+	if err != nil {
+		t.Fatalf("error getting project with id %q: %s", projectID, err)
+	}
+
+	serviceAgent := fmt.Sprintf("serviceAccount:service-%d@%s.iam.gserviceaccount.com", project.ProjectNumber, agentName)
+	getPolicyRequest := &cloudresourcemanager.GetIamPolicyRequest{}
+	policy, err := client.Projects.GetIamPolicy(project.ProjectId, getPolicyRequest).Do()
+	if err != nil {
+		t.Fatalf("error getting project iam policy: %v", err)
+	}
+	// Map each role to whether it was already in the policy
+	rolesFound := make(map[string]bool, len(roles))
+	// Track whether we changed the policy and only set it when it needs changing.
+	changed := false
+	for _, binding := range policy.Bindings {
+		for _, member := range binding.Members {
+			if member == serviceAgent {
+				rolesFound[binding.Role] = true
+			}
+		}
+		if !rolesFound[binding.Role] {
+			binding.Members = append(binding.Members, serviceAgent)
+			changed = true
+		}
+
+	}
+	for _, role := range roles {
+		if !rolesFound[role] {
+			policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
+				Members: []string{serviceAgent},
+				Role:    role,
+			})
+			changed = true
+		}
+	}
+	if changed {
+		setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
+		policy, err = client.Projects.SetIamPolicy(project.ProjectId, setPolicyRequest).Do()
+		if err != nil {
+			t.Fatalf("error setting project iam policy: %v", err)
+		}
+	}
+}
+
 func BootstrapConfig(t *testing.T) *Config {
 	if v := os.Getenv("TF_ACC"); v == "" {
 		t.Skip("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
