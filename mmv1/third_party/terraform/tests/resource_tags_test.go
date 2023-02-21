@@ -883,7 +883,7 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 
 
 
-func testAccTagsLocationTagBinding_locationTagBindingzonal(t *testing.T) {
+func TestAccTagsLocationTagBinding_locationTagBindingzonal(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
