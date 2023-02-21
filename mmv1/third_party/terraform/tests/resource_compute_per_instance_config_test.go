@@ -339,149 +339,149 @@ resource "google_compute_instance_group_manager" "igm" {
 func testAccComputePerInstanceConfig_statefulIpsBasic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_network" "default" {
-	name = "%{network}"
+  name = "%{network}"
 }
 
 resource "google_compute_subnetwork" "default" {
-	name          = "%{subnetwork}"
-	ip_cidr_range = "10.0.0.0/16"
-	region        = "us-central1"
-	network       = google_compute_network.default.id
+  name          = "%{subnetwork}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
 }
 	
 resource "google_compute_address" "static_internal_ip" {
-	name         = "%{address1}"
-	address_type = "INTERNAL"
+  name         = "%{address1}"
+  address_type = "INTERNAL"
 }
 	
 resource "google_compute_address" "static_external_ip" {
-	name         = "%{address2}"
-	address_type = "EXTERNAL"
+  name         = "%{address2}"
+  address_type = "EXTERNAL"
 }
 	  
 resource "google_compute_per_instance_config" "default" {
-	instance_group_manager = google_compute_instance_group_manager.igm.name
-	name = "%{config_name}"
-	remove_instance_state_on_destroy = true
-	preserved_state {
-		metadata = {
-			asdf = "asdf"
-		}
-		disk {
-			device_name = "my-stateful-disk1"
-			source      = google_compute_disk.disk.id
-		}
+  instance_group_manager = google_compute_instance_group_manager.igm.name
+  name = "%{config_name}"
+  remove_instance_state_on_destroy = true
+  preserved_state {
+    metadata = {
+      asdf = "asdf"
+    }
+    disk {
+      device_name = "my-stateful-disk1"
+      source      = google_compute_disk.disk.id
+    }
 
-		disk {
-			device_name = "my-stateful-disk2"
-			source      = google_compute_disk.disk1.id
-		}
-		internal_ip {
-			ip_address {
-				address = google_compute_address.static_internal_ip.self_link
-			}
-			auto_delete    = "NEVER"
-			interface_name = "nic0"
-		}
-		external_ip {
-			ip_address {
-				address = google_compute_address.static_external_ip.self_link
-			}
-			auto_delete    = "NEVER"
-			interface_name = "nic0"
-		}
-	}
+    disk {
+      device_name = "my-stateful-disk2"
+      source      = google_compute_disk.disk1.id
+    }
+    internal_ip {
+      ip_address {
+        address = google_compute_address.static_internal_ip.self_link
+      }
+      auto_delete    = "NEVER"
+      interface_name = "nic0"
+    }
+    external_ip {
+      ip_address {
+        address = google_compute_address.static_external_ip.self_link
+      }
+      auto_delete    = "NEVER"
+      interface_name = "nic0"
+    }
+  }
 }
 
 resource "google_compute_disk" "disk" {
-	name  = "test-disk-%{random_suffix}"
-	type  = "pd-ssd"
-	zone  = google_compute_instance_group_manager.igm.zone
-	image = "debian-8-jessie-v20170523"
-	physical_block_size_bytes = 4096
-  }
+  name  = "test-disk-%{random_suffix}"
+  type  = "pd-ssd"
+  zone  = google_compute_instance_group_manager.igm.zone
+  image = "debian-8-jessie-v20170523"
+  physical_block_size_bytes = 4096
+}
   
 resource "google_compute_disk" "disk1" {
-	name  = "test-disk2-%{random_suffix}"
-	type  = "pd-ssd"
-	zone  = google_compute_instance_group_manager.igm.zone
-	image = "debian-cloud/debian-11"
-	physical_block_size_bytes = 4096
-  }
+  name  = "test-disk2-%{random_suffix}"
+  type  = "pd-ssd"
+  zone  = google_compute_instance_group_manager.igm.zone
+  image = "debian-cloud/debian-11"
+  physical_block_size_bytes = 4096
+}
 `, context) + testAccComputePerInstanceConfig_igm(context)
 }
 
 func testAccComputePerInstanceConfig_statefulIpsUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_network" "default" {
-	name = "%{network}"
+  name = "%{network}"
 }
 
 resource "google_compute_subnetwork" "default" {
-	name          = "%{subnetwork}"
-	ip_cidr_range = "10.0.0.0/16"
-	region        = "us-central1"
-	network       = google_compute_network.default.id
+  name          = "%{subnetwork}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
 }
 	
 resource "google_compute_address" "static_internal_ip" {
-	name         = "%{address1}"
-	address_type = "INTERNAL"
+  name         = "%{address1}"
+  address_type = "INTERNAL"
 }
-
+	
 resource "google_compute_address" "static_external_ip" {
-	name         = "%{address2}"
-	address_type = "EXTERNAL"
+  name         = "%{address2}"
+  address_type = "EXTERNAL"
 }
-		  
+	  
 resource "google_compute_per_instance_config" "default" {
-	instance_group_manager = google_compute_instance_group_manager.igm.name
-	name = "%{config_name}"
-	remove_instance_state_on_destroy = true
-	preserved_state {
-		metadata = {
-			asdf = "asdf"
-		}
-		disk {
-			device_name = "my-stateful-disk1"
-			source      = google_compute_disk.disk.id
-		}
+  instance_group_manager = google_compute_instance_group_manager.igm.name
+  name = "%{config_name}"
+  remove_instance_state_on_destroy = true
+  preserved_state {
+    metadata = {
+      asdf = "asdf"
+    }
+    disk {
+      device_name = "my-stateful-disk1"
+      source      = google_compute_disk.disk.id
+    }
 
-		disk {
-			device_name = "my-stateful-disk2"
-			source      = google_compute_disk.disk1.id
-		}
-		internal_ip {
-			ip_address {
-				address = google_compute_address.static_internal_ip.self_link
-			}
-			auto_delete    = "NEVER"
-			interface_name = "nic0"
-		}
-		external_ip {
-			ip_address {
-				address = google_compute_address.static_external_ip.self_link
-			}
-			auto_delete    = "NEVER"
-			interface_name = "nic0"
-		}
-	}
+    disk {
+      device_name = "my-stateful-disk2"
+      source      = google_compute_disk.disk1.id
+    }
+    internal_ip {
+      ip_address {
+        address = google_compute_address.static_internal_ip.self_link
+      }
+      auto_delete    = "ON_PERMANENT_INSTANCE_DELETION"
+      interface_name = "nic0"
+    }
+    external_ip {
+      ip_address {
+        address = google_compute_address.static_external_ip.self_link
+      }
+      auto_delete    = "ON_PERMANENT_INSTANCE_DELETION"
+      interface_name = "nic0"
+    }
+  }
 }
 
 resource "google_compute_disk" "disk" {
-	name  = "test-disk-%{random_suffix}"
-	type  = "pd-ssd"
-	zone  = google_compute_instance_group_manager.igm.zone
-	image = "debian-8-jessie-v20170523"
-	physical_block_size_bytes = 4096
+  name  = "test-disk-%{random_suffix}"
+  type  = "pd-ssd"
+  zone  = google_compute_instance_group_manager.igm.zone
+  image = "debian-8-jessie-v20170523"
+  physical_block_size_bytes = 4096
 }
   
 resource "google_compute_disk" "disk1" {
-	name  = "test-disk2-%{random_suffix}"
-	type  = "pd-ssd"
-	zone  = google_compute_instance_group_manager.igm.zone
-	image = "debian-cloud/debian-11"
-	physical_block_size_bytes = 4096
+  name  = "test-disk2-%{random_suffix}"
+  type  = "pd-ssd"
+  zone  = google_compute_instance_group_manager.igm.zone
+  image = "debian-cloud/debian-11"
+  physical_block_size_bytes = 4096
 }
 `, context) + testAccComputePerInstanceConfig_igm(context)
 }

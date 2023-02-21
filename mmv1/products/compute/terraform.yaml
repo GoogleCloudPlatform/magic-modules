@@ -1961,10 +1961,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
         custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb
         custom_expand: templates/terraform/custom_expand/preserved_state_disks.go.erb
-      preservedState.internalIp: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
-      preservedState.externalIp: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
     virtual_fields:
       - !ruby/object:Api::Type::Enum
         name: 'minimal_action'
@@ -2036,10 +2032,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
         custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb
         custom_expand: templates/terraform/custom_expand/preserved_state_disks.go.erb
-      preservedState.internalIp: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
-      preservedState.externalIp: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
     virtual_fields:
       - !ruby/object:Api::Type::Enum
         name: 'minimal_action'
