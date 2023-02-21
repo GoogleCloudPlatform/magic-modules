@@ -54,10 +54,11 @@ func resourceSpannerInstanceVirtualUpdate(d *schema.ResourceData, resourceSchema
 			if field == "force_destroy" {
 				continue
 			}
+			if d.HasChange(field) {
+				return false
+			}
 		}
-		// force_destroy is changing, but nothing else
 		return true
 	}
-
 	return false
 }

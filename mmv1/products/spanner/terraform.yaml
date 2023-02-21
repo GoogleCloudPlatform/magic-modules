@@ -139,7 +139,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/sleep.go.erb
       pre_delete: 'templates/terraform/pre_delete/spanner_instance.go.erb'
       constants: 'templates/terraform/constants/spanner_instance.go.erb'
-      pre_update: 'templates/terraform/pre_update/spanner_force_destroy.go.erb'
+      pre_update: 'templates/terraform/pre_update/spanner_instance.go.erb'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

@@ -89,10 +89,11 @@ func resourceSpannerDBVirtualUpdate(d *schema.ResourceData, resourceSchema map[s
 			if field == "deletion_protection" {
 				continue
 			}
+			if d.HasChange(field) {
+				return false
+			}
 		}
-		// deletion_protection is changing, but nothing else
 		return true
 	}
-
 	return false
 }
