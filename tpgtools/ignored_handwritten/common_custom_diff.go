@@ -57,8 +57,8 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(diff *schema.Resource
 		}
 	}
 
-	oldSet := schema.NewSet(schema.HashResource(resourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), old)
-	newSet := schema.NewSet(schema.HashResource(resourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), new)
+	oldSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), old)
+	newSet := schema.NewSet(schema.HashResource(ResourceComputeSubnetwork().Schema["secondary_ip_range"].Elem.(*schema.Resource)), new)
 
 	if oldSet.Equal(newSet) {
 		if err := diff.Clear("secondary_ip_range"); err != nil {
