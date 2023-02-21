@@ -1,19 +1,21 @@
-package google
+<% autogen_exception -%>
+package beyondcorpservice
 
 import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 )
 
 func DataSourceGoogleBeyondcorpAppConnector() *schema.Resource {
 
-	dsSchema := DatasourceSchemaFromResourceSchema(ResourceBeyondcorpAppConnector().Schema)
+	dsSchema := google.DatasourceSchemaFromResourceSchema(ResourceBeyondcorpAppConnector().Schema)
 
-	AddRequiredFieldsToSchema(dsSchema, "name")
+	google.AddRequiredFieldsToSchema(dsSchema, "name")
 
-	AddOptionalFieldsToSchema(dsSchema, "project")
-	AddOptionalFieldsToSchema(dsSchema, "region")
+	google.AddOptionalFieldsToSchema(dsSchema, "project")
+	google.AddOptionalFieldsToSchema(dsSchema, "region")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleBeyondcorpAppConnectorRead,
@@ -22,16 +24,16 @@ func DataSourceGoogleBeyondcorpAppConnector() *schema.Resource {
 }
 
 func dataSourceGoogleBeyondcorpAppConnectorRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*google.Config)
 
 	name := d.Get("name").(string)
 
-	project, err := GetProject(d, config)
+	project, err := google.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := GetRegion(d, config)
+	region, err := google.GetRegion(d, config)
 	if err != nil {
 		return err
 	}

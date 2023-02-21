@@ -114,7 +114,7 @@ func ValidateRegexp(re string) schema.SchemaValidateFunc {
 	}
 }
 
-func validateEnum(values []string) schema.SchemaValidateFunc {
+func ValidateEnum(values []string) schema.SchemaValidateFunc {
 	return validation.StringInSlice(values, false)
 }
 

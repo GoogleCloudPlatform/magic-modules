@@ -194,6 +194,16 @@ module Provider
               ))
       end
 
+      def config_test_service(pwd)
+        body = config_test_body(pwd)
+        lines(compile_file(
+                {
+                  content: body
+                },
+                "#{pwd}/templates/terraform/examples/base_configs/test_body_service.go.erb"
+              ))
+      end
+
       # rubocop:disable Style/FormatStringToken
       def config_test_body(pwd)
         @vars ||= {}

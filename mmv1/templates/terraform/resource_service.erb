@@ -113,7 +113,7 @@ func Resource<%= resource_name -%>() *schema.Resource {
 
         Schema: map[string]*schema.Schema{
 <%      order_properties(properties).each do |prop| -%>
-<%=       lines(build_schema_property(prop, object, pwd)) -%>
+<%=       lines(build_schema_property_service(prop, object, pwd)) -%>
 <%      end -%>
 <%-     unless object.virtual_fields.empty? -%>
 <%-       object.virtual_fields.each do |field| -%>

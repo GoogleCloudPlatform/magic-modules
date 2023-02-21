@@ -24,6 +24,13 @@ module Provider
                          pwd:
       end
 
+      def build_schema_property_service(property, object, pwd)
+        compile_template "#{pwd}/templates/terraform/schema_property_service.erb",
+                         property:,
+                         object:,
+                         pwd:
+      end
+
       def build_subresource_schema(property, object, pwd)
         compile_template "#{pwd}/templates/terraform/schema_subresource.erb",
                          property:,

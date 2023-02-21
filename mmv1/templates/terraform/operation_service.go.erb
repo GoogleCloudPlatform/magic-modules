@@ -12,10 +12,11 @@ import (
 <% end -%>
   "fmt"
   "time"
+  "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 )
 
 type <%= product_name -%>OperationWaiter struct {
-  Config    *Config
+  Config    *google.Config
   UserAgent string
 <% if has_project -%>
   Project string
@@ -23,7 +24,7 @@ type <%= product_name -%>OperationWaiter struct {
 <%  if object.__product.operation_retry -%>
 	retryCount int
 <% end -%>
-  CommonOperationWaiter
+  google.CommonOperationWaiter
 }
 
 func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
@@ -37,7 +38,7 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   url := fmt.Sprintf("%s<%= [async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s')-%>", w.Config.<%= product_name -%>BasePath, w.CommonOperationWaiter.Op.Name)
   <% end -%>
 
-  return SendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  return google.SendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
 <%  if object.__product.operation_retry -%>
@@ -47,7 +48,7 @@ func (w *<%= product_name -%>OperationWaiter) IsRetryable(err error) bool {
 <% end -%>
 
 
-func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
+func create<%= product_name %>Waiter(config *google.Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
   w := &<%= product_name -%>OperationWaiter{
     Config:    config,
     UserAgent: userAgent,
@@ -67,19 +68,19 @@ func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, 
     Might as well just nolint it so we can pass the linter checks.
 -%>
 // nolint: deadcode,unused
-func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *google.Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
   w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
   if err != nil {
       return err
   }
-  if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+  if err := google.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
       return err
   }
   return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
 }
 <% end -%>
 
-func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *google.Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
   if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
     return nil
@@ -89,5 +90,5 @@ func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op m
       // If w is nil, the op was synchronous.
       return err
   }
-  return OperationWait(w, activity, timeout, config.PollInterval)
+  return google.OperationWait(w, activity, timeout, config.PollInterval)
 }

@@ -62,14 +62,13 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"<%= var_name %>": <%= override %>,
 	<% end -%>
 	<% end -%>
-			"random_suffix": RandString(t, 10),
+			"random_suffix": google.RandString(t, 10),
 	}
-
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
 	provider.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { provider.TestAccPreCheck(t) },
 		<% unless versioned_provider -%>
-		Providers: TestAccProviders,
+		Providers: provider.TestAccProviders,
 		<% else -%>
 		Providers: provider.testAccProvidersOiCS,
 		<% end -%>
@@ -101,7 +100,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 }
 
 func testAcc<%= test_slug -%>(context map[string]interface{}) string {
-<%= example.config_test(pwd) -%>
+<%= example.config_test_service(pwd) -%>
 }
 <%- end %>
 
@@ -119,9 +118,9 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 		<% if object.custom_code.test_check_destroy -%>
 	<%= lines(compile(pwd + '/' + object.custom_code.test_check_destroy)) -%>
 		<% else -%>
-		config := GoogleProviderConfig(t)
+		config := provider.GoogleProviderConfig(t)
 
-		url, err := ReplaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+		url, err := google.ReplaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 		if err != nil {
 			return err
 		}
@@ -132,7 +131,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			billingProject = config.BillingProject
 		}
 
-		_, err = SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+		_, err = google.SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 		if err == nil {
 				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 			}
