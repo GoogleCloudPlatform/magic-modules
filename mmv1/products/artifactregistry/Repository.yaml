@@ -116,3 +116,134 @@
         - :RELEASE
         - :SNAPSHOT
         default_value: :VERSION_POLICY_UNSPECIFIED
+  - !ruby/object:Api::Type::Enum
+    name: 'mode'
+    min_version: beta
+    description: |-
+      The mode configures the repository to serve artifacts from different sources.
+    input: true
+    values:
+      - :STANDARD_REPOSITORY
+      - :VIRTUAL_REPOSITORY
+      - :REMOTE_REPOSITORY
+    default_value: :STANDARD_REPOSITORY
+  - !ruby/object:Api::Type::NestedObject
+    name: 'virtualRepositoryConfig'
+    min_version: beta
+    conflicts:
+      - remote_repository_config
+    description: |-
+      Configuration specific for a Virtual Repository.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'upstreamPolicies'
+        description: |-
+          Policies that configure the upstream artifacts distributed by the Virtual
+          Repository. Upstream policies cannot be set on a standard repository.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'id'
+              description: |-
+                The user-provided ID of the upstream policy.
+            - !ruby/object:Api::Type::String
+              name: 'repository'
+              description: |+
+                A reference to the repository resource, for example:
+                "projects/p1/locations/us-central1/repository/repo1".
+            - !ruby/object:Api::Type::Integer
+              name: 'priority'
+              description: |-
+                Entries with a greater priority value take precedence in the pull order.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'remoteRepositoryConfig'
+    min_version: beta
+    conflicts:
+      - virtual_repository_config
+    description: |-
+      Configuration specific for a Remote Repository.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |-
+          The description of the remote source.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dockerRepository'
+        exactly_one_of:
+          - docker_repository
+          - maven_repository
+          - npm_repository
+          - python_repository
+        description: |-
+          Specific settings for a Docker remote repository.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'publicRepository'
+            exactly_one_of:
+              - public_repository
+            description: |-
+              Address of the remote repository.
+            input: true
+            values:
+              - :DOCKER_HUB
+            default_value: :DOCKER_HUB
+      - !ruby/object:Api::Type::NestedObject
+        name: 'mavenRepository'
+        exactly_one_of:
+          - docker_repository
+          - maven_repository
+          - npm_repository
+          - python_repository
+        description: |-
+          Specific settings for a Maven remote repository.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'publicRepository'
+            exactly_one_of:
+              - public_repository
+            description: |-
+              Address of the remote repository.
+            input: true
+            values:
+              - :MAVEN_CENTRAL
+            default_value: :MAVEN_CENTRAL
+      - !ruby/object:Api::Type::NestedObject
+        name: 'npmRepository'
+        exactly_one_of:
+          - docker_repository
+          - maven_repository
+          - npm_repository
+          - python_repository
+        description: |-
+          Specific settings for an Npm remote repository.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'publicRepository'
+            exactly_one_of:
+              - public_repository
+            description: |-
+              Address of the remote repository.
+            input: true
+            values:
+              - :NPMJS
+            default_value: :NPMJS
+      - !ruby/object:Api::Type::NestedObject
+        name: 'pythonRepository'
+        exactly_one_of:
+          - docker_repository
+          - maven_repository
+          - npm_repository
+          - python_repository
+        description: |-
+          Specific settings for a Python remote repository.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'publicRepository'
+            exactly_one_of:
+              - public_repository
+            description: |-
+              Address of the remote repository.
+            input: true
+            values:
+              - :PYPI
+            default_value: :PYPI
