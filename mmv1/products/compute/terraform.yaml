@@ -3437,6 +3437,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_ha_vpn_gateway_encrypted_interconnect"
         primary_resource_id: "vpn-gateway"
+        # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
+        skip_test: true
         vars:
           ha_vpn_gateway_name: "test-ha-vpngw"
           interconnect_attachment1_name: "test-interconnect-attachment1"
