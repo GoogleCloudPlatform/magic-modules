@@ -46,7 +46,7 @@
   custom_code: !ruby/object:Provider::Terraform::CustomCode
     encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
     pre_update: templates/terraform/update_mask.erb
-    post_create: templates/terraform/post_create/sleep_1_min.go.erb
+    post_create: templates/terraform/post_create/sleep_2_min.go.erb
     custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
   parameters:
     - !ruby/object:Api::Type::String
