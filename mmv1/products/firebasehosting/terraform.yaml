@@ -63,6 +63,89 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           channel_id: channel-full
         test_env_vars:
           project_id: :PROJECT_NAME
+  Release: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: [
+      'sites/{{site_id}}/releases/{{release_id}}',
+      'sites/{{site_id}}/channels/{{channel_id}}/releases/{{release_id}}',
+      '{{site_id}}/{{release_id}}',
+      '{{site_id}}/{{channel_id}}/{{release_id}}'
+    ]
+    skip_delete: true # can't delete a release
+    skip_sweeper: true # can't delete a release
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_release_in_site"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          site_id: site-id
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_release_in_channel"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          site_id: site-with-channel
+          channel_id: channel-id
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_release_disable"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          site_id: site-id
+        test_env_vars:
+          project_id: :PROJECT_NAME
+    properties:
+      release_id: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true # not a field on the resource
+      type: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true # type may be DEPLOY or ROLLBACK depending on the version
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/firebasehosting_release.go.erb
+      post_create: templates/terraform/post_create/firebasehosting_release.erb
+  Version: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ['sites/{{site_id}}/versions/{{version_id}}', '{{site_id}}/{{version_id}}']
+    skip_delete: true # can't delete a version
+    skip_sweeper: true # can't delete a version
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_version_redirect"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          site_id: site-id
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_version_cloud_run"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          site_id: site-id
+          cloud_run_service_id: cloud-run-service-via-hosting
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebasehosting_version_cloud_functions"
+        min_version: "beta"
+        primary_resource_id: "default"
+        vars:
+          site_id: site-id
+          cloud_function_id: cloud-function-via-hosting
+          zip_path: "function-source.zip"
+        test_env_vars:
+          project_id: :PROJECT_NAME
+        test_vars_overrides:
+          zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
+    properties:
+      version_id: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true # not a field on the resource
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/firebasehosting_version.go.erb
+      post_create: templates/terraform/post_create/firebasehosting_version_immediate_finalize.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
