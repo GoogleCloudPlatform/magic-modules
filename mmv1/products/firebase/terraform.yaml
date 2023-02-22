@@ -69,6 +69,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
+      constants: templates/terraform/constants/firebase_web_app.go.erb
+      pre_update: templates/terraform/pre_update/firebase_app_deletion_policy.go.erb
   AndroidApp: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/androidApps/{{appId}}", "androidApps/{{appId}}", "{{appId}}"]
     autogen_async: true

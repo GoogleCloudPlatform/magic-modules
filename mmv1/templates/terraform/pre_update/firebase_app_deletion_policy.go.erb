@@ -1,0 +1,8 @@
+if deletePolicyVirtualUpdate(d, resourceFirebaseWebApp().Schema) {
+    if d.Get("deletion_policy") != nil {
+        if err := d.Set("deletion_policy", d.Get("deletion_policy")); err != nil {
+            return fmt.Errorf("Error reading Instance: %s", err)
+        }
+    }
+    return nil
+}

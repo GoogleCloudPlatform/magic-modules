@@ -1,0 +1,15 @@
+func deletePolicyVirtualUpdate(d *schema.ResourceData, resourceSchema map[string]*schema.Schema) bool {
+	// deletion_policy is the only virtual field
+	if d.HasChange("deletion_policy") {
+		for field := range resourceSchema {
+			if field == "deletion_policy" {
+				continue
+			}
+			if d.HasChange(field) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
