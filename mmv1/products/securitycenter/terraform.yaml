@@ -63,8 +63,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           mute_config_id: "my-config"
-          # description: "My Mute Config"
-          # filter: "category: \"OS_VULNERABILITY\""
         test_env_vars:
           org_id: :ORG_ID
     import_format: ["{{name}}"]
