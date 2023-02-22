@@ -15,7 +15,7 @@
 <%
   dir = @target_version_name == 'ga' ? 'google' : "google-#{@target_version_name}"
 -%>
-<% Dir["third_party/terraform/products/**"].each do |product_path|
+<% Dir["third_party/terraform/services/**"].each do |product_path|
   puts product_path
   product_name = product_path.split('/')[-1]
   puts product_name
@@ -40,16 +40,16 @@
 '<%= dir -%>/acctest/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/acctest/<%= fname -%>'
 <% end -%>
 <%
-  Dir["third_party/terraform/conns/*.go.erb"].each do |file_path|
+  Dir["third_party/terraform/transport/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/conns/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/conns/<%= fname -%>'
+'<%= dir -%>/transport/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/transport/<%= fname -%>'
 <% end -%>
 <%
-  Dir["third_party/terraform/tfresource/*.go.erb"].each do |file_path|
+  Dir["third_party/terraform/tpgresource/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/tfresource/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tfresource/<%= fname -%>'
+'<%= dir -%>/tpgresource/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tpgresource/<%= fname -%>'
 <% end -%>
 <%
   Dir["third_party/terraform/verify/*.go.erb"].each do |file_path|

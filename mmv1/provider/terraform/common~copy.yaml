@@ -43,7 +43,7 @@
 '<%= dir -%>/<%= fname -%>': 'third_party/terraform/utils/<%= fname -%>'
 <% end -%>
 
-<% Dir["third_party/terraform/products/**"].each do |product_path|
+<% Dir["third_party/terraform/services/**"].each do |product_path|
   puts product_path
   product_name = product_path.split('/')[-1]
   puts product_name
@@ -66,16 +66,16 @@
 '<%= dir -%>/acctest/<%= fname -%>': 'third_party/terraform/acctest/<%= fname -%>'
 <% end -%>
 <%
-  Dir["third_party/terraform/conns/*.go"].each do |file_path|
+  Dir["third_party/terraform/transport/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/conns/<%= fname -%>': 'third_party/terraform/conns/<%= fname -%>'
+'<%= dir -%>/transport/<%= fname -%>': 'third_party/terraform/transport/<%= fname -%>'
 <% end -%>
 <%
-  Dir["third_party/terraform/tfresource/*.go"].each do |file_path|
+  Dir["third_party/terraform/tpgresource/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/tfresource/<%= fname -%>': 'third_party/terraform/tfresource/<%= fname -%>'
+'<%= dir -%>/tpgresource/<%= fname -%>': 'third_party/terraform/tpgresource/<%= fname -%>'
 <% end -%>
 <%
   Dir["third_party/terraform/verify/*.go"].each do |file_path|
