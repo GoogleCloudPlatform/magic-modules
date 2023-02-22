@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://cloudbuild.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://cloudbuild.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -25,6 +28,130 @@ apis_required:
     name: Cloud Build API
     url: https://console.cloud.google.com/apis/library/cloudbuild.googleapis.com/
 objects:
+  - !ruby/object:Api::Resource
+    name: 'BitbucketServerConfig'
+    base_url: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs
+    self_link: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{bitbucketServerConfigId}}
+    create_url: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs?bitbucketServerConfigId={{bitbucketServerConfigId}}
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Connect to a Bitbucket Server host': 'https://cloud.google.com/build/docs/automating-builds/bitbucket/connect-host-bitbucket-server'
+      api: 'https://cloud.google.com/build/docs/api/reference/rest/v1/projects.locations.bitbucketServerConfigs'
+    description: |
+      BitbucketServerConfig represents the configuration for a Bitbucket Server.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'bitbucketServerConfigId'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The ID to use for the BitbucketServerConfig, which will become the final component of the BitbucketServerConfig's resource name.
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        url_param_only: true
+        input: true
+        required: true
+        description: |
+          The location of this bitbucket server config.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The resource name for the config.
+      - !ruby/object:Api::Type::String
+        name: 'hostUri'
+        required: true
+        description: |
+          Immutable. The URI of the Bitbucket Server host. Once this field has been set, it cannot be changed.
+          If you need to change it, please create another BitbucketServerConfig.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'secrets'
+        required: true
+        description: |
+          Secret Manager secrets needed by the config.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'adminAccessTokenVersionName'
+            required: true
+            description: |
+              The resource name for the admin access token's secret version.
+          - !ruby/object:Api::Type::String
+            name: 'readAccessTokenVersionName'
+            required: true
+            description: |
+              The resource name for the read access token's secret version.
+          - !ruby/object:Api::Type::String
+            name: 'webhookSecretVersionName'
+            required: true
+            input: true
+            description: |
+              Immutable. The resource name for the webhook secret's secret version. Once this field has been set, it cannot be changed.
+              Changing this field will result in deleting/ recreating the resource.
+      - !ruby/object:Api::Type::String
+        name: 'username'
+        required: true
+        description: |
+          Username of the account Cloud Build will use on Bitbucket Server.
+      - !ruby/object:Api::Type::String
+        name: 'webhookKey'
+        output: true
+        description: |
+          Output only. UUID included in webhook requests. The UUID is used to look up the corresponding config.
+      - !ruby/object:Api::Type::String
+        name: 'apiKey'
+        required: true
+        input: true
+        description: |
+          Immutable. API Key that will be attached to webhook. Once this field has been set, it cannot be changed.
+          Changing this field will result in deleting/ recreating the resource.
+      - !ruby/object:Api::Type::Array
+        name: 'connectedRepositories'
+        description: |
+          Connected Bitbucket Server repositories for this config.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'projectKey'
+              required: true
+              description: |
+                Identifier for the project storing the repository.
+            - !ruby/object:Api::Type::String
+              name: 'repoSlug'
+              required: true
+              description: |
+                Identifier for the repository.
+      - !ruby/object:Api::Type::String
+        name: 'peeredNetwork'
+        description: |
+          The network to be used when reaching out to the Bitbucket Server instance. The VPC network must be enabled for private service connection. 
+          This should be set if the Bitbucket Server instance is hosted on-premises and not reachable by public internet. If this field is left empty, 
+          no network peering will occur and calls to the Bitbucket Server instance will be made over the public internet. Must be in the format 
+          projects/{project}/global/networks/{network}, where {project} is a project number or id and {network} is the name of a VPC network in the project.
+      - !ruby/object:Api::Type::String
+        name: 'sslCa'
+        description: |
+          SSL certificate to use for requests to Bitbucket Server. The format should be PEM format but the extension can be one of .pem, .cer, or .crt.
   - !ruby/object:Api::Resource
     name: 'Trigger'
     base_url: projects/{{project}}/locations/{{location}}/triggers
@@ -146,6 +273,90 @@ objects:
               The branch, tag, arbitrary ref, or SHA version of the repo to use when resolving the 
               filename (optional). This field respects the same syntax/resolution as described here: https://git-scm.com/docs/gitrevisions 
               If unspecified, the revision from which the trigger invocation originated is assumed to be the revision from which to read the specified path.
+          - !ruby/object:Api::Type::String
+            name: 'githubEnterpriseConfig'
+            description: |
+              The full resource name of the github enterprise config.
+              Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
+      - !ruby/object:Api::Type::NestedObject
+        name: "repositoryEventConfig"
+        min_version: beta
+        description: |
+          The configuration of a trigger that creates a build whenever an event from Repo API is received.
+        at_least_one_of:
+          - trigger_template
+          - github
+          - bitbucket_server_trigger_config
+          - pubsub_config
+          - webhook_config
+          - source_to_build
+          - repository_event_config
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "repository"
+            description: |
+              The resource name of the Repo API resource.
+          - !ruby/object:Api::Type::NestedObject
+            name: "pullRequest"
+            description: |
+              Contains filter properties for matching Pull Requests.
+            exactly_one_of:
+              - pull_request
+              - push
+            properties:
+              - !ruby/object:Api::Type::String
+                name: "branch"
+                description: |
+                  Regex of branches to match.
+
+                  The syntax of the regular expressions accepted is the syntax accepted by
+                  RE2 and described at https://github.com/google/re2/wiki/Syntax
+                exactly_one_of:
+                  - branch
+              - !ruby/object:Api::Type::Boolean
+                name: "invertRegex"
+                description: |
+                  If true, branches that do NOT match the git_ref will trigger a build.
+              - !ruby/object:Api::Type::Enum
+                name: "commentControl"
+                description: |
+                  Configure builds to run whether a repository owner or collaborator need to comment `/gcbrun`.
+                values:
+                  - :COMMENTS_DISABLED
+                  - :COMMENTS_ENABLED
+                  - :COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY
+          - !ruby/object:Api::Type::NestedObject
+            name: "push"
+            description: |
+              Contains filter properties for matching git pushes.
+            exactly_one_of:
+              - pull_request
+              - push
+            properties:
+              - !ruby/object:Api::Type::String
+                name: "branch"
+                description: |
+                  Regex of branches to match.
+
+                  The syntax of the regular expressions accepted is the syntax accepted by
+                  RE2 and described at https://github.com/google/re2/wiki/Syntax
+                exactly_one_of:
+                  - branch
+                  - tag
+              - !ruby/object:Api::Type::String
+                name: "tag"
+                description: |
+                  Regex of tags to match.
+
+                  The syntax of the regular expressions accepted is the syntax accepted by
+                  RE2 and described at https://github.com/google/re2/wiki/Syntax
+                exactly_one_of:
+                  - branch
+                  - tag
+              - !ruby/object:Api::Type::Boolean
+                name: "invertRegex"
+                description: |
+                  If true, only trigger a build if the revision regex does NOT match the git_ref regex.
       - !ruby/object:Api::Type::NestedObject
         name: 'sourceToBuild'
         description: |
@@ -156,9 +367,11 @@ objects:
         at_least_one_of:
           - trigger_template
           - github
+          - bitbucket_server_trigger_config
           - pubsub_config
           - webhook_config
           - source_to_build
+          - repository_event_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'uri'
@@ -181,6 +394,11 @@ objects:
                   - :CLOUD_SOURCE_REPOSITORIES
                   - :GITHUB
                   - :BITBUCKET_SERVER
+          - !ruby/object:Api::Type::String
+            name: 'githubEnterpriseConfig'
+            description: |
+              The full resource name of the github enterprise config.
+              Format: projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}. projects/{project}/githubEnterpriseConfigs/{id}.
       - !ruby/object:Api::Type::Array
         name: 'ignoredFiles'
         item_type: Api::Type::String
@@ -220,9 +438,11 @@ objects:
         at_least_one_of:
           - trigger_template
           - github
+          - bitbucket_server_trigger_config
           - pubsub_config
           - webhook_config
           - source_to_build
+          - repository_event_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'projectId'
@@ -280,9 +500,11 @@ objects:
         at_least_one_of:
           - trigger_template
           - github
+          - bitbucket_server_trigger_config
           - pubsub_config
           - webhook_config
           - source_to_build
+          - repository_event_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'owner'
@@ -345,6 +567,92 @@ objects:
                 exactly_one_of:
                   - github.0.push.0.branch
                   - github.0.push.0.tag
+          - !ruby/object:Api::Type::String
+            name: 'enterpriseConfigResourceName'
+            description: |
+                    The resource name of the github enterprise config that should be applied to this installation.
+                    For example: "projects/{$projectId}/locations/{$locationId}/githubEnterpriseConfigs/{$configId}"
+      - !ruby/object:Api::Type::NestedObject
+        name: "bitbucketServerTriggerConfig"
+        description: |
+          BitbucketServerTriggerConfig describes the configuration of a trigger that creates a build whenever a Bitbucket Server event is received.
+        at_least_one_of:
+          - trigger_template
+          - github
+          - bitbucket_server_trigger_config
+          - pubsub_config
+          - webhook_config
+          - source_to_build
+          - repository_event_config
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "repoSlug"
+            required: true
+            description: |
+              Slug of the repository. A repository slug is a URL-friendly version of a repository name, automatically generated by Bitbucket for use in the URL.
+              For example, if the repository name is 'test repo', in the URL it would become 'test-repo' as in https://mybitbucket.server/projects/TEST/repos/test-repo.
+          - !ruby/object:Api::Type::String
+            name: "projectKey"
+            required: true
+            description: |
+              Key of the project that the repo is in. For example: The key for https://mybitbucket.server/projects/TEST/repos/test-repo is "TEST".
+          - !ruby/object:Api::Type::String
+            name: "bitbucketServerConfigResource"
+            required: true
+            description: |
+              The Bitbucket server config resource that this trigger config maps to.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'pullRequest'
+            description: |
+                Filter to match changes in pull requests.
+            exactly_one_of:
+              - bitbucket_server_trigger_config.0.pull_request
+              - bitbucket_server_trigger_config.0.push
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'branch'
+                required: true
+                description: |
+                    Regex of branches to match.
+                    The syntax of the regular expressions accepted is the syntax accepted by RE2 and described at https://github.com/google/re2/wiki/Syntax
+              - !ruby/object:Api::Type::Enum
+                name: 'commentControl'
+                description: |
+                    Configure builds to run whether a repository owner or collaborator need to comment /gcbrun.
+                values:
+                  - :COMMENTS_DISABLED
+                  - :COMMENTS_ENABLED
+                  - :COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY
+              - !ruby/object:Api::Type::Boolean
+                name: 'invertRegex'
+                description: |
+                    If true, branches that do NOT match the git_ref will trigger a build.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'push'
+            description: |
+                Filter to match changes in refs like branches, tags.
+            exactly_one_of:
+              - bitbucket_server_trigger_config.0.pull_request
+              - bitbucket_server_trigger_config.0.push
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'invertRegex'
+                description: |
+                    When true, only trigger a build if the revision regex does NOT match the gitRef regex.
+              - !ruby/object:Api::Type::String
+                name: 'branch'
+                description: |
+                    Regex of branches to match.  Specify only one of branch or tag.
+                exactly_one_of:
+                  - bitbucket_server_trigger_config.0.push.0.branch
+                  - bitbucket_server_trigger_config.0.push.0.tag
+              - !ruby/object:Api::Type::String
+                name: 'tag'
+                description: |
+                    Regex of tags to match.  Specify only one of branch or tag.
+                exactly_one_of:
+                  - bitbucket_server_trigger_config.0.push.0.branch
+                  - bitbucket_server_trigger_config.0.push.0.tag
       - !ruby/object:Api::Type::NestedObject
         name: 'pubsubConfig'
         description: |
@@ -353,9 +661,11 @@ objects:
         at_least_one_of:
           - trigger_template
           - github
+          - bitbucket_server_trigger_config
           - pubsub_config
           - webhook_config
           - source_to_build
+          - repository_event_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'subscription'
@@ -385,9 +695,11 @@ objects:
         at_least_one_of:
           - trigger_template
           - github
+          - bitbucket_server_trigger_config
           - pubsub_config
           - webhook_config
           - source_to_build
+          - repository_event_config
         properties:
           - !ruby/object:Api::Type::String
             name: 'secret'

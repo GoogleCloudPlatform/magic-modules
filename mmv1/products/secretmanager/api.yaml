@@ -133,8 +133,6 @@ objects:
                             Describes the Cloud KMS encryption key that will be used to protect destination secret.  
       - !ruby/object:Api::Type::Array
         name: topics
-        required_with:
-          - rotation
         description: |
           A list of up to 10 Pub/Sub topics to which messages are published when control plane operations are called on the secret or its versions.
         item_type: !ruby/object:Api::Type::NestedObject

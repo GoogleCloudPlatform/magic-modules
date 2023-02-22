@@ -42,16 +42,6 @@ describe Api::Resource do
       end
     end
   end
-
-  # TODO: Fill in these tests or get rid of them completely
-  it 'uses product base_url if missing' do
-  end
-
-  it 'ignores product base_url if absolute' do
-  end
-
-  it 'combines base_url with product if relative' do
-  end
 end
 
 RSpec::Matchers.define :contain_property_with_name do |expected|

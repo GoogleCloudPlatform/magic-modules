@@ -44,18 +44,12 @@ module Api
       # }
       attr_reader :modify_by_patch
 
-      # Nested resources generally don't have a kind field.
-      # This is used as a (potentially unnecessary) placeholder by Ansible
-      attr_reader :kind
-
       def validate
         super
 
         check :keys, type: Array, item_type: String, required: true
         check :is_list_of_ids, type: :boolean, default: false
         check :modify_by_patch, type: :boolean, default: false
-
-        check :kind, type: String
       end
     end
   end

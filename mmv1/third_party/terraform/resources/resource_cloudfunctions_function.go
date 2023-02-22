@@ -85,7 +85,7 @@ func compareSelfLinkOrResourceNameWithMultipleParts(_, old, new string, _ *schem
 	return strings.HasSuffix(old, new)
 }
 
-func resourceCloudFunctionsFunction() *schema.Resource {
+func ResourceCloudFunctionsFunction() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCloudFunctionsCreate,
 		Read:   resourceCloudFunctionsRead,
@@ -320,7 +320,7 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			"max_instances": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      0,
+				Computed:     true,
 				ValidateFunc: validation.IntAtLeast(0),
 				Description:  `The limit on the maximum number of function instances that may coexist at a given time.`,
 			},
