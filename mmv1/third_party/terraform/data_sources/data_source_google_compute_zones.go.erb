@@ -16,7 +16,7 @@ import (
 <% end -%>
 )
 
-func dataSourceGoogleComputeZones() *schema.Resource {
+func DataSourceGoogleComputeZones() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleComputeZonesRead,
 		Schema: map[string]*schema.Schema{
