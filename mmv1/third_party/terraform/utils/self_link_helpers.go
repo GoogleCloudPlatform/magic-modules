@@ -192,4 +192,3 @@ func GetLocationFromOpName(opName string) string {
 	}
 	return opName
 }
-

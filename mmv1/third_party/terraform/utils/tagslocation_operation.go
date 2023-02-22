@@ -63,4 +63,3 @@ func tagsLocationOperationWaitTime(config *Config, op map[string]interface{}, ac
 	}
 	return OperationWait(w, activity, timeout, config.PollInterval)
 }
-
