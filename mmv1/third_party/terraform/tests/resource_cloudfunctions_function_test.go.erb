@@ -134,6 +134,26 @@ func TestCompareSelfLinkOrResourceNameWithMultipleParts(t *testing.T) {
 			New:                "projects/../resouce-name",
 			ExpectDiffSuppress: true,
 		},
+		"multi to multi": {
+			Old:                "projects/ci-test-project-188019/databases/(default)/documents/messages/{messageId}",
+			New:                "messages/{messageId}",
+			ExpectDiffSuppress: true,
+		},
+		"multi to multi2": {
+			Old:                "messages/{messageId}",
+			New:                "projects/ci-test-project-188019/databases/(default)/documents/messages/{messageId}",
+			ExpectDiffSuppress: true,
+		},
+		"multi to multi3": {
+			Old:                "projects/ci-test-project-188019/databases/(default)/documents/messages/{messageId}",
+			New:                "/messages/{messageId}",
+			ExpectDiffSuppress: true,
+		},
+		"multi to multi4": {
+			Old:                "/messages/{messageId}",
+			New:                "projects/ci-test-project-188019/databases/(default)/documents/messages/{messageId}",
+			ExpectDiffSuppress: true,
+		},
 		"unmacthed names 1": {
 			Old:                "projects/../resouce-name",
 			New:                "resouce-name-2",
@@ -144,10 +164,15 @@ func TestCompareSelfLinkOrResourceNameWithMultipleParts(t *testing.T) {
 			New:                "projects/../resouce-name",
 			ExpectDiffSuppress: false,
 		},
+		"unmatch multi to multi ": {
+			Old:                "//messages/{messageId}",
+			New:                "projects/ci-test-project-188019/databases/(default)/documents/messages/{messageId}",
+			ExpectDiffSuppress: false,
+		},
 	}
 
 	for tn, tc := range cases {
-		if compareSelfLinkOrResourceNameWithMultipleParts("uri", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if compareSelfLinkOrResourceNameWithMultipleParts("resource", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
