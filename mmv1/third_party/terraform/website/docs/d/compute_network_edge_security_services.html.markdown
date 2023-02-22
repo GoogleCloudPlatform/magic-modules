@@ -71,13 +71,3 @@ exported:
 * `fingerprint` - Fingerprint of this resource.
 
 * `self_link` - The URI of the created resource.
-
-## Import
-
-Security policies can be imported using any of the following formats
-
-```
-$ terraform import google_compute_edge_security_services.services projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices/{{name}}
-$ terraform import google_compute_edge_security_services.services {{project}}/{{name}}/{{region}}
-$ terraform import google_compute_edge_security_services.services {{name}}
-```

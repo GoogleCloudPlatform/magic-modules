@@ -289,13 +289,3 @@ exported:
 * `fingerprint` - Fingerprint of this resource.
 
 * `self_link` - The URI of the created resource.
-
-## Import
-
-Security policies can be imported using any of the following formats
-
-```
-$ terraform import google_compute_region_security_policy.policy projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}
-$ terraform import google_compute_region_security_policy.policy {{project}}/{{name}}/{{region}}
-$ terraform import google_compute_region_security_policy.policy {{name}}
-```
