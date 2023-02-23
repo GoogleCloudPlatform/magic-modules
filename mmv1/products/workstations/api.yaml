@@ -259,7 +259,6 @@ objects:
         description: |
           Time the Instance was created in UTC.
         output: true
-        output: true
       - !ruby/object:Api::Type::NestedObject
         name: "host"
         description: |
@@ -330,11 +329,11 @@ objects:
                   A set of Compute Engine Confidential VM instance options.
                 input: true
                 properties:
-                - !ruby/object:Api::Type::Boolean
-                  name: "enableConfidentialCompute"
-                  input: true
-                  description: |
-                    Whether the instance has confidential compute enabled.
+                  - !ruby/object:Api::Type::Boolean
+                    name: "enableConfidentialCompute"
+                    input: true
+                    description: |
+                      Whether the instance has confidential compute enabled.
       - !ruby/object:Api::Type::Array
         name: "persistentDirectories"
         description: |
@@ -348,79 +347,79 @@ objects:
             - !ruby/object:Api::Type::NestedObject
               name: "gcePd"
               description: |
-                  PersistentDirectory backed by a Compute Engine regional persistent disk.
+                PersistentDirectory backed by a Compute Engine regional persistent disk.
               properties:
-              - !ruby/object:Api::Type::String
-                name: "fsType"
-                description: |
-                  Type of file system that the disk should be formatted with. The workstation image must support this file system type. Must be empty if sourceSnapshot is set.
-              - !ruby/object:Api::Type::String
-                name: "diskType"
-                description: |
-                  Type of the disk to use.
-              - !ruby/object:Api::Type::Integer
-                name: "sizeGb"
-                description: |-
-                  Size of the disk in GB. Must be empty if sourceSnapshot is set.
-              - !ruby/object:Api::Type::Enum
-                name: "reclaimPolicy"
-                description: |
-                  What should happen to the disk after the workstation is deleted. Defaults to DELETE.
-                values:
-                  - :RECLAIM_POLICY_UNSPECIFIED
-                  - :DELETE
-                  - :RETAIN
+                - !ruby/object:Api::Type::String
+                  name: "fsType"
+                  description: |
+                    Type of file system that the disk should be formatted with. The workstation image must support this file system type. Must be empty if sourceSnapshot is set.
+                - !ruby/object:Api::Type::String
+                  name: "diskType"
+                  description: |
+                    Type of the disk to use.
+                - !ruby/object:Api::Type::Integer
+                  name: "sizeGb"
+                  description: |-
+                    Size of the disk in GB. Must be empty if sourceSnapshot is set.
+                - !ruby/object:Api::Type::Enum
+                  name: "reclaimPolicy"
+                  description: |
+                    What should happen to the disk after the workstation is deleted. Defaults to DELETE.
+                  values:
+                    - :RECLAIM_POLICY_UNSPECIFIED
+                    - :DELETE
+                    - :RETAIN
       - !ruby/object:Api::Type::NestedObject
-          name: "container"
-          description: |
-            Container that will be run for each workstation using this configuration when that workstation is started.
-          properties:
-            - !ruby/object:Api::Type::String
-              name: "image"
-              description: |
-                Docker image defining the container. This image must be accessible by the config"s service account.
-            - !ruby/object:Api::Type::Array
-              name: "command"
-              item_type: Api::Type::String
-              description: |
-                If set, overrides the default ENTRYPOINT specified by the image.
-            - !ruby/object:Api::Type::Array
-              name: "args"
-              item_type: Api::Type::String
-              description: |
-                Arguments passed to the entrypoint.
-            - !ruby/object:Api::Type::String
-              name: "workingDir"
-              description: |
-                If set, overrides the default DIR specified by the image.
-            - !ruby/object:Api::Type::KeyValuePairs
-              name: "env"
-              description: |
-                Environment variables passed to the container.
-                The elements are of the form "KEY=VALUE" for the environment variable "KEY" being given the value "VALUE".
-            - !ruby/object:Api::Type::Integer
-              name: "runAsUser"
-              description: |
-                If set, overrides the USER specified in the image with the given uid.
+        name: "container"
+        description: |
+          Container that will be run for each workstation using this configuration when that workstation is started.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "image"
+            description: |
+              Docker image defining the container. This image must be accessible by the config"s service account.
+          - !ruby/object:Api::Type::Array
+            name: "command"
+            item_type: Api::Type::String
+            description: |
+              If set, overrides the default ENTRYPOINT specified by the image.
+          - !ruby/object:Api::Type::Array
+            name: "args"
+            item_type: Api::Type::String
+            description: |
+              Arguments passed to the entrypoint.
+          - !ruby/object:Api::Type::String
+            name: "workingDir"
+            description: |
+              If set, overrides the default DIR specified by the image.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: "env"
+            description: |
+              Environment variables passed to the container.
+              The elements are of the form "KEY=VALUE" for the environment variable "KEY" being given the value "VALUE".
+          - !ruby/object:Api::Type::Integer
+            name: "runAsUser"
+            description: |
+              If set, overrides the USER specified in the image with the given uid.
       - !ruby/object:Api::Type::NestedObject
-          name: "encryptionKey"
-          description: |
-            Encrypts resources of this workstation configuration using a customer-managed encryption key.
+        name: "encryptionKey"
+        description: |
+          Encrypts resources of this workstation configuration using a customer-managed encryption key.
 
-            If specified, the boot disk of the Compute Engine instance and the persistent disk are encrypted using this encryption key. If this field is not set, the disks are encrypted using a generated key. Customer-managed encryption keys do not protect disk metadata.
-            If the customer-managed encryption key is rotated, when the workstation instance is stopped, the system attempts to recreate the persistent disk with the new version of the key. Be sure to keep older versions of the key until the persistent disk is recreated. Otherwise, data on the persistent disk will be lost.
-            If the encryption key is revoked, the workstation session will automatically be stopped within 7 hours.
-          properties:
-            - !ruby/object:Api::Type::String
-              name: "kmsKey"
-              description: |
-                The name of the Google Cloud KMS encryption key.
-              required: true
-            - !ruby/object:Api::Type::String
-              name: "kmsKeyServiceAccount"
-              description: |
-                The service account to use with the specified KMS key.
-              required: true
+          If specified, the boot disk of the Compute Engine instance and the persistent disk are encrypted using this encryption key. If this field is not set, the disks are encrypted using a generated key. Customer-managed encryption keys do not protect disk metadata.
+          If the customer-managed encryption key is rotated, when the workstation instance is stopped, the system attempts to recreate the persistent disk with the new version of the key. Be sure to keep older versions of the key until the persistent disk is recreated. Otherwise, data on the persistent disk will be lost.
+          If the encryption key is revoked, the workstation session will automatically be stopped within 7 hours.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "kmsKey"
+            description: |
+              The name of the Google Cloud KMS encryption key.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: "kmsKeyServiceAccount"
+            description: |
+              The service account to use with the specified KMS key.
+            required: true
       - !ruby/object:Api::Type::Boolean
         name: "degraded"
         description: |
