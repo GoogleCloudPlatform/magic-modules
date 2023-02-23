@@ -74,6 +74,82 @@ resource "google_workstations_workstation_config" "default" {
 `, context)
 }
 
+func TestAccWorkstationsWorkstationConfig_displayName(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProvidersOiCS,
+		CheckDestroy: testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWorkstationsWorkstationConfig_displayName(context, "test"),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag"},
+			},
+			{
+				Config: testAccWorkstationsWorkstationConfig_displayName(context, "update"),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag"},
+			},
+		},
+	})
+}
+
+func testAccWorkstationsWorkstationConfig_displayName(context map[string]interface{}, displayName string) string {
+	return fmt.Sprintf(Nprintf(`
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "tf-test-workstation-cluster%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider      = google-beta
+  name          = "tf-test-workstation-cluster%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.default.name
+}
+
+resource "google_workstations_workstation_cluster" "default" {
+  provider   		      	 = google-beta
+  workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
+  network                    = google_compute_network.default.id
+  subnetwork                 = google_compute_subnetwork.default.id
+  location   		         = "us-central1"
+
+  labels = {
+	foo = "bar"
+  }
+}
+
+resource "google_workstations_workstation_config" "default" {
+  provider               = google-beta
+  workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
+  workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+  location   		     = "us-central1"
+  display_name           = %s
+
+  labels = {
+	foo = "bar"
+  }
+}
+`, context), displayName)
+}
+
 func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
 	t.Parallel()
 
