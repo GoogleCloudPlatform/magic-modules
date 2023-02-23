@@ -242,7 +242,6 @@ objects:
         name: "displayName"
         description: |
           Human-readable name for this resource.
-        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: "labels"
         description: "Client-specified labels that are applied to the resource and that are also propagated to the underlying Compute Engine resources."
