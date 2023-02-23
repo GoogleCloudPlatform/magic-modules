@@ -19,7 +19,7 @@ if len(obj["statements"].([]string)) == 0 {
 	return resourceSpannerDatabaseRead(d, meta)
 }
 
-if resourceSpannerDBVirtualUpdate(d, resourceSpannerInstance().Schema) {
+if resourceSpannerDBVirtualUpdate(d, ResourceSpannerInstance().Schema) {
     if d.Get("deletion_protection") != nil {
         if err := d.Set("deletion_protection", d.Get("deletion_protection")); err != nil {
             return fmt.Errorf("Error reading Instance: %s", err)
