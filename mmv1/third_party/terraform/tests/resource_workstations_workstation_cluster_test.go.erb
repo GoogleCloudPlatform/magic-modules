@@ -62,10 +62,6 @@ resource "google_compute_network" "default" {
   auto_create_subnetworks = false
 }
 
-data "google_project" "project" {
-  provider = google-beta
-}
-
 resource "google_compute_subnetwork" "default" {
   provider      = google-beta
   name          = "tf-test-workstation-cluster%{random_suffix}"

@@ -1,7 +1,3 @@
-data "google_project" "project" {
-  provider = google-beta
-}
-
 resource "google_compute_network" "default" {
   provider                = google-beta
   name                    = "<%= ctx[:vars]['workstation_cluster_name'] %>"

@@ -35,10 +35,6 @@ func TestAccWorkstationsWorkstationConfig_basic(t *testing.T) {
 
 func testAccWorkstationsWorkstationConfig_basic(context map[string]interface{}) string {
 	return Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
-
 resource "google_compute_network" "default" {
   provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
@@ -105,10 +101,6 @@ func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
 
 func testAccWorkstationsWorkstationConfig_persistentDirectories(context map[string]interface{}) string {
 	return Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
-
 resource "google_compute_network" "default" {
   provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
@@ -188,10 +180,6 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 
 func testAccWorkstationsWorkstationConfig_update(context map[string]interface{}) string {
 	return Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
-
 resource "google_compute_network" "default" {
   provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
