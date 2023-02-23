@@ -1,0 +1,8 @@
+if resourceSpannerInstanceVirtualUpdate(d, resourceSpannerInstance().Schema) {
+    if d.Get("force_destroy") != nil {
+        if err := d.Set("force_destroy", d.Get("force_destroy")); err != nil {
+            return fmt.Errorf("Error reading Instance: %s", err)
+        }
+    }
+    return nil
+}
