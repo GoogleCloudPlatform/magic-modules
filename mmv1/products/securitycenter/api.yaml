@@ -84,7 +84,7 @@ objects:
       notification config is a Cloud SCC resource that contains the
       configuration to send notifications for create/update events of
       findings, assets and etc.
-      ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled 
+      ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
       in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
       Without doing so, you may run into errors during resource creation.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -166,3 +166,75 @@ objects:
               See
               [Filtering notifications](https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications)
               for information on how to write a filter.
+  - !ruby/object:Api::Resource
+      name: 'MuteConfig'
+      base_url: '{{parent}}/muteConfigs'
+      self_link: '{{name}}'
+      create_url: '{{parent}}/muteConfigs?muteConfigId={{mute_config_id}}'
+      update_verb: :PATCH
+      update_mask: true
+      description: |
+        Mute Findings is a volume management feature in Security Command Center
+        that lets you manually or programmatically hide irrelevant findings,
+        and create filters to automatically silence existing and future
+        findings based on criteria you specify.
+      references: !ruby/object:Api::Resource::ReferenceLinks
+        api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.muteConfigs'
+      parameters:
+        - !ruby/object:Api::Type::String
+          name: muteConfigId
+          required: true
+          input: true
+          url_param_only: true
+          description: |
+            Unique identifier provided by the client within the parent scope.
+        - !ruby/object:Api::Type::String
+          name: parent
+          required: true
+          input: true
+          url_param_only: true
+          description: |
+            Resource name of the new mute configs's parent. Its format is
+            "organizations/[organization_id]", "folders/[folder_id]", or
+            "projects/[project_id]".
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'name'
+          output: true
+          description: |
+            Name of the mute config. Its format is
+            organizations/{organization}/muteConfigs/{configId},
+            folders/{folder}/muteConfigs/{configId},
+            or projects/{project}/muteConfigs/{configId}
+        - !ruby/object:Api::Type::String
+          name: 'description'
+          description: A description of the mute config.
+        - !ruby/object:Api::Type::String
+          name: 'filter'
+          description: |
+            An expression that defines the filter to apply across create/update
+            events of findings. While creating a filter string, be mindful of
+            the scope in which the mute configuration is being created. E.g.,
+            If a filter contains project = X but is created under the
+            project = Y scope, it might not match any findings.
+          required: true
+        - !ruby/object:Api::Type::String
+          name: 'createTime'
+          description: |
+            The time at which the mute config was created. This field is set by
+            the server and will be ignored if provided on config creation.
+          output: true
+        - !ruby/object:Api::Type::String
+          name: 'updateTime'
+          description: |
+            Output only. The most recent time at which the mute config was
+            updated. This field is set by the server and will be ignored if
+            provided on config creation or update.
+          output: true
+        - !ruby/object:Api::Type::String
+          name: 'mostRecentEditor'
+          description: |
+            Email address of the user who last edited the mute config. This
+            field is set by the server and will be ignored if provided on
+            config creation or update.
+          output: true
