@@ -548,7 +548,6 @@ objects:
         description: |
           Current state of the workstation.
         values:
-          - :STATE_UNSPECIFIED
           - :STATE_STARTING
           - :STATE_RUNNING
           - :STATE_STOPPING
