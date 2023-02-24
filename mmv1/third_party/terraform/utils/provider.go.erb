@@ -432,10 +432,10 @@ end     # products.each do
 				"google_compute_region_instance_group_manager": ResourceComputeRegionInstanceGroupManager(),
 				"google_compute_router_interface":              ResourceComputeRouterInterface(),
 				"google_compute_security_policy":               ResourceComputeSecurityPolicy(),
-        <% unless version == 'ga' -%>
+        		<% unless version == 'ga' -%>
 				"google_compute_region_security_policy":        ResourceComputeRegionSecurityPolicy(),
-        "google_compute_network_edge_security_services": ResourceComputeNetworkEdgeSecurityServices(),
-        <% end -%>
+        		"google_compute_network_edge_security_services":ResourceComputeNetworkEdgeSecurityServices(),
+        		<% end -%>
 				"google_compute_shared_vpc_host_project":       ResourceComputeSharedVpcHostProject(),
 				"google_compute_shared_vpc_service_project":    ResourceComputeSharedVpcServiceProject(),
 				"google_compute_target_pool":                   ResourceComputeTargetPool(),
