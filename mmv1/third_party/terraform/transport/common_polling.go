@@ -1,4 +1,4 @@
-package google
+package transport
 
 import (
 	"fmt"
@@ -6,7 +6,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/googleapi"
 )
 
 type (
@@ -151,4 +154,41 @@ func PollCheckForAbsence(_ map[string]interface{}, respErr error) PollResult {
 		return ErrorPollResult(respErr)
 	}
 	return PendingStatusPollResult("found")
+}
+
+func HandleNotFoundError(err error, d *schema.ResourceData, resource string) error {
+	if IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[WARN] Removing %s because it's gone", resource)
+		// The resource doesn't exist anymore
+		d.SetId("")
+
+		return nil
+	}
+
+	return errwrap.Wrapf(
+		fmt.Sprintf("Error when reading or editing %s: {{err}}", resource), err)
+}
+
+func IsGoogleApiErrorWithCode(err error, errCode int) bool {
+	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
+	return ok && gerr != nil && gerr.Code == errCode
+}
+
+func isApiNotEnabledError(err error) bool {
+	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
+	if !ok {
+		return false
+	}
+	if gerr == nil {
+		return false
+	}
+	if gerr.Code != 403 {
+		return false
+	}
+	for _, e := range gerr.Errors {
+		if e.Reason == "accessNotConfigured" {
+			return true
+		}
+	}
+	return false
 }

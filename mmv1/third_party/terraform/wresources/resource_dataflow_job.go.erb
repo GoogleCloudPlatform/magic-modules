@@ -639,7 +639,7 @@ func waitForDataflowJobToBeUpdated(d *schema.ResourceData, config *Config, repla
 
 		replacementJob, err := resourceDataflowJobGetJob(config, project, region, userAgent, replacementJobID)
 		if err != nil {
-			if isRetryableError(err) {
+			if IsRetryableError(err) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)

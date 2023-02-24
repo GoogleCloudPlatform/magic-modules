@@ -7,7 +7,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/tpgresource"
 	)
 
 // List of prefixes used for test resource names
@@ -31,23 +32,23 @@ func TestMain(m *testing.M) {
 
 // acctest.SharedConfigForRegion returns a common config setup needed for the sweeper
 // functions for a given region
-func SharedConfigForRegion(region string) (*google.Config, error) {
+func SharedConfigForRegion(region string) (*transport.Config, error) {
 	project := GetTestProjectFromEnv()
 	if project == "" {
 		return nil, fmt.Errorf("set project using any of these env variables %v", projectEnvVars)
 	}
 
-	if v := google.MultiEnvSearch(CredsEnvVars); v == "" {
+	if v := transport.MultiEnvSearch(CredsEnvVars); v == "" {
 		return nil, fmt.Errorf("set credentials using any of these env variables %v", CredsEnvVars)
 	}
 
-	conf := &google.Config{
+	conf := &transport.Config{
 		Credentials: GetTestCredsFromEnv(),
 		Region:      region,
 		Project:     project,
 	}
 
-	google.ConfigureBasePaths(conf)
+	transport.ConfigureBasePaths(conf)
 
 	return conf, nil
 }

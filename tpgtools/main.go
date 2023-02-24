@@ -561,7 +561,7 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 		fmt.Print(string(formatted))
 	} else {
 		outname := fileName + ".go"
-		if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "conns", outname), formatted, 0644); err != nil {
+		if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "transport", outname), formatted, 0644); err != nil {
 			glog.Exit(err)
 		}
 	}

@@ -1,4 +1,4 @@
-package google
+package verify
 
 import (
 	"encoding/base64"

@@ -1,4 +1,4 @@
-package google
+package transport
 
 import (
 	"log"
@@ -22,14 +22,14 @@ func RetryTimeDuration(retryFunc func() error, duration time.Duration, errorRetr
 		if err == nil {
 			return nil
 		}
-		if isRetryableError(err, errorRetryPredicates...) {
+		if IsRetryableError(err, errorRetryPredicates...) {
 			return resource.RetryableError(err)
 		}
 		return resource.NonRetryableError(err)
 	})
 }
 
-func isRetryableError(topErr error, customPredicates ...RetryErrorPredicateFunc) bool {
+func IsRetryableError(topErr error, customPredicates ...RetryErrorPredicateFunc) bool {
 	if topErr == nil {
 		return false
 	}
@@ -62,7 +62,7 @@ func retryWithPolling(retryFunc func() (interface{}, error), timeout time.Durati
 		}
 
 		// Check if it is a retryable error.
-		if isRetryableError(err, errorRetryPredicates...) {
+		if IsRetryableError(err, errorRetryPredicates...) {
 			return result, "retrying", nil
 		}
 

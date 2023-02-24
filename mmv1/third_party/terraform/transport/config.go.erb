@@ -1,5 +1,5 @@
 <% autogen_exception -%>
-package google
+package transport
 
 import (
 	"bytes"
@@ -72,6 +72,8 @@ composer "google.golang.org/api/composer/v1beta1"
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
+
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/tpgresource"
 )
 
 type providerMeta struct {
@@ -321,7 +323,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	c.Client = client
 	c.context = ctx
-	c.Region = GetRegionFromRegionSelfLink(c.Region)
+	c.Region = tpgresource.GetRegionFromRegionSelfLink(c.Region)
 	c.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
 	c.requestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
 	c.PollInterval = 10 * time.Second
@@ -384,6 +386,26 @@ func (c *Config) synchronousTimeout() time.Duration {
 	}
 	return c.RequestTimeout
 }
+
+func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
+	// When environment variables UserProjectOverride and BillingProject are set for the provider,
+	// the header X-Goog-User-Project is set for the API requests.
+	// But it causes an error when calling GetCurrentUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".
+	// And then it triggers the header X-Goog-User-Project to be set to empty string.
+
+	// See https://github.com/golang/oauth2/issues/306 for a recommendation to do this from a Go maintainer
+	// URL retrieved from https://accounts.google.com/.well-known/openid-configuration
+	res, err := SendRequest(config, "GET", "NO_BILLING_PROJECT_OVERRIDE", "https://openidconnect.googleapis.com/v1/userinfo", userAgent, nil)
+
+	if err != nil {
+		return "", fmt.Errorf("error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
+	}
+	if res["email"] == nil {
+		return "", fmt.Errorf("error retrieving email from userinfo. email was nil in the response.")
+	}
+	return res["email"].(string), nil
+}
+
 
 // Print Identities executing terraform API Calls.
 func (c *Config) logGoogleIdentities() error {
@@ -577,7 +599,7 @@ func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
 func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
 	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
-	wrappedPubsubClient := ClientWithAdditionalRetries(c.Client, pubsubTopicProjectNotReady)
+	wrappedPubsubClient := ClientWithAdditionalRetries(c.Client, PubsubTopicProjectNotReady)
 	clientPubsub, err := pubsub.NewService(c.context, option.WithHTTPClient(wrappedPubsubClient))
 	if err != nil {
 		log.Printf("[WARN] Error creating client pubsub: %s", err)
@@ -1054,4 +1076,13 @@ func ConfigureBasePaths(c *Config) {
 	c.BigQueryBasePath = DefaultBasePaths[BigQueryBasePathKey]
 	c.BigtableAdminBasePath = DefaultBasePaths[BigtableAdminBasePathKey]
 	c.TagsLocationBasePath = DefaultBasePaths[TagsLocationBasePathKey]
+}
+
+func MultiEnvSearch(ks []string) string {
+	for _, k := range ks {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return ""
 }

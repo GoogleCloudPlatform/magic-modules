@@ -205,7 +205,7 @@ func waitForDataflowJobState(d *schema.ResourceData, config *Config, jobID, user
 
 		job, err := resourceDataflowJobGetJob(config, project, region, userAgent, jobID)
 		if err != nil {
-			if isRetryableError(err) {
+			if IsRetryableError(err) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)

@@ -1,9 +1,10 @@
-package google
+package tpgresource
 
 import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -180,4 +181,221 @@ func GetRegionFromRegionalSelfLink(selfLink string) string {
 		}
 	}
 	return selfLink
+}
+
+func ReplaceVars(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
+	return replaceVarsRecursive(d, config, linkTmpl, false, 0)
+}
+
+// relaceVarsForId shortens variables by running them through GetResourceNameFromSelfLink
+// this allows us to use long forms of variables from configs without needing
+// custom id formats. For instance:
+// accessPolicies/{{access_policy}}/accessLevels/{{access_level}}
+// with values:
+// access_policy: accessPolicies/foo
+// access_level: accessPolicies/foo/accessLevels/bar
+// becomes accessPolicies/foo/accessLevels/bar
+func ReplaceVarsForId(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
+	return replaceVarsRecursive(d, config, linkTmpl, true, 0)
+}
+
+// ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
+// (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
+// substitution as 10+ calls to allow for future use cases.
+func replaceVarsRecursive(d TerraformResourceData, config *Config, linkTmpl string, shorten bool, depth int) (string, error) {
+	if depth > 10 {
+		return "", errors.New("Recursive substitution detcted")
+	}
+
+	// https://github.com/google/re2/wiki/Syntax
+	re := regexp.MustCompile("{{([%[:word:]]+)}}")
+	f, err := buildReplacementFunc(re, d, config, linkTmpl, shorten)
+	if err != nil {
+		return "", err
+	}
+	final := re.ReplaceAllStringFunc(linkTmpl, f)
+
+	if re.Match([]byte(final)) {
+		return replaceVarsRecursive(d, config, final, shorten, depth+1)
+	}
+
+	return final, nil
+}
+
+// This function isn't a test of transport.go; instead, it is used as an alternative
+// to ReplaceVars inside tests.
+func ReplaceVarsForTest(config *Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
+	re := regexp.MustCompile("{{([[:word:]]+)}}")
+	var project, region, zone string
+
+	if strings.Contains(linkTmpl, "{{project}}") {
+		project = rs.Primary.Attributes["project"]
+	}
+
+	if strings.Contains(linkTmpl, "{{region}}") {
+		region = GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
+	}
+
+	if strings.Contains(linkTmpl, "{{zone}}") {
+		zone = GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
+	}
+
+	replaceFunc := func(s string) string {
+		m := re.FindStringSubmatch(s)[1]
+		if m == "project" {
+			return project
+		}
+		if m == "region" {
+			return region
+		}
+		if m == "zone" {
+			return zone
+		}
+
+		if v, ok := rs.Primary.Attributes[m]; ok {
+			return v
+		}
+
+		// Attempt to draw values from the provider config
+		if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
+			return f.String()
+		}
+
+		return ""
+	}
+
+	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
+}
+
+// This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
+// It also replaces {{project}}, {{project_id_or_project}}, {{region}}, and {{zone}} with their appropriate values
+// This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
+func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Config, linkTmpl string, shorten bool) (func(string) string, error) {
+	var project, projectID, region, zone string
+	var err error
+
+	if strings.Contains(linkTmpl, "{{project}}") {
+		project, err = GetProject(d, config)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
+		v, ok := d.GetOkExists("project_id")
+		if ok {
+			projectID, _ = v.(string)
+		}
+		if projectID == "" {
+			project, err = GetProject(d, config)
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if strings.Contains(linkTmpl, "{{region}}") {
+		region, err = GetRegion(d, config)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if strings.Contains(linkTmpl, "{{zone}}") {
+		zone, err = GetZone(d, config)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	f := func(s string) string {
+
+		m := re.FindStringSubmatch(s)[1]
+		if m == "project" {
+			return project
+		}
+		if m == "project_id_or_project" {
+			if projectID != "" {
+				return projectID
+			}
+			return project
+		}
+		if m == "region" {
+			return region
+		}
+		if m == "zone" {
+			return zone
+		}
+		if string(m[0]) == "%" {
+			v, ok := d.GetOkExists(m[1:])
+			if ok {
+				return url.PathEscape(fmt.Sprintf("%v", v))
+			}
+		} else {
+			v, ok := d.GetOkExists(m)
+			if ok {
+				if shorten {
+					return GetResourceNameFromSelfLink(fmt.Sprintf("%v", v))
+				} else {
+					return fmt.Sprintf("%v", v)
+				}
+			}
+		}
+
+		// terraform-google-conversion doesn't provide a provider config in tests.
+		if config != nil {
+			// Attempt to draw values from the provider config if it's present.
+			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
+				return f.String()
+			}
+		}
+		return ""
+	}
+
+	return f, nil
+}
+
+// This function isn't a test of transport.go; instead, it is used as an alternative
+// to ReplaceVars inside tests.
+func ReplaceVarsForFrameworkTest(prov *FrameworkProvider, rs *terraform.ResourceState, linkTmpl string) (string, error) {
+	re := regexp.MustCompile("{{([[:word:]]+)}}")
+	var project, region, zone string
+
+	if strings.Contains(linkTmpl, "{{project}}") {
+		project = rs.Primary.Attributes["project"]
+	}
+
+	if strings.Contains(linkTmpl, "{{region}}") {
+		region = GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
+	}
+
+	if strings.Contains(linkTmpl, "{{zone}}") {
+		zone = GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
+	}
+
+	replaceFunc := func(s string) string {
+		m := re.FindStringSubmatch(s)[1]
+		if m == "project" {
+			return project
+		}
+		if m == "region" {
+			return region
+		}
+		if m == "zone" {
+			return zone
+		}
+
+		if v, ok := rs.Primary.Attributes[m]; ok {
+			return v
+		}
+
+		// Attempt to draw values from the provider
+		if f := reflect.Indirect(reflect.ValueOf(prov)).FieldByName(m); f.IsValid() {
+			return f.String()
+		}
+
+		return ""
+	}
+
+	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
 }

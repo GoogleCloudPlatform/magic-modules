@@ -35,6 +35,8 @@ import (
     "google.golang.org/api/serviceusage/v1"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/provider"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/tpgresource"
 )
 
 var TestAccProviders map[string]*schema.Provider
@@ -119,7 +121,7 @@ var billingAccountEnvVars = []string{
 	"GOOGLE_BILLING_ACCOUNT",
 }
 
-var configs map[string]*google.Config
+var configs map[string]*transport.Config
 
 // A source for a given VCR test with the value that seeded it
 type VcrSource struct {
@@ -137,7 +139,7 @@ var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
 
 func init() {
-	configs = make(map[string]*google.Config)
+	configs = make(map[string]*transport.Config)
 	sources = make(map[string]VcrSource)
 	TestAccProvider = provider.Provider()
 	<% if version == 'ga' -%>
@@ -167,7 +169,7 @@ func init() {
 // ConfigureFunc on our provider creates a new HTTP client and sets base paths (config.go LoadAndValidate)
 // VCR requires a single HTTP client to handle all interactions so it can record and replay responses so
 // this caches HTTP clients per test by replacing ConfigureFunc
-func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*google.Config, diag.Diagnostics) {
+func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*transport.Config, diag.Diagnostics) {
 	configsLock.RLock()
 	v, ok := configs[testName]
 	configsLock.RUnlock()
@@ -178,7 +180,7 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 	if diags.HasError() {
 		return nil, diags
 	}
-	config := c.(*google.Config)
+	config := c.(*transport.Config)
 	var vcrMode recorder.Mode
 	switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
 	case "RECORDING":
@@ -288,14 +290,14 @@ func closeRecorder(t *testing.T) {
 	}
 }
 
-func GoogleProviderConfig(t *testing.T) *google.Config {
+func GoogleProviderConfig(t *testing.T) *transport.Config {
 	configsLock.RLock()
 	config, ok := configs[t.Name()]
 	configsLock.RUnlock()
 	if ok {
 		return config
 	}
-	return TestAccProvider.Meta().(*google.Config)
+	return TestAccProvider.Meta().(*transport.Config)
 }
 
 func getTestAccProviders(testName string, c resource.TestCase) map[string]*schema.Provider {
@@ -406,7 +408,7 @@ func readSeedFromFile(fileName string) (int64, error) {
 	// Remove NULL characters from seed
 	data = bytes.Trim(data, "\x00")
 	seed := string(data)
-	return google.StringToFixed64(seed)
+	return tpgresource.StringToFixed64(seed)
 }
 
 func writeSeedToFile(seed int64, fileName string) error {
@@ -484,33 +486,33 @@ func TestAccPreCheck(t *testing.T) {
 		os.Setenv("GOOGLE_CREDENTIALS", string(creds))
 	}
 
-	if v := google.MultiEnvSearch(CredsEnvVars); v == "" {
+	if v := transport.MultiEnvSearch(CredsEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(CredsEnvVars, ", "))
 	}
 
-	if v := google.MultiEnvSearch(projectEnvVars); v == "" {
+	if v := transport.MultiEnvSearch(projectEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(projectEnvVars, ", "))
 	}
 
-	if v := google.MultiEnvSearch(regionEnvVars); v == "" {
+	if v := transport.MultiEnvSearch(regionEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(regionEnvVars, ", "))
 	}
 
-	if v := google.MultiEnvSearch(zoneEnvVars); v == "" {
+	if v := transport.MultiEnvSearch(zoneEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(zoneEnvVars, ", "))
 	}
 }
 
 func TestProvider_getRegionFromZone(t *testing.T) {
 	expected := "us-central1"
-	actual := google.GetRegionFromZone("us-central1-f")
+	actual := tpgresource.GetRegionFromZone("us-central1-f")
 	if expected != actual {
 		t.Fatalf("Region (%s) did not match expected value: %s", actual, expected)
 	}
 }
 
 func TestProvider_loadCredentialsFromFile(t *testing.T) {
-	ws, es := provider.ValidateCredentials(google.TestFakeCredentialsPath, "")
+	ws, es := provider.ValidateCredentials(transport.GetRegionFromZone, "")
 	if len(ws) != 0 {
 		t.Errorf("Expected %d warnings, got %v", len(ws), ws)
 	}
@@ -520,7 +522,7 @@ func TestProvider_loadCredentialsFromFile(t *testing.T) {
 }
 
 func TestProvider_loadCredentialsFromJSON(t *testing.T) {
-	contents, err := ioutil.ReadFile(google.TestFakeCredentialsPath)
+	contents, err := ioutil.ReadFile(transport.GetRegionFromZone)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
@@ -773,7 +775,7 @@ provider "google" {
 }
 
 // GetTestRegion has the same logic as the provider's getRegion, to be used in tests.
-func GetTestRegion(is *terraform.InstanceState, config *google.Config) (string, error) {
+func GetTestRegion(is *terraform.InstanceState, config *transport.Config) (string, error) {
 	if res, ok := is.Attributes["region"]; ok {
 		return res, nil
 	}
@@ -784,7 +786,7 @@ func GetTestRegion(is *terraform.InstanceState, config *google.Config) (string, 
 }
 
 // GetTestProject has the same logic as the provider's getProject, to be used in tests.
-func GetTestProject(is *terraform.InstanceState, config *google.Config) (string, error) {
+func GetTestProject(is *terraform.InstanceState, config *transport.Config) (string, error) {
 	if res, ok := is.Attributes["project"]; ok {
 		return res, nil
 	}
@@ -796,77 +798,77 @@ func GetTestProject(is *terraform.InstanceState, config *google.Config) (string,
 
 // TestAccPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
-	return google.MultiEnvSearch(projectNumberEnvVars)
+	return transport.MultiEnvSearch(projectNumberEnvVars)
 }
 
 // TestAccPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectFromEnv() string {
-	return google.MultiEnvSearch(projectEnvVars)
+	return transport.MultiEnvSearch(projectEnvVars)
 }
 
 // TestAccPreCheck ensures at least one of the credentials env variables is set.
 func GetTestCredsFromEnv() string {
 	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
-	if google.MultiEnvSearch(CredsEnvVars) == "true" {
+	if transport.MultiEnvSearch(CredsEnvVars) == "true" {
 		return ""
 	}
-	return google.MultiEnvSearch(CredsEnvVars)
+	return transport.MultiEnvSearch(CredsEnvVars)
 }
 
 // TestAccPreCheck ensures at least one of the region env variables is set.
 func GetTestRegionFromEnv() string {
-	return google.MultiEnvSearch(regionEnvVars)
+	return transport.MultiEnvSearch(regionEnvVars)
 }
 
 func GetTestZoneFromEnv() string {
-	return google.MultiEnvSearch(zoneEnvVars)
+	return transport.MultiEnvSearch(zoneEnvVars)
 }
 
 func GetTestCustIdFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, custIdEnvVars...)
-	return google.MultiEnvSearch(custIdEnvVars)
+	return transport.MultiEnvSearch(custIdEnvVars)
 }
 
 func GetTestIdentityUserFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, identityUserEnvVars...)
-	return google.MultiEnvSearch(identityUserEnvVars)
+	return transport.MultiEnvSearch(identityUserEnvVars)
 }
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
 func GetTestFirestoreProjectFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, firestoreProjectEnvVars...)
-	return google.MultiEnvSearch(firestoreProjectEnvVars)
+	return transport.MultiEnvSearch(firestoreProjectEnvVars)
 }
 
 func GetTestOrgFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, orgEnvVars...)
-	return google.MultiEnvSearch(orgEnvVars)
+	return transport.MultiEnvSearch(orgEnvVars)
 }
 
 func GetTestOrgDomainFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, orgEnvDomainVars...)
-	return google.MultiEnvSearch(orgEnvDomainVars)
+	return transport.MultiEnvSearch(orgEnvDomainVars)
 }
 
 func getTestOrgTargetFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, orgTargetEnvVars...)
-	return google.MultiEnvSearch(orgTargetEnvVars)
+	return transport.MultiEnvSearch(orgTargetEnvVars)
 }
 
 func getTestBillingAccountFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, billingAccountEnvVars...)
-	return google.MultiEnvSearch(billingAccountEnvVars)
+	return transport.MultiEnvSearch(billingAccountEnvVars)
 }
 
 func GetTestMasterBillingAccountFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, masterBillingAccountEnvVars...)
-	return google.MultiEnvSearch(masterBillingAccountEnvVars)
+	return transport.MultiEnvSearch(masterBillingAccountEnvVars)
 }
 
 func GetTestServiceAccountFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, serviceAccountEnvVars...)
-	return google.MultiEnvSearch(serviceAccountEnvVars)
+	return transport.MultiEnvSearch(serviceAccountEnvVars)
 }
 
 // Some tests fail during VCR. One common case is race conditions when creating resources.
@@ -885,7 +887,7 @@ func sleepInSecondsForTest(t int) resource.TestCheckFunc {
 	}
 }
 
-func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *google.Config) (string, error) {
+func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *transport.Config) (string, error) {
 	// Create project-1 and project-2
 	rmService := config.NewResourceManagerClient(config.UserAgent)
 
@@ -899,7 +901,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	}
 
 	var op *cloudresourcemanager.Operation
-	err := google.RetryTimeDuration(func() (reqErr error) {
+	err := transport.RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()
 		return reqErr
 	}, 5*time.Minute)
@@ -908,7 +910,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	}
 
 	// Wait for the operation to complete
-	opAsMap, err := google.ConvertToMap(op)
+	opAsMap, err := transport.ConvertToMap(op)
 	if err != nil {
 		return "", err
 	}
@@ -930,7 +932,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	project.ProjectId = p2
 	project.Name = fmt.Sprintf("%s-2", Pname)
 
-	err = google.RetryTimeDuration(func() (reqErr error) {
+	err = transport.RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()
 		return reqErr
 	}, 5*time.Minute)
@@ -939,7 +941,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	}
 
 	// Wait for the operation to complete
-	opAsMap, err = google.ConvertToMap(op)
+	opAsMap, err = transport.ConvertToMap(op)
 	if err != nil {
 		return "", err
 	}
@@ -968,7 +970,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 
 	// Enable the test runner to create service accounts and get an access token on behalf of
 	// the project 1 service account
-	curEmail, err := GetCurrentUserEmail(config, config.UserAgent)
+	curEmail, err := transport.GetCurrentUserEmail(config, config.UserAgent)
 	if err != nil {
 		return "", err
 	}

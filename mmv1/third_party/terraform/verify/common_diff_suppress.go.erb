@@ -1,7 +1,7 @@
 <% autogen_exception -%>
 // Contains common diff suppress functions.
 
-package google
+package verify
 
 import (
 	"crypto/sha256"
@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
 )
 
 func optionalPrefixSuppress(prefix string) schema.SchemaDiffSuppressFunc {
@@ -137,7 +138,7 @@ func emptyOrUnsetBlockDiffSuppressLogic(k, old, new string, o, n interface{}) bo
 		return false
 	}
 	for _, v := range contents {
-		if !IsEmptyValue(reflect.ValueOf(v)) {
+		if !transport.IsEmptyValue(reflect.ValueOf(v)) {
 			return false
 		}
 	}

@@ -1,4 +1,4 @@
-package google
+package transport
 
 import (
 	"fmt"
@@ -202,7 +202,7 @@ func iamMemberMissing(err error) (bool, string) {
 // Cloud PubSub returns a 400 error if a topic's parent project was recently created and an
 // organization policy has not propagated.
 // See https://github.com/hashicorp/terraform-provider-google/issues/4349
-func pubsubTopicProjectNotReady(err error) (bool, string) {
+func PubsubTopicProjectNotReady(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 400 && strings.Contains(gerr.Body, "retry this operation") {
 			log.Printf("[DEBUG] Dismissed error as a retryable operation: %s", err)
@@ -316,7 +316,7 @@ func isCryptoKeyVersionsPendingGeneration(err error) (bool, string) {
 
 // Retry if getting a resource/operation returns a 404 for specific operations.
 // opType should describe the operation for which 404 can be retryable.
-func isNotFoundRetryableError(opType string) RetryErrorPredicateFunc {
+func IsNotFoundRetryableError(opType string) RetryErrorPredicateFunc {
 	return func(err error) (bool, string) {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
 			return true, fmt.Sprintf("Retry 404s for %s", opType)

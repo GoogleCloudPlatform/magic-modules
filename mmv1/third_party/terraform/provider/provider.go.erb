@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/service/composer"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/service/storagetransfer"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
 
 	googleoauth "golang.org/x/oauth2/google"
 )
@@ -573,13 +574,13 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// only check environment variables if neither value was set in config- this
 	// means config beats env var in all cases.
 	if config.AccessToken == "" && config.Credentials == "" {
-		config.Credentials = google.MultiEnvSearch([]string{
+		config.Credentials = transport.MultiEnvSearch([]string{
 			"GOOGLE_CREDENTIALS",
 			"GOOGLE_CLOUD_KEYFILE_JSON",
 			"GCLOUD_KEYFILE_JSON",
 		})
 
-		config.AccessToken = google.MultiEnvSearch([]string{
+		config.AccessToken = transport.MultiEnvSearch([]string{
 			"GOOGLE_OAUTH_ACCESS_TOKEN",
 		})
 	}
@@ -668,13 +669,13 @@ func ValidateCredentials(v interface{}, k string) (warnings []string, errors []e
 
 func HandleSDKDefaults(d *schema.ResourceData) {
 	if d.Get("impersonate_service_account") == "" {
-		d.Set("impersonate_service_account", google.MultiEnvSearch([]string{
+		d.Set("impersonate_service_account", transport.MultiEnvSearch([]string{
 			"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 		}))
 	}
 
 	if d.Get("project") == "" {
-		d.Set("project", google.MultiEnvSearch([]string{
+		d.Set("project", transport.MultiEnvSearch([]string{
 			"GOOGLE_PROJECT",
 			"GOOGLE_CLOUD_PROJECT",
 			"GCLOUD_PROJECT",
@@ -683,13 +684,13 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 	}
 
 	if d.Get("billing_project") == "" {
-		d.Set("billing_project", google.MultiEnvSearch([]string{
+		d.Set("billing_project", transport.MultiEnvSearch([]string{
 			"GOOGLE_BILLING_PROJECT",
 		}))
 	}
 
 	if d.Get("region") == "" {
-		d.Set("region", google.MultiEnvSearch([]string{
+		d.Set("region", transport.MultiEnvSearch([]string{
 			"GOOGLE_REGION",
 			"GCLOUD_REGION",
 			"CLOUDSDK_COMPUTE_REGION",
@@ -697,7 +698,7 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 	}
 
 	if d.Get("zone") == "" {
-		d.Set("zone", google.MultiEnvSearch([]string{
+		d.Set("zone", transport.MultiEnvSearch([]string{
 			"GOOGLE_ZONE",
 			"GCLOUD_ZONE",
 			"CLOUDSDK_COMPUTE_ZONE",
@@ -705,13 +706,13 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 	}
 
 	if d.Get("user_project_override") == "" {
-		d.Set("user_project_override", google.MultiEnvSearch([]string{
+		d.Set("user_project_override", transport.MultiEnvSearch([]string{
 			"USER_PROJECT_OVERRIDE",
 		}))
 	}
 
 	if d.Get("request_reason") == "" {
-		d.Set("request_reason", google.MultiEnvSearch([]string{
+		d.Set("request_reason", transport.MultiEnvSearch([]string{
 			"CLOUDSDK_CORE_REQUEST_REASON",
 		}))
 	}
