@@ -530,11 +530,6 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: "annotations"
         description: "Client-specified annotations. This is distinct from labels."
-      - !ruby/object:Api::Type::String
-        name: "etag"
-        description: |
-          Checksum computed by the server. 
-          May be sent on update and delete requests to ensure that the client has an up-to-date value before proceeding.
       - !ruby/object:Api::Type::Time
         name: "createTime"
         description: |
