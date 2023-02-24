@@ -79,3 +79,5 @@ properties:
         values:
           - :SHA256
           - :ALWAYS_NULL
+          - :DEFAULT_MASKING_VALUE
+

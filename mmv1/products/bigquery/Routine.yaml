@@ -157,3 +157,5 @@ properties:
     description: |
       The fully-qualified unique name of the routine in the format
       projectId:datasetId:routineId. The routine name without the project name is
+      given in the routineId field
+
