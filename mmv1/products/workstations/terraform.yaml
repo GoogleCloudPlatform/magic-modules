@@ -109,3 +109,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"
+  Workstation: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format:
+      [
+        "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations/{{workstation_id}}",
+        "{{workstation_id}}",
+      ]
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_basic"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
+          workstation_name: "workstation"
