@@ -186,7 +186,7 @@ module Provider
     # GCP Resource on Terraform.
     def generate_resource(pwd, data, generate_code, generate_docs)
       if generate_code
-        FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+        FileUtils.mkpath folder_name(data.version)
         data.generate(pwd,
                       '/templates/terraform/resource.erb',
                       "#{folder_name(data.version)}/resource_#{full_resource_name(data)}.go",
@@ -215,7 +215,7 @@ module Provider
                 end
                     .empty?
 
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      FileUtils.mkpath folder_name(data.version)
       data.generate(
         pwd,
         'templates/terraform/examples/base_configs/test_file.go.erb',
@@ -233,7 +233,7 @@ module Provider
 
       file_name =
         "#{folder_name(data.version)}/resource_#{full_resource_name(data)}_sweeper_test.go"
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      FileUtils.mkpath folder_name(data.version)
       data.generate(pwd,
                     'templates/terraform/sweeper_file.go.erb',
                     file_name,
@@ -249,7 +249,7 @@ module Provider
       data.object = @api.objects.select(&:autogen_async).first
 
       data.async = data.object.async
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      FileUtils.mkpath folder_name(data.version)
       data.generate(pwd,
                     'templates/terraform/operation.go.erb',
                     "#{folder_name(data.version)}/#{product_name}_operation.go",
@@ -262,7 +262,7 @@ module Provider
       if generate_code \
         && (!data.object.iam_policy.min_version \
         || data.object.iam_policy.min_version >= data.version)
-        FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+        FileUtils.mkpath folder_name(data.version)
         data.generate(pwd,
                       'templates/terraform/iam_policy.go.erb',
                       "#{folder_name(data.version)}/iam_#{full_resource_name(data)}.go",
@@ -305,7 +305,7 @@ module Provider
     end
 
     def extract_identifiers(url)
-      url.scan(/\{\{\%?(\w+)\}\}/).flatten
+      url.scan(/\{\{%?(\w+)\}\}/).flatten
     end
 
     # Returns the id format of an object, or self_link_uri if none is explicitly defined

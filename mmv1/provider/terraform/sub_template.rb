@@ -18,61 +18,61 @@ module Provider
     # Functions to compile sub-templates.
     module SubTemplate
       def build_schema_property(property, object, pwd)
-        compile_template pwd + '/templates/terraform/schema_property.erb',
-                         property: property,
-                         object: object,
-                         pwd: pwd
+        compile_template "#{pwd}/templates/terraform/schema_property.erb",
+                         property:,
+                         object:,
+                         pwd:
       end
 
       def build_subresource_schema(property, object, pwd)
-        compile_template pwd + '/templates/terraform/schema_subresource.erb',
-                         property: property,
-                         object: object,
-                         pwd: pwd
+        compile_template "#{pwd}/templates/terraform/schema_subresource.erb",
+                         property:,
+                         object:,
+                         pwd:
       end
 
       # Transforms a Cloud API representation of a property into a Terraform
       # schema representation.
       def build_flatten_method(prefix, property, object, pwd)
-        compile_template pwd + '/templates/terraform/flatten_property_method.erb',
-                         prefix: prefix,
-                         property: property,
-                         object: object,
-                         pwd: pwd
+        compile_template "#{pwd}/templates/terraform/flatten_property_method.erb",
+                         prefix:,
+                         property:,
+                         object:,
+                         pwd:
       end
 
       # Transforms a Terraform schema representation of a property into a
       # representation used by the Cloud API.
       def build_expand_method(prefix, property, object, pwd)
-        compile_template pwd + '/templates/terraform/expand_property_method.erb',
-                         prefix: prefix,
-                         property: property,
-                         object: object,
-                         pwd: pwd
+        compile_template "#{pwd}/templates/terraform/expand_property_method.erb",
+                         prefix:,
+                         property:,
+                         object:,
+                         pwd:
       end
 
       def build_expand_resource_ref(var_name, property, pwd)
-        compile_template pwd + '/templates/terraform/expand_resource_ref.erb',
-                         var_name: var_name,
-                         property: property,
-                         pwd: pwd
+        compile_template "#{pwd}/templates/terraform/expand_resource_ref.erb",
+                         var_name:,
+                         property:,
+                         pwd:
       end
 
       def build_property_documentation(property, pwd)
         return if property.removed?
 
-        compile_template pwd + '/templates/terraform/property_documentation.erb',
-                         property: property,
-                         pwd: pwd
+        compile_template "#{pwd}/templates/terraform/property_documentation.erb",
+                         property:,
+                         pwd:
       end
 
       def build_nested_property_documentation(property, pwd)
         return if property.removed?
 
         compile_template(
-          pwd + '/templates/terraform/nested_property_documentation.erb',
-          property: property,
-          pwd: pwd
+          "#{pwd}/templates/terraform/nested_property_documentation.erb",
+          property:,
+          pwd:
         )
       end
 

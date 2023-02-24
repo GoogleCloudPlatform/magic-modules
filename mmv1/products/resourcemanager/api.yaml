@@ -121,7 +121,6 @@ objects:
     # of where that happens.
     self_link: liens?parent={{parent}}
     nested_query: !ruby/object:Api::Resource::NestedQuery
-      kind: 'resourceManager#liensList'
       keys:
         - liens
     identity:

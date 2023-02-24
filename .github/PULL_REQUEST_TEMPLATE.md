@@ -11,9 +11,9 @@ your code to be reviewed.
 If this PR is for Terraform, I acknowledge that I have:
 
 - [ ] Searched through the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) for an open issue that this either resolves or contributes to, commented on it to claim it, and written "fixes {url}" or "part of {url}" in this PR description. If there were no relevant open issues, I opened one and commented that I would like to work on it (not necessary for very small changes).
-- [ ] [Generated Terraform](https://github.com/GoogleCloudPlatform/magic-modules#generating-the-terraform-providers), and ran `make test` and `make lint` to ensure it passes unit and linter tests.
 - [ ] Ensured that all new fields I added that can be set by a user appear in at least one [example](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples) (for generated resources) or [third_party test](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/tests) (for handwritten resources or update tests).
-- [ ] [Ran](https://github.com/hashicorp/terraform-provider-google/blob/main/.github/CONTRIBUTING.md#tests) relevant acceptance tests (If the acceptance tests do not yet pass or you are unable to run them, please let your reviewer know).
+- [ ] [Generated Terraform providers](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/docs/content/docs/getting-started/generate-providers.md), and ran [`make test` and `make lint`](https://googlecloudplatform.github.io/magic-modules/docs/getting-started/run-provider-tests/#run-unit-tests) in the generated providers to ensure it passes unit and linter tests.
+- [ ] [Ran](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/docs/content/docs/getting-started/run-provider-tests.md) relevant acceptance tests using my own Google Cloud project and credentials (If the acceptance tests do not yet pass or you are unable to run them, please let your reviewer know).
 - [ ] Read the [Release Notes Guide](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/.ci/RELEASE_NOTES_GUIDE.md) before writing my release note below.
 
 <!-- AUTOCHANGELOG for Downstream PRs.
@@ -27,7 +27,7 @@ Please select one of the following "release-note:" headings:
     - release-note:deprecation
     - release-note:breaking-change
     - release-note:none
-    
+
 Unless you choose release-note:none, please add a release note.
 
 See .ci/RELEASE_NOTES_GUIDE.md for writing good release notes.

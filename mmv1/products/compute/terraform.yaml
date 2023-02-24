@@ -698,6 +698,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           These images can be referred by family name here.
       diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+      diskEncryptionKey.rsaEncryptedKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
       diskEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
         name: "kmsKeySelfLink"
@@ -1496,6 +1498,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       machineImageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: compareCryptoKeyVersions
     iam_policy: !ruby/object:Api::Resource::IamPolicy
+      skip_import_test: true
       allowed_iam_role: 'roles/compute.admin'
       parent_resource_attribute: 'machine_image'
       iam_conditions_request_type: :QUERY_PARAM
@@ -3434,6 +3437,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_ha_vpn_gateway_encrypted_interconnect"
         primary_resource_id: "vpn-gateway"
+        # TODO: https://github.com/hashicorp/terraform-provider-google/issues/11504
+        skip_test: true
         vars:
           ha_vpn_gateway_name: "test-ha-vpngw"
           interconnect_attachment1_name: "test-interconnect-attachment1"
@@ -3472,6 +3477,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           external_gateway_name: "external-gateway"
           global_address_name: "global-address"
           router_name: "ha-vpn-router1"
+      - !ruby/object:Provider::Terraform::Examples
+        skip_docs: true
+        name: "only_external_vpn_gateway_full"
+        primary_resource_id: "external_gateway"
+        vars:
+          external_gateway_name: "external-gateway"
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

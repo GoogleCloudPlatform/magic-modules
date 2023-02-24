@@ -45,7 +45,7 @@ var (
 
 var REQUIRED_SCRATCH_DISK_SIZE_GB = 375
 
-func resourceComputeInstanceTemplate() *schema.Resource {
+func ResourceComputeInstanceTemplate() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceTemplateCreate,
 		Read:   resourceComputeInstanceTemplateRead,
@@ -841,6 +841,18 @@ be from 0 to 999,999,999 inclusive.`,
 				Description: `A set of key/value label pairs to assign to instances created from this template,`,
 			},
 
+			"resource_policies": {
+				Type:             schema.TypeList,
+				Optional:         true,
+				ForceNew:         true,
+				MaxItems:         1,
+				Description:      `A list of self_links of resource policies to attach to the instance. Currently a max of 1 resource policy is supported.`,
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: compareResourceNames,
+				},
+			},
+
 			"reservation_affinity": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -1081,7 +1093,7 @@ func buildDisks(d *schema.ResourceData, config *Config) ([]*compute.AttachedDisk
 
 			if _, ok := d.GetOk(prefix + ".resource_policies"); ok {
 				// instance template only supports a resource name here (not uri)
-				disk.InitializeParams.ResourcePolicies = convertAndMapStringArr(d.Get(prefix+".resource_policies").([]interface{}), GetResourceNameFromSelfLink)
+				disk.InitializeParams.ResourcePolicies = expandInstanceTemplateResourcePolicies(d, prefix + ".resource_policies")
 			}
 		}
 
@@ -1135,6 +1147,10 @@ func expandInstanceTemplateGuestAccelerators(d TerraformResourceData, config *Co
 	return guestAccelerators
 }
 
+func expandInstanceTemplateResourcePolicies(d TerraformResourceData, dataKey string) []string {
+	return convertAndMapStringArr(d.Get(dataKey).([]interface{}), GetResourceNameFromSelfLink)
+}
+
 func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -1176,6 +1192,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
+	resourcePolicies := expandInstanceTemplateResourcePolicies(d, "resource_policies")
 
 	instanceProperties := &compute.InstanceProperties{
 		CanIpForward:               d.Get("can_ip_forward").(bool),
@@ -1198,6 +1215,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 <% unless version == 'ga' -%>
 		DisplayDevice:              expandDisplayDevice(d),
 <% end -%>
+		ResourcePolicies:           resourcePolicies,
 		ReservationAffinity:        reservationAffinity,
 	}
 
@@ -1615,6 +1633,12 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 <% end -%>
+
+	if instanceTemplate.Properties.ResourcePolicies != nil {
+		if err = d.Set("resource_policies", instanceTemplate.Properties.ResourcePolicies); err != nil {
+			return fmt.Errorf("Error setting resource_policies: %s", err)
+		}
+	}
 
 	if reservationAffinity := instanceTemplate.Properties.ReservationAffinity; reservationAffinity != nil {
 		if err = d.Set("reservation_affinity", flattenReservationAffinity(reservationAffinity)); err != nil {

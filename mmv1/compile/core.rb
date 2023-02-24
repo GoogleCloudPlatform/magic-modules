@@ -132,14 +132,6 @@ module Compile
       raise
     end
 
-    def ansible_style_yaml(obj, options = {})
-      if obj.is_a?(::Hash)
-        obj.reject { |_, v| v.nil? }.to_yaml(options).sub("---\n", '')
-      else
-        obj.to_yaml(options).sub("---\n", '')
-      end
-    end
-
     # Compiles a ERB template from a file.
     #
     # Arguments:
@@ -161,14 +153,6 @@ module Compile
       indent_array(text, spaces, filler).join("\n")
     end
 
-    def indent_list(text, spaces, last_line_comma = false, filler = ' ')
-      if last_line_comma
-        [indent_array(text, spaces, filler).join(",\n"), ','].join
-      else
-        indent_array(text, spaces, filler).join(",\n")
-      end
-    end
-
     def indent_array(text, spaces, filler = ' ')
       return [] if text.nil?
 
@@ -181,7 +165,7 @@ module Compile
         elsif line.strip.empty?
           ''
         else
-          ' ' * spaces + line.gsub(/\n/, "\n" + ' ' * spaces)
+          (' ' * spaces) + line.gsub(/\n/, "\n#{' ' * spaces}")
         end
       end
     end
@@ -215,9 +199,10 @@ module Compile
     # Compiles an ERB template using the data from a key-value pair.
     # The key-value pair may be a Hash or a Binding
     def compile_string(ctx, source)
-      if ctx.is_a? Binding
+      case ctx
+      when Binding
         ERB.new(source, trim_mode: '->').result(ctx).split("\n")
-      elsif ctx.is_a? Hash
+      when Hash
         ERB.new(source, trim_mode: '->').result(
           OpenStruct.new(ctx).instance_eval { binding.of_caller(1) }
         ).split("\n")
@@ -228,7 +213,7 @@ module Compile
 
     def autogen_notice(lang, pwd)
       Thread.current[:autogen] = true
-      comment_block(compile(pwd + '/templates/autogen_notice.erb').split("\n"), lang)
+      comment_block(compile("#{pwd}/templates/autogen_notice.erb").split("\n"), lang)
     end
 
     def autogen_exception
@@ -259,9 +244,9 @@ module Compile
        'CONTRIBUTING.md located at the root of this package.']
     end
 
-    def get_helper_file(file, remove_copyright_notice = true)
-      content = IO.read(file)
-      remove_copyright_notice ? strip_copyright_notice(content) : content
+    def get_helper_file(file)
+      content = File.read(file)
+      strip_copyright_notice(content)
     end
 
     def strip_copyright_notice(content, comment_marker = '#')

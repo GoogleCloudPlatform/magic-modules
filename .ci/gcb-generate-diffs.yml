@@ -153,7 +153,7 @@ steps:
       env:
         - BUILD_ID=$BUILD_ID
         - PROJECT_ID=$PROJECT_ID
-        - BUILD_STEP="19"
+        - BUILD_STEP="17"
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
       args:
@@ -173,7 +173,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "20"  # Build step
+          - "18"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.12.31
@@ -190,7 +190,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "21"  # Build step
+          - "19"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.13.7
@@ -207,7 +207,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "22"  # Build step
+          - "20"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
@@ -220,7 +220,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "23"  # Build step
+          - "21"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpg-test
@@ -233,7 +233,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "24"  # Build step
+          - "22"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
       id: gcb-tpg-vcr-test
@@ -244,19 +244,20 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "25"  # Build step
+          - "23"  # Build step
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s
 options:
     machineType: 'N1_HIGHCPU_32'
 
-secrets:
-    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
-      secretEnv:
-          GITHUB_TOKEN: CiQADkR4Nt6nHLI52Kc1W55OwpLdc4vjBfVR0SGQNzm6VSVj9lUSUQBfF82vVhn43A1jNYOv8ScoWgrZONwNrUabHfGjkvl+IZxcii0JlOVUawbscs4OJga0eitNNlagAOruLs6C926X20ZZPqWtH97ui6CKNvxgkQ==
+availableSecrets:
+  secretManager:
+    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
+      env: GITHUB_TOKEN
+  inline:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/environment-keyring/cryptoKeys/ci-project-key
-      secretEnv:
+      envMap:
           GOOGLE_BILLING_ACCOUNT: CiQAis6xrGyvnmGipEEjCQVUzu3o1H4XRJSsp/B8A0IFqwRwnogSPQDOc1nLdG/+VCWpKtYtbEl12+luWkHmOYn/VtkDuMkz3bCj2DNbcuLw2fgvmkha1IjnouGPIah0qLkDmTU=
           GOOGLE_CUST_ID: CiQAis6xrAfbX3gtctcnZnt8n5DDZjercDObUGlyN4CqIpWKu5kSMgDOc1nLhLObfpnlhaUxdZ6Aoo38TBtRXoXAW5W4dbdyP+8ILKjtx1+zVL5WV641NM90
           GOOGLE_FIRESTORE_PROJECT: CiQAis6xrGkbSHeyBpgJg7/DkxNbHgqVJn3iaMYL7ybzkvDUzLESQgDOc1nLn0yUyrqLVfEujlbJEO4HDsk+o+6w608UfOXExJ3v3CTL+DwVwhXqIK/Vbo7UIMUyuP+Lu497BlcDIYyOwQ==
