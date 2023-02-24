@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"

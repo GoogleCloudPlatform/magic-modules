@@ -4,7 +4,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package google_test
 
 import (
 	"context"
