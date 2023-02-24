@@ -35,9 +35,6 @@
   # at request of rileykarson@, and can be removed
   # to add features to global forwarding rule at your convenience.
 - type: EXCLUDE
-  field: ip_version
-  location: region
-- type: EXCLUDE
   field: metadata_filter
   location: region
 - type: EXCLUDE
