@@ -459,7 +459,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         "Workstations": "https://cloud.google.com/workstations/docs/"
-      api: "https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs.workstations/create"
+      api: "https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs.workstations"
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: "name"
