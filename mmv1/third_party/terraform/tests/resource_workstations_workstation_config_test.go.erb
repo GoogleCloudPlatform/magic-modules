@@ -79,6 +79,7 @@ func TestAccWorkstationsWorkstationConfig_displayName(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
+		"display_name":  "Display Name N",
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -87,7 +88,7 @@ func TestAccWorkstationsWorkstationConfig_displayName(t *testing.T) {
 		CheckDestroy: testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWorkstationsWorkstationConfig_displayName(context, "test"),
+				Config: testAccWorkstationsWorkstationConfig_displayName(context, ""),
 			},
 			{
 				ResourceName:            "google_workstations_workstation_cluster.default",
@@ -96,7 +97,7 @@ func TestAccWorkstationsWorkstationConfig_displayName(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"etag"},
 			},
 			{
-				Config: testAccWorkstationsWorkstationConfig_displayName(context, "update"),
+				Config: testAccWorkstationsWorkstationConfig_displayName(context, "2"),
 			},
 			{
 				ResourceName:            "google_workstations_workstation_cluster.default",
@@ -108,8 +109,9 @@ func TestAccWorkstationsWorkstationConfig_displayName(t *testing.T) {
 	})
 }
 
-func testAccWorkstationsWorkstationConfig_displayName(context map[string]interface{}, displayName string) string {
-	return fmt.Sprintf(Nprintf(`
+func testAccWorkstationsWorkstationConfig_displayName(context map[string]interface{}, update string) string {
+	context["display_name"] = context["display_name"].(string) + update	
+	return Nprintf(`
 resource "google_compute_network" "default" {
   provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
@@ -141,13 +143,13 @@ resource "google_workstations_workstation_config" "default" {
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		     = "us-central1"
-  display_name           = %s
+  display_name           = "%{display_name} %{random_suffix}"
 
   labels = {
 	foo = "bar"
   }
 }
-`, context), displayName)
+`, context)
 }
 
 func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
