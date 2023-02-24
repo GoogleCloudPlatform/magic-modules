@@ -42,19 +42,6 @@ func TestAccWorkstationsWorkstation_update(t *testing.T) {
 	})
 }
 
-resource "google_workstations_workstation" "default" {
-  workstation_id         = "tf-test-workstation%{random_suffix}"
-  workstation_config_id  =  google_workstations_workstation_config.default.workstation_config_id
-  workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
-  location   		         = "us-central1"
-    display_name         = "workstation%{random_suffix}"
-
-  labels = {
-	  foo = "bar"
-  }
-}
-`, context)
-}
 
 func testAccWorkstationsWorkstation_basic(context map[string]interface{}) string {
 	return Nprintf(`
@@ -96,7 +83,6 @@ resource "google_workstations_workstation" "default" {
   workstation_config_id  =  google_workstations_workstation_config.default.workstation_config_id
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		         = "us-central1"
-  display_name           = "workstation-modified%{random_suffix}"
 
   labels = {
 	  foo = "bar"
@@ -130,13 +116,17 @@ resource "google_workstations_workstation_cluster" "default" {
   }
 }
 
-resource "google_workstations_workstation_config" "default" {
-  workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
+resource "google_workstations_workstation" "default" {
+  workstation_id         = "tf-test-workstation%{random_suffix}"
+  workstation_config_id  =  google_workstations_workstation_config.default.workstation_config_id
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		         = "us-central1"
+  display_name           = "workstation%{random_suffix}"
 
   labels = {
 	  foo = "bar"
   }
+}
+`, context)
 }
 <% end -%>
