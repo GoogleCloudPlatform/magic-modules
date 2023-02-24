@@ -10,9 +10,9 @@ import (
 func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -38,9 +38,9 @@ func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

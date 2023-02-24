@@ -51,6 +51,15 @@
 <% end -%>
 '<%= dir -%>/test-fixtures/': 'third_party/terraform/utils/test-fixtures'
 <% end -%>
+
+<%
+  Dir["third_party/terraform/acctest/*.go"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/acctest/<%= fname -%>': 'third_party/terraform/acctest/<%= fname -%>'
+<% end -%>
+
+
 <% if generate_docs -%>
 <%  Dir["third_party/terraform/website/**/*.*"].each do |file_path|
     fname = file_path.split('/', 4)[3]

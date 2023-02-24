@@ -10,14 +10,14 @@ import (
 func testAccDataSourceCloudIdentityGroups_basicTest(t *testing.T) {
 
 	context := map[string]interface{}{
-		"org_domain":    getTestOrgDomainFromEnv(t),
-		"cust_id":       getTestCustIdFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
+		"cust_id":       acctest.GetTestCustIdFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudIdentityGroupConfig(context),

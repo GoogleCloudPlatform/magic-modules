@@ -30,17 +30,17 @@ func TestMain(m *testing.M) {
 // sharedConfigForRegion returns a common config setup needed for the sweeper
 // functions for a given region
 func sharedConfigForRegion(region string) (*Config, error) {
-	project := getTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	if project == "" {
-		return nil, fmt.Errorf("set project using any of these env variables %v", projectEnvVars)
+		return nil, fmt.Errorf("set project using any of these env variables %v", acctest.ProjectEnvVars)
 	}
 
-	if v := MultiEnvSearch(credsEnvVars); v == "" {
-		return nil, fmt.Errorf("set credentials using any of these env variables %v", credsEnvVars)
+	if v := MultiEnvSearch(acctest.CredsEnvVars); v == "" {
+		return nil, fmt.Errorf("set credentials using any of these env variables %v", acctest.CredsEnvVars)
 	}
 
 	conf := &Config{
-		Credentials: getTestCredsFromEnv(),
+		Credentials: acctest.GetTestCredsFromEnv(),
 		Region:      region,
 		Project:     project,
 	}

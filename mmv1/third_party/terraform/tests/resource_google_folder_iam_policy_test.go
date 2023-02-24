@@ -12,13 +12,13 @@ import (
 func TestAccFolderIamPolicy_basic(t *testing.T) {
 	t.Parallel()
 
-	folderDisplayName := "tf-test-" + randString(t, 10)
-	org := getTestOrgFromEnv(t)
+	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderIamPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -44,13 +44,13 @@ func TestAccFolderIamPolicy_basic(t *testing.T) {
 func TestAccFolderIamPolicy_auditConfigs(t *testing.T) {
 	t.Parallel()
 
-	folderDisplayName := "tf-test-" + randString(t, 10)
-	org := getTestOrgFromEnv(t)
+	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersroviders,
 		CheckDestroy: testAccCheckGoogleFolderIamPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -67,7 +67,7 @@ func TestAccFolderIamPolicy_auditConfigs(t *testing.T) {
 
 func testAccCheckGoogleFolderIamPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_folder_iam_policy" {
@@ -88,7 +88,7 @@ func testAccCheckGoogleFolderIamPolicyDestroyProducer(t *testing.T) func(s *terr
 // Confirm that a folder has an IAM policy with at least 1 binding
 func testAccFolderExistingPolicy(t *testing.T, org, fname string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		c := googleProviderConfig(t)
+		c := acctest.GoogleProviderConfig(t)
 		var err error
 		originalPolicy, err = getFolderIamPolicyByParentAndDisplayName("organizations/"+org, fname, c)
 		if err != nil {

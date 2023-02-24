@@ -9,9 +9,9 @@ import (
 
 func TestAccMonitoringMetricDescriptor_update(t *testing.T) {
 	t.Parallel()
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringMetricDescriptorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

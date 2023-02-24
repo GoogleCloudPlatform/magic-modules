@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccMultipleResources(t *testing.T) {
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMultipleResources(),

@@ -30,8 +30,8 @@ func Nprintf(format string, params map[string]interface{}) string {
 	return google.Nprintf(format, params)
 }
 
-// testAccPreCheck ensures at least one of the project env variables is set.
-func getTestProjectFromEnv() string {
+// acctest.TestAccPreCheck ensures at least one of the project env variables is set.
+func acctest.GetTestProjectFromEnv() string {
 	project := MultiEnvSearch([]string{"TEST_PROJECT", "GOOGLE_PROJECT"})
 	if project == "" {
 		log.Printf("Missing required env var TEST_PROJECT. Default (%s) will be used.", defaultProject)
@@ -41,8 +41,8 @@ func getTestProjectFromEnv() string {
 	return project
 }
 
-// testAccPreCheck ensures at least one of the credentials env variables is set.
-func getTestCredsFromEnv() string {
+// acctest.TestAccPreCheck ensures at least one of the credentials env variables is set.
+func acctest.GetTestCredsFromEnv() string {
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("cannot get current directory: %v", err)
@@ -62,26 +62,26 @@ func getTestCredsFromEnv() string {
 	return credentials
 }
 
-// testAccPreCheck ensures at least one of the region env variables is set.
-func getTestRegionFromEnv() string {
+// acctest.TestAccPreCheck ensures at least one of the region env variables is set.
+func acctest.GetTestRegionFromEnv() string {
 	return defaultRegion
 }
 
-func getTestCustIdFromEnv(t *testing.T) string {
+func acctest.GetTestCustIdFromEnv(t *testing.T) string {
 	return defaultCustId
 }
 
-func getTestIdentityUserFromEnv(t *testing.T) string {
+func acctest.GetTestIdentityUserFromEnv(t *testing.T) string {
 	return defaultIdentityUser
 }
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
-func getTestFirestoreProjectFromEnv(t *testing.T) string {
+func acctest.GetTestFirestoreProjectFromEnv(t *testing.T) string {
 	return defaultFirestoreProject
 }
 
-func getTestOrgFromEnv(t *testing.T) string {
+func acctest.GetTestOrgFromEnv(t *testing.T) string {
 	org, ok := os.LookupEnv("TEST_ORG_ID")
 	if !ok {
 		log.Printf("Missing required env var TEST_ORG_ID. Default (%s) will be used.", defaultOrganization)
@@ -91,19 +91,19 @@ func getTestOrgFromEnv(t *testing.T) string {
 	return org
 }
 
-func getTestOrgDomainFromEnv(t *testing.T) string {
+func acctest.GetTestOrgDomainFromEnv(t *testing.T) string {
 	return defaultOrganizationDomain
 }
 
-func getTestOrgTargetFromEnv(t *testing.T) string {
+func acctest.GetTestOrgTargetFromEnv(t *testing.T) string {
 	return defaultOrganizationTarget
 }
 
-func getTestBillingAccountFromEnv(t *testing.T) string {
+func acctest.GetTestBillingAccountFromEnv(t *testing.T) string {
 	return defaultBillingAccount
 }
 
-func getTestServiceAccountFromEnv(t *testing.T) string {
+func acctest.GetTestServiceAccountFromEnv(t *testing.T) string {
 	return defaultServiceAccount
 }
 

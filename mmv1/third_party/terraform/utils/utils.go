@@ -46,8 +46,8 @@ type TerraformResourceDiff interface {
 	ForceNew(string) error
 }
 
-// getRegionFromZone returns the region from a zone for Google cloud.
-func getRegionFromZone(zone string) string {
+// GetRegionFromZone returns the region from a zone for Google cloud.
+func GetRegionFromZone(zone string) string {
 	if zone != "" && len(zone) > 2 {
 		region := zone[:len(zone)-2]
 		return region

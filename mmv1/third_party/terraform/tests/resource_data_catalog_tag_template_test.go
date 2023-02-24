@@ -15,9 +15,9 @@ func TestAccDataCatalogTagTemplate_dataCatalogTagTemplate_updateFields(t *testin
 		"random_suffix": randString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckDataCatalogTagTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

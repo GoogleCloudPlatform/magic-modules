@@ -10,12 +10,12 @@ import (
 func TestAccSecurityCenterSource_basic(t *testing.T) {
 	t.Parallel()
 
-	orgId := getTestOrgFromEnv(t)
-	suffix := randString(t, 10)
+	orgId := acctest.GetTestOrgFromEnv(t)
+	suffix := acctest.RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterSource_sccSourceBasicExample(orgId, suffix, "My description"),

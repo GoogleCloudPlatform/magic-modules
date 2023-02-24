@@ -14,15 +14,15 @@ import (
 // See AccessApprovalOrganizationSettings for the test runner.
 func testAccAccessApprovalFolderSettings(t *testing.T) {
 	context := map[string]interface{}{
-		"project":       getTestProjectFromEnv(),
-		"org_id":        getTestOrgFromEnv(t),
-		"location":      getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project":       acctest.GetTestProjectFromEnv(),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"location":      acctest.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},

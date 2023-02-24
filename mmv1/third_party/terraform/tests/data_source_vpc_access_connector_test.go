@@ -10,9 +10,9 @@ import (
 func TestAccVPCAccessConnectorDatasource_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVPCAccessConnectorDatasourceConfig(randString(t, 10)),

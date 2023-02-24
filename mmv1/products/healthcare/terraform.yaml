@@ -174,7 +174,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_consent_store_basic"
         primary_resource_id: "my-consent"
-        primary_resource_name: "fmt.Sprintf(\"projects/%s/locations/%s/datasets/tf-test-my-dataset%s\",  getTestProjectFromEnv(), getTestRegionFromEnv(), context[\"random_suffix\"]) , fmt.Sprintf(\"tf-test-my-consent-store%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"projects/%s/locations/%s/datasets/tf-test-my-dataset%s\",  acctest.GetTestProjectFromEnv(), acctest.GetTestRegionFromEnv(), context[\"random_suffix\"]) , fmt.Sprintf(\"tf-test-my-consent-store%s\", context[\"random_suffix\"])"
         vars:
           dataset_id: "my-dataset"
           consent_id: "my-consent-store"

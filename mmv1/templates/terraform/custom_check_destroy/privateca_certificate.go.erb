@@ -1,4 +1,4 @@
-config := googleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
 url, err := replaceVarsForTest(config, rs, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates/{{name}}")
 

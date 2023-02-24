@@ -11,7 +11,7 @@ if zone == "" {
 
 // API Endpoint requires region in the URL. We infer it from the zone.
 
-region := getRegionFromZone(zone)
+region := GetRegionFromZone(zone)
 
 if region == "" {
 	return nil, fmt.Errorf("invalid zone %q, unable to infer region from zone", zone)

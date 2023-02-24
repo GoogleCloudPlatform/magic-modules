@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -10,11 +10,11 @@ import (
 func TestAccDataSourceComputeHaVpnGateway(t *testing.T) {
 	t.Parallel()
 
-	gwName := fmt.Sprintf("tf-%s", randString(t, 10))
+	gwName := fmt.Sprintf("tf-%s", acctest.RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeHaVpnGatewayConfig(gwName),

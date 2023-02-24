@@ -11,12 +11,12 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"network_name":  BootstrapSharedTestNetwork(t, "alloydb"),
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckAlloydbBackupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

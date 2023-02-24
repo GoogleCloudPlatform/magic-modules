@@ -9,17 +9,17 @@ import (
 func testAccDataSourceCloudIdentityGroupMemberships_basicTest(t *testing.T) {
 
 	context := map[string]interface{}{
-		"org_domain":    getTestOrgDomainFromEnv(t),
-		"cust_id":       getTestCustIdFromEnv(t),
-		"identity_user": getTestIdentityUserFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
+		"cust_id":       acctest.GetTestCustIdFromEnv(t),
+		"identity_user": acctest.GetTestIdentityUserFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	memberId := Nprintf("%{identity_user}@%{org_domain}", context)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudIdentityGroupMembershipConfig(context),

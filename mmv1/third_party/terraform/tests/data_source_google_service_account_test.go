@@ -11,17 +11,17 @@ func TestAccDatasourceGoogleServiceAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_service_account.acceptance"
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleServiceAccount_basic(account),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						resourceName, "id", fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", getTestProjectFromEnv(), account, getTestProjectFromEnv())),
+						resourceName, "id", fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", acctest.GetTestProjectFromEnv(), account, acctest.GetTestProjectFromEnv())),
 					resource.TestCheckResourceAttrSet(resourceName, "email"),
 					resource.TestCheckResourceAttrSet(resourceName, "unique_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "name"),

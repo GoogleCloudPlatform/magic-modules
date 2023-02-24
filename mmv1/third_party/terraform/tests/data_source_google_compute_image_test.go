@@ -11,12 +11,12 @@ import (
 func TestAccDataSourceComputeImage(t *testing.T) {
 	t.Parallel()
 
-	family := fmt.Sprintf("tf-test-%d", randInt(t))
-	name := fmt.Sprintf("tf-test-%d", randInt(t))
+	family := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -43,12 +43,12 @@ func TestAccDataSourceComputeImage(t *testing.T) {
 func TestAccDataSourceComputeImageFilter(t *testing.T) {
 	t.Parallel()
 
-	family := fmt.Sprintf("tf-test-%d", randInt(t))
-	name := fmt.Sprintf("tf-test-%d", randInt(t))
+	family := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

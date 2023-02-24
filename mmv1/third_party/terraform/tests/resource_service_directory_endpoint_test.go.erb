@@ -12,13 +12,13 @@ import (
 func TestAccServiceDirectoryEndpoint_serviceDirectoryEndpointUpdateExample(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	location := "us-central1"
-	testId := fmt.Sprintf("tf-test-example-endpoint%s", randString(t, 10))
+	testId := fmt.Sprintf("tf-test-example-endpoint%s", acctest.RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckServiceDirectoryEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

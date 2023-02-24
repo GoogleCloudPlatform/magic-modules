@@ -176,8 +176,8 @@ func TestGetRegion(t *testing.T) {
 		"zone": "foo",
 	})
 	var config Config
-	barRegionName := getRegionFromZone("bar")
-	fooRegionName := getRegionFromZone("foo")
+	barRegionName := GetRegionFromZone("bar")
+	fooRegionName := GetRegionFromZone("foo")
 
 	if region, err := getRegion(d, &config); err != nil || region != fooRegionName {
 		t.Fatalf("Zone '%s' != '%s', %s", region, fooRegionName, err)
@@ -722,7 +722,7 @@ func TestSnakeToPascalCase(t *testing.T) {
 }
 
 func TestCheckGCSName(t *testing.T) {
-	valid63 := randString(t, 63)
+	valid63 := acctest.RandString(t, 63)
 	cases := map[string]bool{
 		// Valid
 		"foobar":       true,
@@ -739,16 +739,16 @@ func TestCheckGCSName(t *testing.T) {
 		fmt.Sprintf("%s.%s.%s", valid63, valid63, valid63): true,
 
 		// Invalid
-		"goog-foobar":     false,
-		"foobar-google":   false,
-		"-foobar":         false,
-		"foobar-":         false,
-		"_foobar":         false,
-		"foobar_":         false,
-		"fo":              false,
-		"foo$bar":         false,
-		"foo..bar":        false,
-		randString(t, 64): false,
+		"goog-foobar":             false,
+		"foobar-google":           false,
+		"-foobar":                 false,
+		"foobar-":                 false,
+		"_foobar":                 false,
+		"foobar_":                 false,
+		"fo":                      false,
+		"foo$bar":                 false,
+		"foo..bar":                false,
+		acctest.RandString(t, 64): false,
 		fmt.Sprintf("%s.%s.%s.%s", valid63, valid63, valid63, valid63): false,
 	}
 

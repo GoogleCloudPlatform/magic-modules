@@ -12,14 +12,14 @@ func TestAccFirebaseHostingSite_firebasehostingSiteUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_id":    acctest.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 		"site_id":       "tf-test-site-update-app",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckFirebaseHostingSiteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

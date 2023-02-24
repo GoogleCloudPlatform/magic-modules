@@ -1,5 +1,5 @@
 <% autogen_exception -%>
-package google
+package acctest
 
 import (
 	"bytes"
@@ -32,15 +32,16 @@ import (
     "google.golang.org/api/cloudresourcemanager/v1"
     "google.golang.org/api/iamcredentials/v1"
     "google.golang.org/api/serviceusage/v1"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 )
 
-var testAccProviders map[string]*schema.Provider
+var TestAccProviders map[string]*schema.Provider
 <% unless version == 'ga' -%>
-var testAccProvidersOiCS map[string]*schema.Provider
+var TestAccProvidersOiCS map[string]*schema.Provider
 <% end -%>
 var testAccProvider *schema.Provider
 
-var credsEnvVars = []string{
+var CredsEnvVars = []string{
 	"GOOGLE_CREDENTIALS",
 	"GOOGLE_CLOUD_KEYFILE_JSON",
 	"GCLOUD_KEYFILE_JSON",
@@ -52,7 +53,7 @@ var projectNumberEnvVars = []string{
 	"GOOGLE_PROJECT_NUMBER",
 }
 
-var projectEnvVars = []string{
+var ProjectEnvVars = []string{
 	"GOOGLE_PROJECT",
 	"GCLOUD_PROJECT",
 	"CLOUDSDK_CORE_PROJECT",
@@ -110,7 +111,7 @@ var billingAccountEnvVars = []string{
 	"GOOGLE_BILLING_ACCOUNT",
 }
 
-var configs map[string]*Config
+var configs map[string]*google.Config
 
 // A source for a given VCR test with the value that seeded it
 type VcrSource struct {
@@ -130,22 +131,22 @@ var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
 
 func init() {
-	configs = make(map[string]*Config)
+	configs = make(map[string]*google.Config)
 	sources = make(map[string]VcrSource)
 	testAccProvider = Provider()
 	<% if version == 'ga' -%>
-	testAccProviders = map[string]*schema.Provider{
+	TestAccProviders = map[string]*schema.Provider{
 		"google": testAccProvider,
 	}
 	<% else -%>
-	testAccProviders = map[string]*schema.Provider{
+	TestAccProviders = map[string]*schema.Provider{
 		"google": testAccProvider,
 	}
 
 	// The OiCS provider map is used to ensure that OiCS examples use `google-beta`
 	// if the example is versioned as beta; normal beta tests should continue to
 	// use the standard provider map.
-	testAccProvidersOiCS = map[string]*schema.Provider{
+	TestAccProvidersOiCS = map[string]*schema.Provider{
 <%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
 <% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
 		"google-<%= aliased_version -%>": testAccProvider,
@@ -160,7 +161,7 @@ func init() {
 // ConfigureFunc on our provider creates a new HTTP client and sets base paths (config.go LoadAndValidate)
 // VCR requires a single HTTP client to handle all interactions so it can record and replay responses so
 // this caches HTTP clients per test by replacing ConfigureFunc
-func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*Config, diag.Diagnostics) {
+func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*google.Config, diag.Diagnostics) {
 	configsLock.RLock()
 	v, ok := configs[testName]
 	configsLock.RUnlock()
@@ -171,7 +172,7 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 	if diags.HasError() {
 		return nil, diags
 	}
-	config := c.(*Config)
+	config := c.(*google.Config)
 	var vcrMode recorder.Mode
 	switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
 	case "RECORDING":
@@ -281,14 +282,14 @@ func closeRecorder(t *testing.T) {
 	}
 }
 
-func googleProviderConfig(t *testing.T) *Config {
+func GoogleProviderConfig(t *testing.T) *google.Config {
 	configsLock.RLock()
 	config, ok := configs[t.Name()]
 	configsLock.RUnlock()
 	if ok {
 		return config
 	}
-	return testAccProvider.Meta().(*Config)
+	return testAccProvider.Meta().(*google.Config)
 }
 
 func getTestAccProviders(testName string, c resource.TestCase) map[string]*schema.Provider {
@@ -321,7 +322,7 @@ func isVcrEnabled() bool {
 
 // Wrapper for resource.Test to swap out providers for VCR providers and handle VCR specific things
 // Can be called when VCR is not enabled, and it will behave as normal
-func vcrTest(t *testing.T, c resource.TestCase) {
+func VcrTest(t *testing.T, c resource.TestCase) {
 	if isVcrEnabled() {
 		providers := getTestAccProviders(t.Name(), c)
 		c.Providers = providers
@@ -410,9 +411,9 @@ func writeSeedToFile(seed int64, fileName string) error {
 	return nil
 }
 
-func randString(t *testing.T, length int) string {
+func RandString(t *testing.T, length int) string {
 	if !isVcrEnabled() {
-		return acctest.RandString(length)
+		return RandString(length)
 	}
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
@@ -431,9 +432,9 @@ func randString(t *testing.T, length int) string {
 	return string(result)
 }
 
-func randInt(t *testing.T) int {
+func RandInt(t *testing.T) int {
 	if !isVcrEnabled() {
-		return acctest.RandInt()
+		return RandInt()
 	}
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
@@ -446,7 +447,7 @@ func randInt(t *testing.T) int {
 	return rand.New(s.source).Int()
 }
 
-func testAccPreCheck(t *testing.T) {
+func TestAccPreCheck(t *testing.T) {
 	if v := os.Getenv("GOOGLE_CREDENTIALS_FILE"); v != "" {
 		creds, err := ioutil.ReadFile(v)
 		if err != nil {
@@ -455,12 +456,12 @@ func testAccPreCheck(t *testing.T) {
 		os.Setenv("GOOGLE_CREDENTIALS", string(creds))
 	}
 
-	if v := MultiEnvSearch(credsEnvVars); v == "" {
-		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(credsEnvVars, ", "))
+	if v := MultiEnvSearch(CredsEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(CredsEnvVars, ", "))
 	}
 
-	if v := MultiEnvSearch(projectEnvVars); v == "" {
-		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(projectEnvVars, ", "))
+	if v := MultiEnvSearch(ProjectEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ProjectEnvVars, ", "))
 	}
 
 	if v := MultiEnvSearch(regionEnvVars); v == "" {
@@ -472,8 +473,8 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-// getTestRegion has the same logic as the provider's getRegion, to be used in tests.
-func getTestRegion(is *terraform.InstanceState, config *Config) (string, error) {
+// GetTestRegion has the same logic as the provider's getRegion, to be used in tests.
+func GetTestRegion(is *terraform.InstanceState, config *google.Config) (string, error) {
 	if res, ok := is.Attributes["region"]; ok {
 		return res, nil
 	}
@@ -483,8 +484,8 @@ func getTestRegion(is *terraform.InstanceState, config *Config) (string, error) 
 	return "", fmt.Errorf("%q: required field is not set", "region")
 }
 
-// getTestProject has the same logic as the provider's getProject, to be used in tests.
-func getTestProject(is *terraform.InstanceState, config *Config) (string, error) {
+// GetTestProject has the same logic as the provider's getProject, to be used in tests.
+func GetTestProject(is *terraform.InstanceState, config *google.Config) (string, error) {
 	if res, ok := is.Attributes["project"]; ok {
 		return res, nil
 	}
@@ -494,81 +495,81 @@ func getTestProject(is *terraform.InstanceState, config *Config) (string, error)
 	return "", fmt.Errorf("%q: required field is not set", "project")
 }
 
-// testAccPreCheck ensures at least one of the project env variables is set.
-func getTestProjectNumberFromEnv() string {
+// TestAccPreCheck ensures at least one of the project env variables is set.
+func GetTestProjectNumberFromEnv() string {
 	return MultiEnvSearch(projectNumberEnvVars)
 }
 
-// testAccPreCheck ensures at least one of the project env variables is set.
-func getTestProjectFromEnv() string {
-	return MultiEnvSearch(projectEnvVars)
+// TestAccPreCheck ensures at least one of the project env variables is set.
+func GetTestProjectFromEnv() string {
+	return MultiEnvSearch(ProjectEnvVars)
 }
 
-// testAccPreCheck ensures at least one of the credentials env variables is set.
-func getTestCredsFromEnv() string {
+// TestAccPreCheck ensures at least one of the credentials env variables is set.
+func GetTestCredsFromEnv() string {
 	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
-	if MultiEnvSearch(credsEnvVars) == "true" {
+	if MultiEnvSearch(CredsEnvVars) == "true" {
 		return ""
 	}
-	return MultiEnvSearch(credsEnvVars)
+	return MultiEnvSearch(CredsEnvVars)
 }
 
-// testAccPreCheck ensures at least one of the region env variables is set.
-func getTestRegionFromEnv() string {
+// TestAccPreCheck ensures at least one of the region env variables is set.
+func GetTestRegionFromEnv() string {
 	return MultiEnvSearch(regionEnvVars)
 }
 
-func getTestZoneFromEnv() string {
+func GetTestZoneFromEnv() string {
 	return MultiEnvSearch(zoneEnvVars)
 }
 
-func getTestCustIdFromEnv(t *testing.T) string {
+func GetTestCustIdFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, custIdEnvVars...)
 	return MultiEnvSearch(custIdEnvVars)
 }
 
-func getTestIdentityUserFromEnv(t *testing.T) string {
+func GetTestIdentityUserFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, identityUserEnvVars...)
 	return MultiEnvSearch(identityUserEnvVars)
 }
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
-func getTestFirestoreProjectFromEnv(t *testing.T) string {
+func GetTestFirestoreProjectFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, firestoreProjectEnvVars...)
 	return MultiEnvSearch(firestoreProjectEnvVars)
 }
 
-func getTestOrgFromEnv(t *testing.T) string {
+func GetTestOrgFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, orgEnvVars...)
 	return MultiEnvSearch(orgEnvVars)
 }
 
-func getTestOrgDomainFromEnv(t *testing.T) string {
+func GetTestOrgDomainFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, orgEnvDomainVars...)
 	return MultiEnvSearch(orgEnvDomainVars)
 }
 
-func getTestOrgTargetFromEnv(t *testing.T) string {
+func GetTestOrgTargetFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, orgTargetEnvVars...)
 	return MultiEnvSearch(orgTargetEnvVars)
 }
 
 // This is the billing account that will be charged for the infrastructure used during testing. For
 // that reason, it is also the billing account used for creating new projects.
-func getTestBillingAccountFromEnv(t *testing.T) string {
+func GetTestBillingAccountFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, billingAccountEnvVars...)
 	return MultiEnvSearch(billingAccountEnvVars)
 }
 
 // This is the billing account that will be modified to test billing-related functionality. It is
 // expected to have more permissions granted to the test user and support subaccounts.
-func getTestMasterBillingAccountFromEnv(t *testing.T) string {
+func GetTestMasterBillingAccountFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, masterBillingAccountEnvVars...)
 	return MultiEnvSearch(masterBillingAccountEnvVars)
 }
 
-func getTestServiceAccountFromEnv(t *testing.T) string {
+func GetTestServiceAccountFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, serviceAccountEnvVars...)
 	return MultiEnvSearch(serviceAccountEnvVars)
 }
@@ -576,20 +577,20 @@ func getTestServiceAccountFromEnv(t *testing.T) string {
 // Some tests fail during VCR. One common case is race conditions when creating resources.
 // If a test config adds two fine-grained resources with the same parent it is undefined
 // which will be created first, causing VCR to fail ~50% of the time
-func skipIfVcr(t *testing.T) {
+func SkipIfVcr(t *testing.T) {
 	if isVcrEnabled() {
 		t.Skipf("VCR enabled, skipping test: %s", t.Name())
 	}
 }
 
-func sleepInSecondsForTest(t int) resource.TestCheckFunc {
+func SleepInSecondsForTest(t int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		time.Sleep(time.Duration(t) * time.Second)
 		return nil
 	}
 }
 
-func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *Config) (string, error) {
+func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *google.Config) (string, error) {
 	// Create project-1 and project-2
 	rmService := config.NewResourceManagerClient(config.userAgent)
 

@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -10,13 +10,13 @@ import (
 func TestAccDataSourceGoogleFolders_basic(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "tf-test-" + randString(t, 10)
+	displayName := "tf-test-" + acctest.RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFoldersConfig(parent, displayName),

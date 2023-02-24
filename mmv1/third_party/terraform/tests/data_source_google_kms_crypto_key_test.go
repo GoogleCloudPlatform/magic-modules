@@ -16,9 +16,9 @@ func TestAccDataSourceGoogleKmsCryptoKey_basic(t *testing.T) {
 	keyParts := strings.Split(kms.CryptoKey.Name, "/")
 	cryptoKeyId := keyParts[len(keyParts)-1]
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleKmsCryptoKey_basic(kms.KeyRing.Name, cryptoKeyId),

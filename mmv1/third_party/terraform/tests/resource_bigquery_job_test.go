@@ -11,16 +11,16 @@ func TestAccBigQueryJob_withLocation(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 		"location":      "asia-northeast1",
 	}
 
 	// Need to construct the import ID manually since the state ID will not contain the location
 	importID := fmt.Sprintf("projects/%s/jobs/tf_test_job_query%s/location/%s", getTestProjectFromEnv(), context["random_suffix"], context["location"])
 
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryJob_withLocation(context),

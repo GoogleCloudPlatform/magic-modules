@@ -11,10 +11,10 @@ import (
 func TestAccDataSourceGoogleVpnGateway(t *testing.T) {
 	t.Parallel()
 
-	vpnGatewayName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	vpnGatewayName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleVpnGatewayConfig(vpnGatewayName),

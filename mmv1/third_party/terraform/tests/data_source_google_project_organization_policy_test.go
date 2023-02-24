@@ -8,11 +8,11 @@ import (
 )
 
 func TestAccDataSourceGoogleProjectOrganizationPolicy_basic(t *testing.T) {
-	project := getTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleProjectOrganizationPolicy_basic(project),

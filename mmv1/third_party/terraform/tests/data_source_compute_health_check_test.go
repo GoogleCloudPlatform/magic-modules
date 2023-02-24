@@ -10,12 +10,12 @@ import (
 func TestAccComputeHealthCheckDatasource_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheckDatasourceConfig(randString(t, 10)),
+				Config: testAccComputeHealthCheckDatasourceConfig(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceState("data.google_compute_health_check.hc", "google_compute_health_check.hc"),
 				),

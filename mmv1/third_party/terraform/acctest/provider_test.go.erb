@@ -1,4 +1,5 @@
-package google_test
+<% autogen_exception -%>
+package acctest
 
 import (
 	"fmt"
@@ -8,20 +9,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 )
 
 func TestProvider(t *testing.T) {
-	if err := Provider().InternalValidate(); err != nil {
+	if err := google.Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestProvider_impl(t *testing.T) {
-	var _ *schema.Provider = Provider()
+	var _ *schema.Provider = google.Provider()
 }
 
 func TestProvider_noDuplicatesInResourceMap(t *testing.T) {
-	_, err := ResourceMapWithErrors()
+	_, err := google.ResourceMapWithErrors()
 	if err != nil {
 		t.Error(err)
 	}
@@ -29,14 +31,14 @@ func TestProvider_noDuplicatesInResourceMap(t *testing.T) {
 
 func TestProvider_getRegionFromZone(t *testing.T) {
 	expected := "us-central1"
-	actual := getRegionFromZone("us-central1-f")
+	actual := google.GetRegionFromZone("us-central1-f")
 	if expected != actual {
 		t.Fatalf("Region (%s) did not match expected value: %s", actual, expected)
 	}
 }
 
 func TestProvider_loadCredentialsFromFile(t *testing.T) {
-	ws, es := validateCredentials(testFakeCredentialsPath, "")
+	ws, es := google.ValidateCredentials(google.TestFakeCredentialsPath, "")
 	if len(ws) != 0 {
 		t.Errorf("Expected %d warnings, got %v", len(ws), ws)
 	}
@@ -46,11 +48,11 @@ func TestProvider_loadCredentialsFromFile(t *testing.T) {
 }
 
 func TestProvider_loadCredentialsFromJSON(t *testing.T) {
-	contents, err := ioutil.ReadFile(testFakeCredentialsPath)
+	contents, err := ioutil.ReadFile(google.TestFakeCredentialsPath)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
-	ws, es := validateCredentials(string(contents), "")
+	ws, es := google.ValidateCredentials(string(contents), "")
 	if len(ws) != 0 {
 		t.Errorf("Expected %d warnings, got %v", len(ws), ws)
 	}
@@ -59,82 +61,25 @@ func TestProvider_loadCredentialsFromJSON(t *testing.T) {
 	}
 }
 
-func TestAccProviderBasePath_setBasePath(t *testing.T) {
-	t.Parallel()
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccProviderBasePath_setBasePath("https://www.googleapis.com/compute/beta/", randString(t, 10)),
-			},
-			{
-				ResourceName:      "google_compute_address.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
-	t.Parallel()
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", randString(t, 10)),
-				ExpectError: regexp.MustCompile("got HTTP response code 404 with body"),
-			},
-		},
-	})
-}
-
-func TestAccProviderMeta_setModuleName(t *testing.T) {
-	t.Parallel()
-
-	moduleName := "my-module"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccProviderMeta_setModuleName(moduleName, randString(t, 10)),
-			},
-			{
-				ResourceName:      "google_compute_address.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func TestAccProviderUserProjectOverride(t *testing.T) {
 	// Parallel fine-grained resource creation
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billing := getTestBillingAccountFromEnv(t)
-	pid := "tf-test-" + randString(t, 10)
-	topicName := "tf-test-topic-" + randString(t, 10)
+	org := GetTestOrgFromEnv(t)
+	billing := GetTestBillingAccountFromEnv(t)
+	pid := "tf-test-" + RandString(t, 10)
+	topicName := "tf-test-topic-" + RandString(t, 10)
 
-	config := BootstrapConfig(t)
+	config := google.BootstrapConfig(t)
 	accessToken, err := setupProjectsAndGetAccessToken(org, billing, pid, "pubsub", config)
 	if err != nil {
 		t.Error(err)
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		// No TestDestroy since that's not really the point of this test
 		Steps: []resource.TestStep{
 			{
@@ -160,22 +105,22 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 // a reference to a different resource instead of a project field.
 func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 	// Parallel fine-grained resource creation
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billing := getTestBillingAccountFromEnv(t)
-	pid := "tf-test-" + randString(t, 10)
+	org := GetTestOrgFromEnv(t)
+	billing := GetTestBillingAccountFromEnv(t)
+	pid := "tf-test-" + RandString(t, 10)
 
-	config := BootstrapConfig(t)
+	config := google.BootstrapConfig(t)
 	accessToken, err := setupProjectsAndGetAccessToken(org, billing, pid, "cloudkms", config)
 	if err != nil {
 		t.Error(err)
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		// No TestDestroy since that's not really the point of this test
 		Steps: []resource.TestStep{
 			{
@@ -195,32 +140,6 @@ func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccProviderBasePath_setBasePath(endpoint, name string) string {
-	return fmt.Sprintf(`
-provider "google" {
-  alias                   = "compute_custom_endpoint"
-  compute_custom_endpoint = "%s"
-}
-
-resource "google_compute_address" "default" {
-  provider = google.compute_custom_endpoint
-  name     = "tf-test-address-%s"
-}`, endpoint, name)
-}
-
-func testAccProviderMeta_setModuleName(key, name string) string {
-	return fmt.Sprintf(`
-terraform {
-  provider_meta "google" {
-    module_name = "%s"
-  }
-}
-
-resource "google_compute_address" "default" {
-	name = "tf-test-address-%s"
-}`, key, name)
 }
 
 // Set up two projects. Project 1 has a service account that is used to create a

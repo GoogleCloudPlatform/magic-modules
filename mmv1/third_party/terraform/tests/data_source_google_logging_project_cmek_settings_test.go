@@ -11,15 +11,15 @@ func TestAccLoggingProjectCmekSettings_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":    "tf-test-" + randString(t, 10),
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
 	}
 	resourceName := "data.google_logging_project_cmek_settings.cmek_settings"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingProjectCmekSettings_basic(context),

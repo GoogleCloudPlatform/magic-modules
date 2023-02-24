@@ -11,14 +11,14 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-		"folder_name":   "tf-test-" + randString(t, 10),
-		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"folder_name":   "tf-test-" + acctest.RandString(t, 10),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigFolder_basic(context, 30),
@@ -46,14 +46,14 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-		"project_name":  "tf-test-" + randString(t, 10),
-		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"project_name":  "tf-test-" + acctest.RandString(t, 10),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersroviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigProject_basic(context, 30),
@@ -90,19 +90,19 @@ func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":    "tf-test-" + randString(t, 10),
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
 	}
 
-	bucketId := fmt.Sprintf("tf-test-bucket-%s", randString(t, 10))
-	keyRingName := fmt.Sprintf("tf-test-key-ring-%s", randString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-crypto-key-%s", randString(t, 10))
-	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", randString(t, 10))
+	bucketId := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-key-ring-%s", acctest.RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-crypto-key-%s", acctest.RandString(t, 10))
+	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", acctest.RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersroviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigProject_cmekSettings(context, bucketId, keyRingName, cryptoKeyName, cryptoKeyNameUpdate),
@@ -130,14 +130,14 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":        randString(t, 10),
-		"billing_account_name": "billingAccounts/" + getTestMasterBillingAccountFromEnv(t),
-		"org_id":               getTestOrgFromEnv(t),
+		"random_suffix":        acctest.RandString(t, 10),
+		"billing_account_name": "billingAccounts/" + acctest.GetTestMasterBillingAccountFromEnv(t),
+		"org_id":               acctest.GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersroviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigBillingAccount_basic(context, 30),
@@ -165,13 +165,13 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersroviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigOrganization_basic(context, 30),
@@ -322,19 +322,19 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":        randString(t, 10),
-		"billing_account_name": getTestBillingAccountFromEnv(t),
-		"org_id":               getTestOrgFromEnv(t),
-		"project_name":         "tf-test-" + randString(t, 10),
-		"bucket_id":            "tf-test-bucket-" + randString(t, 10),
+		"random_suffix":        acctest.RandString(t, 10),
+		"billing_account_name": acctest.GetTestBillingAccountFromEnv(t),
+		"org_id":               acctest.GetTestOrgFromEnv(t),
+		"project_name":         "tf-test-" + acctest.RandString(t, 10),
+		"bucket_id":            "tf-test-bucket-" + acctest.RandString(t, 10),
 	}
 
 	configList := getLoggingBucketConfigs(context)
 
 	for res, config := range configList {
-		vcrTest(t, resource.TestCase{
-			PreCheck:  func() { testAccPreCheck(t) },
-			Providers: testAccProviders,
+		acctest.VcrTest(t, resource.TestCase{
+			PreCheck:  func() { acctest.TestAccPreCheck(t) },
+			Providers: acctest.TestAccProvidersroviders,
 			Steps: []resource.TestStep{
 				{
 					Config: config,

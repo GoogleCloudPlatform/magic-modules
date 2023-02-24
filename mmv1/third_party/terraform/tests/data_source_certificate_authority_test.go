@@ -12,12 +12,12 @@ func TestAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorit
 	context := map[string]interface{}{
 		"pool_name":     BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location": "us-central1",
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckPrivatecaCertificateAuthorityDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

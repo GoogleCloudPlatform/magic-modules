@@ -22,12 +22,12 @@ func TestAccStorageNotification_basic(t *testing.T) {
 
 	var notification storage.Notification
 	bucketName := testBucketName(t)
-	topicName := fmt.Sprintf("tf-pstopic-test-%d", randInt(t))
+	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
 	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageNotificationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -66,14 +66,14 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 
 	var notification storage.Notification
 	bucketName := testBucketName(t)
-	topicName := fmt.Sprintf("tf-pstopic-test-%d", randInt(t))
+	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
 	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 	eventType1 := "OBJECT_FINALIZE"
 	eventType2 := "OBJECT_ARCHIVE"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersroviders,
 		CheckDestroy: testAccStorageNotificationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -104,7 +104,7 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 
 func testAccStorageNotificationDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_storage_notification" {
@@ -134,7 +134,7 @@ func testAccCheckStorageNotificationExists(t *testing.T, resource string, notifi
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		bucket, notificationID := resourceStorageNotificationParseID(rs.Primary.ID)
 

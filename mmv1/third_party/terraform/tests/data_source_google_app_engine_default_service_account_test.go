@@ -11,9 +11,9 @@ func TestAccDataSourceGoogleAppEngineDefaultServiceAccount_basic(t *testing.T) {
 
 	resourceName := "data.google_app_engine_default_service_account.default"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleAppEngineDefaultServiceAccount_basic,

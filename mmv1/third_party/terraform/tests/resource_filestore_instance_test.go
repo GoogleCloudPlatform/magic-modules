@@ -39,11 +39,11 @@ func TestFilestoreInstanceStateUpgradeV0(t *testing.T) {
 func TestAccFilestoreInstance_update(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", randInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -112,11 +112,11 @@ resource "google_filestore_instance" "instance" {
 func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", randInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersroviders,
 		CheckDestroy: testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -10,15 +10,15 @@ import (
 func TestAccMemcacheInstance_update(t *testing.T) {
 	t.Parallel()
 	// Temporary as CI has used up servicenetworking quota
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
-	prefix := fmt.Sprintf("%d", randInt(t))
+	prefix := fmt.Sprintf("%d", acctest.RandInt(t))
 	name := fmt.Sprintf("tf-test-%s", prefix)
 	network := BootstrapSharedTestNetwork(t, "memcache-update")
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMemcacheInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

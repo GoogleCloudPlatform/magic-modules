@@ -12,17 +12,17 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 	skipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + randString(t, 10)
-	cluster := "c-" + randString(t, 10)
-	account := "tf-bigtable-iam-" + randString(t, 10)
+	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
+	cluster := "c-" + acctest.RandString(t, 10)
+	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s %s",
-		getTestProjectFromEnv(), instance, role)
+		acctest.GetTestProjectFromEnv(), instance, role)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -57,20 +57,20 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 	skipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + randString(t, 10)
-	cluster := "c-" + randString(t, 10)
-	account := "tf-bigtable-iam-" + randString(t, 10)
+	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
+	cluster := "c-" + acctest.RandString(t, 10)
+	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s %s serviceAccount:%s",
-		getTestProjectFromEnv(),
+		acctest.GetTestProjectFromEnv(),
 		instance,
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersrovidersroviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
@@ -97,17 +97,17 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 	skipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + randString(t, 10)
-	cluster := "c-" + randString(t, 10)
-	account := "tf-bigtable-iam-" + randString(t, 10)
+	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
+	cluster := "c-" + acctest.RandString(t, 10)
+	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s",
-		getTestProjectFromEnv(), instance)
+		acctest.GetTestProjectFromEnv(), instance)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersrovidersroviders,
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation

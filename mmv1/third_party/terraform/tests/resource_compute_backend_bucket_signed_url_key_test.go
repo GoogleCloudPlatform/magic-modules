@@ -14,12 +14,12 @@ func TestAccComputeBackendBucketSignedUrlKey_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendBucketSignedUrlKeyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -87,7 +87,7 @@ func checkComputeBackendBucketSignedUrlKeyExists(t *testing.T, s *terraform.Stat
 			continue
 		}
 
-		config := googleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		keyName := rs.Primary.Attributes["name"]
 
 		url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/backendBuckets/{{backend_bucket}}")

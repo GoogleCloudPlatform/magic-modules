@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -9,12 +9,12 @@ import (
 
 func TestAccDataSourceGoogleProject_basic(t *testing.T) {
 	t.Parallel()
-	org := getTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleProjectConfig(project, org),

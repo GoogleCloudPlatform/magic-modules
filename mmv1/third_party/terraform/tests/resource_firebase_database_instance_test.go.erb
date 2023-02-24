@@ -25,14 +25,14 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestProjectFromEnv(),
-		"region":        getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_id":    acctest.GetTestProjectFromEnv(),
+		"region":        acctest.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckFirebaseDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

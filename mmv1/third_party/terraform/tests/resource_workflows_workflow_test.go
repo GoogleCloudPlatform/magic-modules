@@ -12,11 +12,11 @@ func TestAccWorkflowsWorkflow_Update(t *testing.T) {
 	// Custom test written to test diffs
 	t.Parallel()
 
-	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", randInt(t))
+	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", acctest.RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckWorkflowsWorkflowDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

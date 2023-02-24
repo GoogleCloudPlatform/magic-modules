@@ -13,12 +13,12 @@ import (
 func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	pid := "tf-test-" + randString(t, 10)
-	billingId := getTestBillingAccountFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := "tf-test-" + acctest.RandString(t, 10)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBinaryAuthorizationPolicyBasic(pid, pname, org, billingId),
@@ -41,15 +41,15 @@ func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	pid := "tf-test-" + randString(t, 10)
-	billingId := getTestBillingAccountFromEnv(t)
-	note := randString(t, 10)
-	attestor := randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := "tf-test-" + acctest.RandString(t, 10)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	note := acctest.RandString(t, 10)
+	attestor := acctest.RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBinaryAuthorizationPolicyFull(pid, pname, org, billingId, note, attestor, "ENABLE"),
@@ -73,15 +73,15 @@ func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 func TestAccBinaryAuthorizationPolicy_separateProject(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	pid := "tf-test-" + randString(t, 10)
-	billingId := getTestBillingAccountFromEnv(t)
-	note := randString(t, 10)
-	attestor := randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := "tf-test-" + acctest.RandString(t, 10)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	note := acctest.RandString(t, 10)
+	attestor := acctest.RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBinaryAuthorizationPolicy_separateProject(pid, pname, org, billingId, note, attestor),
@@ -104,15 +104,15 @@ func TestAccBinaryAuthorizationPolicy_separateProject(t *testing.T) {
 func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	pid := "tf-test-" + randString(t, 10)
-	billingId := getTestBillingAccountFromEnv(t)
-	note := randString(t, 10)
-	attestor := randString(t, 10)
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := "tf-test-" + acctest.RandString(t, 10)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	note := acctest.RandString(t, 10)
+	attestor := acctest.RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBinaryAuthorizationPolicyBasic(pid, pname, org, billingId),
@@ -158,7 +158,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 
 func testAccCheckBinaryAuthorizationPolicyDefault(t *testing.T, pid string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		url := fmt.Sprintf("https://binaryauthorization.googleapis.com/v1/projects/%s/policy", pid)
 		pol, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
 		if err != nil {

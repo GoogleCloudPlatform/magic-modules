@@ -10,15 +10,15 @@ func TestAccDataSourceAccessApprovalFolderServiceAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	resourceName := "data.google_access_approval_folder_service_account.aa_account"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},

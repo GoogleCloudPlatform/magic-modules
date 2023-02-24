@@ -9,12 +9,12 @@ import (
 func TestAccInstanceTemplateDatasource_name(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_name(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccInstanceTemplate_name(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
@@ -30,12 +30,12 @@ func TestAccInstanceTemplateDatasource_name(t *testing.T) {
 func TestAccInstanceTemplateDatasource_filter(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersrovidersroviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_filter(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccInstanceTemplate_filter(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
@@ -51,12 +51,12 @@ func TestAccInstanceTemplateDatasource_filter(t *testing.T) {
 func TestAccInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersrovidersroviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceTemplate_filter_mostRecent(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccInstanceTemplate_filter_mostRecent(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",

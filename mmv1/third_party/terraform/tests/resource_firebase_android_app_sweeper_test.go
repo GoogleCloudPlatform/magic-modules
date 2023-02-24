@@ -41,7 +41,7 @@ func testSweepFirebaseAndroidApp(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := getTestBillingAccountFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
 	d := &ResourceDataMock{

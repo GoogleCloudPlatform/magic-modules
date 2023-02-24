@@ -11,11 +11,11 @@ import (
 func TestAccDataSourceComputeInstance_basic(t *testing.T) {
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

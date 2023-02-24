@@ -10,14 +10,14 @@ import (
 
 func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 	// Sqladmin client
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instance := BootstrapSharedSQLInstanceBackupRun(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -30,16 +30,16 @@ func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 
 func TestAccDataSourceSqlBackupRun_notFound(t *testing.T) {
 	// Sqladmin client
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

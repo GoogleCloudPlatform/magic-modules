@@ -1,4 +1,5 @@
-package google
+<% autogen_exception -%>
+package acctest
 
 import (
 	"context"
@@ -66,7 +67,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 		}
 	}
 
-	projectID := getTestProjectFromEnv()
+	projectID := GetTestProjectFromEnv()
 	keyRingParent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 	keyRingName := fmt.Sprintf("%s/keyRings/%s", keyRingParent, SharedKeyRing)
 	keyParent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", projectID, locationID, SharedKeyRing)
@@ -215,7 +216,7 @@ func BootstrapServiceAccount(t *testing.T, project, testRunner string) string {
 const SharedTestADDomainPrefix = "tf-bootstrap-ad"
 
 func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string) string {
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 	sharedADDomain := fmt.Sprintf("%s.%s.com", SharedTestADDomainPrefix, testId)
 	adDomainName := fmt.Sprintf("projects/%s/locations/global/domains/%s", project, sharedADDomain)
 
@@ -264,7 +265,7 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 // testId specifies the test/suite for which a shared network is used/initialized.
 // Returns the name of an network, creating it if hasn't been created in the test projcet.
 func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 	networkName := SharedTestNetworkPrefix + testId
 
 	config := BootstrapConfig(t)
@@ -312,7 +313,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 		return nil
 	}
 
-	org := getTestOrgFromEnv(t)
+	org := GetTestOrgFromEnv(t)
 
 	// The filter endpoint works differently if you provide both the parent id and parent type, and
 	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
@@ -325,7 +326,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 
 	projects := res.Projects
 	for len(projects) < desiredProjects {
-		pid := SharedServicePerimeterProjectPrefix + randString(t, 10)
+		pid := SharedServicePerimeterProjectPrefix + acctest.RandString(t, 10)
 		project := &cloudresourcemanager.Project{
 			ProjectId: pid,
 			Name:      "TF Service Perimeter Test",
@@ -431,7 +432,7 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 		if !isGoogleApiErrorWithCode(err, 403) {
 			t.Fatalf("Error getting bootstrapped project: %s", err)
 		}
-		org := getTestOrgFromEnv(t)
+		org := GetTestOrgFromEnv(t)
 
 		op, err := crmClient.Projects.Create(&cloudresourcemanager.Project{
 			ProjectId: projectID,
@@ -523,10 +524,10 @@ func BootstrapConfig(t *testing.T) *Config {
 	}
 
 	config := &Config{
-		Credentials: getTestCredsFromEnv(),
-		Project:     getTestProjectFromEnv(),
-		Region:      getTestRegionFromEnv(),
-		Zone:        getTestZoneFromEnv(),
+		Credentials: GetTestCredsFromEnv(),
+		Project:     GetTestProjectFromEnv(),
+		Region:      GetTestRegionFromEnv(),
+		Zone:        GetTestZoneFromEnv(),
 	}
 
 	ConfigureBasePaths(config)
@@ -543,7 +544,7 @@ const SharedTestSQLInstanceNamePrefix = "tf-bootstrap-"
 // BootstrapSharedSQLInstanceBackupRun will return a shared SQL db instance that
 // has a backup created for it.
 func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -568,7 +569,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 	}
 
 	if bootstrapInstance == nil {
-		bootstrapInstanceName := SharedTestSQLInstanceNamePrefix + randString(t, 10)
+		bootstrapInstanceName := SharedTestSQLInstanceNamePrefix + acctest.RandString(t, 10)
 		log.Printf("[DEBUG] Bootstrap SQL Instance not found, bootstrapping new instance %s", bootstrapInstanceName)
 
 		backupConfig := &sqladmin.BackupConfiguration{
@@ -630,7 +631,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 }
 
 func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 	poolName := "static-ca-pool"
 
 	config := BootstrapConfig(t)

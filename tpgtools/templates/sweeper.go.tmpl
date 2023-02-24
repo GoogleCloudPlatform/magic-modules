@@ -60,7 +60,7 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := getTestBillingAccountFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to be used for Delete arguments.
 	d := map[string]string{

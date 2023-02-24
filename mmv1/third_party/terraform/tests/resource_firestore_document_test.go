@@ -10,12 +10,12 @@ import (
 func TestAccFirestoreDocument_update(t *testing.T) {
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", randInt(t))
-	project := getTestFirestoreProjectFromEnv(t)
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	project := acctest.GetTestFirestoreProjectFromEnv(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirestoreDocument_update(project, name),

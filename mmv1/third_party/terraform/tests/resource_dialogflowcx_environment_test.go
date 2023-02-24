@@ -13,14 +13,14 @@ func TestAccDialogflowCXEnvironment_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDialogflowCXEnvironment_basic(context),
@@ -134,12 +134,12 @@ func TestAccDialogflowCXEnvironment_dialogflowcxEnvironmentFullExample(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckDialogflowCXEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -193,12 +193,12 @@ func TestAccDialogflowCXEnvironment_dialogflowcxEnvironmentRegional(t *testing.T
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckDialogflowCXEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -256,7 +256,7 @@ func testAccCheckDialogflowCXEnvironmentDestroyProducer(t *testing.T) func(s *te
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{DialogflowCXBasePath}}{{parent}}/environments/{{name}}")
 			if err != nil {

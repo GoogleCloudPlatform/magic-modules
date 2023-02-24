@@ -12,14 +12,14 @@ import (
 func TestAccSpannerDatabase_basic(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	rnd := randString(t, 10)
+	project := acctest.GetTestProjectFromEnv()
+	rnd := acctest.RandString(t, 10)
 	instanceName := fmt.Sprintf("tf-test-%s", rnd)
 	databaseName := fmt.Sprintf("tfgen_%s", rnd)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -123,13 +123,13 @@ resource "google_spanner_database" "basic" {
 func TestAccSpannerDatabase_postgres(t *testing.T) {
 	t.Parallel()
 
-	rnd := randString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	instanceName := fmt.Sprintf("tf-test-%s", rnd)
 	databaseName := fmt.Sprintf("tfgen_%s", rnd)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -212,13 +212,13 @@ resource "google_spanner_database" "basic_spangres" {
 func TestAccSpannerDatabase_versionRetentionPeriod(t *testing.T) {
 	t.Parallel()
 
-	rnd := randString(t, 10)
+	rnd := acctest.RandString(t, 10)
 	instanceName := fmt.Sprintf("tf-test-%s", rnd)
 	databaseName := fmt.Sprintf("tfgen_%s", rnd)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -521,16 +521,16 @@ func TestValidateDatabaseRetentionPeriod(t *testing.T) {
 }
 
 func TestAccSpannerDatabase_deletionProtection(t *testing.T) {
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -576,16 +576,16 @@ resource "google_spanner_database" "database" {
 <% unless version == 'ga' -%>
 <%# Field is not beta, but google_project_service_identity dependency is -%>
 func TestAccSpannerDatabase_cmek(t *testing.T) {
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

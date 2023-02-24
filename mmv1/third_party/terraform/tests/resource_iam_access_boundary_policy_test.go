@@ -31,14 +31,14 @@ func TestAccIAM2AccessBoundaryPolicy(t *testing.T) {
 
 func testAccIAM2AccessBoundaryPolicy_iamAccessBoundaryPolicyBasic(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckIAM2AccessBoundaryPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -180,7 +180,7 @@ func testAccCheckIAM2AccessBoundaryPolicyDestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{IAM2BasePath}}policies/{{parent}}/accessboundarypolicies/{{name}}")
 			if err != nil {

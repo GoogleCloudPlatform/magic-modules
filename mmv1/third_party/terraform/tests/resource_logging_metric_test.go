@@ -10,13 +10,13 @@ import (
 func TestAccLoggingMetric_update(t *testing.T) {
 	t.Parallel()
 
-	suffix := randString(t, 10)
+	suffix := acctest.RandString(t, 10)
 	filter := "resource.type=gae_app AND severity>=ERROR"
 	updatedFilter := "resource.type=gae_app AND severity=ERROR"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -42,12 +42,12 @@ func TestAccLoggingMetric_update(t *testing.T) {
 func TestAccLoggingMetric_explicitBucket(t *testing.T) {
 	t.Parallel()
 
-	suffix := randString(t, 10)
+	suffix := acctest.RandString(t, 10)
 	filter := "resource.type=gae_app AND severity>=ERROR"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersroviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -66,12 +66,12 @@ func TestAccLoggingMetric_loggingBucket(t *testing.T) {
 	t.Parallel()
 
 	filter := "resource.type=gae_app AND severity>=ERROR"
-	project_id := getTestProjectFromEnv()
-	suffix := randString(t, 10)
+	project_id := acctest.GetTestProjectFromEnv()
+	suffix := acctest.RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersroviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -105,11 +105,11 @@ func TestAccLoggingMetric_loggingBucket(t *testing.T) {
 func TestAccLoggingMetric_descriptionUpdated(t *testing.T) {
 	t.Parallel()
 
-	suffix := randString(t, 10)
+	suffix := acctest.RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersroviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -9,19 +9,19 @@ import (
 
 func TestAccDatasourceGoogleServiceNetworkingPeeredDnsDomain_basic(t *testing.T) {
 	t.Parallel()
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
-	project := fmt.Sprintf("tf-test-%d", randInt(t))
+	project := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	resourceName := "data.google_service_networking_peered_dns_domain.acceptance"
-	name := fmt.Sprintf("test-name-%d", randInt(t))
+	name := fmt.Sprintf("test-name-%d", acctest.RandInt(t))
 	network := "test-network"
 	service := "servicenetworking.googleapis.com"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleServiceNetworkingPeeredDnsDomain_basic(project, org, billingId, name, network, service),

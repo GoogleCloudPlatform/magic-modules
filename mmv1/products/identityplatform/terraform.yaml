@@ -60,7 +60,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           idp_entity_id: tf-idp
           sp_entity_id: tf-sp
         test_vars_overrides:
-          name: '"saml.tf-config-" + randString(t, 10)'
+          name: '"saml.tf-config-" + acctest.RandString(t, 10)'
   TenantInboundSamlConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -74,7 +74,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           idp_entity_id: tf-idp
           sp_entity_id: tf-sp
         test_vars_overrides:
-          name: '"saml.tf-config-" + randString(t, 10)'
+          name: '"saml.tf-config-" + acctest.RandString(t, 10)'
   OauthIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -86,7 +86,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: oidc.oauth-idp-config
         test_vars_overrides:
-          name: '"oidc.oauth-idp-config-" + randString(t, 10)'
+          name: '"oidc.oauth-idp-config-" + acctest.RandString(t, 10)'
   TenantOauthIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -98,7 +98,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: oidc.oauth-idp-config
         test_vars_overrides:
-          name: '"oidc.oauth-idp-config-" + randString(t, 10)'
+          name: '"oidc.oauth-idp-config-" + acctest.RandString(t, 10)'
   Tenant: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride

@@ -8,16 +8,16 @@ import (
 
 func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 	// Uses random provider
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
@@ -143,12 +143,12 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionAwsUpdate(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersrovidersroviders,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time":   {},

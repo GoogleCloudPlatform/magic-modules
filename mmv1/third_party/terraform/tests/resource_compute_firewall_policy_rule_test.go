@@ -11,13 +11,13 @@ func TestAccComputeFirewallPolicyRule_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-		"org_name":      fmt.Sprintf("organizations/%s", getTestOrgFromEnv(t)),
+		"random_suffix": acctest.RandString(t, 10),
+		"org_name":      fmt.Sprintf("organizations/%s", acctest.GetTestOrgFromEnv(t)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeFirewallPolicyRule_start(context),
@@ -225,13 +225,13 @@ func TestAccComputeFirewallPolicyRule_multipleRules(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-		"org_name":      fmt.Sprintf("organizations/%s", getTestOrgFromEnv(t)),
+		"random_suffix": acctest.RandString(t, 10),
+		"org_name":      fmt.Sprintf("organizations/%s", acctest.GetTestOrgFromEnv(t)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersrovidersroviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeFirewallPolicyRule_multiple(context),

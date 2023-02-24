@@ -10,11 +10,11 @@ import (
 func TestAccAppEngineApplication_basic(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", randInt(t))
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAppEngineApplication_basic(pid, org),
@@ -46,12 +46,12 @@ func TestAccAppEngineApplication_basic(t *testing.T) {
 func TestAccAppEngineApplication_withIAP(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProvidersrovidersroviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAppEngineApplication_withIAP(pid, org),

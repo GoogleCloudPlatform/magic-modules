@@ -8,18 +8,18 @@ import (
 
 func TestAccOSLoginSSHPublicKey_osLoginSshKeyExpiry(t *testing.T) {
 	// Uses time provider
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   randString(t, 10),
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},

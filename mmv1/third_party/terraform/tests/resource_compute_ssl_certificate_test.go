@@ -10,12 +10,12 @@ import (
 
 func TestAccComputeSslCertificate_no_name(t *testing.T) {
 	// Randomness
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeSslCertificateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -46,7 +46,7 @@ func testAccCheckComputeSslCertificateExists(t *testing.T, n string) resource.Te
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 		// We don't specify a name, but it is saved during create
 		name := rs.Primary.Attributes["name"]
 

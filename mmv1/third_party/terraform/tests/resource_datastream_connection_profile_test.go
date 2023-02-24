@@ -8,16 +8,16 @@ import (
 
 func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 	// this test uses the random provider
-	skipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},

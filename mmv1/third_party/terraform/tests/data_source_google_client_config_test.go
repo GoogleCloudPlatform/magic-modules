@@ -11,9 +11,9 @@ func TestAccDataSourceGoogleClientConfig_basic(t *testing.T) {
 
 	resourceName := "data.google_client_config.current"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleClientConfig_basic,

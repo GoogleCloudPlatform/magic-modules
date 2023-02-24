@@ -11,13 +11,13 @@ import (
 func TestAccComputeTargetPool_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeTargetPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeTargetPool_basic(randString(t, 10)),
+				Config: testAccComputeTargetPool_basic(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeTargetPoolExists(
 						t, "google_compute_target_pool.foo"),
@@ -39,13 +39,13 @@ func TestAccComputeTargetPool_basic(t *testing.T) {
 func TestAccComputeTargetPool_update(t *testing.T) {
 	t.Parallel()
 
-	tpname := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	name1 := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	name2 := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	tpname := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	name1 := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	name2 := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acctest.TestAccProvidersroviders,
 		CheckDestroy: testAccCheckComputeTargetPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -81,7 +81,7 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 
 func testAccCheckComputeTargetPoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_target_pool" {
@@ -110,7 +110,7 @@ func testAccCheckComputeTargetPoolExists(t *testing.T, n string) resource.TestCh
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		found, err := config.NewComputeClient(config.userAgent).TargetPools.Get(
 			config.Project, config.Region, rs.Primary.Attributes["name"]).Do()

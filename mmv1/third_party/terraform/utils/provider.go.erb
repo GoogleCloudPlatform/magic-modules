@@ -38,7 +38,7 @@ func Provider() *schema.Provider {
 			"credentials": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ValidateFunc: validateCredentials,
+				ValidateFunc: ValidateCredentials,
 				ConflictsWith: []string{"access_token"},
 			},
 
@@ -683,7 +683,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	return ProviderDCLConfigure(d, &config), nil
 }
 
-func validateCredentials(v interface{}, k string) (warnings []string, errors []error) {
+func ValidateCredentials(v interface{}, k string) (warnings []string, errors []error) {
 	if v == nil || v.(string) == "" {
 		return
 	}

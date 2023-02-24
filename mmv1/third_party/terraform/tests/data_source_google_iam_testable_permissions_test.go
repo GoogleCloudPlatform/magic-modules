@@ -12,10 +12,10 @@ import (
 func TestAccDataSourceGoogleIamTestablePermissions_basic(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	project := acctest.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(`

@@ -14,12 +14,12 @@ import (
 func TestAccFolderOrganizationPolicy_boolean(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", randInt(t))
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	org := getTestOrgFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -53,12 +53,12 @@ func TestAccFolderOrganizationPolicy_boolean(t *testing.T) {
 func TestAccFolderOrganizationPolicy_list_allowAll(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", randInt(t))
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-	org := getTestOrgFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	org := acctest.GetTestOrgFromEnv(t)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -77,12 +77,12 @@ func TestAccFolderOrganizationPolicy_list_allowAll(t *testing.T) {
 func TestAccFolderOrganizationPolicy_list_allowSome(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", randInt(t))
-	org := getTestOrgFromEnv(t)
-	project := getTestProjectFromEnv()
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	project := acctest.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -101,11 +101,11 @@ func TestAccFolderOrganizationPolicy_list_allowSome(t *testing.T) {
 func TestAccFolderOrganizationPolicy_list_denySome(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", randInt(t))
-	org := getTestOrgFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -124,11 +124,11 @@ func TestAccFolderOrganizationPolicy_list_denySome(t *testing.T) {
 func TestAccFolderOrganizationPolicy_list_update(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", randInt(t))
-	org := getTestOrgFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -151,11 +151,11 @@ func TestAccFolderOrganizationPolicy_list_update(t *testing.T) {
 func TestAccFolderOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 	t.Parallel()
 
-	folder := fmt.Sprintf("tf-test-%d", randInt(t))
-	org := getTestOrgFromEnv(t)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	folder := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	org := acctest.GetTestOrgFromEnv(t)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -173,7 +173,7 @@ func TestAccFolderOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 
 func testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := acctest.GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_folder_organization_policy" {
@@ -293,7 +293,7 @@ func getGoogleFolderOrganizationPolicyTestResource(t *testing.T, s *terraform.St
 		return nil, fmt.Errorf("No ID is set")
 	}
 
-	config := googleProviderConfig(t)
+	config := acctest.GoogleProviderConfig(t)
 	folder := canonicalFolderId(rs.Primary.Attributes["folder"])
 
 	return config.NewResourceManagerClient(config.userAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{

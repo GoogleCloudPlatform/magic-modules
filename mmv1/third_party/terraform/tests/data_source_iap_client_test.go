@@ -10,14 +10,14 @@ func TestAccIapClient_Datasource_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"org_domain":    getTestOrgDomainFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIapClientDatasourceConfig(context),

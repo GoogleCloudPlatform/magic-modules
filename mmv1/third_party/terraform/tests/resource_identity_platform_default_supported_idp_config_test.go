@@ -13,12 +13,12 @@ func TestAccIdentityPlatformDefaultSupportedIdpConfig_defaultSupportedIdpConfigU
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckIdentityPlatformDefaultSupportedIdpConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -51,7 +51,7 @@ func testAccCheckIdentityPlatformDefaultSupportedIdpConfigDestroyProducer(t *tes
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{IdentityPlatformBasePath}}projects/{{project}}/defaultSupportedIdpConfigs/{{client_id}}")
 			if err != nil {

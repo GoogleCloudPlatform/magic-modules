@@ -10,9 +10,9 @@ import (
 func TestAccMonitoringGroup_update(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

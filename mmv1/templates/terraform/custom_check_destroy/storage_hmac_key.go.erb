@@ -1,4 +1,4 @@
-config := googleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
 url, err := replaceVarsForTest(config, rs, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
 if err != nil {

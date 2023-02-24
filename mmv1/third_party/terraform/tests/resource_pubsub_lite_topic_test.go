@@ -10,11 +10,11 @@ import (
 func TestAccPubsubLiteTopic_pubsubLiteTopic_count_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-foo-%s", randString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-foo-%s", acctest.RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckPubsubLiteTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

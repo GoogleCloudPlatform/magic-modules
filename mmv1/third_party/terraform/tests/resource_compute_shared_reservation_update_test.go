@@ -7,19 +7,19 @@ import (
 )
 
 func TestAccComputeSharedReservation_update(t *testing.T) {
-	skipIfVcr(t) // large number of parallel resources.
+	acctest.SkipIfVcr(t) // large number of parallel resources.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":         getTestProjectFromEnv(),
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"project":         acctest.GetTestProjectFromEnv(),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

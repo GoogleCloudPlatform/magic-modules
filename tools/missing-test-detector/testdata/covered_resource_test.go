@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccCoveredResource(t *testing.T) {
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCoveredResource(),

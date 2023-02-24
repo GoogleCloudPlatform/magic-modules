@@ -11,12 +11,12 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source.zip",
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -178,14 +178,14 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       getTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 		"zip_path":      "./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip",
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckCloudfunctions2functionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

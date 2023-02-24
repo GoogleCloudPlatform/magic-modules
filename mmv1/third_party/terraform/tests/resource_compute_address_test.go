@@ -10,13 +10,13 @@ import (
 func TestAccComputeAddress_networkTier(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeAddress_networkTier(randString(t, 10)),
+				Config: testAccComputeAddress_networkTier(acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_address.foobar",
@@ -28,13 +28,13 @@ func TestAccComputeAddress_networkTier(t *testing.T) {
 }
 
 func TestAccComputeAddress_internal(t *testing.T) {
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeAddress_internal(randString(t, 10)),
+				Config: testAccComputeAddress_internal(acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_address.internal",
@@ -108,4 +108,88 @@ resource "google_compute_address" "foobar" {
   network_tier = "STANDARD"
 }
 `, i)
+}
+
+func TestAccProviderBasePath_setBasePath(t *testing.T) {
+	t.Parallel()
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProviderBasePath_setBasePath("https://www.googleapis.com/compute/beta/", RandString(t, 10)),
+			},
+			{
+				ResourceName:      "google_compute_address.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// Move this test here because the testAccCheckComputeAddressDestroyProducer is used to check destroy.
+func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
+	t.Parallel()
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", RandString(t, 10)),
+				ExpectError: regexp.MustCompile("got HTTP response code 404 with body"),
+			},
+		},
+	})
+}
+
+func TestAccProviderMeta_setModuleName(t *testing.T) {
+	t.Parallel()
+
+	moduleName := "my-module"
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProviderMeta_setModuleName(moduleName, RandString(t, 10)),
+			},
+			{
+				ResourceName:      "google_compute_address.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccProviderBasePath_setBasePath(endpoint, name string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  alias                   = "compute_custom_endpoint"
+  compute_custom_endpoint = "%s"
+}
+
+resource "google_compute_address" "default" {
+  provider = google.compute_custom_endpoint
+  name     = "tf-test-address-%s"
+}`, endpoint, name)
+}
+
+func testAccProviderMeta_setModuleName(key, name string) string {
+	return fmt.Sprintf(`
+terraform {
+  provider_meta "google" {
+    module_name = "%s"
+  }
+}
+
+resource "google_compute_address" "default" {
+	name = "tf-test-address-%s"
+}`, key, name)
 }

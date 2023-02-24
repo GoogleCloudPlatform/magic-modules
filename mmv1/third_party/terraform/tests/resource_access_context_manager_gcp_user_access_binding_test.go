@@ -16,15 +16,15 @@ func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"org_domain":    getTestOrgDomainFromEnv(t),
-		"cust_id":       getTestCustIdFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
+		"cust_id":       acctest.GetTestCustIdFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -102,7 +102,7 @@ func testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t *test
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := acctest.GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}organizations/{{organization_id}}/gcpUserAccessBindings/{{name}}")
 			if err != nil {

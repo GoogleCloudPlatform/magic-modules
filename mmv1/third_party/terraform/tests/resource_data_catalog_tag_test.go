@@ -11,12 +11,12 @@ func TestAccDataCatalogTag_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"force_delete":  true,
-		"random_suffix": randString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckDataCatalogEntryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
