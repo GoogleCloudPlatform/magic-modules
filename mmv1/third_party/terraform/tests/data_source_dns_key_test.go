@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -11,11 +11,11 @@ import (
 func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 	t.Parallel()
 
-	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
+	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", acctest.RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -35,11 +35,11 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 	t.Parallel()
 
-	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
+	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", acctest.RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
+		Providers:    acctest.TestAccProvidersrovidersroviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -11,12 +11,12 @@ import (
 func TestAccDataSourceGoogleContainerAttachedInstallManifest(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleContainerAttachedInstallManifestConfig(randString(t, 10)),
+				Config: testAccDataSourceGoogleContainerAttachedInstallManifestConfig(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceGoogleContainerAttachedInstallManifestCheck("data.google_container_attached_install_manifest.manifest"),
 				),
