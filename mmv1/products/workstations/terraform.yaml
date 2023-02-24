@@ -113,7 +113,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format:
       [
         "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations/{{workstation_id}}",
-        "{{workstation_id}}",
       ]
     autogen_async: true
     examples:
