@@ -50,7 +50,7 @@ resource "google_workstations_workstation" "default" {
     display_name         = "workstation%{random_suffix}"
 
   labels = {
-	foo = "bar"
+	  foo = "bar"
   }
 }
 `, context)
@@ -77,7 +77,7 @@ resource "google_workstations_workstation_cluster" "default" {
   location   		         = "us-central1"
 
   labels = {
-	foo = "bar"
+	  foo = "bar"
   }
 }
 
