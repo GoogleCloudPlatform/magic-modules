@@ -43,8 +43,10 @@ fi
 git checkout origin/$NEW_BRANCH
 popd
 
-## Breaking change and missing tests unit tests
-./test_tools.sh $MM_LOCAL_PATH $TPG_LOCAL_PATH $COMMIT_SHA $BUILD_ID $BUILD_STEP $PROJECT_ID
+if ! git diff --exit-code origin/main tools; then
+    ## Run unit tests for breaking change and missing test detector.
+    /test_tools.sh $MM_LOCAL_PATH $TPG_LOCAL_PATH $COMMIT_SHA $BUILD_ID $BUILD_STEP $PROJECT_ID
+fi
 
 ## Breaking change setup and execution
 TPG_LOCAL_PATH_OLD="${TPG_LOCAL_PATH}old"
