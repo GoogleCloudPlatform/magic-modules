@@ -155,7 +155,7 @@ func testAccArtifactRegistryRepository_kfp(repositoryID string) string {
 resource "google_artifact_registry_repository" "test" {
   repository_id = "%s"
   location = "us-central1"
-  description = "my-kfp-repository""
+  description = "my-kfp-repository"
   format = "KFP"
 }
 `, repositoryID)
