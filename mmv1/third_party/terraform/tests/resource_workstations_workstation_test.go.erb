@@ -74,7 +74,7 @@ resource "google_workstations_workstation_cluster" "default" {
   workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
   network                    = google_compute_network.default.id
   subnetwork                 = google_compute_subnetwork.default.id
-  location   		         = "us-central1"
+  location   		             = "us-central1"
 
   labels = {
 	  foo = "bar"
@@ -84,10 +84,10 @@ resource "google_workstations_workstation_cluster" "default" {
 resource "google_workstations_workstation_config" "default" {
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
-  location   		     = "us-central1"
+  location   		         = "us-central1"
 
   labels = {
-	foo = "bar"
+	  foo = "bar"
   }
 }
 
@@ -99,7 +99,7 @@ resource "google_workstations_workstation" "default" {
   display_name           = "workstation-modified%{random_suffix}"
 
   labels = {
-	foo = "bar"
+	  foo = "bar"
   }
 }
 `, context)
@@ -126,7 +126,7 @@ resource "google_workstations_workstation_cluster" "default" {
   location   		             = "us-central1"
 
   labels = {
-	foo = "bar"
+	  foo = "bar"
   }
 }
 
@@ -136,7 +136,7 @@ resource "google_workstations_workstation_config" "default" {
   location   		         = "us-central1"
 
   labels = {
-	foo = "bar"
+	  foo = "bar"
   }
 }
 <% end -%>
