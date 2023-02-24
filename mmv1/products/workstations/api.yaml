@@ -447,3 +447,108 @@ objects:
               description: |
                 A list of messages that carry the error details.
               item_type: Api::Type::KeyValuePairs
+  - !ruby/object:Api::Resource
+    name: "Workstation"
+    self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations/{{workstation_id}}"
+    base_url: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations"
+    create_url: "projects/{{project}}/locations/{{location}}/workstationClusters?workstationClusterId={{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations/{{workstation_id}}"
+    update_verb: :PATCH
+    update_mask: true
+    min_version: beta
+    description: "A single instance of a developer workstation with its own persistent storage."
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        "Workstations": "https://cloud.google.com/workstations/docs/"
+      api: "https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs.workstations/create"
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: "name"
+        base_url: "{{op_id}}"
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 30
+          update_minutes: 30
+          delete_minutes: 30
+      result: !ruby/object:Api::OpAsync::Result
+        path: "response"
+      status: !ruby/object:Api::OpAsync::Status
+        path: "done"
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: "error"
+        message: "message"
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: "workstationId"
+        required: true
+        input: true
+        url_param_only: true
+        description: |
+          ID to use for the workstation.
+      - !ruby/object:Api::Type::String
+        name: "workstationConfigId"
+        required: true
+        input: true
+        url_param_only: true
+        description: |
+          The ID of the workstation cluster config.
+      - !ruby/object:Api::Type::String
+        name: "workstationClusterId"
+        required: true
+        input: true
+        url_param_only: true
+        description: |
+          The name of the workstation cluster.
+      - !ruby/object:Api::Type::String
+        name: "location"
+        input: true
+        required: true
+        url_param_only: true
+        description: |
+          The location where the workstation cluster config should reside.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "name"
+        output: true
+        description: |
+          The name of the cluster resource.
+      - !ruby/object:Api::Type::String
+        name: "uid"
+        output: true
+        description: |
+          The system-generated UID of the resource.
+      - !ruby/object:Api::Type::String
+        name: "displayName"
+        description: |
+          Human-readable name for this resource.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "labels"
+        description: "Client-specified labels that are applied to the resource and that are also propagated to the underlying Compute Engine resources."
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "annotations"
+        description: "Client-specified annotations. This is distinct from labels."
+      - !ruby/object:Api::Type::String
+        name: "etag"
+        description: |
+          Checksum computed by the server. 
+          May be sent on update and delete requests to ensure that the client has an up-to-date value before proceeding.
+      - !ruby/object:Api::Type::Time
+        name: "createTime"
+        description: |
+          Time the Instance was created in UTC.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: "host"
+        description: |
+          Host to which clients can send HTTPS traffic that will be received by the workstation. 
+          Authorized traffic will be received to the workstation as HTTP on port 80. 
+          To send traffic to a different port, clients may prefix the host with the destination port in the format "{port}-{host}".
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: "state"
+        output: true
+        description: |
+          Current state of the workstation.
