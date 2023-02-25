@@ -7,7 +7,7 @@ import (
 )
 
 func TestDetectMissingTests(t *testing.T) {
-	t.Error("this test should fail")
+	t.Fatal("this test should fail")
 	allTests, err := readAllTests("testdata")
 	if err != nil {
 		t.Errorf("error reading tests before testing detect missing tests: %v", err)
