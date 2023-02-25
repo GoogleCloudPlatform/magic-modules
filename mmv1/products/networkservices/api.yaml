@@ -1122,7 +1122,7 @@ objects:
                                   Specifies the list of origins that will be allowed to do CORS requests.
 
                                   This translates to the Access-Control-Allow-Origin response header.
-                                max_size: 5
+                                max_size: 25
                                 item_type: Api::Type::String
                               - !ruby/object:Api::Type::Array
                                 name: allowMethods
