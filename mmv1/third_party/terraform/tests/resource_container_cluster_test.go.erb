@@ -2895,6 +2895,65 @@ func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeClassic(t *tes
 	})
 }
 
+func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeAndPolicyAutopilot(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withBinaryAuthorizationEvaluationModeAndPolicy(clusterName, true, "MONITORING"),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_binary_authorization_evaluation_mode_and_policy",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+			{
+				Config: testAccContainerCluster_withBinaryAuthorizationEvaluationModeAndPolicy(clusterName, true, "MONITORING_AND_PROJECT_SINGLETON_POLICY_ENFORCE"),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_binary_authorization_evaluation_mode_and_policy",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+                        }
+		},
+	})
+}
+
+func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeAndPolicyClassic(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withBinaryAuthorizationEvaluationModeAndPolicy(clusterName, false, "MONITORING"),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_binary_authorization_evaluation_mode_and_policy",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+			{
+				Config: testAccContainerCluster_withBinaryAuthorizationEvaluationModeAndPolicy(clusterName, false, "MONITORING_AND_PROJECT_SINGLETON_POLICY_ENFORCE"),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_binary_authorization_evaluation_mode_and_policy",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+		},
+	})
+}
 func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 	t.Parallel()
 
@@ -6576,6 +6635,24 @@ resource "google_container_cluster" "with_binary_authorization_evaluation_mode" 
 
   binary_authorization {
     evaluation_mode = "%s"
+  }
+}
+`, clusterName, autopilot_enabled, evaluation_mode)
+}
+
+func testAccContainerCluster_withBinaryAuthorizationEvaluationModeAndPolicy(clusterName string, autopilot_enabled bool, evaluation_mode string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_binary_authorization_evaluation_mode_and_policy" {
+  name               = "%s"
+  location           = "us-central1"
+  initial_node_count = 1
+  ip_allocation_policy {
+  }
+  enable_autopilot = %v
+
+  binary_authorization {
+    evaluation_mode = "%s"
+    policy          = "projects/test-project/platforms/gke/policies/test-policy"
   }
 }
 `, clusterName, autopilot_enabled, evaluation_mode)

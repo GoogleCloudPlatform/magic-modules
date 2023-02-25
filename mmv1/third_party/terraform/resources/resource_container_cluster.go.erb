@@ -782,9 +782,14 @@ func ResourceContainerCluster() *schema.Resource {
                                                 "evaluation_mode": {
                                                         Type:          schema.TypeString,
                                                         Optional:      true,
-                                                        ValidateFunc:  validation.StringInSlice([]string{"DISABLED", "PROJECT_SINGLETON_POLICY_ENFORCE"}, false),
+                                                        ValidateFunc:  validation.StringInSlice([]string{"DISABLED", "PROJECT_SINGLETON_POLICY_ENFORCE", "MONITORING", "MONITORING_AND_PROJECT_SINGLETON_POLICY_ENFORCE"}, false),
                                                         Description:   "Mode of operation for Binary Authorization policy evaluation.",
                                                         ConflictsWith: []string{"binary_authorization.0.enabled"},
+                                                },
+                                                "policy": {
+                                                        Type:          schema.TypeString,
+                                                        Optional:      true,
+                                                        Description:   "The relative resource name of the binauthz platform policy to audit and/or enforce against. GKE platform policies have the following format: `projects/{project_number}/platforms/gke/policies/{policy_id}`. Can only be set if `evaluation_mode` is set to `MONITORING` or `MONITORING_AND_PROJECT_SINGLETON_POLICY_ENFORCE`.",
                                                 },
                                         },
                                 },
@@ -4255,6 +4260,7 @@ func expandBinaryAuthorization(configured interface{}, legacy_enabled bool) *con
 	return &container.BinaryAuthorization{
                 Enabled:        config["enabled"].(bool),
                 EvaluationMode: config["evaluation_mode"].(string),
+                Policy:         config["policy"].(string),
 	}
 }
 
@@ -4748,6 +4754,7 @@ func flattenBinaryAuthorization(c *container.BinaryAuthorization) []map[string]i
 		result = append(result, map[string]interface{}{
                         "enabled":         c.Enabled,
 			"evaluation_mode": c.EvaluationMode,
+                        "policy":          c.Policy,
 		})
         }
 	return result
