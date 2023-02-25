@@ -498,6 +498,9 @@ func TestAccBigQueryExternalDataTable_objectTable(t *testing.T) {
 			{
 				Config: testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName),
 			},
+			{
+				Config: testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName),
+			},
 		},
 	})
 }
@@ -1620,6 +1623,61 @@ resource "google_bigquery_table" "test" {
 	connection_id   = local.connection_id_reformatted
     autodetect      = false
 	object_metadata = "SIMPLE"
+
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/*",
+    ]
+  }
+}
+`, connectionID, datasetID, bucketName, objectName, tableID)
+}
+
+func testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_connection" "test" {
+   connection_id = "%s"
+   location = "US"
+   cloud_resource {}
+}
+
+locals {
+   connection_id_split = split("/", google_bigquery_connection.test.name)
+   connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+}
+
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "test" {
+   role = "roles/storage.objectViewer"
+   project = data.google_project.project.id
+   member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "test" {
+  name    = "%s"
+  source = "./test-fixtures/bigquerytable/test.parquet.gzip"
+  bucket = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  external_data_configuration {
+	connection_id       = local.connection_id_reformatted
+    autodetect          = false
+	object_metadata     = "SIMPLE"
+	metadata_cache_mode = "MANUAL"
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
