@@ -113,7 +113,7 @@ func partsCompare(a, b, reg string) bool {
 // strings in the new state (config) part
 func compareSelfLinkOrResourceNameWithMultipleParts(_, old, new string, _ *schema.ResourceData) bool {
 	// two formats based on expandEventTrigger()
-	regex1 := "projects/(.+)/databases/(default)/documents/(.+)"
+	regex1 := "projects/(.+)/databases/\\(default\\)/documents/(.+)"
 	regex2 := "projects/(.+)/(.+)/(.+)"
 	return partsCompare(old, new, regex1) || partsCompare(old, new, regex2)
 }

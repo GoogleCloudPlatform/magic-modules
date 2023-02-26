@@ -139,6 +139,16 @@ func TestCompareSelfLinkOrResourceNameWithMultipleParts(t *testing.T) {
 			New:                "projects/myproject/databases/default/documents/resource",
 			ExpectDiffSuppress: true,
 		},
+		"multi messages doc": {
+			Old:                "messages/{messageId}",
+			New:                "projects/myproject/databases/(default)/documents/messages/{messageId}",
+			ExpectDiffSuppress: true,
+		},
+		"multi messages 2 doc": {
+			Old:                "projects/myproject/databases/(default)/documents/messages/{messageId}",
+			New:                "messages/{messageId}",
+			ExpectDiffSuppress: true,
+		},
 		"projects to no projects topics": {
 			Old:                "projects/myproject/topics/resource",
 			New:                "resource",
