@@ -167,7 +167,7 @@ type Resource struct {
 	Samples []Sample
 
 	// Versions specific information about this resource
-	versionMetadata Version
+	VersionMetadata Version
 
 	// Reference points to the rest API
 	Reference *Link
@@ -408,7 +408,7 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		dclStructName:        TitleCaseResourceName(schema.Title),
 		dclTitle:             TitleCaseResourceName(resourceTitle),
 		productMetadata:      product,
-		versionMetadata:      version,
+		VersionMetadata:      version,
 		Description:          info.Description,
 		location:             location,
 		InsertTimeoutMinutes: 20,
@@ -698,19 +698,19 @@ func (r Resource) getSamples(docs bool) []Sample {
 		if len(r.Samples[0].DocHideConditional) > 0 {
 			for _, dochidec := range r.Samples[0].DocHideConditional {
 				if r.location == dochidec.Location {
-					hideList = append (hideList, dochidec.Name)
+					hideList = append(hideList, dochidec.Name)
 				}
 			}
 		}
 	} else {
 		hideList = r.Samples[0].Testhide
-                if len(r.Samples[0].TestHideConditional) > 0 {
-                        for _, testhidec := range r.Samples[0].TestHideConditional {
-                                if r.location == testhidec.Location {
-                                        hideList = append (hideList, testhidec.Name)
-                                }
-                        }
-                }
+		if len(r.Samples[0].TestHideConditional) > 0 {
+			for _, testhidec := range r.Samples[0].TestHideConditional {
+				if r.location == testhidec.Location {
+					hideList = append(hideList, testhidec.Name)
+				}
+			}
+		}
 	}
 	for _, sample := range r.Samples {
 		shouldhide := false
@@ -787,7 +787,7 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			versionMatch = true
 		} else {
 			for _, v := range sample.Versions {
-				if v == r.versionMetadata.V {
+				if v == r.VersionMetadata.V {
 					versionMatch = true
 				}
 				if v == "ga" {
@@ -819,8 +819,8 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
-	version := r.versionMetadata.V
-        resourceType := r.DCLTitle()
+	version := r.VersionMetadata.V
+	resourceType := r.DCLTitle()
 	sampleFriendlyMetaPath := path.Join(string(sampleAccessoryFolder), "meta.yaml")
 	samples := []Sample{}
 

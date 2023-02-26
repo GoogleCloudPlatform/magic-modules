@@ -221,7 +221,7 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 	dFileNameParts := strings.Split(fileName, "samples/")
 	fileName = dFileNameParts[len(dFileNameParts)-1]
 	dependencyBytes, err := ioutil.ReadFile(path.Join(string(s.SamplesPath), fileName))
-	version := s.resourceReference.versionMetadata.V
+	version := s.resourceReference.VersionMetadata.V
 	product := s.resourceReference.productMetadata.ProductName
 	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
 	if err != nil {
