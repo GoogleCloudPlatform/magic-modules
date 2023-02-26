@@ -27,7 +27,7 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: Pipeline
-    base_url: projects/{{project}}/locations/{{location}}/pipelines
+    base_url: projects/{{project}}/locations/{{region}}/pipelines
     update_verb: :PATCH
     description: |
       The main pipeline entity and all the necessary metadata for launching and managing linked jobs.
@@ -35,6 +35,12 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/dataflow'
       api: 'https://cloud.google.com/dataflow/docs/reference/data-pipelines/rest/v1/projects.locations.pipelines'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: 'A reference to the region'
+        input: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

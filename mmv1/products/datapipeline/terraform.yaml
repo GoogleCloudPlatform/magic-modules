@@ -14,12 +14,11 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Pipeline:  !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: projects/{{project}}/locations/{{location}}/pipelines/{{name}}
-    base_url: projects/{{project}}/locations/{{location}}/pipelines
+    id_format: projects/{{project}}/locations/{{region}}/pipelines/{{name}}
+    base_url: projects/{{project}}/locations/{{region}}/pipelines
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: 'data_pipeline_pipeline'
-        primary_id: data_pipeline_pipeline
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
