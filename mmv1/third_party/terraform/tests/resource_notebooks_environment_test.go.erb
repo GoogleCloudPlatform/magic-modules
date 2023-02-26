@@ -4,6 +4,7 @@ package google_test
 <% unless version == 'ga' %>
 import (
 	"fmt"
+    "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
