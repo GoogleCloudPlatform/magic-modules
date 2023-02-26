@@ -61,6 +61,18 @@ objects:
           Service account email. If this field is set, transfer config will
           be created with this service account credentials. It requires that
           requesting user calling this API has permissions to act as this service account.
+      - !ruby/object:Api::Type::String
+        name: 'versionInfo'
+        description: |
+          Optional OAuth2 authorization code to use with this transfer configuration. This is required only if
+          data_source_id is 'youtube_channel' and new credentials are needed. Note that this should not be set
+          when service_account_name is used to create the transfer config.
+      - !ruby/object:Api::Type::String
+        name: 'authorizationCode'
+        description: |
+          Optional version info. This is required only if data_source_id is not 'youtube_channel'
+          and new credentials are needed. Note that this should not be set when serviceAccountName is used to
+          create the transfer config.
     properties:
       - !ruby/object:Api::Type::String
         name: 'displayName'
