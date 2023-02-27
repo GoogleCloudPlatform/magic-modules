@@ -14,6 +14,7 @@
 # After applying this configuration:
 #   - Increase project quota for the new service account
 #   - Increase project quota for the billing account
+#   - (Internal only) Enable stubbed calls for GKE MultiCloud resources
 #   - Enable Media CDN
 #   - Deploy "Hello World" app: https://cloud.google.com/appengine/docs/flexible/go/create-app
 #     ```
