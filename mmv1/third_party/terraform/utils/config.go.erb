@@ -267,13 +267,13 @@ var DefaultClientScopes = []string{
 
 func HandleSDKDefaults(d *schema.ResourceData) {
 	if d.Get("impersonate_service_account") == "" {
-		d.Set("impersonate_service_account", multiEnvSearch([]string{
+		d.Set("impersonate_service_account", MultiEnvSearch([]string{
 			"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 		}))
 	}
 
 	if d.Get("project") == "" {
-		d.Set("project", multiEnvSearch([]string{
+		d.Set("project", MultiEnvSearch([]string{
 			"GOOGLE_PROJECT",
 			"GOOGLE_CLOUD_PROJECT",
 			"GCLOUD_PROJECT",
@@ -282,13 +282,13 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 	}
 
 	if d.Get("billing_project") == "" {
-		d.Set("billing_project", multiEnvSearch([]string{
+		d.Set("billing_project", MultiEnvSearch([]string{
 			"GOOGLE_BILLING_PROJECT",
 		}))
 	}
 
 	if d.Get("region") == "" {
-		d.Set("region", multiEnvSearch([]string{
+		d.Set("region", MultiEnvSearch([]string{
 			"GOOGLE_REGION",
 			"GCLOUD_REGION",
 			"CLOUDSDK_COMPUTE_REGION",
@@ -296,7 +296,7 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 	}
 
 	if d.Get("zone") == "" {
-		d.Set("zone", multiEnvSearch([]string{
+		d.Set("zone", MultiEnvSearch([]string{
 			"GOOGLE_ZONE",
 			"GCLOUD_ZONE",
 			"CLOUDSDK_COMPUTE_ZONE",
@@ -304,13 +304,13 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 	}
 
 	if d.Get("user_project_override") == "" {
-		d.Set("user_project_override", multiEnvSearch([]string{
+		d.Set("user_project_override", MultiEnvSearch([]string{
 			"USER_PROJECT_OVERRIDE",
 		}))
 	}
 
 	if d.Get("request_reason") == "" {
-		d.Set("request_reason", multiEnvSearch([]string{
+		d.Set("request_reason", MultiEnvSearch([]string{
 			"CLOUDSDK_CORE_REQUEST_REASON",
 		}))
 	}

@@ -93,7 +93,7 @@ func testAccCheckDNSManagedZoneDestroyProducerFramework(t *testing.T) func(s *te
 				continue
 			}
 
-			p := getTestFwProvider(t)
+			p := GetTestFwProvider(t)
 
 			url, err := replaceVarsForFrameworkTest(&p.ProdProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
 			if err != nil {
