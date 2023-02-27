@@ -337,7 +337,7 @@ func TestAccStorageObjectAcl_noOwner(t *testing.T) {
 	oldConfigureFunc := provider.ConfigureContextFunc
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		c, diagnostics := oldConfigureFunc(ctx, d)
-		config := c.(*Config)
+		config := c.(*google.Config)
 		roundTripper := &testRoundTripper{RoundTripper: config.Client.Transport, bucketName: bucketName, objectName: objectName}
 		config.Client.Transport = roundTripper
 		return c, diagnostics

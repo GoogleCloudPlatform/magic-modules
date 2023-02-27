@@ -1030,7 +1030,7 @@ func testAccCheckDataprocClusterAutoscaling(t *testing.T, cluster *dataproc.Clus
 	}
 }
 
-func validateBucketExists(bucket string, config *Config) (bool, error) {
+func validateBucketExists(bucket string, config *google.Config) (bool, error) {
 	_, err := config.NewStorageClient(config.UserAgent).Buckets.Get(bucket).Do()
 
 	if err != nil {

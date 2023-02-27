@@ -25,22 +25,22 @@ var SharedCryptoKey = map[string]string{
 	"ASYMMETRIC_DECRYPT": "tftest-shared-decrypt-key-1",
 }
 
-type bootstrappedKMS struct {
+type BootstrappedKMS struct {
 	*cloudkms.KeyRing
 	*cloudkms.CryptoKey
 }
 
-func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
+func BootstrapKMSKey(t *testing.T) BootstrappedKMS {
 	return BootstrapKMSKeyInLocation(t, "global")
 }
 
-func BootstrapKMSKeyInLocation(t *testing.T, locationID string) bootstrappedKMS {
+func BootstrapKMSKeyInLocation(t *testing.T, locationID string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", locationID)
 }
 
 // BootstrapKMSKeyWithPurpose returns a KMS key in the "global" location.
 // See BootstrapKMSKeyWithPurposeInLocation.
-func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) bootstrappedKMS {
+func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocation(t, purpose, "global")
 }
 
@@ -55,14 +55,14 @@ func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) bootstrappedKMS {
 * to incur the overhead of creating a new project for each test that needs to use
 * a KMS key.
 **/
-func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) bootstrappedKMS {
+func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocationAndName(t, purpose, locationID, SharedCryptoKey[purpose])
 }
 
-func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) bootstrappedKMS {
+func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) BootstrappedKMS {
 	config := BootstrapConfig(t)
 	if config == nil {
-		return bootstrappedKMS{
+		return BootstrappedKMS{
 			&cloudkms.KeyRing{},
 			&cloudkms.CryptoKey{},
 		}
@@ -126,7 +126,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 		t.Fatalf("Unable to bootstrap KMS key. CryptoKey is nil!")
 	}
 
-	return bootstrappedKMS{
+	return BootstrappedKMS{
 		keyRing,
 		cryptoKey,
 	}

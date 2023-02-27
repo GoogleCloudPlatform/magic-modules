@@ -6772,7 +6772,7 @@ func testAccContainerCluster_updateCostManagementConfig(projectID string, cluste
 	}`, projectID, clusterName, enabled)
 }
 
-func testAccContainerCluster_withDatabaseEncryption(clusterName string, kmsData bootstrappedKMS) string {
+func testAccContainerCluster_withDatabaseEncryption(clusterName string, kmsData BootstrappedKMS) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
 }

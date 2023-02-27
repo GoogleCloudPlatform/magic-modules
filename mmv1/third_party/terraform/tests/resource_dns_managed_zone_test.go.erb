@@ -552,7 +552,7 @@ func TestDnsManagedZoneImport_parseImportId(t *testing.T) {
 	cases := map[string]struct {
 		ImportId             string
 		IdRegexes            []string
-		Config               *Config
+		Config               *google.Config
 		ExpectedSchemaValues map[string]interface{}
 		ExpectError          bool
 	}{

@@ -19,7 +19,7 @@ func TestAccHealthcareHl7V2StoreIdParsing(t *testing.T) {
 		ExpectedError        bool
 		ExpectedTerraformId  string
 		ExpectedHl7V2StoreId string
-		Config               *Config
+		Config               *google.Config
 	}{
 		"id is in project/location/datasetName/hl7V2StoreName format": {
 			ImportId:             "test-project/us-central1/test-dataset/test-store-name",
