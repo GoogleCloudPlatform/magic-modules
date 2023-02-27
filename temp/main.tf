@@ -30,7 +30,8 @@
 #     curl --header "Content-Type: application/json" --header "Authorization: Bearer $(gcloud auth print-access-token -q)" --header "X-Goog-User-Project: <project>" -X PATCH https://identitytoolkit.googleapis.com/admin/v2/projects/<project>/config?updateMask=multiTenant -d '{"multiTenant": {"allowTenants": true}}'
 #     ```
 #   - Create a Service Account key for the new service account
-#   - Add Group Admin role to new service account in Google Workspace: https://admin.google.com/ac/roles
+#   - Add Group Admin role to new service account in the Google Workspace Admin Console: https://admin.google.com/ac/roles
+#   - Add a new test user in the Google Workspace Admin Console: https://admin.google.com/ac/users
 #
 
 provider "google" {}
