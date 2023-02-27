@@ -35,6 +35,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 )
 
+const TestEnvVar = "TF_ACC"
+
 var TestAccProviders map[string]*schema.Provider
 <% unless version == 'ga' -%>
 var TestAccProvidersOiCS map[string]*schema.Provider
