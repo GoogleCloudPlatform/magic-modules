@@ -1361,6 +1361,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           image_name: "example-image"
         primary_resource_name: "fmt.Sprintf(\"tf-test-example-image%s\", context[\"random_suffix\"])"
       - !ruby/object:Provider::Terraform::Examples
+        name: "image_basic_storage_location"
+        primary_resource_id: "image_basic_storage_location"
+        vars:
+          image_name: "example-image"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-example-image-stg%s\", context[\"random_suffix\"])"
+      - !ruby/object:Provider::Terraform::Examples
         name: "image_guest_os"
         primary_resource_id: "example"
         vars:

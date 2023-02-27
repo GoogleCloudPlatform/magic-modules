@@ -6242,6 +6242,13 @@ objects:
         path: 'error/errors'
         message: 'message'
     properties:
+      - !ruby/object:Api::Type::Array
+        name: 'storageLocations'
+        description: |
+          Cloud Storage bucket storage location of the image 
+          (regional or multi-regional). 
+          Reference link: https://cloud.google.com/compute/docs/reference/rest/v1/images
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: 'archiveSizeBytes'
         description: |
