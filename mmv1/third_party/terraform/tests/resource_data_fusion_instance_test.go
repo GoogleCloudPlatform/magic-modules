@@ -42,12 +42,8 @@ resource "google_data_fusion_instance" "foobar" {
   name   = "%s"
   region = "us-central1"
   type   = "BASIC"
-<<<<<<< HEAD:mmv1/third_party/terraform/tests/resource_data_fusion_instance_test.go
   # See supported versions here https://cloud.google.com/data-fusion/docs/support/version-support-policy
   version = "6.7.0"
-=======
-  version = "6.5.0"
->>>>>>> ba9999d00 (Added in-place update handwritten test):mmv1/third_party/terraform/tests/resource_data_fusion_instance_test.go.erb
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
   	prober_test_run = "true"
