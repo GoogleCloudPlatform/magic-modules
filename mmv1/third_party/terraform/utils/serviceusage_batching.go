@@ -41,7 +41,7 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 		DebugId:      fmt.Sprintf("Enable Project Service %q for project %q", service, project),
 	}
 
-	_, err = config.requestBatcherServiceUsage.SendRequestWithTimeout(
+	_, err = config.RequestBatcherServiceUsage.SendRequestWithTimeout(
 		fmt.Sprintf(batchKeyTmplServiceUsageEnableServices, project),
 		req,
 		d.Timeout(schema.TimeoutCreate))
@@ -96,7 +96,7 @@ func BatchRequestReadServices(project string, d *schema.ResourceData, config *Co
 		DebugId:  fmt.Sprintf("List Project Services %s", project),
 	}
 
-	return config.requestBatcherServiceUsage.SendRequestWithTimeout(
+	return config.RequestBatcherServiceUsage.SendRequestWithTimeout(
 		fmt.Sprintf(batchKeyTmplServiceUsageListServices, project),
 		req,
 		d.Timeout(schema.TimeoutRead))

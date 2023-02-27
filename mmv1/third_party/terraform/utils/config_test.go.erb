@@ -243,10 +243,10 @@ func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 	}
 
 	expectedDur := time.Second * google.DefaultBatchSendIntervalSec
-	if config.requestBatcherServiceUsage.sendAfter != expectedDur {
+	if config.RequestBatcherServiceUsage.sendAfter != expectedDur {
 		t.Fatalf("expected sendAfter to be %d seconds, got %v",
 			google.DefaultBatchSendIntervalSec,
-			config.requestBatcherServiceUsage.sendAfter)
+			config.RequestBatcherServiceUsage.sendAfter)
 	}
 }
 
@@ -280,13 +280,13 @@ func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 	}
 
 	expectedDur := time.Second * 1
-	if config.requestBatcherServiceUsage.sendAfter != expectedDur {
+	if config.RequestBatcherServiceUsage.sendAfter != expectedDur {
 		t.Fatalf("expected sendAfter to be %d seconds, got %v",
 			1,
-			config.requestBatcherServiceUsage.sendAfter)
+			config.RequestBatcherServiceUsage.sendAfter)
 	}
 
-	if config.requestBatcherServiceUsage.enableBatching {
+	if config.RequestBatcherServiceUsage.enableBatching {
 		t.Fatalf("expected enableBatching to be false")
 	}
 }
