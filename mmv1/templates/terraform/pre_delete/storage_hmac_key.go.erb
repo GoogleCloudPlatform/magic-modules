@@ -3,7 +3,7 @@ if err != nil {
 	return err
 }
 
-getRes, err := sendRequest(config, "GET", project, getUrl, userAgent, nil)
+getRes, err := SendRequest(config, "GET", project, getUrl, userAgent, nil)
 if err != nil {
 	return handleNotFoundError(err, d, fmt.Sprintf("StorageHmacKey %q", d.Id()))
 }

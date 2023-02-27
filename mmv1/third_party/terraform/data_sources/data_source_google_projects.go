@@ -80,7 +80,7 @@ func datasourceGoogleProjectsRead(d *schema.ResourceData, meta interface{}) erro
 			return err
 		}
 
-		res, err := sendRequest(config, "GET", "", url, userAgent, nil)
+		res, err := SendRequest(config, "GET", "", url, userAgent, nil)
 		if err != nil {
 			return fmt.Errorf("Error retrieving projects: %s", err)
 		}

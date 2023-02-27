@@ -27,7 +27,7 @@ if d.Get("delete_service_on_destroy") == true {
 	if err != nil {
 		return handleNotFoundError(err, d, "Service")
 	}
-	err = appEngineOperationWaitTime(
+	err = AppEngineOperationWaitTime(
 		config, res, project, "Deleting Service", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
@@ -47,7 +47,7 @@ if d.Get("delete_service_on_destroy") == true {
 	if err != nil {
 		return handleNotFoundError(err, d, "AppVersion")
 	}
-	err = appEngineOperationWaitTime(
+	err = AppEngineOperationWaitTime(
 		config, res, project, "Deleting AppVersion", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 

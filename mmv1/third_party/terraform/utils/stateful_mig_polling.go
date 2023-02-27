@@ -25,7 +25,7 @@ func resourceComputePerInstanceConfigPollRead(d *schema.ResourceData, meta inter
 		if err != nil {
 			return nil, err
 		}
-		res, err := sendRequest(config, "POST", project, url, userAgent, nil)
+		res, err := SendRequest(config, "POST", project, url, userAgent, nil)
 		if err != nil {
 			return res, err
 		}
@@ -57,7 +57,7 @@ func resourceComputeRegionPerInstanceConfigPollRead(d *schema.ResourceData, meta
 		if err != nil {
 			return nil, err
 		}
-		res, err := sendRequest(config, "POST", project, url, userAgent, nil)
+		res, err := SendRequest(config, "POST", project, url, userAgent, nil)
 		if err != nil {
 			return res, err
 		}
@@ -98,7 +98,7 @@ func findInstanceName(d *schema.ResourceData, config *Config) (string, error) {
 		} else {
 			urlWithToken = fmt.Sprintf("%s?maxResults=1", url)
 		}
-		res, err := sendRequest(config, "POST", project, urlWithToken, userAgent, nil)
+		res, err := SendRequest(config, "POST", project, urlWithToken, userAgent, nil)
 		if err != nil {
 			return "", err
 		}

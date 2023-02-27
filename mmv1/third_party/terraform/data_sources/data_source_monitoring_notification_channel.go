@@ -84,7 +84,7 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 		return err
 	}
 
-	response, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	response, err := SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving NotificationChannels: %s", err)
 	}

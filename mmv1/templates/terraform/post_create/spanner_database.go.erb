@@ -55,7 +55,7 @@ if retentionPeriodOk || ddlOk {
 		// Use the resource in the operation response to populate
 		// identity fields and d.Id() before read
 		var opRes map[string]interface{}
-		err = spannerOperationWaitTimeWithResponse(
+		err = SpannerOperationWaitTimeWithResponse(
 			config, res, &opRes, project, "Creating Database", userAgent,
 			d.Timeout(schema.TimeoutCreate))
 		if err != nil {

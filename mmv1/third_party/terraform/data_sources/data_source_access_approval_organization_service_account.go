@@ -46,7 +46,7 @@ func dataSourceAccessApprovalOrganizationServiceAccountRead(d *schema.ResourceDa
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("AccessApprovalOrganizationServiceAccount %q", d.Id()))
 	}

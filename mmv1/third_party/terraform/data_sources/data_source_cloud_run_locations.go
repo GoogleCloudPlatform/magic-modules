@@ -43,7 +43,7 @@ func dataSourceGoogleCloudRunLocationsRead(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	res, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error listing Cloud Run Locations : %s", err)
 	}

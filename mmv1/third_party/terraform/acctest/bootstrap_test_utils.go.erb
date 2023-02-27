@@ -306,6 +306,61 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 	return network.Name
 }
 
+var SharedServicePerimeterProjectPrefix = "tf-bootstrap-sp-"
+
+func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*cloudresourcemanager.Project {
+	config := BootstrapConfig(t)
+	if config == nil {
+		return nil
+	}
+
+	org := GetTestOrgFromEnv(t)
+
+	// The filter endpoint works differently if you provide both the parent id and parent type, and
+	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
+	// that API behavior changes.
+	prefixFilter := fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)
+	res, err := config.NewResourceManagerClient(config.UserAgent).Projects.List().Filter(prefixFilter).Do()
+	if err != nil {
+		t.Fatalf("Error getting shared test projects: %s", err)
+	}
+
+	projects := res.Projects
+	for len(projects) < desiredProjects {
+		pid := SharedServicePerimeterProjectPrefix + RandString(t, 10)
+		project := &cloudresourcemanager.Project{
+			ProjectId: pid,
+			Name:      "TF Service Perimeter Test",
+			Parent: &cloudresourcemanager.ResourceId{
+				Type: "organization",
+				Id:   org,
+			},
+		}
+		op, err := config.NewResourceManagerClient(config.UserAgent).Projects.Create(project).Do()
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		opAsMap, err := google.ConvertToMap(op)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		err = google.ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 4)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		p, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
+		if err != nil {
+			t.Fatalf("Error getting shared test project: %s", err)
+		}
+		projects = append(projects, p)
+	}
+
+	return projects
+}
+
 func removeContainerServiceAgentRoleFromContainerEngineRobot(t *testing.T, project *cloudresourcemanager.Project) {
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -397,7 +452,7 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 			t.Fatalf("Error converting create project operation to map: %s", err)
 		}
 
-		err = ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 4*time.Minute)
+		err = google.ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 4*time.Minute)
 		if err != nil {
 			t.Fatalf("Error waiting for create project operation: %s", err)
 		}
@@ -441,7 +496,7 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 
 	if len(services) > 0 {
 
-		enabledServices, err := listCurrentlyEnabledServices(projectID, "", config.UserAgent, config, 1*time.Minute)
+		enabledServices, err := google.ListCurrentlyEnabledServices(projectID, "", config.UserAgent, config, 1*time.Minute)
 		if err != nil {
 			t.Fatalf("Error listing services for project %q: %s", projectID, err)
 		}
@@ -454,7 +509,7 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 		}
 
 		if len(servicesToEnable) > 0 {
-			if err := enableServiceUsageProjectServices(servicesToEnable, projectID, "", config.UserAgent, config, 10*time.Minute); err != nil {
+			if err := google.EnableServiceUsageProjectServices(servicesToEnable, projectID, "", config.UserAgent, config, 10*time.Minute); err != nil {
 				t.Fatalf("Error enabling services for project %q: %s", projectID, err)
 			}
 		}
@@ -469,14 +524,14 @@ func BootstrapConfig(t *testing.T) *google.Config {
 		return nil
 	}
 
-	config := &Config{
+	config := &google.Config{
 		Credentials: GetTestCredsFromEnv(),
 		Project:     GetTestProjectFromEnv(),
 		Region:      GetTestRegionFromEnv(),
 		Zone:        GetTestZoneFromEnv(),
 	}
 
-	ConfigureBasePaths(config)
+	google.ConfigureBasePaths(config)
 
 	if err := config.LoadAndValidate(context.Background()); err != nil {
 		t.Fatalf("Bootstrapping failed. Unable to load test config: %s", err)
@@ -537,11 +592,11 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		err = google.RetryTimeDuration(func() (operr error) {
 			op, operr = config.NewSqlAdminClient(config.UserAgent).Instances.Insert(project, bootstrapInstance).Do()
 			return operr
-		}, time.Duration(20)*time.Minute, isSqlOperationInProgressError)
+		}, time.Duration(20)*time.Minute, google.IsSqlOperationInProgressError)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", config.UserAgent, time.Duration(40)*time.Minute)
+		err = google.SqlAdminOperationWaitTime(config, op, project, "Create Instance", config.UserAgent, time.Duration(40)*time.Minute)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance %s: %s", bootstrapInstance.Name, err)
 		}
@@ -563,11 +618,11 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		err = google.RetryTimeDuration(func() (operr error) {
 			op, operr = config.NewSqlAdminClient(config.UserAgent).BackupRuns.Insert(project, bootstrapInstance.Name, backupRun).Do()
 			return operr
-		}, time.Duration(20)*time.Minute, isSqlOperationInProgressError)
+		}, time.Duration(20)*time.Minute, google.IsSqlOperationInProgressError)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.UserAgent, time.Duration(20)*time.Minute)
+		err = google.SqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.UserAgent, time.Duration(20)*time.Minute)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
@@ -587,7 +642,7 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 
 	log.Printf("[DEBUG] Getting shared CA pool %q", poolName)
 	url := fmt.Sprintf("%sprojects/%s/locations/%s/caPools/%s", config.PrivatecaBasePath, project, location, poolName)
-	_, err := sendRequest(config, "GET", project, url, config.UserAgent, nil)
+	_, err := google.SendRequest(config, "GET", project, url, config.UserAgent, nil)
 	if err != nil {
 		log.Printf("[DEBUG] CA pool %q not found, bootstrapping", poolName)
 		poolObj := map[string]interface{}{
@@ -601,13 +656,13 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 
 		log.Printf("[DEBUG] Waiting for CA pool creation to finish")
 		var opRes map[string]interface{}
-		err = privatecaOperationWaitTimeWithResponse(
+		err = google.PrivatecaOperationWaitTimeWithResponse(
 			config, res, &opRes, project, "Creating CA pool", config.UserAgent,
 			4*time.Minute)
 		if err != nil {
 			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
 		}
-		_, err = sendRequest(config, "GET", project, url, config.UserAgent, nil)
+		_, err = google.SendRequest(config, "GET", project, url, config.UserAgent, nil)
 		if err != nil {
 			t.Errorf("Error getting shared CA pool %q: %s", poolName, err)
 		}

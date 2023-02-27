@@ -63,7 +63,7 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 			billingProject = bp
 		}
 
-		res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+		res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 		if err != nil {
 			return handleNotFoundError(err, d, fmt.Sprintf("PrivatecaCertificateAuthority %q", d.Id()))
 		}

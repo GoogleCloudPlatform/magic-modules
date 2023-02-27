@@ -81,7 +81,7 @@ func (u *BigqueryDatasetIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 		return nil, err
 	}
 
-	res, err := sendRequest(u.Config, "GET", u.project, url, userAgent, nil)
+	res, err := SendRequest(u.Config, "GET", u.project, url, userAgent, nil)
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -109,7 +109,7 @@ func (u *BigqueryDatasetIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 		return err
 	}
 
-	_, err = sendRequest(u.Config, "PATCH", u.project, url, userAgent, obj)
+	_, err = SendRequest(u.Config, "PATCH", u.project, url, userAgent, obj)
 	if err != nil {
 		return fmt.Errorf("Error creating DatasetAccess: %s", err)
 	}

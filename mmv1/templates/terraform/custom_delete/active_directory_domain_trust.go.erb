@@ -60,7 +60,7 @@
         return handleNotFoundError(err, d, "DomainTrust")
     }
 
-    err = activeDirectoryOperationWaitTime(
+    err = ActiveDirectoryOperationWaitTime(
         config, res, project, "Deleting DomainTrust", userAgent,
         d.Timeout(schema.TimeoutDelete))
 

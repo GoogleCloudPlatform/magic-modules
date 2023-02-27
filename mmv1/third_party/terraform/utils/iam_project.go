@@ -49,7 +49,7 @@ func (u *ProjectIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy
 	p, err := u.Config.NewResourceManagerClient(userAgent).Projects.GetIamPolicy(projectId,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{
-				RequestedPolicyVersion: iamPolicyVersion,
+				RequestedPolicyVersion: IamPolicyVersion,
 			},
 		}).Do()
 

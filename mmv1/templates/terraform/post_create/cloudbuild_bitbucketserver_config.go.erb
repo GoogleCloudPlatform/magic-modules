@@ -31,7 +31,7 @@ if v, ok := d.GetOkExists("connected_repositories"); !isEmptyValue(reflect.Value
         return fmt.Errorf("Error creating connected_repositories: %s", err)
     }
 
-    err = cloudBuildOperationWaitTime(
+    err = CloudBuildOperationWaitTime(
         config, res, project, "Creating connected_repositories on BitbucketServerConfig", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {

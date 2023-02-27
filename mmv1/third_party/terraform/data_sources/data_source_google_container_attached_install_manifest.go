@@ -70,7 +70,7 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 	if err != nil {
 		return err
 	}
-	res, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return err
 	}

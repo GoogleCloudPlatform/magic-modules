@@ -32,7 +32,7 @@
 		return handleNotFoundError(err, d, "App")
 	}
 
-	err = firebaseOperationWaitTime(
+	err = FirebaseOperationWaitTime(
 		config, res, project, "Deleting App", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 

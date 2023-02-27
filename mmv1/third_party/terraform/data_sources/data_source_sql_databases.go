@@ -50,7 +50,7 @@ func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error 
 	err = RetryTimeDuration(func() (rerr error) {
 		databases, rerr = config.NewSqlAdminClient(userAgent).Databases.List(project, d.Get("instance").(string)).Do()
 		return rerr
-	}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
+	}, d.Timeout(schema.TimeoutRead), IsSqlOperationInProgressError)
 
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Databases in %q instance", d.Get("instance").(string)))

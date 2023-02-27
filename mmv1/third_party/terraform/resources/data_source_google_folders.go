@@ -77,7 +77,7 @@ func dataSourceGoogleFoldersRead(d *schema.ResourceData, meta interface{}) error
 			return err
 		}
 
-		res, err := sendRequest(config, "GET", "", url, userAgent, nil)
+		res, err := SendRequest(config, "GET", "", url, userAgent, nil)
 		if err != nil {
 			return fmt.Errorf("Error retrieving folders: %s", err)
 		}

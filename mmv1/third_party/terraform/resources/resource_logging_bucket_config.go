@@ -169,7 +169,7 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 				return err
 			}
 
-			res, _ := sendRequest(config, "GET", "", url, userAgent, nil)
+			res, _ := SendRequest(config, "GET", "", url, userAgent, nil)
 			if res == nil {
 				log.Printf("[DEGUG] Loggin Bucket not exist %s", id)
 				// we need to pass the id in here because we don't want to set it in state
@@ -243,7 +243,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	res, err := sendRequest(config, "GET", "", url, userAgent, nil)
+	res, err := SendRequest(config, "GET", "", url, userAgent, nil)
 	if err != nil {
 		log.Printf("[WARN] Unable to acquire logging bucket config at %s", d.Id())
 

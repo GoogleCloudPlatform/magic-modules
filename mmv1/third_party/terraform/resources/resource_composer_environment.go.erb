@@ -896,7 +896,7 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 	}
 	d.SetId(id)
 
-	waitErr := composerOperationWaitTime(
+	waitErr := ComposerOperationWaitTime(
 		config, op, envName.Project, "Creating Environment", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 
@@ -1229,7 +1229,7 @@ func resourceComposerEnvironmentPatchField(updateMask, userAgent string, env *co
 		return err
 	}
 
-	waitErr := composerOperationWaitTime(
+	waitErr := ComposerOperationWaitTime(
 		config, op, envName.Project, "Updating newly created Environment", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
@@ -1259,7 +1259,7 @@ func resourceComposerEnvironmentDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	err = composerOperationWaitTime(
+	err = ComposerOperationWaitTime(
 		config, op, envName.Project, "Deleting Environment", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 	if err != nil {
@@ -2254,7 +2254,7 @@ func handleComposerEnvironmentCreationOpFailure(id string, envName *composerEnvi
 		return fmt.Errorf("Could not delete the invalid created environment with state %q: %s", env.State, err)
 	}
 
-	waitErr := composerOperationWaitTime(
+	waitErr := ComposerOperationWaitTime(
 		config, op, envName.Project,
 		fmt.Sprintf("Deleting invalid created Environment with state %q", env.State), userAgent,
 		d.Timeout(schema.TimeoutCreate))

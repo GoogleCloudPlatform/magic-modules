@@ -182,7 +182,7 @@ func testAccCheckGoogleOrganizationIamBindingExists(t *testing.T, bindingResourc
 			"organizations/"+bindingRs.Primary.Attributes["org_id"],
 			&cloudresourcemanager.GetIamPolicyRequest{
 				Options: &cloudresourcemanager.GetPolicyOptions{
-					RequestedPolicyVersion: iamPolicyVersion,
+					RequestedPolicyVersion: IamPolicyVersion,
 				},
 			},
 		).Do()
@@ -219,7 +219,7 @@ func testAccCheckGoogleOrganizationIamMemberExists(t *testing.T, n, role, member
 			"organizations/"+rs.Primary.Attributes["org_id"],
 			&cloudresourcemanager.GetIamPolicyRequest{
 				Options: &cloudresourcemanager.GetPolicyOptions{
-					RequestedPolicyVersion: iamPolicyVersion,
+					RequestedPolicyVersion: IamPolicyVersion,
 				},
 			},
 		).Do()

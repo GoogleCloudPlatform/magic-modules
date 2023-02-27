@@ -121,7 +121,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	res, err := sendRequest(config, "GET", project, url, userAgent, nil, isMonitoringConcurrentEditError)
+	res, err := SendRequest(config, "GET", project, url, userAgent, nil, isMonitoringConcurrentEditError)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("MonitoringDashboard %q", d.Id()))
 	}

@@ -246,7 +246,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			err = RetryTimeDuration(func() (rerr error) {
 				fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
 				return rerr
-			}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
+			}, d.Timeout(schema.TimeoutRead), IsSqlOperationInProgressError)
 			if err != nil {
 				return handleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("instance").(string)))
 			}
@@ -273,7 +273,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	// for which user.Host is an empty string.  That's okay.
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = SqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for insertion of %s "+
@@ -445,7 +445,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 				"user %s into user %s: %s", name, instance, err)
 		}
 
-		err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = SqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			return fmt.Errorf("Error, failure waiting for update of %s "+
@@ -491,11 +491,11 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 
-		if err := sqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
+		if err := SqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
 			return err
 		}
 		return nil
-	}, d.Timeout(schema.TimeoutDelete), isSqlOperationInProgressError, isSqlInternalError)
+	}, d.Timeout(schema.TimeoutDelete), IsSqlOperationInProgressError, isSqlInternalError)
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete"+

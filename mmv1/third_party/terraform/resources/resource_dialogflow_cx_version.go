@@ -166,7 +166,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	// Use the resource in the operation response to populate
 	// identity fields and d.Id() before read
 	var opRes map[string]interface{}
-	err = dialogflowCXOperationWaitTimeWithResponse(
+	err = DialogflowCXOperationWaitTimeWithResponse(
 		config, res, &opRes, "Creating Version", userAgent, location,
 		d.Timeout(schema.TimeoutCreate))
 	if err != nil {
@@ -225,7 +225,7 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("DialogflowCXVersion %q", d.Id()))
 	}
@@ -325,7 +325,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 		log.Printf("[DEBUG] Finished updating Version %q: %#v", d.Id(), res)
 	}
 
-	err = dialogflowCXOperationWaitTime(
+	err = DialogflowCXOperationWaitTime(
 		config, res, "Updating Version", userAgent, location,
 		d.Timeout(schema.TimeoutUpdate))
 
@@ -378,7 +378,7 @@ func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{})
 		return handleNotFoundError(err, d, "Version")
 	}
 
-	err = dialogflowCXOperationWaitTime(
+	err = DialogflowCXOperationWaitTime(
 		config, res, "Deleting Version", userAgent, location,
 		d.Timeout(schema.TimeoutDelete))
 

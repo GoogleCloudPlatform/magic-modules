@@ -119,7 +119,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	if err := serviceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+	if err := ServiceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return err
 	}
 
@@ -248,7 +248,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 		if err != nil {
 			return err
 		}
-		if err := serviceNetworkingOperationWaitTime(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate)); err != nil {
+		if err := ServiceNetworkingOperationWaitTime(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return err
 		}
 	}

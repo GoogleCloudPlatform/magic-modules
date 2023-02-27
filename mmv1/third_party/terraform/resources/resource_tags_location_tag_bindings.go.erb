@@ -101,7 +101,7 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 	// identity fields and d.Id() before read
 	
 	var opRes map[string]interface{}
-	err = tagsOperationWaitTimeWithResponse(
+	err = TagsOperationWaitTimeWithResponse(
 		config, res, &opRes, "Creating LocationTagBinding", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 
@@ -155,7 +155,7 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 	}
@@ -174,7 +174,7 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 			if err != nil {
 				return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 			}
-			resp, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+			resp, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 			if err != nil {
 				return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 			}
@@ -243,7 +243,7 @@ func resourceTagsLocationTagBindingDelete(d *schema.ResourceData, meta interface
 		return handleNotFoundError(err, d, "LocationTagBinding")
 	}
 
-	err = tagsOperationWaitTime(
+	err = TagsOperationWaitTime(
 		config, res, "Deleting LocationTagBinding", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 

@@ -6,7 +6,7 @@ if err != nil {
 	return err
 }
 
-res, err := sendRequest(config, "GET", "", url, config.UserAgent, nil)
+res, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
 if err != nil {
 	return err
 }

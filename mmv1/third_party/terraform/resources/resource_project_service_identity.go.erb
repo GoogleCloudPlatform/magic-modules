@@ -73,7 +73,7 @@ func resourceProjectServiceIdentityCreate(d *schema.ResourceData, meta interface
 	}
 
 	var opRes map[string]interface{}
-	err = serviceUsageOperationWaitTimeWithResponse(
+	err = ServiceUsageOperationWaitTimeWithResponse(
 		config, res, &opRes, billingProject, "Creating Service Identity", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 	if err != nil {

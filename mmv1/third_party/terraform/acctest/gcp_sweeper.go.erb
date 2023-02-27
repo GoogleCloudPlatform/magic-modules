@@ -34,7 +34,7 @@ func SharedConfigForRegion(region string) (*google.Config, error) {
 		return nil, fmt.Errorf("set credentials using any of these env variables %v", CredsEnvVars)
 	}
 
-	conf := &Config{
+	conf := &google.Config{
 		Credentials: GetTestCredsFromEnv(),
 		Region:      region,
 		Project:     project,

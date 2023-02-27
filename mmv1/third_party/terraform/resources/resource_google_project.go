@@ -192,7 +192,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 			billingProject = bp
 		}
 
-		if err = enableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, billingProject, userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
+		if err = EnableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, billingProject, userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
 			return errwrap.Wrapf("Error enabling the Compute Engine API required to delete the default network: {{err}} ", err)
 		}
 
@@ -599,7 +599,7 @@ func readGoogleProject(d *schema.ResourceData, config *Config, userAgent string)
 }
 
 // Enables services. WARNING: Use BatchRequestEnableServices for better batching if possible.
-func enableServiceUsageProjectServices(services []string, project, billingProject, userAgent string, config *Config, timeout time.Duration) error {
+func EnableServiceUsageProjectServices(services []string, project, billingProject, userAgent string, config *Config, timeout time.Duration) error {
 	// ServiceUsage does not allow more than 20 services to be enabled per
 	// batchEnable API call. See
 	// https://cloud.google.com/service-usage/docs/reference/rest/v1/services/batchEnable
@@ -665,7 +665,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 // if a service has been renamed, this function will list both the old and new
 // forms of the service. LIST responses are expected to return only the old or
 // new form, but we'll always return both.
-func listCurrentlyEnabledServices(project, billingProject, userAgent string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
+func ListCurrentlyEnabledServices(project, billingProject, userAgent string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
 	log.Printf("[DEBUG] Listing enabled services for project %s", project)
 	apiServices := make(map[string]struct{})
 	err := RetryTimeDuration(func() error {
@@ -710,7 +710,7 @@ func waitForServiceUsageEnabledServices(services []string, project, billingProje
 	interval := time.Second
 	err := RetryTimeDuration(func() error {
 		// Get the list of services that are enabled on the project
-		enabledServices, err := listCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
+		enabledServices, err := ListCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 		if err != nil {
 			return err
 		}

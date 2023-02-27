@@ -97,7 +97,7 @@ func checkComputeBackendBucketSignedUrlKeyExists(t *testing.T, s *terraform.Stat
 			return false, err
 		}
 
-		res, err := sendRequest(config, "GET", "", url, config.UserAgent, nil)
+		res, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
 		if err != nil {
 			return false, err
 		}

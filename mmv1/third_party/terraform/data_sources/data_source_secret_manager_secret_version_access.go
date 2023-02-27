@@ -79,7 +79,7 @@ func dataSourceSecretManagerSecretVersionAccessRead(d *schema.ResourceData, meta
 	}
 
 	url = fmt.Sprintf("%s:access", url)
-	resp, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	resp, err := SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving available secret manager secret version access: %s", err.Error())
 	}

@@ -147,7 +147,7 @@ func resourceDialogflowCXEnvironmentCreate(d *schema.ResourceData, meta interfac
 	// Use the resource in the operation response to populate
 	// identity fields and d.Id() before read
 	var opRes map[string]interface{}
-	err = dialogflowCXOperationWaitTimeWithResponse(
+	err = DialogflowCXOperationWaitTimeWithResponse(
 		config, res, &opRes, "Creating Environment", userAgent, location,
 		d.Timeout(schema.TimeoutCreate))
 	if err != nil {
@@ -206,7 +206,7 @@ func resourceDialogflowCXEnvironmentRead(d *schema.ResourceData, meta interface{
 	}
 
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("DialogflowCXEnvironment %q", d.Id()))
 	}
@@ -313,7 +313,7 @@ func resourceDialogflowCXEnvironmentUpdate(d *schema.ResourceData, meta interfac
 		log.Printf("[DEBUG] Finished updating Environment %q: %#v", d.Id(), res)
 	}
 
-	err = dialogflowCXOperationWaitTime(
+	err = DialogflowCXOperationWaitTime(
 		config, res, "Updating Environment", userAgent, location,
 		d.Timeout(schema.TimeoutUpdate))
 
@@ -366,7 +366,7 @@ func resourceDialogflowCXEnvironmentDelete(d *schema.ResourceData, meta interfac
 		return handleNotFoundError(err, d, "Environment")
 	}
 
-	err = dialogflowCXOperationWaitTime(
+	err = DialogflowCXOperationWaitTime(
 		config, res, "Deleting Environment", userAgent, location,
 		d.Timeout(schema.TimeoutDelete))
 

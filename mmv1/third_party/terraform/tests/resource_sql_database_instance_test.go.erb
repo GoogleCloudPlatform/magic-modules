@@ -185,7 +185,7 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 						t.Errorf("Error while inserting root@%% user: %s", err)
 						return
 					}
-					err = sqlAdminOperationWaitTime(config, op, config.Project, "Waiting for user to insert", config.UserAgent, 10 * time.Minute)
+					err = SqlAdminOperationWaitTime(config, op, config.Project, "Waiting for user to insert", config.UserAgent, 10 * time.Minute)
 					if err != nil {
 						t.Errorf("Error while waiting for user insert operation to complete: %s", err.Error())
 					}
@@ -239,7 +239,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 						t.Errorf("Error while inserting root@%% user: %s", err)
 						return
 					}
-					err = sqlAdminOperationWaitTime(config, op, config.Project, "Waiting for user to insert", config.UserAgent, 10 * time.Minute)
+					err = SqlAdminOperationWaitTime(config, op, config.Project, "Waiting for user to insert", config.UserAgent, 10 * time.Minute)
 					if err != nil {
 						t.Errorf("Error while waiting for user insert operation to complete: %s", err.Error())
 					}

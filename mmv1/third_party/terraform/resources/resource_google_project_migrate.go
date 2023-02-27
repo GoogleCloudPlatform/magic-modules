@@ -52,7 +52,7 @@ func getProjectIamPolicy(project string, config *Config) (*cloudresourcemanager.
 	p, err := config.NewResourceManagerClient(config.UserAgent).Projects.GetIamPolicy(project,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{
-				RequestedPolicyVersion: iamPolicyVersion,
+				RequestedPolicyVersion: IamPolicyVersion,
 			},
 		}).Do()
 

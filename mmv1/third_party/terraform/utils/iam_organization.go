@@ -48,7 +48,7 @@ func (u *OrganizationIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.P
 		"organizations/"+u.resourceId,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{
-				RequestedPolicyVersion: iamPolicyVersion,
+				RequestedPolicyVersion: IamPolicyVersion,
 			},
 		},
 	).Do()

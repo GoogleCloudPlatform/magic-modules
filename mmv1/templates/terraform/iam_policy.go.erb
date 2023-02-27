@@ -187,19 +187,19 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 <% end -%>
 	var obj map[string]interface{}
 <% if object.iam_policy.iam_conditions_request_type == :QUERY_PARAM -%>
-	url, err = addQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> iamPolicyVersion <% end -%>)})
+	url, err = addQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> IamPolicyVersion <% end -%>)})
 	if err != nil {
 		return nil, err
 	}
 <% elsif object.iam_policy.iam_conditions_request_type == :QUERY_PARAM_NESTED -%>
-	url, err = addQueryParams(url, map[string]string{"options.requestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> iamPolicyVersion <% end -%>)})
+	url, err = addQueryParams(url, map[string]string{"options.requestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> IamPolicyVersion <% end -%>)})
 	if err != nil {
 		return nil, err
 	}
 <% elsif object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
 	obj = map[string]interface{}{
 		"options": map[string]interface{}{
-			"requestedPolicyVersion": <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> iamPolicyVersion <% end -%>,
+			"requestedPolicyVersion": <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> IamPolicyVersion <% end -%>,
 		},
 	}
 <%  end -%>
@@ -209,7 +209,7 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 		return nil, err
 	}
 
-	policy, err := sendRequest(u.Config, "<%= object.iam_policy.fetch_iam_policy_verb.to_s.upcase -%>", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, userAgent, obj<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	policy, err := SendRequest(u.Config, "<%= object.iam_policy.fetch_iam_policy_verb.to_s.upcase -%>", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, userAgent, obj<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}

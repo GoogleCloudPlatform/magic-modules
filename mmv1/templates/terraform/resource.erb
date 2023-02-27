@@ -278,7 +278,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
-    err = <%= client_name_camel -%>OperationWaitTimeWithResponse(
+    err = <%= client_name_pascal -%>OperationWaitTimeWithResponse(
     config, res, &opRes, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
@@ -330,7 +330,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
     <% else -%>
-    err = <%= client_name_camel -%>OperationWaitTime(
+    err = <%= client_name_pascal -%>OperationWaitTime(
     config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
@@ -413,7 +413,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 
-        res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        res, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return res, err
         }
@@ -478,7 +478,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 
     <%= lines(compile(pwd + '/' + object.custom_code.pre_read)) if object.custom_code.pre_read -%>
-    res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.read_error_transform -%>
         return handleNotFoundError(<%= object.read_error_transform %>(err), d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
@@ -679,7 +679,7 @@ if len(updateMask) > 0 {
 
 <%  if object.async&.allow?('update') -%>
 <%    if object.async.is_a? Api::OpAsync -%>
-    err = <%= client_name_camel -%>OperationWaitTime(
+    err = <%= client_name_pascal -%>OperationWaitTime(
         config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
@@ -727,7 +727,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         billingProject = bp
         }
 
-        getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        getRes, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
         }
@@ -813,7 +813,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 
 <%      if object.async&.allow?('update') -%>
 <%          if object.async.is_a? Api::OpAsync-%>
-        err = <%= client_name_camel -%>OperationWaitTime(
+        err = <%= client_name_pascal -%>OperationWaitTime(
             config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
             d.Timeout(schema.TimeoutUpdate))
         if err != nil {
@@ -933,7 +933,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%      end -%>
     }
 <%    else -%>
-    err = <%= client_name_camel -%>OperationWaitTime(
+    err = <%= client_name_pascal -%>OperationWaitTime(
         config, res, <% if has_project || object.async.include_project-%> project, <% end -%> "Deleting <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutDelete))
 

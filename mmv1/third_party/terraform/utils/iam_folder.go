@@ -118,7 +118,7 @@ func getFolderIamPolicyByFolderName(folderName, userAgent string, config *Config
 	p, err := config.NewResourceManagerV3Client(userAgent).Folders.GetIamPolicy(folderName,
 		&resourceManagerV3.GetIamPolicyRequest{
 			Options: &resourceManagerV3.GetPolicyOptions{
-				RequestedPolicyVersion: iamPolicyVersion,
+				RequestedPolicyVersion: IamPolicyVersion,
 			},
 		}).Do()
 	if err != nil {

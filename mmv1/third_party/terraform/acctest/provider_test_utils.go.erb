@@ -133,7 +133,7 @@ var sourcesLock = sync.RWMutex{}
 func init() {
 	configs = make(map[string]*google.Config)
 	sources = make(map[string]VcrSource)
-	testAccProvider = Provider()
+	testAccProvider = google.Provider()
 	<% if version == 'ga' -%>
 	TestAccProviders = map[string]*schema.Provider{
 		"google": testAccProvider,
@@ -293,7 +293,7 @@ func GoogleProviderConfig(t *testing.T) *google.Config {
 }
 
 func getTestAccProviders(testName string, c resource.TestCase) map[string]*schema.Provider {
-	prov := Provider()
+	prov := google.Provider()
 	if isVcrEnabled() {
 		old := prov.ConfigureContextFunc
 		prov.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -395,7 +395,7 @@ func readSeedFromFile(fileName string) (int64, error) {
 	// Remove NULL characters from seed
 	data = bytes.Trim(data, "\x00")
 	seed := string(data)
-	return stringToFixed64(seed)
+	return google.StringToFixed64(seed)
 }
 
 func writeSeedToFile(seed int64, fileName string) error {
@@ -413,7 +413,7 @@ func writeSeedToFile(seed int64, fileName string) error {
 
 func RandString(t *testing.T, length int) string {
 	if !isVcrEnabled() {
-		return RandString(length)
+		return acctest.RandString(length)
 	}
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
@@ -434,7 +434,7 @@ func RandString(t *testing.T, length int) string {
 
 func RandInt(t *testing.T) int {
 	if !isVcrEnabled() {
-		return RandInt()
+		return acctest.RandInt()
 	}
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
@@ -456,19 +456,19 @@ func TestAccPreCheck(t *testing.T) {
 		os.Setenv("GOOGLE_CREDENTIALS", string(creds))
 	}
 
-	if v := MultiEnvSearch(CredsEnvVars); v == "" {
+	if v := google.MultiEnvSearch(CredsEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(CredsEnvVars, ", "))
 	}
 
-	if v := MultiEnvSearch(ProjectEnvVars); v == "" {
+	if v := google.MultiEnvSearch(ProjectEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ProjectEnvVars, ", "))
 	}
 
-	if v := MultiEnvSearch(regionEnvVars); v == "" {
+	if v := google.MultiEnvSearch(regionEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(regionEnvVars, ", "))
 	}
 
-	if v := MultiEnvSearch(zoneEnvVars); v == "" {
+	if v := google.MultiEnvSearch(zoneEnvVars); v == "" {
 		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(zoneEnvVars, ", "))
 	}
 }
@@ -497,81 +497,81 @@ func GetTestProject(is *terraform.InstanceState, config *google.Config) (string,
 
 // TestAccPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
-	return MultiEnvSearch(projectNumberEnvVars)
+	return google.MultiEnvSearch(projectNumberEnvVars)
 }
 
 // TestAccPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectFromEnv() string {
-	return MultiEnvSearch(ProjectEnvVars)
+	return google.MultiEnvSearch(ProjectEnvVars)
 }
 
 // TestAccPreCheck ensures at least one of the credentials env variables is set.
 func GetTestCredsFromEnv() string {
 	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
-	if MultiEnvSearch(CredsEnvVars) == "true" {
+	if google.MultiEnvSearch(CredsEnvVars) == "true" {
 		return ""
 	}
-	return MultiEnvSearch(CredsEnvVars)
+	return google.MultiEnvSearch(CredsEnvVars)
 }
 
 // TestAccPreCheck ensures at least one of the region env variables is set.
 func GetTestRegionFromEnv() string {
-	return MultiEnvSearch(regionEnvVars)
+	return google.MultiEnvSearch(regionEnvVars)
 }
 
 func GetTestZoneFromEnv() string {
-	return MultiEnvSearch(zoneEnvVars)
+	return google.MultiEnvSearch(zoneEnvVars)
 }
 
 func GetTestCustIdFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, custIdEnvVars...)
-	return MultiEnvSearch(custIdEnvVars)
+	SkipIfEnvNotSet(t, custIdEnvVars...)
+	return google.MultiEnvSearch(custIdEnvVars)
 }
 
 func GetTestIdentityUserFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, identityUserEnvVars...)
-	return MultiEnvSearch(identityUserEnvVars)
+	SkipIfEnvNotSet(t, identityUserEnvVars...)
+	return google.MultiEnvSearch(identityUserEnvVars)
 }
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
 func GetTestFirestoreProjectFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, firestoreProjectEnvVars...)
-	return MultiEnvSearch(firestoreProjectEnvVars)
+	SkipIfEnvNotSet(t, firestoreProjectEnvVars...)
+	return google.MultiEnvSearch(firestoreProjectEnvVars)
 }
 
 func GetTestOrgFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, orgEnvVars...)
-	return MultiEnvSearch(orgEnvVars)
+	SkipIfEnvNotSet(t, orgEnvVars...)
+	return google.MultiEnvSearch(orgEnvVars)
 }
 
 func GetTestOrgDomainFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, orgEnvDomainVars...)
-	return MultiEnvSearch(orgEnvDomainVars)
+	SkipIfEnvNotSet(t, orgEnvDomainVars...)
+	return google.MultiEnvSearch(orgEnvDomainVars)
 }
 
 func GetTestOrgTargetFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, orgTargetEnvVars...)
-	return MultiEnvSearch(orgTargetEnvVars)
+	SkipIfEnvNotSet(t, orgTargetEnvVars...)
+	return google.MultiEnvSearch(orgTargetEnvVars)
 }
 
 // This is the billing account that will be charged for the infrastructure used during testing. For
 // that reason, it is also the billing account used for creating new projects.
 func GetTestBillingAccountFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, billingAccountEnvVars...)
-	return MultiEnvSearch(billingAccountEnvVars)
+	SkipIfEnvNotSet(t, billingAccountEnvVars...)
+	return google.MultiEnvSearch(billingAccountEnvVars)
 }
 
 // This is the billing account that will be modified to test billing-related functionality. It is
 // expected to have more permissions granted to the test user and support subaccounts.
 func GetTestMasterBillingAccountFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, masterBillingAccountEnvVars...)
-	return MultiEnvSearch(masterBillingAccountEnvVars)
+	SkipIfEnvNotSet(t, masterBillingAccountEnvVars...)
+	return google.MultiEnvSearch(masterBillingAccountEnvVars)
 }
 
 func GetTestServiceAccountFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, serviceAccountEnvVars...)
-	return MultiEnvSearch(serviceAccountEnvVars)
+	SkipIfEnvNotSet(t, serviceAccountEnvVars...)
+	return google.MultiEnvSearch(serviceAccountEnvVars)
 }
 
 // Some tests fail during VCR. One common case is race conditions when creating resources.
@@ -596,7 +596,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 
 	project := &cloudresourcemanager.Project{
 		ProjectId: pid,
-		Name:      pname,
+		Name:      google.Pname,
 		Parent: &cloudresourcemanager.ResourceId{
 			Id:   org,
 			Type: "organization",
@@ -604,7 +604,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	}
 
 	var op *cloudresourcemanager.Operation
-	err := RetryTimeDuration(func() (reqErr error) {
+	err := google.RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()
 		return reqErr
 	}, 5*time.Minute)
@@ -613,12 +613,12 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	}
 
 	// Wait for the operation to complete
-	opAsMap, err := ConvertToMap(op)
+	opAsMap, err := google.ConvertToMap(op)
 	if err != nil {
 		return "", err
 	}
 
-	waitErr := ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
+	waitErr := google.ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
 	if waitErr != nil {
 		return "", waitErr
 	}
@@ -626,16 +626,16 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	ba := &cloudbilling.ProjectBillingInfo{
 		BillingAccountName: fmt.Sprintf("billingAccounts/%s", billing),
 	}
-	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(pid), ba).Do()
+	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(google.PrefixedProject(pid), ba).Do()
 	if err != nil {
 		return "", err
 	}
 
 	p2 := fmt.Sprintf("%s-2", pid)
 	project.ProjectId = p2
-	project.Name = fmt.Sprintf("%s-2", pname)
+	project.Name = fmt.Sprintf("%s-2", google.Pname)
 
-	err = RetryTimeDuration(func() (reqErr error) {
+	err = google.RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()
 		return reqErr
 	}, 5*time.Minute)
@@ -644,17 +644,17 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	}
 
 	// Wait for the operation to complete
-	opAsMap, err = ConvertToMap(op)
+	opAsMap, err = google.ConvertToMap(op)
 	if err != nil {
 		return "", err
 	}
 
-	waitErr = ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
+	waitErr = google.ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
 	if waitErr != nil {
 		return "", waitErr
 	}
 
-	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(p2), ba).Do()
+	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(google.PrefixedProject(p2), ba).Do()
 	if err != nil {
 		return "", err
 	}
@@ -673,7 +673,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 
 	// Enable the test runner to create service accounts and get an access token on behalf of
 	// the project 1 service account
-	curEmail, err := GetCurrentUserEmail(config, config.UserAgent)
+	curEmail, err := google.GetCurrentUserEmail(config, config.UserAgent)
 	if err != nil {
 		return "", err
 	}
@@ -688,19 +688,19 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 		Role:    "roles/iam.serviceAccountCreator",
 	}
 
-	bindings := mergeBindings([]*cloudresourcemanager.Binding{proj1SATokenCreator, proj1SACreator})
+	bindings := google.MergeBindings([]*cloudresourcemanager.Binding{proj1SATokenCreator, proj1SACreator})
 
 	p, err := rmService.Projects.GetIamPolicy(pid,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{
-				RequestedPolicyVersion: iamPolicyVersion,
+				RequestedPolicyVersion: google.IamPolicyVersion,
 			},
 		}).Do()
 	if err != nil {
 		return "", err
 	}
 
-	p.Bindings = mergeBindings(append(p.Bindings, bindings...))
+	p.Bindings = google.MergeBindings(append(p.Bindings, bindings...))
 	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(pid,
 		&cloudresourcemanager.SetIamPolicyRequest{
 			Policy:     p,
@@ -730,7 +730,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 		Role:    fmt.Sprintf("roles/%s.admin", service),
 	}
 
-	bindings = mergeBindings([]*cloudresourcemanager.Binding{proj2ServiceUsageBinding, proj2ServiceAdminBinding})
+	bindings = google.MergeBindings([]*cloudresourcemanager.Binding{proj2ServiceUsageBinding, proj2ServiceAdminBinding})
 
 	// For KMS test only
 	if service == "cloudkms" {
@@ -739,20 +739,20 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 			Role:    "roles/cloudkms.cryptoKeyEncrypter",
 		}
 
-		bindings = mergeBindings(append(bindings, proj2CryptoKeyBinding))
+		bindings = google.MergeBindings(append(bindings, proj2CryptoKeyBinding))
 	}
 
 	p, err = rmService.Projects.GetIamPolicy(p2,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{
-				RequestedPolicyVersion: iamPolicyVersion,
+				RequestedPolicyVersion: google.IamPolicyVersion,
 			},
 		}).Do()
 	if err != nil {
 		return "", err
 	}
 
-	p.Bindings = mergeBindings(append(p.Bindings, bindings...))
+	p.Bindings = google.MergeBindings(append(p.Bindings, bindings...))
 	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(p2,
 		&cloudresourcemanager.SetIamPolicyRequest{
 			Policy:     p,
@@ -788,7 +788,7 @@ func isReleaseDiffEnabled() bool {
 
 func initializeReleaseDiffTest(c resource.TestCase) resource.TestCase {
 	var releaseProvider string
-	packagePath := fmt.Sprint(reflect.TypeOf(Config{}).PkgPath())
+	packagePath := fmt.Sprint(reflect.TypeOf(google.Config{}).PkgPath())
 	if strings.Contains(packagePath, "google-beta") {
 		releaseProvider = "google-beta"
 	} else {
@@ -847,4 +847,18 @@ func reformConfigWithProvider(config, provider string) string {
 	providerReplacementBytes = []byte(providerReplacement)
 	resourceHeader := regexp.MustCompile(`(resource .*google_.* .*\w+.*\{.*)`)
 	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
+}
+
+func SkipIfEnvNotSet(t *testing.T, envs ...string) {
+	if t == nil {
+		log.Printf("[DEBUG] Not running inside of test - skip skipping")
+		return
+	}
+
+	for _, k := range envs {
+		if os.Getenv(k) == "" {
+			log.Printf("[DEBUG] Warning - environment variable %s is not set - skipping test %s", k, t.Name())
+			t.Skipf("Environment variable %s is not set", k)
+		}
+	}
 }
