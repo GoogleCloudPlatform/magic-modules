@@ -15,7 +15,7 @@ if err != nil {
 	log.Printf("[DEBUG] Finished deleting AccessLevels %q: %#v", d.Id(), res)
 }
 
-err = accessContextManagerOperationWaitTime(
+err = AccessContextManagerOperationWaitTime(
 	config, res, "Updating AccessLevels", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 
