@@ -99,7 +99,7 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	}
 	acctest.TestAccPreCheck(t)
 
-	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	serviceaccount := google.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 	creds := acctest.GetTestCredsFromEnv()
 	proj := acctest.GetTestProjectFromEnv()
 
@@ -131,9 +131,9 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 
 	creds := acctest.GetTestCredsFromEnv()
 	proj := acctest.GetTestProjectFromEnv()
-	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	serviceaccount := google.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
-	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), DefaultClientScopes...)
+	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), google.DefaultClientScopes...)
 	if err != nil {
 		t.Fatalf("invalid test credentials: %s", err)
 	}
@@ -226,7 +226,7 @@ func TestConfigLoadAndValidate_customScopes(t *testing.T) {
 
 func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 	// Use default batching config
-	batchCfg, err := ExpandProviderBatchingConfig(nil)
+	batchCfg, err := google.ExpandProviderBatchingConfig(nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -242,16 +242,16 @@ func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expectedDur := time.Second * defaultBatchSendIntervalSec
+	expectedDur := time.Second * google.DefaultBatchSendIntervalSec
 	if config.requestBatcherServiceUsage.sendAfter != expectedDur {
 		t.Fatalf("expected sendAfter to be %d seconds, got %v",
-			defaultBatchSendIntervalSec,
+			google.DefaultBatchSendIntervalSec,
 			config.requestBatcherServiceUsage.sendAfter)
 	}
 }
 
 func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
-	batchCfg, err := ExpandProviderBatchingConfig([]interface{}{
+	batchCfg, err := google.ExpandProviderBatchingConfig([]interface{}{
 		map[string]interface{}{
 			"send_after":      "1s",
 			"enable_batching": false,

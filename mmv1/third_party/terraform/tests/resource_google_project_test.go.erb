@@ -72,7 +72,7 @@ func testSweepProject(region string) error {
 func TestAccProject_createWithoutOrg(t *testing.T) {
 	t.Parallel()
 
-	creds := MultiEnvSearch(acctest.CredsEnvVars)
+	creds := google.MultiEnvSearch(acctest.CredsEnvVars)
 	if strings.Contains(creds, "iam.gserviceaccount.com") {
 		t.Skip("Service accounts cannot create projects without a parent. Requires user credentials.")
 	}
