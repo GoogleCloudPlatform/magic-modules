@@ -47,7 +47,7 @@ func init() {
 func testSweep{{$.TitleCaseFullName}}(region string) error {
 	log.Print("[INFO][SWEEPER_LOG] Starting sweeper for {{$.TitleCaseFullName}}")
 
-	config, err := sharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -80,5 +80,5 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 }
 
 func isDeletable{{$.TitleCaseFullName}}(r *{{$.Package}}.{{$.DCLStructName}}) bool {
-	return isSweepableTestResource(*r.Name)
+	return acctest.IsSweepableTestResource(*r.Name)
 }

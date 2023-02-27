@@ -2304,7 +2304,7 @@ resource "google_project_iam_member" "composer-worker" {
  * rate-limited, for now just warn instead of returning actual errors.
  */
 func testSweepComposerResources(region string) error {
-	config, err := sharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		return fmt.Errorf("error getting shared config for region: %s", err)
 	}

@@ -1,9 +1,10 @@
 <% autogen_exception -%>
-package google
+package google_test
 <% unless version == 'ga' -%>
 
 import (
 	"testing"
+  "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
 
         "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )

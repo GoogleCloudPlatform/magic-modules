@@ -1,4 +1,5 @@
-package google
+<% autogen_exception -%>
+package google_test
 
 import (
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
 )
 
 func TestConvertStringArr(t *testing.T) {
@@ -544,18 +546,6 @@ func TestRetryTimeDuration_noretry(t *testing.T) {
 	if i != 1 {
 		t.Errorf("expected error function to be called exactly once, but was called %d times", i)
 	}
-}
-
-type TimeoutError struct {
-	timeout bool
-}
-
-func (e *TimeoutError) Timeout() bool {
-	return e.timeout
-}
-
-func (e *TimeoutError) Error() string {
-	return "timeout error"
 }
 
 func TestRetryTimeDuration_URLTimeoutsShouldRetry(t *testing.T) {

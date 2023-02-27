@@ -108,7 +108,7 @@ func handleNotFoundError(err error, d *schema.ResourceData, resource string) err
 		fmt.Sprintf("Error when reading or editing %s: {{err}}", resource), err)
 }
 
-func isGoogleApiErrorWithCode(err error, errCode int) bool {
+func IsGoogleApiErrorWithCode(err error, errCode int) bool {
 	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
 	return ok && gerr != nil && gerr.Code == errCode
 }

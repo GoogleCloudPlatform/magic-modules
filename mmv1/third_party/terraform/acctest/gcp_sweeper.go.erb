@@ -1,11 +1,10 @@
-package google
+<% autogen_exception -%>
+package acctest
 
 import (
 	"fmt"
 	"strings"
-	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 )
 
 // List of prefixes used for test resource names
@@ -23,34 +22,30 @@ var testResourcePrefixes = []string{
 	"k8s-fw-",             // firewall rules are getting created and not cleaned up by k8 resources using this prefix
 }
 
-func TestMain(m *testing.M) {
-	resource.TestMain(m)
-}
-
-// sharedConfigForRegion returns a common config setup needed for the sweeper
+// SharedConfigForRegion returns a common config setup needed for the sweeper
 // functions for a given region
-func sharedConfigForRegion(region string) (*Config, error) {
-	project := acctest.GetTestProjectFromEnv()
+func SharedConfigForRegion(region string) (*Config, error) {
+	project := GetTestProjectFromEnv()
 	if project == "" {
-		return nil, fmt.Errorf("set project using any of these env variables %v", acctest.ProjectEnvVars)
+		return nil, fmt.Errorf("set project using any of these env variables %v", ProjectEnvVars)
 	}
 
-	if v := MultiEnvSearch(acctest.CredsEnvVars); v == "" {
-		return nil, fmt.Errorf("set credentials using any of these env variables %v", acctest.CredsEnvVars)
+	if v := google.MultiEnvSearch(CredsEnvVars); v == "" {
+		return nil, fmt.Errorf("set credentials using any of these env variables %v", CredsEnvVars)
 	}
 
 	conf := &Config{
-		Credentials: acctest.GetTestCredsFromEnv(),
+		Credentials: GetTestCredsFromEnv(),
 		Region:      region,
 		Project:     project,
 	}
 
-	ConfigureBasePaths(conf)
+	google.ConfigureBasePaths(conf)
 
 	return conf, nil
 }
 
-func isSweepableTestResource(resourceName string) bool {
+func IsSweepableTestResource(resourceName string) bool {
 	for _, p := range testResourcePrefixes {
 		if strings.HasPrefix(resourceName, p) {
 			return true
