@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleFirebaseHostingChannel() *schema.Resource {
+func DataSourceGoogleFirebaseHostingChannel() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceFirebaseHostingChannel().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceFirebaseHostingChannel().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "site_id", "channel_id")

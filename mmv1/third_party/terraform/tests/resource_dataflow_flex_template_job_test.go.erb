@@ -12,11 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-<% if version == "ga" -%>
-	"google.golang.org/api/compute/v1"
-<% else -%>
 	compute "google.golang.org/api/compute/v0.beta"
-<% end -%>
 )
 
 func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
@@ -27,6 +23,7 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 
 	randStr := randString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -34,7 +31,7 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_basic(job, "mytopic"),
+				Config: testAccDataflowFlexTemplateJob_basic(job, bucket, "mytopic"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 				),
@@ -57,6 +54,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 
 	randStr := randString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -64,13 +62,13 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_basic(job, "mytopic"),
+				Config: testAccDataflowFlexTemplateJob_basic(job, bucket, "mytopic"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 				),
 			},
 			{
-				Config: testAccDataflowFlexTemplateJob_basic(job, "mytopic2"),
+				Config: testAccDataflowFlexTemplateJob_basic(job, bucket, "mytopic2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobHasOption(t, "google_dataflow_flex_template_job.job", "topic", "projects/myproject/topics/mytopic2"),
 				),
@@ -93,6 +91,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
 
 	randStr := randString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -100,13 +99,13 @@ func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_basic(job, "mytopic"),
+				Config: testAccDataflowFlexTemplateJob_basic(job, bucket, "mytopic"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 				),
 			},
 			{
-				Config: testAccDataflowFlexTemplateJob_basic(job, ""),
+				Config: testAccDataflowFlexTemplateJob_basic(job, bucket, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobHasOption(t, "google_dataflow_flex_template_job.job", "topic", "projects/myproject/topics/mytopic"),
 				),
@@ -125,13 +124,17 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 	randStr := randString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 
+	bucket := "tf-test-dataflow-bucket-" + randStr
+	accountId := "tf-test-dataflow-sa" + randStr
+	zone := "us-central1-b"
+
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job),
+				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket),
 			},
 			{
 				ResourceName:            "google_dataflow_flex_template_job.job",
@@ -140,7 +143,7 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
 			},
 			{
-				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job),
+				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job, bucket),
 			},
 			{
 				ResourceName:            "google_dataflow_flex_template_job.job",
@@ -448,7 +451,7 @@ func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *te
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_basic(job, topicName string) string {
+func testAccDataflowFlexTemplateJob_basic(job, bucket, topicName string) string {
 	topicField := ""
 	if topicName != "" {
 		topicField = fmt.Sprintf("topic = \"projects/myproject/topics/%s\"", topicName)
@@ -458,12 +461,26 @@ data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
   bucket = "dataflow-templates"
 }
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = "{}"
+}
+
 resource "google_dataflow_flex_template_job" "job" {
   name = "%s"
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
   parameters = {
-    schemaLocation = "gs://mybucket/schema.json"
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
     %s
   }
@@ -471,11 +488,11 @@ resource "google_dataflow_flex_template_job" "job" {
    "my_labels" = "value"
   }
 }
-`, job, topicField)
+`, bucket, job, topicField)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job string) string {
+func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -483,21 +500,37 @@ resource "google_service_account" "dataflow-sa" {
   account_id   = "dataflow-sa-create"
   display_name = "DataFlow Service Account"
 }
+
 resource "google_project_iam_member" "dataflow-worker" {
   project = data.google_project.project.project_id
   role   = "roles/dataflow.worker"
   member = "serviceAccount:${google_service_account.dataflow-sa.email}"
 }
+
 data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
   bucket = "dataflow-templates"
 }
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = "{}"
+}
+
 resource "google_dataflow_flex_template_job" "job" {
   name = "%s"
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
   parameters = {
-    schemaLocation = "gs://mybucket/schema.json"
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
     topic = "projects/myproject/topics/mytopic"
   }
@@ -507,7 +540,7 @@ resource "google_dataflow_flex_template_job" "job" {
   service_account_email = google_service_account.dataflow-sa.email
   machine_type = "n1-standard-2"
 }
-`, job)
+`, bucket, job)
 }
 
 func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job string) string {
@@ -527,12 +560,24 @@ data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
   bucket = "dataflow-templates"
 }
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = "{}"
+}
 resource "google_dataflow_flex_template_job" "job" {
   name = "%s"
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
   parameters = {
-    schemaLocation = "gs://mybucket/schema.json"
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
     topic = "projects/myproject/topics/mytopic"
   }
@@ -542,7 +587,7 @@ resource "google_dataflow_flex_template_job" "job" {
   service_account_email = google_service_account.dataflow-sa.email
   machine_type = "n2-standard-2"
 }
-`, job)
+`, bucket, job)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
@@ -574,6 +619,7 @@ resource "google_dataflow_flex_template_job" "job" {
   network           = google_compute_network.net.name
 
 }
+<<<<<<< HEAD
 `, network, job)
 }
 
@@ -717,6 +763,9 @@ resource "google_dataflow_flex_template_job" "job" {
 
 }
 `, job, strings.Join(experiments, `", "`))
+=======
+`, accountId, bucket, job, zone)
+>>>>>>> 232f859efadf9ca8877179e1ebeafb6a469d5858
 }
 
 func testAccDataflowJobHasOption(t *testing.T, res, option, expectedValue string) resource.TestCheckFunc {
