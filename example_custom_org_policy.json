@@ -1,0 +1,61 @@
+[
+  {
+    "name": "cloudresourcemanager.googleapis.com/folders/{{.FolderID}}",
+    "asset_type": "cloudresourcemanager.googleapis.com/Folder",
+    "v2_org_policies": [
+      {
+        "name": "folders/{{.FolderID}}/policies/samplePolicy",
+        "spec": {
+          "update_time": "{{.Time.RFC3339Nano}}",
+          "rules": [
+            {
+              "deny_all": true
+            }
+          ],
+          "inherit_from_parent": true
+        }
+      }
+    ],
+    "ancestors": [
+      "organization/{{.OrgID}}/folder/{{.FolderID}}"
+    ]
+  },
+  {
+    "name": "cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+    "asset_type": "cloudresourcemanager.googleapis.com/Project",
+    "v2_org_policies": [
+      {
+        "name": "projects/{{.Provider.project}}/policies/gcp.resourceLocations",
+        "spec": {
+          "update_time": "{{.Time.RFC3339Nano}}",
+          "rules": [
+            {
+              "values": {
+                "allowed_values": [
+                  "projects/allowed-project1",
+                  "projects/allowed-project2"
+                ],
+                "denied_values": [
+                  "projects/denied-project"
+                ]
+              },
+              "expression": {
+                "expression": "resource.matchLabels('labelKeys/123', 'labelValues/345')",
+                "title": "sample-condition",
+                "description": "A sample condition for the policy",
+                "location": "sample-location.log"
+              }
+            },
+            {
+              "allow_all": true
+            }
+          ],
+          "inherit_from_parent": true
+        }
+      }
+    ],
+    "ancestors": [
+      "organization/{{.OrgID}}/folder/{{.FolderID}}/project/{{.Provider.project}}"
+    ]
+  }
+]
