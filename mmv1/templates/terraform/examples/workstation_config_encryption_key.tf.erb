@@ -42,7 +42,7 @@ resource "google_kms_crypto_key" "default" {
 }
 
 resource "google_service_account" "default" {
-  account_id   = "cloud-workstations-kms"
+  account_id   = "workstations%{random_suffix}"
   display_name = "Service Account for Cloud Workstations"
   provider     = google-beta
 }
