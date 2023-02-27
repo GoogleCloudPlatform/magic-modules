@@ -24,7 +24,7 @@ func TestRequestBatcher_disableBatching(t *testing.T) {
 		"testBatcher",
 		context.Background(),
 		&batchingConfig{
-			sendAfter:      time.Duration(1) * time.Second,
+			SendAfter:      time.Duration(1) * time.Second,
 			enableBatching: false,
 		})
 
@@ -72,7 +72,7 @@ func TestRequestBatcher_errInCombine(t *testing.T) {
 		"testBatcher",
 		context.Background(),
 		&batchingConfig{
-			sendAfter:      time.Duration(5) * time.Second,
+			SendAfter:      time.Duration(5) * time.Second,
 			enableBatching: true,
 		})
 
@@ -136,7 +136,7 @@ func TestRequestBatcher_errInSend(t *testing.T) {
 		"testBatcher",
 		context.Background(),
 		&batchingConfig{
-			sendAfter:      time.Duration(5) * time.Second,
+			SendAfter:      time.Duration(5) * time.Second,
 			enableBatching: true,
 		})
 
@@ -205,7 +205,7 @@ func TestRequestBatcher_errTimeout(t *testing.T) {
 		"testBatcher",
 		context.Background(),
 		&batchingConfig{
-			sendAfter:      time.Duration(5) * time.Second,
+			SendAfter:      time.Duration(5) * time.Second,
 			enableBatching: true,
 		})
 
@@ -250,7 +250,7 @@ func testBasicCountBatches(t *testing.T, testName string, numBatches int) {
 		"testBatcher",
 		context.Background(),
 		&batchingConfig{
-			sendAfter:      time.Duration(1) * time.Second,
+			SendAfter:      time.Duration(1) * time.Second,
 			enableBatching: true,
 		})
 
