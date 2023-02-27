@@ -125,7 +125,6 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 
 	bucket := "tf-test-dataflow-bucket-" + randStr
-	accountId := "tf-test-dataflow-sa" + randStr
 	zone := "us-central1-b"
 
 	vcrTest(t, resource.TestCase{
@@ -165,6 +164,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
 	network2 := "tf-test-dataflow-net2" + randStr
+  bucket := "tf-test-dataflow-bucket-" + randStr
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -172,7 +172,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_network(job, network),
+				Config: testAccDataflowFlexTemplateJob_network(job, network, bucket),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasNetwork(t, "google_dataflow_flex_template_job.job", network),
@@ -185,7 +185,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
 			},
 			{
-				Config: testAccDataflowFlexTemplateJob_network(job, network2),
+				Config: testAccDataflowFlexTemplateJob_network(job, network2, bucket),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasNetwork(t, "google_dataflow_flex_template_job.job", network),
@@ -212,14 +212,15 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 	network := "tf-test-dataflow-net" + randStr
 	subnetwork := "tf-test-dataflow-subnetwork" + randStr
 	subnetwork2 := "tf-test-dataflow-subnetwork" + randStr
-
+  bucket := "tf-test-dataflow-bucket-" + randStr
+  
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_subnetwork(job, network, subnetwork),
+				Config: testAccDataflowFlexTemplateJob_subnetwork(job, network, subnetwork, bucket),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasSubNetwork(t, "google_dataflow_flex_template_job.job", subnetwork),
@@ -232,7 +233,7 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state"},
 			},
 			{
-				Config: testAccDataflowFlexTemplateJob_subnetwork(job, network, subnetwork),
+				Config: testAccDataflowFlexTemplateJob_subnetwork(job, network, subnetwork, bucket),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasSubNetwork(t, "google_dataflow_flex_template_job.job", subnetwork2),
@@ -255,7 +256,8 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 	t.Parallel()
 
 	randStr := randString(t, 10)
-	job := "tf-test-dataflow-job-" + randStr
+  job := "tf-test-dataflow-job-" + randStr
+  bucket := "tf-test-dataflow-bucket-" + randStr
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -263,7 +265,7 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_ipConfig(job),
+				Config: testAccDataflowFlexTemplateJob_ipConfig(job, bucket),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 				),
@@ -288,6 +290,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	key_ring := "tf-test-dataflow-kms-ring-" + randStr
 	crypto_key := "tf-test-dataflow-kms-key-" + randStr
+  bucket := "tf-test-dataflow-bucket-" + randStr  
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -295,7 +298,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key),
+				Config: testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key, bucket),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 				),
@@ -319,14 +322,15 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 	randStr := randString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	additionalExperiments := []string{"enable_stackdriver_agent_metrics", "shuffle_mode=service"}
-
+  bucket := "tf-test-dataflow-bucket-" + randStr
+  
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_additionalExperiments(job, additionalExperiments),
+				Config: testAccDataflowFlexTemplateJob_additionalExperiments(job, additionalExperiments, bucket),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasAdditionalExperiments(t, "google_dataflow_flex_template_job.job", additionalExperiments),
@@ -482,7 +486,7 @@ resource "google_dataflow_flex_template_job" "job" {
   parameters = {
     schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
-    %s
+    topic = %s
   }
   labels = {
    "my_labels" = "value"
@@ -543,7 +547,7 @@ resource "google_dataflow_flex_template_job" "job" {
 `, bucket, job)
 }
 
-func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job string) string {
+func testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFullUpdate(job, bucket string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -591,7 +595,7 @@ resource "google_dataflow_flex_template_job" "job" {
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_network(job, network string) string {
+func testAccDataflowFlexTemplateJob_network(job, network, bucket string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -604,6 +608,20 @@ data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
   bucket = "dataflow-templates"
 }
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = "{}"
+}
+
 resource "google_dataflow_flex_template_job" "job" {
   name = "%s"
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
@@ -619,18 +637,30 @@ resource "google_dataflow_flex_template_job" "job" {
   network           = google_compute_network.net.name
 
 }
-<<<<<<< HEAD
-`, network, job)
+`, network, bucket, job)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_subnetwork(job, network, subnetwork string) string {
+func testAccDataflowFlexTemplateJob_subnetwork(job, network, subnetwork, bucket string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
 resource "google_compute_network" "net" {
   name                    = "%s"
   auto_create_subnetworks = false
+}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = "{}"
 }
 
 resource "google_compute_subnetwork" "subnet" {
@@ -658,13 +688,26 @@ resource "google_dataflow_flex_template_job" "job" {
   subnetwork        = google_compute_subnetwork.subnet.self_link
 
 }
-`, network, subnetwork, job)
+`, network, bucket, subnetwork, job)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_ipConfig(job string) string {
+func testAccDataflowFlexTemplateJob_ipConfig(job, bucket string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = "{}"
+}
 
 data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
@@ -685,13 +728,26 @@ resource "google_dataflow_flex_template_job" "job" {
   ip_configuration = "WORKER_IP_PRIVATE"
 
 }
-`, job)
+`,bucket, job)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key string) string {
+func testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key, bucket string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = "{}"
+}
 
 resource "google_project_iam_member" "kms-project-dataflow-binding" {
   project = data.google_project.project.project_id
@@ -735,13 +791,26 @@ resource "google_dataflow_flex_template_job" "job" {
   kms_key_name		= google_kms_crypto_key.crypto_key.id
 
 }
-`, key_ring, crypto_key, job)
+`,bucket, key_ring, crypto_key, job)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
-func testAccDataflowFlexTemplateJob_additionalExperiments(job string, experiments []string) string {
+func testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket string, experiments []string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = "{}"
+}
 
 data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
@@ -762,10 +831,7 @@ resource "google_dataflow_flex_template_job" "job" {
   additional_experiments = ["%s"]
 
 }
-`, job, strings.Join(experiments, `", "`))
-=======
-`, accountId, bucket, job, zone)
->>>>>>> 232f859efadf9ca8877179e1ebeafb6a469d5858
+`,bucket, job, strings.Join(experiments, `", "`))
 }
 
 func testAccDataflowJobHasOption(t *testing.T, res, option, expectedValue string) resource.TestCheckFunc {
