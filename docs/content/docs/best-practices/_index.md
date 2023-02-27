@@ -15,7 +15,7 @@ This is necessary and required for cases where a field can't be updated in-place
 
 Some fields or resources may be possible to update in place, but only under specific conditions. In these cases, you can treat the field as updatable - that is, do not mark it as ForceNew; instead, implement standard update functionality. Then, call `diff.ForceNew` inside a [`CustomizeDiff`](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/customizing-differences) if the appropriate conditions to allow update in place are not met. Any `CustomizeDiff` function like this must be thoroughly unit tested. Making a field conditionally updatable like this is considered a good and useful enhancement in cases where recreation is costly and conditional updates do not introduce undue complexity.
 
-In complex cases, it is better to mark the field `ForceNew` to ensure that users are able to have their configurations applied successfully.
+In complex cases, it is better to mark the field `ForceNew` to ensure that users can apply their configurations successfully.
 
 ### Mitigating data loss risk via deletion_protection
 
