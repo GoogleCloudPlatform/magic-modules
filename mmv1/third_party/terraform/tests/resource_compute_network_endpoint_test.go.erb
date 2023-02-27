@@ -205,7 +205,7 @@ func testAccComputeNetworkEndpointsListEndpointPorts(t *testing.T, negId string)
 	config := acctest.GoogleProviderConfig(t)
 
 	url := fmt.Sprintf("https://www.googleapis.com/compute/<% if version == 'ga' %>v1<% else %>beta<% end %>/%s/listNetworkEndpoints", negId)
-	res, err := sendRequest(config, "POST", "", url, config.userAgent, nil)
+	res, err := sendRequest(config, "POST", "", url, config.UserAgent, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -150,7 +150,7 @@ func resourceLoggingBucketConfigImportState(parent string) schema.StateFunc {
 func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggingBucketConfigIDFunc) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*Config)
-		userAgent, err := generateUserAgentString(d, config.userAgent)
+		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
 		}
@@ -186,7 +186,7 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 
 func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{}, id string) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Bucket: %s", err)
 	}
@@ -231,7 +231,7 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 
 func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -273,7 +273,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -303,7 +303,7 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-	_, err = sendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	_, err = SendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), err)
 	}
@@ -322,7 +322,7 @@ func resourceLoggingBucketConfigDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -330,7 +330,7 @@ func resourceLoggingBucketConfigDelete(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-	if _, err := sendRequestWithTimeout(config, "DELETE", "", url, userAgent, nil, d.Timeout(schema.TimeoutUpdate)); err != nil {
+	if _, err := SendRequestWithTimeout(config, "DELETE", "", url, userAgent, nil, d.Timeout(schema.TimeoutUpdate)); err != nil {
 		return fmt.Errorf("Error deleting Logging Bucket Config %q: %s", d.Id(), err)
 	}
 	return nil

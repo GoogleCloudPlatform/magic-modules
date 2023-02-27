@@ -43,7 +43,7 @@ func FolderIdParseFunc(d *schema.ResourceData, _ *Config) error {
 }
 
 func (u *FolderIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (u *FolderIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Pol
 		return err
 	}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}

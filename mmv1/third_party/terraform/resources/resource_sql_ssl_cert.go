@@ -94,7 +94,7 @@ func ResourceSqlSslCert() *schema.Resource {
 
 func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -201,7 +201,7 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

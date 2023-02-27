@@ -859,7 +859,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 
 func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -925,7 +925,7 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 
 func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -962,7 +962,7 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	tfConfig := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, tfConfig.userAgent)
+	userAgent, err := generateUserAgentString(d, tfConfig.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1243,7 +1243,7 @@ func resourceComposerEnvironmentPatchField(updateMask, userAgent string, env *co
 
 func resourceComposerEnvironmentDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -2227,7 +2227,7 @@ func validateComposerEnvironmentEnvVariables(v interface{}, k string) (ws []stri
 }
 
 func handleComposerEnvironmentCreationOpFailure(id string, envName *composerEnvironmentName, d *schema.ResourceData, config *Config) error {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

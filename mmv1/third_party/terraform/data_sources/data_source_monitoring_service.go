@@ -37,7 +37,7 @@ func dataSourceMonitoringServiceType(
 func dataSourceMonitoringServiceTypeReadFromList(listFilter string, typeStateSetter monitoringServiceTypeStateSetter) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*Config)
-		userAgent, err := generateUserAgentString(d, config.userAgent)
+		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
 		}

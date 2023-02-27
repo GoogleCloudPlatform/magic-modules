@@ -110,7 +110,7 @@ func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) fu
 				continue
 			}
 
-			_, err := config.NewComputeClient(config.userAgent).Instances.Get(
+			_, err := config.NewComputeClient(config.UserAgent).Instances.Get(
 				config.Project, rs.Primary.Attributes["zone"], rs.Primary.ID).Do()
 			if err == nil {
 				return fmt.Errorf("Instance still exists")

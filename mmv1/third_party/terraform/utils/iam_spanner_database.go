@@ -57,7 +57,7 @@ func SpannerDatabaseIdParseFunc(d *schema.ResourceData, config *Config) error {
 }
 
 func (u *SpannerDatabaseIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (u *SpannerDatabaseIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 
 	spannerPolicy.Version = iamPolicyVersion
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}

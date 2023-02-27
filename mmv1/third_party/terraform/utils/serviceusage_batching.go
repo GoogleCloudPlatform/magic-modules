@@ -22,7 +22,7 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 		return tryEnableRenamedService(service, altName, project, d, config)
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 }
 
 func tryEnableRenamedService(service, altName string, project string, d *schema.ResourceData, config *Config) error {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func tryEnableRenamedService(service, altName string, project string, d *schema.
 }
 
 func BatchRequestReadServices(project string, d *schema.ResourceData, config *Config) (interface{}, error) {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}

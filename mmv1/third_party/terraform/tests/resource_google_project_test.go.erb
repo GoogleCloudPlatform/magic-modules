@@ -48,7 +48,7 @@ func testSweepProject(region string) error {
 	for paginate := true; paginate; {
 		// Filter for projects with test prefix
 		filter := "id:" + testPrefix + "*"
-		found, err := config.NewResourceManagerClient(config.userAgent).Projects.List().Filter(filter).PageToken(token).Do()
+		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.List().Filter(filter).PageToken(token).Do()
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error listing projects: %s", err)
 			return nil
@@ -59,7 +59,7 @@ func testSweepProject(region string) error {
 			}
 			log.Printf("[INFO][SWEEPER_LOG] Sweeping Project id: %s", project.ProjectId)
 
-			_, err := config.NewResourceManagerClient(config.userAgent).Projects.Delete(project.ProjectId).Do()
+			_, err := config.NewResourceManagerClient(config.UserAgent).Projects.Delete(project.ProjectId).Do()
 
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] Error, failed to delete project %s: %s", project.Name, err)
@@ -320,9 +320,9 @@ func testAccCheckGoogleProjectHasBillingAccount(t *testing.T, r, pid, billingId 
 		// Actual value in API should match state and expected
 		// Read the billing account
 		config := acctest.GoogleProviderConfig(t)
-		ba, err := config.NewBillingClient(config.userAgent).Projects.GetBillingInfo(prefixedProject(pid)).Do()
+		ba, err := config.NewBillingClient(config.UserAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 		if err != nil {
-			return fmt.Errorf("Error reading billing account for project %q: %v", prefixedProject(pid), err)
+			return fmt.Errorf("Error reading billing account for project %q: %v", PrefixedProject(pid), err)
 		}
 		if billingId != strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/") {
 			return fmt.Errorf("Billing ID returned by API (%s) did not match expected value (%s)", ba.BillingAccountName, billingId)
@@ -346,7 +346,7 @@ func testAccCheckGoogleProjectHasLabels(t *testing.T, r, pid string, expected ma
 		// Actual value in API should match state and expected
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(pid).Do()
+		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
 		if err != nil {
 			return err
 		}
@@ -388,7 +388,7 @@ func testAccCheckGoogleProjectHasNoLabels(t *testing.T, r, pid string) resource.
 		// Actual value in API should match state and expected
 		config := acctest.GoogleProviderConfig(t)
 
-		found, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(pid).Do()
+		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
 		if err != nil {
 			return err
 		}

@@ -21,7 +21,7 @@ if d.HasChange("connected_repositories") {
 	for _, repo := range removeRepos {
 		obj := make(map[string]interface{})
 		obj["connectedRepository"] = repo
-		res, err = sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+		res, err = SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			return fmt.Errorf("Error removing connected_repositories: %s", err)
 		}
@@ -53,7 +53,7 @@ if d.HasChange("connected_repositories") {
 			return err
 		}
 
-		res, err = sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+		res, err = SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			return fmt.Errorf("Error creating connected_repositories: %s", err)
 		}

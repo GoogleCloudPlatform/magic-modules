@@ -60,7 +60,7 @@ func DataSourceGoogleKmsCryptoKeyVersion() *schema.Resource {
 
 func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 		}
 		log.Printf("[DEBUG] Getting public key of CryptoKeyVersion: %#v", url)
 
-		res, err = sendRequestWithTimeout(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil, d.Timeout(schema.TimeoutRead), isCryptoKeyVersionsPendingGeneration)
+		res, err = SendRequestWithTimeout(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil, d.Timeout(schema.TimeoutRead), isCryptoKeyVersionsPendingGeneration)
 
 		if err != nil {
 			log.Printf("Error generating public key: %s", err)

@@ -96,7 +96,7 @@ func getRouterLockName(region string, router string) string {
 }
 
 func handleNotFoundError(err error, d *schema.ResourceData, resource string) error {
-	if isGoogleApiErrorWithCode(err, 404) {
+	if IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[WARN] Removing %s because it's gone", resource)
 		// The resource doesn't exist anymore
 		d.SetId("")

@@ -11,7 +11,7 @@ import (
 func resourceComputePerInstanceConfigPollRead(d *schema.ResourceData, meta interface{}) PollReadFunc {
 	return func() (map[string]interface{}, error) {
 		config := meta.(*Config)
-		userAgent, err := generateUserAgentString(d, config.userAgent)
+		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return nil, err
 		}
@@ -43,7 +43,7 @@ func resourceComputePerInstanceConfigPollRead(d *schema.ResourceData, meta inter
 func resourceComputeRegionPerInstanceConfigPollRead(d *schema.ResourceData, meta interface{}) PollReadFunc {
 	return func() (map[string]interface{}, error) {
 		config := meta.(*Config)
-		userAgent, err := generateUserAgentString(d, config.userAgent)
+		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return nil, err
 		}
@@ -79,7 +79,7 @@ func findInstanceName(d *schema.ResourceData, config *Config) (string, error) {
 		return "", err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return "", err
 	}

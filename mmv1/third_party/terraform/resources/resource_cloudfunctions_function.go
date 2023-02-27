@@ -430,7 +430,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 
 func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -560,7 +560,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	// We retry the whole create-and-wait because Cloud Functions
 	// will sometimes fail a creation operation entirely if it fails to pull
 	// source code and we need to try the whole creation again.
-	rerr := retryTimeDuration(func() error {
+	rerr := RetryTimeDuration(func() error {
 		op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Create(
 			cloudFuncId.locationId(), function).Do()
 		if err != nil {
@@ -582,7 +582,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -712,7 +712,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG]: Updating google_cloudfunctions_function")
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -859,7 +859,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if len(updateMaskArr) > 0 {
 		log.Printf("[DEBUG] Send Patch CloudFunction Configuration request: %#v", function)
 		updateMask := strings.Join(updateMaskArr, ",")
-		rerr := retryTimeDuration(func() error {
+		rerr := RetryTimeDuration(func() error {
 			op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Patch(function.Name, function).
 				UpdateMask(updateMask).Do()
 			if err != nil {
@@ -880,7 +880,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

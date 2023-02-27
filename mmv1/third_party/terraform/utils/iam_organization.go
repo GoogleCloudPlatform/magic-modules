@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -38,7 +39,7 @@ func OrgIdParseFunc(d *schema.ResourceData, _ *Config) error {
 }
 
 func (u *OrganizationIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func (u *OrganizationIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.P
 }
 
 func (u *OrganizationIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}

@@ -105,7 +105,7 @@ The score values range from 0.0 (completely uncertain) to 1.0 (completely certai
 
 func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Version: %s", err)
 	}
@@ -194,7 +194,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 
 func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -254,7 +254,7 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -317,7 +317,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return fmt.Errorf("Error updating Version %q: %s", d.Id(), err)
@@ -338,7 +338,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -373,7 +373,7 @@ func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{})
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "Version")
 	}

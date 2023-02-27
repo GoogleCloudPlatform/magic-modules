@@ -193,7 +193,7 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 	}
 	path := filepath.Join(envPath, vcrFileName(testName))
 
-	rec, err := recorder.NewAsMode(path, vcrMode, config.client.Transport)
+	rec, err := recorder.NewAsMode(path, vcrMode, config.Client.Transport)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
@@ -239,7 +239,7 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 		}
 		return false
 	})
-	config.client.Transport = rec
+	config.Client.Transport = rec
 	configsLock.Lock()
 	configs[testName] = config
 	configsLock.Unlock()
@@ -255,7 +255,7 @@ func closeRecorder(t *testing.T) {
 		// We did not cache the config if it does not use VCR
 		if !t.Failed() && isVcrEnabled() {
 			// If a test succeeds, write new seed/yaml to files
-			err := config.client.Transport.(*recorder.Recorder).Stop()
+			err := config.Client.Transport.(*recorder.Recorder).Stop()
 			if err != nil {
 				t.Error(err)
 			}
@@ -592,7 +592,7 @@ func SleepInSecondsForTest(t int) resource.TestCheckFunc {
 
 func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *google.Config) (string, error) {
 	// Create project-1 and project-2
-	rmService := config.NewResourceManagerClient(config.userAgent)
+	rmService := config.NewResourceManagerClient(config.UserAgent)
 
 	project := &cloudresourcemanager.Project{
 		ProjectId: pid,
@@ -604,7 +604,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	}
 
 	var op *cloudresourcemanager.Operation
-	err := retryTimeDuration(func() (reqErr error) {
+	err := RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()
 		return reqErr
 	}, 5*time.Minute)
@@ -618,7 +618,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 		return "", err
 	}
 
-	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating project", config.userAgent, 5*time.Minute)
+	waitErr := ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
 	if waitErr != nil {
 		return "", waitErr
 	}
@@ -626,7 +626,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	ba := &cloudbilling.ProjectBillingInfo{
 		BillingAccountName: fmt.Sprintf("billingAccounts/%s", billing),
 	}
-	_, err = config.NewBillingClient(config.userAgent).Projects.UpdateBillingInfo(prefixedProject(pid), ba).Do()
+	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(pid), ba).Do()
 	if err != nil {
 		return "", err
 	}
@@ -635,7 +635,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	project.ProjectId = p2
 	project.Name = fmt.Sprintf("%s-2", pname)
 
-	err = retryTimeDuration(func() (reqErr error) {
+	err = RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()
 		return reqErr
 	}, 5*time.Minute)
@@ -649,18 +649,18 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 		return "", err
 	}
 
-	waitErr = resourceManagerOperationWaitTime(config, opAsMap, "creating project", config.userAgent, 5*time.Minute)
+	waitErr = ResourceManagerOperationWaitTime(config, opAsMap, "creating project", config.UserAgent, 5*time.Minute)
 	if waitErr != nil {
 		return "", waitErr
 	}
 
-	_, err = config.NewBillingClient(config.userAgent).Projects.UpdateBillingInfo(prefixedProject(p2), ba).Do()
+	_, err = config.NewBillingClient(config.UserAgent).Projects.UpdateBillingInfo(PrefixedProject(p2), ba).Do()
 	if err != nil {
 		return "", err
 	}
 
 	// Enable the appropriate service in project-2 only
-	suService := config.NewServiceUsageClient(config.userAgent)
+	suService := config.NewServiceUsageClient(config.UserAgent)
 
 	serviceReq := &serviceusage.BatchEnableServicesRequest{
 		ServiceIds: []string{fmt.Sprintf("%s.googleapis.com", service)},
@@ -673,7 +673,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 
 	// Enable the test runner to create service accounts and get an access token on behalf of
 	// the project 1 service account
-	curEmail, err := GetCurrentUserEmail(config, config.userAgent)
+	curEmail, err := GetCurrentUserEmail(config, config.UserAgent)
 	if err != nil {
 		return "", err
 	}
@@ -701,7 +701,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	}
 
 	p.Bindings = mergeBindings(append(p.Bindings, bindings...))
-	_, err = config.NewResourceManagerClient(config.userAgent).Projects.SetIamPolicy(pid,
+	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(pid,
 		&cloudresourcemanager.SetIamPolicyRequest{
 			Policy:     p,
 			UpdateMask: "bindings,etag,auditConfigs",
@@ -753,7 +753,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	}
 
 	p.Bindings = mergeBindings(append(p.Bindings, bindings...))
-	_, err = config.NewResourceManagerClient(config.userAgent).Projects.SetIamPolicy(p2,
+	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(p2,
 		&cloudresourcemanager.SetIamPolicyRequest{
 			Policy:     p,
 			UpdateMask: "bindings,etag,auditConfigs",
@@ -766,7 +766,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *g
 	// actually usable. Wait a solid 2 minutes to ensure we can use it.
 	time.Sleep(2 * time.Minute)
 
-	iamCredsService := config.NewIamCredentialsClient(config.userAgent)
+	iamCredsService := config.NewIamCredentialsClient(config.UserAgent)
 	tokenRequest := &iamcredentials.GenerateAccessTokenRequest{
 		Lifetime: "300s",
 		Scope:    []string{"https://www.googleapis.com/auth/cloud-platform"},

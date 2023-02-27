@@ -237,7 +237,7 @@ func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta inte
   }
   <% end -%>
 
-  userAgent, err := generateUserAgentString(d, config.userAgent)
+  userAgent, err := generateUserAgentString(d, config.UserAgent)
   if err != nil {
     return nil, err
   }

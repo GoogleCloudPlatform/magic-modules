@@ -12,7 +12,7 @@
   // 3) the project IDs represented by both the new and old values are the same.
   config := meta.(*Config)
 
-  userAgent, err := generateUserAgentString(d, config.userAgent)
+  userAgent, err := generateUserAgentString(d, config.UserAgent)
   if err != nil {
     return nil, err
   }

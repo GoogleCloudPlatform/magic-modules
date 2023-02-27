@@ -41,7 +41,7 @@ func ProjectIdParseFunc(d *schema.ResourceData, _ *Config) error {
 func (u *ProjectIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
 	projectId := GetResourceNameFromSelfLink(u.resourceId)
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (u *ProjectIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy
 func (u *ProjectIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
 	projectId := GetResourceNameFromSelfLink(u.resourceId)
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}

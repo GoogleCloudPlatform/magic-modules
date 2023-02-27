@@ -187,7 +187,7 @@ func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, p
 	}
 
 	log.Printf("[DEBUG] Signing CA Certificate: %#v", obj)
-	res, err = sendRequestWithTimeout(config, "POST", billingProject, signUrl, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err = SendRequestWithTimeout(config, "POST", billingProject, signUrl, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Certificate: %s", err)
 	}

@@ -71,7 +71,7 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 		"billing_account":billingId,
 	}
 
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, config.userAgent, "", 0)
+	client := NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, "", 0)
 	err = client.DeleteAll{{$.DCLTitle}}(context.Background(), {{$.SweeperFunctionArgs}} isDeletable{{$.TitleCaseFullName}})
 	if err != nil {
 		return err
