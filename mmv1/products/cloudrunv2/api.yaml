@@ -1015,6 +1015,23 @@ objects:
                             name: port
                             description: |-
                               Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: grpc
+                      description: |-
+                        GRPC specifies an action involving a GRPC port.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      properties:
+                        - !ruby/object:Api::Type::Integer
+                          name: port
+                          description: |-
+                            Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to the same value as container.ports[0].containerPort.
+                        - !ruby/object:Api::Type::String
+                          name: service
+                          description: |-
+                            The name of the service to place in the gRPC HealthCheckRequest
+                            (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                            If this is not specified, the default behavior is defined by gRPC.
                 - !ruby/object:Api::Type::NestedObject
                   name: "startupProbe"
                   description: |-
@@ -1049,6 +1066,7 @@ objects:
                         # exactly_one_of:
                         #   - template.0.containers.0.startupProbe.0.httpGet
                         #   - template.0.containers.0.startupProbe.0.tcpSocket
+                        #   - template.0.containers.0.startupProbe.0.grpc
                         properties:
                           - !ruby/object:Api::Type::String
                             name: "path"
@@ -1081,11 +1099,33 @@ objects:
                         # exactly_one_of:
                         #   - template.0.containers.0.startupProbe.0.httpGet
                         #   - template.0.containers.0.startupProbe.0.tcpSocket
+                        #   - template.0.containers.0.startupProbe.0.grpc
                         properties:
                           - !ruby/object:Api::Type::Integer
                             name: port
                             description: |-
-                              Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080. 
+                              Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: grpc
+                      description: |-
+                        GRPC specifies an action involving a GRPC port.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      # exactly_one_of:
+                      #   - template.0.containers.0.startupProbe.0.httpGet
+                      #   - template.0.containers.0.startupProbe.0.tcpSocket
+                      #   - template.0.containers.0.startupProbe.0.grpc
+                      properties:
+                        - !ruby/object:Api::Type::Integer
+                          name: port
+                          description: |-
+                            Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to the same value as container.ports[0].containerPort.
+                        - !ruby/object:Api::Type::String
+                          name: service
+                          description: |-
+                            The name of the service to place in the gRPC HealthCheckRequest
+                            (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                            If this is not specified, the default behavior is defined by gRPC.
           - !ruby/object:Api::Type::Array
             name: "volumes"
             description: |-
@@ -1161,7 +1201,7 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: "maxInstanceRequestConcurrency"
             description: |-
-              Sets the maximum number of requests that each serving instance can receive.      
+              Sets the maximum number of requests that each serving instance can receive.
       - !ruby/object:Api::Type::Array
         name: "traffic"
         description: |-
@@ -1186,7 +1226,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: "tag"
             description: |
-              Indicates a string to be part of the URI to exclusively reference this target.  
+              Indicates a string to be part of the URI to exclusively reference this target.
       - !ruby/object:Api::Type::String
         name: "observedGeneration"
         output: true
@@ -1350,5 +1390,3 @@ objects:
         output: true
         description: |
           A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
-
-
