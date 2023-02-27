@@ -17,13 +17,17 @@ Some fields or resources may be possible to update in place, but only under spec
 
 ### Mitigating data loss risk via deletion_protection
 
-Some resources, such as databases, have a significant risk of unrecoverable data loss if the resource is accidentally deleted due to a change to a ForceNew field. For these resources, the best practice is to add a `deletion_protection` field that defaults to `true`. This can be client-side only or can be backed by a server-side field. The Terraform field should default to `true` even if the server-side field does not.
+Some resources, such as databases, have a significant risk of unrecoverable data loss if the resource is accidentally deleted due to a change to a ForceNew field. For these resources, the best practice is to add a `deletion_protection` field that defaults to `true`, which prevents the resource from being deleted if enabled. Although it is a small breaking change, we believe that for users, the benefits of `deletion_protection` defaulting to `true` outweigh the cost.
 
-APIs also sometimes add `deletion_protection` fields, which will default to `false` for backwards-compatibility reasons. However, for Terraform, the benefits of `deletion_protection` defaulting to `true` outweigh the smaller cost of the breaking change. In cases where both server-side and client-side fields have been separately added to the provider, they should be reconciled into a single field in the next major release.
+APIs also sometimes add `deletion_protection` fields, which will generally default to `false` for backwards-compatibility reasons. Any `deletion_protection` API field added to an existing Terraform resource must match the API default initially. The default may be set to `true` in the next major release. For new Terraform resources, any `deletion_protection` field should default to `true` in Terraform regardless of the API default.
 
-The previous best practice was a field called `force_delete` that defaulted to `false`. This is still present on some resources for backwards-compatibility reasons, but `deletion_protection` is preferred going forward.
+A resource can have up to two `deletion_protection` fields (with different names): one that represents a field in the API, and one that is only in Terraform. This could happen because the API added its field after `deletion_protection` already existed in Terraform; it could also happen because a separate field was added in Terraform to make sure that `deletion_protection` is enabled by default. In either case, they should be reconciled into a single field (that defaults to `true`) in the next major release.
 
 Resources that do not have a significant risk of unrecoverable data loss or similar critical concern will not be given `deletion_protection` fields.
+
+{{< hint info >}}
+**Note:** The previous best practice was a field called `force_delete` that defaulted to `false`. This is still present on some resources for backwards-compatibility reasons, but `deletion_protection` is preferred going forward.
+{{< /hint >}}
 
 ## Deletion policy
 
