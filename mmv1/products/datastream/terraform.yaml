@@ -176,6 +176,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           stream_cmek: "kms-name"
         test_vars_overrides:
           deletion_protection: "false"
+          stream_cmek: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_postgresql"
         primary_resource_id: "default"
@@ -192,7 +193,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           stream_id: "my-stream"
           source_connection_profile_id: "source-profile"
           destination_connection_profile_id: "destination-profile"
-          stream_cmek: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_bigquery"
         pull_external: true
