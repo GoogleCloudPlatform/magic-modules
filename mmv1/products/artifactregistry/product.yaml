@@ -18,9 +18,6 @@ scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://artifactregistry.googleapis.com/v1beta2/
-  - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://artifactregistry.googleapis.com/v1/    
 apis_required:
