@@ -328,7 +328,7 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_additionalExperiments(job, additionalExperiments, bucket),
+				Config: testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket, additionalExperiments),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.job"),
 					testAccDataflowFlexTemplateJobHasAdditionalExperiments(t, "google_dataflow_flex_template_job.job", additionalExperiments),
