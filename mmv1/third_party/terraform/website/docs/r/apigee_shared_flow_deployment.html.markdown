@@ -35,7 +35,7 @@ The following arguments are supported:
 
 * `org_id` -
   (Required)
-  The Apigee Organization associated with the Apigee instance
+  The Apigee Organization associated with the Sharedflow
 
 * `environment` -
   (Required)
