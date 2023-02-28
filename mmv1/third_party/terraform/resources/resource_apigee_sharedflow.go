@@ -377,7 +377,7 @@ func expandApigeeSharedFlowName(v interface{}, d TerraformResourceData, config *
 	return v, nil
 }
 
-//sendRequestRawBodyWithTimeout is derived from sendRequestWithTimeout with direct pass throught of request body
+// sendRequestRawBodyWithTimeout is derived from sendRequestWithTimeout with direct pass through of request body
 func sendRequestRawBodyWithTimeout(config *Config, method, project, rawurl, userAgent string, body io.Reader, contentType string, timeout time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] sendRequestRawBodyWithTimeout start")
 	reqHeaders := make(http.Header)
