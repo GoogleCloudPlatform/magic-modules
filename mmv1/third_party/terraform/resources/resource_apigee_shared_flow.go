@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/googleapi"
 )
@@ -32,6 +33,18 @@ func resourceApigeeSharedFlow() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceApigeeSharedFlowImport,
 		},
+
+		CustomizeDiff: customdiff.All(
+			/*
+				If any of the config_bundle, detect_md5hash or md5hash is changed,
+				then an update is expected, so we tell Terraform core to expect update on meta_data,
+				latest_revision_id and revision
+			*/
+
+			customdiff.ComputedIf("meta_data", apigeeSharedflowDetectBundleUpdate),
+			customdiff.ComputedIf("latest_revision_id", apigeeSharedflowDetectBundleUpdate),
+			customdiff.ComputedIf("revision", apigeeSharedflowDetectBundleUpdate),
+		),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -432,4 +445,19 @@ func sendRequestRawBodyWithTimeout(config *Config, method, project, rawurl, user
 	}
 	log.Printf("[DEBUG] sendRequestRawBodyWithTimeout returning")
 	return result, nil
+}
+
+func apigeeSharedflowDetectBundleUpdate(_ context.Context, diff *schema.ResourceDiff, v interface{}) bool {
+	tmp, _ := diff.GetChange("detect_md5hash")
+	oldBundleHash := tmp.(string)
+	currentBundleHash := ""
+	if config_bundle, ok := diff.GetOkExists("config_bundle"); ok {
+		currentBundleHash = getFileMd5Hash(config_bundle.(string))
+	}
+	log.Printf("[DEBUG] apigeeSharedflowDetectUpdate detect_md5hash: %s -> %s", oldBundleHash, currentBundleHash)
+
+	if oldBundleHash != currentBundleHash {
+		return true
+	}
+	return diff.HasChange("config_bundle") || diff.HasChange("md5hash")
 }

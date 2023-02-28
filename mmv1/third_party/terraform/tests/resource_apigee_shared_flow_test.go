@@ -30,7 +30,7 @@ func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
 				Config: testAccApigeeSharedFlow_apigeeSharedflowTestExample(context),
 			},
 			{
-				ResourceName:            "google_apigee_shared_flow.test_apigee_sharedflow",
+				ResourceName:            "google_apigee_sharedflow.test_apigee_sharedflow",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"config_bundle", "detect_md5hash", "md5hash"},
@@ -39,7 +39,7 @@ func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
 				Config: testAccApigeeSharedFlow_apigeeSharedflowTestExampleUpdate(context),
 			},
 			{
-				ResourceName:            "google_apigee_shared_flow.test_apigee_sharedflow",
+				ResourceName:            "google_apigee_sharedflow.test_apigee_sharedflow",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"config_bundle", "detect_md5hash", "md5hash"},
@@ -106,14 +106,7 @@ resource "google_apigee_organization" "apigee_org" {
   ]
 }
 
-resource "google_apigee_environment" "org" {
-  org_id   = google_apigee_organization.apigee_org.id
-  name         = "tf-test%{random_suffix}"
-  description  = "Apigee Environment"
-  display_name = "environment-1"
-}
-
-resource "google_apigee_shared_flow" "test_apigee_sharedflow" {
+resource "google_apigee_sharedflow" "test_apigee_sharedflow" {
   name            = "tf-test-apigee-sharedflow"
   org_id          = google_project.project.project_id
   config_bundle   = "./test-fixtures/apigee/apigee_sharedflow_bundle.zip"
@@ -135,6 +128,7 @@ func testAccCheckApigeeSharedFlowDestroyProducer(t *testing.T) func(s *terraform
 			config := googleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
+			// url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/test-apigee-sharedflow")
 			if err != nil {
 				return err
 			}
@@ -154,7 +148,6 @@ func testAccCheckApigeeSharedFlowDestroyProducer(t *testing.T) func(s *terraform
 		return nil
 	}
 }
-
 
 func testAccApigeeSharedFlow_apigeeSharedflowTestExampleUpdate(context map[string]interface{}) string {
 	return Nprintf(`
@@ -214,14 +207,7 @@ resource "google_apigee_organization" "apigee_org" {
   ]
 }
 
-resource "google_apigee_environment" "org" {
-  org_id   = google_apigee_organization.apigee_org.id
-  name         = "tf-test%{random_suffix}"
-  description  = "Apigee Environment"
-  display_name = "environment-1"
-}
-
-resource "google_apigee_shared_flow" "test_apigee_sharedflow" {
+resource "google_apigee_sharedflow" "test_apigee_sharedflow" {
   name            = "tf-test-apigee-sharedflow"
   org_id          = google_project.project.project_id
   config_bundle   = "./test-fixtures/apigee/apigee_sharedflow_bundle2.zip"
