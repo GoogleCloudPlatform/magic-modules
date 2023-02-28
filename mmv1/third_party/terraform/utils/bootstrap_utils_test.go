@@ -418,11 +418,16 @@ func removeContainerServiceAgentRoleFromContainerEngineRobot(t *testing.T, proje
 	}
 }
 
-func BootstrapProject(t *testing.T, projectID, billingAccount string, services []string) *cloudresourcemanager.Project {
+// BootstrapProject will create or get a project named "<projectIDPrefix><testProjectFromEnv>"
+// that will persist across test runs. The reason for the naming is to isolate
+// bootstrapped projects by test environment.
+func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, services []string) *cloudresourcemanager.Project {
 	config := BootstrapConfig(t)
 	if config == nil {
 		return nil
 	}
+
+	projectID := fmt.Printf("%s%s", projectIDPrefix, getTestProjectFromEnv(t))
 
 	crmClient := config.NewResourceManagerClient(config.UserAgent)
 
