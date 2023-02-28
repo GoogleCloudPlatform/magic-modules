@@ -171,7 +171,14 @@ popd
 pushd $LOCAL_PATH
 
 if [ "$REPO" == "terraform" ]; then
+    # See https://github.com/hashicorp/terraform-provider-google/issues/13864
     make generate
+fi
+
+if [ "$REPO" == "terraform" ] && [ $PR_NUMBER == "7255" ]; then
+    # Add copyright headers using copywrite CLI (see .copywrite.hcl config file)
+    # Only add copyright headers to the TPG and TPGB repos
+    copywrite headers
 fi
 
 git config --local user.name "Modular Magician"
@@ -183,10 +190,8 @@ COMMITTED=true
 git commit --signoff -m "$COMMIT_MESSAGE" || COMMITTED=false
 
 CHANGELOG=false
-COPYRIGHT=false
 if [ "$REPO" == "terraform" ]; then
   CHANGELOG=true
-  COPYRIGHT=true
 fi
 
 PR_NUMBER=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
@@ -204,12 +209,6 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG
     git commit --signoff --amend --no-edit
 fi
 
-if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$COPYRIGHT" == "true" ]; then
-    # Add copyright headers using copywrite CLI
-    copywrite headers --spdx 'MPL-2.0'
-    git add .
-    git commit --signoff --amend --no-edit
-fi
 
 git push $SCRATCH_PATH $BRANCH -f
 
