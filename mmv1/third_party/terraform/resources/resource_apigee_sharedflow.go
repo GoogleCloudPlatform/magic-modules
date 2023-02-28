@@ -146,11 +146,9 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 	tflog.Info(ctx, "resourceApigeeSharedFlowCreate")
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate")
 
-	//print debug info======	
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, name=			 	%s", d.Get("name").(string))
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, org_id=, 			%s", d.Get("org_id").(string))
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, config_bundle=, 	%s", d.Get("config_bundle").(string))
-	//debug=================
 
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
