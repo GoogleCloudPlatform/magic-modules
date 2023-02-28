@@ -123,18 +123,21 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			"service_account_email": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: `The Service Account email used to create the job.`,
 			},
 
 			"temp_location": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: `The Cloud Storage path to use for temporary files. Must be a valid Cloud Storage URL, beginning with gs://.`,
 			},
 
 			"staging_location": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: `The Cloud Storage path to use for staging files. Must be a valid Cloud Storage URL, beginning with gs://.`,
 			},
 
@@ -581,7 +584,7 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	// All non-virtual fields are ForceNew for batch jobs
 	if d.Get("type") == "JOB_TYPE_BATCH" {
-		resourceSchema := resourceDataflowFlexTemplateJob().Schema
+		resourceSchema := ResourceDataflowFlexTemplateJob().Schema
 		for field := range resourceSchema {
 			if field == "on_delete" {
 				continue
