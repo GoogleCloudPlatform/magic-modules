@@ -1,8 +1,11 @@
 resource "google_bigquery_capacity_commitment" "<%= ctx[:primary_resource_id] %>" {
-	capacity_commitment_id = "<%= ctx[:vars]['name'] %>"
-	location               = "asia-northeast1"
-	// Set to 0 for testing purposes
-	// In reality this would be larger than zero
-	slot_count = 0
+	location   = "us-west1"
+	slot_count = 100
 	plan       = "FLEX"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+	depends_on = [google_bigquery_capacity_commitment.<%= ctx[:primary_resource_id] %>]
+  # Only needed for CI tests to be able to tear down the commitment once it's expired
+  create_duration = "61s"
 }

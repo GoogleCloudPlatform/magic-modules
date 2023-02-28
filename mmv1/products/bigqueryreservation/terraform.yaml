@@ -24,12 +24,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: 'my-reservation'
   CapacityCommitment: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_reservation_capacity_commitment_basic"
+        pull_external: true
         primary_resource_id: "commitment"
-        vars:
-          name: 'my-commitment'          
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
