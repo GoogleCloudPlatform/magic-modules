@@ -19,7 +19,7 @@ func TestAccDataSourceGoogleProjectService_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleProjectService_basic(services, pid, pname, org),
+				Config: testAccDataSourceGoogleProjectService_basic(services, pid, ProjectName, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceGoogleProjectServiceCheck("data.google_project_service.foo"),
 				),

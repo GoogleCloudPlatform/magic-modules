@@ -32,14 +32,14 @@ func TestAccProjectIamBinding_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, ProjectName, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
 			{
-				Config: testAccProjectAssociateBindingBasic(pid, pname, org, role, member),
+				Config: testAccProjectAssociateBindingBasic(pid, ProjectName, org, role, member),
 			},
 			projectIamBindingImportStep("google_project_iam_binding.acceptance", pid, role),
 		},
@@ -62,18 +62,18 @@ func TestAccProjectIamBinding_multiple(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, ProjectName, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
 			{
-				Config: testAccProjectAssociateBindingBasic(pid, pname, org, role, member),
+				Config: testAccProjectAssociateBindingBasic(pid, ProjectName, org, role, member),
 			},
 			// Apply another IAM binding
 			{
-				Config: testAccProjectAssociateBindingMultiple(pid, pname, org, role, role2),
+				Config: testAccProjectAssociateBindingMultiple(pid, ProjectName, org, role, role2),
 			},
 			projectIamBindingImportStep("google_project_iam_binding.acceptance", pid, role),
 			projectIamBindingImportStep("google_project_iam_binding.multiple", pid, role2),
@@ -98,14 +98,14 @@ func TestAccProjectIamBinding_multipleAtOnce(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, ProjectName, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
 			{
-				Config: testAccProjectAssociateBindingMultiple(pid, pname, org, role, role2),
+				Config: testAccProjectAssociateBindingMultiple(pid, ProjectName, org, role, role2),
 			},
 			projectIamBindingImportStep("google_project_iam_binding.acceptance", pid, role),
 			projectIamBindingImportStep("google_project_iam_binding.multiple", pid, role2),
@@ -128,26 +128,26 @@ func TestAccProjectIamBinding_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, ProjectName, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
 			{
-				Config: testAccProjectAssociateBindingBasic(pid, pname, org, role, member),
+				Config: testAccProjectAssociateBindingBasic(pid, ProjectName, org, role, member),
 			},
 			projectIamBindingImportStep("google_project_iam_binding.acceptance", pid, role),
 
 			// Apply an updated IAM binding
 			{
-				Config: testAccProjectAssociateBindingUpdated(pid, pname, org, role),
+				Config: testAccProjectAssociateBindingUpdated(pid, ProjectName, org, role),
 			},
 			projectIamBindingImportStep("google_project_iam_binding.acceptance", pid, role),
 
 			// Drop the original member
 			{
-				Config: testAccProjectAssociateBindingDropMemberFromBasic(pid, pname, org, role),
+				Config: testAccProjectAssociateBindingDropMemberFromBasic(pid, ProjectName, org, role),
 			},
 			projectIamBindingImportStep("google_project_iam_binding.acceptance", pid, role),
 		},
@@ -171,21 +171,21 @@ func TestAccProjectIamBinding_remove(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, ProjectName, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply multiple IAM bindings
 			{
-				Config: testAccProjectAssociateBindingMultiple(pid, pname, org, role, role2),
+				Config: testAccProjectAssociateBindingMultiple(pid, ProjectName, org, role, role2),
 			},
 			projectIamBindingImportStep("google_project_iam_binding.acceptance", pid, role),
 			projectIamBindingImportStep("google_project_iam_binding.multiple", pid, role2),
 
 			// Remove the bindings
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, ProjectName, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
@@ -207,14 +207,14 @@ func TestAccProjectIamBinding_noMembers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, ProjectName, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
 			{
-				Config: testAccProjectAssociateBindingNoMembers(pid, pname, org, role),
+				Config: testAccProjectAssociateBindingNoMembers(pid, ProjectName, org, role),
 			},
 			projectIamBindingImportStep("google_project_iam_binding.acceptance", pid, role),
 		},
@@ -234,14 +234,14 @@ func TestAccProjectIamBinding_withCondition(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, pname, org),
+				Config: testAccProject_create(pid, ProjectName, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
 			{
-				Config: testAccProjectAssociateBinding_withCondition(pid, pname, org, role, conditionTitle),
+				Config: testAccProjectAssociateBinding_withCondition(pid, ProjectName, org, role, conditionTitle),
 			},
 			{
 				ResourceName:      "google_project_iam_binding.acceptance",
@@ -265,11 +265,11 @@ func TestAccProjectIamBinding_invalidMembers(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectAssociateBindingBasic(pid, pname, org, role, "admin@hashicorptest.com"),
+				Config: testAccProjectAssociateBindingBasic(pid, ProjectName, org, role, "admin@hashicorptest.com"),
 				ExpectError: regexp.MustCompile("invalid value for members\\.0 \\(IAM members must have one of the values outlined here: https://cloud.google.com/billing/docs/reference/rest/v1/Policy#Binding\\)"),
 			},
 			{
-				Config: testAccProjectAssociateBindingBasic(pid, pname, org, role, "user:admin@hashicorptest.com"),
+				Config: testAccProjectAssociateBindingBasic(pid, ProjectName, org, role, "user:admin@hashicorptest.com"),
 			},
 		},
 	})

@@ -19,7 +19,7 @@ func TestAccComputeProjectDefaultNetworkTier_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, pname, org, billingId),
+				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, ProjectName, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_default_network_tier.fizzbuzz",
@@ -42,7 +42,7 @@ func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, pname, org, billingId),
+				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, ProjectName, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_default_network_tier.fizzbuzz",
@@ -51,7 +51,7 @@ func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 			},
 
 			{
-				Config: testAccComputeProject_defaultNetworkTier_standard(projectID, pname, org, billingId),
+				Config: testAccComputeProject_defaultNetworkTier_standard(projectID, ProjectName, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_default_network_tier.fizzbuzz",
