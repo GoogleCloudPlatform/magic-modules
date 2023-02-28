@@ -30,7 +30,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_reservation_capacity_commitment_basic"
         pull_external: true
+        skip_docs: true
         primary_resource_id: "commitment"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_reservation_capacity_commitment_docs"
+        skip_test: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
 # This is for copying files over
