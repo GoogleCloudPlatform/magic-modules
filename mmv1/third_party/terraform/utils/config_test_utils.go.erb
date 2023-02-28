@@ -38,4 +38,7 @@ func configureTestBasePaths(c *Config, url string) {
 	c.BigtableAdminBasePath = url
 }
 
+// TODO: TestFakeCredentialsPath will have the value "./test-fixtures/fake_account.json"
+// and TestFakeCredentialsPath_temporary will be removed.
 const TestFakeCredentialsPath = "./test-fixtures/fake_account.json"
+const TestFakeCredentialsPath_temporary = "../test-fixtures/fake_account.json"

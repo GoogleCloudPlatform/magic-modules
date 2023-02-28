@@ -38,7 +38,7 @@ func TestProvider_getRegionFromZone(t *testing.T) {
 }
 
 func TestProvider_loadCredentialsFromFile(t *testing.T) {
-	ws, es := google.ValidateCredentials(google.TestFakeCredentialsPath, "")
+	ws, es := google.ValidateCredentials(google.TestFakeCredentialsPath_temporary, "")
 	if len(ws) != 0 {
 		t.Errorf("Expected %d warnings, got %v", len(ws), ws)
 	}
@@ -48,7 +48,7 @@ func TestProvider_loadCredentialsFromFile(t *testing.T) {
 }
 
 func TestProvider_loadCredentialsFromJSON(t *testing.T) {
-	contents, err := ioutil.ReadFile(google.TestFakeCredentialsPath)
+	contents, err := ioutil.ReadFile(google.TestFakeCredentialsPath_temporary)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
@@ -71,7 +71,7 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 	pid := "tf-test-" + RandString(t, 10)
 	topicName := "tf-test-topic-" + RandString(t, 10)
 
-	config := google.BootstrapConfig(t)
+	config := BootstrapConfig(t)
 	accessToken, err := setupProjectsAndGetAccessToken(org, billing, pid, "pubsub", config)
 	if err != nil {
 		t.Error(err)
@@ -112,7 +112,7 @@ func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 	billing := GetTestBillingAccountFromEnv(t)
 	pid := "tf-test-" + RandString(t, 10)
 
-	config := google.BootstrapConfig(t)
+	config := BootstrapConfig(t)
 	accessToken, err := setupProjectsAndGetAccessToken(org, billing, pid, "cloudkms", config)
 	if err != nil {
 		t.Error(err)
