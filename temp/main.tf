@@ -329,6 +329,55 @@ module "project-services" {
   ]
 }
 
+resource "google_project_service_identity" "bigtable_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "bigtableadmin.googleapis.com"
+}
+
+resource "google_project_service_identity" "secretmanager_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "secretmanager.googleapis.com"
+}
+
+resource "google_project_service_identity" "sqladmin_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "sqladmin.googleapis.com"
+}
+
+# TODO: Replace these permissions with bootstrapped permissions
+
+# TestAccComposerEnvironment_fixPyPiPackages
+# TestAccComposerEnvironmentComposer2_private
+# TestAccComposerEnvironment_withEncryptionConfigComposer1
+# TestAccComposerEnvironment_withEncryptionConfigComposer2
+# TestAccComposerEnvironment_ComposerV2
+# TestAccComposerEnvironment_UpdateComposerV2
+# TestAccComposerEnvironment_composerV2PrivateServiceConnect
+# TestAccComposerEnvironment_composerV2MasterAuthNetworks
+# TestAccComposerEnvironment_composerV2MasterAuthNetworksUpdate
+# TestAccComposerEnvironmentAirflow2_withRecoveryConfig
+resource "google_project_iam_member" "composer_agent_v2_ext" {
+  project = google_project.proj.project_id
+  role    = "roles/composer.ServiceAgentV2Ext"
+  member  = "serviceAccount:service-${google_project.proj.number}@cloudcomposer-accounts.iam.gserviceaccount.com"
+}
+
+# TestAccComputeInstance_resourcePolicyUpdate
+resource "google_project_iam_member" "compute_agent_instance_admin" {
+  project = google_project.proj.project_id
+  role    = "roles/compute.instanceAdmin"
+  member  = "serviceAccount:service-${google_project.proj.number}@compute-system.iam.gserviceaccount.com"
+}
+
 output "service_account" {
   value = google_service_account.sa.email
 }
