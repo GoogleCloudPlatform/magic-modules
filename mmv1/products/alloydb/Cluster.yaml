@@ -197,7 +197,7 @@
         - !ruby/object:Api::Type::Boolean
           name: "enabled"
           description: |
-            Whether automated automated backups are enabled.
+            Whether automated backups are enabled.
     - !ruby/object:Api::Type::NestedObject
       name: "backupSource"
       output: true
