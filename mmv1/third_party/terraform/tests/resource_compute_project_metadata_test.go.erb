@@ -46,7 +46,7 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -80,7 +80,7 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

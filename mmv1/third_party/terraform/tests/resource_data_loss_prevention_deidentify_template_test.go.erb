@@ -44,7 +44,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsStart(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -246,7 +246,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -407,7 +407,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -431,7 +431,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_start(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"
@@ -694,7 +694,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
 }
 
 func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTransformations_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_deidentify_template" "basic" {
   parent = "organizations/%{organization}"
   description = "Description"

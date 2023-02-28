@@ -51,7 +51,7 @@ func TestAccFolderIamMember_multiple(t *testing.T) {
 	fname := "tf-test-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{
@@ -93,7 +93,7 @@ func TestAccFolderIamMember_remove(t *testing.T) {
 	fname := "tf-test-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Create a new folder
 			{

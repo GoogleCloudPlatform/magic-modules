@@ -51,7 +51,7 @@ func TestAccBigtableGCPolicy_abandoned(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -84,7 +84,7 @@ func TestAccBigtableGCPolicy_swapOffDeprecated(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -122,7 +122,7 @@ func TestAccBigtableGCPolicy_union(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -148,7 +148,7 @@ func TestAccBigtableGCPolicy_multiplePolicies(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -179,7 +179,7 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableGCPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

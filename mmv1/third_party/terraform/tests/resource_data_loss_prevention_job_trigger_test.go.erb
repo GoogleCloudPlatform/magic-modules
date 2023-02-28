@@ -54,7 +54,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample2(t *testing.
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -88,7 +88,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerPubsub(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -105,7 +105,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerPubsub(t *testing.T) {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -142,7 +142,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFields(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "identifying_fields" {
 	parent = "projects/%{project}"
 	description = "Starting description"
@@ -186,7 +186,7 @@ resource "google_data_loss_prevention_job_trigger" "identifying_fields" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
 	description = "An updated description"
@@ -223,7 +223,7 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 }
 
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFieldsUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "identifying_fields_update" {
 	parent = "projects/%{project}"
 	description = "An updated description"
@@ -267,7 +267,7 @@ resource "google_data_loss_prevention_job_trigger" "identifying_fields_update" {
 }
 
 func testAccDataLossPreventionJobTrigger_publishToPubSub(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "pubsub" {
 	parent = "projects/%{project}"
 	description = "Starting description"

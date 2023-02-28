@@ -50,7 +50,7 @@ func TestAccLoggingMetric_explicitBucket(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -74,7 +74,7 @@ func TestAccLoggingMetric_loggingBucket(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -112,7 +112,7 @@ func TestAccLoggingMetric_descriptionUpdated(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

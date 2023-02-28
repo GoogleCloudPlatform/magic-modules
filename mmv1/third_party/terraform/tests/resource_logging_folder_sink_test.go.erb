@@ -54,7 +54,7 @@ func TestAccLoggingFolderSink_described(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -78,7 +78,7 @@ func TestAccLoggingFolderSink_disabled(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -102,7 +102,7 @@ func TestAccLoggingFolderSink_removeOptionals(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -137,7 +137,7 @@ func TestAccLoggingFolderSink_folderAcceptsFullFolderPath(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -169,7 +169,7 @@ func TestAccLoggingFolderSink_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -212,7 +212,7 @@ func TestAccLoggingFolderSink_updateBigquerySink(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -247,7 +247,7 @@ func TestAccLoggingFolderSink_heredoc(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

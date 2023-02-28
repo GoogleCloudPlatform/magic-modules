@@ -72,7 +72,7 @@ func TestAccStorageObjectAcl_upgrade(t *testing.T) {
 			}
 			acctest.TestAccPreCheck(t)
 		},
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -126,7 +126,7 @@ func TestAccStorageObjectAcl_downgrade(t *testing.T) {
 			}
 			acctest.TestAccPreCheck(t)
 		},
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -180,7 +180,7 @@ func TestAccStorageObjectAcl_predefined(t *testing.T) {
 			}
 			acctest.TestAccPreCheck(t)
 		},
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -206,7 +206,7 @@ func TestAccStorageObjectAcl_predefinedToExplicit(t *testing.T) {
 			}
 			acctest.TestAccPreCheck(t)
 		},
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -241,7 +241,7 @@ func TestAccStorageObjectAcl_explicitToPredefined(t *testing.T) {
 			}
 			acctest.TestAccPreCheck(t)
 		},
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -277,7 +277,7 @@ func TestAccStorageObjectAcl_unordered(t *testing.T) {
 			}
 			acctest.TestAccPreCheck(t)
 		},
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageObjectAclDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

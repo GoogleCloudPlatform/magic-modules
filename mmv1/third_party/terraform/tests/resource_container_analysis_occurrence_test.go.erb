@@ -126,7 +126,7 @@ func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -150,7 +150,7 @@ func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 }
 
 func testAccContainerAnalysisOccurence_basic(params map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_binary_authorization_attestor" "attestor" {
   name = "test-attestor%{random_suffix}"
   attestation_authority_note {
@@ -204,7 +204,7 @@ resource "google_container_analysis_occurrence" "occurrence" {
 }
 
 func testAccContainerAnalysisOccurence_multipleSignatures(params map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_binary_authorization_attestor" "attestor" {
   name = "test-attestor%{random_suffix}"
   attestation_authority_note {

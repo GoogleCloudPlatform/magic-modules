@@ -36,7 +36,7 @@ func TestAccComputeRoute_hopInstance(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -80,7 +80,7 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -115,7 +115,7 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccHealthcareDatasetIamPolicy_basic(account, datasetName, roleId),

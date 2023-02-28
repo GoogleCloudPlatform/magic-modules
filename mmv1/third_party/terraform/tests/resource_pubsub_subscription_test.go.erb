@@ -43,7 +43,7 @@ func TestAccPubsubSubscription_basic(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -67,7 +67,7 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -101,7 +101,7 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -129,7 +129,7 @@ func TestAccPubsubSubscription_pollOnCreate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

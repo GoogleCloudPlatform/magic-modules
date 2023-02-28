@@ -30,7 +30,7 @@ func TestAccContainerRegistry_iam(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerRegistry_iam(account),

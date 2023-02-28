@@ -59,7 +59,7 @@ func testAccLoggingProjectExclusion_disablePreservesFilter(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -87,7 +87,7 @@ func testAccLoggingProjectExclusion_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -113,7 +113,7 @@ func testAccLoggingProjectExclusion_update(t *testing.T) {
 func testAccLoggingProjectExclusion_multiple(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

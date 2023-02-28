@@ -50,7 +50,7 @@ func TestDataSourceGoogleContainerRegistryImage(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleContainerRegistryImage_basic,

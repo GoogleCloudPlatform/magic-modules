@@ -78,7 +78,7 @@ func TestAccHealthcareHl7V2StoreIamMember(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -113,7 +113,7 @@ func TestAccHealthcareHl7V2StoreIamPolicy(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Policy creation (no update for policy, no need to test)

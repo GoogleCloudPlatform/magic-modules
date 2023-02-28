@@ -119,7 +119,7 @@ func TestAccFilestoreInstance_reservedIpRange_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

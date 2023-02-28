@@ -42,7 +42,7 @@ func TestAccLoggingProjectSink_described(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -65,7 +65,7 @@ func TestAccLoggingProjectSink_described_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -96,7 +96,7 @@ func TestAccLoggingProjectSink_disabled(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -120,7 +120,7 @@ func TestAccLoggingProjectSink_updatePreservesUniqueWriter(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -151,7 +151,7 @@ func TestAccLoggingProjectSink_updateBigquerySink(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -182,7 +182,7 @@ func TestAccLoggingProjectSink_heredoc(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -204,7 +204,7 @@ func TestAccLoggingProjectSink_loggingbucket(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -283,7 +283,7 @@ func TestAccLoggingProjectSink_disabled_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

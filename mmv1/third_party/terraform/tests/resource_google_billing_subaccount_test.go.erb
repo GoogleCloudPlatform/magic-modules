@@ -36,7 +36,7 @@ func TestAccBillingSubaccount_basic(t *testing.T) {
 	masterBilling := acctest.GetTestMasterBillingAccountFromEnv(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Billing Subaccount creation

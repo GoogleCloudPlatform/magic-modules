@@ -36,7 +36,7 @@ func TestAccDataSourceGoogleOrganization_byShortName(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleOrganization_byName(orgId),
@@ -54,7 +54,7 @@ func TestAccDataSourceGoogleOrganization_byDomain(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckGoogleOrganization_byDomain(name),

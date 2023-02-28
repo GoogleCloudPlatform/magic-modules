@@ -19,7 +19,7 @@ func TestAccInstanceTemplateDatasource_name(t *testing.T) {
 			{
 				Config: testAccInstanceTemplate_name(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
 						"google_compute_instance_template.default",
 						map[string]struct{}{},
@@ -35,12 +35,12 @@ func TestAccInstanceTemplateDatasource_filter(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccInstanceTemplate_filter(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
 						"google_compute_instance_template.c",
 						map[string]struct{}{},
@@ -56,12 +56,12 @@ func TestAccInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccInstanceTemplate_filter_mostRecent(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_instance_template.default",
 						"google_compute_instance_template.c",
 						map[string]struct{}{},
@@ -73,7 +73,7 @@ func TestAccInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 }
 
 func testAccInstanceTemplate_name(project, suffix string) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_compute_instance_template" "default" {
   name        = "tf-test-template-%{suffix}"
   description = "Example template."
@@ -101,7 +101,7 @@ data "google_compute_instance_template" "default" {
 }
 
 func testAccInstanceTemplate_filter(project, suffix string) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_compute_instance_template" "a" {
   name        = "tf-test-template-a-%{suffix}"
   description = "Example template."
@@ -167,7 +167,7 @@ data "google_compute_instance_template" "default" {
 }
 
 func testAccInstanceTemplate_filter_mostRecent(project, suffix string) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_compute_instance_template" "a" {
   name        = "tf-test-template-%{suffix}-a"
   description = "tf-test-instance-template"

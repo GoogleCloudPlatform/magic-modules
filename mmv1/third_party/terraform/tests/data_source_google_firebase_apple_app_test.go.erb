@@ -29,7 +29,7 @@ func TestAccDataSourceGoogleFirebaseAppleApp(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleFirebaseAppleApp(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						resourceName,
 						"google_firebase_apple_app.my_app",
 						map[string]struct{}{
@@ -43,7 +43,7 @@ func TestAccDataSourceGoogleFirebaseAppleApp(t *testing.T) {
 }
 
 func testAccDataSourceGoogleFirebaseAppleApp(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_firebase_apple_app" "my_app" {
   project = "%{project_id}"
   bundle_id = "%{bundle_id}"

@@ -214,7 +214,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -252,7 +252,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_no_destination(t *testing.
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -273,7 +273,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_with_service_account(t *te
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -294,7 +294,7 @@ func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -315,7 +315,7 @@ func testAccBigqueryDataTransferConfig_force_new_update_params(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

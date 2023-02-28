@@ -21,7 +21,7 @@ func TestAcccDataSourceDnsRecordSet_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceDnsRecordSet_basic(acctest.RandString(t, 10), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),
 				),
 			},
 		},

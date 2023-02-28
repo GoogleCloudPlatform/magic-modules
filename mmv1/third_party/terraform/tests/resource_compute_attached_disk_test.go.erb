@@ -52,7 +52,7 @@ func TestAccComputeAttachedDisk_full(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -79,7 +79,7 @@ func TestAccComputeAttachedDisk_region(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -106,7 +106,7 @@ func TestAccComputeAttachedDisk_count(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{

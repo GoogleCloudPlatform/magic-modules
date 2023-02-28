@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 )
 
 <%# Since most resources define a "basic" config as their first example, we can reuse that config to create a resource to test IAM resources with. -%>
@@ -365,10 +366,10 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 
 <% if object.iam_policy.admin_iam_role.nil? -%>
 	// Test should have 2 bindings: one with a description and one without. Any < chars are converted to a unicode character by the API.
-	expectedPolicyData := Nprintf(`{"bindings":[{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr}","title":"%{condition_title}-no-description"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"}]}`, context)
+	expectedPolicyData := google.Nprintf(`{"bindings":[{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr}","title":"%{condition_title}-no-description"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"}]}`, context)
 <% else -%>
 	// Test should have 3 bindings: one with a description and one without, and a third for an admin role. Any < chars are converted to a unicode character by the API.
-	expectedPolicyData := Nprintf(`{"bindings":[{"members":["serviceAccount:%{service_account}"],"role":"%{admin_role}"},{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr}","title":"%{condition_title}-no-description"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"}]}`, context)
+	expectedPolicyData := google.Nprintf(`{"bindings":[{"members":["serviceAccount:%{service_account}"],"role":"%{admin_role}"},{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr}","title":"%{condition_title}-no-description"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"}]}`, context)
 <% end -%>
 	expectedPolicyData = strings.Replace(expectedPolicyData, "<", "\\u003c", -1)
 
@@ -409,7 +410,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 <% end -%>
 
 func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
@@ -424,7 +425,7 @@ resource "<%= resource_ns_iam -%>_member" "foo" {
 }
 
 func testAcc<%= resource_name -%>IamPolicy_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 data "google_iam_policy" "foo" {
@@ -454,7 +455,7 @@ resource "<%= resource_ns_iam -%>_policy" "foo" {
 }
 
 func testAcc<%= resource_name -%>IamPolicy_emptyBinding(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 data "google_iam_policy" "foo" {
@@ -474,7 +475,7 @@ resource "<%= resource_ns_iam -%>_policy" "foo" {
 }
 
 func testAcc<%= resource_name -%>IamBinding_basicGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
@@ -489,7 +490,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 }
 
 func testAcc<%= resource_name -%>IamBinding_updateGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
@@ -505,7 +506,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 
 <% unless object.iam_policy.iam_conditions_request_type.nil? -%>
 func testAcc<%= resource_name -%>IamBinding_withConditionGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
@@ -525,7 +526,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 }
 
 func testAcc<%= resource_name -%>IamBinding_withAndWithoutConditionGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
@@ -569,7 +570,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo3" {
 }
 
 func testAcc<%= resource_name -%>IamMember_withConditionGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
@@ -589,7 +590,7 @@ resource "<%= resource_ns_iam -%>_member" "foo" {
 }
 
 func testAcc<%= resource_name -%>IamMember_withAndWithoutConditionGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
@@ -633,7 +634,7 @@ resource "<%= resource_ns_iam -%>_member" "foo3" {
 }
 
 func testAcc<%= resource_name -%>IamPolicy_withConditionGenerated(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 <%= example.config_test_body(pwd) -%>
 
 data "google_iam_policy" "foo" {

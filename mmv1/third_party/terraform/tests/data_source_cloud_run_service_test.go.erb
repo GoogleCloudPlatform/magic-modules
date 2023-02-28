@@ -24,7 +24,7 @@ func TestAccDataSourceGoogleCloudRunService_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleCloudRunService_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_cloud_run_service.foo", "google_cloud_run_service.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_cloud_run_service.foo", "google_cloud_run_service.foo"),
 				),
 			},
 		},
@@ -40,13 +40,13 @@ func TestAccDataSourceGoogleCloudRunService_optionalProject(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleCloudRunService_optionalProject(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_cloud_run_service.foo", "google_cloud_run_service.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_cloud_run_service.foo", "google_cloud_run_service.foo"),
 				),
 			},
 		},
@@ -54,7 +54,7 @@ func TestAccDataSourceGoogleCloudRunService_optionalProject(t *testing.T) {
 }
 
 func testAccDataSourceGoogleCloudRunService_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_cloud_run_service" "foo" {
   name     = "tf-test-cloudrun-srv%{random_suffix}"
   location = "us-central1"
@@ -82,7 +82,7 @@ data "google_cloud_run_service" "foo" {
 }
 
 func testAccDataSourceGoogleCloudRunService_optionalProject(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_cloud_run_service" "foo" {
   name     = "tf-test-cloudrun-srv%{random_suffix}"
   location = "us-central1"

@@ -92,7 +92,7 @@ func TestAccIAM2DenyPolicy_iamDenyPolicyFolderParent(t *testing.T) {
 }
 
 func testAccIAM2DenyPolicy_iamDenyPolicyUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_project" "project" {
   provider        = google-beta
   project_id      = "tf-test%{random_suffix}"
@@ -141,7 +141,7 @@ resource "google_service_account" "test-account" {
 }
 
 func testAccIAM2DenyPolicy_iamDenyPolicyUpdate2(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_project" "project" {
   provider        = google-beta
   project_id      = "tf-test%{random_suffix}"
@@ -180,7 +180,7 @@ resource "google_service_account" "test-account" {
 }
 
 func testAccIAM2DenyPolicy_iamDenyPolicyFolder(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_iam_deny_policy" "example" {
   provider = google-beta
   parent   = urlencode("cloudresourcemanager.googleapis.com/${google_folder.folder.id}")
@@ -208,7 +208,7 @@ resource "google_folder" "folder" {
 }
 
 func testAccIAM2DenyPolicy_iamDenyPolicyFolderUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_iam_deny_policy" "example" {
   provider = google-beta
   parent   = urlencode("cloudresourcemanager.googleapis.com/${google_folder.folder.id}")

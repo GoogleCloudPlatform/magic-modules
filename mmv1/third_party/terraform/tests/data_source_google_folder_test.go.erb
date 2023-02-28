@@ -40,7 +40,7 @@ func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_byShortNameConfig(parent, displayName),
@@ -60,7 +60,7 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleFolder_lookupOrganizationConfig(parent, displayName),
@@ -78,7 +78,7 @@ func TestAccDataSourceGoogleFolder_byFullNameNotFound(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckGoogleFolder_byFullNameNotFoundConfig(name),

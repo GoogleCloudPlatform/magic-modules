@@ -19,7 +19,7 @@ func TestAccSnapshotDatasource_name(t *testing.T) {
 			{
 				Config: testAccSnapshot_name(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
 						"google_compute_snapshot.default",
 						map[string]struct{}{"zone": {}},
@@ -35,12 +35,12 @@ func TestAccSnapshotDatasource_filter(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSnapshot_filter(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
 						"google_compute_snapshot.c",
 						map[string]struct{}{"zone": {}},
@@ -56,12 +56,12 @@ func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSnapshot_filter_mostRecent(acctest.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
 						"google_compute_snapshot.c",
 						map[string]struct{}{"zone": {}},
@@ -73,7 +73,7 @@ func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 }
 
 func testAccSnapshot_name(project, suffix string) string {
-	return Nprintf(`
+	return google.Nprintf(`
 	data "google_compute_image" "tf-test-image" {
 		family  = "debian-11"
 		project = "debian-cloud"
@@ -105,7 +105,7 @@ func testAccSnapshot_name(project, suffix string) string {
 }
 
 func testAccSnapshot_filter(project, suffix string) string {
-	return Nprintf(`
+	return google.Nprintf(`
 	data "google_compute_image" "tf-test-image" {
 		family  = "debian-11"
 		project = "debian-cloud"
@@ -156,7 +156,7 @@ func testAccSnapshot_filter(project, suffix string) string {
 }
 
 func testAccSnapshot_filter_mostRecent(project, suffix string) string {
-	return Nprintf(`
+	return google.Nprintf(`
 	data "google_compute_image" "tf-test-image" {
 		family  = "debian-11"
 		project = "debian-cloud"

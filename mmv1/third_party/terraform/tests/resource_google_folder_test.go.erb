@@ -63,7 +63,7 @@ func TestAccFolder_moveParent(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

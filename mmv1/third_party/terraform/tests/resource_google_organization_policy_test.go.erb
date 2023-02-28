@@ -89,7 +89,7 @@ func testAccOrganizationPolicy_list_allowAll(t *testing.T) {
 	org := acctest.GetTestOrgTargetFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -110,7 +110,7 @@ func testAccOrganizationPolicy_list_allowSome(t *testing.T) {
 	project := acctest.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -130,7 +130,7 @@ func testAccOrganizationPolicy_list_denySome(t *testing.T) {
 	org := acctest.GetTestOrgTargetFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -150,7 +150,7 @@ func testAccOrganizationPolicy_list_update(t *testing.T) {
 	org := acctest.GetTestOrgTargetFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -174,7 +174,7 @@ func testAccOrganizationPolicy_list_inheritFromParent(t *testing.T) {
 	org := acctest.GetTestOrgTargetFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -193,7 +193,7 @@ func testAccOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 	org := acctest.GetTestOrgTargetFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

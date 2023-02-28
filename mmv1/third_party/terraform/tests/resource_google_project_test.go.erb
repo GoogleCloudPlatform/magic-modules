@@ -102,7 +102,7 @@ func TestAccProject_create(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", testPrefix, acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
@@ -128,7 +128,7 @@ func TestAccProject_billing(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", testPrefix, acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project with a billing account
 			{
@@ -170,7 +170,7 @@ func TestAccProject_labels(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", testPrefix, acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_labels(pid, pname, org, map[string]string{"test": "that"}),
@@ -213,7 +213,7 @@ func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	billingId := acctest.GetTestBillingAccountFromEnv(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_deleteDefaultNetwork(pid, pname, org, billingId),
@@ -230,7 +230,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 	folderDisplayName := testPrefix + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_parentFolder(pid, pname, folderDisplayName, org),
@@ -247,7 +247,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 	folderDisplayName := testPrefix + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_migrateParentFolder(pid, pname, folderDisplayName, org),

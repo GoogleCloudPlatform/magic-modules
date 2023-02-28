@@ -47,7 +47,7 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 }
 
 func testAccAlloydbCluster_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"

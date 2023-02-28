@@ -99,7 +99,7 @@ func TestAccMonitoringSlo_availabilitySli(t *testing.T) {
 	var generatedId string
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -134,7 +134,7 @@ func TestAccMonitoringSlo_requestBased(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -184,7 +184,7 @@ func TestAccMonitoringSlo_windowBased_updateSlis(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -250,7 +250,7 @@ func TestAccMonitoringSlo_windowBasedGoodTotalRatioThresholdSlis(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -326,7 +326,7 @@ func TestAccMonitoringSlo_windowBasedMetricMeanRangeSlis(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -366,7 +366,7 @@ func TestAccMonitoringSlo_windowBasedMetricSumRangeSlis(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -406,7 +406,7 @@ func TestAccMonitoringSlo_genericService(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

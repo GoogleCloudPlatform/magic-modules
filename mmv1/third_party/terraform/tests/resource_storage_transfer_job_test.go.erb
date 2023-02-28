@@ -88,7 +88,7 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -111,7 +111,7 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -134,7 +134,7 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -160,7 +160,7 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -211,7 +211,7 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

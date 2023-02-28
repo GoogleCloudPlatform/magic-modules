@@ -24,7 +24,7 @@ func TestAccDataSourceGameServicesGameServerDeploymentRollout_basic(t *testing.T
 			{
 				Config: testAccDataSourceGameServicesGameServerDeploymentRollout_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_game_services_game_server_deployment_rollout.qa", "google_game_services_game_server_deployment_rollout.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_game_services_game_server_deployment_rollout.qa", "google_game_services_game_server_deployment_rollout.foo"),
 				),
 			},
 		},
@@ -32,7 +32,7 @@ func TestAccDataSourceGameServicesGameServerDeploymentRollout_basic(t *testing.T
 }
 
 func testAccDataSourceGameServicesGameServerDeploymentRollout_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_game_services_game_server_deployment" "default" {
   deployment_id  = "tf-test-deployment-%{random_suffix}"
   description = "a deployment description"

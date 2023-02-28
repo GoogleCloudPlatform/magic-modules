@@ -56,7 +56,7 @@ func TestAccSqlUser_iamUser(t *testing.T) {
 	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -81,7 +81,7 @@ func TestAccSqlUser_postgres(t *testing.T) {
 	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -114,7 +114,7 @@ func TestAccSqlUser_postgresIAM(t *testing.T) {
 	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -141,7 +141,7 @@ func TestAccSqlUser_postgresAbandon(t *testing.T) {
 	userName := "admin"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -256,7 +256,7 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 	instance := fmt.Sprintf("tf-test-i%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

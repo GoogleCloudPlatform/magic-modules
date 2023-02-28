@@ -46,7 +46,7 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 
 // Updates "label" field from testAccAlloydbBackup_alloydbBackupFullExample
 func testAccAlloydbBackup_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_alloydb_backup" "default" {
   location     = "us-central1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"

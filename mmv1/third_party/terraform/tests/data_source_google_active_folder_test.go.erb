@@ -39,7 +39,7 @@ func TestAccDataSourceGoogleActiveFolder_space(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleActiveFolderConfig(parent, displayName),
@@ -59,7 +59,7 @@ func TestAccDataSourceGoogleActiveFolder_dash(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleActiveFolderConfig(parent, displayName),

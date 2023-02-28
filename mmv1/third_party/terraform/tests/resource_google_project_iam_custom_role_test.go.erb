@@ -62,7 +62,7 @@ func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -101,7 +101,7 @@ func TestAccProjectIamCustomRole_createAfterDestroy(t *testing.T) {
 	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -51,7 +51,7 @@ func TestAccComputeBackendBucket_withCdnPolicy(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -106,7 +106,7 @@ func TestAccComputeBackendBucket_withSecurityPolicy(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -137,7 +137,7 @@ func TestAccComputeBackendBucket_withCompressionMode(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

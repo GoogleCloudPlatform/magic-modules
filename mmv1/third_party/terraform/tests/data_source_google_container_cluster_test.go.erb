@@ -20,7 +20,7 @@ func TestAccContainerClusterDatasource_zonal(t *testing.T) {
 			{
 				Config: testAccContainerClusterDatasource_zonal(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_container_cluster.kubes",
 						"google_container_cluster.kubes",
 						// Remove once https://github.com/hashicorp/terraform/issues/21347 is fixed.
@@ -41,12 +41,12 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerClusterDatasource_regional(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_container_cluster.kubes",
 						"google_container_cluster.kubes",
 						// Remove once https://github.com/hashicorp/terraform/issues/21347 is fixed.

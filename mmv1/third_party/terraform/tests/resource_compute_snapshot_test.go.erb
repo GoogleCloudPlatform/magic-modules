@@ -44,7 +44,7 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

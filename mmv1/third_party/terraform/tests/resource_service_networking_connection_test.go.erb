@@ -45,7 +45,7 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
 			{

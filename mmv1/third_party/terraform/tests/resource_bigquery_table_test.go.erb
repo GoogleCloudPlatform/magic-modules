@@ -437,7 +437,7 @@ func TestAccBigQueryTable_Kms(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -461,7 +461,7 @@ func TestAccBigQueryTable_HourlyTimePartitioning(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -494,7 +494,7 @@ func TestAccBigQueryTable_MonthlyTimePartitioning(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -527,7 +527,7 @@ func TestAccBigQueryTable_YearlyTimePartitioning(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -561,7 +561,7 @@ func TestAccBigQueryTable_HivePartitioning(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -586,7 +586,7 @@ func TestAccBigQueryTable_HivePartitioningCustomSchema(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -612,7 +612,7 @@ func TestAccBigQueryTable_AvroPartitioning(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -636,7 +636,7 @@ func TestAccBigQueryTable_RangePartitioning(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -660,7 +660,7 @@ func TestAccBigQueryTable_View(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -684,7 +684,7 @@ func TestAccBigQueryTable_updateView(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -717,7 +717,7 @@ func TestAccBigQueryTable_WithViewAndSchema(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -753,7 +753,7 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Basic(t *testing.
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -804,7 +804,7 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Update(t *testing
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -852,7 +852,7 @@ func TestAccBigQueryExternalDataTable_parquet(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -873,7 +873,7 @@ func TestAccBigQueryExternalDataTable_CSV(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -902,7 +902,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -941,7 +941,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -986,7 +986,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateAllowQuotedNewlines(t
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1021,7 +1021,7 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1046,7 +1046,7 @@ func TestAccBigQueryDataTable_sheet(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1070,7 +1070,7 @@ func TestAccBigQueryDataTable_jsonEquivalency(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1103,7 +1103,7 @@ func TestAccBigQueryDataTable_canReorderParameters(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1129,7 +1129,7 @@ func TestAccBigQueryDataTable_expandArray(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1162,7 +1162,7 @@ func TestAccBigQueryTable_allowDestroy(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1194,7 +1194,7 @@ func TestAccBigQueryTable_emptySchema(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2297,7 +2297,7 @@ resource "google_bigquery_table" "test" {
 }
 
 func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 	resource "google_bigtable_instance" "instance" {
 		name = "tf-test-bigtable-inst-%{random_suffix}"
 		cluster {
@@ -2344,7 +2344,7 @@ func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 }
 
 func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
   resource "google_bigquery_table" "table" {
 	  deletion_protection = false
     dataset_id = google_bigquery_dataset.dataset.dataset_id

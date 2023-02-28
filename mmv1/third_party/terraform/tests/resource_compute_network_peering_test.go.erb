@@ -46,7 +46,7 @@ func TestAccComputeNetworkPeering_subnetRoutes(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccComputeNetworkPeeringDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -72,7 +72,7 @@ func TestAccComputeNetworkPeering_customRoutesUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccComputeNetworkPeeringDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -24,7 +24,7 @@ func TestAccDataSourceGoogleComputeDisk_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleComputeDisk_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_compute_disk.foo", "google_compute_disk.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_compute_disk.foo", "google_compute_disk.foo"),
 				),
 			},
 		},
@@ -32,7 +32,7 @@ func TestAccDataSourceGoogleComputeDisk_basic(t *testing.T) {
 }
 
 func testAccDataSourceGoogleComputeDisk_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_compute_disk" "foo" {
   name     = "tf-test-compute-disk-%{random_suffix}"
 }

@@ -100,7 +100,7 @@ resource "google_notebooks_instance" "test" {
 }
 
 func testAccNotebooksInstance_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_notebooks_instance" "instance" {
   name = "tf-test-notebooks-instance%{random_suffix}"
   location = "us-central1-a"
@@ -115,7 +115,7 @@ resource "google_notebooks_instance" "instance" {
 }
 
 func testAccNotebooksInstance_update(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_notebooks_instance" "instance" {
   name = "tf-test-notebooks-instance%{random_suffix}"
   location = "us-central1-a"

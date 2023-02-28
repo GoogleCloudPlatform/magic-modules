@@ -48,7 +48,7 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeTargetPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

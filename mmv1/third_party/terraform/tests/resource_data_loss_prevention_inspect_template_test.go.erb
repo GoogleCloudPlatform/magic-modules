@@ -43,7 +43,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplateUpdate(t *testin
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplateBasic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -153,7 +153,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 func testAccDataLossPreventionInspectTemplate_dlpInspectTemplateUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Updated"

@@ -69,7 +69,7 @@ func testAccMonitoringAlertPolicy_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -100,7 +100,7 @@ func testAccMonitoringAlertPolicy_full(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -122,7 +122,7 @@ func testAccMonitoringAlertPolicy_mql(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -144,7 +144,7 @@ func testAccMonitoringAlertPolicy_log(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

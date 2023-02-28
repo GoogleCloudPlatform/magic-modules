@@ -86,7 +86,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureAcmUpdate(t *testing.T) {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureAcmUpdateStart(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + google.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   project = google_project.project.project_id
   name = "configmanagement"
@@ -138,7 +138,7 @@ resource "google_gke_hub_feature_membership" "feature_member_2" {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureAcmMembershipUpdate(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + google.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   project = google_project.project.project_id
   name = "configmanagement"
@@ -196,7 +196,7 @@ resource "google_gke_hub_feature_membership" "feature_member_2" {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureAcmAddHierarchyController(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + google.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   project = google_project.project.project_id
   name = "configmanagement"
@@ -293,7 +293,7 @@ resource "google_gke_hub_feature_membership" "feature_member_4" {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureAcmRemoveFields(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup(context) + google.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   project = google_project.project.project_id
   name = "configmanagement"
@@ -390,7 +390,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureAcmAllFields(t *testing.T) {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureAcmAllFields(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + google.Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
   name               = "tf-test-cl%{random_suffix}"
@@ -457,7 +457,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureWithPreventDriftField(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + google.Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
   name               = "tf-test-cl%{random_suffix}"
@@ -525,7 +525,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureAcmFewFields(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + google.Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
   name               = "tf-test-cl%{random_suffix}"
@@ -638,7 +638,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureAcmOci(t *testing.T) {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureAcmOciStart(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup_ACMOCI(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup_ACMOCI(context) + google.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   project = google_project.project.project_id
   name = "configmanagement"
@@ -690,7 +690,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureAcmOciUpdate(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup_ACMOCI(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup_ACMOCI(context) + google.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   project = google_project.project.project_id
   name = "configmanagement"
@@ -742,7 +742,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 }
 
 func testAccGkeHubFeatureMembership_gkehubFeatureAcmOciRemoveFields(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup_ACMOCI(context) + Nprintf(`
+  return gkeHubFeatureProjectSetup(context) + gkeHubClusterMembershipSetup_ACMOCI(context) + google.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   project = google_project.project.project_id
   name = "configmanagement"
@@ -836,7 +836,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureMesh(t *testing.T) {
 }
 
 func testAccGkeHubFeatureMembership_meshStart(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetup(context) + Nprintf(`
+	return gkeHubFeatureProjectSetup(context) + google.Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
   name               = "tf-test-cl%{random_suffix}"
@@ -891,7 +891,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 }
 
 func testAccGkeHubFeatureMembership_meshUpdateManagement(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetup(context) + Nprintf(`
+	return gkeHubFeatureProjectSetup(context) + google.Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
   name               = "tf-test-cl%{random_suffix}"
@@ -945,7 +945,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 }
 
 func testAccGkeHubFeatureMembership_meshUpdateControlPlane(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetup(context) + Nprintf(`
+	return gkeHubFeatureProjectSetup(context) + google.Nprintf(`
 resource "google_container_cluster" "primary" {
   project = google_project.project.project_id
   name               = "tf-test-cl%{random_suffix}"
@@ -999,7 +999,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 }
 
 func gkeHubClusterMembershipSetup(context map[string]interface{}) string {
-  return Nprintf(`
+  return google.Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "tf-test-cl%{random_suffix}"
   location           = "us-central1-a"
@@ -1088,7 +1088,7 @@ resource "google_gke_hub_membership" "membership_fourth" {
 }
 
 func gkeHubClusterMembershipSetup_ACMOCI(context map[string]interface{}) string {
-  return Nprintf(`
+  return google.Nprintf(`
 
 resource "google_compute_network" "testnetwork" {
     project                 = google_project.project.project_id

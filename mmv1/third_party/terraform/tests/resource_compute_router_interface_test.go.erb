@@ -45,7 +45,7 @@ func TestAccComputeRouterInterface_redundant(t *testing.T) {
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -68,7 +68,7 @@ func TestAccComputeRouterInterface_withTunnel(t *testing.T) {
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -91,7 +91,7 @@ func TestAccComputeRouterInterface_withPrivateIpAddress(t *testing.T) {
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

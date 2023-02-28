@@ -81,7 +81,7 @@ func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -102,7 +102,7 @@ func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 	canonicalProject := canonicalProjectId(project)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -122,7 +122,7 @@ func testAccProjectOrganizationPolicy_list_denySome(t *testing.T) {
 	projectId := acctest.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -142,7 +142,7 @@ func testAccProjectOrganizationPolicy_list_update(t *testing.T) {
 	projectId := acctest.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -167,7 +167,7 @@ func testAccProjectOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -188,7 +188,7 @@ func testAccProjectOrganizationPolicy_none(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

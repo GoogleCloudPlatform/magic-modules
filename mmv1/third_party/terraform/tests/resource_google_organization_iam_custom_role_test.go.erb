@@ -61,7 +61,7 @@ func TestAccOrganizationIamCustomRole_undelete(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -91,7 +91,7 @@ func TestAccOrganizationIamCustomRole_createAfterDestroy(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationIamCustomRoleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

@@ -24,7 +24,7 @@ func TestAccDataSourceGoogleFirebaseHostingChannel(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleFirebaseHostingChannel(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState(
+					google.CheckDataSourceStateMatchesResourceState(
 						"data.google_firebase_hosting_channel.channel",
 						"google_firebase_hosting_channel.channel",
 					),
@@ -35,7 +35,7 @@ func TestAccDataSourceGoogleFirebaseHostingChannel(t *testing.T) {
 }
 
 func testAccDataSourceGoogleFirebaseHostingChannel(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_firebase_hosting_site" "default" {
 	project  = "%{project_id}"
 	site_id = "tf-test-site-with-channel%{random_suffix}"

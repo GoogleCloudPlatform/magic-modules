@@ -53,7 +53,7 @@ func TestAccBigtableAppProfile_ignoreWarnings(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableAppProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -78,7 +78,7 @@ func TestAccBigtableAppProfile_multiClusterIds(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableAppProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -112,7 +112,7 @@ func TestAccBigtableAppProfile_updateSingleToMulti(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableAppProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

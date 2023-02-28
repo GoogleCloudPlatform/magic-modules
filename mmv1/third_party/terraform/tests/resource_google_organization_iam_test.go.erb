@@ -92,7 +92,7 @@ func testAccOrganizationIamBinding_condition(t *testing.T) {
 	conditionTitle := "expires_after_2019_12_31"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
@@ -116,7 +116,7 @@ func testAccOrganizationIamMember_basic(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
@@ -141,7 +141,7 @@ func testAccOrganizationIamMember_condition(t *testing.T) {
 	conditionTitle := "expires_after_2019_12_31"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)

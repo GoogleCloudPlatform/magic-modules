@@ -13,7 +13,7 @@ func TestAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorit
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"pool_name":     BootstrapSharedCaPoolInLocation(t, "us-central1"),
+		"pool_name":     acctest.BootstrapSharedCaPoolInLocation(t, "us-central1"),
 		"pool_location": "us-central1",
 		"random_suffix": acctest.RandString(t, 10),
 	}
@@ -34,7 +34,7 @@ func TestAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorit
 }
 
 func testAccDataSourcePrivatecaCertificateAuthority_privatecaCertificateAuthorityBasicExample(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_privateca_certificate_authority" "default" {
   // This example assumes this pool already exists.
   // Pools cannot be deleted in normal test circumstances, so we depend on static pools

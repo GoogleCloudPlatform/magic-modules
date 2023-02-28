@@ -54,7 +54,7 @@ func TestAccOrganizationIamAuditConfig_multiple(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Apply an IAM audit config
 			{
@@ -83,7 +83,7 @@ func TestAccOrganizationIamAuditConfig_multipleAtOnce(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Apply an IAM audit config
 			{
@@ -105,7 +105,7 @@ func TestAccOrganizationIamAuditConfig_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Apply an IAM audit config
 			{
@@ -141,7 +141,7 @@ func TestAccOrganizationIamAuditConfig_remove(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Apply multiple IAM audit configs
 			{
@@ -171,7 +171,7 @@ func TestAccOrganizationIamAuditConfig_addFirstExemptMember(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Apply IAM audit config with no members
 			{
@@ -200,7 +200,7 @@ func TestAccOrganizationIamAuditConfig_removeLastExemptMember(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Apply IAM audit config with member
 			{
@@ -229,7 +229,7 @@ func TestAccOrganizationIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			// Apply IAM audit config with DATA_READ
 			{

@@ -66,7 +66,7 @@ func TestAccStorageObjectAccessControl_updateWithSlashes(t *testing.T) {
 			}
 			acctest.TestAccPreCheck(t)
 		},
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

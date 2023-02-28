@@ -79,7 +79,7 @@ func testAccLoggingFolderExclusion_folderAcceptsFullFolderPath(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -110,7 +110,7 @@ func testAccLoggingFolderExclusion_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -140,7 +140,7 @@ func testAccLoggingFolderExclusion_multiple(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

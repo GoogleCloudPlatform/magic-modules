@@ -37,7 +37,7 @@ func TestAccDataSourceGoogleBillingAccount_byShortName(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleBillingAccount_byName(billingId),
@@ -57,7 +57,7 @@ func TestAccDataSourceGoogleBillingAccount_byFullNameClosed(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckGoogleBillingAccount_byNameClosed(name),
@@ -72,7 +72,7 @@ func TestAccDataSourceGoogleBillingAccount_byDisplayName(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },
-		Providers: acctest.TestAccProvidersrovidersroviders,
+		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckGoogleBillingAccount_byDisplayName(name),

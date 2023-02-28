@@ -39,7 +39,7 @@ func TestAccSourceRepoRepository_update(t *testing.T) {
 	topicName := fmt.Sprintf("topic-name-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckSourceRepoRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

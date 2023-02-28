@@ -48,7 +48,7 @@ func TestAccBigtableTable_splitKeys(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -75,7 +75,7 @@ func TestAccBigtableTable_family(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -101,7 +101,7 @@ func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			// creating a table with a column family and deletion protection equals to protected
@@ -161,7 +161,7 @@ func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			// creating a table with a column family and deletion protection equals to unprotected
@@ -220,7 +220,7 @@ func TestAccBigtableTable_familyMany(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -246,7 +246,7 @@ func TestAccBigtableTable_familyUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

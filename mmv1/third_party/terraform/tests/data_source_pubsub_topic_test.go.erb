@@ -24,7 +24,7 @@ func TestAccDataSourceGooglePubsubTopic_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGooglePubsubTopic_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_pubsub_topic.foo", "google_pubsub_topic.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_pubsub_topic.foo", "google_pubsub_topic.foo"),
 				),
 			},
 		},
@@ -40,13 +40,13 @@ func TestAccDataSourceGooglePubsubTopic_optionalProject(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGooglePubsubTopic_optionalProject(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_pubsub_topic.foo", "google_pubsub_topic.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_pubsub_topic.foo", "google_pubsub_topic.foo"),
 				),
 			},
 		},
@@ -54,7 +54,7 @@ func TestAccDataSourceGooglePubsubTopic_optionalProject(t *testing.T) {
 }
 
 func testAccDataSourceGooglePubsubTopic_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_pubsub_topic" "foo" {
   name     = "tf-test-pubsub-%{random_suffix}"
 }
@@ -67,7 +67,7 @@ data "google_pubsub_topic" "foo" {
 }
 
 func testAccDataSourceGooglePubsubTopic_optionalProject(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_pubsub_topic" "foo" {
   name     = "tf-test-pubsub-%{random_suffix}"
 }

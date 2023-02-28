@@ -48,7 +48,7 @@ func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -76,7 +76,7 @@ func TestAccComputeProjectMetadataItem_basicWithEmptyVal(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -99,7 +99,7 @@ func TestAccComputeProjectMetadataItem_basicUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -131,7 +131,7 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
-		Providers:    acctest.TestAccProvidersrovidersroviders,
+		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
