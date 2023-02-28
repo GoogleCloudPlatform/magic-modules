@@ -9750,6 +9750,62 @@ objects:
                     - :NEVER
                     - :ON_PERMANENT_INSTANCE_DELETION
                   default_value: :NEVER
+          - !ruby/object:Api::Type::Map
+            name: 'internalIp'
+            api_name: internalIPs
+            min_version: beta
+            key_name: "interface_name"
+            description: |
+              Preserved internal IPs defined for this instance. This map is keyed with the name of the network interface.
+            value_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: autoDelete
+                  description: |
+                    These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
+                  values:
+                    - :NEVER
+                    - :ON_PERMANENT_INSTANCE_DELETION
+                  default_value: :NEVER
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'ipAddress'
+                  description: |
+                    Ip address representation
+                  properties:
+                    - !ruby/object:Api::Type::ResourceRef
+                      name: 'address'
+                      resource: 'Address'
+                      imports: 'selfLink'
+                      description: |
+                        The URL of the reservation for this IP address.
+          - !ruby/object:Api::Type::Map
+            name: 'externalIp'
+            min_version: beta
+            api_name: externalIPs
+            key_name: "interface_name"
+            description: |
+              Preserved external IPs defined for this instance. This map is keyed with the name of the network interface.
+            value_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: autoDelete
+                  description: |
+                    These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
+                  values:
+                    - :NEVER
+                    - :ON_PERMANENT_INSTANCE_DELETION
+                  default_value: :NEVER
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'ipAddress'
+                  description: |
+                    Ip address representation
+                  properties:
+                    - !ruby/object:Api::Type::ResourceRef
+                      name: 'address'
+                      resource: 'Address'
+                      imports: 'selfLink'
+                      description: |
+                        The URL of the reservation for this IP address.
   - !ruby/object:Api::Resource
     name: 'RegionPerInstanceConfig'
     base_url:  'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}'
@@ -9865,6 +9921,62 @@ objects:
                     - :NEVER
                     - :ON_PERMANENT_INSTANCE_DELETION
                   default_value: :NEVER
+          - !ruby/object:Api::Type::Map
+            name: 'internalIp'
+            api_name: internalIPs
+            min_version: beta
+            key_name: "interface_name"
+            description: |
+              Preserved internal IPs defined for this instance. This map is keyed with the name of the network interface.
+            value_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: autoDelete
+                  description: |
+                    These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
+                  values:
+                    - :NEVER
+                    - :ON_PERMANENT_INSTANCE_DELETION
+                  default_value: :NEVER
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'ipAddress'
+                  description: |
+                    Ip address representation
+                  properties:
+                    - !ruby/object:Api::Type::ResourceRef
+                      name: 'address'
+                      resource: 'Address'
+                      imports: 'selfLink'
+                      description: |
+                        The URL of the reservation for this IP address.
+          - !ruby/object:Api::Type::Map
+            name: 'externalIp'
+            min_version: beta
+            api_name: externalIPs
+            key_name: "interface_name"
+            description: |
+              Preserved external IPs defined for this instance. This map is keyed with the name of the network interface.
+            value_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: autoDelete
+                  description: |
+                    These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
+                  values:
+                    - :NEVER
+                    - :ON_PERMANENT_INSTANCE_DELETION
+                  default_value: :NEVER
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'ipAddress'
+                  description: |
+                    Ip address representation
+                  properties:
+                    - !ruby/object:Api::Type::ResourceRef
+                      name: 'address'
+                      resource: 'Address'
+                      imports: 'selfLink'
+                      description: |
+                        The URL of the reservation for this IP address.
   - !ruby/object:Api::Resource
     name: 'ProjectInfo'
     base_url: projects
@@ -13653,6 +13765,11 @@ objects:
               attached.
             values:
               - :COLLOCATED
+          - !ruby/object:Api::Type::Integer
+            name: 'maxDistance'
+            min_version: 'beta'
+            description: |
+              Specifies the number of max logical switches.
       - !ruby/object:Api::Type::NestedObject
         name: 'instanceSchedulePolicy'
         conflicts:
