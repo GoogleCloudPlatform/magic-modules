@@ -13,8 +13,6 @@ func TestAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(t *
 	skipIfVcr(t)
 	t.Parallel()
 
-	fmt.Printf("from t: org_id %s", getTestOrgFromEnv(t))
-
 	context := map[string]interface{}{
 		"org_id":          getTestOrgFromEnv(t),
 		"billing_account": getTestBillingAccountFromEnv(t),
