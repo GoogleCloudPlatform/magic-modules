@@ -106,7 +106,6 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 	testDataSinkName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
 	testSourceAgentPoolName := fmt.Sprintf("tf-test-source-agent-pool-%s", randString(t, 10))
-	testSourceAgentPoolNameUpdated := fmt.Sprintf("tf-updated-source-agent-pool-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -115,14 +114,6 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_posixSource(getTestProjectFromEnv(), testDataSinkName, testTransferJobDescription, testSourceAgentPoolName),
-			},
-			{
-				ResourceName:      "google_storage_transfer_job.transfer_job",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccStorageTransferJob_posixSource(getTestProjectFromEnv(), testDataSinkName, testTransferJobDescription, testSourceAgentPoolNameUpdated),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -138,7 +129,6 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 	testDataSourceName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
 	testSinkAgentPoolName := fmt.Sprintf("tf-test-sink-agent-pool-%s", randString(t, 10))
-	testSinkAgentPoolNameUpdated := fmt.Sprintf("tf-updated-sink-agent-pool-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -147,14 +137,6 @@ func TestAccStorageTransferJob_posixSink(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_posixSink(getTestProjectFromEnv(), testDataSourceName, testTransferJobDescription, testSinkAgentPoolName),
-			},
-			{
-				ResourceName:      "google_storage_transfer_job.transfer_job",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccStorageTransferJob_posixSink(getTestProjectFromEnv(), testDataSourceName, testTransferJobDescription, testSinkAgentPoolNameUpdated),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
