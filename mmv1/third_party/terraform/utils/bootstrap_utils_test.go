@@ -427,7 +427,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 		return nil
 	}
 
-	projectID := fmt.Sprintf("%s%s", projectIDPrefix, getTestProjectFromEnv(t))
+	projectID := fmt.Sprintf("%s%s", projectIDPrefix, getTestProjectFromEnv())
 
 	crmClient := config.NewResourceManagerClient(config.UserAgent)
 
