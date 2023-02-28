@@ -504,7 +504,6 @@ objects:
     name: Taxonomy
     base_url: projects/{{project}}/locations/{{region}}/taxonomies
     self_link: "{{name}}"
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -512,7 +511,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': https://cloud.google.com/data-catalog/docs
-      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1beta1/projects.locations.taxonomies
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       skip_import_test: true
       method_name_separator: ':'
@@ -563,7 +562,6 @@ objects:
     name: PolicyTag
     base_url: "{{taxonomy}}/policyTags"
     self_link: "{{name}}"
-    min_version: beta
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -571,7 +569,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': https://cloud.google.com/data-catalog/docs
-      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1beta1/projects.locations.taxonomies.policyTags
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies.policyTags
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       skip_import_test: true
       method_name_separator: ':'
