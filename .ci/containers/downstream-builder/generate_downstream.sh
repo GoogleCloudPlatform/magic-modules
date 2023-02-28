@@ -209,7 +209,6 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG
     git commit --signoff --amend --no-edit
 fi
 
-
 git push $SCRATCH_PATH $BRANCH -f
 
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
