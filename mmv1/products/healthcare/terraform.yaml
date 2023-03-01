@@ -60,23 +60,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           pubsub_topic: "fhir-notifications"
           bq_dataset_name: "bq_example_dataset"
         test_vars_overrides:
-          psaRoles: 'BootstrapPSARoles(t,
+          policyChanged: 'BootstrapPSARoles(t, []string{"gsp-sa-healthcare"},
 
-            BootstrapPSARolesOptions{
-
-              ProjectID: getTestProjectFromEnv(),
-
-              AgentName: "gcp-sa-healthcare",
-
-              Roles: []string{
-
-                "roles/bigquery.dataEditor",
-
-                "roles/bigquery.jobUser",
-
-              },
-
-            })'
+            []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_fhir_store_notification_config"
         primary_resource_id: "default"
@@ -126,23 +112,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bq_dataset_name: "dicom_bq_ds"
           bq_table_name: "dicom_bq_tb"
         test_vars_overrides:
-          psaRoles: 'BootstrapPSARoles(t,
+          policyChanged: 'BootstrapPSARoles(t, []string{"gsp-sa-healthcare"},
 
-            BootstrapPSARolesOptions{
-
-              ProjectID: getTestProjectFromEnv(),
-
-              AgentName: "gcp-sa-healthcare",
-
-              Roles: []string{
-
-                "roles/bigquery.dataEditor",
-
-                "roles/bigquery.jobUser",
-
-              },
-
-            })'
+            []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true

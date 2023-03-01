@@ -529,62 +529,58 @@ type BootstrapPSARolesOptions struct {
 // policy grants the given service's agent the given roles.
 // This is important to bootstrap because using iam policy resources means that
 // deleting removes permissions for concurrent tests.
-// Return the roles granted.
-func BootstrapPSARoles(t *testing.T, opts BootstrapPSARolesOptions) []string {
+// Return whether the policy changed.
+func BootstrapPSARoles(t *testing.T, agentNames, roles []string) bool {
 	config := BootstrapConfig(t)
 	if config == nil {
 		t.Fatal("Could not bootstrap a config for BootstrapPSARoles.")
+		return false
 	}
 	client := config.NewResourceManagerClient(config.userAgent)
 
-	project, err := client.Projects.Get(opts.ProjectID).Do()
+	// Get the project since we need its number, id, and policy.
+	project, err := client.Projects.Get(getTestProjectFromEnv()).Do()
 	if err != nil {
-		t.Fatalf("Error getting project with id %q: %s", opts.ProjectID, err)
+		t.Fatalf("Error getting project with id %q: %s", project.ProjectID, err)
+		return false
 	}
 
-	serviceAgent := fmt.Sprintf("serviceAccount:service-%d@%s.iam.gserviceaccount.com", project.ProjectNumber, opts.AgentName)
 	getPolicyRequest := &cloudresourcemanager.GetIamPolicyRequest{}
 	policy, err := client.Projects.GetIamPolicy(project.ProjectId, getPolicyRequest).Do()
 	if err != nil {
 		t.Fatalf("Error getting project iam policy: %v", err)
+		return false
 	}
 
-	// Map each role to whether it was already in the policy
-	rolesFound := make(map[string]bool, len(opts.Roles))
-	// Track whether we changed the policy and only set it when it needs changing.
-	changed := false
-	for _, binding := range policy.Bindings {
-		for _, member := range binding.Members {
-			if member == serviceAgent {
-				rolesFound[binding.Role] = true
-			}
-		}
-		if !rolesFound[binding.Role] {
-			binding.Members = append(binding.Members, serviceAgent)
-			rolesFound[binding.Role] = true
-			changed = true
-		}
+	var members []string
+	for _, agentName := range agentNames {
+		member := fmt.Sprintf("serviceAccount:service-%d@%s.iam.gserviceaccount.com", project.ProjectNumber, agentName)
+		members = append(members, member)
 	}
 
-	// Add bindings for the roles that were missing.
-	for _, role := range opts.Roles {
-		if !rolesFound[role] {
-			policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
-				Members: []string{serviceAgent},
-				Role:    role,
-			})
-			changed = true
-		}
+	// Create the bindings we need to add to the policy.
+	var newBindings []*cloudresourcemanager.Binding
+	for _, role := range roles {
+		newBindings = append(newBindings, &cloudresourcemanager.Binding{
+			Role:    role,
+			Members: members,
+		})
 	}
 
-	if changed {
+	mergedBindings := mergeBindings(policy.Bindings, newBindings)
+
+	if !compareBindings(policy.Bindings, mergedBindings) {
+		// The policy must change.
 		setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
 		policy, err = client.Projects.SetIamPolicy(project.ProjectId, setPolicyRequest).Do()
 		if err != nil {
 			t.Fatalf("Error setting project iam policy: %v", err)
+			return false
 		}
+		return true
 	}
-	return opts.Roles
+
+	return false
 }
 
 func BootstrapConfig(t *testing.T) *Config {

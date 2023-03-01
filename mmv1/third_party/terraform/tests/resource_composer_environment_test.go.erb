@@ -342,7 +342,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer1(t *testing.T) {
 
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
 	pid := getTestProjectFromEnv()
-	grantEncrypterDecrypterRoleToAgents(t, pid)
+	grantEncrypterDecrypterRoleToServiceAgents(t)
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
 	subnetwork := network + "-1"
@@ -378,7 +378,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
 	pid := getTestProjectFromEnv()
-	grantEncrypterDecrypterRoleToAgents(t, pid)
+	grantEncrypterDecrypterRoleToServiceAgents(t)
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
 	subnetwork := network + "-1"
@@ -962,6 +962,21 @@ func TestAccComposerEnvironment_fixPyPiPackages(t *testing.T) {
 	})
 }
 
+// This bootstraps the IAM roles needed for the service agents when using encryption.
+func grantEncrypterDecrypterRoleToServiceAgents(t *testing.T) {
+	serviceAgents := []string{
+		"cloudcomposer-accounts",
+		"compute-system",
+		"container-engine-robot",
+		"gcp-sa-artifactregistry",
+		"gcp-sa-pubsub",
+	}
+	if policyChanged := BootstrapPSARoles(t, serviceAgents, []string{"roles/cloudkms.cryptoKeyEncrypterDecrypter"}); policyChanged {
+		// Fail this test run because the policy needs time to reconcile.
+		t.Fatalf("Granted crypto key encrypter/decrypter role for %v in test project's IAM policy. Retry the test in a few minutes.", serviceAgents)
+	}
+}
+
 func testAccComposerEnvironmentDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
@@ -1343,24 +1358,6 @@ resource "google_compute_subnetwork" "test" {
   network       = google_compute_network.test.self_link
 }
 `, name, network, subnetwork)
-}
-
-func grantEncrypterDecrypterRoleToAgents(t *testing.T, projectID string) {
-	for _, agentName := range []string{
-		"cloudcomposer-accounts",
-		"compute-system",
-		"container-engine-robot",
-		"gcp-sa-artifactregistry",
-		"gcp-sa-pubsub",
-	} {
-		if roles := BootstrapPSARoles(t, BootstrapPSARolesOptions{
-			ProjectID: projectID,
-			AgentName: agentName,
-			roles: []string{"roles/cloudkms.cryptoKeyEncrypterDecrypter"},
-		}); len(roles) == 0 {
-			t.Errorf("Failed to grant encrypter/decrypter role to service agent %q", agentName)
-		}
-	}
 }
 
 
@@ -2317,6 +2314,7 @@ resource "google_project_iam_member" "composer-worker" {
 }
 `, environment, network, subnetwork, serviceAccount)
 }
+
 
 /**
  * CLEAN UP HELPER FUNCTIONS
