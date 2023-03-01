@@ -342,7 +342,7 @@ func TestAccComposerEnvironment_withWebServerConfig(t *testing.T) {
 func TestAccComposerEnvironment_withEncryptionConfigComposer1(t *testing.T) {
 	t.Parallel()
 
-	kms := BootstrapKMSKeyInLocation(t, "us-central1")
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	pid := acctest.GetTestProjectFromEnv()
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
@@ -377,7 +377,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer1(t *testing.T) {
 func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 	t.Parallel()
 
-	kms := BootstrapKMSKeyInLocation(t, "us-central1")
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	pid := acctest.GetTestProjectFromEnv()
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))

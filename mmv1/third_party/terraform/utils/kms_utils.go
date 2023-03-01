@@ -95,7 +95,7 @@ func (s *kmsCryptoKeyVersionId) cryptoKeyVersionId() string {
 }
 
 func (s *kmsCryptoKeyVersionId) terraformId() string {
-	return fmt.Sprintf("%s/%s", s.CryptoKeyId.terraformId(), s.Name)
+	return fmt.Sprintf("%s/%s", s.CryptoKeyId.TerraformId(), s.Name)
 }
 
 func validateKmsCryptoKeyRotationPeriod(value interface{}, _ string) (ws []string, errors []error) {

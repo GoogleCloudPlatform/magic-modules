@@ -255,7 +255,7 @@ func testAccCheckGoogleKmsCryptoKeyIamBindingExists(t *testing.T, bindingResourc
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		cryptoKeyId, err := ParseKmsCryptoKeyId(bindingRs.Primary.Attributes["crypto_key_id"], config)
+		cryptoKeyId, err := google.ParseKmsCryptoKeyId(bindingRs.Primary.Attributes["crypto_key_id"], config)
 
 		if err != nil {
 			return err
@@ -291,7 +291,7 @@ func testAccCheckGoogleKmsCryptoKeyIamMemberExists(t *testing.T, n, role, member
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		cryptoKeyId, err := ParseKmsCryptoKeyId(rs.Primary.Attributes["crypto_key_id"], config)
+		cryptoKeyId, err := google.ParseKmsCryptoKeyId(rs.Primary.Attributes["crypto_key_id"], config)
 
 		if err != nil {
 			return err
@@ -326,7 +326,7 @@ func testAccCheckGoogleCryptoKmsKeyIam(t *testing.T, n, role string, members []s
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		cryptoKeyId, err := ParseKmsCryptoKeyId(rs.Primary.Attributes["crypto_key_id"], config)
+		cryptoKeyId, err := google.ParseKmsCryptoKeyId(rs.Primary.Attributes["crypto_key_id"], config)
 
 		if err != nil {
 			return err

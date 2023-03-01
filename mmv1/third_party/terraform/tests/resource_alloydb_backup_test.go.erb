@@ -13,7 +13,7 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  BootstrapSharedTestNetwork(t, "alloydb"),
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "alloydb"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

@@ -99,10 +99,10 @@ func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 	}
 
 	payload := getTestOccurrenceAttestationPayload(t)
-	key1 := BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key1")
+	key1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key1")
 	signature1 := getSignedTestOccurrenceAttestationPayload(t, config, key1, payload)
 
-	key2 := BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key2")
+	key2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ASYMMETRIC_SIGN", "global", "tf-bootstrap-binauthz-key2")
 	signature2 := getSignedTestOccurrenceAttestationPayload(t, config, key2, payload)
 
 	paramsMultipleSignatures := map[string]interface{}{

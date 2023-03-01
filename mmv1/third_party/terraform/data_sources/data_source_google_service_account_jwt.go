@@ -48,7 +48,7 @@ func DataSourceGoogleServiceAccountJwt() *schema.Resource {
 }
 
 var (
-	dataSourceGoogleServiceAccountJwtNow = time.Now
+	DataSourceGoogleServiceAccountJwtNow = time.Now
 )
 
 func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interface{}) error {
@@ -69,7 +69,7 @@ func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interfac
 			return fmt.Errorf("error decoding `payload` while adding `exp` field: %w", err)
 		}
 
-		decoded["exp"] = dataSourceGoogleServiceAccountJwtNow().Add(time.Duration(expiresIn) * time.Second).Unix()
+		decoded["exp"] = DataSourceGoogleServiceAccountJwtNow().Add(time.Duration(expiresIn) * time.Second).Unix()
 
 		payloadBytesWithExp, err := json.Marshal(decoded)
 

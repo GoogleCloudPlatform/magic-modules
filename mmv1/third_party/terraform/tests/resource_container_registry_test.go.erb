@@ -14,7 +14,7 @@ func TestAccContainerRegistry_basic(t *testing.T) {
 	t.Parallel()
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
 		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -29,7 +29,7 @@ func TestAccContainerRegistry_iam(t *testing.T) {
 	account := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
 		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{

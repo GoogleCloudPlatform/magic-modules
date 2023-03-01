@@ -30,7 +30,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           display_name: "terraform"
           kms_key_name: "kms-name"
         test_vars_overrides:
-          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
           - "project"
     properties:
@@ -70,8 +70,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           kms_key_name: "kms-name"
           network_name: "network-name"
         test_vars_overrides:
-          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-          network_name: 'BootstrapSharedTestNetwork(t, "vertex")'
+          kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex")'
     properties:
       etag: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -91,7 +91,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
         test_vars_overrides:
-          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
           - "force_destroy"
       - !ruby/object:Provider::Terraform::Examples
@@ -106,7 +106,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
         test_vars_overrides:
-          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
           - "force_destroy"
         min_version: beta
@@ -122,7 +122,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
         test_vars_overrides:
-          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
           - "force_destroy"
     properties:
@@ -196,7 +196,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
         test_vars_overrides:
-          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore_entitytype_with_beta_fields"
         primary_resource_id: "entity"
@@ -208,7 +208,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
         test_vars_overrides:
-          kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         min_version: beta
     properties:
       etag: !ruby/object:Overrides::Terraform::PropertyOverride

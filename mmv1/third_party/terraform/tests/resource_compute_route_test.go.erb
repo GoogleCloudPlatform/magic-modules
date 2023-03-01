@@ -14,12 +14,12 @@ func TestAccComputeRoute_defaultInternetGateway(t *testing.T) {
 	t.Parallel()
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
 		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRoute_defaultInternetGateway(randString(t, 10)),
+				Config: testAccComputeRoute_defaultInternetGateway(acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_route.foobar",
@@ -31,16 +31,16 @@ func TestAccComputeRoute_defaultInternetGateway(t *testing.T) {
 }
 
 func TestAccComputeRoute_hopInstance(t *testing.T) {
-	instanceName := "tf-test-" + randString(t, 10)
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	zone := "us-central1-b"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
 		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRoute_hopInstance(instanceName, zone, randString(t, 10)),
+				Config: testAccComputeRoute_hopInstance(instanceName, zone, acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_route.foobar",

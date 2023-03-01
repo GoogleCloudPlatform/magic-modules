@@ -19,7 +19,7 @@ func TestAccComputeFirewallPolicyAssociation_basic(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
 		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{

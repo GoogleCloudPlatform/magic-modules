@@ -20,7 +20,7 @@ func TestAccPrivatecaCertificate_privatecaCertificateUpdate(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { acctest.TestAccPreCheck(t) },
 		Providers:    acctest.TestAccProviders,
 		CheckDestroy: testAccCheckPrivatecaCertificateDestroyProducer(t),
 		Steps: []resource.TestStep{

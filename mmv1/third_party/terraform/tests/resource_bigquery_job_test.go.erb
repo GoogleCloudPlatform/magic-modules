@@ -22,7 +22,7 @@ func TestAccBigQueryJob_withLocation(t *testing.T) {
 	importID := fmt.Sprintf("projects/%s/jobs/tf_test_job_query%s/location/%s", getTestProjectFromEnv(), context["random_suffix"], context["location"])
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { acctest.TestAccPreCheck(t) },
 		Providers: acctest.TestAccProviders,
 		Steps: []resource.TestStep{
 			{

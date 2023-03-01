@@ -180,11 +180,11 @@ func testAccCheckComputeUrlMapExists(t *testing.T, n string) resource.TestCheckF
 func TestAccComputeUrlMap_defaultRouteActionTrafficDirectorPathUpdate(t *testing.T) {
   t.Parallel()
 
-  randString := acctest.RandString(t, 10)
+  acctest.RandString := acctest.RandString(t, 10)
 
-  bsName := fmt.Sprintf("urlmap-test-%s", randString)
-  hcName := fmt.Sprintf("urlmap-test-%s", randString)
-  umName := fmt.Sprintf("urlmap-test-%s", randString)
+  bsName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+  hcName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+  umName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
   acctest.VcrTest(t, resource.TestCase{
     PreCheck:     func() { acctest.TestAccPreCheck(t) },
     Providers:    acctest.TestAccProviders,
@@ -213,11 +213,11 @@ func TestAccComputeUrlMap_defaultRouteActionTrafficDirectorPathUpdate(t *testing
 func TestAccComputeUrlMap_defaultRouteActionTrafficDirectorUpdate(t *testing.T) {
   t.Parallel()
 
-  randString := acctest.RandString(t, 10)
+  acctest.RandString := acctest.RandString(t, 10)
 
-  bsName := fmt.Sprintf("urlmap-test-%s", randString)
-  hcName := fmt.Sprintf("urlmap-test-%s", randString)
-  umName := fmt.Sprintf("urlmap-test-%s", randString)
+  bsName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+  hcName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+  umName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
   acctest.VcrTest(t, resource.TestCase{
     PreCheck:     func() { acctest.TestAccPreCheck(t) },
     Providers:    acctest.TestAccProviders,
@@ -246,11 +246,11 @@ func TestAccComputeUrlMap_defaultRouteActionTrafficDirectorUpdate(t *testing.T) 
 func TestAccComputeUrlMap_trafficDirectorUpdate(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	acctest.RandString := acctest.RandString(t, 10)
 
-	bsName := fmt.Sprintf("urlmap-test-%s", randString)
-	hcName := fmt.Sprintf("urlmap-test-%s", randString)
-	umName := fmt.Sprintf("urlmap-test-%s", randString)
+	bsName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+	hcName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+	umName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
 		Providers:    acctest.TestAccProviders,
@@ -279,11 +279,11 @@ func TestAccComputeUrlMap_trafficDirectorUpdate(t *testing.T) {
 func TestAccComputeUrlMap_trafficDirectorPathUpdate(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	acctest.RandString := acctest.RandString(t, 10)
 
-	bsName := fmt.Sprintf("urlmap-test-%s", randString)
-	hcName := fmt.Sprintf("urlmap-test-%s", randString)
-	umName := fmt.Sprintf("urlmap-test-%s", randString)
+	bsName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+	hcName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+	umName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
 		Providers:    acctest.TestAccProviders,
@@ -312,11 +312,11 @@ func TestAccComputeUrlMap_trafficDirectorPathUpdate(t *testing.T) {
 func TestAccComputeUrlMap_trafficDirectorRemoveRouteRule(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	acctest.RandString := acctest.RandString(t, 10)
 
-	bsName := fmt.Sprintf("urlmap-test-%s", randString)
-	hcName := fmt.Sprintf("urlmap-test-%s", randString)
-	umName := fmt.Sprintf("urlmap-test-%s", randString)
+	bsName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+	hcName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
+	umName := fmt.Sprintf("urlmap-test-%s", acctest.RandString)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
 		Providers:    acctest.TestAccProviders,

@@ -54,7 +54,7 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		cryptoKeyId, err := ParseKmsCryptoKeyId(tc.ImportId, tc.Config)
+		cryptoKeyId, err := google.ParseKmsCryptoKeyId(tc.ImportId, tc.Config)
 
 		if tc.ExpectedError && err == nil {
 			t.Fatalf("bad: %s, expected an error", tn)
@@ -67,8 +67,8 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 			t.Fatalf("bad: %s, err: %#v", tn, err)
 		}
 
-		if cryptoKeyId.terraformId() != tc.ExpectedTerraformId {
-			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, cryptoKeyId.terraformId())
+		if cryptoKeyId.TerraformId() != tc.ExpectedTerraformId {
+			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, cryptoKeyId.TerraformId())
 		}
 
 		if cryptoKeyId.cryptoKeyId() != tc.ExpectedCryptoKeyId {

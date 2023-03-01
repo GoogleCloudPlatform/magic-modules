@@ -1421,7 +1421,7 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	kms := BootstrapKMSKeyInLocation(t, "us-central1")
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.TestAccPreCheck(t) },
@@ -3024,7 +3024,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsBootDiskKmsKey(t *testi
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	kms := BootstrapKMSKeyInLocation(t, "us-central1")
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.TestAccPreCheck(t) },
@@ -3267,7 +3267,7 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 	// deleted.  Also, we need to create the key in the same location as the
 	// cluster as GKE does not support the "global" location for KMS keys.
 	// See https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#creating_a_key
-	kmsData := BootstrapKMSKeyInLocation(t, "us-central1")
+	kmsData := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
@@ -4417,7 +4417,7 @@ func TestAccContainerCluster_failedCreation(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 
-	project := BootstrapProject(t, "tf-fail-cluster-test", acctest.GetTestBillingAccountFromEnv(t), []string{"container.googleapis.com"})
+	project := acctest.BootstrapProject(t, "tf-fail-cluster-test", acctest.GetTestBillingAccountFromEnv(t), []string{"container.googleapis.com"})
 	removeContainerServiceAgentRoleFromContainerEngineRobot(t, project)
 
 	acctest.VcrTest(t, resource.TestCase{

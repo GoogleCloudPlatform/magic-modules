@@ -192,7 +192,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           stream_id: "my-stream"
           source_connection_profile_id: "source-profile"
           destination_connection_profile_id: "destination-profile"
-          stream_cmek: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          stream_cmek: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_bigquery"
         pull_external: true
@@ -210,7 +210,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bigquery_destination_table_kms_key_name: "bigquery-kms-name"
         test_vars_overrides:
           deletion_protection: "false"
-          bigquery_destination_table_kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          bigquery_destination_table_kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
