@@ -516,32 +516,41 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 	return project
 }
 
-// BootstrapProjectServiceAgentRoles ensures that the given project's IAM
+// BootstrapPSARolesOptions are for bootstrapping service agent roles in a project.
+type BootstrapPSARolesOptions struct {
+	ProjectID string // the project in which to grant roles
+	AgentName string // the name of the service agent
+	// (e.g. for service-<project_number>@gcp-sa-healthcare.iam.gserviceaccount.com,
+	// agentName would be 'gcp-sa-healthcare')
+	Roles []string // the roles to grant
+}
+
+// BootstrapPSARoles ensures that the given project's IAM
 // policy grants the given service's agent the given roles.
-// (e.g. for service-<project_number>@gcp-sa-healthcare.iam.gserviceaccount.com,
-// agentName would be 'gcp-sa-healthcare')
 // This is important to bootstrap because using iam policy resources means that
 // deleting removes permissions for concurrent tests.
-func BootstrapProjectServiceAgentRoles(t *testing.T, projectID, agentName string, roles []string) {
+// Return the roles granted.
+func BootstrapPSARoles(t *testing.T, opts BootstrapPSARolesOptions) []string {
 	config := BootstrapConfig(t)
 	if config == nil {
-		t.Fatalf("could not bootstrap a config for BootstrapProjectServiceAgentRoles")
+		t.Fatal("Could not bootstrap a config for BootstrapPSARoles.")
 	}
 	client := config.NewResourceManagerClient(config.userAgent)
 
-	project, err := client.Projects.Get(projectID).Do()
+	project, err := client.Projects.Get(opts.ProjectID).Do()
 	if err != nil {
-		t.Fatalf("error getting project with id %q: %s", projectID, err)
+		t.Fatalf("Error getting project with id %q: %s", opts.ProjectID, err)
 	}
 
-	serviceAgent := fmt.Sprintf("serviceAccount:service-%d@%s.iam.gserviceaccount.com", project.ProjectNumber, agentName)
+	serviceAgent := fmt.Sprintf("serviceAccount:service-%d@%s.iam.gserviceaccount.com", project.ProjectNumber, opts.AgentName)
 	getPolicyRequest := &cloudresourcemanager.GetIamPolicyRequest{}
 	policy, err := client.Projects.GetIamPolicy(project.ProjectId, getPolicyRequest).Do()
 	if err != nil {
-		t.Fatalf("error getting project iam policy: %v", err)
+		t.Fatalf("Error getting project iam policy: %v", err)
 	}
+
 	// Map each role to whether it was already in the policy
-	rolesFound := make(map[string]bool, len(roles))
+	rolesFound := make(map[string]bool, len(opts.Roles))
 	// Track whether we changed the policy and only set it when it needs changing.
 	changed := false
 	for _, binding := range policy.Bindings {
@@ -552,11 +561,13 @@ func BootstrapProjectServiceAgentRoles(t *testing.T, projectID, agentName string
 		}
 		if !rolesFound[binding.Role] {
 			binding.Members = append(binding.Members, serviceAgent)
+			rolesFound[binding.Role] = true
 			changed = true
 		}
-
 	}
-	for _, role := range roles {
+
+	// Add bindings for the roles that were missing.
+	for _, role := range opts.Roles {
 		if !rolesFound[role] {
 			policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
 				Members: []string{serviceAgent},
@@ -565,13 +576,15 @@ func BootstrapProjectServiceAgentRoles(t *testing.T, projectID, agentName string
 			changed = true
 		}
 	}
+
 	if changed {
 		setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
 		policy, err = client.Projects.SetIamPolicy(project.ProjectId, setPolicyRequest).Do()
 		if err != nil {
-			t.Fatalf("error setting project iam policy: %v", err)
+			t.Fatalf("Error setting project iam policy: %v", err)
 		}
 	}
+	return opts.Roles
 }
 
 func BootstrapConfig(t *testing.T) *Config {
