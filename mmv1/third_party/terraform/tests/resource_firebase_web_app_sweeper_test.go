@@ -1,9 +1,12 @@
-<% autogen_exception -%>
-package google_test
+// ----------------------------------------------------------------------------
+//
+//     ***     HANDWRITTEN CODE    ***    Type: MMv1     ***
+//
+// ----------------------------------------------------------------------------
+
+package google
 
 import (
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
 	"context"
 	"fmt"
 	"log"
@@ -14,18 +17,18 @@ import (
 )
 
 func init() {
-	resource.AddTestSweepers("FirebaseAndroidApp", &resource.Sweeper{
-		Name: "FirebaseAndroidApp",
-		F:    testSweepFirebaseAndroidApp,
+	resource.AddTestSweepers("FirebaseWebApp", &resource.Sweeper{
+		Name: "FirebaseWebApp",
+		F:    testSweepFirebaseWebApp,
 	})
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepFirebaseAndroidApp(region string) error {
-	resourceName := "FirebaseAndroidApp"
+func testSweepFirebaseWebApp(region string) error {
+	resourceName := "FirebaseWebApp"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := acctest.SharedConfigForRegion(region)
+	config, err := sharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -38,7 +41,7 @@ func testSweepFirebaseAndroidApp(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := acctest.GetTestBillingAccountFromEnv(t)
+	billingId := getTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
 	d := &ResourceDataMock{
@@ -51,7 +54,7 @@ func testSweepFirebaseAndroidApp(region string) error {
 		},
 	}
 
-	listTemplate := strings.Split("https://firebase.googleapis.com/v1beta1/projects/{{project}}/androidApps", "?")[0]
+	listTemplate := strings.Split("https://firebase.googleapis.com/v1beta1/projects/{{project}}/webApps", "?")[0]
 	listUrl, err := replaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
@@ -83,7 +86,7 @@ func testSweepFirebaseAndroidApp(region string) error {
 		}
 
 		// Skip resources that shouldn't be sweeped
-		if !acctest.IsSweepableTestResource(obj["displayName"].(string)) {
+		if !isSweepableTestResource(obj["displayName"].(string)) {
 			nonPrefixCount++
 			continue
 		}

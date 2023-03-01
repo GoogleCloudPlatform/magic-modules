@@ -90,12 +90,12 @@ func testAccCheckActiveDirectoryDomainTrustDestroyProducer(t *testing.T) func(s 
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}projects/{{project}}/locations/global/domains/{{domain}}")
+			url, err := google.ReplaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}projects/{{project}}/locations/global/domains/{{domain}}")
 			if err != nil {
 				return err
 			}
 
-			res, _ := SendRequest(config, "GET", "", url, config.UserAgent, nil)
+			res, _ := google.SendRequest(config, "GET", "", url, config.UserAgent, nil)
 
 			var v interface{}
 			var ok bool

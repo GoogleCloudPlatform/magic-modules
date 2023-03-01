@@ -51,7 +51,7 @@ func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interf
 		Plaintext: plaintext,
 	}
 
-	encryptCall := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.Encrypt(cryptoKeyId.cryptoKeyId(), kmsEncryptRequest)
+	encryptCall := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.Encrypt(cryptoKeyId.CryptoKeyId(), kmsEncryptRequest)
 	if config.UserProjectOverride {
 		encryptCall.Header().Set("X-Goog-User-Project", cryptoKeyId.KeyRingId.Project)
 	}

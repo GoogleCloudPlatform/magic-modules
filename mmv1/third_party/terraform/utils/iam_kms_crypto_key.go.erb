@@ -33,7 +33,7 @@ func NewKmsCryptoKeyIamUpdater(d TerraformResourceData, config *Config) (Resourc
 	}
 
 	return &KmsCryptoKeyIamUpdater{
-		resourceId: cryptoKeyId.cryptoKeyId(),
+		resourceId: cryptoKeyId.CryptoKeyId(),
 		d:          d,
 		Config:     config,
 	}, nil
@@ -44,10 +44,10 @@ func CryptoIdParseFunc(d *schema.ResourceData, config *Config) error {
 	if err != nil {
 		return err
 	}
-	if err := d.Set("crypto_key_id", cryptoKeyId.cryptoKeyId()); err != nil {
+	if err := d.Set("crypto_key_id", cryptoKeyId.CryptoKeyId()); err != nil {
 		return fmt.Errorf("Error setting crypto_key_id: %s", err)
 	}
-	d.SetId(cryptoKeyId.cryptoKeyId())
+	d.SetId(cryptoKeyId.CryptoKeyId())
 	return nil
 }
 

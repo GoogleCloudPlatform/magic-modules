@@ -1,31 +1,26 @@
-<% autogen_exception -%>
-package google_test
+package google
 
 import (
 	"context"
 	"log"
-    "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
-    "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// This will sweep GCE Disk resources
+// This will sweep both Standard and Flexible App Engine App Versions
 func init() {
-	resource.AddTestSweepers("BigtableInstance", &resource.Sweeper{
-		Name: "BigtableInstance",
-		F:    testSweepBigtableInstance,
+	resource.AddTestSweepers("AppEngineAppVersion", &resource.Sweeper{
+		Name: "AppEngineAppVersion",
+		F:    testSweepAppEngineAppVersion,
 	})
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-// We don't have a way to filter the list by zone, and it's not clear it's worth the
-// effort as we only create within us-central1.
-func testSweepBigtableInstance(region string) error {
-	resourceName := "BigtableInstance"
+func testSweepAppEngineAppVersion(region string) error {
+	resourceName := "AppEngineAppVersion"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := acctest.SharedConfigForRegion(region)
+	config, err := sharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -36,14 +31,15 @@ func testSweepBigtableInstance(region string) error {
 		log.Printf("[INFO][SWEEPER_LOG] error loading: %s", err)
 		return err
 	}
-	servicesUrl := "https://bigtableadmin.googleapis.com/v2/projects/" + config.Project + "/instances"
+
+	servicesUrl := "https://appengine.googleapis.com/v1/apps/" + config.Project + "/services"
 	res, err := google.SendRequest(config, "GET", config.Project, servicesUrl, config.UserAgent, nil)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", servicesUrl, err)
 		return nil
 	}
 
-	resourceList, ok := res["instances"]
+	resourceList, ok := res["services"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil
@@ -56,14 +52,14 @@ func testSweepBigtableInstance(region string) error {
 	nonPrefixCount := 0
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
-		if obj["name"] == nil {
+		if obj["id"] == nil {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource id was nil", resourceName)
 			return nil
 		}
 
-		id := obj["displayName"].(string)
+		id := obj["id"].(string)
 		// Increment count and skip if resource is not sweepable.
-		if !acctest.IsSweepableTestResource(id) {
+		if !isSweepableTestResource(id) {
 			nonPrefixCount++
 			continue
 		}
@@ -79,7 +75,7 @@ func testSweepBigtableInstance(region string) error {
 	}
 
 	if nonPrefixCount > 0 {
-		log.Printf("[INFO][SWEEPER_LOG] %d items without tf-test prefix remain.", nonPrefixCount)
+		log.Printf("[INFO][SWEEPER_LOG] %d items without tf_test prefix remain.", nonPrefixCount)
 	}
 
 	return nil

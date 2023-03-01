@@ -5,7 +5,7 @@
 
 	log.Printf(`
 [WARNING] KMS CryptoKey resources cannot be deleted from GCP. The CryptoKey %s will be removed from Terraform state,
-and all its CryptoKeyVersions will be destroyed, but it will still be present in the project.`, cryptoKeyId.cryptoKeyId())
+and all its CryptoKeyVersions will be destroyed, but it will still be present in the project.`, cryptoKeyId.CryptoKeyId())
 
 	// Delete all versions of the key
 	if err := clearCryptoKeyVersions(cryptoKeyId, userAgent, config); err != nil {
