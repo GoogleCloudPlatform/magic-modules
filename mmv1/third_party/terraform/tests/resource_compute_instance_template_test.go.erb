@@ -1829,7 +1829,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-func testAccComputeInstanceTemplate_basic(suffix string) string {
+func testAccComputeInstanceTemplate_maintenance_interval(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
