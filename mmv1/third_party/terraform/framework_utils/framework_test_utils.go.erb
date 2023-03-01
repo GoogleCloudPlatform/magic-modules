@@ -77,7 +77,7 @@ func testStringValue(sPtr *string) string {
 // Used to set ProtoV5ProviderFactories in a resource.TestStep within an acceptance test.
 func protoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.ProviderServer, error) {
 	return map[string]func() (tfprotov5.ProviderServer, error){
-		"google": func() (tfprotov5.ProviderServer, error) {
+		"google<%= "-" + version unless version == 'ga'  -%>": func() (tfprotov5.ProviderServer, error) {
 			provider, err := MuxedProviders(t.Name())
 			return provider(), err
 		},
@@ -88,7 +88,7 @@ func protoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.Provide
 // Used to set ExternalProviders in a resource.TestStep within an acceptance test.
 func providerVersion450() map[string]resource.ExternalProvider {
 	return map[string]resource.ExternalProvider{
-		"google": {
+		"google<%= "-" + version unless version == 'ga'  -%>": {
 			VersionConstraint: "4.50.0",
 			Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
 		},
