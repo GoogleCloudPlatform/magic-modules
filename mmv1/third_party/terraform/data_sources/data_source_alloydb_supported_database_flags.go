@@ -198,10 +198,10 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 			}
 			supportedDatabaseFlags = append(supportedDatabaseFlags, supportedDatabaseFlag)
 		}
-		if res["pageToken"] == nil || res["pageToken"].(string) == "" {
+		if res["nextPageToken"] == nil || res["nextPageToken"].(string) == "" {
 			break
 		}
-		url, err = replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{location}}/supportedDatabaseFlags?pageToken={{res[\"pageToken\"]}}")
+		url, err = replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{location}}/supportedDatabaseFlags?pageToken="+res["nextPageToken"])
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
