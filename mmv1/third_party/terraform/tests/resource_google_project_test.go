@@ -365,7 +365,7 @@ func testAccCheckGoogleProjectHasLabels(t *testing.T, r, pid string, expected ma
 			spewConf.SortKeys = true
 			return fmt.Errorf(
 				"Labels not equivalent. Difference is shown below. Top is actual, bottom is expected."+
-						"\n\n%s\n\n%s",
+					"\n\n%s\n\n%s",
 				spewConf.Sdump(actual), spewConf.Sdump(expected),
 			)
 		}
