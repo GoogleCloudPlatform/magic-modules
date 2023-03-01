@@ -517,9 +517,9 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 }
 
 // BootstrapPSARoles ensures that the given project's IAM
-// policy grants the given service's agent the given roles.
+// policy grants the given service agents the given roles.
 // This is important to bootstrap because using iam policy resources means that
-// deleting removes permissions for concurrent tests.
+// deleting them removes permissions for concurrent tests.
 // Return whether the policy changed.
 func BootstrapPSARoles(t *testing.T, agentNames, roles []string) bool {
 	config := BootstrapConfig(t)
