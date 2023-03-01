@@ -35,6 +35,7 @@ type Asset struct {
 	Resource  *AssetResource `json:"resource,omitempty"`
 	IAMPolicy *IAMPolicy     `json:"iam_policy,omitempty"`
 	OrgPolicy []*OrgPolicy   `json:"org_policy,omitempty"`
+	CustomOrgPolicy []*CustomOrgPolicy `json:"v2_org_policies,omitempty"`
 }
 
 // AssetResource is the Asset's Resource field.
@@ -69,6 +70,42 @@ type OrgPolicy struct {
 	RestoreDefault *RestoreDefault `json:"restoreDefault"`
 	UpdateTime     *Timestamp      `json:"update_time,omitempty"`
 }
+
+// CustomOrgPolicy is the represtation of V2OrgPolicies
+type CustomOrgPolicy struct {
+	Name string `json:"name"`
+	Spec *Spec  `json:"spec,omitempty"`
+}
+
+// Spec is the representation of Spec for Custom Org Policy
+type Spec struct {
+	Etag              string        `json:"etag,omitempty"`
+	UpdateTime        *Timestamp    `json:"update_time,omitempty"`
+	Rules             []*PolicyRule `json:"rules,omitempty"`
+	InheritFromParent bool          `json:"inherit_from_parent,omitempty"`
+	Reset             bool          `json:"reset,omitempty"`
+}
+
+type PolicyRule struct {
+	Values    *StringValues `json:"values,omitempty"`
+	AllowAll  bool          `json:"allow_all,omitempty"`
+	DenyAll   bool          `json:"deny_all,omitempty"`
+	Enforce   bool          `json:"enforce,omitempty"`
+	Condition *Expr         `json:"expression,omitempty"`
+}
+
+type StringValues struct {
+	AllowedValues []string `json:"allowed_values,omitempty"`
+	DeniedValues  []string `json:"denied_values,omitempty"`
+}
+
+type Expr struct {
+	Expression  string `json:"expression,omitempty"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Location    string `json:"location,omitempty"`
+}
+
 
 type Timestamp struct {
 	Seconds int64 `json:"seconds,omitempty"`
