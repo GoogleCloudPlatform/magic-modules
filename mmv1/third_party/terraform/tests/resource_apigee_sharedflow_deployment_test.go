@@ -140,7 +140,6 @@ func testAccCheckApigeeSharedflowDeploymentDestroyProducer(t *testing.T) func(s 
 			if config.BillingProject != "" {
 				billingProject = config.BillingProject
 			}
-			fmt.Printf("testAccCheckApigeeSharedflowDeploymentDestroyProducer, url %s", url)
 			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ApigeeSharedFlow still exists at %s", url)
