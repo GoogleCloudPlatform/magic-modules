@@ -6,6 +6,7 @@
 #
 # Prerequisites:
 #   - An existing organization
+#   - A second existing organization (used only for TestAccOrganizationPolicy)
 #   - An existing billing account where charges can be applied
 #   - A second existing billing account where charges can be applied (used only for TestAccProject_billing)
 #   - An existing billing account where subaccounts can be created
@@ -377,6 +378,34 @@ resource "google_project_iam_member" "compute_agent_instance_admin" {
   project = google_project.proj.project_id
   role    = "roles/compute.instanceAdmin"
   member  = "serviceAccount:service-${google_project.proj.number}@compute-system.iam.gserviceaccount.com"
+}
+
+data "google_organization" "org2" {
+  organization = var.org2_id
+}
+
+resource "google_organization_iam_member" "sa_org2_admin" {
+  org_id = data.google_organization.org2.org_id
+  role   = "roles/resourcemanager.organizationAdmin"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_org2_owner" {
+  org_id = data.google_organization.org2.org_id
+  role   = "roles/owner"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_org2_policy_admin" {
+  org_id = data.google_organization.org2.org_id
+  role   = "roles/orgpolicy.policyAdmin"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_org2_resource_settings_admin" {
+  org_id = data.google_organization.org2.org_id
+  role   = "roles/resourcesettings.admin"
+  member = google_service_account.sa.member
 }
 
 output "service_account" {
