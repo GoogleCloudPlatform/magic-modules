@@ -516,15 +516,6 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 	return project
 }
 
-// BootstrapPSARolesOptions are for bootstrapping service agent roles in a project.
-type BootstrapPSARolesOptions struct {
-	ProjectID string // the project in which to grant roles
-	AgentName string // the name of the service agent
-	// (e.g. for service-<project_number>@gcp-sa-healthcare.iam.gserviceaccount.com,
-	// agentName would be 'gcp-sa-healthcare')
-	Roles []string // the roles to grant
-}
-
 // BootstrapPSARoles ensures that the given project's IAM
 // policy grants the given service's agent the given roles.
 // This is important to bootstrap because using iam policy resources means that
