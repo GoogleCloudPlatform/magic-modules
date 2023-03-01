@@ -342,6 +342,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer1(t *testing.T) {
 
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
 	pid := getTestProjectFromEnv()
+	grantEncrypterDecrypterRoleToAgents(t, pid)
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
 	subnetwork := network + "-1"
@@ -377,6 +378,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
 	pid := getTestProjectFromEnv()
+	grantEncrypterDecrypterRoleToAgents(t, pid)
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
 	subnetwork := network + "-1"
@@ -1342,6 +1344,25 @@ resource "google_compute_subnetwork" "test" {
 }
 `, name, network, subnetwork)
 }
+
+func grantEncrypterDecrypterRoleToAgents(t *testing.T, projectID string) {
+	for _, agentName := range []string{
+		"cloudcomposer-accounts",
+		"compute-system",
+		"container-engine-robot",
+		"gcp-sa-artifactregistry",
+		"gcp-sa-pubsub",
+	} {
+		if roles := BootstrapPSARoles(t, BootstrapPSARolesOptions{
+			ProjectID: projectID,
+			AgentName: agentName,
+			roles: []string{"roles/cloudkms.cryptoKeyEncrypterDecrypter"},
+		}); len(roles) == 0 {
+			t.Errorf("Failed to grant encrypter/decrypter role to service agent %q", agentName)
+		}
+	}
+}
+
 
 func testAccComposerEnvironment_encryptionCfg(pid, compVersion, airflowVersion, name, kmsKey, network, subnetwork string) string {
 	return fmt.Sprintf(`
