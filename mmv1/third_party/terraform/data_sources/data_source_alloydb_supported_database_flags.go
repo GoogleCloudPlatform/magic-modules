@@ -124,7 +124,7 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 
 	project, err := getProject(d, config)
 	if err != nil {
-		return fmt.Errorf("Error fetching project for Cluster: %s", err)
+		return fmt.Errorf("Error fetching project: %s", err)
 	}
 	billingProject = project
 
