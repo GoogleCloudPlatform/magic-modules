@@ -16,8 +16,8 @@
         }
       }
     ],
-    "ancestors": [
-      "organization/{{.OrgID}}/folder/{{.FolderID}}"
+    "ancestors":[
+      "organizations/unknown"
     ]
   },
   {
@@ -55,7 +55,7 @@
       }
     ],
     "ancestors": [
-      "organization/{{.OrgID}}/folder/{{.FolderID}}/project/{{.Provider.project}}"
+      "organizations/unknown"
     ]
   }
 ]
