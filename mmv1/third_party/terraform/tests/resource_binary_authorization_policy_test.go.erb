@@ -179,7 +179,7 @@ func testAccCheckBinaryAuthorizationPolicyDefault(t *testing.T, pid string) reso
 	}
 }
 
-func testAccBinaryAuthorizationPolicyDefault(pid, google.Pname, org, billing string) string {
+func testAccBinaryAuthorizationPolicyDefault(pid, pname, org, billing string) string {
 	return fmt.Sprintf(`
 // Use a separate project since each project can only have one policy
 resource "google_project" "project" {
@@ -193,10 +193,10 @@ resource "google_project_service" "binauthz" {
   project = google_project.project.project_id
   service = "binaryauthorization.googleapis.com"
 }
-`, pid, google.Pname, org, billing)
+`, pid, pname, org, billing)
 }
 
-func testAccBinaryAuthorizationPolicyBasic(pid, google.Pname, org, billing string) string {
+func testAccBinaryAuthorizationPolicyBasic(pid, pname, org, billing string) string {
 	return fmt.Sprintf(`
 // Use a separate project since each project can only have one policy
 resource "google_project" "project" {
@@ -225,10 +225,10 @@ resource "google_binary_authorization_policy" "policy" {
 
   depends_on = [google_project_service.binauthz]
 }
-`, pid, google.Pname, org, billing)
+`, pid, pname, org, billing)
 }
 
-func testAccBinaryAuthorizationPolicyFull(pid, google.Pname, org, billing, note, attestor, gpmode string) string {
+func testAccBinaryAuthorizationPolicyFull(pid, pname, org, billing, note, attestor, gpmode string) string {
 	return fmt.Sprintf(`
 // Use a separate project since each project can only have one policy
 resource "google_project" "project" {
@@ -289,10 +289,10 @@ resource "google_binary_authorization_policy" "policy" {
 
   global_policy_evaluation_mode = "%s"
 }
-`, pid, google.Pname, org, billing, note, attestor, gpmode)
+`, pid, pname, org, billing, note, attestor, gpmode)
 }
 
-func testAccBinaryAuthorizationPolicy_separateProject(pid, google.Pname, org, billing, note, attestor string) string {
+func testAccBinaryAuthorizationPolicy_separateProject(pid, pname, org, billing, note, attestor string) string {
 	return fmt.Sprintf(`
 // Use a separate project since each project can only have one policy
 resource "google_project" "project" {
@@ -352,5 +352,5 @@ resource "google_binary_authorization_policy" "policy" {
     require_attestations_by = ["projects/${data.google_client_config.current.project}/attestors/${google_binary_authorization_attestor.attestor.name}"]
   }
 }
-`, pid, google.Pname, org, billing, note, attestor)
+`, pid, pname, org, billing, note, attestor)
 }

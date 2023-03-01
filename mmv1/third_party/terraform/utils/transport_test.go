@@ -5,8 +5,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestReplaceVars(t *testing.T) {

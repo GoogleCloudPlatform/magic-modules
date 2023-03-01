@@ -77,7 +77,7 @@ type KmsCryptoKeyId struct {
 	Name      string
 }
 
-func (s *KmsCryptoKeyId) cryptoKeyId() string {
+func (s *KmsCryptoKeyId) CryptoKeyId() string {
 	return fmt.Sprintf("%s/cryptoKeys/%s", s.KeyRingId.keyRingId(), s.Name)
 }
 
