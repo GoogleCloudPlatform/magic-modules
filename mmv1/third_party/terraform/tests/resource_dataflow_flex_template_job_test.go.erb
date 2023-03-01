@@ -270,7 +270,7 @@ resource "google_dataflow_flex_template_job" "job" {
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
   parameters = {
-    schemaLocation = "gs://${google_storabe_bucket_object.schema.bucket}/schema.json"
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
     topic = "projects/myproject/topics/mytopic"
     serviceAccount = google_service_account.dataflow-sa.email

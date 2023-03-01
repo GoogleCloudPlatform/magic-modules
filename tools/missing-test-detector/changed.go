@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// A map of field names with whether the field is covered as values.
+// FieldCoverage is a nested map with field names as keys and whether the field is covered as values.
+// Fields are assumed not to be covered until detected in a test.
 type FieldCoverage map[string]any
 
 // Returns a map with resource names as keys and field coverage maps as values.

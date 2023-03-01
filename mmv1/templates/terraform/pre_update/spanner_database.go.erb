@@ -18,3 +18,12 @@ if len(obj["statements"].([]string)) == 0 {
 	// due to containing no DDL SQL statements
 	return resourceSpannerDatabaseRead(d, meta)
 }
+
+if resourceSpannerDBVirtualUpdate(d, ResourceSpannerDatabase().Schema) {
+    if d.Get("deletion_protection") != nil {
+        if err := d.Set("deletion_protection", d.Get("deletion_protection")); err != nil {
+            return fmt.Errorf("Error reading Instance: %s", err)
+        }
+    }
+    return nil
+}

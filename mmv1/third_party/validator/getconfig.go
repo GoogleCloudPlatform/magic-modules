@@ -17,6 +17,16 @@ func (c *Config) Client() *http.Client {
 	return c.client
 }
 
+// Return the value of the private userAgent field
+func (c *Config) GetUserAgent() string {
+	return c.userAgent
+}
+
+// Return the value of the private client field
+func (c *Config) GetClient() *http.Client {
+	return c.client
+}
+
 func NewConfig(ctx context.Context, project, zone, region string, offline bool, userAgent string, client *http.Client) (*Config, error) {
 	cfg := &Config{
 		Project:   project,
