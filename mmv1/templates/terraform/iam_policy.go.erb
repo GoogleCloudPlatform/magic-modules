@@ -44,7 +44,7 @@ var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
 <%# The last parameter can be used as a long name for IAM policies -%>
 <% if i == resource_params.size - 1 -%>
 <% if object.iam_policy.custom_diff_suppress.nil? -%>
-		DiffSuppressFunc: compareSelfLinkOrResourceName,
+		DiffSuppressFunc: CompareSelfLinkOrResourceName,
 <% else -%>
 		DiffSuppressFunc: <%= resource_name -%>DiffSuppress,
 <% end -%>

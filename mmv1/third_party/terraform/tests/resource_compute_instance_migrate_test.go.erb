@@ -875,7 +875,7 @@ func runInstanceMigrateTest(t *testing.T, id, testName string, version int, attr
 		// source is the only self link, so compare by relpaths if source is being
 		// compared
 		if strings.HasSuffix(k, "source") {
-			if !compareSelfLinkOrResourceName("", attributes[k], v, nil) && attributes[k] != v {
+			if !google.CompareSelfLinkOrResourceName("", attributes[k], v, nil) && attributes[k] != v {
 				t.Fatalf(
 					"bad uri: %s\n\n expected: %#v -> %#v\n got: %#v -> %#v\n in: %#v",
 					testName, k, expected[k], k, attributes[k], attributes)
@@ -893,7 +893,7 @@ func runInstanceMigrateTest(t *testing.T, id, testName string, version int, attr
 		// source is the only self link, so compare by relpaths if source is being
 		// compared
 		if strings.HasSuffix(k, "source") {
-			if !compareSelfLinkOrResourceName("", expected[k], v, nil) && expected[k] != v {
+			if !google.CompareSelfLinkOrResourceName("", expected[k], v, nil) && expected[k] != v {
 				t.Fatalf(
 					"bad: %s\n\n expected: %#v -> %#v\n got: %#v -> %#v\n in: %#v",
 					testName, k, expected[k], k, attributes[k], expected)

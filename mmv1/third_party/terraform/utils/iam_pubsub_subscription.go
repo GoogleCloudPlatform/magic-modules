@@ -14,7 +14,7 @@ var IamPubsubSubscriptionSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		DiffSuppressFunc: compareSelfLinkOrResourceName,
+		DiffSuppressFunc: CompareSelfLinkOrResourceName,
 	},
 	"project": {
 		Type:     schema.TypeString,

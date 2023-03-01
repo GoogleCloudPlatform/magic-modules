@@ -20,7 +20,7 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDnsManagedZone_basic(acctest.RandString(t, 10)),
-				Check: acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+				Check: google.CheckDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",
 					map[string]struct{}{

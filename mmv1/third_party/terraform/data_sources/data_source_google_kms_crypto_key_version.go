@@ -72,7 +72,7 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 
 	log.Printf("[DEBUG] Getting attributes for CryptoKeyVersion: %#v", url)
 
-	cryptoKeyId, err := parseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
+	cryptoKeyId, err := ParseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
 	if err != nil {
 		return err
 	}

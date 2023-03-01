@@ -919,7 +919,7 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -947,7 +947,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -984,7 +984,7 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1012,7 +1012,7 @@ func TestAccSqlDatabaseInstance_cloneWithSettings(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
-		"original_db_name": BootstrapSharedSQLInstanceBackupRun(t),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

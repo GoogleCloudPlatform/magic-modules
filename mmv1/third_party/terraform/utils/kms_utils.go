@@ -81,7 +81,7 @@ func (s *KmsCryptoKeyId) cryptoKeyId() string {
 	return fmt.Sprintf("%s/cryptoKeys/%s", s.KeyRingId.keyRingId(), s.Name)
 }
 
-func (s *KmsCryptoKeyId) terraformId() string {
+func (s *KmsCryptoKeyId) TerraformId() string {
 	return fmt.Sprintf("%s/%s", s.KeyRingId.terraformId(), s.Name)
 }
 
@@ -141,7 +141,7 @@ func kmsCryptoKeyNextRotation(now time.Time, period string) (result string, err 
 	return
 }
 
-func parseKmsCryptoKeyId(id string, config *Config) (*KmsCryptoKeyId, error) {
+func ParseKmsCryptoKeyId(id string, config *Config) (*KmsCryptoKeyId, error) {
 	parts := strings.Split(id, "/")
 
 	cryptoKeyIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})/([a-zA-Z0-9_-]{1,63})$")

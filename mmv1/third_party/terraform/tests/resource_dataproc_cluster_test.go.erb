@@ -863,7 +863,7 @@ func TestAccDataprocCluster_KMS(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(t, 10)
-	kms := BootstrapKMSKey(t)
+	kms := acctest.BootstrapKMSKey(t)
 	pid := acctest.GetTestProjectFromEnv()
 
 	var cluster dataproc.Cluster
@@ -886,7 +886,7 @@ func TestAccDataprocCluster_withKerberos(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(t, 10)
-	kms := BootstrapKMSKey(t)
+	kms := acctest.BootstrapKMSKey(t)
 
 	var cluster dataproc.Cluster
 	acctest.VcrTest(t, resource.TestCase{

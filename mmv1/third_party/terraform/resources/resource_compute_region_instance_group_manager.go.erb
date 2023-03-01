@@ -234,7 +234,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Set:         hashZoneFromSelfLinkOrResourceName,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
-					DiffSuppressFunc: compareSelfLinkOrResourceName,
+					DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				},
 			},
 

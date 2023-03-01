@@ -30,7 +30,7 @@ func ResourceBillingSubaccount() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"deletion_policy": {
 				Type:         schema.TypeString,

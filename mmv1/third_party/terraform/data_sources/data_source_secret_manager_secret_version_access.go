@@ -21,7 +21,7 @@ func DataSourceSecretManagerSecretVersionAccess() *schema.Resource {
 			"secret": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"version": {
 				Type:     schema.TypeString,

@@ -60,7 +60,7 @@ func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 		return
 	}
 
-	signKey := BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_SIGN")
+	signKey := acctest.BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_SIGN")
 	payload := getTestOccurrenceAttestationPayload(t)
 	signed := getSignedTestOccurrenceAttestationPayload(t, config, signKey, payload)
 	params := map[string]interface{}{

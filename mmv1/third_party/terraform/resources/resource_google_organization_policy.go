@@ -18,7 +18,7 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		DiffSuppressFunc: compareSelfLinkOrResourceName,
+		DiffSuppressFunc: CompareSelfLinkOrResourceName,
 		Description:      `The name of the Constraint the Policy is configuring, for example, serviceuser.services.`,
 	},
 	"boolean_policy": {

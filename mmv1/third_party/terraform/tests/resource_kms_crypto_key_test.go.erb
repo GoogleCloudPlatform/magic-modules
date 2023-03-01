@@ -54,7 +54,7 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		cryptoKeyId, err := parseKmsCryptoKeyId(tc.ImportId, tc.Config)
+		cryptoKeyId, err := ParseKmsCryptoKeyId(tc.ImportId, tc.Config)
 
 		if tc.ExpectedError && err == nil {
 			t.Fatalf("bad: %s, expected an error", tn)

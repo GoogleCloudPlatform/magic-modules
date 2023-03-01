@@ -79,7 +79,7 @@ func validateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []s
 	return validateRegexp(re)(v, k)
 }
 
-// based on compareSelfLinkOrResourceName, but less reusable and allows multi-/
+// based on CompareSelfLinkOrResourceName, but less reusable and allows multi-/
 // strings in the new state (config) part
 func compareSelfLinkOrResourceNameWithMultipleParts(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.HasSuffix(old, new)
@@ -239,7 +239,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 			"vpc_connector": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				Description:      `The VPC Network Connector that this cloud function can connect to. It can be either the fully-qualified URI, or the short name of the network connector resource. The format of this field is projects/*/locations/*/connectors/*.`,
 			},
 

@@ -13,7 +13,7 @@
 	# limitations under the License.
 -%>
 
-if d.HasChange("multi_cluster_routing_cluster_ids") && !stringInSlice(updateMask, "multiClusterRoutingUseAny") {
+if d.HasChange("multi_cluster_routing_cluster_ids") && !StringInSlice(updateMask, "multiClusterRoutingUseAny") {
 	updateMask = append(updateMask, "multiClusterRoutingUseAny")
 }
 

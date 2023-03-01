@@ -42,7 +42,7 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	cryptoKeyId, err := parseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
+	cryptoKeyId, err := ParseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
 
 	if err != nil {
 		return err

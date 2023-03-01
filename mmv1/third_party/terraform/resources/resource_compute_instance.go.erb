@@ -241,7 +241,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Computed:         true,
 							ForceNew:         true,
 							ConflictsWith:    []string{"boot_disk.initialize_params"},
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the disk attached to this instance.`,
 						},
 					},
@@ -272,7 +272,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the network attached to this interface.`,
 						},
 
@@ -280,7 +280,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
@@ -448,7 +448,7 @@ func ResourceComputeInstance() *schema.Resource {
 						"source": {
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the disk attached to this instance.`,
 						},
 
@@ -537,7 +537,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ForceNew:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							DiffSuppressFunc: CompareSelfLinkOrResourceName,
 							Description:      `The accelerator type resource exposed to this instance. E.g. nvidia-tesla-k80.`,
 						},
 					},

@@ -40,7 +40,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
       attestationAuthorityNote.noteReference: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/container_analysis_note.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         description: |
           The resource name of a ATTESTATION_AUTHORITY Note, created by the
           user. If the Note is in a different project from the Attestor, it
@@ -107,7 +107,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
         set_hash_func: selfLinkNameHash
         custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         description: |
           The resource names of the attestors that must attest to a
           container image. If the attestor is in a different project from the
@@ -122,7 +122,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
         set_hash_func: selfLinkNameHash
         custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         description: |
           The resource names of the attestors that must attest to a
           container image. If the attestor is in a different project from the

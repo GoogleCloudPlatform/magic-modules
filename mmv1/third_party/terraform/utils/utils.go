@@ -426,7 +426,7 @@ func calcAddRemove(from []string, to []string) (add, remove []string) {
 	for _, u := range to {
 		found := false
 		for _, v := range from {
-			if compareSelfLinkOrResourceName("", v, u, nil) {
+			if CompareSelfLinkOrResourceName("", v, u, nil) {
 				found = true
 				break
 			}
@@ -438,7 +438,7 @@ func calcAddRemove(from []string, to []string) (add, remove []string) {
 	for _, u := range from {
 		found := false
 		for _, v := range to {
-			if compareSelfLinkOrResourceName("", u, v, nil) {
+			if CompareSelfLinkOrResourceName("", u, v, nil) {
 				found = true
 				break
 			}
@@ -450,7 +450,7 @@ func calcAddRemove(from []string, to []string) (add, remove []string) {
 	return add, remove
 }
 
-func stringInSlice(arr []string, str string) bool {
+func StringInSlice(arr []string, str string) bool {
 	for _, i := range arr {
 		if i == str {
 			return true

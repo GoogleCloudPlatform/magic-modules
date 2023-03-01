@@ -116,7 +116,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateCloudIotDeviceRegistrySubfolderMatch'
       eventNotificationConfigs.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       stateNotificationConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # Excluding this because the original (manually-generated) implementation
         # wrongly set this to be a Map, instead of a NestedObject. To avoid breaking

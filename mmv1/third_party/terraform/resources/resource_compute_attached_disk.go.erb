@@ -38,14 +38,14 @@ func ResourceComputeAttachedDisk() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				Description:      `name or self_link of the disk that will be attached.`,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"instance": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				Description:      `name or self_link of the compute instance that the disk will be attached to. If the self_link is provided then zone and project are extracted from the self link. If only the name is used then zone and project must be defined as properties on the resource or provider.`,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"project": {
 				Type:        schema.TypeString,
@@ -250,7 +250,7 @@ func resourceAttachedDiskImport(d *schema.ResourceData, meta interface{}) ([]*sc
 
 func findDiskByName(disks []*compute.AttachedDisk, id string) *compute.AttachedDisk {
 	for _, disk := range disks {
-		if compareSelfLinkOrResourceName("", disk.Source, id, nil) {
+		if CompareSelfLinkOrResourceName("", disk.Source, id, nil) {
 			return disk
 		}
 	}

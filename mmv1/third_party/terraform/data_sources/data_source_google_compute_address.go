@@ -101,11 +101,11 @@ type computeAddressId struct {
 	Name    string
 }
 
-func (s computeAddressId) canonicalId() string {
+func (s computeAddressId) CanonicalId() string {
 	return fmt.Sprintf(computeAddressIdTemplate, s.Project, s.Region, s.Name)
 }
 
-func parseComputeAddressId(id string, config *Config) (*computeAddressId, error) {
+func ParseComputeAddressId(id string, config *Config) (*computeAddressId, error) {
 	var parts []string
 	if computeAddressLinkRegex.MatchString(id) {
 		parts = computeAddressLinkRegex.FindStringSubmatch(id)

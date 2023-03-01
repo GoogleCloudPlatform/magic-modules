@@ -72,7 +72,7 @@ func ResourceComputeTargetPool() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
-					DiffSuppressFunc: compareSelfLinkOrResourceName,
+					DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				},
 				Description: `List of zero or one health check name or self_link. Only legacy google_compute_http_health_check is supported.`,
 			},

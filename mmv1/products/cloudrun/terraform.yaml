@@ -53,7 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       spec.routeName: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       spec.forceOverride: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/cloudrun_ignore_force_override.go.erb
   Service: !ruby/object:Overrides::Terraform::ResourceOverride

@@ -45,7 +45,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 func TestAccPubsubTopic_cmek(t *testing.T) {
 	t.Parallel()
 
-	kms := BootstrapKMSKey(t)
+	kms := acctest.BootstrapKMSKey(t)
 	topicName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{

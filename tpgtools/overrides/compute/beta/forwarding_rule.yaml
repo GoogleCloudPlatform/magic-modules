@@ -87,15 +87,15 @@
   field: target
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    diffsuppressfunc: CompareSelfLinkOrResourceName
   field: subnetwork
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    diffsuppressfunc: CompareSelfLinkOrResourceName
   field: location
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    diffsuppressfunc: CompareSelfLinkOrResourceName
   field: network
 - type: DIFF_SUPPRESS_FUNC
   details:
@@ -111,7 +111,7 @@
   field: service_label
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: compareSelfLinkOrResourceName
+    diffsuppressfunc: CompareSelfLinkOrResourceName
   field: backend_service
 - type: CUSTOM_NAME
   details:

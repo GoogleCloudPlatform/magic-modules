@@ -15,7 +15,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeT
 	context := map[string]interface{}{
 		"organization":  acctest.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -402,7 +402,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	context := map[string]interface{}{
 		"organization":  acctest.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms_key_name":  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

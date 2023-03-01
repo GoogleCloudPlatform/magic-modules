@@ -84,7 +84,7 @@ func ResourceDnsRecordSet() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 				Description:      `The name of the zone in which this record set will reside.`,
 			},
 
@@ -278,7 +278,7 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 					"network_url": {
 						Type:             schema.TypeString,
 						Required:         true,
-						DiffSuppressFunc: compareSelfLinkOrResourceName,
+						DiffSuppressFunc: CompareSelfLinkOrResourceName,
 						Description:      "The fully qualified url of the network in which the load balancer belongs. This should be formatted like `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.",
 					},
 					"project": {

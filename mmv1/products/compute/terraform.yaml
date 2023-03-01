@@ -246,7 +246,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       cdnPolicy.negativeCachingPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       edgeSecurityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
@@ -425,9 +425,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       securityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       edgeSecurityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1469,9 +1469,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
       router: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       interconnect: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       bandwidth: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       type: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2130,7 +2130,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: target
         required: true # See comment for minReplicas
       target: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -2561,14 +2561,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
       network: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       priority: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 1000
         send_empty_value: true
       nextHopIp: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       nextHopGateway: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_gateway.erb
         description: |+
           URL to a gateway that should handle matching packets.
@@ -2855,7 +2855,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       snapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "kmsKeySelfLink"
       sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
       sourceDiskEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       sourceDiskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -3305,7 +3305,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         required: false # the provider-default value will be used if not specified
       instance:  !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
         custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
         description: |
           The Compute instance VM handling traffic for this target instance.
@@ -3741,7 +3741,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetGrpcProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       urlMap: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        diff_suppress_func: 'CompareSelfLinkOrResourceName'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_grpc_proxy_basic"

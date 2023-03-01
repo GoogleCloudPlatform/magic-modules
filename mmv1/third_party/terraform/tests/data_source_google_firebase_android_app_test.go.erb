@@ -27,7 +27,7 @@ func TestAccDataSourceGoogleFirebaseAndroidApp(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleFirebaseAndroidApp(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+					google.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						resourceName,
 						"google_firebase_android_app.my_app",
 						map[string]struct{}{

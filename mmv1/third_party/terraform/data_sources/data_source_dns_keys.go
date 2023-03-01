@@ -34,7 +34,7 @@ func DataSourceDNSKeys() *schema.Resource {
 			"managed_zone": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"project": {
 				Type:     schema.TypeString,

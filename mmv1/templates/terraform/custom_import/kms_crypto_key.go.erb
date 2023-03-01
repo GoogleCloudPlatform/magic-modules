@@ -1,7 +1,7 @@
 
 	config := meta.(*Config)
 
-	cryptoKeyId, err := parseKmsCryptoKeyId(d.Id(), config)
+	cryptoKeyId, err := ParseKmsCryptoKeyId(d.Id(), config)
 	if err != nil {
 		return nil, err
 	}

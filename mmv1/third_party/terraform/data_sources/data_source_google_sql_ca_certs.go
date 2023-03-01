@@ -15,7 +15,7 @@ func DataSourceGoogleSQLCaCerts() *schema.Resource {
 			"instance": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				DiffSuppressFunc: CompareSelfLinkOrResourceName,
 			},
 			"project": {
 				Type:     schema.TypeString,
