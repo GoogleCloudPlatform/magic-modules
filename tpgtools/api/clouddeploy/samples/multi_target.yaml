@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC. All Rights Reserved.
+# Copyright 2023 Google LLC. All Rights Reserved.
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,17 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-- type: CUSTOM_ID
-  details:
-    id: 'projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}'
-- type: MUTEX
-  details:
-    mutex: '{{project}}/{{location}}/{{feature}}'
-- type: CUSTOM_TERRAFORM_PRODUCT_NAME
-  details:
-    product: gke_hub
-- type: DEPRECATED
-  field: mesh.control_plane
-  details:
-    message: >-
-      Deprecated in favor of the `management` field
+name: multi_target
+description: tests creating and updating a multi-target
+type: target
+versions:
+- beta
+resource: samples/multi.target.json
+updates:
+- resource: samples/update_multi.target.json
+  dependencies: []
+variables:
+- name: project
+  type: project
+- name: region
+  type: region
+- name: target
+  type: resource_name
