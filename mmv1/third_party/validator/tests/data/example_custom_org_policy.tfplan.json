@@ -5,18 +5,18 @@
     "root_module": {
       "resources": [
         {
-          "address": "google_org_policy_policy.primary11",
+          "address": "google_org_policy_policy.primary_policy",
           "mode": "managed",
           "type": "google_org_policy_policy",
-          "name": "primary11",
+          "name": "primary_policy",
           "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 0,
           "values": {
-            "name": "projects/name/policies/gcp.resourceLocations",
-            "parent": "projects/name",
+            "name": "projects/{{.Provider.project}}/policies/gcp.resourceLocations",
+            "parent": "projects/{{.Provider.project}}",
             "spec": [
               {
-                "inherit_from_parent": null,
+                "inherit_from_parent": true,
                 "reset": null,
                 "rules": [
                   {
@@ -34,7 +34,8 @@
                     "values": [
                       {
                         "allowed_values": [
-                          "projects/allowed-project"
+                          "projects/allowed-project1",
+                          "projects/allowed-project2"
                         ],
                         "denied_values": [
                           "projects/denied-project"
@@ -65,6 +66,7 @@
                     "values": [
                       {
                         "allowed_values": [
+                          false,
                           false
                         ],
                         "denied_values": [
@@ -83,33 +85,54 @@
           }
         },
         {
-          "address": "google_project.basic",
+          "address": "google_org_policy_policy.secondary_policy",
           "mode": "managed",
-          "type": "google_project",
-          "name": "basic",
+          "type": "google_org_policy_policy",
+          "name": "secondary_policy",
           "provider_name": "registry.terraform.io/hashicorp/google",
-          "schema_version": 1,
+          "schema_version": 0,
           "values": {
-            "auto_create_network": true,
-            "billing_account": null,
-            "folder_id": null,
-            "labels": null,
-            "name": "name",
-            "org_id": "123456789",
-            "project_id": "project",
+            "name": "folders/{{.FolderID}}/policies/samplePolicy",
+            "parent": "folders/{{.FolderID}}",
+            "spec": [
+              {
+                "inherit_from_parent": true,
+                "reset": null,
+                "rules": [
+                  {
+                    "allow_all": null,
+                    "condition": [],
+                    "deny_all": "TRUE",
+                    "enforce": null,
+                    "values": []
+                  }
+                ]
+              }
+            ],
             "timeouts": null
           },
-          "sensitive_values": {}
+          "sensitive_values": {
+            "spec": [
+              {
+                "rules": [
+                  {
+                    "condition": [],
+                    "values": []
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     }
   },
   "resource_changes": [
     {
-      "address": "google_org_policy_policy.primary11",
+      "address": "google_org_policy_policy.primary_policy",
       "mode": "managed",
       "type": "google_org_policy_policy",
-      "name": "primary11",
+      "name": "primary_policy",
       "provider_name": "registry.terraform.io/hashicorp/google",
       "change": {
         "actions": [
@@ -117,11 +140,11 @@
         ],
         "before": null,
         "after": {
-          "name": "projects/name/policies/gcp.resourceLocations",
-          "parent": "projects/name",
+          "name": "projects/{{.Provider.project}}/policies/gcp.resourceLocations",
+          "parent": "projects/{{.Provider.project}}",
           "spec": [
             {
-              "inherit_from_parent": null,
+              "inherit_from_parent": true,
               "reset": null,
               "rules": [
                 {
@@ -139,7 +162,8 @@
                   "values": [
                     {
                       "allowed_values": [
-                        "projects/allowed-project"
+                        "projects/allowed-project1",
+                        "projects/allowed-project2"
                       ],
                       "denied_values": [
                         "projects/denied-project"
@@ -172,6 +196,7 @@
                   "values": [
                     {
                       "allowed_values": [
+                        false,
                         false
                       ],
                       "denied_values": [
@@ -201,6 +226,7 @@
                   "values": [
                     {
                       "allowed_values": [
+                        false,
                         false
                       ],
                       "denied_values": [
@@ -220,10 +246,10 @@
       }
     },
     {
-      "address": "google_project.basic",
+      "address": "google_org_policy_policy.secondary_policy",
       "mode": "managed",
-      "type": "google_project",
-      "name": "basic",
+      "type": "google_org_policy_policy",
+      "name": "secondary_policy",
       "provider_name": "registry.terraform.io/hashicorp/google",
       "change": {
         "actions": [
@@ -231,22 +257,53 @@
         ],
         "before": null,
         "after": {
-          "auto_create_network": true,
-          "billing_account": null,
-          "folder_id": null,
-          "labels": null,
-          "name": "name",
-          "org_id": "123456789",
-          "project_id": "project",
+          "name": "folders/{{.FolderID}}/policies/samplePolicy",
+          "parent": "folders/{{.FolderID}}",
+          "spec": [
+            {
+              "inherit_from_parent": true,
+              "reset": null,
+              "rules": [
+                {
+                  "allow_all": null,
+                  "condition": [],
+                  "deny_all": "TRUE",
+                  "enforce": null,
+                  "values": []
+                }
+              ]
+            }
+          ],
           "timeouts": null
         },
         "after_unknown": {
           "id": true,
-          "number": true,
-          "skip_delete": true
+          "spec": [
+            {
+              "etag": true,
+              "rules": [
+                {
+                  "condition": [],
+                  "values": []
+                }
+              ],
+              "update_time": true
+            }
+          ]
         },
         "before_sensitive": false,
-        "after_sensitive": {}
+        "after_sensitive": {
+          "spec": [
+            {
+              "rules": [
+                {
+                  "condition": [],
+                  "values": []
+                }
+              ]
+            }
+          ]
+        }
       }
     }
   ],
@@ -260,26 +317,23 @@
     "root_module": {
       "resources": [
         {
-          "address": "google_org_policy_policy.primary11",
+          "address": "google_org_policy_policy.primary_policy",
           "mode": "managed",
           "type": "google_org_policy_policy",
-          "name": "primary11",
+          "name": "primary_policy",
           "provider_config_key": "google",
           "expressions": {
             "name": {
-              "references": [
-                "google_project.basic.name",
-                "google_project.basic"
-              ]
+              "constant_value": "projects/{{.Provider.project}}/policies/gcp.resourceLocations"
             },
             "parent": {
-              "references": [
-                "google_project.basic.name",
-                "google_project.basic"
-              ]
+              "constant_value": "projects/{{.Provider.project}}"
             },
             "spec": [
               {
+                "inherit_from_parent": {
+                  "constant_value": true
+                },
                 "rules": [
                   {
                     "condition": [
@@ -302,7 +356,8 @@
                       {
                         "allowed_values": {
                           "constant_value": [
-                            "projects/allowed-project"
+                            "projects/allowed-project1",
+                            "projects/allowed-project2"
                           ]
                         },
                         "denied_values": {
@@ -325,33 +380,36 @@
           "schema_version": 0
         },
         {
-          "address": "google_project.basic",
+          "address": "google_org_policy_policy.secondary_policy",
           "mode": "managed",
-          "type": "google_project",
-          "name": "basic",
+          "type": "google_org_policy_policy",
+          "name": "secondary_policy",
           "provider_config_key": "google",
           "expressions": {
             "name": {
-              "constant_value": "name"
+              "constant_value": "folders/{{.FolderID}}/policies/samplePolicy"
             },
-            "org_id": {
-              "constant_value": "123456789"
+            "parent": {
+              "constant_value": "folders/{{.FolderID}}"
             },
-            "project_id": {
-              "constant_value": "project"
-            }
+            "spec": [
+              {
+                "inherit_from_parent": {
+                  "constant_value": true
+                },
+                "rules": [
+                  {
+                    "deny_all": {
+                      "constant_value": "TRUE"
+                    }
+                  }
+                ]
+              }
+            ]
           },
-          "schema_version": 1
+          "schema_version": 0
         }
       ]
     }
-  },
-  "relevant_attributes": [
-    {
-      "resource": "google_project.basic",
-      "attribute": [
-        "name"
-      ]
-    }
-  ]
+  }
 }
