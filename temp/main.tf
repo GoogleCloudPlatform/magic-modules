@@ -32,6 +32,7 @@
 #   - Create a Service Account key for the new service account
 #   - Add Group Admin role to new service account in the Google Workspace Admin Console: https://admin.google.com/ac/roles
 #   - Add a new test user in the Google Workspace Admin Console: https://admin.google.com/ac/users
+#   - Create a support@ group in the Google Workspace Admin Console, add new service account as a member, and make it an owner
 #
 
 provider "google" {}
