@@ -1360,7 +1360,6 @@ resource "google_compute_subnetwork" "test" {
 `, name, network, subnetwork)
 }
 
-
 func testAccComposerEnvironment_encryptionCfg(pid, compVersion, airflowVersion, name, kmsKey, network, subnetwork string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
