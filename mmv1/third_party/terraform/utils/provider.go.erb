@@ -409,6 +409,8 @@ end     # products.each do
 			map[string]*schema.Resource{
 				// ####### START handwritten resources ###########
 				"google_app_engine_application":                ResourceAppEngineApplication(),
+				"google_apigee_sharedflow":                     ResourceApigeeSharedFlow(),
+				"google_apigee_sharedflow_deployment":          ResourceApigeeSharedFlowDeployment(),
 				"google_bigquery_table":                        ResourceBigQueryTable(),
 				"google_bigtable_gc_policy":                    ResourceBigtableGCPolicy(),
 				"google_bigtable_instance":                     ResourceBigtableInstance(),
@@ -482,21 +484,17 @@ end     # products.each do
 				"google_runtimeconfig_config":                  ResourceRuntimeconfigConfig(),
 				"google_runtimeconfig_variable":                ResourceRuntimeconfigVariable(),
 				<% end -%>
-
-				"google_service_account":                       resourceGoogleServiceAccount(),
-				"google_service_account_key":                   resourceGoogleServiceAccountKey(),
-				"google_service_networking_peered_dns_domain":  resourceGoogleServiceNetworkingPeeredDNSDomain(),
-				"google_storage_bucket":                        resourceStorageBucket(),
-				"google_storage_bucket_acl":                    resourceStorageBucketAcl(),
-				"google_storage_bucket_object":                 resourceStorageBucketObject(),
-				"google_storage_object_acl":                    resourceStorageObjectAcl(),
-				"google_storage_default_object_acl":            resourceStorageDefaultObjectAcl(),
-				"google_storage_notification":                  resourceStorageNotification(),
-				"google_storage_transfer_job":                  resourceStorageTransferJob(),
-				"google_apigee_sharedflow":			resourceApigeeSharedFlow(),
-				"google_apigee_sharedflow_deployment":          resourceApigeeSharedFlowDeployment(),
-				"google_tags_location_tag_binding":             resourceTagsLocationTagBinding(),
-
+				"google_service_account":                       ResourceGoogleServiceAccount(),
+				"google_service_account_key":                   ResourceGoogleServiceAccountKey(),
+				"google_service_networking_peered_dns_domain":  ResourceGoogleServiceNetworkingPeeredDNSDomain(),
+				"google_storage_bucket":                        ResourceStorageBucket(),
+				"google_storage_bucket_acl":                    ResourceStorageBucketAcl(),
+				"google_storage_bucket_object":                 ResourceStorageBucketObject(),
+				"google_storage_object_acl":                    ResourceStorageObjectAcl(),
+				"google_storage_default_object_acl":            ResourceStorageDefaultObjectAcl(),
+				"google_storage_notification":                  ResourceStorageNotification(),
+				"google_storage_transfer_job":                  ResourceStorageTransferJob(),
+				"google_tags_location_tag_binding":             ResourceTagsLocationTagBinding(),
 				// ####### END handwritten resources ###########
 			},
 			map[string]*schema.Resource{

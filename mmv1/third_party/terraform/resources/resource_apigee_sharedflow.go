@@ -23,7 +23,7 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-func resourceApigeeSharedFlow() *schema.Resource {
+func ResourceApigeeSharedFlow() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceApigeeSharedFlowCreate,
 		Read:   resourceApigeeSharedFlowRead,

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceApigeeSharedFlowDeployment() *schema.Resource {
+func ResourceApigeeSharedFlowDeployment() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceApigeeSharedflowDeploymentCreate,
 		Read:   resourceApigeeSharedflowDeploymentRead,
