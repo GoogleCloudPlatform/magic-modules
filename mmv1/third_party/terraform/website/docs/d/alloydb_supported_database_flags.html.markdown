@@ -29,6 +29,10 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
+* `supported_database_flags` - Contains a list of `flag`, which contains the details about a particular flag.
+
+A `flag` object would contain the following fields:-
+
 * `name` - The name of the flag resource, following Google Cloud conventions, e.g.: * projects/{project}/locations/{location}/flags/{flag} This field currently has no semantic meaning.
 
 * `flag_name` - The name of the database flag, e.g. "max_allowed_packets". The is a possibly key for the Instance.database_flags map field.

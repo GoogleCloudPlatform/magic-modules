@@ -213,6 +213,6 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 	if err := d.Set("supported_database_flags", supportedDatabaseFlags); err != nil {
 		return fmt.Errorf("Error setting supported_database_flags: %s", err)
 	}
-	d.SetId(fmt.Sprintf("project/%s/location/%s/supportedDbFlags", project, location))
+	d.SetId(fmt.Sprintf("projects/%s/locations/%s/supportedDbFlags", project, location))
 	return nil
 }
