@@ -532,7 +532,7 @@ func BootstrapAllPSARoles(t *testing.T, agentNames, roles []string) bool {
 	// Get the project since we need its number, id, and policy.
 	project, err := client.Projects.Get(getTestProjectFromEnv()).Do()
 	if err != nil {
-		t.Fatalf("Error getting project with id %q: %s", project.ProjectID, err)
+		t.Fatalf("Error getting project with id %q: %s", project.ProjectId, err)
 		return false
 	}
 
@@ -558,7 +558,7 @@ func BootstrapAllPSARoles(t *testing.T, agentNames, roles []string) bool {
 		})
 	}
 
-	mergedBindings := mergeBindings(policy.Bindings, newBindings)
+	mergedBindings := mergeBindings(append(policy.Bindings, newBindings...))
 
 	if !compareBindings(policy.Bindings, mergedBindings) {
 		// The policy must change.
