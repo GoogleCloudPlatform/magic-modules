@@ -125,6 +125,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           pubsub_topic: "dicom-notifications"
           bq_dataset_name: "dicom_bq_ds"
           bq_table_name: "dicom_bq_tb"
+        test_vars_overrides:
+          psaRoles: 'BootstrapPSARoles(t,
+
+            BootstrapPSARolesOptions{
+
+              ProjectID: getTestProjectFromEnv(),
+
+              AgentName: "gcp-sa-healthcare",
+
+              Roles: []string{
+
+                "roles/bigquery.dataEditor",
+
+                "roles/bigquery.jobUser",
+
+              },
+
+            })'
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
