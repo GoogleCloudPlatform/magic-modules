@@ -181,14 +181,3 @@ func GetRegionFromRegionalSelfLink(selfLink string) string {
 	}
 	return selfLink
 }
-
-func GetLocationFromOpName(opName string) string {
-	re := regexp.MustCompile("operations/(?:rctb|rdtb)\\.([a-zA-Z0-9-]*)\\.([0-9]*)")
-	switch {
-	case re.MatchString(opName):
-		if res := re.FindStringSubmatch(opName); len(res) == 3 && res[1] != "" {
-			return res[1]
-		}
-	}
-	return opName
-}

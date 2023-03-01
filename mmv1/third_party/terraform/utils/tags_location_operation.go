@@ -3,6 +3,7 @@ package google
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -39,7 +40,6 @@ func createTagsLocationWaiter(config *Config, op map[string]interface{}, activit
 	return w, nil
 }
 
-// nolint: deadcode,unused
 func tagsLocationOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
 	w, err := createTagsLocationWaiter(config, op, activity, userAgent)
 	if err != nil {
@@ -62,4 +62,15 @@ func tagsLocationOperationWaitTime(config *Config, op map[string]interface{}, ac
 		return err
 	}
 	return OperationWait(w, activity, timeout, config.PollInterval)
+}
+
+func GetLocationFromOpName(opName string) string {
+	re := regexp.MustCompile("operations/(?:rctb|rdtb)\\.([a-zA-Z0-9-]*)\\.([0-9]*)")
+	switch {
+	case re.MatchString(opName):
+		if res := re.FindStringSubmatch(opName); len(res) == 3 && res[1] != "" {
+			return res[1]
+		}
+	}
+	return opName
 }
