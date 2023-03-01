@@ -107,5 +107,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         primary_resource_id: "default"
         vars:
+          account_id: "my-account"
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"

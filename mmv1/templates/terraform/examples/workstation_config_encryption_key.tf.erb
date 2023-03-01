@@ -42,9 +42,8 @@ resource "google_kms_crypto_key" "default" {
 }
 
 resource "google_service_account" "default" {
-  account_id   = "workstations%{random_suffix}"
-  display_name = "Service Account for Cloud Workstations"
-  provider     = google-beta
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  display_name = "Service Account"
 }
 
 resource "google_workstations_workstation_config" "<%= ctx[:primary_resource_id] %>" {
