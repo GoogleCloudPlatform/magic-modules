@@ -309,7 +309,7 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccComputeInstanceTemplate_maintenance_interval(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_maintenance_interval(randString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
