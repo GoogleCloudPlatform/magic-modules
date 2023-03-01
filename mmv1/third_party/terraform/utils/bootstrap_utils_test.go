@@ -516,15 +516,15 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 	return project
 }
 
-// BootstrapPSARoles ensures that the given project's IAM
+// BootstrapAllPSARoles ensures that the given project's IAM
 // policy grants the given service agents the given roles.
 // This is important to bootstrap because using iam policy resources means that
 // deleting them removes permissions for concurrent tests.
 // Return whether the policy changed.
-func BootstrapPSARoles(t *testing.T, agentNames, roles []string) bool {
+func BootstrapAllPSARoles(t *testing.T, agentNames, roles []string) bool {
 	config := BootstrapConfig(t)
 	if config == nil {
-		t.Fatal("Could not bootstrap a config for BootstrapPSARoles.")
+		t.Fatal("Could not bootstrap a config for BootstrapAllPSARoles.")
 		return false
 	}
 	client := config.NewResourceManagerClient(config.userAgent)
@@ -572,6 +572,24 @@ func BootstrapPSARoles(t *testing.T, agentNames, roles []string) bool {
 	}
 
 	return false
+}
+
+// BootstrapAllPSARole is a version of BootstrapAllPSARoles for granting a
+// single role to multiple service agents.
+func BootstrapAllPSARole(t *testing.T, agentNames []string, role string) bool {
+	return BootstrapAllPSARoles(t, agentNames, []string{role})
+}
+
+// BootstrapPSARoles is a version of BootstrapAllPSARoles for granting roles to
+// a single service agent.
+func BootstrapPSARoles(t *testing.T, agentName string, roles []string) bool {
+	return BootstrapAllPSARoles(t, []string{agentName}, roles)
+}
+
+// BootstrapPSARole is a simplified version of BootstrapPSARoles for granting a
+// single role to a single service agent.
+func BootstrapPSARole(t *testing.T, agentName, role string) bool {
+	return BootstrapPSARoles(t, agentName, []string{role})
 }
 
 func BootstrapConfig(t *testing.T) *Config {
