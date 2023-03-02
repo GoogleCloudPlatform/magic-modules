@@ -7,13 +7,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-)
-
-var (
-	ProjectName    = "Terraform Acceptance Tests"
-	OriginalPolicy *cloudresourcemanager.Policy
-	TestPrefix     = "tf-test"
 )
 
 type ResourceDataMock struct {

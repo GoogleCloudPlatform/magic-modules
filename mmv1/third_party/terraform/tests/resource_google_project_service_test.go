@@ -62,7 +62,7 @@ func TestAccProjectService_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_basic(services, pid, ProjectName, org),
+				Config: testAccProjectService_basic(services, pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, true),
 				),
@@ -81,21 +81,21 @@ func TestAccProjectService_basic(t *testing.T) {
 			},
 			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, false),
 				),
 			},
 			// Create services with disabling turned off.
 			{
-				Config: testAccProjectService_noDisable(services, pid, ProjectName, org),
+				Config: testAccProjectService_noDisable(services, pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, true),
 				),
 			},
 			// Check that services are still enabled even after the resources are deleted.
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, services, pid, true),
 				),
@@ -119,7 +119,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_disableDependentServices(services, pid, ProjectName, org, billingId, "false"),
+				Config: testAccProjectService_disableDependentServices(services, pid, pname, org, billingId, "false"),
 			},
 			{
 				ResourceName:            "google_project_service.test",
@@ -128,11 +128,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
 			},
 			{
-				Config:      testAccProjectService_dependencyRemoved(services, pid, ProjectName, org, billingId),
+				Config:      testAccProjectService_dependencyRemoved(services, pid, pname, org, billingId),
 				ExpectError: regexp.MustCompile("Please specify disable_dependent_services=true if you want to proceed with disabling all services."),
 			},
 			{
-				Config: testAccProjectService_disableDependentServices(services, pid, ProjectName, org, billingId, "true"),
+				Config: testAccProjectService_disableDependentServices(services, pid, pname, org, billingId, "true"),
 			},
 			{
 				ResourceName:            "google_project_service.test",
@@ -141,7 +141,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
 			},
 			{
-				Config:             testAccProjectService_dependencyRemoved(services, pid, ProjectName, org, billingId),
+				Config:             testAccProjectService_dependencyRemoved(services, pid, pname, org, billingId),
 				ExpectNonEmptyPlan: true,
 			},
 		},
@@ -159,7 +159,7 @@ func TestAccProjectService_handleNotFound(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_handleNotFound(service, pid, ProjectName, org),
+				Config: testAccProjectService_handleNotFound(service, pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectService(t, []string{service}, pid, true),
 				),
@@ -192,7 +192,7 @@ func TestAccProjectService_renamedService(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_single(newName, pid, ProjectName, org),
+				Config: testAccProjectService_single(newName, pid, pname, org),
 			},
 			{
 				ResourceName:            "google_project_service.test",

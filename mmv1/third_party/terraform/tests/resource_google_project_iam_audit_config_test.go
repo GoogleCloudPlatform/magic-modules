@@ -30,14 +30,14 @@ func TestAccProjectIamAuditConfig_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM audit config
 			{
-				Config: testAccProjectAssociateAuditConfigBasic(pid, ProjectName, org, service),
+				Config: testAccProjectAssociateAuditConfigBasic(pid, pname, org, service),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 		},
@@ -59,18 +59,18 @@ func TestAccProjectIamAuditConfig_multiple(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM audit config
 			{
-				Config: testAccProjectAssociateAuditConfigBasic(pid, ProjectName, org, service),
+				Config: testAccProjectAssociateAuditConfigBasic(pid, pname, org, service),
 			},
 			// Apply another IAM audit config
 			{
-				Config: testAccProjectAssociateAuditConfigMultiple(pid, ProjectName, org, service, service2),
+				Config: testAccProjectAssociateAuditConfigMultiple(pid, pname, org, service, service2),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.multiple", pid, service2),
@@ -95,14 +95,14 @@ func TestAccProjectIamAuditConfig_multipleAtOnce(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM audit config
 			{
-				Config: testAccProjectAssociateAuditConfigMultiple(pid, ProjectName, org, service, service2),
+				Config: testAccProjectAssociateAuditConfigMultiple(pid, pname, org, service, service2),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.multiple", pid, service2),
@@ -124,26 +124,26 @@ func TestAccProjectIamAuditConfig_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM audit config
 			{
-				Config: testAccProjectAssociateAuditConfigBasic(pid, ProjectName, org, service),
+				Config: testAccProjectAssociateAuditConfigBasic(pid, pname, org, service),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 
 			// Apply an updated IAM audit config
 			{
-				Config: testAccProjectAssociateAuditConfigUpdated(pid, ProjectName, org, service),
+				Config: testAccProjectAssociateAuditConfigUpdated(pid, pname, org, service),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 
 			// Drop the original member
 			{
-				Config: testAccProjectAssociateAuditConfigDropMemberFromBasic(pid, ProjectName, org, service),
+				Config: testAccProjectAssociateAuditConfigDropMemberFromBasic(pid, pname, org, service),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 		},
@@ -167,21 +167,21 @@ func TestAccProjectIamAuditConfig_remove(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply multiple IAM audit configs
 			{
-				Config: testAccProjectAssociateAuditConfigMultiple(pid, ProjectName, org, service, service2),
+				Config: testAccProjectAssociateAuditConfigMultiple(pid, pname, org, service, service2),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.multiple", pid, service2),
 
 			// Remove the audit configs
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
@@ -206,20 +206,20 @@ func TestAccProjectIamAuditConfig_addFirstExemptMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply IAM audit config with no members
 			{
-				Config: testAccProjectAssociateAuditConfigMembers(pid, ProjectName, org, service, members),
+				Config: testAccProjectAssociateAuditConfigMembers(pid, pname, org, service, members),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 
 			// Apply IAM audit config with one member
 			{
-				Config: testAccProjectAssociateAuditConfigMembers(pid, ProjectName, org, service, members2),
+				Config: testAccProjectAssociateAuditConfigMembers(pid, pname, org, service, members2),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 		},
@@ -242,20 +242,20 @@ func TestAccProjectIamAuditConfig_removeLastExemptMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply IAM audit config with member
 			{
-				Config: testAccProjectAssociateAuditConfigMembers(pid, ProjectName, org, service, members),
+				Config: testAccProjectAssociateAuditConfigMembers(pid, pname, org, service, members),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 
 			// Apply IAM audit config with no members
 			{
-				Config: testAccProjectAssociateAuditConfigMembers(pid, ProjectName, org, service, members2),
+				Config: testAccProjectAssociateAuditConfigMembers(pid, pname, org, service, members2),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 		},
@@ -278,20 +278,20 @@ func TestAccProjectIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a new project
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply IAM audit config with DATA_READ
 			{
-				Config: testAccProjectAssociateAuditConfigLogType(pid, ProjectName, org, service, logType),
+				Config: testAccProjectAssociateAuditConfigLogType(pid, pname, org, service, logType),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 
 			// Apply IAM audit config with DATA_WRITE
 			{
-				Config: testAccProjectAssociateAuditConfigLogType(pid, ProjectName, org, service, logType2),
+				Config: testAccProjectAssociateAuditConfigLogType(pid, pname, org, service, logType2),
 			},
 			projectIamAuditConfigImportStep("google_project_iam_audit_config.acceptance", pid, service),
 		},

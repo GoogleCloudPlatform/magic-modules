@@ -13,6 +13,13 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"google.golang.org/api/cloudresourcemanager/v1"
+)
+
+var (
+	pname          = "Terraform Acceptance Tests"
+	OriginalPolicy *cloudresourcemanager.Policy
+	TestPrefix     = "tf-test"
 )
 
 func init() {
@@ -82,7 +89,7 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
-				Config: testAccProject_createWithoutOrg(pid, ProjectName),
+				Config: testAccProject_createWithoutOrg(pid, pname),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
@@ -104,7 +111,7 @@ func TestAccProject_create(t *testing.T) {
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
@@ -130,7 +137,7 @@ func TestAccProject_billing(t *testing.T) {
 		Steps: []resource.TestStep{
 			// This step creates a new project with a billing account
 			{
-				Config: testAccProject_createBilling(pid, ProjectName, org, billingId),
+				Config: testAccProject_createBilling(pid, pname, org, billingId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount(t, "google_project.acceptance", pid, billingId),
 				),
@@ -144,14 +151,14 @@ func TestAccProject_billing(t *testing.T) {
 			},
 			// Update to a different  billing account
 			{
-				Config: testAccProject_createBilling(pid, ProjectName, org, billingId2),
+				Config: testAccProject_createBilling(pid, pname, org, billingId2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount(t, "google_project.acceptance", pid, billingId2),
 				),
 			},
 			// Unlink the billing account
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount(t, "google_project.acceptance", pid, ""),
 				),
@@ -171,7 +178,7 @@ func TestAccProject_labels(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_labels(pid, ProjectName, org, map[string]string{"test": "that"}),
+				Config: testAccProject_labels(pid, pname, org, map[string]string{"test": "that"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"test": "that"}),
 				),
@@ -185,7 +192,7 @@ func TestAccProject_labels(t *testing.T) {
 			},
 			// update project with labels
 			{
-				Config: testAccProject_labels(pid, ProjectName, org, map[string]string{"label": "label-value"}),
+				Config: testAccProject_labels(pid, pname, org, map[string]string{"label": "label-value"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"label": "label-value"}),
@@ -193,7 +200,7 @@ func TestAccProject_labels(t *testing.T) {
 			},
 			// update project delete labels
 			{
-				Config: testAccProject_create(pid, ProjectName, org),
+				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 					testAccCheckGoogleProjectHasNoLabels(t, "google_project.acceptance", pid),
@@ -214,7 +221,7 @@ func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_deleteDefaultNetwork(pid, ProjectName, org, billingId),
+				Config: testAccProject_deleteDefaultNetwork(pid, pname, org, billingId),
 			},
 		},
 	})
@@ -231,7 +238,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_parentFolder(pid, ProjectName, folderDisplayName, org),
+				Config: testAccProject_parentFolder(pid, pname, folderDisplayName, org),
 			},
 		},
 	})
@@ -248,7 +255,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_migrateParentFolder(pid, ProjectName, folderDisplayName, org),
+				Config: testAccProject_migrateParentFolder(pid, pname, folderDisplayName, org),
 			},
 			{
 				ResourceName:            "google_project.acceptance",
@@ -257,7 +264,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"skip_delete"},
 			},
 			{
-				Config: testAccProject_migrateParentOrg(pid, ProjectName, folderDisplayName, org),
+				Config: testAccProject_migrateParentOrg(pid, pname, folderDisplayName, org),
 			},
 			{
 				ResourceName:            "google_project.acceptance",
@@ -266,7 +273,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"skip_delete"},
 			},
 			{
-				Config: testAccProject_migrateParentFolder(pid, ProjectName, folderDisplayName, org),
+				Config: testAccProject_migrateParentFolder(pid, pname, folderDisplayName, org),
 			},
 			{
 				ResourceName:            "google_project.acceptance",

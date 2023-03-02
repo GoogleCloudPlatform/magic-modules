@@ -40,7 +40,7 @@ func createTagsLocationWaiter(config *Config, op map[string]interface{}, activit
 	return w, nil
 }
 
-func tagsLocationOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
+func TagsLocationOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
 	w, err := createTagsLocationWaiter(config, op, activity, userAgent)
 	if err != nil {
 		return err

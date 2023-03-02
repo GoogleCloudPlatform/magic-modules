@@ -527,7 +527,7 @@ func BootstrapAllPSARoles(t *testing.T, agentNames, roles []string) bool {
 		t.Fatal("Could not bootstrap a config for BootstrapAllPSARoles.")
 		return false
 	}
-	client := config.NewResourceManagerClient(config.userAgent)
+	client := config.NewResourceManagerClient(config.UserAgent)
 
 	// Get the project since we need its number, id, and policy.
 	project, err := client.Projects.Get(getTestProjectFromEnv()).Do()
@@ -558,7 +558,7 @@ func BootstrapAllPSARoles(t *testing.T, agentNames, roles []string) bool {
 		})
 	}
 
-	mergedBindings := mergeBindings(append(policy.Bindings, newBindings...))
+	mergedBindings := MergeBindings(append(policy.Bindings, newBindings...))
 
 	if !compareBindings(policy.Bindings, mergedBindings) {
 		// The policy must change.

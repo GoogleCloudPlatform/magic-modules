@@ -101,7 +101,7 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 	// identity fields and d.Id() before read
 	
 	var opRes map[string]interface{}
-	err = TagsOperationWaitTimeWithResponse(
+	err = TagsLocationOperationWaitTimeWithResponse(
 		config, res, &opRes, "Creating LocationTagBinding", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 

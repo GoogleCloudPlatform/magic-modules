@@ -891,7 +891,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 
 	project := &cloudresourcemanager.Project{
 		ProjectId: pid,
-		Name:      ProjectName,
+		Name:      pname,
 		Parent: &cloudresourcemanager.ResourceId{
 			Id:   org,
 			Type: "organization",
@@ -928,7 +928,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 
 	p2 := fmt.Sprintf("%s-2", pid)
 	project.ProjectId = p2
-	project.Name = fmt.Sprintf("%s-2", ProjectName)
+	project.Name = fmt.Sprintf("%s-2", pname)
 
 	err = RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()
