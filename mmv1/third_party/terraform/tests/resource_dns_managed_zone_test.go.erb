@@ -584,7 +584,7 @@ func TestDnsManagedZoneImport_parseImportId(t *testing.T) {
 		"short id with default project and region": {
 			IdRegexes: zoneRegexes,
 			ImportId:  "my-zone",
-			Config: &Config{
+			Config: &google.Config{
 				Project: "default-project",
 			},
 			ExpectedSchemaValues: map[string]interface{}{
@@ -601,7 +601,7 @@ func TestDnsManagedZoneImport_parseImportId(t *testing.T) {
 		}
 		config := tc.Config
 		if config == nil {
-			config = &Config{}
+			config = &google.Config{}
 		}
 		//
 		if err := parseImportId(tc.IdRegexes, d, config); err == nil {

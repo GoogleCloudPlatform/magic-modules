@@ -16,7 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
-    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    error_retry_predicates: ["IsMonitoringConcurrentEditError"]
     properties:
       conditions.conditionAbsent.aggregations.crossSeriesReducer: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: crossSeriesReducerDiffSuppress
@@ -48,7 +48,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/groups/{{project}}
-    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    error_retry_predicates: ["IsMonitoringConcurrentEditError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_basic"
@@ -73,7 +73,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["{{name}}"]
     delete_url: 'v3/{{name}}?force={{force_delete}}'
     mutex: stackdriver/notifications/{{project}}
-    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    error_retry_predicates: ["IsMonitoringConcurrentEditError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "notification_channel_basic"
@@ -136,7 +136,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     legacy_name: 'google_monitoring_custom_service'
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    error_retry_predicates: ["IsMonitoringConcurrentEditError"]
     properties:
       serviceId: !ruby/object:Overrides::Terraform::PropertyOverride
         api_name: 'name'
@@ -159,7 +159,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     legacy_name: 'google_monitoring_service'
     id_format: "projects/{{project}}/services/{{service_id}}"
     import_format: ["projects/{{project}}/services/{{service_id}}"]
-    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    error_retry_predicates: ["IsMonitoringConcurrentEditError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_service_example"
@@ -282,7 +282,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    error_retry_predicates: ["IsMonitoringConcurrentEditError"]
     mutex: stackdriver/groups/{{project}}
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -343,7 +343,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       actions: ['create', 'update', 'delete']
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    error_retry_predicates: ["IsMonitoringConcurrentEditError"]
     properties:
       labels: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true

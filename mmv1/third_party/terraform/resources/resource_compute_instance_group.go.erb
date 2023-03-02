@@ -35,7 +35,7 @@ func ResourceComputeInstanceGroup() *schema.Resource {
 		},
 
 		SchemaVersion: 2,
-		MigrateState:  resourceComputeInstanceGroupMigrateState,
+		MigrateState:  ResourceComputeInstanceGroupMigrateState,
 
 		Schema: map[string]*schema.Schema{
 			"name": {

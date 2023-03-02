@@ -28,7 +28,7 @@ func TestComputeInstanceGroupMigrateState(t *testing.T) {
 				"name": "instancegroup-test",
 			},
 			ExpectedId: "us-central1-c/instancegroup-test",
-			Meta:       &Config{},
+			Meta:       &google.Config{},
 		},
 		"v0 to v2": {
 			StateVersion: 0,
@@ -47,7 +47,7 @@ func TestComputeInstanceGroupMigrateState(t *testing.T) {
 				"instances.1519187872": "https://www.googleapis.com/compute/v1/projects/project_name/zones/zone_name/instances/instancegroup-test-0",
 			},
 			ExpectedId: "us-central1-c/instancegroup-test",
-			Meta:       &Config{},
+			Meta:       &google.Config{},
 		},
 	}
 
@@ -56,7 +56,7 @@ func TestComputeInstanceGroupMigrateState(t *testing.T) {
 			ID:         "i-abc123",
 			Attributes: tc.Attributes,
 		}
-		is, err := resourceComputeInstanceGroupMigrateState(
+		is, err := google.ResourceComputeInstanceGroupMigrateState(
 			tc.StateVersion, is, tc.Meta)
 
 		if err != nil {
@@ -94,7 +94,7 @@ func TestComputeInstanceGroupMigrateState_empty(t *testing.T) {
 		var meta *google.Config
 
 		// should handle nil
-		is, err := resourceComputeInstanceGroupMigrateState(tc.StateVersion, is, meta)
+		is, err := google.ResourceComputeInstanceGroupMigrateState(tc.StateVersion, is, meta)
 
 		if err != nil {
 			t.Fatalf("bad %s, err: %#v", tn, err)
@@ -105,7 +105,7 @@ func TestComputeInstanceGroupMigrateState_empty(t *testing.T) {
 
 		// should handle non-nil but empty
 		is = &terraform.InstanceState{}
-		_, err = resourceComputeInstanceGroupMigrateState(tc.StateVersion, is, meta)
+		_, err = google.ResourceComputeInstanceGroupMigrateState(tc.StateVersion, is, meta)
 
 		if err != nil {
 			t.Fatalf("bad %s, err: %#v", tn, err)

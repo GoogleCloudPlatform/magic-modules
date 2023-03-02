@@ -203,7 +203,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("column_family", flattenColumnFamily(table.Families)); err != nil {
+	if err := d.Set("column_family", FlattenColumnFamily(table.Families)); err != nil {
 		return fmt.Errorf("Error setting column_family: %s", err)
 	}
 
@@ -320,7 +320,7 @@ func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func flattenColumnFamily(families []string) []map[string]interface{} {
+func FlattenColumnFamily(families []string) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, len(families))
 
 	for _, f := range families {

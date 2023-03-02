@@ -54,7 +54,7 @@ var renamedServicesByOldAndNewServiceNames = mergeStringMaps(renamedServices, re
 
 const maxServiceUsageBatchSize = 20
 
-func validateProjectServiceService(val interface{}, key string) (warns []string, errs []error) {
+func ValidateProjectServiceService(val interface{}, key string) (warns []string, errs []error) {
 	bannedServicesFunc := StringNotInSlice(append(ignoredProjectServices, bannedProjectServices...), false)
 	warns, errs = bannedServicesFunc(val, key)
 	if len(errs) > 0 {
@@ -92,7 +92,7 @@ func ResourceGoogleProjectService() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateProjectServiceService,
+				ValidateFunc: ValidateProjectServiceService,
 			},
 			"project": {
 				Type:             schema.TypeString,

@@ -76,7 +76,7 @@ func TestEndpointsService_grpcMigrateState(t *testing.T) {
 				"protoc_output":        "",
 				"name":                 "testcase",
 			},
-			Meta: &Config{Project: "gcp-project", Region: "us-central1"},
+			Meta: &google.Config{Project: "gcp-project", Region: "us-central1"},
 		},
 		"update from non-protoc_output": {
 			StateVersion: 0,
@@ -88,7 +88,7 @@ func TestEndpointsService_grpcMigrateState(t *testing.T) {
 				"openapi_config": "foo bar baz",
 				"name":           "testcase-2",
 			},
-			Meta: &Config{Project: "gcp-project", Region: "us-central1"},
+			Meta: &google.Config{Project: "gcp-project", Region: "us-central1"},
 		},
 	}
 

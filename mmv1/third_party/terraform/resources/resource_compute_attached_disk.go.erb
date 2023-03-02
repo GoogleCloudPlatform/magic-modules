@@ -156,7 +156,7 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 
 	// Iterate through the instance's attached disks as this is the only way to
 	// confirm the disk is actually attached
-	ad := findDiskByName(instance.Disks, diskName)
+	ad := FindDiskByName(instance.Disks, diskName)
 	if ad == nil {
 		log.Printf("[WARN] Referenced disk wasn't found attached to this compute instance. Removing from state.")
 		d.SetId("")
@@ -210,7 +210,7 @@ func resourceAttachedDiskDelete(d *schema.ResourceData, meta interface{}) error 
 
 	// Confirm the disk is still attached before making the call to detach it. If the disk isn't listed as an attached
 	// disk on the compute instance then return as though the delete call succeed since this is the desired state.
-	ad := findDiskByName(instance.Disks, diskName)
+	ad := FindDiskByName(instance.Disks, diskName)
 	if ad == nil {
 		return nil
 	}
@@ -248,7 +248,7 @@ func resourceAttachedDiskImport(d *schema.ResourceData, meta interface{}) ([]*sc
 	return []*schema.ResourceData{d}, nil
 }
 
-func findDiskByName(disks []*compute.AttachedDisk, id string) *compute.AttachedDisk {
+func FindDiskByName(disks []*compute.AttachedDisk, id string) *compute.AttachedDisk {
 	for _, disk := range disks {
 		if CompareSelfLinkOrResourceName("", disk.Source, id, nil) {
 			return disk

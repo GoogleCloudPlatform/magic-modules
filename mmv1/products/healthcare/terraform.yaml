@@ -18,7 +18,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       {{description}}
     id_format: "projects/{{project}}/locations/{{location}}/datasets/{{name}}"
     import_format: ["projects/{{project}}/locations/{{location}}/datasets/{{name}}"]
-    error_retry_predicates: ["healthcareDatasetNotInitialized"]
+    error_retry_predicates: ["HealthcareDatasetNotInitialized"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_dataset_basic"

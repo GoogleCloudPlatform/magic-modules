@@ -136,7 +136,7 @@ func testCheckAttachedDiskIsNowDetached(t *testing.T, instanceName, diskName str
 			return err
 		}
 
-		ad := findDiskByName(instance.Disks, diskName)
+		ad := google.FindDiskByName(instance.Disks, diskName)
 		if ad != nil {
 			return fmt.Errorf("compute disk is still attached to compute instance")
 		}

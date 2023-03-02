@@ -70,10 +70,10 @@ var (
 // holds up to par.
 func forceNewIfNetworkIPNotUpdatable(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	// separate func to allow unit testing
-	return forceNewIfNetworkIPNotUpdatableFunc(d)
+	return ForceNewIfNetworkIPNotUpdatableFunc(d)
 }
 
-func forceNewIfNetworkIPNotUpdatableFunc(d TerraformResourceDiff) error {
+func ForceNewIfNetworkIPNotUpdatableFunc(d TerraformResourceDiff) error {
 	oldCount, newCount := d.GetChange("network_interface.#")
 	if oldCount.(int) != newCount.(int) {
 		return nil
@@ -108,7 +108,7 @@ func ResourceComputeInstance() *schema.Resource {
 		},
 
 		SchemaVersion: 6,
-		MigrateState:  resourceComputeInstanceMigrateState,
+		MigrateState:  ResourceComputeInstanceMigrateState,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -208,7 +208,7 @@ func ResourceComputeInstance() *schema.Resource {
 										AtLeastOneOf:     initializeParamsKeys,
 										Computed:         true,
 										ForceNew:         true,
-										DiffSuppressFunc: diskImageDiffSuppress,
+										DiffSuppressFunc: DiskImageDiffSuppress,
 										Description:      `The image from which this disk was initialised.`,
 									},
 
@@ -348,7 +348,7 @@ func ResourceComputeInstance() *schema.Resource {
 									"ip_cidr_range": {
 										Type:             schema.TypeString,
 										Required:         true,
-										DiffSuppressFunc: ipCidrRangeDiffSuppress,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
 										Description:      `The IP CIDR range represented by this alias IP range.`,
 									},
 									"subnetwork_range_name": {
@@ -1213,7 +1213,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	md := flattenMetadataBeta(instance.Metadata)
+	md := FlattenMetadataBeta(instance.Metadata)
 
 	// If the existing state contains "metadata_startup_script" instead of "metadata.startup-script",
 	// we should move the remote metadata.startup-script to metadata_startup_script to avoid
@@ -2460,7 +2460,7 @@ func expandBootDisk(d *schema.ResourceData, config *Config, project string) (*co
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.image"); ok {
 			imageName := v.(string)
-			imageUrl, err := resolveImage(config, project, imageName, userAgent)
+			imageUrl, err := ResolveImage(config, project, imageName, userAgent)
 			if err != nil {
 				return nil, fmt.Errorf("Error resolving image name '%s': %s", imageName, err)
 			}

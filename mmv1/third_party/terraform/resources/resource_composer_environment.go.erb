@@ -423,7 +423,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 <% end -%>
 										AtLeastOneOf:     composerSoftwareConfigKeys,
 										ValidateFunc:     validateRegexp(composerEnvironmentVersionRegexp),
-										DiffSuppressFunc: composerImageVersionDiffSuppress,
+										DiffSuppressFunc: ComposerImageVersionDiffSuppress,
 										Description:      `The version of the software running in the environment. This encapsulates both the version of Cloud Composer functionality and the version of Apache Airflow. It must match the regular expression composer-([0-9]+(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-([0-9]+(\.[0-9]+(\.[0-9]+)?)?). The Cloud Composer portion of the image version is a full semantic version, or an alias in the form of major version number or 'latest'. The Apache Airflow portion of the image version is a full semantic version that points to one of the supported Apache Airflow versions, or an alias in the form of only major or major.minor versions specified. See documentation for more details and version list.`,
 									},
 									"python_version": {
@@ -875,7 +875,7 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	env := &composer.Environment{
-		Name:   envName.resourceName(),
+		Name:   envName.ResourceName(),
 		Labels: expandLabels(d),
 		Config: transformedConfig,
 	}
@@ -935,7 +935,7 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	res, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Get(envName.resourceName()).Do()
+	res, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ComposerEnvironment %q", d.Id()))
 	}
@@ -1223,7 +1223,7 @@ func resourceComposerEnvironmentPatchField(updateMask, userAgent string, env *co
 	}
 
 	op, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.
-		Patch(envName.resourceName(), env).
+		Patch(envName.ResourceName(), env).
 		UpdateMask(updateMask).Do()
 	if err != nil {
 		return err
@@ -1254,7 +1254,7 @@ func resourceComposerEnvironmentDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	log.Printf("[DEBUG] Deleting Environment %q", d.Id())
-	op, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Delete(envName.resourceName()).Do()
+	op, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Delete(envName.ResourceName()).Do()
 	if err != nil {
 		return err
 	}
@@ -2226,7 +2226,7 @@ func validateComposerEnvironmentEnvVariables(v interface{}, k string) (ws []stri
 	return ws, errors
 }
 
-func handleComposerEnvironmentCreationOpFailure(id string, envName *composerEnvironmentName, d *schema.ResourceData, config *Config) error {
+func handleComposerEnvironmentCreationOpFailure(id string, envName *ComposerEnvironmentName, d *schema.ResourceData, config *Config) error {
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -2234,11 +2234,11 @@ func handleComposerEnvironmentCreationOpFailure(id string, envName *composerEnvi
 
 	log.Printf("[WARNING] Creation operation for Composer Environment %q failed, check Environment isn't still running", id)
 	// Try to get possible created but invalid environment.
-	env, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Get(envName.resourceName()).Do()
+	env, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
 	if err != nil {
 		// If error is 401, we don't have to clean up environment, return nil.
 		// Otherwise, we encountered another error.
-		return handleNotFoundError(err, d, fmt.Sprintf("Composer Environment %q", envName.resourceName()))
+		return handleNotFoundError(err, d, fmt.Sprintf("Composer Environment %q", envName.ResourceName()))
 	}
 
 	if env.State == "CREATING" {
@@ -2249,7 +2249,7 @@ func handleComposerEnvironmentCreationOpFailure(id string, envName *composerEnvi
 	}
 
 	log.Printf("[WARNING] Environment %q from failed creation operation was created, deleting.", id)
-	op, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Delete(envName.resourceName()).Do()
+	op, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.Delete(envName.ResourceName()).Do()
 	if err != nil {
 		return fmt.Errorf("Could not delete the invalid created environment with state %q: %s", env.State, err)
 	}
@@ -2285,7 +2285,7 @@ func getComposerEnvironmentPostCreateUpdateObj(env *composer.Environment) (updat
 	return updateEnv
 }
 
-func resourceComposerEnvironmentName(d *schema.ResourceData, config *Config) (*composerEnvironmentName, error) {
+func resourceComposerEnvironmentName(d *schema.ResourceData, config *Config) (*ComposerEnvironmentName, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
@@ -2296,24 +2296,24 @@ func resourceComposerEnvironmentName(d *schema.ResourceData, config *Config) (*c
 		return nil, err
 	}
 
-	return &composerEnvironmentName{
+	return &ComposerEnvironmentName{
 		Project:     project,
 		Region:      region,
 		Environment: d.Get("name").(string),
 	}, nil
 }
 
-type composerEnvironmentName struct {
+type ComposerEnvironmentName struct {
 	Project     string
 	Region      string
 	Environment string
 }
 
-func (n *composerEnvironmentName) resourceName() string {
+func (n *ComposerEnvironmentName) ResourceName() string {
 	return fmt.Sprintf("projects/%s/locations/%s/environments/%s", n.Project, n.Region, n.Environment)
 }
 
-func (n *composerEnvironmentName) parentName() string {
+func (n *ComposerEnvironmentName) parentName() string {
 	return fmt.Sprintf("projects/%s/locations/%s", n.Project, n.Region)
 }
 
@@ -2343,7 +2343,7 @@ func validateServiceAccountRelativeNameOrEmail(v interface{}, k string) (ws []st
 	return
 }
 
-func composerImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+func ComposerImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	versionRe := regexp.MustCompile(composerEnvironmentVersionRegexp)
 	oldVersions := versionRe.FindStringSubmatch(old)
 	newVersions := versionRe.FindStringSubmatch(new)

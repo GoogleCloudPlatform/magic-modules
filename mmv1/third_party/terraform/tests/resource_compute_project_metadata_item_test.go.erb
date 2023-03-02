@@ -160,7 +160,7 @@ func testAccCheckProjectMetadataItemDestroyProducer(t *testing.T) func(s *terraf
 			return err
 		}
 
-		metadata := flattenMetadata(project.CommonInstanceMetadata)
+		metadata := google.FlattenMetadata(project.CommonInstanceMetadata)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_project_metadata_item" {

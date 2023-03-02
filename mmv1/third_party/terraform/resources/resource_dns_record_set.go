@@ -39,13 +39,13 @@ func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 			return record
 		}
 	}
-	return rrdatasListDiffSuppress(oList, nList, parseFunc, d)
+	return RrdatasListDiffSuppress(oList, nList, parseFunc, d)
 }
 
 // suppress on a list when 1) its items have dups that need to be ignored
 // and 2) string comparison on the items may need a special parse function
 // example of usage can be found ../../../third_party/terraform/tests/resource_dns_record_set_test.go.erb
-func rrdatasListDiffSuppress(oldList, newList []string, fun func(x string) string, _ *schema.ResourceData) bool {
+func RrdatasListDiffSuppress(oldList, newList []string, fun func(x string) string, _ *schema.ResourceData) bool {
 	// compare two lists of unordered records
 	diff := make(map[string]bool, len(oldList))
 	for _, oldRecord := range oldList {
@@ -92,7 +92,7 @@ func ResourceDnsRecordSet() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateRecordNameTrailingDot,
+				ValidateFunc: ValidateRecordNameTrailingDot,
 				Description:  `The DNS name this record set will apply to.`,
 			},
 
@@ -887,7 +887,7 @@ func flattenDnsRecordSetRoutingPolicyPrimaryBackup(primaryBackup *dns.RRSetRouti
 	return []map[string]interface{}{data}
 }
 
-func validateRecordNameTrailingDot(v interface{}, k string) (warnings []string, errors []error) {
+func ValidateRecordNameTrailingDot(v interface{}, k string) (warnings []string, errors []error) {
 	value := v.(string)
 	len_value := len(value)
 	if len_value == 0 {

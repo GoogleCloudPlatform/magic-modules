@@ -83,7 +83,7 @@ func ResourceStorageBucket() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				// GCP (Dataplex) automatically adds labels
-				DiffSuppressFunc: resourceDataplexLabelDiffSuppress,
+				DiffSuppressFunc: ResourceDataplexLabelDiffSuppress,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `A set of key/value label pairs to assign to the bucket.`,
 			},
@@ -425,7 +425,7 @@ func ResourceStorageBucket() *schema.Resource {
 
 const resourceDataplexGoogleProvidedLabelPrefix = "labels.goog-dataplex"
 
-func resourceDataplexLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+func ResourceDataplexLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if strings.HasPrefix(k, resourceDataplexGoogleProvidedLabelPrefix) && new == "" {
 		return true
 	}

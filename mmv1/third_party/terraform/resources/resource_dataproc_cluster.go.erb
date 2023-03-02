@@ -917,7 +917,7 @@ by Dataproc`,
 										Computed:         true,
 										AtLeastOneOf:     clusterSoftwareConfigKeys,
 										ForceNew:         true,
-										DiffSuppressFunc: dataprocImageVersionDiffSuppress,
+										DiffSuppressFunc: DataprocImageVersionDiffSuppress,
 										Description:      `The Cloud Dataproc image version to use for the cluster - this controls the sets of software versions installed onto the nodes when you create clusters. If not specified, defaults to the latest version.`,
 									},
 									"override_properties": {
@@ -2407,7 +2407,7 @@ func flattenInitializationActions(nia []*dataproc.NodeInitializationAction) ([]m
 			"script": v.ExecutableFile,
 		}
 		if len(v.ExecutionTimeout) > 0 {
-			tsec, err := extractInitTimeout(v.ExecutionTimeout)
+			tsec, err := ExtractInitTimeout(v.ExecutionTimeout)
 			if err != nil {
 				return nil, err
 			}
@@ -2526,7 +2526,7 @@ func flattenInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGr
 	return []map[string]interface{}{data}
 }
 
-func extractInitTimeout(t string) (int, error) {
+func ExtractInitTimeout(t string) (int, error) {
 	d, err := time.ParseDuration(t)
 	if err != nil {
 		return 0, err
@@ -2582,7 +2582,7 @@ func configOptions(d *schema.ResourceData, option string) (map[string]interface{
 	return nil, false
 }
 
-func dataprocImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+func DataprocImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	oldV, err := parseDataprocImageVersion(old)
 	if err != nil {
 		return false

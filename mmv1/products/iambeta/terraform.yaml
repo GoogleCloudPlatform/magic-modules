@@ -35,7 +35,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       workloadIdentityPoolId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateWorkloadIdentityPoolId'
+          function: 'ValidateWorkloadIdentityPoolId'
   WorkloadIdentityPoolProvider: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}"]
@@ -71,7 +71,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       workloadIdentityPoolProviderId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateWorkloadIdentityPoolProviderId'
+          function: 'ValidateWorkloadIdentityPoolProviderId'
       oidc: !ruby/object:Overrides::Terraform::PropertyOverride
         update_mask_fields:
           - "oidc.allowed_audiences"

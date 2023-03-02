@@ -290,7 +290,7 @@ func TestDiskImageDiffSuppress(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			if diskImageDiffSuppress("image", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			if google.DiskImageDiffSuppress("image", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 				t.Fatalf("%q => %q expect DiffSuppress to return %t", tc.Old, tc.New, tc.ExpectDiffSuppress)
 			}
 		})
@@ -301,13 +301,13 @@ func TestDiskImageDiffSuppress(t *testing.T) {
 func TestAccComputeDisk_imageDiffSuppressPublicVendorsFamilyNames(t *testing.T) {
 	t.Parallel()
 
-	if os.Getenv(TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
+	if os.Getenv(acctest.TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", acctest.TestEnvVar)
 	}
 
 	config := getInitializedConfig(t)
 
-	for _, publicImageProject := range imageMap {
+	for _, publicImageProject := range google.ImageMap {
 		token := ""
 		for paginate := true; paginate; {
 			resp, err := config.NewComputeClient(config.UserAgent).Images.List(publicImageProject).Filter("deprecated.replacement ne .*images.*").PageToken(token).Do()
@@ -316,7 +316,7 @@ func TestAccComputeDisk_imageDiffSuppressPublicVendorsFamilyNames(t *testing.T) 
 			}
 
 			for _, image := range resp.Items {
-				if !diskImageDiffSuppress("image", image.SelfLink, "family/"+image.Family, nil) {
+				if !google.DiskImageDiffSuppress("image", image.SelfLink, "family/"+image.Family, nil) {
 					t.Errorf("should suppress diff for image %q and family %q", image.SelfLink, image.Family)
 				}
 			}

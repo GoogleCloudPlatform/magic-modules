@@ -151,7 +151,7 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 }
 
 // Compare the JSON strings are equal
-func bigQueryTableSchemaDiffSuppress(name, old, new string, _ *schema.ResourceData) bool {
+func BigQueryTableSchemaDiffSuppress(name, old, new string, _ *schema.ResourceData) bool {
 	// The API can return an empty schema which gets encoded to "null" during read.
 	if old == "null" {
 		old = "[]"
@@ -222,7 +222,7 @@ func bigQueryTableModeIsForceNew(old, new string) bool {
 
 // Compares two existing schema implementations and decides if
 // it is changeable.. pairs with a force new on not changeable
-func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error) {
+func ResourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error) {
 	switch old.(type) {
 	case []interface{}:
 		arrayOld := old.([]interface{})
@@ -260,7 +260,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 				return false, nil
 			}
 			if isChangable, err :=
-				resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key]); err != nil || !isChangable {
+				ResourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key]); err != nil || !isChangable {
 				return false, err
 			}
 		}
@@ -303,7 +303,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 					return false, nil
 				}
 			case "fields":
-				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew)
+				return ResourceBigQueryTableSchemaIsChangeable(valOld, valNew)
 
 				// other parameters: description, policyTags and
 				// policyTags.names[] are changeable
@@ -320,7 +320,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 	}
 }
 
-func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error {
+func ResourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error {
 	if _, hasSchema := d.GetOk("schema"); hasSchema {
 		oldSchema, newSchema := d.GetChange("schema")
 		oldSchemaText := oldSchema.(string)
@@ -342,7 +342,7 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error
 			// same as above
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
 		}
-		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
+		isChangeable, err := ResourceBigQueryTableSchemaIsChangeable(old, new)
 		if err != nil {
 			return err
 		}
@@ -357,7 +357,7 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d TerraformResourceDiff) error
 }
 
 func resourceBigQueryTableSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	return resourceBigQueryTableSchemaCustomizeDiffFunc(d)
+	return ResourceBigQueryTableSchemaCustomizeDiffFunc(d)
 }
 
 func ResourceBigQueryTable() *schema.Resource {
@@ -690,7 +690,7 @@ func ResourceBigQueryTable() *schema.Resource {
 					json, _ := structure.NormalizeJsonString(v)
 					return json
 				},
-				DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
+				DiffSuppressFunc: BigQueryTableSchemaDiffSuppress,
 				Description:      `A JSON schema for the table.`,
 			},
 			// View: [Optional] If specified, configures this table as a view.

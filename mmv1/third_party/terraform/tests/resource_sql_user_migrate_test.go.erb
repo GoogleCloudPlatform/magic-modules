@@ -28,7 +28,7 @@ func TestSqlUserMigrateState(t *testing.T) {
 				"name":     "tf-user",
 				"instance": "tf-instance",
 			},
-			Meta:       &Config{},
+			Meta:       &google.Config{},
 			ID:         "tf-user",
 			ExpectedID: "tf-instance/tf-user",
 		},
@@ -39,7 +39,7 @@ func TestSqlUserMigrateState(t *testing.T) {
 			ID:         tc.ID,
 			Attributes: tc.Attributes,
 		}
-		is, err := resourceSqlUserMigrateState(
+		is, err := google.ResourceSqlUserMigrateState(
 			tc.StateVersion, is, tc.Meta)
 
 		if err != nil {
@@ -65,7 +65,7 @@ func TestSqlUserMigrateState_empty(t *testing.T) {
 	var meta *google.Config
 
 	// should handle nil
-	is, err := resourceSqlUserMigrateState(0, is, meta)
+	is, err := google.ResourceSqlUserMigrateState(0, is, meta)
 
 	if err != nil {
 		t.Fatalf("err: %#v", err)
@@ -76,7 +76,7 @@ func TestSqlUserMigrateState_empty(t *testing.T) {
 
 	// should handle non-nil but empty
 	is = &terraform.InstanceState{}
-	_, err = resourceSqlUserMigrateState(0, is, meta)
+	_, err = google.ResourceSqlUserMigrateState(0, is, meta)
 
 	if err != nil {
 		t.Fatalf("err: %#v", err)

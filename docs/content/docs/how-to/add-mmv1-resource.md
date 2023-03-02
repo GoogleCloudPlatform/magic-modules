@@ -302,7 +302,7 @@ diff_suppress_func: 'optionalPrefixSuppress("folders/")'
 Please make sure to add thorough unit tests (in addition to basic integration
 tests) for your diff suppress func.
 
-Example: DomainMapping (domainMappingLabelDiffSuppress)
+Example: DomainMapping (DomainMappingLabelDiffSuppress)
 
 -   [terraform.yaml resource overrides](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L16)
     -   [`custom_code`](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L31)

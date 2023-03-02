@@ -198,7 +198,7 @@ func ResourceContainerCluster() *schema.Resource {
 		},
 
 		SchemaVersion: 1,
-		MigrateState:  resourceContainerClusterMigrateState,
+		MigrateState:  ResourceContainerClusterMigrateState,
 
 		Importer: &schema.ResourceImporter{
 			State: resourceContainerClusterStateImporter,
@@ -2111,7 +2111,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 <% unless version == 'ga' -%>
-	if err := validateNodePoolAutoConfig(cluster); err != nil {
+	if err := ValidateNodePoolAutoConfig(cluster); err != nil {
 		return err
 	}
 <% end -%>
@@ -5630,7 +5630,7 @@ func BinaryAuthorizationDiffSuppress(k, old, new string, r *schema.ResourceData)
 }
 
 <% unless version == 'ga' -%>
-func validateNodePoolAutoConfig(cluster *container.Cluster) error {
+func ValidateNodePoolAutoConfig(cluster *container.Cluster) error {
 	if cluster == nil || cluster.NodePoolAutoConfig == nil {
 		return nil
 	}

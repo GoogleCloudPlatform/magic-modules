@@ -59,7 +59,7 @@ func ResourceComputeInstanceTemplate() *schema.Resource {
 			resourceComputeInstanceTemplateScratchDiskCustomizeDiff,
 			resourceComputeInstanceTemplateBootDiskCustomizeDiff,
 		),
-		MigrateState: resourceComputeInstanceTemplateMigrateState,
+		MigrateState: ResourceComputeInstanceTemplateMigrateState,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(4 * time.Minute),
@@ -474,7 +474,7 @@ Google Cloud KMS.`,
 										Type:             schema.TypeString,
 										Required:         true,
 										ForceNew:         true,
-										DiffSuppressFunc: ipCidrRangeDiffSuppress,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
 										Description:      `The IP CIDR range represented by this alias IP range. This IP CIDR range must belong to the specified subnetwork and cannot contain IP addresses reserved by system or used by other network interfaces. At the time of writing only a netmask (e.g. /24) may be supplied, with a CIDR format resulting in an API error.`,
 									},
 									"subnetwork_range_name": {
@@ -921,7 +921,7 @@ func resourceComputeInstanceTemplateSourceImageCustomizeDiff(_ context.Context, 
 			if err != nil {
 				return err
 			}
-			oldResolved, err := resolveImage(config, project, old.(string), config.UserAgent)
+			oldResolved, err := ResolveImage(config, project, old.(string), config.UserAgent)
 			if err != nil {
 				return err
 			}
@@ -929,7 +929,7 @@ func resourceComputeInstanceTemplateSourceImageCustomizeDiff(_ context.Context, 
 			if err != nil {
 				return err
 			}
-			newResolved, err := resolveImage(config, project, new.(string), config.UserAgent)
+			newResolved, err := ResolveImage(config, project, new.(string), config.UserAgent)
 			if err != nil {
 				return err
 			}
@@ -951,10 +951,10 @@ func resourceComputeInstanceTemplateSourceImageCustomizeDiff(_ context.Context, 
 
 func resourceComputeInstanceTemplateScratchDiskCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	// separate func to allow unit testing
-	return resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff)
+	return ResourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff)
 }
 
-func resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff TerraformResourceDiff) error {
+func ResourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff TerraformResourceDiff) error {
 	numDisks := diff.Get("disk.#").(int)
 	for i := 0; i < numDisks; i++ {
 		// misspelled on purpose, type is a special symbol
@@ -1057,7 +1057,7 @@ func buildDisks(d *schema.ResourceData, config *Config) ([]*compute.AttachedDisk
 
 			if v, ok := d.GetOk(prefix + ".source_image"); ok {
 				imageName := v.(string)
-				imageUrl, err := resolveImage(config, project, imageName, userAgent)
+				imageUrl, err := ResolveImage(config, project, imageName, userAgent)
 				if err != nil {
 					return nil, fmt.Errorf(
 						"Error resolving image name '%s': %s",
@@ -1341,7 +1341,7 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 	return diskMap, nil
 }
 
-func reorderDisks(configDisks []interface{}, apiDisks []map[string]interface{}) []map[string]interface{} {
+func ReorderDisks(configDisks []interface{}, apiDisks []map[string]interface{}) []map[string]interface{} {
 	if len(apiDisks) != len(configDisks) {
 		// There are different numbers of disks in state and returned from the API, so it's not
 		// worth trying to reorder them since it'll be a diff anyway.
@@ -1471,7 +1471,7 @@ func flattenDisks(disks []*compute.AttachedDisk, d *schema.ResourceData, default
 		apiDisks[i] = apiDisk
 	}
 
-	return reorderDisks(d.Get("disk").([]interface{}), apiDisks), nil
+	return ReorderDisks(d.Get("disk").([]interface{}), apiDisks), nil
 }
 
 func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{}) error {
@@ -1500,7 +1500,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 
 		md := instanceTemplate.Properties.Metadata
 
-		_md := flattenMetadataBeta(md)
+		_md := FlattenMetadataBeta(md)
 
 		if script, scriptExists := d.GetOk("metadata_startup_script"); scriptExists {
 			if err = d.Set("metadata_startup_script", script); err != nil {

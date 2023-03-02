@@ -2369,7 +2369,7 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 		},
 	}
 
-	err := forceNewIfNetworkIPNotUpdatableFunc(d)
+	err := google.ForceNewIfNetworkIPNotUpdatableFunc(d)
 	if err != nil {
 		t.Error(err)
 	}
@@ -2475,7 +2475,7 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 				"network_interface.0.network_ip":         tc.After.NetworkIP,
 			},
 		}
-		err := forceNewIfNetworkIPNotUpdatableFunc(d)
+		err := google.ForceNewIfNetworkIPNotUpdatableFunc(d)
 		if err != nil {
 			t.Error(err)
 		}
@@ -2531,7 +2531,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 		if err != nil {
 			return fmt.Errorf("Could not stop instance: %s", err)
 		}
-		err = ComputeOperationWaitTime(config, op, config.Project, "Waiting on stop", config.UserAgent, 20*time.Minute)
+		err = google.ComputeOperationWaitTime(config, op, config.Project, "Waiting on stop", config.UserAgent, 20*time.Minute)
 		if err != nil {
 			return fmt.Errorf("Could not stop instance: %s", err)
 		}
@@ -2545,7 +2545,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 		if err != nil {
 			return fmt.Errorf("Could not change machine type: %s", err)
 		}
-		err = ComputeOperationWaitTime(config, op, config.Project, "Waiting machine type change", config.UserAgent, 20*time.Minute)
+		err = google.ComputeOperationWaitTime(config, op, config.Project, "Waiting machine type change", config.UserAgent, 20*time.Minute)
 		if err != nil {
 			return fmt.Errorf("Could not change machine type: %s", err)
 		}
@@ -3120,7 +3120,7 @@ func testAccCheckComputeInstanceHasAliasIpRange(instance *compute.Instance, subn
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
 			for _, aliasIpRange := range networkInterface.AliasIpRanges {
-				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || ipCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
+				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || google.IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
 					return nil
 				}
 			}

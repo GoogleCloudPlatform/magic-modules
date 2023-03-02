@@ -14,7 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
-    error_retry_predicates: ["isNotFilestoreQuotaError"]
+    error_retry_predicates: ["IsNotFilestoreQuotaError"]
     autogen_async: true
     schema_version: 1
     examples:
@@ -54,7 +54,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_create: templates/terraform/pre_create/filestore_instance.go.erb
   Backup: !ruby/object:Overrides::Terraform::ResourceOverride
     mutex: "filestore/{{project}}"
-    error_retry_predicates: ["isNotFilestoreQuotaError"]
+    error_retry_predicates: ["IsNotFilestoreQuotaError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "filestore_backup_basic"
@@ -64,7 +64,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "tf-fs-inst"
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
     mutex: "filestore/{{project}}"
-    error_retry_predicates: ["isNotFilestoreQuotaError"]
+    error_retry_predicates: ["IsNotFilestoreQuotaError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "filestore_snapshot_basic"

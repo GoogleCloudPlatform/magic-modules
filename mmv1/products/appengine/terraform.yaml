@@ -33,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
     id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
     mutex: "apps/{{project}}"
-    error_retry_predicates: ["isAppEngineRetryableError"]
+    error_retry_predicates: ["IsAppEngineRetryableError"]
     parameters:
       service: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -89,7 +89,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
     id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
     mutex: "apps/{{project}}"
-    error_retry_predicates: ["isAppEngineRetryableError"]
+    error_retry_predicates: ["IsAppEngineRetryableError"]
     parameters:
       service: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -184,7 +184,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{project}}"
     import_format: ["{{project}}"]
     mutex: "apps/{{project}}"
-    error_retry_predicates: ["isAppEngineRetryableError"]
+    error_retry_predicates: ["IsAppEngineRetryableError"]
     # This resource is a child resource (requires app ID in the URL)
     skip_sweeper: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode

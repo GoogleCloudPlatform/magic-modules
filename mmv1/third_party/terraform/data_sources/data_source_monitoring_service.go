@@ -58,7 +58,7 @@ func dataSourceMonitoringServiceTypeReadFromList(listFilter string, typeStateSet
 			return err
 		}
 
-		resp, err := SendRequest(config, "GET", project, url, userAgent, nil, isMonitoringConcurrentEditError)
+		resp, err := SendRequest(config, "GET", project, url, userAgent, nil, IsMonitoringConcurrentEditError)
 		if err != nil {
 			return fmt.Errorf("unable to list Monitoring Service for data source: %v", err)
 		}

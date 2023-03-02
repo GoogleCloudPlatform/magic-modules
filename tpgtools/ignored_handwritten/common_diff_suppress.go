@@ -28,7 +28,7 @@ func emptyOrDefaultStringSuppress(defaultVal string) schema.SchemaDiffSuppressFu
 	}
 }
 
-func ipCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// The range may be a:
 	// A) single IP address (e.g. 10.2.3.4)
 	// B) CIDR format string (e.g. 10.1.2.0/24)

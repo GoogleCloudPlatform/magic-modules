@@ -190,7 +190,7 @@ func isFingerprintError(err error) (bool, string) {
 // If a permission necessary to provision a resource is created in the same config
 // as the resource itself, the permission may not have propagated by the time terraform
 // attempts to create the resource. This allows those errors to be retried until the timeout expires
-func iamMemberMissing(err error) (bool, string) {
+func IamMemberMissing(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 400 && strings.Contains(gerr.Body, "permission") {
 			return true, "Waiting for IAM member permissions to propagate."
@@ -202,7 +202,7 @@ func iamMemberMissing(err error) (bool, string) {
 // Cloud PubSub returns a 400 error if a topic's parent project was recently created and an
 // organization policy has not propagated.
 // See https://github.com/hashicorp/terraform-provider-google/issues/4349
-func pubsubTopicProjectNotReady(err error) (bool, string) {
+func PubsubTopicProjectNotReady(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 400 && strings.Contains(gerr.Body, "retry this operation") {
 			log.Printf("[DEBUG] Dismissed error as a retryable operation: %s", err)
@@ -258,7 +258,7 @@ func serviceUsageServiceBeingActivated(err error) (bool, string) {
 
 // Retry if Bigquery operation returns a 403 with a specific message for
 // concurrent operations (which are implemented in terms of 'edit quota').
-func isBigqueryIAMQuotaError(err error) (bool, string) {
+func IsBigqueryIAMQuotaError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 403 && strings.Contains(strings.ToLower(gerr.Body), "exceeded rate limits") {
 			return true, "Waiting for Bigquery edit quota to refresh"
@@ -269,7 +269,7 @@ func isBigqueryIAMQuotaError(err error) (bool, string) {
 
 // Retry if Monitoring operation returns a 409 with a specific message for
 // concurrent operations.
-func isMonitoringConcurrentEditError(err error) (bool, string) {
+func IsMonitoringConcurrentEditError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && (strings.Contains(strings.ToLower(gerr.Body), "too many concurrent edits") ||
 			strings.Contains(strings.ToLower(gerr.Body), "could not fulfill the request")) {
@@ -281,7 +281,7 @@ func isMonitoringConcurrentEditError(err error) (bool, string) {
 
 // Retry if filestore operation returns a 429 with a specific message for
 // concurrent operations.
-func isNotFilestoreQuotaError(err error) (bool, string) {
+func IsNotFilestoreQuotaError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 429 {
 			return false, ""
@@ -292,7 +292,7 @@ func isNotFilestoreQuotaError(err error) (bool, string) {
 
 // Retry if App Engine operation returns a 409 with a specific message for
 // concurrent operations, or a 404 indicating p4sa has not yet propagated.
-func isAppEngineRetryableError(err error) (bool, string) {
+func IsAppEngineRetryableError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "operation is already in progress") {
 			return true, "Waiting for other concurrent App Engine changes to finish"
@@ -334,7 +334,7 @@ func isDataflowJobUpdateRetryableError(err error) (bool, string) {
 	return false, ""
 }
 
-func isPeeringOperationInProgress(err error) (bool, string) {
+func IsPeeringOperationInProgress(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 400 && strings.Contains(gerr.Body, "There is a peering operation in progress") {
 			return true, "Waiting peering operation to complete"
@@ -352,7 +352,7 @@ func isCloudFunctionsSourceCodeError(err error) (bool, string) {
 	return false, ""
 }
 
-func datastoreIndex409Contention(err error) (bool, string) {
+func DatastoreIndex409Contention(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && strings.Contains(gerr.Body, "too much contention") {
 			return true, "too much contention - waiting for less activity"
@@ -361,7 +361,7 @@ func datastoreIndex409Contention(err error) (bool, string) {
 	return false, ""
 }
 
-func iapClient409Operation(err error) (bool, string) {
+func IapClient409Operation(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "operation was aborted") {
 			return true, "operation was aborted possibly due to concurrency issue - retrying"
@@ -370,7 +370,7 @@ func iapClient409Operation(err error) (bool, string) {
 	return false, ""
 }
 
-func healthcareDatasetNotInitialized(err error) (bool, string) {
+func HealthcareDatasetNotInitialized(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 404 && strings.Contains(strings.ToLower(gerr.Body), "dataset not initialized") {
 			return true, "dataset not initialized - retrying"
@@ -383,7 +383,7 @@ func healthcareDatasetNotInitialized(err error) (bool, string) {
 // (eg GET and LIST) but not the backing apiserver. When we encounter a 409, we can retry it.
 // Note that due to limitations in MMv1's error_retry_predicates this is currently applied to all requests.
 // We only expect to receive it on create, though.
-func isCloudRunCreationConflict(err error) (bool, string) {
+func IsCloudRunCreationConflict(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 {
 			return true, "saw a 409 - waiting until background deletion completes"

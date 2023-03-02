@@ -44,12 +44,12 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 			ExpectedError:       false,
 			ExpectedTerraformId: "test-project/us-central1/test-key-ring/test-key-name",
 			ExpectedCryptoKeyId: "projects/test-project/locations/us-central1/keyRings/test-key-ring/cryptoKeys/test-key-name",
-			Config:              &Config{Project: "test-project"},
+			Config:              &google.Config{Project: "test-project"},
 		},
 		"id is in location/keyRingName/cryptoKeyName format without project in config": {
 			ImportId:      "us-central1/test-key-ring/test-key-name",
 			ExpectedError: true,
-			Config:        &Config{Project: ""},
+			Config:        &google.Config{Project: ""},
 		},
 	}
 
@@ -99,13 +99,13 @@ func TestCryptoKeyNextRotationCalculation(t *testing.T) {
 func TestCryptoKeyNextRotationCalculation_validation(t *testing.T) {
 	t.Parallel()
 
-	_, errs := validateKmsCryptoKeyRotationPeriod("86399s", "rotation_period")
+	_, errs := google.ValidateKmsCryptoKeyRotationPeriod("86399s", "rotation_period")
 
 	if len(errs) == 0 {
 		t.Fatalf("Periods of less than a day should be invalid")
 	}
 
-	_, errs = validateKmsCryptoKeyRotationPeriod("100000.0000000001s", "rotation_period")
+	_, errs = google.ValidateKmsCryptoKeyRotationPeriod("100000.0000000001s", "rotation_period")
 
 	if len(errs) == 0 {
 		t.Fatalf("Numbers with more than 9 fractional digits are invalid")
@@ -127,7 +127,7 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
-			Meta: &Config{},
+			Meta: &google.Config{},
 		},
 		"key_ring link fmt stays as link fmt": {
 			Attributes: map[string]interface{}{
@@ -136,7 +136,7 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
-			Meta: &Config{},
+			Meta: &google.Config{},
 		},
 		"key_ring without project to link fmt": {
 			Attributes: map[string]interface{}{
@@ -145,14 +145,14 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
-			Meta: &Config{
+			Meta: &google.Config{
 				Project: "my-project",
 			},
 		},
 	}
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			actual, err := resourceKMSCryptoKeyUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
+			actual, err := google.ResourceKMSCryptoKeyUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
 
 			if err != nil {
 				t.Error(err)

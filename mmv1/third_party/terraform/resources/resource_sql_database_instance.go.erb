@@ -594,7 +594,7 @@ is set to true. Defaults to ZONAL.`,
 				Computed:    true,
 				Optional:    true,
 				Description: `Maintenance version.`,
-				DiffSuppressFunc: maintenanceVersionDiffSuppress,
+				DiffSuppressFunc: MaintenanceVersionDiffSuppress,
 			},
 			"available_maintenance_versions": {
 				Type:        schema.TypeList,
@@ -1719,7 +1719,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	return resourceSqlDatabaseInstanceRead(d, meta)
 }
 
-func maintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+func MaintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	// Ignore the database version part and only compare the last part of the maintenance version which represents the release date of the version.
 	if len(old) > 14 && len(new) > 14 && old[len(old)-14:] >= new[len(new)-14:] {
 		log.Printf("[DEBUG] Maintenance version in configuration [%s] is older than current maintenance version [%s] on instance. Suppressing diff", new, old)

@@ -19,12 +19,12 @@ import (
 
 const resourceDataflowJobGoogleProvidedLabelPrefix = "labels.goog-dataflow-provided"
 
-var dataflowTerminatingStatesMap = map[string]struct{}{
+var DataflowTerminatingStatesMap = map[string]struct{}{
 	"JOB_STATE_CANCELLING": {},
 	"JOB_STATE_DRAINING":   {},
 }
 
-var dataflowTerminalStatesMap = map[string]struct{}{
+var DataflowTerminalStatesMap = map[string]struct{}{
 	"JOB_STATE_DONE":      {},
 	"JOB_STATE_FAILED":    {},
 	"JOB_STATE_CANCELLED": {},
@@ -253,9 +253,9 @@ func resourceDataflowJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceD
 // return true if a job is in a terminal state, OR if a job is in a
 // terminating state and skipWait is true
 func shouldStopDataflowJobDeleteQuery(state string, skipWait bool) bool {
-	_, stopQuery := dataflowTerminalStatesMap[state]
+	_, stopQuery := DataflowTerminalStatesMap[state]
 	if !stopQuery && skipWait {
-		_, stopQuery = dataflowTerminatingStatesMap[state]
+		_, stopQuery = DataflowTerminatingStatesMap[state]
 	}
 	return stopQuery
 }

@@ -43,7 +43,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       workforcePoolId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateWorkforcePoolId'
+          function: 'ValidateWorkforcePoolId'
   WorkforcePoolProvider: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       note: |
@@ -90,7 +90,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       providerId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateWorkforcePoolProviderId'
+          function: 'ValidateWorkforcePoolProviderId'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

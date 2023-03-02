@@ -2,11 +2,12 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func resourceContainerNodePoolMigrateState(v int, is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
+func ResourceContainerNodePoolMigrateState(v int, is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
 	if is.Empty() {
 		log.Println("[DEBUG] Empty InstanceState; nothing to migrate.")
 		return is, nil

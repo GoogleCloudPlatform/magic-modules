@@ -8,7 +8,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func resourceGoogleProjectMigrateState(v int, s *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
+func ResourceGoogleProjectMigrateState(v int, s *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
 	if s.Empty() {
 		log.Println("[DEBUG] Empty InstanceState; nothing to migrate.")
 		return s, nil

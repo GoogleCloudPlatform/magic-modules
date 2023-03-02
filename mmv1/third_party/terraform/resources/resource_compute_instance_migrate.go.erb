@@ -16,7 +16,7 @@ import (
 <% end -%>
 )
 
-func resourceComputeInstanceMigrateState(
+func ResourceComputeInstanceMigrateState(
 	v int, is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
 	if is.Empty() {
 		log.Println("[DEBUG] Empty InstanceState; nothing to migrate.")
@@ -453,7 +453,7 @@ func getDiskFromEncryptionKey(instance *compute.Instance, encryptionKey string) 
 }
 
 func getDiskFromAutoDeleteAndImage(config *Config, instance *compute.Instance, allDisks map[string]*compute.Disk, autoDelete bool, image, project, zone string) (*compute.AttachedDisk, error) {
-	img, err := resolveImage(config, project, image, config.UserAgent)
+	img, err := ResolveImage(config, project, image, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}

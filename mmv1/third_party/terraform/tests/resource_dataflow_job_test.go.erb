@@ -440,9 +440,9 @@ func testAccCheckDataflowJobDestroyProducer(t *testing.T) func(s *terraform.Stat
         if err != nil {
           return fmt.Errorf("could not parse attribute: %v", err)
         }
-				_, ok = dataflowTerminalStatesMap[job.CurrentState]
+				_, ok = google.DataflowTerminalStatesMap[job.CurrentState]
         if !ok && skipWait {
-				  _, ok = dataflowTerminatingStatesMap[job.CurrentState]
+				  _, ok = google.DataflowTerminatingStatesMap[job.CurrentState]
         }
         if !ok {
           return fmt.Errorf("Job still present")
@@ -470,9 +470,9 @@ func testAccCheckDataflowJobRegionDestroyProducer(t *testing.T) func(s *terrafor
         if err != nil {
           return fmt.Errorf("could not parse attribute: %v", err)
         }
-				_, ok = dataflowTerminalStatesMap[job.CurrentState]
+				_, ok = google.DataflowTerminalStatesMap[job.CurrentState]
         if !ok && skipWait {
-				  _, ok = dataflowTerminatingStatesMap[job.CurrentState]
+				  _, ok = google.DataflowTerminatingStatesMap[job.CurrentState]
         }
         if !ok {
           return fmt.Errorf("Job still present")
@@ -719,7 +719,7 @@ func testAccDataflowJobHasTempLocation(t *testing.T, res, targetLocation string)
 		if err != nil {
 			return fmt.Errorf("dataflow job does not exist")
 		}
-		sdkPipelineOptions, err := ConvertToMap(job.Environment.SdkPipelineOptions)
+		sdkPipelineOptions, err := google.ConvertToMap(job.Environment.SdkPipelineOptions)
 		if err != nil {
 			return err
 		}

@@ -510,7 +510,7 @@ func TestBillingBudgetStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
 			},
-			Meta: &Config{},
+			Meta: &google.Config{},
 		},
 		"short name stays": {
 			Attributes: map[string]interface{}{
@@ -519,12 +519,12 @@ func TestBillingBudgetStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
 			},
-			Meta: &Config{},
+			Meta: &google.Config{},
 		},
 	}
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			actual, err := resourceBillingBudgetUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
+			actual, err := google.ResourceBillingBudgetUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
 
 			if err != nil {
 				t.Error(err)

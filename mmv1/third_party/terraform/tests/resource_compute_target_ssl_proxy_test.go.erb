@@ -117,7 +117,7 @@ func testAccCheckComputeTargetSslProxyHasSslCertificate(t *testing.T, cert strin
 		certURL := fmt.Sprintf(canonicalSslCertificateTemplate, config.Project, cert)
 
 		for _, sslCertificate := range proxy.SslCertificates {
-			if ConvertSelfLinkToV1(sslCertificate) == certURL {
+			if google.ConvertSelfLinkToV1(sslCertificate) == certURL {
 				return nil
 			}
 		}
@@ -130,7 +130,7 @@ func testAccCheckComputeTargetSslProxyHasCertificateMap(t *testing.T, certificat
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 		wantCertMapURL := fmt.Sprintf(canonicalCertificateMapTemplate, config.Project, certificateMap)
-		gotCertMapURL := ConvertSelfLinkToV1(proxy.CertificateMap)
+		gotCertMapURL := google.ConvertSelfLinkToV1(proxy.CertificateMap)
 		if wantCertMapURL != gotCertMapURL {
 			return fmt.Errorf("certificate map not found: got %q, want %q", gotCertMapURL, wantCertMapURL)
 		}

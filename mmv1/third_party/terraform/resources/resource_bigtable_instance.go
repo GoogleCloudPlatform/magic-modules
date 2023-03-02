@@ -31,7 +31,7 @@ func ResourceBigtableInstance() *schema.Resource {
 		StateUpgraders: []schema.StateUpgrader{
 			{
 				Type:    resourceBigtableInstanceResourceV0().CoreConfigSchema().ImpliedType(),
-				Upgrade: resourceBigtableInstanceUpgradeV0,
+				Upgrade: ResourceBigtableInstanceUpgradeV0,
 				Version: 0,
 			},
 		},

@@ -97,7 +97,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           A unique name for the resource, required by device registry.
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateCloudIotDeviceRegistryID'
+          function: 'ValidateCloudIotDeviceRegistryID'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         # We don't need this field, because it has the same format as the ID
         exclude: true

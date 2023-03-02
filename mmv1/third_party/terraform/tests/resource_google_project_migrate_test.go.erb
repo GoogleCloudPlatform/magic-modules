@@ -23,7 +23,7 @@ func TestGoogleProjectMigrateState(t *testing.T) {
 				"project_id":  "test-project",
 				"skip_delete": "true",
 			},
-			Meta: &Config{},
+			Meta: &google.Config{},
 		},
 	}
 
@@ -32,7 +32,7 @@ func TestGoogleProjectMigrateState(t *testing.T) {
 			ID:         "test-project",
 			Attributes: tc.Attributes,
 		}
-		is, err := resourceGoogleProjectMigrateState(
+		is, err := google.ResourceGoogleProjectMigrateState(
 			tc.StateVersion, is, tc.Meta)
 
 		if err != nil {
@@ -54,7 +54,7 @@ func TestGoogleProjectMigrateState_empty(t *testing.T) {
 	var meta *google.Config
 
 	// should handle nil
-	is, err := resourceGoogleProjectMigrateState(0, is, meta)
+	is, err := google.ResourceGoogleProjectMigrateState(0, is, meta)
 
 	if err != nil {
 		t.Fatalf("err: %#v", err)
@@ -65,7 +65,7 @@ func TestGoogleProjectMigrateState_empty(t *testing.T) {
 
 	// should handle non-nil but empty
 	is = &terraform.InstanceState{}
-	_, err = resourceGoogleProjectMigrateState(0, is, meta)
+	_, err = google.ResourceGoogleProjectMigrateState(0, is, meta)
 
 	if err != nil {
 		t.Fatalf("err: %#v", err)

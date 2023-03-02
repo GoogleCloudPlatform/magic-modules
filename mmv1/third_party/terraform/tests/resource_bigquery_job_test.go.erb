@@ -19,7 +19,7 @@ func TestAccBigQueryJob_withLocation(t *testing.T) {
 	}
 
 	// Need to construct the import ID manually since the state ID will not contain the location
-	importID := fmt.Sprintf("projects/%s/jobs/tf_test_job_query%s/location/%s", getTestProjectFromEnv(), context["random_suffix"], context["location"])
+	importID := fmt.Sprintf("projects/%s/jobs/tf_test_job_query%s/location/%s", acctest.GetTestProjectFromEnv(), context["random_suffix"], context["location"])
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:  func() { acctest.TestAccPreCheck(t) },

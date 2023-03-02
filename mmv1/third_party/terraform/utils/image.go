@@ -32,7 +32,7 @@ var (
 
 // built-in projects to look for images/families containing the string
 // on the left in
-var imageMap = map[string]string{
+var ImageMap = map[string]string{
 	"centos":      "centos-cloud",
 	"coreos":      "coreos-cloud",
 	"debian":      "debian-cloud",
@@ -90,9 +90,9 @@ func sanityTestRegexMatches(expected int, got []string, regexType, name string) 
 //	If not, check if it could be a GCP-provided image, and if it exists. If it does, return it as projects/{project}/global/images/{image}.
 //	If not, check if it's a family in the current project. If it is, return it as global/images/family/{family}.
 //	If not, check if it could be a GCP-provided family, and if it exists. If it does, return it as projects/{project}/global/images/family/{family}
-func resolveImage(c *Config, project, name, userAgent string) (string, error) {
+func ResolveImage(c *Config, project, name, userAgent string) (string, error) {
 	var builtInProject string
-	for k, v := range imageMap {
+	for k, v := range ImageMap {
 		if strings.Contains(name, k) {
 			builtInProject = v
 			break
@@ -204,9 +204,9 @@ func resolveImage(c *Config, project, name, userAgent string) (string, error) {
 	return "", fmt.Errorf("Could not find image or family %s", name)
 }
 
-// resolveImageRefToRelativeURI takes the output of resolveImage and coerces it
+// resolveImageRefToRelativeURI takes the output of ResolveImage and coerces it
 // into a relative URI. In the event that a global/images/IMAGE or
-// global/images/family/FAMILY reference is returned from resolveImage,
+// global/images/family/FAMILY reference is returned from ResolveImage,
 // providerProject will be used as the project for the self_link.
 func resolveImageRefToRelativeURI(providerProject, name string) (string, error) {
 	switch {

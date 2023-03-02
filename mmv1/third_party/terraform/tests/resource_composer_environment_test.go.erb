@@ -53,7 +53,7 @@ func TestComposerImageVersionDiffSuppress(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		if actual := composerImageVersionDiffSuppress("", tc.old, tc.new, nil); actual != tc.expected {
+		if actual := google.ComposerImageVersionDiffSuppress("", tc.old, tc.new, nil); actual != tc.expected {
 			t.Errorf("'%s' failed, expected %v but got %v", tc.name, tc.expected, actual)
 		}
 	}
@@ -975,15 +975,15 @@ func testAccComposerEnvironmentDestroyProducer(t *testing.T) func(s *terraform.S
 			if len(idTokens) != 6 {
 				return fmt.Errorf("Invalid ID %q, expected format projects/{project}/regions/{region}/environments/{environment}", rs.Primary.ID)
 			}
-			envName := &composerEnvironmentName{
+			envName := &google.ComposerEnvironmentName{
 				Project:		 idTokens[1],
 				Region:			idTokens[3],
 				Environment: idTokens[5],
 			}
 
-			_, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.Get(envName.resourceName()).Do()
+			_, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.Get(envName.ResourceName()).Do()
 			if err == nil {
-				return fmt.Errorf("environment %s still exists", envName.resourceName())
+				return fmt.Errorf("environment %s still exists", envName.ResourceName())
 			}
 		}
 
@@ -2377,7 +2377,7 @@ func testSweepComposerEnvironments(config *google.Config, region string) error {
 				allErrors = multierror.Append(allErrors, fmt.Errorf("composer: unable to delete environment %q: %s", e.Name, deleteErr))
 				continue
 			}
-			waitErr := ComposerOperationWaitTime(config, op, config.Project, "Sweeping old test environments", config.UserAgent, 10*time.Minute)
+			waitErr := google.ComposerOperationWaitTime(config, op, config.Project, "Sweeping old test environments", config.UserAgent, 10*time.Minute)
 			if waitErr != nil {
 				allErrors = multierror.Append(allErrors, fmt.Errorf("composer: unable to delete environment %q: %s", e.Name, waitErr))
 			}
@@ -2478,7 +2478,7 @@ func testAccCheckClearComposerEnvironmentFirewalls(t *testing.T, networkName str
 				continue
 			}
 
-			waitErr := ComputeOperationWaitTime(config, op, config.Project,
+			waitErr := google.ComputeOperationWaitTime(config, op, config.Project,
 				"Sweeping test composer environment firewalls", config.UserAgent, 10)
 			if waitErr != nil {
 				allErrors = multierror.Append(allErrors,

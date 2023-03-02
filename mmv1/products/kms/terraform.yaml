@@ -76,7 +76,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       rotationPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'orEmpty(validateKmsCryptoKeyRotationPeriod)'
+          function: 'orEmpty(ValidateKmsCryptoKeyRotationPeriod)'
         update_mask_fields:
           - "rotationPeriod"
           - "nextRotationTime"

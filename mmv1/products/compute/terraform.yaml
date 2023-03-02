@@ -685,7 +685,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       sourceImage: !ruby/object:Overrides::Terraform::PropertyOverride
         name: image
-        diff_suppress_func: 'diskImageDiffSuppress'
+        diff_suppress_func: 'DiskImageDiffSuppress'
         description: |
           The image from which to initialize this disk. This can be
           one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
@@ -2527,7 +2527,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     # Route cannot be added while a peering is on progress on the network
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
-    error_retry_predicates: ["isPeeringOperationInProgress"]
+    error_retry_predicates: ["IsPeeringOperationInProgress"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "route_basic"

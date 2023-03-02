@@ -101,7 +101,7 @@ func resourceComputeProjectMetadataRead(d *schema.ResourceData, meta interface{}
 		return handleNotFoundError(err, d, fmt.Sprintf("Project metadata for project %q", projectId))
 	}
 
-	err = d.Set("metadata", flattenMetadata(project.CommonInstanceMetadata))
+	err = d.Set("metadata", FlattenMetadata(project.CommonInstanceMetadata))
 	if err != nil {
 		return fmt.Errorf("Error setting metadata: %s", err)
 	}

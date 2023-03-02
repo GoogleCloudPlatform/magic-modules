@@ -302,9 +302,9 @@ func testAccDataflowJobHasOption(t *testing.T, res, option, expectedValue string
 			return fmt.Errorf("dataflow job does not exist")
 		}
 
-		sdkPipelineOptions, err := ConvertToMap(job.Environment.SdkPipelineOptions)
+		sdkPipelineOptions, err := google.ConvertToMap(job.Environment.SdkPipelineOptions)
 		if err != nil {
-			return fmt.Errorf("error from ConvertToMap: %s", err)
+			return fmt.Errorf("error from google.ConvertToMap: %s", err)
 		}
 		optionsMap := sdkPipelineOptions["options"].(map[string]interface{})
 

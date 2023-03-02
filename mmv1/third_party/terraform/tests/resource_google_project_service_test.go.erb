@@ -41,7 +41,7 @@ func TestProjectServiceServiceValidateFunc(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		_, errs := validateProjectServiceService(tc.val, "service")
+		_, errs := google.ValidateProjectServiceService(tc.val, "service")
 		if tc.ExpectValidationError && len(errs) == 0 {
 			t.Errorf("bad: %s, %q passed validation but was expected to fail", tn, tc.val)
 		}

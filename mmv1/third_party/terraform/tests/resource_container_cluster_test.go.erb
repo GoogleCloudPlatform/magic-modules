@@ -7396,7 +7396,7 @@ func TestValidateNodePoolAutoConfig(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if err := validateNodePoolAutoConfig(tc.Input); (err != nil) != tc.ExpectError {
+		if err := google.ValidateNodePoolAutoConfig(tc.Input); (err != nil) != tc.ExpectError {
 			t.Fatalf("bad: '%s', expected error: %t, received error: %t", tn, tc.ExpectError, (err != nil))
 		}
 	}

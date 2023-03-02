@@ -209,7 +209,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
     self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
     import_format: ['{{brand}}/identityAwareProxyClients/{{client_id}}']
-    error_retry_predicates: ["iapClient409Operation"]
+    error_retry_predicates: ["IapClient409Operation"]
     # Child of iap brand resource
     skip_sweeper: true
     examples:

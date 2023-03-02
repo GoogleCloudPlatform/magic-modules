@@ -19,7 +19,7 @@ const (
 	GCPolicyModeUnion        = "UNION"
 )
 
-func resourceBigtableGCPolicyCustomizeDiffFunc(diff TerraformResourceDiff) error {
+func ResourceBigtableGCPolicyCustomizeDiffFunc(diff TerraformResourceDiff) error {
 	count := diff.Get("max_age.#").(int)
 	if count < 1 {
 		return nil
@@ -54,7 +54,7 @@ func resourceBigtableGCPolicyCustomizeDiffFunc(diff TerraformResourceDiff) error
 }
 
 func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	return resourceBigtableGCPolicyCustomizeDiffFunc(d)
+	return ResourceBigtableGCPolicyCustomizeDiffFunc(d)
 }
 
 func ResourceBigtableGCPolicy() *schema.Resource {
@@ -289,7 +289,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		maxAge := d.Get("max_age")
 		maxVersion := d.Get("max_version")
 		if d.Get("mode") == "" && len(maxAge.([]interface{})) == 0 && len(maxVersion.([]interface{})) == 0 {
-			gcRuleString, err := gcPolicyToGCRuleString(fi.FullGCPolicy, true)
+			gcRuleString, err := GcPolicyToGCRuleString(fi.FullGCPolicy, true)
 			if err != nil {
 				return err
 			}
@@ -310,7 +310,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 // Recursively convert Bigtable GC policy to JSON format in a map.
-func gcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]interface{}, error) {
+func GcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
 	switch bigtable.GetPolicyType(gc) {
 	case bigtable.PolicyMaxAge:
@@ -344,7 +344,7 @@ func gcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]int
 		result["mode"] = "union"
 		rules := []interface{}{}
 		for _, c := range gc.(bigtable.UnionGCPolicy).Children {
-			gcRuleString, err := gcPolicyToGCRuleString(c, false)
+			gcRuleString, err := GcPolicyToGCRuleString(c, false)
 			if err != nil {
 				return nil, err
 			}
@@ -356,7 +356,7 @@ func gcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]int
 		result["mode"] = "intersection"
 		rules := []interface{}{}
 		for _, c := range gc.(bigtable.IntersectionGCPolicy).Children {
-			gcRuleString, err := gcPolicyToGCRuleString(c, false)
+			gcRuleString, err := GcPolicyToGCRuleString(c, false)
 			if err != nil {
 				return nil, err
 			}
@@ -440,7 +440,7 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 		if err := json.Unmarshal([]byte(gcRules.(string)), &topLevelPolicy); err != nil {
 			return nil, err
 		}
-		return getGCPolicyFromJSON(topLevelPolicy /*isTopLevel=*/, true)
+		return GetGCPolicyFromJSON(topLevelPolicy /*isTopLevel=*/, true)
 	}
 
 	if aok {
@@ -470,7 +470,7 @@ func generateBigtableGCPolicy(d *schema.ResourceData) (bigtable.GCPolicy, error)
 	return policies[0], nil
 }
 
-func getGCPolicyFromJSON(inputPolicy map[string]interface{}, isTopLevel bool) (bigtable.GCPolicy, error) {
+func GetGCPolicyFromJSON(inputPolicy map[string]interface{}, isTopLevel bool) (bigtable.GCPolicy, error) {
 	policy := []bigtable.GCPolicy{}
 
 	if err := validateNestedPolicy(inputPolicy, isTopLevel); err != nil {
@@ -498,7 +498,7 @@ func getGCPolicyFromJSON(inputPolicy map[string]interface{}, isTopLevel bool) (b
 		}
 
 		if childPolicy["mode"] != nil {
-			n, err := getGCPolicyFromJSON(childPolicy /*isTopLevel=*/, false)
+			n, err := GetGCPolicyFromJSON(childPolicy /*isTopLevel=*/, false)
 			if err != nil {
 				return nil, err
 			}

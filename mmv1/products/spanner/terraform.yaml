@@ -55,7 +55,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       versionRetentionPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          function: validateDatabaseRetentionPeriod
+          function: ValidateDatabaseRetentionPeriod
         default_from_api: true
       extraStatements: !ruby/object:Overrides::Terraform::PropertyOverride
         name: ddl

@@ -10,7 +10,7 @@ import (
 )
 
 func TestValidateIAMBetaWorkloadIdentityPoolProviderId(t *testing.T) {
-	x := []StringValidationTestCase{
+	x := []google.StringValidationTestCase{
 		// No errors
 		{TestName: "basic", Value: "foobar"},
 		{TestName: "with numbers", Value: "foobar123"},
@@ -28,7 +28,7 @@ func TestValidateIAMBetaWorkloadIdentityPoolProviderId(t *testing.T) {
 		{TestName: "too long", Value: strings.Repeat("f", 33), ExpectError: true},
 	}
 
-	es := testStringValidationCases(x, validateWorkloadIdentityPoolProviderId)
+	es := google.TestStringValidationCases(x, google.ValidateWorkloadIdentityPoolProviderId)
 	if len(es) > 0 {
 		t.Errorf("Failed to validate WorkloadIdentityPoolProvider names: %v", es)
 	}

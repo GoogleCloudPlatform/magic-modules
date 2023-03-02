@@ -104,7 +104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude_import: true # no unique way to specify
     skip_sweeper: true  # covered by Dataset sweeper
     exclude_validator: true
-    error_retry_predicates: ["isBigqueryIAMQuotaError"]
+    error_retry_predicates: ["IsBigqueryIAMQuotaError"]
     mutex: "{{dataset_id}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples

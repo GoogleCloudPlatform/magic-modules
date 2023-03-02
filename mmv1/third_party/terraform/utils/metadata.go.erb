@@ -123,7 +123,7 @@ func expandComputeMetadata(m map[string]interface{}) []*compute.MetadataItems {
 	return metadata
 }
 
-func flattenMetadataBeta(metadata *compute.Metadata) map[string]string {
+func FlattenMetadataBeta(metadata *compute.Metadata) map[string]string {
 	metadataMap := make(map[string]string)
 	for _, item := range metadata.Items {
 		metadataMap[item.Key] = *item.Value
@@ -131,11 +131,11 @@ func flattenMetadataBeta(metadata *compute.Metadata) map[string]string {
 	return metadataMap
 }
 
-// This function differs from flattenMetadataBeta only in that it takes
+// This function differs from FlattenMetadataBeta only in that it takes
 // compute.metadata rather than compute.metadata as an argument. It should
-// be removed in favour of flattenMetadataBeta if/when all resources using it get
+// be removed in favour of FlattenMetadataBeta if/when all resources using it get
 // beta support.
-func flattenMetadata(metadata *compute.Metadata) map[string]interface{} {
+func FlattenMetadata(metadata *compute.Metadata) map[string]interface{} {
 	metadataMap := make(map[string]interface{})
 	for _, item := range metadata.Items {
 		metadataMap[item.Key] = *item.Value

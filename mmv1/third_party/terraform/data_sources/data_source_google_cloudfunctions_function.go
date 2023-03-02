@@ -33,13 +33,13 @@ func dataSourceGoogleCloudFunctionsFunctionRead(d *schema.ResourceData, meta int
 		return err
 	}
 
-	cloudFuncId := &cloudFunctionId{
+	cloudFuncId := &CloudFunctionId{
 		Project: project,
 		Region:  region,
 		Name:    d.Get("name").(string),
 	}
 
-	d.SetId(cloudFuncId.cloudFunctionId())
+	d.SetId(cloudFuncId.CloudFunctionId())
 
 	err = resourceCloudFunctionsRead(d, meta)
 	if err != nil {

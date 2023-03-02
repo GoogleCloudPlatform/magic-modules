@@ -40,7 +40,7 @@ func ResourceSqlUser() *schema.Resource {
 		},
 
 		SchemaVersion: 1,
-		MigrateState:  resourceSqlUserMigrateState,
+		MigrateState:  ResourceSqlUserMigrateState,
 
 		Schema: map[string]*schema.Schema{
 			"host": {

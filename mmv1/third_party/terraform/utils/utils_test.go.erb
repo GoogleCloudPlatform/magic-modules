@@ -14,6 +14,7 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
 )
 
@@ -97,7 +98,7 @@ func TestIpCidrRangeDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if ipCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if google.IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -478,7 +479,7 @@ func TestServiceAccountFQN(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		config := &Config{Project: tc.project}
+		config := &google.Config{Project: tc.project}
 		d := &schema.ResourceData{}
 		serviceAccountName, err := serviceAccountFQN(tc.serviceAccount, d, config)
 		if err != nil {

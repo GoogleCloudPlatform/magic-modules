@@ -125,7 +125,7 @@ func testAccComputeTargetHttpsProxyHasSslCertificate(t *testing.T, cert string, 
 		certUrl := fmt.Sprintf(canonicalSslCertificateTemplate, config.Project, cert)
 
 		for _, sslCertificate := range proxy.SslCertificates {
-			if ConvertSelfLinkToV1(sslCertificate) == certUrl {
+			if google.ConvertSelfLinkToV1(sslCertificate) == certUrl {
 				return nil
 			}
 		}
@@ -139,7 +139,7 @@ func testAccComputeTargetHttpsProxyHasCertificateMap(t *testing.T, certificateMa
 		config := acctest.GoogleProviderConfig(t)
 		certificateMapUrl := fmt.Sprintf(canonicalCertificateMapTemplate, config.Project, certificateMap)
 
-		if ConvertSelfLinkToV1(proxy.CertificateMap) == certificateMapUrl {
+		if google.ConvertSelfLinkToV1(proxy.CertificateMap) == certificateMapUrl {
 			return nil
 		}
 

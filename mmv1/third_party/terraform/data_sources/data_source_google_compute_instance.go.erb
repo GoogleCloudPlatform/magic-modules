@@ -37,7 +37,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", name))
 	}
 
-	md := flattenMetadataBeta(instance.Metadata)
+	md := FlattenMetadataBeta(instance.Metadata)
 	if err = d.Set("metadata", md); err != nil {
 		return fmt.Errorf("error setting metadata: %s", err)
 	}

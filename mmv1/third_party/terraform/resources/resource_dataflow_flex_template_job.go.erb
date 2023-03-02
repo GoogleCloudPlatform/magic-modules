@@ -216,11 +216,11 @@ func waitForDataflowJobState(d *schema.ResourceData, config *Config, jobID, user
 			log.Printf("[DEBUG] the job with ID %q has state %q.", jobID, state)
 			return nil
 		}
-		_, terminating := dataflowTerminatingStatesMap[state]
+		_, terminating := DataflowTerminatingStatesMap[state]
 		if terminating && targetState == "JOB_STATE_RUNNING" {
 			return resource.NonRetryableError(fmt.Errorf("the job with ID %q is terminating with state %q and cannot reach expected state %q", jobID, state, targetState))
 		}
-		if _, terminated := dataflowTerminalStatesMap[state]; terminated {
+		if _, terminated := DataflowTerminalStatesMap[state]; terminated {
 			return resource.NonRetryableError(fmt.Errorf("the job with ID %q has terminated with state %q instead of expected state %q", jobID, state, targetState))
 		} else {
 			log.Printf("[DEBUG] the job with ID %q has state %q.", jobID, state)

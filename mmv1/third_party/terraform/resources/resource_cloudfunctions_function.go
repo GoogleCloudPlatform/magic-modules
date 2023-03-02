@@ -26,20 +26,20 @@ var allowedVpcConnectorEgressSettings = []string{
 	"PRIVATE_RANGES_ONLY",
 }
 
-type cloudFunctionId struct {
+type CloudFunctionId struct {
 	Project string
 	Region  string
 	Name    string
 }
 
-func (s *cloudFunctionId) cloudFunctionId() string {
+func (s *CloudFunctionId) CloudFunctionId() string {
 	return fmt.Sprintf("projects/%s/locations/%s/functions/%s", s.Project, s.Region, s.Name)
 }
 
 // matches all international lower case letters, number, underscores and dashes.
 var labelKeyRegex = regexp.MustCompile(`^[\p{Ll}0-9_-]+$`)
 
-func labelKeyValidator(val interface{}, key string) (warns []string, errs []error) {
+func LabelKeyValidator(val interface{}, key string) (warns []string, errs []error) {
 	if val == nil {
 		return
 	}
@@ -53,11 +53,11 @@ func labelKeyValidator(val interface{}, key string) (warns []string, errs []erro
 	return
 }
 
-func (s *cloudFunctionId) locationId() string {
+func (s *CloudFunctionId) locationId() string {
 	return fmt.Sprintf("projects/%s/locations/%s", s.Project, s.Region)
 }
 
-func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*cloudFunctionId, error) {
+func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*CloudFunctionId, error) {
 	if err := parseImportId([]string{
 		"projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/functions/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
@@ -65,7 +65,7 @@ func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*cloudFunctio
 	}, d, config); err != nil {
 		return nil, err
 	}
-	return &cloudFunctionId{
+	return &CloudFunctionId{
 		Project: d.Get("project").(string),
 		Region:  d.Get("region").(string),
 		Name:    d.Get("name").(string),
@@ -74,7 +74,7 @@ func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*cloudFunctio
 
 // Differs from validateGCEName because Cloud Functions allow capital letters
 // at start/end
-func validateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []string, errors []error) {
+func ValidateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []string, errors []error) {
 	re := `^(?:[a-zA-Z](?:[-_a-zA-Z0-9]{0,61}[a-zA-Z0-9])?)$`
 	return validateRegexp(re)(v, k)
 }
@@ -109,7 +109,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				Description:  `A user-defined name of the function. Function names must be unique globally.`,
-				ValidateFunc: validateResourceCloudFunctionsFunctionName,
+				ValidateFunc: ValidateResourceCloudFunctionsFunctionName,
 			},
 
 			"build_worker_pool": {
@@ -217,7 +217,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 
 			"labels": {
 				Type:         schema.TypeMap,
-				ValidateFunc: labelKeyValidator,
+				ValidateFunc: LabelKeyValidator,
 				Optional:     true,
 				Description:  `A set of key/value label pairs to assign to the function. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.`,
 			},
@@ -445,14 +445,14 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	cloudFuncId := &cloudFunctionId{
+	cloudFuncId := &CloudFunctionId{
 		Project: project,
 		Region:  region,
 		Name:    d.Get("name").(string),
 	}
 
 	function := &cloudfunctions.CloudFunction{
-		Name:                cloudFuncId.cloudFunctionId(),
+		Name:                cloudFuncId.CloudFunctionId(),
 		Runtime:             d.Get("runtime").(string),
 		ServiceAccountEmail: d.Get("service_account_email").(string),
 		ForceSendFields:     []string{},
@@ -568,7 +568,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		}
 
 		// Name of function should be unique
-		d.SetId(cloudFuncId.cloudFunctionId())
+		d.SetId(cloudFuncId.CloudFunctionId())
 
 		return cloudFunctionsOperationWait(config, op, "Creating CloudFunctions Function", userAgent,
 			d.Timeout(schema.TimeoutCreate))
@@ -592,7 +592,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
+	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.CloudFunctionId()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
 	}
@@ -728,7 +728,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	// The full function needs to supplied in the PATCH call to evaluate some Organization Policies. https://github.com/hashicorp/terraform-provider-google/issues/6603
-	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
+	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.CloudFunctionId()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
 	}
@@ -890,7 +890,7 @@ func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Delete(cloudFuncId.cloudFunctionId()).Do()
+	op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Delete(cloudFuncId.CloudFunctionId()).Do()
 	if err != nil {
 		return err
 	}

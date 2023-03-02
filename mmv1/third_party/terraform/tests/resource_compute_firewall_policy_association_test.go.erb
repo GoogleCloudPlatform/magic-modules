@@ -15,7 +15,7 @@ func TestAccComputeFirewallPolicyAssociation_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"org_name":      fmt.Sprintf("organizations/%s", getTestOrgFromEnv(t)),
+		"org_name":      fmt.Sprintf("organizations/%s", acctest.GetTestOrgFromEnv(t)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

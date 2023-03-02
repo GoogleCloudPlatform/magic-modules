@@ -221,7 +221,7 @@ func (testcase *testUnitBigtableGCPolicyCustomizeDiffTestcase) check(t *testing.
 	d.After["max_age.0.days"] = testcase.newDays
 	d.After["max_age.0.duration"] = testcase.newDuration
 
-	err := resourceBigtableGCPolicyCustomizeDiffFunc(d)
+	err := google.ResourceBigtableGCPolicyCustomizeDiffFunc(d)
 	if err != nil {
 		t.Errorf("error on testcase %s - %v", testcase.testName, err)
 	}
@@ -323,7 +323,7 @@ func TestUnitBigtableGCPolicy_getGCPolicyFromJSON(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error unmarshalling JSON string: %v", err)
 			}
-			got, err := getGCPolicyFromJSON(topLevelPolicy /*isTopLevel=*/, true)
+			got, err := google.GetGCPolicyFromJSON(topLevelPolicy /*isTopLevel=*/, true)
 			if tc.errorExpected && err == nil {
 				t.Fatal("expect error, got nil")
 			} else if !tc.errorExpected && err != nil {
@@ -453,7 +453,7 @@ var testUnitGcPolicyToGCRuleStringTestCases = []testUnitGcPolicyToGCRuleString{
 func TestUnitBigtableGCPolicy_gcPolicyToGCRuleString(t *testing.T) {
 	for _, tc := range testUnitGcPolicyToGCRuleStringTestCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := gcPolicyToGCRuleString(tc.policy, tc.topLevel)
+			got, err := google.GcPolicyToGCRuleString(tc.policy, tc.topLevel)
 			if tc.errorExpected && err == nil {
 				t.Fatal("expect error, got nil")
 			} else if !tc.errorExpected && err != nil {
@@ -539,7 +539,7 @@ func testAccBigtableGCPolicyExists(t *testing.T, n string, compareGcRules bool) 
 				if !compareGcRules {
 					return nil
 				}
-				gcRuleString, err := gcPolicyToGCRuleString(familyInfo.FullGCPolicy /*isTopLevel=*/, true)
+				gcRuleString, err := google.GcPolicyToGCRuleString(familyInfo.FullGCPolicy /*isTopLevel=*/, true)
 				if err != nil {
 					return fmt.Errorf("Error converting GC policy to JSON string: %s", err)
 				}

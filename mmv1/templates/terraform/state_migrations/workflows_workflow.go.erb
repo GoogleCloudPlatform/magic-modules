@@ -80,7 +80,7 @@ Format: projects/{project}/serviceAccounts/{account}.`,
 	}
 }
 
-func resourceWorkflowsWorkflowUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+func ResourceWorkflowsWorkflowUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
 	rawState["name"] = GetResourceNameFromSelfLink(rawState["name"].(string))

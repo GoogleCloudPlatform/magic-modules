@@ -16,7 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"]
-    error_retry_predicates: ["isCloudRunCreationConflict"]
+    error_retry_predicates: ["IsCloudRunCreationConflict"]
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']
@@ -43,7 +43,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       metadata.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        diff_suppress_func: 'domainMappingLabelDiffSuppress'
+        diff_suppress_func: 'DomainMappingLabelDiffSuppress'
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
@@ -64,7 +64,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         Have a look at the Cloud Run Anthos example below.
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
-    error_retry_predicates: ["isCloudRunCreationConflict"]
+    error_retry_predicates: ["IsCloudRunCreationConflict"]
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckKnativeStatusFunc(res)
       actions: ['create', 'update']

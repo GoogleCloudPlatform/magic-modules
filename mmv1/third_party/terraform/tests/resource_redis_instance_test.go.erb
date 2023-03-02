@@ -287,7 +287,7 @@ func TestSecondaryIpDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if secondaryIpDiffSuppress("whatever", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if google.SecondaryIpDiffSuppress("whatever", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}

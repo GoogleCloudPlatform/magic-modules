@@ -36,7 +36,7 @@ func ResourceContainerNodePool() *schema.Resource {
 		},
 
 		SchemaVersion: 1,
-		MigrateState:  resourceContainerNodePoolMigrateState,
+		MigrateState:  ResourceContainerNodePoolMigrateState,
 
 		Importer: &schema.ResourceImporter{
 			State: resourceContainerNodePoolStateImporter,

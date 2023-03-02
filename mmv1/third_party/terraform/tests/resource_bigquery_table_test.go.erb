@@ -387,7 +387,7 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			if err := json.Unmarshal([]byte(tc.New), &b); err != nil {
 				t.Fatalf(fmt.Sprintf("unable to unmarshal new json - %v", err))
 			}
-			if bigQueryTableSchemaDiffSuppress("schema", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			if google.BigQueryTableSchemaDiffSuppress("schema", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 				t.Fatalf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 			}
 		})
@@ -1234,7 +1234,7 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 	if err := json.Unmarshal([]byte(testcase.jsonNew), &new); err != nil {
 		t.Fatalf("unable to unmarshal json - %v", err)
 	}
-	changeable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
+	changeable, err := google.ResourceBigQueryTableSchemaIsChangeable(old, new)
 	if err != nil {
 		t.Errorf("%s failed unexpectedly: %s", testcase.name, err)
 	}
@@ -1250,7 +1250,7 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 	d.Before["schema"] = testcase.jsonOld
 	d.After["schema"] = testcase.jsonNew
 
-	err = resourceBigQueryTableSchemaCustomizeDiffFunc(d)
+	err = google.ResourceBigQueryTableSchemaCustomizeDiffFunc(d)
 	if err != nil {
 		t.Errorf("error on testcase %s - %v", testcase.name, err)
 	}

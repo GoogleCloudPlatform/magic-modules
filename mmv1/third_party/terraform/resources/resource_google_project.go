@@ -45,7 +45,7 @@ func ResourceGoogleProject() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
-		MigrateState: resourceGoogleProjectMigrateState,
+		MigrateState: ResourceGoogleProjectMigrateState,
 
 		Schema: map[string]*schema.Schema{
 			"project_id": {

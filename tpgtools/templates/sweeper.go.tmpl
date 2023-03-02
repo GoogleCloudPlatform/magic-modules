@@ -40,6 +40,11 @@ import(
 	{{- else }}
 		"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
 	{{ end -}}
+	{{- if eq $.VersionMetadata.V "ga" }}
+		"github.com/hashicorp/terraform-provider-google/google"
+	{{- else }}
+		"github.com/hashicorp/terraform-provider-google-beta/google-beta"
+	{{ end -}}
 )
 
 func init() {
@@ -76,7 +81,7 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 		"billing_account":billingId,
 	}
 
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, "", 0)
+	client := google.NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, "", 0)
 	err = client.DeleteAll{{$.DCLTitle}}(context.Background(), {{$.SweeperFunctionArgs}} isDeletable{{$.TitleCaseFullName}})
 	if err != nil {
 		return err

@@ -160,7 +160,7 @@ func TestComputeInstanceTemplate_reorderDisks(t *testing.T) {
 				}
 			}
 
-			result := reorderDisks(tc.ConfigDisks, tc.ApiDisks)
+			result := google.ReorderDisks(tc.ConfigDisks, tc.ApiDisks)
 			if !reflect.DeepEqual(tc.ExpectedResult, result) {
 				t.Errorf("reordering did not match\nExpected: %+v\nActual: %+v", tc.ExpectedResult, result)
 			}
@@ -206,7 +206,7 @@ func TestComputeInstanceTemplate_scratchDiskSizeCustomizeDiff(t *testing.T) {
 				"disk.0.disk_size_gb": tc.DiskSize,
 			},
 		}
-		err := resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(d)
+		err := google.ResourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(d)
 		if tc.ExpectError && err == nil {
 			t.Errorf("%s failed, expected error but was none", tn)
 		}
@@ -1519,7 +1519,7 @@ func testAccCheckComputeInstanceTemplateHasAliasIpRange(instanceTemplate *comput
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instanceTemplate.Properties.NetworkInterfaces {
 			for _, aliasIpRange := range networkInterface.AliasIpRanges {
-				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || ipCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
+				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || google.IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
 					return nil
 				}
 			}

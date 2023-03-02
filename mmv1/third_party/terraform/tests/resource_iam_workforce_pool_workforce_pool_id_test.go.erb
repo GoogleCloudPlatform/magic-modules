@@ -9,7 +9,7 @@ import (
 )
 
 func TestValidateIAMWorkforcePoolWorkforcePoolId(t *testing.T) {
-	x := []StringValidationTestCase{
+	x := []google.StringValidationTestCase{
 		// No errors
 		{TestName: "with numbers", Value: "foobar123"},
 		{TestName: "short", Value: "foobar"},
@@ -28,7 +28,7 @@ func TestValidateIAMWorkforcePoolWorkforcePoolId(t *testing.T) {
 		{TestName: "ends with a hyphen", Value: "foobar-", ExpectError: true},
 	}
 
-	es := testStringValidationCases(x, validateWorkforcePoolId)
+	es := google.TestStringValidationCases(x, google.ValidateWorkforcePoolId)
 	if len(es) > 0 {
 		t.Errorf("Failed to validate WorkforcePool names: %v", es)
 	}
