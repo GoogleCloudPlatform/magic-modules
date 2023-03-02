@@ -37,7 +37,7 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   url := fmt.Sprintf("%s<%= [async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s')-%>", w.Config.<%= product_name -%>BasePath, w.CommonOperationWaiter.Op.Name)
   <% end -%>
 
-  return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  return SendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
 <%  if object.__product.operation_retry -%>
@@ -67,7 +67,7 @@ func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, 
     Might as well just nolint it so we can pass the linter checks.
 -%>
 // nolint: deadcode,unused
-func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+func <%= product_name.camelize() -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
   w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
   if err != nil {
       return err
@@ -79,7 +79,7 @@ func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *
 }
 <% end -%>
 
-func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+func <%= product_name.camelize() -%>OperationWaitTime(config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
   if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
     return nil
