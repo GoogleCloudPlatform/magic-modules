@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Cloudbuildv2
-display_name: Cloud Build V2
+display_name: Cloud Build v2
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
