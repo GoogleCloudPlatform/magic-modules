@@ -21,7 +21,7 @@ if v, ok := d.GetOkExists("connected_repositories"); !isEmptyValue(reflect.Value
     obj = make(map[string]interface{})
     obj["requests"] = requests
 
-    url, err = replaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}/connectedRepositories:batchCreate")
+    url, err = ReplaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}/connectedRepositories:batchCreate")
     if err != nil {
         return err
     }

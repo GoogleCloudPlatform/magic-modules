@@ -89,7 +89,7 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{MonitoringBasePath}}v1/projects/{{project}}/dashboards")
+	url, err := ReplaceVars(d, config, "{{MonitoringBasePath}}v1/projects/{{project}}/dashboards")
 	if err != nil {
 		return err
 	}

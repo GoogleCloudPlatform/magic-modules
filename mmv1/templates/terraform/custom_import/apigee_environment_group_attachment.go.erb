@@ -9,7 +9,7 @@ if err := parseImportId([]string{
 	}
 
 // Replace import id for the resource id
-id, err := replaceVars(d, config, "{{envgroup_id}}/attachments/{{name}}")
+id, err := ReplaceVars(d, config, "{{envgroup_id}}/attachments/{{name}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

@@ -41,7 +41,7 @@ func testSweepCloudIdentityGroup(region string) error {
 	custId := acctest.GetTestCustIdFromEnv(t)
 
 	// Setup variables to replace in list template
-	d := &ResourceDataMock{
+	d := &google.ResourceDataMock{
 		FieldsInSchema: map[string]interface{}{
 			"project":  config.Project,
 			"region":   region,
@@ -56,7 +56,7 @@ func testSweepCloudIdentityGroup(region string) error {
 <% else -%>
 	listTemplate := "https://cloudidentity.googleapis.com/v1/groups?parent={{parent}}"
 <% end -%>
-	listUrl, err := replaceVars(d, config, listTemplate)
+	listUrl, err := google.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
 		return nil
@@ -98,7 +98,7 @@ func testSweepCloudIdentityGroup(region string) error {
 <% else -%>
 		deleteTemplate := "https://cloudidentity.googleapis.com/v1/{{name}}"
 <% end -%>
-		deleteUrl, err := replaceVars(d, config, deleteTemplate)
+		deleteUrl, err := google.ReplaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
 			return nil

@@ -209,7 +209,7 @@ func TestUnitBigtableGCPolicy_customizeDiff(t *testing.T) {
 }
 
 func (testcase *testUnitBigtableGCPolicyCustomizeDiffTestcase) check(t *testing.T) {
-	d := &ResourceDiffMock{
+	d := &google.ResourceDiffMock{
 		Before: map[string]interface{}{},
 		After:  map[string]interface{}{},
 	}

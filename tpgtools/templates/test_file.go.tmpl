@@ -42,9 +42,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	{{- if eq $.VersionMetadata.V "ga" }}
-		"github.com/hashicorp/terraform-provider-google/google"
+		"github.com/hashicorp/terraform-provider-google/google/acctest"
 	{{- else }}
-		"github.com/hashicorp/terraform-provider-google-beta/google-beta"
+		"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
 	{{ end -}}
 )
 
@@ -103,7 +103,7 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 {{- range $s := $.TestSamples -}}
 {{ range $se := $s.EnumerateWithUpdateSamples }}
 func testAcc{{$.PathType}}_{{$se.TestSlug}}(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 {{ $se.GenerateHCL false }}
 `, context)
 }

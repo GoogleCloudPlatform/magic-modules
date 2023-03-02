@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"golang.org/x/oauth2/google"
+	googleoauth2 "golang.org/x/oauth2/google"
 )
 
 const fakeCredentials = `{
@@ -61,7 +61,7 @@ func TestUrlData_Signing(t *testing.T) {
 	}
 
 	// load fake service account credentials
-	cfg, err := google.JWTConfigFromJSON([]byte(fakeCredentials), "")
+	cfg, err := googleoauth2.JWTConfigFromJSON([]byte(fakeCredentials), "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -82,7 +82,7 @@ func TestUrlData_Signing(t *testing.T) {
 
 func TestUrlData_SignedUrl(t *testing.T) {
 	// load fake service account credentials
-	cfg, err := google.JWTConfigFromJSON([]byte(fakeCredentials), "")
+	cfg, err := googleoauth2.JWTConfigFromJSON([]byte(fakeCredentials), "")
 	if err != nil {
 		t.Error(err)
 	}

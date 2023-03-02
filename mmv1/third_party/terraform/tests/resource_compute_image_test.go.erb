@@ -222,8 +222,8 @@ func TestAccComputeImage_imageEncryptionKey(t *testing.T) {
 	t.Parallel()
 
 	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-	kmsKeyName := GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
-	kmsRingName := GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
+	kmsKeyName := google.GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
+	kmsRingName := google.GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },

@@ -279,7 +279,7 @@ func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/serviceAccounts/{{email}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/serviceAccounts/{{email}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

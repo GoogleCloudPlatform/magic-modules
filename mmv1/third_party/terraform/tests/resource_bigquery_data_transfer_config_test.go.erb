@@ -131,7 +131,7 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 	}
 
 	for tn, tc := range cases {
-		d := &ResourceDiffMock{
+		d := &google.ResourceDiffMock{
 			Before: map[string]interface{}{
 				"params":         tc.before["params"],
 				"data_source_id": tc.before["data_source_id"],

@@ -5,7 +5,7 @@ if err := parseImportId([]string{"projects/(?P<project>[^/]+)/instances/(?P<name
 }
 res["project"] = d.Get("project").(string)
 res["name"] = d.Get("name").(string)
-id, err := replaceVars(d, config, "{{project}}/{{name}}")
+id, err := ReplaceVars(d, config, "{{project}}/{{name}}")
 if err != nil {
 	return nil, err
 }

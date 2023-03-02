@@ -140,7 +140,7 @@ func addQueryParams(rawurl string, params map[string]string) (string, error) {
 	return u.String(), nil
 }
 
-func replaceVars(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
+func ReplaceVars(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
 	return replaceVarsRecursive(d, config, linkTmpl, false, 0)
 }
 
@@ -156,7 +156,7 @@ func replaceVarsForId(d TerraformResourceData, config *Config, linkTmpl string) 
 	return replaceVarsRecursive(d, config, linkTmpl, true, 0)
 }
 
-// replaceVars must be done recursively because there are baseUrls that can contain references to regions
+// ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
 // (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
 // substitution as 10+ calls to allow for future use cases.
 func replaceVarsRecursive(d TerraformResourceData, config *Config, linkTmpl string, shorten bool, depth int) (string, error) {
@@ -268,7 +268,7 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 }
 
 // This function isn't a test of transport.go; instead, it is used as an alternative
-// to replaceVars inside tests.
+// to ReplaceVars inside tests.
 func ReplaceVarsForTest(config *Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string

@@ -595,7 +595,7 @@ func TestDnsManagedZoneImport_parseImportId(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		d := &ResourceDataMock{
+		d := &google.ResourceDataMock{
 			FieldsInSchema: make(map[string]interface{}),
 			id:             tc.ImportId,
 		}

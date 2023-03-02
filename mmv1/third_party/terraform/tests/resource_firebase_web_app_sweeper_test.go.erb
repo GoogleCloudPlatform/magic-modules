@@ -41,7 +41,7 @@ func testSweepFirebaseWebApp(region string) error {
 	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
-	d := &ResourceDataMock{
+	d := &google.ResourceDataMock{
 		FieldsInSchema: map[string]interface{}{
 			"project":         config.Project,
 			"region":          region,
@@ -52,7 +52,7 @@ func testSweepFirebaseWebApp(region string) error {
 	}
 
 	listTemplate := strings.Split("https://firebase.googleapis.com/v1beta1/projects/{{project}}/webApps", "?")[0]
-	listUrl, err := replaceVars(d, config, listTemplate)
+	listUrl, err := google.ReplaceVars(d, config, listTemplate)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
 		return nil

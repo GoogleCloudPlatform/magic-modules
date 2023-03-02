@@ -35,6 +35,11 @@ import(
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
+	{{- if eq $.VersionMetadata.V "ga" }}
+		"github.com/hashicorp/terraform-provider-google/google/acctest"
+	{{- else }}
+		"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+	{{ end -}}
 )
 
 func init() {

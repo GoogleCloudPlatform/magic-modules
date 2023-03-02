@@ -6,7 +6,7 @@ for i, field := range updateMask {
     }
 }
 // reconstruct url
-url, err = replaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}")
+url, err = ReplaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}")
 if err != nil {
     return err
 }

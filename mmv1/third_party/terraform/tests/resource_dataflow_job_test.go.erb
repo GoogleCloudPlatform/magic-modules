@@ -542,7 +542,7 @@ func testAccDataflowJobHasNetwork(t *testing.T, res, expected string) resource.T
 			return fmt.Errorf("no network interfaces in template properties: %+v", instanceTmpl.Properties)
 		}
 		actual := instanceTmpl.Properties.NetworkInterfaces[0].Network
-		if GetResourceNameFromSelfLink(actual) != GetResourceNameFromSelfLink(expected) {
+		if google.GetResourceNameFromSelfLink(actual) != google.GetResourceNameFromSelfLink(expected) {
 			return fmt.Errorf("network mismatch: %s != %s", actual, expected)
 		}
 		return nil
@@ -559,7 +559,7 @@ func testAccDataflowJobHasSubnetwork(t *testing.T, res, expected string) resourc
 			return fmt.Errorf("no network interfaces in template properties: %+v", instanceTmpl.Properties)
 		}
 		actual := instanceTmpl.Properties.NetworkInterfaces[0].Subnetwork
-		if GetResourceNameFromSelfLink(actual) != GetResourceNameFromSelfLink(expected) {
+		if google.GetResourceNameFromSelfLink(actual) != google.GetResourceNameFromSelfLink(expected) {
 			return fmt.Errorf("subnetwork mismatch: %s != %s", actual, expected)
 		}
 		return nil

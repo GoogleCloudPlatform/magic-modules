@@ -198,7 +198,7 @@ func TestComputeInstanceTemplate_scratchDiskSizeCustomizeDiff(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		d := &ResourceDiffMock{
+		d := &google.ResourceDiffMock{
 			After: map[string]interface{}{
 				"disk.#":              1,
 				"disk.0.type":         tc.Typee,
@@ -1207,8 +1207,8 @@ func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-	kmsKeyName := GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
-	kmsRingName := GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
+	kmsKeyName := google.GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
+	kmsRingName := google.GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },
@@ -1237,8 +1237,8 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-	kmsKeyName := GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
-	kmsRingName := GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
+	kmsKeyName := google.GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
+	kmsRingName := google.GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.TestAccPreCheck(t) },

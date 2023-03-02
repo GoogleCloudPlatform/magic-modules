@@ -90,7 +90,7 @@ func dataSourceGoogleFirebaseWebappConfigRead(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{FirebaseBasePath}}projects/{{project}}/webApps/{{web_app_id}}/config")
+	url, err := ReplaceVars(d, config, "{{FirebaseBasePath}}projects/{{project}}/webApps/{{web_app_id}}/config")
 	if err != nil {
 		return err
 	}

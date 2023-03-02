@@ -159,7 +159,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error creating table. %s", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -344,7 +344,7 @@ func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

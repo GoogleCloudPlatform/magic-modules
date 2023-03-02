@@ -51,9 +51,9 @@ func TestAccEventarcChannel_cryptoKeyUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"region":        region,
 		"project_name":  acctest.GetTestProjectFromEnv(),
-		"key_ring":      GetResourceNameFromSelfLink(key1.KeyRing.Name),
-		"key1":          GetResourceNameFromSelfLink(key1.CryptoKey.Name),
-		"key2":          GetResourceNameFromSelfLink(key2.CryptoKey.Name),
+		"key_ring":      google.GetResourceNameFromSelfLink(key1.KeyRing.Name),
+		"key1":          google.GetResourceNameFromSelfLink(key1.CryptoKey.Name),
+		"key2":          google.GetResourceNameFromSelfLink(key2.CryptoKey.Name),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

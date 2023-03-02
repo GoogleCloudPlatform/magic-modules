@@ -1,9 +1,6 @@
 package google
 
 import (
-	"reflect"
-	"regexp"
-	"strings"
 	"testing"
 )
 
@@ -116,7 +113,7 @@ func TestReplaceVars(t *testing.T) {
 			config = &Config{}
 		}
 
-		v, err := replaceVars(d, config, tc.Template)
+		v, err := ReplaceVars(d, config, tc.Template)
 
 		if err != nil {
 			if !tc.ExpectedError {

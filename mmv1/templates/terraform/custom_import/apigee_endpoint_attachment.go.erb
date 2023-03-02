@@ -23,7 +23,7 @@ if len(nameParts) == 4 {
 }
 
 // Replace import id for the resource id
-id, err := replaceVars(d, config, "{{name}}")
+id, err := ReplaceVars(d, config, "{{name}}")
 if err != nil {
         return nil, fmt.Errorf("Error constructing id: %s", err)
 }

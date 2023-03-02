@@ -433,7 +433,7 @@ func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncForceNew(t *testing.T
 	}
 
 	for tn, tc := range cases {
-		d := &ResourceDiffMock{
+		d := &google.ResourceDiffMock{
 			Before: map[string]interface{}{
 				"ddl": tc.before,
 			},

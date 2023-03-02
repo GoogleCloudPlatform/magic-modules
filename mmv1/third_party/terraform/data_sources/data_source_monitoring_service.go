@@ -47,13 +47,13 @@ func dataSourceMonitoringServiceTypeReadFromList(listFilter string, typeStateSet
 			return err
 		}
 
-		filters, err := replaceVars(d, config, listFilter)
+		filters, err := ReplaceVars(d, config, listFilter)
 		if err != nil {
 			return err
 		}
 
 		listUrlTmpl := "{{MonitoringBasePath}}v3/projects/{{project}}/services?filter=" + neturl.QueryEscape(filters)
-		url, err := replaceVars(d, config, listUrlTmpl)
+		url, err := ReplaceVars(d, config, listUrlTmpl)
 		if err != nil {
 			return err
 		}

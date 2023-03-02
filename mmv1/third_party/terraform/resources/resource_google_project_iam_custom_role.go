@@ -238,7 +238,7 @@ func resourceGoogleProjectIamCustomRoleImport(d *schema.ResourceData, meta inter
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/roles/{{role_id}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/roles/{{role_id}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

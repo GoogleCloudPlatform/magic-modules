@@ -385,7 +385,7 @@ func testCheckDeploymentServiceAccountExists(accountId string, config *google.Co
 	_, err = config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Get(
 		fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", acctest.GetTestProjectFromEnv(), accountId, acctest.GetTestProjectFromEnv())).Do()
 	if err != nil {
-		if IsGoogleApiErrorWithCode(err, 404) {
+		if google.IsGoogleApiErrorWithCode(err, 404) {
 			return false, nil
 		}
 		return false, fmt.Errorf("unexpected error while trying to confirm deployment service account %q exists: %v", accountId, err)
@@ -404,7 +404,7 @@ func testAccCheckDeploymentManagerDestroyInvalidDeployment(t *testing.T, deploym
 		config := acctest.GoogleProviderConfig(t)
 		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.DeploymentManagerBasePath, acctest.GetTestProjectFromEnv(), deploymentName)
 		_, err := google.SendRequest(config, "GET", "", url, config.UserAgent, nil)
-		if !IsGoogleApiErrorWithCode(err, 404) {
+		if !google.IsGoogleApiErrorWithCode(err, 404) {
 			return fmt.Errorf("Unexpected error while trying to confirm DeploymentManagerDeployment deleted: %v", err)
 		}
 		if err == nil {

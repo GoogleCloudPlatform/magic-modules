@@ -9,7 +9,7 @@ if err := parseImportId([]string{
 }
 
 // Replace import id for the resource id
-id, err := replaceVars(d, config, "{{parent}}/flows/{{name}}")
+id, err := ReplaceVars(d, config, "{{parent}}/flows/{{name}}")
 if err != nil {
     return nil, fmt.Errorf("Error constructing id: %s", err)
 }

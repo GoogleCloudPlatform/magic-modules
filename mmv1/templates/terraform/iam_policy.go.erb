@@ -269,7 +269,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 <% string_qualifiers = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}")).map{|param| "u.#{param.camelize(:lower)}"}.join(', ') -%>
 func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) (string, error) {
 	urlTemplate := fmt.Sprintf("{{<%= object.__product.name -%>BasePath}}%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
-  url, err := replaceVars(u.d, u.Config, urlTemplate)
+  url, err := ReplaceVars(u.d, u.Config, urlTemplate)
   if err != nil {
       return "", err
   }
