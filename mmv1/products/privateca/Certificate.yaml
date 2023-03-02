@@ -413,6 +413,88 @@ properties:
                       description: |
                         An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
                       output: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'nameConstraints'
+            description: |
+              Describes the X.509 name constraints extension.
+            output: true
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'critical'
+              description: Indicates whether or not the name constraints are marked critical.
+              output: true
+            - !ruby/object:Api::Type::Array
+              name: 'permittedDnsNames'
+              description: |
+                Contains permitted DNS names. Any DNS name that can be
+                constructed by simply adding zero or more labels to
+                the left-hand side of the name satisfies the name constraint.
+                For example, `example.com`, `www.example.com`, `www.sub.example.com`
+                would satisfy `example.com` while `example1.com` does not.
+              output: true
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'excludedDnsNames'
+              description: |
+                Contains excluded DNS names. Any DNS name that can be
+                constructed by simply adding zero or more labels to
+                the left-hand side of the name satisfies the name constraint.
+                For example, `example.com`, `www.example.com`, `www.sub.example.com`
+                would satisfy `example.com` while `example1.com` does not.
+              output: true
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'permittedIpRanges'
+              description: |
+                Contains the permitted IP ranges. For IPv4 addresses, the ranges
+                are expressed using CIDR notation as specified in RFC 4632.
+                For IPv6 addresses, the ranges are expressed in similar encoding as IPv4
+                addresses.
+              output: true
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'excludedIpRanges'
+              description: |
+                Contains the excluded IP ranges. For IPv4 addresses, the ranges
+                are expressed using CIDR notation as specified in RFC 4632.
+                For IPv6 addresses, the ranges are expressed in similar encoding as IPv4
+                addresses.
+              output: true
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'permittedEmailAddresses'
+              description: |
+                Contains the permitted email addresses. The value can be a particular
+                email address, a hostname to indicate all email addresses on that host or
+                a domain with a leading period (e.g. `.example.com`) to indicate
+                all email addresses in that domain.
+              output: true
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'excludedEmailAddresses'
+              description: |
+                Contains the excluded email addresses. The value can be a particular
+                email address, a hostname to indicate all email addresses on that host or
+                a domain with a leading period (e.g. `.example.com`) to indicate
+                all email addresses in that domain.
+              output: true
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'permittedUris'
+              description: |
+                Contains the permitted URIs that apply to the host part of the name.
+                The value can be a hostname or a domain with a
+                leading period (like `.example.com`)
+              output: true
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'excludedUris'
+              description: |
+                Contains the excluded URIs that apply to the host part of the name.
+                The value can be a hostname or a domain with a
+                leading period (like `.example.com`)
+              output: true
+              item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'configValues'
         deprecation_message: Deprecated in favor of `x509_description`.
@@ -864,6 +946,88 @@ properties:
                     description: |
                       An ObjectId specifies an object identifier (OID). These provide context and describe types in ASN.1 messages.
                     immutable: true
+        - !ruby/object:Api::Type::NestedObject
+          name: 'nameConstraints'
+          description: |
+            Describes the X.509 name constraints extension.
+          immutable: true
+          properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'critical'
+            description: Indicates whether or not the name constraints are marked critical.
+            immutable: true
+          - !ruby/object:Api::Type::Array
+            name: 'permittedDnsNames'
+            description: |
+              Contains permitted DNS names. Any DNS name that can be
+              constructed by simply adding zero or more labels to
+              the left-hand side of the name satisfies the name constraint.
+              For example, `example.com`, `www.example.com`, `www.sub.example.com`
+              would satisfy `example.com` while `example1.com` does not.
+            immutable: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'excludedDnsNames'
+            description: |
+              Contains excluded DNS names. Any DNS name that can be
+              constructed by simply adding zero or more labels to
+              the left-hand side of the name satisfies the name constraint.
+              For example, `example.com`, `www.example.com`, `www.sub.example.com`
+              would satisfy `example.com` while `example1.com` does not.
+            immutable: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'permittedIpRanges'
+            description: |
+              Contains the permitted IP ranges. For IPv4 addresses, the ranges
+              are expressed using CIDR notation as specified in RFC 4632.
+              For IPv6 addresses, the ranges are expressed in similar encoding as IPv4
+              addresses.
+            immutable: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'excludedIpRanges'
+            description: |
+              Contains the excluded IP ranges. For IPv4 addresses, the ranges
+              are expressed using CIDR notation as specified in RFC 4632.
+              For IPv6 addresses, the ranges are expressed in similar encoding as IPv4
+              addresses.
+            immutable: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'permittedEmailAddresses'
+            description: |
+              Contains the permitted email addresses. The value can be a particular
+              email address, a hostname to indicate all email addresses on that host or
+              a domain with a leading period (e.g. `.example.com`) to indicate
+              all email addresses in that domain.
+            immutable: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'excludedEmailAddresses'
+            description: |
+              Contains the excluded email addresses. The value can be a particular
+              email address, a hostname to indicate all email addresses on that host or
+              a domain with a leading period (e.g. `.example.com`) to indicate
+              all email addresses in that domain.
+            immutable: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'permittedUris'
+            description: |
+              Contains the permitted URIs that apply to the host part of the name.
+              The value can be a hostname or a domain with a
+              leading period (like `.example.com`)
+            immutable: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'excludedUris'
+            description: |
+              Contains the excluded URIs that apply to the host part of the name.
+              The value can be a hostname or a domain with a
+              leading period (like `.example.com`)
+            immutable: true
+            item_type: Api::Type::String
     - !ruby/object:Api::Type::NestedObject
       name: 'subjectConfig'
       description: |
