@@ -1458,7 +1458,7 @@ func testAccCheckComputeInstanceTemplateMaintenanceInterval(instanceTemplate *co
 <% unless version == "ga" -%>
 func testAccCheckComputeInstanceTemplateMaintenanceIntervalNil(instanceTemplate *compute.InstanceTemplate) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if instanceTemplate.Properties.Scheduling.MaintenanceInterval != nil {
+		if instanceTemplate.Properties.Scheduling.MaintenanceInterval != "" {
 			return fmt.Errorf("Expected maintenance interval value nil, got %v", instanceTemplate.Properties.Scheduling.MaintenanceInterval)
 		}
 		return nil
