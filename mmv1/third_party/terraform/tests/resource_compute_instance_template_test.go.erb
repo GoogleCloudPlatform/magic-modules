@@ -298,6 +298,7 @@ func TestAccComputeInstanceTemplate_preemptible(t *testing.T) {
 	})
 }
 
+<% unless version == "ga" -%>
 func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 	t.Parallel()
 
@@ -321,9 +322,18 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccComputeInstanceTemplate_basic(randString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateMaintenanceIntervalNil(&instanceTemplate),
+				),
+			},
 		},
 	})
 }
+<% end -%>
 
 func TestAccComputeInstanceTemplate_IP(t *testing.T) {
 	t.Parallel()
@@ -1434,6 +1444,7 @@ func testAccCheckComputeInstanceTemplatePreemptible(instanceTemplate *compute.In
 	}
 }
 
+<% unless version == "ga" -%>
 func testAccCheckComputeInstanceTemplateMaintenanceInterval(instanceTemplate *compute.InstanceTemplate, maintenance_interval string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instanceTemplate.Properties.Scheduling.MaintenanceInterval != maintenance_interval {
@@ -1442,6 +1453,18 @@ func testAccCheckComputeInstanceTemplateMaintenanceInterval(instanceTemplate *co
 		return nil
 	}
 }
+<% end -%>
+
+<% unless version == "ga" -%>
+func testAccCheckComputeInstanceTemplateMaintenanceIntervalNil(instanceTemplate *compute.InstanceTemplate) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instanceTemplate.Properties.Scheduling.MaintenanceInterval != nil {
+			return fmt.Errorf("Expected maintenance interval value nil, got %v", instanceTemplate.Properties.Scheduling.MaintenanceInterval)
+		}
+		return nil
+	}
+}
+<% end -%>
 
 func testAccCheckComputeInstanceTemplateProvisioningModel(instanceTemplate *compute.InstanceTemplate, provisioning_model string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -1829,6 +1852,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeInstanceTemplate_maintenance_interval(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1872,6 +1896,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
+<% end -%>
 
 func testAccComputeInstanceTemplate_ip(suffix string) string {
 	return fmt.Sprintf(`
