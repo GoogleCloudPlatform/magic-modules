@@ -338,13 +338,13 @@ func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 
 func testAccProviderBasePath_setBasePath(endpoint, name string) string {
 	return fmt.Sprintf(`
-provider "google<%= "-" + version unless version == 'ga'  -%>" {
+provider "google" {
   alias                   = "compute_custom_endpoint"
   compute_custom_endpoint = "%s"
 }
 
 resource "google_compute_address" "default" {
-  provider = google<%= "-" + version unless version == 'ga'  -%>.compute_custom_endpoint
+  provider = google.compute_custom_endpoint
   name     = "tf-test-address-%s"
 }`, endpoint, name)
 }
@@ -375,7 +375,7 @@ func testAccProviderUserProjectOverride_step2(accessToken, pid string, override 
 %s
 
 resource "google_pubsub_topic" "project-2-topic" {
-	provider = google<%= "-" + version unless version == 'ga'  -%>.project-1-token
+	provider = google.project-1-token
 	project  = "%s-2"
 
 	name = "%s"
@@ -388,7 +388,7 @@ resource "google_pubsub_topic" "project-2-topic" {
 
 func testAccProviderUserProjectOverride_step3(accessToken string, override bool) string {
 	return fmt.Sprintf(`
-provider "google<%= "-" + version unless version == 'ga'  -%>" {
+provider "google" {
 	alias  = "project-1-token"
 	access_token = "%s"
 	user_project_override = %v
@@ -405,7 +405,7 @@ func testAccProviderIndirectUserProjectOverride_step2(pid, accessToken string, o
 %s
 
 resource "google_kms_key_ring" "project-2-keyring" {
-	provider = google<%= "-" + version unless version == 'ga'  -%>.project-1-token
+	provider = google.project-1-token
 	project  = "%s-2"
 
 	name     = "%s"
@@ -413,13 +413,13 @@ resource "google_kms_key_ring" "project-2-keyring" {
 }
 
 resource "google_kms_crypto_key" "project-2-key" {
-	provider = google<%= "-" + version unless version == 'ga'  -%>.project-1-token
+	provider = google.project-1-token
 	name     = "%s"
 	key_ring = google_kms_key_ring.project-2-keyring.id
 }
 
 data "google_kms_secret_ciphertext" "project-2-ciphertext" {
-	provider   = google<%= "-" + version unless version == 'ga'  -%>.project-1-token
+	provider   = google.project-1-token
 	crypto_key = google_kms_crypto_key.project-2-key.id
 	plaintext  = "my-secret"
 }
@@ -428,7 +428,7 @@ data "google_kms_secret_ciphertext" "project-2-ciphertext" {
 
 func testAccProviderIndirectUserProjectOverride_step3(accessToken string, override bool) string {
 	return fmt.Sprintf(`
-provider "google<%= "-" + version unless version == 'ga'  -%>" {
+provider "google" {
 	alias = "project-1-token"
 
 	access_token          = "%s"
