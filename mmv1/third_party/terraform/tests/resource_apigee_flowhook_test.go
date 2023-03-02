@@ -151,7 +151,7 @@ func testAccCheckApigeeFlowhookDestroyProducer(t *testing.T) func(s *terraform.S
 			}
 			fmt.Printf("testAccCheckApigeeFlowhookDestroyProducer, url %s", url)
 			res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
-			//Flowhooks always exist, we treat the binding as a removable resource, thus we check if the sharedFlow field to detect sharedflow attachment
+			// Flowhooks always exist, we treat the binding as a removable resource, thus we check if the sharedFlow field to detect sharedflow attachment
 			if err == nil && res != nil && res["sharedFlow"] != nil {
 				return fmt.Errorf("Flowhook still has an attachment at %s", url)
 			}
