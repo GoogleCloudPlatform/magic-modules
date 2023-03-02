@@ -1,7 +1,7 @@
 ---
 subcategory: "Apigee"
 description: |-
-  Represents a sharedflow attacehment to a flowhook point.
+  Represents a sharedflow attachment to a flowhook point.
 ---
 
 # google\_apigee\_flowhook
