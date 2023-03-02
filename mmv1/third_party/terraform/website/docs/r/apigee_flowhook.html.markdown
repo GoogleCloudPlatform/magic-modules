@@ -6,7 +6,7 @@ description: |-
 
 # google\_apigee\_flowhook
 
-Represents a sharedflow attacehment to a flowhook point.
+Represents a sharedflow attachment to a flowhook point.
 
 
 To get more information about Flowhook, see:
