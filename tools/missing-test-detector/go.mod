@@ -2,9 +2,9 @@ module github.com/trodge/magic-modules/tools/missing-test-detector
 
 go 1.18
 
-replace google/provider/old => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20220909235129-920d87b9bba0
+replace google/provider/old => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20230228191546-cd4e339e0ce6
 
-replace google/provider/new => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20230224210646-05a8ffbed936
+replace google/provider/new => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20230301204602-e72330247c9a
 
 require (
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
@@ -22,7 +22,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.2 // indirect
 	cloud.google.com/go/iam v0.8.0 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
-	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.31.0 // indirect
+	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.34.0 // indirect
 	github.com/agext/levenshtein v1.2.2 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
