@@ -86,10 +86,3 @@ properties:
     name: 'renewalPlan'
     description: |
       The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable for ANNUAL and TRIAL commitments.
-  - !ruby/object:Api::Type::Boolean
-    name: 'multiRegionAuxiliary'
-    input: true
-    description: |
-      Applicable only for commitments located within one of the BigQuery multi-regions (US or EU).
-
-      If set to true, this commitment is placed in the organization's secondary region which is designated for disaster recovery purposes. If false, this commitment is placed in the organization's default region.
