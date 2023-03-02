@@ -25,6 +25,18 @@
 #     cd helloworld
 #     gcloud app deploy --project=<project>
 #     ```
+#   - Create repo for "Hello World" function: https://cloud.google.com/source-repositories/docs/deploy-cloud-functions-version-control
+#     ```
+#     gcloud source repos create cloudfunctions-test-do-not-delete --project=<project>
+#     gcloud source repos clone cloudfunctions-test-do-not-delete --project=<project>
+#     cd cloudfunctions-test-do-not-delete
+#     curl https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/third_party/terraform/utils/test-fixtures/cloudfunctions/http_trigger.js > index.js
+#     git add .
+#     git commit -m "Initial commit"
+#     git push origin main
+#     git checkout -b master
+#     git push origin master
+#     ```
 #   - Enable Multi-Tenancy
 #     ```
 #     curl --header "Authorization: Bearer $(gcloud auth print-access-token -q)" --header "X-Goog-User-Project: <project>" -X POST https://identitytoolkit.googleapis.com/v2/projects/<project>/identityPlatform:initializeAuth
