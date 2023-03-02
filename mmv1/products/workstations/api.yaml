@@ -185,6 +185,15 @@ objects:
       guides:
         "Workstations": "https://cloud.google.com/workstations/docs/"
       api: "https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs/create"
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ":"
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: workstationConfig
+      import_format:
+        [
+          "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}",
+        ]
+      min_version: beta
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: "name"
@@ -460,6 +469,15 @@ objects:
       guides:
         "Workstations": "https://cloud.google.com/workstations/docs/"
       api: "https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs.workstations"
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ":"
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: workstation
+      import_format:
+        [
+          "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations/{{workstation_id}}",
+        ]
+      min_version: beta
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: "name"
