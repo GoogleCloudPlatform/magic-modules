@@ -24,4 +24,5 @@ func main() {
 			fmt.Printf("Untested fields: %v\n", missingTestInfo.UntestedFields)
 		}
 	}
+	fmt.Print("This is a line with no purpose")
 }
