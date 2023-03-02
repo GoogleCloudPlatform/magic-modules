@@ -418,16 +418,20 @@ func removeContainerServiceAgentRoleFromContainerEngineRobot(t *testing.T, proje
 	}
 }
 
-// BootstrapProject will create or get a project named "<projectIDPrefix><testProjectFromEnv>"
-// that will persist across test runs. The reason for the naming is to isolate
-// bootstrapped projects by test environment.
+// BootstrapProject will create or get a project named
+// "<projectIDPrefix><projectIDSuffix>" that will persist across test runs,
+// where projectIDSuffix is based off of getTestProjectFromEnv(). The reason
+// for the naming is to isolate bootstrapped projects by test environment.
+// Given the existing projects being used by our team, the prefix provided to
+// this function can be no longer than 18 characters.
 func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, services []string) *cloudresourcemanager.Project {
 	config := BootstrapConfig(t)
 	if config == nil {
 		return nil
 	}
 
-	projectID := fmt.Sprintf("%s%s", projectIDPrefix, getTestProjectFromEnv())
+	projectIDSuffix = strings.Replace(getTestProjectFromEnv(), "ci-test-project-", "", 1)
+	projectID := projectIDPrefix + projectIDSuffix
 
 	crmClient := config.NewResourceManagerClient(config.UserAgent)
 
