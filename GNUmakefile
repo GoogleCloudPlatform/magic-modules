@@ -72,8 +72,17 @@ tpgtools:
 
 validator:
 	cd mmv1;\
+		rm -rf third_party/validator/tests/source;\
+		cp -rf third_party/validator/tests/tfv-source third_party/validator/tests/source;\
 		bundle; \
 		bundle exec compiler.rb -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
+
+tgc:
+	cd mmv1;\
+		rm -rf third_party/validator/tests/source;\
+		cp -rf third_party/validator/tests/tgc-source third_party/validator/tests/source;\
+		bundle;\
+		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);\
 
 test:
 	cd mmv1; \

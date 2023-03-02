@@ -336,9 +336,7 @@ module Provider
     end
 
     def generate_resource_tests(pwd, data)
-      product_whitelist = [
-        'cloudrun'
-      ]
+      product_whitelist = []
 
       return unless product_whitelist.include?(data.product.name.downcase)
       return if data.object.examples
