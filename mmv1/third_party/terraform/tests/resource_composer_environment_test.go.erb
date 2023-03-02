@@ -973,7 +973,7 @@ func grantEncrypterDecrypterRoleToServiceAgents(t *testing.T) {
 	}
 	if policyChanged := BootstrapAllPSARole(t, serviceAgents, "roles/cloudkms.cryptoKeyEncrypterDecrypter"); policyChanged {
 		// Fail this test run because the policy needs time to reconcile.
-		t.Fatalf("Granted crypto key encrypter/decrypter role for %v in test project's IAM policy. Retry the test in a few minutes.", serviceAgents)
+		t.Fatalf("Granted crypto key encrypter/decrypter role for service agents %v in test project's IAM policy. Retry the test in a few minutes.", serviceAgents)
 	}
 }
 
