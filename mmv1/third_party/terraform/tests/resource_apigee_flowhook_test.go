@@ -149,7 +149,6 @@ func testAccCheckApigeeFlowhookDestroyProducer(t *testing.T) func(s *terraform.S
 			if config.BillingProject != "" {
 				billingProject = config.BillingProject
 			}
-			fmt.Printf("testAccCheckApigeeFlowhookDestroyProducer, url %s", url)
 			res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
 			// Flowhooks always exist, we treat the binding as a removable resource, thus we check if the sharedFlow field to detect sharedflow attachment
 			if err == nil && res != nil && res["sharedFlow"] != nil {
