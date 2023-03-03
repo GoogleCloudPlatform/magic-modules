@@ -44,7 +44,7 @@ func ResourceGoogleProjectOrganizationPolicy() *schema.Resource {
 func resourceProjectOrgPolicyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+):constraints/(?P<constraint>[^/]+)",
 		"(?P<project>[^/]+):constraints/(?P<constraint>[^/]+)",
 		"(?P<project>[^/]+):(?P<constraint>[^/]+)"},
@@ -85,7 +85,7 @@ func resourceGoogleProjectOrganizationPolicyRead(d *schema.ResourceData, meta in
 	var policy *cloudresourcemanager.OrgPolicy
 	err = RetryTimeDuration(func() (readErr error) {
 		policy, readErr = config.NewResourceManagerClient(userAgent).Projects.GetOrgPolicy(project, &cloudresourcemanager.GetOrgPolicyRequest{
-			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
+			Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return readErr
 	}, d.Timeout(schema.TimeoutRead))
@@ -140,7 +140,7 @@ func resourceGoogleProjectOrganizationPolicyDelete(d *schema.ResourceData, meta 
 
 	return RetryTimeDuration(func() error {
 		_, err := config.NewResourceManagerClient(userAgent).Projects.ClearOrgPolicy(project, &cloudresourcemanager.ClearOrgPolicyRequest{
-			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
+			Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return err
 	}, d.Timeout(schema.TimeoutDelete))
@@ -168,7 +168,7 @@ func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) erro
 	return RetryTimeDuration(func() error {
 		_, err := config.NewResourceManagerClient(userAgent).Projects.SetOrgPolicy(project, &cloudresourcemanager.SetOrgPolicyRequest{
 			Policy: &cloudresourcemanager.OrgPolicy{
-				Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
+				Constraint:     CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 				BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),
 				ListPolicy:     listPolicy,
 				RestoreDefault: restore_default,

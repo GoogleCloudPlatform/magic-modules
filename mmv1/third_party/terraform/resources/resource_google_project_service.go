@@ -44,13 +44,13 @@ var bannedProjectServices = []string{"bigquery-json.googleapis.com"}
 // "DEPRECATED FOR {{version}} next to entries slated for removal in {{version}}
 // upon removal, we should disallow the old name from being used even if it's
 // not gone from the underlying API yet
-var renamedServices = map[string]string{}
+var RenamedServices = map[string]string{}
 
-// renamedServices in reverse (new -> old)
-var renamedServicesByNewServiceNames = reverseStringMap(renamedServices)
+// RenamedServices in reverse (new -> old)
+var renamedServicesByNewServiceNames = reverseStringMap(RenamedServices)
 
-// renamedServices expressed as both old -> new and new -> old
-var renamedServicesByOldAndNewServiceNames = mergeStringMaps(renamedServices, renamedServicesByNewServiceNames)
+// RenamedServices expressed as both old -> new and new -> old
+var renamedServicesByOldAndNewServiceNames = mergeStringMaps(RenamedServices, renamedServicesByNewServiceNames)
 
 const maxServiceUsageBatchSize = 20
 

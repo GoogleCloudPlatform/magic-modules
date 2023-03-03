@@ -1132,7 +1132,7 @@ func testAccCheckGkeHubFeatureMembershipPresent(t *testing.T, project, location,
       Project:    dcl.String(project),
     }
 
-    _, err := NewDCLGkeHubClient(config, "", "", 0).GetFeatureMembership(context.Background(), obj)
+    _, err := google.NewDCLGkeHubClient(config, "", "", 0).GetFeatureMembership(context.Background(), obj)
     if err != nil {
       return err
     }
@@ -1150,7 +1150,7 @@ func testAccCheckGkeHubFeatureMembershipNotPresent(t *testing.T, project, locati
       Project:    dcl.String(project),
     }
 
-    _, err := NewDCLGkeHubClient(config, "", "", 0).GetFeatureMembership(context.Background(), obj)
+    _, err := google.NewDCLGkeHubClient(config, "", "", 0).GetFeatureMembership(context.Background(), obj)
     if err == nil {
       return fmt.Errorf("Did not expect to find GKE Feature Membership for projects/%s/locations/%s/features/%s/membershipId/%s", project, location, feature, membership)
     }

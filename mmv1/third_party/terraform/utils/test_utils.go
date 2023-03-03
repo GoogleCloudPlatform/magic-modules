@@ -12,8 +12,7 @@ import (
 
 var (
 	Pname          = "Terraform Acceptance Tests"
-	originalPolicy *cloudresourcemanager.Policy
-	testPrefix     = "tf-test"
+	OriginalPolicy *cloudresourcemanager.Policy
 )
 
 type ResourceDataMock struct {

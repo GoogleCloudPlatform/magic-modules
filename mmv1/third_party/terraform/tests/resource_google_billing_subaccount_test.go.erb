@@ -99,7 +99,7 @@ func testAccCheckGoogleBillingSubaccountExists(bindingResourceName string) resou
 			return fmt.Errorf("Not found: %s", bindingResourceName)
 		}
 
-		config := testAccProvider.Meta().(*google.Config)
+		config := acctest.TestAccProvider.Meta().(*google.Config)
 		_, err := config.NewBillingClient(config.UserAgent).BillingAccounts.Get(subaccount.Primary.ID).Do()
 		if err != nil {
 			return err
@@ -118,7 +118,7 @@ func testAccCheckGoogleBillingSubaccountRenameOnDestroy(s *terraform.State) erro
 			continue
 		}
 
-		config := testAccProvider.Meta().(*google.Config)
+		config := acctest.TestAccProvider.Meta().(*google.Config)
 
 		res, err := config.NewBillingClient(config.UserAgent).BillingAccounts.Get(rs.Primary.ID).Do()
 		if err != nil {

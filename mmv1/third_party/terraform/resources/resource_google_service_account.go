@@ -271,7 +271,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/serviceAccounts/(?P<email>[^/]+)",
 		"(?P<project>[^/]+)/(?P<email>[^/]+)",
 		"(?P<email>[^/]+)"}, d, config); err != nil {

@@ -189,7 +189,7 @@ func getStatePrimaryResource(s *terraform.State, res, expectedID string) (*terra
 	if !ok {
 		return nil, fmt.Errorf("Not found: %s", res)
 	}
-	if expectedID != "" && !compareProjectName("", resource.Primary.Attributes["id"], expectedID, nil) {
+	if expectedID != "" && !google.CompareProjectName("", resource.Primary.Attributes["id"], expectedID, nil) {
 		return nil, fmt.Errorf("Expected project %q to match ID %q in state", resource.Primary.ID, expectedID)
 	}
 	return resource.Primary, nil
@@ -227,13 +227,13 @@ func testAccCheckGoogleProjectIamPolicyExists(projectRes, policyRes, pid string)
 		}
 
 		// The bindings in both policies should be identical
-		if !compareBindings(projectPolicy.Bindings, policyPolicy.Bindings) {
-			return fmt.Errorf("Project and data source policies do not match: project policy is %+v, data resource policy is  %+v", debugPrintBindings(projectPolicy.Bindings), debugPrintBindings(policyPolicy.Bindings))
+		if !google.CompareBindings(projectPolicy.Bindings, policyPolicy.Bindings) {
+			return fmt.Errorf("Project and data source policies do not match: project policy is %+v, data resource policy is  %+v", google.DebugPrintBindings(projectPolicy.Bindings), google.DebugPrintBindings(policyPolicy.Bindings))
 		}
 
 		// The audit configs in both policies should be identical
-		if !compareAuditConfigs(projectPolicy.AuditConfigs, policyPolicy.AuditConfigs) {
-			return fmt.Errorf("Project and data source policies do not match: project policy is %+v, data resource policy is  %+v", debugPrintAuditConfigs(projectPolicy.AuditConfigs), debugPrintAuditConfigs(policyPolicy.AuditConfigs))
+		if !google.CompareAuditConfigs(projectPolicy.AuditConfigs, policyPolicy.AuditConfigs) {
+			return fmt.Errorf("Project and data source policies do not match: project policy is %+v, data resource policy is  %+v", google.DebugPrintAuditConfigs(projectPolicy.AuditConfigs), google.DebugPrintAuditConfigs(policyPolicy.AuditConfigs))
 		}
 		return nil
 	}
@@ -244,11 +244,11 @@ func testAccProjectExistingPolicy(t *testing.T, pid string) resource.TestCheckFu
 	return func(s *terraform.State) error {
 		c := acctest.GoogleProviderConfig(t)
 		var err error
-		originalPolicy, err = getProjectIamPolicy(pid, c)
+		google.OriginalPolicy, err = google.GetProjectIamPolicy(pid, c)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve IAM Policy for project %q: %s", pid, err)
 		}
-		if len(originalPolicy.Bindings) == 0 {
+		if len(google.OriginalPolicy.Bindings) == 0 {
 			return fmt.Errorf("Refuse to run test against project with zero IAM Bindings. This is likely an error in the test code that is not properly identifying the IAM policy of a project.")
 		}
 		return nil

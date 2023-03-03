@@ -49,7 +49,7 @@ func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		dicomStoreId, err := parseHealthcareDicomStoreId(tc.ImportId, tc.Config)
+		dicomStoreId, err := gogole.ParseHealthcareDicomStoreId(tc.ImportId, tc.Config)
 
 		if tc.ExpectedError && err == nil {
 			t.Fatalf("bad: %s, expected an error", tn)

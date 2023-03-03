@@ -13,7 +13,7 @@ var IamProjectSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		DiffSuppressFunc: compareProjectName,
+		DiffSuppressFunc: CompareProjectName,
 	},
 }
 
@@ -93,7 +93,7 @@ func (u *ProjectIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("project %q", u.resourceId)
 }
 
-func compareProjectName(_, old, new string, _ *schema.ResourceData) bool {
+func CompareProjectName(_, old, new string, _ *schema.ResourceData) bool {
 	// We can either get "projects/project-id" or "project-id", so strip any prefixes
 	return GetResourceNameFromSelfLink(old) == GetResourceNameFromSelfLink(new)
 }

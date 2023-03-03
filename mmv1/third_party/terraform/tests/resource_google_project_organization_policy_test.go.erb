@@ -214,7 +214,7 @@ func testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t *testing.T) fu
 			}
 
 			projectId := canonicalProjectId(rs.Primary.Attributes["project"])
-			constraint := canonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
+			constraint := google.CanonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
 			policy, err := config.NewResourceManagerClient(config.UserAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: constraint,
 			}).Do()

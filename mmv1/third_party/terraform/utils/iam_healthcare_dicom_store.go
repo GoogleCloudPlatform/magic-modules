@@ -26,7 +26,7 @@ type HealthcareDicomStoreIamUpdater struct {
 
 func NewHealthcareDicomStoreIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
 	dicomStore := d.Get("dicom_store_id").(string)
-	dicomStoreId, err := parseHealthcareDicomStoreId(dicomStore, config)
+	dicomStoreId, err := ParseHealthcareDicomStoreId(dicomStore, config)
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error parsing resource ID for %s: {{err}}", dicomStore), err)
@@ -40,7 +40,7 @@ func NewHealthcareDicomStoreIamUpdater(d TerraformResourceData, config *Config) 
 }
 
 func DicomStoreIdParseFunc(d *schema.ResourceData, config *Config) error {
-	dicomStoreId, err := parseHealthcareDicomStoreId(d.Id(), config)
+	dicomStoreId, err := ParseHealthcareDicomStoreId(d.Id(), config)
 	if err != nil {
 		return err
 	}

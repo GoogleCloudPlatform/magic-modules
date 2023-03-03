@@ -956,7 +956,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%= lines(compile(pwd + '/' + object.custom_code.custom_import)) -%>
 <% else -%>
     config := meta.(*Config)
-    if err := parseImportId([]string{
+    if err := ParseImportId([]string{
 <%   for import_id in import_id_formats_from_resource(object) -%>
         "<%= format2regex(import_id) %>",
 <%   end -%>

@@ -197,7 +197,7 @@ func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface
 	var policy *cloudresourcemanager.OrgPolicy
 	err = RetryTimeDuration(func() (readErr error) {
 		policy, readErr = config.NewResourceManagerClient(userAgent).Organizations.GetOrgPolicy(org, &cloudresourcemanager.GetOrgPolicyRequest{
-			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
+			Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return readErr
 	}, d.Timeout(schema.TimeoutRead))
@@ -252,7 +252,7 @@ func resourceGoogleOrganizationPolicyDelete(d *schema.ResourceData, meta interfa
 
 	err = RetryTimeDuration(func() error {
 		_, dErr := config.NewResourceManagerClient(userAgent).Organizations.ClearOrgPolicy(org, &cloudresourcemanager.ClearOrgPolicyRequest{
-			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
+			Constraint: CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return dErr
 	}, d.Timeout(schema.TimeoutDelete))
@@ -314,7 +314,7 @@ func setOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
 	err = RetryTimeDuration(func() (setErr error) {
 		_, setErr = config.NewResourceManagerClient(userAgent).Organizations.SetOrgPolicy(org, &cloudresourcemanager.SetOrgPolicyRequest{
 			Policy: &cloudresourcemanager.OrgPolicy{
-				Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
+				Constraint:     CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 				BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),
 				ListPolicy:     listPolicy,
 				RestoreDefault: restoreDefault,
@@ -464,7 +464,7 @@ func expandListOrganizationPolicy(configured []interface{}) (*cloudresourcemanag
 	}, nil
 }
 
-func canonicalOrgPolicyConstraint(constraint string) string {
+func CanonicalOrgPolicyConstraint(constraint string) string {
 	if strings.HasPrefix(constraint, "constraints/") {
 		return constraint
 	}

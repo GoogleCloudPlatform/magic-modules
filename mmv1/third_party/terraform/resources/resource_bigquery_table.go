@@ -1781,7 +1781,7 @@ func flattenMaterializedView(mvd *bigquery.MaterializedViewDefinition) []map[str
 
 func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/datasets/(?P<dataset_id>[^/]+)/tables/(?P<table_id>[^/]+)",
 		"(?P<project>[^/]+)/(?P<dataset_id>[^/]+)/(?P<table_id>[^/]+)",
 		"(?P<dataset_id>[^/]+)/(?P<table_id>[^/]+)",

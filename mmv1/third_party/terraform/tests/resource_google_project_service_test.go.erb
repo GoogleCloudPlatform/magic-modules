@@ -179,12 +179,12 @@ func TestAccProjectService_handleNotFound(t *testing.T) {
 func TestAccProjectService_renamedService(t *testing.T) {
 	t.Parallel()
 
-	if len(renamedServices) == 0 {
+	if len(google.RenamedServices) == 0 {
 		t.Skip()
 	}
 
 	var newName string
-	for _, new := range renamedServices {
+	for _, new := range google.RenamedServices {
 		newName = new
 	}
 
@@ -210,7 +210,7 @@ func TestAccProjectService_renamedService(t *testing.T) {
 func testAccCheckProjectService(t *testing.T, services []string, pid string, expectEnabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		currentlyEnabled, err := ListCurrentlyEnabledServices(pid, "", config.UserAgent, config, time.Minute*10)
+		currentlyEnabled, err := google.ListCurrentlyEnabledServices(pid, "", config.UserAgent, config, time.Minute*10)
 		if err != nil {
 			return fmt.Errorf("Error listing services for project %q: %v", pid, err)
 		}

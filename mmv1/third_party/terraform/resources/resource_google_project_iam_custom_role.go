@@ -229,7 +229,7 @@ func resourceGoogleProjectIamCustomRoleDelete(d *schema.ResourceData, meta inter
 
 func resourceGoogleProjectIamCustomRoleImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/roles/(?P<role_id>[^/]+)",
 		"(?P<project>[^/]+)/(?P<role_id>[^/]+)",
 		"(?P<role_id>[^/]+)",

@@ -67,7 +67,7 @@ func (w *DataprocJobOperationWaiter) TargetStates() []string {
 	return []string{"CANCELLED", "DONE", "ATTEMPT_FAILURE", "ERROR", "RUNNING"}
 }
 
-func dataprocJobOperationWait(config *Config, region, projectId, jobId, activity, userAgent string, timeout time.Duration) error {
+func DataprocJobOperationWait(config *Config, region, projectId, jobId, activity, userAgent string, timeout time.Duration) error {
 	w := &DataprocJobOperationWaiter{
 		Service:   config.NewDataprocClient(userAgent),
 		Region:    region,

@@ -26,7 +26,7 @@ type FolderIamUpdater struct {
 
 func NewFolderIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
 	return &FolderIamUpdater{
-		folderId: canonicalFolderId(d.Get("folder").(string)),
+		folderId: CanonicalFolderId(d.Get("folder").(string)),
 		d:        d,
 		Config:   config,
 	}, nil
@@ -48,7 +48,7 @@ func (u *FolderIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy,
 		return nil, err
 	}
 
-	return getFolderIamPolicyByFolderName(u.folderId, userAgent, u.Config)
+	return GetFolderIamPolicyByFolderName(u.folderId, userAgent, u.Config)
 }
 
 func (u *FolderIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
@@ -86,7 +86,7 @@ func (u *FolderIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("folder %q", u.folderId)
 }
 
-func canonicalFolderId(folder string) string {
+func CanonicalFolderId(folder string) string {
 	if strings.HasPrefix(folder, "folders/") {
 		return folder
 	}
@@ -114,7 +114,7 @@ func v2PolicyToV1(in *resourceManagerV3.Policy) (*cloudresourcemanager.Policy, e
 }
 
 // Retrieve the existing IAM Policy for a folder
-func getFolderIamPolicyByFolderName(folderName, userAgent string, config *Config) (*cloudresourcemanager.Policy, error) {
+func GetFolderIamPolicyByFolderName(folderName, userAgent string, config *Config) (*cloudresourcemanager.Policy, error) {
 	p, err := config.NewResourceManagerV3Client(userAgent).Folders.GetIamPolicy(folderName,
 		&resourceManagerV3.GetIamPolicyRequest{
 			Options: &resourceManagerV3.GetPolicyOptions{

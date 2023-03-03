@@ -7,7 +7,7 @@ import (
 )
 
 func sourceRepoImport(d *schema.ResourceData, config *Config) error {
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/repos/(?P<name>.+)",
 		"(?P<name>.+)",
 	}, d, config); err != nil {
@@ -25,7 +25,7 @@ func sourceRepoImport(d *schema.ResourceData, config *Config) error {
 }
 
 func runtimeconfigVariableImport(d *schema.ResourceData, config *Config) error {
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/configs/(?P<parent>[^/]+)/variables/(?P<name>.+)",
 		"(?P<parent>[^/]+)/(?P<name>.+)",
 	}, d, config); err != nil {

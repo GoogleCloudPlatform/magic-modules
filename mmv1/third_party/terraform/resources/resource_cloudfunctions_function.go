@@ -58,7 +58,7 @@ func (s *CloudFunctionId) locationId() string {
 }
 
 func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*CloudFunctionId, error) {
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/functions/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",

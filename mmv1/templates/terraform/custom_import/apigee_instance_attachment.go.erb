@@ -1,7 +1,7 @@
 config := meta.(*Config)
 
 // current import_formats cannot import fields with forward slashes in their value
-if err := parseImportId([]string{
+if err := ParseImportId([]string{
 		"(?P<instance_id>.+)/attachments/(?P<name>.+)",
 		"(?P<instance_id>.+)/(?P<name>.+)",
 	}, d, config); err != nil {

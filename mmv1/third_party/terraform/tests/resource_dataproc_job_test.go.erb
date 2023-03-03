@@ -352,7 +352,7 @@ func testAccCheckDataprocJobCompletesSuccessfully(t *testing.T, n string, job *d
 		}
 
 		jobCompleteTimeoutMins := 5 * time.Minute
-		waitErr := dataprocJobOperationWait(config, region, project, job.Reference.JobId,
+		waitErr := google.DataprocJobOperationWait(config, region, project, job.Reference.JobId,
 			"Awaiting Dataproc job completion", config.UserAgent, jobCompleteTimeoutMins)
 		if waitErr != nil {
 			return waitErr

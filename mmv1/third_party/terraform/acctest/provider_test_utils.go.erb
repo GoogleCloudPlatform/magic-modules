@@ -41,7 +41,7 @@ var TestAccProviders map[string]*schema.Provider
 <% unless version == 'ga' -%>
 var TestAccProvidersOiCS map[string]*schema.Provider
 <% end -%>
-var testAccProvider *schema.Provider
+var TestAccProvider *schema.Provider
 
 var CredsEnvVars = []string{
 	"GOOGLE_CREDENTIALS",
@@ -135,14 +135,14 @@ var sourcesLock = sync.RWMutex{}
 func init() {
 	configs = make(map[string]*google.Config)
 	sources = make(map[string]VcrSource)
-	testAccProvider = google.Provider()
+	TestAccProvider = google.Provider()
 	<% if version == 'ga' -%>
 	TestAccProviders = map[string]*schema.Provider{
-		"google": testAccProvider,
+		"google": TestAccProvider,
 	}
 	<% else -%>
 	TestAccProviders = map[string]*schema.Provider{
-		"google": testAccProvider,
+		"google": TestAccProvider,
 	}
 
 	// The OiCS provider map is used to ensure that OiCS examples use `google-beta`
@@ -151,7 +151,7 @@ func init() {
 	TestAccProvidersOiCS = map[string]*schema.Provider{
 <%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
 <% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
-		"google-<%= aliased_version -%>": testAccProvider,
+		"google-<%= aliased_version -%>": TestAccProvider,
 <% end -%>
 	}
 	<% end -%>
@@ -291,7 +291,7 @@ func GoogleProviderConfig(t *testing.T) *google.Config {
 	if ok {
 		return config
 	}
-	return testAccProvider.Meta().(*google.Config)
+	return TestAccProvider.Meta().(*google.Config)
 }
 
 func getTestAccProviders(testName string, c resource.TestCase) map[string]*schema.Provider {
@@ -807,7 +807,7 @@ func initializeReleaseDiffTest(c resource.TestCase) resource.TestCase {
 
 	localProviderName := "google-local"
 	localProvider := map[string]*schema.Provider{
-		localProviderName: testAccProvider,
+		localProviderName: TestAccProvider,
 	}
 	c.Providers = localProvider
 

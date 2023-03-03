@@ -36,7 +36,7 @@ func migrateGoogleProjectStateV0toV1(s *terraform.InstanceState, config *Config)
 	s.Attributes["project_id"] = s.ID
 
 	if s.Attributes["policy_data"] != "" {
-		p, err := getProjectIamPolicy(s.ID, config)
+		p, err := GetProjectIamPolicy(s.ID, config)
 		if err != nil {
 			return s, fmt.Errorf("Could not retrieve project's IAM policy while attempting to migrate state from V0 to V1: %v", err)
 		}
@@ -48,7 +48,7 @@ func migrateGoogleProjectStateV0toV1(s *terraform.InstanceState, config *Config)
 }
 
 // Retrieve the existing IAM Policy for a Project
-func getProjectIamPolicy(project string, config *Config) (*cloudresourcemanager.Policy, error) {
+func GetProjectIamPolicy(project string, config *Config) (*cloudresourcemanager.Policy, error) {
 	p, err := config.NewResourceManagerClient(config.UserAgent).Projects.GetIamPolicy(project,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{

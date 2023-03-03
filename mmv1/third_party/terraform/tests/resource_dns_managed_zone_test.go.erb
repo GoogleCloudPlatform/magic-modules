@@ -270,7 +270,7 @@ func testAccCheckManagedZoneCreateRRs(t *testing.T, zoneSuffix string, project s
 			return fmt.Errorf("Error creating DNS RecordSet: %s", err)
 		}
 
-		w := &DnsChangeWaiter{
+		w := &google.DnsChangeWaiter{
 			Service:     config.NewDnsClient(config.UserAgent),
 			Change:      chg,
 			Project:     project,
@@ -597,14 +597,14 @@ func TestDnsManagedZoneImport_parseImportId(t *testing.T) {
 	for tn, tc := range cases {
 		d := &google.ResourceDataMock{
 			FieldsInSchema: make(map[string]interface{}),
-			id:             tc.ImportId,
 		}
+		d.SetId(tc.ImportId)
 		config := tc.Config
 		if config == nil {
 			config = &google.Config{}
 		}
 		//
-		if err := parseImportId(tc.IdRegexes, d, config); err == nil {
+		if err := google.ParseImportId(tc.IdRegexes, d, config); err == nil {
 			for k, expectedValue := range tc.ExpectedSchemaValues {
 				if v, ok := d.GetOk(k); ok {
 					if v != expectedValue {

@@ -1,5 +1,5 @@
 config := meta.(*Config)
-if err := parseImportId([]string{
+if err := ParseImportId([]string{
 	"(?P<featurestore>.+)/entityTypes/(?P<name>[^/]+)",
 }, d, config); err != nil {
 	return nil, err

@@ -42,7 +42,7 @@ func GetOrganizationPolicyApiObject(d TerraformResourceData, config *Config) (Or
 	}
 
 	policy := OrgPolicy{
-		Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
+		Constraint:     CanonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),
 		ListPolicy:     listPolicy,
 		RestoreDefault: restoreDefault,

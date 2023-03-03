@@ -183,8 +183,8 @@ func testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t *testing.T) fun
 				continue
 			}
 
-			folder := canonicalFolderId(rs.Primary.Attributes["folder"])
-			constraint := canonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
+			folder := google.CanonicalFolderId(rs.Primary.Attributes["folder"])
+			constraint := google.CanonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
 			policy, err := config.NewResourceManagerClient(config.UserAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: constraint,
 			}).Do()
@@ -297,7 +297,7 @@ func getGoogleFolderOrganizationPolicyTestResource(t *testing.T, s *terraform.St
 	}
 
 	config := acctest.GoogleProviderConfig(t)
-	folder := canonicalFolderId(rs.Primary.Attributes["folder"])
+	folder := google.CanonicalFolderId(rs.Primary.Attributes["folder"])
 
 	return config.NewResourceManagerClient(config.UserAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{
 		Constraint: rs.Primary.Attributes["constraint"],
