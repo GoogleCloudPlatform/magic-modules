@@ -12,7 +12,7 @@ func TestAccDataSourceGoogleFirebaseWebApp(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_id":   getTestProjectFromEnv(),
-		"display_name": "Display Name WebApp DataSource",
+		"display_name": "tf_test Display Name WebApp DataSource",
 	}
 
 	resourceName := "data.google_firebase_web_app.my_app"
