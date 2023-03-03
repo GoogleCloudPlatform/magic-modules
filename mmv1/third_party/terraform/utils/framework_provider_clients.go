@@ -19,7 +19,7 @@ import (
 // the basePath value in the client library file.
 
 func (p *frameworkProvider) NewDnsClient(userAgent string, diags *diag.Diagnostics) *dns.Service {
-	dnsClientBasePath := removeBasePathVersion(p.DNSBasePath)
+	dnsClientBasePath := RemoveBasePathVersion(p.DNSBasePath)
 	dnsClientBasePath = strings.ReplaceAll(dnsClientBasePath, "/dns/", "")
 	tflog.Info(p.context, fmt.Sprintf("Instantiating Google Cloud DNS client for path %s", dnsClientBasePath))
 	clientDns, err := dns.NewService(p.context, option.WithHTTPClient(p.client))

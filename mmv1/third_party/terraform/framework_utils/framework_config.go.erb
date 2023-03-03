@@ -637,8 +637,8 @@ func GetCredentials(ctx context.Context, data ProviderModel, initialCredentialsO
 // provider configuration set for batching
 func GetBatchingConfig(ctx context.Context, data types.List, diags *diag.Diagnostics) *batchingConfig {
 	bc := &batchingConfig{
-		sendAfter:      time.Second * defaultBatchSendIntervalSec,
-		enableBatching: true,
+		SendAfter:      time.Second * DefaultBatchSendIntervalSec,
+		EnableBatching: true,
 	}
 
 	if data.IsNull() {
@@ -658,10 +658,10 @@ func GetBatchingConfig(ctx context.Context, data types.List, diags *diag.Diagnos
 		return bc
 	}
 
-	bc.sendAfter = sendAfter
+	bc.SendAfter = sendAfter
 
 	if !pbConfigs[0].EnableBatching.IsNull() {
-		bc.enableBatching = pbConfigs[0].EnableBatching.ValueBool()
+		bc.EnableBatching = pbConfigs[0].EnableBatching.ValueBool()
 	}
 
 	return bc
