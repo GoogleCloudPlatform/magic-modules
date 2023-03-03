@@ -175,7 +175,7 @@ all_product_files.each do |product_name|
     product_yaml = File.read(api_yaml_path)
   elsif File.exist?(product_override_path)
     result = if File.exist?(product_yaml_path)
-               YAML.load_file(product_yaml_pat, permitted_classes: allowed_classes) \
+               YAML.load_file(product_yaml_path, permitted_classes: allowed_classes) \
                    .merge(YAML.load_file(product_override_path, permitted_classes: allowed_classes))
              else
                YAML.load_file(product_override_path, permitted_classes: allowed_classes)

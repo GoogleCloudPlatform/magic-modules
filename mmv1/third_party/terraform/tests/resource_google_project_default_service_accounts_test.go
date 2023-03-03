@@ -15,7 +15,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsBasic(t *testing.T) {
 
 	resourceName := "google_project_default_service_accounts.acceptance"
 	org := getTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-project-%d", randInt(t))
+	project := fmt.Sprintf("tf-test-%d", randInt(t))
 	billingAccount := getTestBillingAccountFromEnv(t)
 
 	vcrTest(t, resource.TestCase{
@@ -55,7 +55,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-project-%d", randInt(t))
+	project := fmt.Sprintf("tf-test-%d", randInt(t))
 	billingAccount := getTestBillingAccountFromEnv(t)
 	action := "DISABLE"
 	restorePolicy := "REVERT"
@@ -84,7 +84,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-project-%d", randInt(t))
+	project := fmt.Sprintf("tf-test-%d", randInt(t))
 	billingAccount := getTestBillingAccountFromEnv(t)
 	action := "DELETE"
 	restorePolicy := "REVERT"
@@ -113,7 +113,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-project-%d", randInt(t))
+	project := fmt.Sprintf("tf-test-%d", randInt(t))
 	billingAccount := getTestBillingAccountFromEnv(t)
 	action := "DELETE"
 	restorePolicy := "REVERT_AND_IGNORE_FAILURE"
@@ -141,7 +141,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeprivilege(t *testing.T)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	project := fmt.Sprintf("tf-project-%d", randInt(t))
+	project := fmt.Sprintf("tf-test-%d", randInt(t))
 	billingAccount := getTestBillingAccountFromEnv(t)
 	action := "DEPRIVILEGE"
 	restorePolicy := "REVERT"
@@ -194,7 +194,7 @@ resource "google_project_default_service_accounts" "acceptance" {
 func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, project, action string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
-		response, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.List(prefixedProject(project)).Do()
+		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(PrefixedProject(project)).Do()
 		if err != nil {
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
 		}
@@ -208,7 +208,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, projec
 				case "DELETE":
 					return fmt.Errorf("compute engine default service account is not deleted")
 				case "DEPRIVILEGE":
-					iamPolicy, err := config.NewResourceManagerClient(config.userAgent).Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
+					iamPolicy, err := config.NewResourceManagerClient(config.UserAgent).Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
 					if err != nil {
 						return fmt.Errorf("cannot get IAM policy on project %s: %v", project, err)
 					}
@@ -231,7 +231,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, projec
 func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project, action string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
-		response, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.List(prefixedProject(project)).Do()
+		response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(PrefixedProject(project)).Do()
 		if err != nil {
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
 		}

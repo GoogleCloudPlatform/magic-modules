@@ -566,9 +566,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       failoverPolicy.disableConnectionDrainOnFailover: !ruby/object:Overrides::Terraform::PropertyOverride
-        send_empty_value: true
+        default_from_api: true
       failoverPolicy.dropTrafficIfUnhealthy: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
+        default_from_api: true
       connectionTrackingPolicy.idleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
