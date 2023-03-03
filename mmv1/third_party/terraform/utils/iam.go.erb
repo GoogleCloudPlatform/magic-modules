@@ -484,6 +484,8 @@ func missingBindingsMap(aMap, bMap map[iamBindingKey]map[string]struct{}) map[ia
 			results[key] = bMembers
 		}
 	}
+
+	return results
 }
 
 // Returns the bindings that are in one set of bindings and not the other.
