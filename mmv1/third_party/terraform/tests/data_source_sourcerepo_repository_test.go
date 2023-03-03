@@ -10,11 +10,11 @@ import (
 func TestAccDataSourceGoogleSourceRepoRepository_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-repository-" + randString(t, 10)
+	name := "tf-repository-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSourceRepoRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

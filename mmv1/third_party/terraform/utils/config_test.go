@@ -65,10 +65,10 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	TestAccPreCheck(t)
 
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	config := &Config{
 		Credentials: creds,
@@ -93,11 +93,11 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	TestAccPreCheck(t)
 
 	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	config := &Config{
 		Credentials:               creds,
@@ -123,10 +123,10 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	TestAccPreCheck(t)
 
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), DefaultClientScopes...)
@@ -163,10 +163,10 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	TestAccPreCheck(t)
 
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
 	if err != nil {

@@ -30,12 +30,12 @@ func TestAccDataSourceGoogleServiceAccountAccessToken_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_service_account_access_token.default"
-	serviceAccount := getTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := BootstrapServiceAccount(t, getTestProjectFromEnv(), serviceAccount)
+	serviceAccount := GetTestServiceAccountFromEnv(t)
+	targetServiceAccountEmail := BootstrapServiceAccount(t, GetTestProjectFromEnv(), serviceAccount)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { TestAccPreCheck(t) },
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config:  testAccCheckGoogleServiceAccountAccessToken_datasource(targetServiceAccountEmail),

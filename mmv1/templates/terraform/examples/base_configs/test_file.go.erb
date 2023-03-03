@@ -49,7 +49,7 @@ object.examples
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
 <% if example.skip_vcr -%>
-	skipIfVcr(t)
+	SkipIfVcr(t)
 <% end -%>
   t.Parallel()
 
@@ -60,16 +60,16 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"<%= var_name %>": <%= override %>,
 	<% end -%>
 	<% end -%>
-			"random_suffix": randString(t, 10),
+			"random_suffix": RandString(t, 10),
 	}
 
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { TestAccPreCheck(t) },
 		<% unless versioned_provider -%>
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 		<% else -%>
-		Providers: testAccProvidersOiCS,
+		Providers: TestAccProvidersOiCS,
 		<% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -117,7 +117,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 		<% if object.custom_code.test_check_destroy -%>
 	<%= lines(compile(pwd + '/' + object.custom_code.test_check_destroy)) -%>
 		<% else -%>
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 		if err != nil {
