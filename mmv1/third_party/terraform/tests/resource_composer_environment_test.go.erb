@@ -1006,7 +1006,7 @@ resource "google_composer_environment" "test" {
       }
     }
     software_config {
-      image_version = "composer-1-airflow-2"
+      image_version = "composer-1-airflow-2.3"
     }
   }
 }
@@ -1761,7 +1761,7 @@ resource "google_composer_environment" "test" {
     }
 
     software_config {
-      image_version = "composer-1-airflow-1"
+      image_version = "composer-1-airflow-2"
 
       airflow_config_overrides = {
         core-load_example = "True"
