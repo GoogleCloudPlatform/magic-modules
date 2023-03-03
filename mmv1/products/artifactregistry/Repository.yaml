@@ -162,6 +162,7 @@
       - virtual_repository_config
     description: |-
       Configuration specific for a Remote Repository.
+    input: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'description'
@@ -183,7 +184,6 @@
               - remoteRepositoryConfig.0.docker_repository.0.public_repository
             description: |-
               Address of the remote repository.
-            input: true
             values:
               - :DOCKER_HUB
             default_value: :DOCKER_HUB
@@ -203,7 +203,6 @@
               - remoteRepositoryConfig.0.maven_repository.0.public_repository
             description: |-
               Address of the remote repository.
-            input: true
             values:
               - :MAVEN_CENTRAL
             default_value: :MAVEN_CENTRAL
@@ -223,7 +222,6 @@
               - remoteRepositoryConfig.0.npm_repository.0.public_repository
             description: |-
               Address of the remote repository.
-            input: true
             values:
               - :NPMJS
             default_value: :NPMJS
@@ -243,7 +241,6 @@
               - remoteRepositoryConfig.0.python_repository.0.public_repository
             description: |-
               Address of the remote repository.
-            input: true
             values:
               - :PYPI
             default_value: :PYPI
