@@ -84,6 +84,18 @@ func protoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.Provide
 	}
 }
 
+// protoV5ProviderBetaFactories returns the same as protoV5ProviderFactories only the provider is mapped with
+// "google-beta" to ensure that registry examples use `google-beta` if the example is versioned as beta;
+// normal beta tests should continue to use protoV5ProviderFactories
+func protoV5ProviderBetaFactories(t *testing.T) map[string]func() (tfprotov5.ProviderServer, error) {
+	return map[string]func() (tfprotov5.ProviderServer, error){
+		"google-beta": func() (tfprotov5.ProviderServer, error) {
+			provider, err := MuxedProviders(t.Name())
+			return provider(), err
+		},
+	}
+}
+
 // providerVersion450 returns information allowing tests to download TPG v4.50.0 from the Registry during `init`
 // Used to set ExternalProviders in a resource.TestStep within an acceptance test.
 func providerVersion450() map[string]resource.ExternalProvider {
