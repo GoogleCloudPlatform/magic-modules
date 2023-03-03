@@ -12,7 +12,7 @@ func TestAccMonitoringService_basic(t *testing.T) {
 
 	randomSuffix := RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckMonitoringServiceDestroyProducer(t),
 		Steps: []resource.TestStep{

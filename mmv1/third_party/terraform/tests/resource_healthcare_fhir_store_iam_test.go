@@ -25,7 +25,7 @@ func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
 	fhirStoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -74,7 +74,7 @@ func TestAccHealthcareFhirStoreIamMember(t *testing.T) {
 	fhirStoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -109,7 +109,7 @@ func TestAccHealthcareFhirStoreIamPolicy(t *testing.T) {
 	fhirStoreName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

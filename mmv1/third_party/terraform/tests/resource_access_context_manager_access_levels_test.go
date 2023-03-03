@@ -15,7 +15,7 @@ func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerAccessLevelsDestroyProducer(t),
 		Steps: []resource.TestStep{

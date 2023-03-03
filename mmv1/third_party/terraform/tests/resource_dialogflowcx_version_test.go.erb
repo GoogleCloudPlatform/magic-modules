@@ -20,7 +20,7 @@ func TestAccDialogflowCXVersion_update(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -121,7 +121,7 @@ func TestAccDialogflowCXVersion_dialogflowcxVersionFullExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDialogflowCXVersionDestroyProducer(t),
 		Steps: []resource.TestStep{

@@ -20,7 +20,7 @@ func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
 	urlmap := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -64,7 +64,7 @@ func TestAccComputeGlobalForwardingRule_ipv6(t *testing.T) {
 	urlmap := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -96,7 +96,7 @@ func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 	urlmap := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -136,7 +136,7 @@ func TestAccComputeGlobalForwardingRule_internalLoadBalancing(t *testing.T) {
 	it := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{

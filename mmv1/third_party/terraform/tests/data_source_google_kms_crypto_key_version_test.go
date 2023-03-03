@@ -13,7 +13,7 @@ func TestAccDataSourceGoogleKmsCryptoKeyVersion_basic(t *testing.T) {
 	symKey := BootstrapKMSKey(t)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

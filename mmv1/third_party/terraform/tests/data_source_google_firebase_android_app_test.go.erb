@@ -19,7 +19,7 @@ func TestAccDataSourceGoogleFirebaseAndroidApp(t *testing.T) {
 	resourceName := "data.google_firebase_android_app.my_app"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

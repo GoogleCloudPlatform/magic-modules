@@ -15,7 +15,7 @@ func TestAccDNSResponsePolicy_update(t *testing.T) {
 	responsePolicySuffix := RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckDNSResponsePolicyDestroyProducer(t),
 		Steps: []resource.TestStep{

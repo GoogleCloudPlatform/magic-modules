@@ -78,7 +78,7 @@ func TestAccHealthcareDicomStore_basic(t *testing.T) {
 	resourceName := "google_healthcare_dicom_store.default"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckHealthcareDicomStoreDestroyProducer(t),
 		Steps: []resource.TestStep{

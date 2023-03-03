@@ -78,7 +78,7 @@ func TestAccHealthcareFhirStore_basic(t *testing.T) {
 	resourceName := "google_healthcare_fhir_store.default"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckHealthcareFhirStoreDestroyProducer(t),
 		Steps: []resource.TestStep{

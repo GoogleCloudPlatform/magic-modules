@@ -84,7 +84,7 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project
@@ -106,7 +106,7 @@ func TestAccProject_create(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project
@@ -132,7 +132,7 @@ func TestAccProject_billing(t *testing.T) {
 	billingId := GetTestBillingAccountFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project with a billing account
@@ -174,7 +174,7 @@ func TestAccProject_labels(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -217,7 +217,7 @@ func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	billingId := GetTestBillingAccountFromEnv(t)
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -234,7 +234,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	folderDisplayName := TestPrefix + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -251,7 +251,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	folderDisplayName := TestPrefix + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

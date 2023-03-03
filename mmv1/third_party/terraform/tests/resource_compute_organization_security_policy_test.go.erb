@@ -17,7 +17,7 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyUpdateEx
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeOrganizationSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{

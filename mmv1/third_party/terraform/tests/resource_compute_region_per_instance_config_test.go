@@ -27,7 +27,7 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 		GetTestProjectFromEnv(), GetTestRegionFromEnv(), rigmName)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -98,7 +98,7 @@ func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -139,7 +139,7 @@ func TestAccComputeRegionPerInstanceConfig_statefulIps(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

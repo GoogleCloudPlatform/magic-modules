@@ -53,7 +53,7 @@ func TestAccSpannerInstance_basic(t *testing.T) {
 
 	idName := fmt.Sprintf("spanner-test-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -77,7 +77,7 @@ func TestAccSpannerInstance_noNodeCountSpecified(t *testing.T) {
 
 	idName := fmt.Sprintf("spanner-test-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -96,7 +96,7 @@ func TestAccSpannerInstance_basicWithAutogenName(t *testing.T) {
 
 	displayName := fmt.Sprintf("spanner-test-%s-dname", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -123,7 +123,7 @@ func TestAccSpannerInstance_update(t *testing.T) {
 	dName1 := fmt.Sprintf("spanner-dname1-%s", RandString(t, 10))
 	dName2 := fmt.Sprintf("spanner-dname2-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{

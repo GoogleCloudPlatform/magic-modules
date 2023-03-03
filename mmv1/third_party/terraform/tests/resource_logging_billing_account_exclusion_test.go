@@ -36,7 +36,7 @@ func testAccLoggingBillingAccountExclusion_basic(t *testing.T) {
 	description := "Description " + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -59,7 +59,7 @@ func testAccLoggingBillingAccountExclusion_update(t *testing.T) {
 	descriptionAfter := "Updated Basic BillingAccount Logging Exclusion" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -87,7 +87,7 @@ func testAccLoggingBillingAccountExclusion_multiple(t *testing.T) {
 	billingAccount := GetTestMasterBillingAccountFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountExclusionDestroyProducer(t),
 		Steps: []resource.TestStep{

@@ -14,7 +14,7 @@ func TestAccIdentityPlatformOauthIdpConfig_identityPlatformOauthIdpConfigUpdate(
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckIdentityPlatformOauthIdpConfigDestroyProducer(t),
 		Steps: []resource.TestStep{

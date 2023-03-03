@@ -18,7 +18,7 @@ func TestAccServiceUsageConsumerQuotaOverride_consumerQuotaOverrideCustomIncorre
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckServiceUsageConsumerQuotaOverrideDestroyProducer(t),
 		Steps: []resource.TestStep{

@@ -15,7 +15,7 @@ func TestAccDataSourceGoogleArtifactRegistryRepositoryConfig(t *testing.T) {
 	funcDataName := "data.google_artifact_registry_repository.my-repo"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckArtifactRegistryRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{

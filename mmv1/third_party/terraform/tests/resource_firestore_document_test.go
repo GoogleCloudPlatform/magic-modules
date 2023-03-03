@@ -14,7 +14,7 @@ func TestAccFirestoreDocument_update(t *testing.T) {
 	project := GetTestFirestoreProjectFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

@@ -14,7 +14,7 @@ func TestAccDataSourceSqlDatabase_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccSqlDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{

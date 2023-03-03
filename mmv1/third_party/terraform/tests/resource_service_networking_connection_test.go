@@ -16,7 +16,7 @@ func TestAccServiceNetworkingConnection_create(t *testing.T) {
 	service := "servicenetworking.googleapis.com"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
@@ -41,7 +41,7 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 	service := "servicenetworking.googleapis.com"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{

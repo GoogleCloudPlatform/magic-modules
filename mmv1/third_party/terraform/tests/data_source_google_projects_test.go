@@ -13,7 +13,7 @@ func TestAccDataSourceGoogleProjects_basic(t *testing.T) {
 	project := GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

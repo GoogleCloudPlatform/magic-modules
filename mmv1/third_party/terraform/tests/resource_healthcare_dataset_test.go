@@ -77,7 +77,7 @@ func TestAccHealthcareDataset_basic(t *testing.T) {
 	resourceName := "google_healthcare_dataset.dataset"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckHealthcareDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{

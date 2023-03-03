@@ -18,7 +18,7 @@ func TestAccResourceManagerLien_basic(t *testing.T) {
 	var lien resourceManager.Lien
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckResourceManagerLienDestroyProducer(t),
 		Steps: []resource.TestStep{

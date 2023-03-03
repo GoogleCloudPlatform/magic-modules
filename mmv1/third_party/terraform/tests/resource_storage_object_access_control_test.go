@@ -22,7 +22,7 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			TestAccPreCheck(t)
+			testAccPreCheck(t)
 		},
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),
@@ -61,7 +61,7 @@ func TestAccStorageObjectAccessControl_updateWithSlashes(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			TestAccPreCheck(t)
+			testAccPreCheck(t)
 		},
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),

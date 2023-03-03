@@ -20,7 +20,7 @@ func TestAccDatasourceGoogleServiceNetworkingPeeredDnsDomain_basic(t *testing.T)
 	service := "servicenetworking.googleapis.com"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

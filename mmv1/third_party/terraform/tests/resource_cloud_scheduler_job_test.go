@@ -103,7 +103,7 @@ func TestAccCloudSchedulerJob_schedulerPausedExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckCloudSchedulerJobDestroyProducer(t),
 		Steps: []resource.TestStep{

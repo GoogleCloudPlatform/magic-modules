@@ -14,7 +14,7 @@ func TestAccComputeSnapshot_encryption(t *testing.T) {
 	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -40,7 +40,7 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{

@@ -15,7 +15,7 @@ func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *test
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckSecurityCenterNotificationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{

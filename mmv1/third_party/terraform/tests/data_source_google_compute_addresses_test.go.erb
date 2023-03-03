@@ -22,7 +22,7 @@ func TestAccDataSourceComputeAddresses(t *testing.T) {
 	dsAllFullName := fmt.Sprintf("data.google_compute_addresses.%s", dsAllName)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

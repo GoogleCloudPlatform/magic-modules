@@ -14,7 +14,7 @@ func testAccAccessContextManagerServicePerimeters_basicTest(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerServicePerimetersDestroyProducer(t),
 		Steps: []resource.TestStep{

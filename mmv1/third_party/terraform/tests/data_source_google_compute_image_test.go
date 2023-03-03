@@ -15,7 +15,7 @@ func TestAccDataSourceComputeImage(t *testing.T) {
 	name := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -47,7 +47,7 @@ func TestAccDataSourceComputeImageFilter(t *testing.T) {
 	name := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{

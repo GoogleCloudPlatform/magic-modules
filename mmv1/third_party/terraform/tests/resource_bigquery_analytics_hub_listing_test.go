@@ -14,7 +14,7 @@ func TestAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingUpdate(t *tes
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigqueryAnalyticsHubListingDestroyProducer(t),
 		Steps: []resource.TestStep{

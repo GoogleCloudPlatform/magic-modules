@@ -16,7 +16,7 @@ func TestAccComputeNetworkPeering_basic(t *testing.T) {
 	importId := fmt.Sprintf("%s/%s/%s", GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccComputeNetworkPeeringDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -42,7 +42,7 @@ func TestAccComputeNetworkPeering_subnetRoutes(t *testing.T) {
 	importId := fmt.Sprintf("%s/%s/%s", GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccComputeNetworkPeeringDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -68,7 +68,7 @@ func TestAccComputeNetworkPeering_customRoutesUpdate(t *testing.T) {
 	suffix := RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccComputeNetworkPeeringDestroyProducer(t),
 		Steps: []resource.TestStep{

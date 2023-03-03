@@ -14,7 +14,7 @@ func TestAccBillingSubaccount_renameOnDestroy(t *testing.T) {
 
 	masterBilling := GetTestMasterBillingAccountFromEnv(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckGoogleBillingSubaccountRenameOnDestroy,
 		Steps: []resource.TestStep{
@@ -32,7 +32,7 @@ func TestAccBillingSubaccount_basic(t *testing.T) {
 
 	masterBilling := GetTestMasterBillingAccountFromEnv(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

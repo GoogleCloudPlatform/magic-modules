@@ -55,7 +55,7 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 	{{ if $s.HasGAEquivalent -}}
 		Providers: TestAccProviders,
 	{{- else }}

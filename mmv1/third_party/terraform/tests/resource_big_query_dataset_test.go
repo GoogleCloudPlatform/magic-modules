@@ -15,7 +15,7 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -46,7 +46,7 @@ func TestAccBigQueryDataset_datasetWithContents(t *testing.T) {
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -72,7 +72,7 @@ func TestAccBigQueryDataset_access(t *testing.T) {
 	otherTableID := fmt.Sprintf("tf_test_other_%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -118,7 +118,7 @@ func TestAccBigQueryDataset_regionalLocation(t *testing.T) {
 	datasetID1 := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -142,7 +142,7 @@ func TestAccBigQueryDataset_cmek(t *testing.T) {
 	datasetID1 := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

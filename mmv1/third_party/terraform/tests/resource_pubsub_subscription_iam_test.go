@@ -18,7 +18,7 @@ func TestAccPubsubSubscriptionIamBinding(t *testing.T) {
 	account := "tf-test-iam-" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -55,7 +55,7 @@ func TestAccPubsubSubscriptionIamMember(t *testing.T) {
 	accountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", account, GetTestProjectFromEnv())
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -83,7 +83,7 @@ func TestAccPubsubSubscriptionIamPolicy(t *testing.T) {
 	account := "tf-test-iam-" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

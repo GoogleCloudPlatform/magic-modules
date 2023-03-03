@@ -21,7 +21,7 @@ func TestAccBigtableTableIamBinding(t *testing.T) {
 		GetTestProjectFromEnv(), instance, cluster, role)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -70,7 +70,7 @@ func TestAccBigtableTableIamMember(t *testing.T) {
 		serviceAccountCanonicalEmail(account))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -107,7 +107,7 @@ func TestAccBigtableTableIamPolicy(t *testing.T) {
 		GetTestProjectFromEnv(), instance, cluster)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

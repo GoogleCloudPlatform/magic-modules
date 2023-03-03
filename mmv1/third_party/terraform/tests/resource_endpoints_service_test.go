@@ -18,7 +18,7 @@ func TestAccEndpointsService_basic(t *testing.T) {
 	serviceId := "tf-test" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		CheckDestroy: testAccCheckEndpointServiceDestroyProducer(t),
 		Providers:    TestAccProviders,
 		Steps: []resource.TestStep{
@@ -43,7 +43,7 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 	serviceId := "tf-test" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckEndpointServiceDestroyProducer(t),
 		Steps: []resource.TestStep{

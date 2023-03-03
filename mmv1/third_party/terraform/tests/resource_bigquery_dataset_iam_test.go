@@ -18,7 +18,7 @@ func TestAccBigqueryDatasetIamBinding(t *testing.T) {
 		GetTestProjectFromEnv(), dataset, role)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -63,7 +63,7 @@ func TestAccBigqueryDatasetIamMember(t *testing.T) {
 		serviceAccountCanonicalEmail(account))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -97,7 +97,7 @@ func TestAccBigqueryDatasetIamPolicy(t *testing.T) {
 		GetTestProjectFromEnv(), dataset)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

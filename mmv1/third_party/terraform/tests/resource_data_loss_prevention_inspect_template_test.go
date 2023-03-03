@@ -15,7 +15,7 @@ func TestAccDataLossPreventionInspectTemplate_dlpInspectTemplateUpdate(t *testin
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataLossPreventionInspectTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{

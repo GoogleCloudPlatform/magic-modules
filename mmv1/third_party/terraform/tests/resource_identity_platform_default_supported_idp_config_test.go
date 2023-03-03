@@ -17,7 +17,7 @@ func TestAccIdentityPlatformDefaultSupportedIdpConfig_defaultSupportedIdpConfigU
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckIdentityPlatformDefaultSupportedIdpConfigDestroyProducer(t),
 		Steps: []resource.TestStep{

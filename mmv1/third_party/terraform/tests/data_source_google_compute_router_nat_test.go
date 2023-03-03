@@ -14,7 +14,7 @@ func TestAccDataSourceGoogleComputeRouterNat_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{

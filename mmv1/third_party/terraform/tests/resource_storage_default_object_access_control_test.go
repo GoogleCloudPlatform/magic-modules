@@ -16,7 +16,7 @@ func TestAccStorageDefaultObjectAccessControl_update(t *testing.T) {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			TestAccPreCheck(t)
+			testAccPreCheck(t)
 		},
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckStorageDefaultObjectAccessControlDestroyProducer(t),

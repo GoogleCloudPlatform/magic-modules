@@ -12,7 +12,7 @@ func TestDataSourceGoogleContainerRegistryRepository(t *testing.T) {
 	resourceName := "data.google_container_registry_repository.test"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -46,7 +46,7 @@ func TestDataSourceGoogleContainerRegistryImage(t *testing.T) {
 	resourceName := "data.google_container_registry_image.test"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

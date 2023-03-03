@@ -17,7 +17,7 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -52,7 +52,7 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -101,7 +101,7 @@ func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -136,7 +136,7 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -170,7 +170,7 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -333,7 +333,7 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 
 	for res, config := range configList {
 		VcrTest(t, resource.TestCase{
-			PreCheck:  func() { TestAccPreCheck(t) },
+			PreCheck:  func() { testAccPreCheck(t) },
 			Providers: TestAccProviders,
 			Steps: []resource.TestStep{
 				{

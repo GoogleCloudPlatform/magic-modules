@@ -12,7 +12,7 @@ func TestAccDataSourceGoogleStorageTransferProjectServiceAccount_basic(t *testin
 	resourceName := "data.google_storage_transfer_project_service_account.default"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

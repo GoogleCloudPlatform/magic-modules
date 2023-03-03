@@ -25,7 +25,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureAcmUpdate(t *testing.T) {
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:  func() { TestAccPreCheck(t) },
+    PreCheck:  func() { testAccPreCheck(t) },
     Providers: TestAccProvidersOiCS,
     CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -335,7 +335,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureAcmAllFields(t *testing.T) {
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:  func() { TestAccPreCheck(t) },
+    PreCheck:  func() { testAccPreCheck(t) },
     Providers: TestAccProvidersOiCS,
     CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -594,7 +594,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureAcmOci(t *testing.T) {
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:  func() { TestAccPreCheck(t) },
+    PreCheck:  func() { testAccPreCheck(t) },
     Providers: TestAccProvidersOiCS,
     CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -792,7 +792,7 @@ func TestAccGkeHubFeatureMembership_gkehubFeatureMesh(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{

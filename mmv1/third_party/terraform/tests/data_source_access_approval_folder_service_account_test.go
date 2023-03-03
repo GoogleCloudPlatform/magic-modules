@@ -17,7 +17,7 @@ func TestAccDataSourceAccessApprovalFolderServiceAccount_basic(t *testing.T) {
 	resourceName := "data.google_access_approval_folder_service_account.aa_account"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},

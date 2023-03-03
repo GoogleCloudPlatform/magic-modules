@@ -15,7 +15,7 @@ func TestAccSqlUser_mysql(t *testing.T) {
 
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -52,7 +52,7 @@ func TestAccSqlUser_iamUser(t *testing.T) {
 
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -77,7 +77,7 @@ func TestAccSqlUser_postgres(t *testing.T) {
 
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -110,7 +110,7 @@ func TestAccSqlUser_postgresIAM(t *testing.T) {
 
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -137,7 +137,7 @@ func TestAccSqlUser_postgresAbandon(t *testing.T) {
 	instance := fmt.Sprintf("tf-test-%d", RandInt(t))
 	userName := "admin"
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -252,7 +252,7 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 
 	instance := fmt.Sprintf("tf-test-i%d", RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{

@@ -16,7 +16,7 @@ func TestAccServiceAccountKey_basic(t *testing.T) {
 	accountID := "a" + RandString(t, 10)
 	displayName := "Terraform Test"
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -40,7 +40,7 @@ func TestAccServiceAccountKey_fromEmail(t *testing.T) {
 	accountID := "a" + RandString(t, 10)
 	displayName := "Terraform Test"
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -64,7 +64,7 @@ func TestAccServiceAccountKey_fromCertificate(t *testing.T) {
 	accountID := "a" + RandString(t, 10)
 	displayName := "Terraform Test"
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

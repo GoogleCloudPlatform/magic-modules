@@ -17,7 +17,7 @@ func TestAccDataSourceGoogleKmsCryptoKey_basic(t *testing.T) {
 	cryptoKeyId := keyParts[len(keyParts)-1]
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

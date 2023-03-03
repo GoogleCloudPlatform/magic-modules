@@ -18,7 +18,7 @@ func TestAccDataprocClusterIamBinding(t *testing.T) {
 		GetTestProjectFromEnv(), "us-central1", cluster, role)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -64,7 +64,7 @@ func TestAccDataprocClusterIamMember(t *testing.T) {
 		serviceAccountCanonicalEmail(account))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -98,7 +98,7 @@ func TestAccDataprocClusterIamPolicy(t *testing.T) {
 		GetTestProjectFromEnv(), "us-central1", cluster)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

@@ -17,7 +17,7 @@ func TestAccServiceDirectoryNamespace_serviceDirectoryNamespaceUpdateExample(t *
 	testId := fmt.Sprintf("tf-test-example-namespace%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckServiceDirectoryNamespaceDestroyProducer(t),
 		Steps: []resource.TestStep{

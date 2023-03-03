@@ -26,7 +26,7 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 	bucket := "tf-test-dataflow-bucket-" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -51,7 +51,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 	bucket := "tf-test-dataflow-bucket-" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -82,7 +82,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
 	bucket := "tf-test-dataflow-bucket-" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -116,7 +116,7 @@ func TestAccDataflowFlexTemplateJob_withServiceAccount(t *testing.T) {
 	zone := "us-central1-b"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{

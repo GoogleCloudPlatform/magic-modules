@@ -18,7 +18,7 @@ func TestAccOSLoginSSHPublicKey_osLoginSshKeyExpiry(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},

@@ -28,7 +28,7 @@ func TestAccComputeTargetSslProxy_update(t *testing.T) {
 	var proxy compute.TargetSslProxy
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeTargetSslProxyDestroyProducer(t),
 		Steps: []resource.TestStep{

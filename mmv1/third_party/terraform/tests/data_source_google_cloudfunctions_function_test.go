@@ -18,7 +18,7 @@ func TestAccDataSourceGoogleCloudFunctionsFunction_basic(t *testing.T) {
 	defer os.Remove(zipFilePath) // clean up
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{

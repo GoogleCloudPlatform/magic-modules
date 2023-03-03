@@ -19,7 +19,7 @@ func TestAccIAM2DenyPolicy_iamDenyPolicyUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckIAM2DenyPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -63,7 +63,7 @@ func TestAccIAM2DenyPolicy_iamDenyPolicyFolderParent(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProvidersOiCS,
 		CheckDestroy: testAccCheckIAM2DenyPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{

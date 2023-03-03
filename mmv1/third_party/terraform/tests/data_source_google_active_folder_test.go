@@ -15,7 +15,7 @@ func TestAccDataSourceGoogleActiveFolder_default(t *testing.T) {
 	displayName := "tf-test-" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -35,7 +35,7 @@ func TestAccDataSourceGoogleActiveFolder_space(t *testing.T) {
 	displayName := "terraform test " + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -55,7 +55,7 @@ func TestAccDataSourceGoogleActiveFolder_dash(t *testing.T) {
 	displayName := "terraform - test " + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{

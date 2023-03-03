@@ -17,7 +17,7 @@ func TestAccFirebaseAppleApp_update(t *testing.T) {
                 "display_name":  "tf-test Display Name N",
 	}
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProvidersOiCS,
 		Steps: []resource.TestStep{
 			{

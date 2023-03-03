@@ -14,7 +14,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckContainerAttachedClusterDestroyProducer(t),
 		Steps: []resource.TestStep{

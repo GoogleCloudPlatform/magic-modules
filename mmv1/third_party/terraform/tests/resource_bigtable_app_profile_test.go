@@ -15,7 +15,7 @@ func TestAccBigtableAppProfile_update(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigtableAppProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -49,7 +49,7 @@ func TestAccBigtableAppProfile_ignoreWarnings(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigtableAppProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -74,7 +74,7 @@ func TestAccBigtableAppProfile_multiClusterIds(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigtableAppProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -108,7 +108,7 @@ func TestAccBigtableAppProfile_updateSingleToMulti(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckBigtableAppProfileDestroyProducer(t),
 		Steps: []resource.TestStep{

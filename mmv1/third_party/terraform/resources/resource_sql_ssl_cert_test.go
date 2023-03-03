@@ -13,7 +13,7 @@ func TestAccSqlClientCert_mysql(t *testing.T) {
 
 	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccSqlClientCertDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -33,7 +33,7 @@ func TestAccSqlClientCert_postgres(t *testing.T) {
 
 	instance := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccSqlClientCertDestroyProducer(t),
 		Steps: []resource.TestStep{

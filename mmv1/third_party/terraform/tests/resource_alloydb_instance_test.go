@@ -14,7 +14,7 @@ func TestAccAlloydbInstance_update(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckAlloydbInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{

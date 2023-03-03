@@ -14,7 +14,7 @@ func TestAccIdentityPlatformTenant_identityPlatformTenantUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { TestAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckIdentityPlatformTenantDestroyProducer(t),
 		Steps: []resource.TestStep{

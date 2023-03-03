@@ -108,7 +108,7 @@ func TestAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(t *testing.T)
     }
 
     VcrTest(t, resource.TestCase{
-        PreCheck:     func() { TestAccPreCheck(t) },
+        PreCheck:     func() { testAccPreCheck(t) },
         Providers:    TestAccProviders,
         CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
         Steps: []resource.TestStep{

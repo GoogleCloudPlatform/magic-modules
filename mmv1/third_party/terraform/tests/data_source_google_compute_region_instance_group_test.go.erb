@@ -14,7 +14,7 @@ func TestAccDataSourceRegionInstanceGroup(t *testing.T) {
 	t.Parallel()
 	name := "tf-test-" + RandString(t, 6)
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { TestAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
