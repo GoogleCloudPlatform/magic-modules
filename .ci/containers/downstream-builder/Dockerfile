@@ -17,7 +17,7 @@ RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev unzip sed rsy
 RUN git clone https://github.com/rbenv/rbenv.git /rbenv
 ENV PATH /rbenv/bin:/root/.rbenv/shims:$PATH
 
-ENV RUBY_VERSION 3.2.0
+ENV RUBY_VERSION 3.1.0
 ENV RUBYGEMS_VERSION 3.4.1
 ENV BUNDLER_VERSION 2.4.6
 

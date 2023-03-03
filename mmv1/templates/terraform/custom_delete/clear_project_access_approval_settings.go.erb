@@ -22,7 +22,7 @@ if err != nil {
 	return err
 }
 
-res, err := sendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+res, err := SendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {
 	return fmt.Errorf("Error emptying ProjectSettings %q: %s", d.Id(), err)

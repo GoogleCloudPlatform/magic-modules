@@ -14,7 +14,7 @@ func TestAccLoggingBillingAccountSink_basic(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
-	billingAccount := getTestBillingAccountFromEnv(t)
+	billingAccount := getTestMasterBillingAccountFromEnv(t)
 
 	var sink logging.LogSink
 
@@ -44,7 +44,7 @@ func TestAccLoggingBillingAccountSink_update(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	updatedBucketName := "tf-test-sink-bucket-" + randString(t, 10)
-	billingAccount := getTestBillingAccountFromEnv(t)
+	billingAccount := getTestMasterBillingAccountFromEnv(t)
 
 	var sinkBefore, sinkAfter logging.LogSink
 
@@ -88,7 +88,7 @@ func TestAccLoggingBillingAccountSink_described(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
-	billingAccount := getTestBillingAccountFromEnv(t)
+	billingAccount := getTestMasterBillingAccountFromEnv(t)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -111,7 +111,7 @@ func TestAccLoggingBillingAccountSink_disabled(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
-	billingAccount := getTestBillingAccountFromEnv(t)
+	billingAccount := getTestMasterBillingAccountFromEnv(t)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -134,7 +134,7 @@ func TestAccLoggingBillingAccountSink_updateBigquerySink(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bqDatasetID := "tf_test_sink_" + randString(t, 10)
-	billingAccount := getTestBillingAccountFromEnv(t)
+	billingAccount := getTestMasterBillingAccountFromEnv(t)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -166,7 +166,7 @@ func TestAccLoggingBillingAccountSink_heredoc(t *testing.T) {
 
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
-	billingAccount := getTestBillingAccountFromEnv(t)
+	billingAccount := getTestMasterBillingAccountFromEnv(t)
 
 	var sink logging.LogSink
 
@@ -201,7 +201,7 @@ func testAccCheckLoggingBillingAccountSinkDestroyProducer(t *testing.T) func(s *
 
 			attributes := rs.Primary.Attributes
 
-			_, err := config.NewLoggingClient(config.userAgent).BillingAccounts.Sinks.Get(attributes["id"]).Do()
+			_, err := config.NewLoggingClient(config.UserAgent).BillingAccounts.Sinks.Get(attributes["id"]).Do()
 			if err == nil {
 				return fmt.Errorf("billing sink still exists")
 			}
@@ -219,7 +219,7 @@ func testAccCheckLoggingBillingAccountSinkExists(t *testing.T, n string, sink *l
 		}
 		config := googleProviderConfig(t)
 
-		si, err := config.NewLoggingClient(config.userAgent).BillingAccounts.Sinks.Get(attributes["id"]).Do()
+		si, err := config.NewLoggingClient(config.UserAgent).BillingAccounts.Sinks.Get(attributes["id"]).Do()
 		if err != nil {
 			return err
 		}
