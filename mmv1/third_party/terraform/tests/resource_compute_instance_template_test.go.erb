@@ -327,7 +327,7 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
-					testAccCheckComputeInstanceTemplateMaintenanceIntervalNil(&instanceTemplate),
+					testAccCheckComputeInstanceTemplateMaintenanceInterval(&instanceTemplate, ""),
 				),
 			},
 		},
@@ -1449,17 +1449,6 @@ func testAccCheckComputeInstanceTemplateMaintenanceInterval(instanceTemplate *co
 	return func(s *terraform.State) error {
 		if instanceTemplate.Properties.Scheduling.MaintenanceInterval != maintenance_interval {
 			return fmt.Errorf("Expected maintenance interval value %v, got %v", maintenance_interval, instanceTemplate.Properties.Scheduling.MaintenanceInterval)
-		}
-		return nil
-	}
-}
-<% end -%>
-
-<% unless version == "ga" -%>
-func testAccCheckComputeInstanceTemplateMaintenanceIntervalNil(instanceTemplate *compute.InstanceTemplate) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		if instanceTemplate.Properties.Scheduling.MaintenanceInterval != "" {
-			return fmt.Errorf("Expected maintenance interval value nil, got %v", instanceTemplate.Properties.Scheduling.MaintenanceInterval)
 		}
 		return nil
 	}
