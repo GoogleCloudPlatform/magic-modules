@@ -27,12 +27,12 @@ func datasourceContainerClusterRead(d *schema.ResourceData, meta interface{}) er
 
 	clusterName := d.Get("name").(string)
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

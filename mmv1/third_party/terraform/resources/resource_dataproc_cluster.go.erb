@@ -1302,7 +1302,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1665,7 +1665,7 @@ func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.G
 		conf.InternalIpOnly = v.(bool)
 	}
 	if v, ok := cfg["metadata"]; ok {
-		conf.Metadata = convertStringMap(v.(map[string]interface{}))
+		conf.Metadata = ConvertStringMap(v.(map[string]interface{}))
 	}
 	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.shielded_instance_config"); ok {
 		cfgSic := v.([]interface{})[0].(map[string]interface{})
@@ -1952,7 +1952,7 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -2059,7 +2059,7 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -2541,7 +2541,7 @@ func resourceDataprocClusterDelete(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

@@ -69,7 +69,7 @@ func resourceComputeProjectMetadataItemCreate(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	projectID, err := getProject(d, config)
+	projectID, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func resourceComputeProjectMetadataItemRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	projectID, err := getProject(d, config)
+	projectID, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func resourceComputeProjectMetadataItemUpdate(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	projectID, err := getProject(d, config)
+	projectID, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func resourceComputeProjectMetadataItemDelete(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	projectID, err := getProject(d, config)
+	projectID, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

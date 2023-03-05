@@ -4,7 +4,7 @@ if d.Get("noop_on_destroy") == true {
 	return nil
 }
 
-project, err := getProject(d, config)
+project, err := GetProject(d, config)
 if err != nil {
 	return err
 }

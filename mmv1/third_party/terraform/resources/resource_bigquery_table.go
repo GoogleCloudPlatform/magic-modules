@@ -982,7 +982,7 @@ func ResourceBigQueryTable() *schema.Resource {
 func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, error) {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -1063,7 +1063,7 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 
 	if v, ok := d.GetOk("clustering"); ok {
 		table.Clustering = &bigquery.Clustering{
-			Fields:          convertStringArr(v.([]interface{})),
+			Fields:          ConvertStringArr(v.([]interface{})),
 			ForceSendFields: []string{"Fields"},
 		}
 	}
@@ -1078,7 +1078,7 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1137,7 +1137,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] Reading BigQuery table: %s", d.Id())
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1293,7 +1293,7 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[INFO] Updating BigQuery table: %s", d.Id())
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1320,7 +1320,7 @@ func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[INFO] Deleting BigQuery table: %s", d.Id())
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

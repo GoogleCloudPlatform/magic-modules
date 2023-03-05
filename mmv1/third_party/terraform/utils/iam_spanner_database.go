@@ -38,7 +38,7 @@ type SpannerDatabaseIamUpdater struct {
 }
 
 func NewSpannerDatabaseIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (u *SpannerDatabaseIamUpdater) GetResourceId() string {
 		Project:  u.project,
 		Instance: u.instance,
 		Database: u.database,
-	}.terraformId()
+	}.TerraformId()
 }
 
 func (u *SpannerDatabaseIamUpdater) GetMutexKey() string {

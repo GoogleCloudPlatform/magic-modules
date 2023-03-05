@@ -460,7 +460,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -905,9 +905,9 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
 		corsRule := storage.BucketCors{
-			Origin:         convertStringArr(data["origin"].([]interface{})),
-			Method:         convertStringArr(data["method"].([]interface{})),
-			ResponseHeader: convertStringArr(data["response_header"].([]interface{})),
+			Origin:         ConvertStringArr(data["origin"].([]interface{})),
+			Method:         ConvertStringArr(data["method"].([]interface{})),
+			ResponseHeader: ConvertStringArr(data["response_header"].([]interface{})),
 			MaxAgeSeconds:  int64(data["max_age_seconds"].(int)),
 		}
 
@@ -1514,7 +1514,7 @@ func setStorageBucket(d *schema.ResourceData, config *Config, res *storage.Bucke
 	// block, or the resource or an environment variable, we use the compute API to lookup the projectID
 	// from the projectNumber which is included in the bucket API response
 	if d.Get("project") == "" {
-		project, _ := getProject(d, config)
+		project, _ := GetProject(d, config)
 		if err := d.Set("project", project); err != nil {
 			return fmt.Errorf("Error setting project: %s", err)
 		}

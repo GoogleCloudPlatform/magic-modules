@@ -530,12 +530,12 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -615,12 +615,12 @@ type getInstanceManagerFunc func(*schema.ResourceData, interface{}) (*compute.In
 func getRegionalManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGroupManager, error) {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -686,7 +686,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 		return nil
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -787,12 +787,12 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -938,12 +938,12 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

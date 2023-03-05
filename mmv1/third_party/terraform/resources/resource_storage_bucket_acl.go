@@ -96,7 +96,7 @@ func getBucketAclId(bucket string) string {
 	return bucket + "-acl"
 }
 
-func getRoleEntityPair(role_entity string) (*RoleEntity, error) {
+func GetRoleEntityPair(role_entity string) (*RoleEntity, error) {
 	split := strings.Split(role_entity, ":")
 	if len(split) != 2 {
 		return nil, fmt.Errorf("Error, each role entity pair must be " +
@@ -159,7 +159,7 @@ func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) er
 			return fmt.Errorf("Error retrieving current ACLs: %s", err)
 		}
 		for _, v := range role_entity {
-			pair, err := getRoleEntityPair(v.(string))
+			pair, err := GetRoleEntityPair(v.(string))
 			if err != nil {
 				return err
 			}
@@ -281,7 +281,7 @@ func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) er
 
 		old_re_map := make(map[string]string)
 		for _, v := range old_re {
-			res, err := getRoleEntityPair(v.(string))
+			res, err := GetRoleEntityPair(v.(string))
 
 			if err != nil {
 				return fmt.Errorf(
@@ -292,7 +292,7 @@ func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		for _, v := range new_re {
-			pair, err := getRoleEntityPair(v.(string))
+			pair, err := GetRoleEntityPair(v.(string))
 
 			bucketAccessControl := &storage.BucketAccessControl{
 				Role:   pair.Role,
@@ -375,7 +375,7 @@ func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) er
 
 	re_local := d.Get("role_entity").([]interface{})
 	for _, v := range re_local {
-		res, err := getRoleEntityPair(v.(string))
+		res, err := GetRoleEntityPair(v.(string))
 		if err != nil {
 			return err
 		}

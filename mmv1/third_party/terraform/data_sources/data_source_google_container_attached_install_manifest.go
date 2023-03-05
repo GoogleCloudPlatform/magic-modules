@@ -45,12 +45,12 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 	clusterId := d.Get("cluster_id").(string)
 	platformVersion := d.Get("platform_version").(string)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 		"attached_cluster_id": clusterId,
 		"platform_version":    platformVersion,
 	}
-	url, err = addQueryParams(url, params)
+	url, err = AddQueryParams(url, params)
 	if err != nil {
 		return err
 	}

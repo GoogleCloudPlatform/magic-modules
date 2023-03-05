@@ -120,12 +120,12 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -221,12 +221,12 @@ func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -291,12 +291,12 @@ func resourceComputeRouterInterfaceDelete(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

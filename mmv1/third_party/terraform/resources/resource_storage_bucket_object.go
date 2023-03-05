@@ -312,7 +312,7 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	if v, ok := d.GetOk("metadata"); ok {
-		object.Metadata = convertStringMap(v.(map[string]interface{}))
+		object.Metadata = ConvertStringMap(v.(map[string]interface{}))
 	}
 
 	if v, ok := d.GetOk("storage_class"); ok {

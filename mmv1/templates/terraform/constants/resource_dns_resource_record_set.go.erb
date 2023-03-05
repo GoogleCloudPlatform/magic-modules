@@ -4,8 +4,8 @@ func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		return false
 	}
 
-	oList := convertStringArr(o.([]interface{}))
-	nList := convertStringArr(n.([]interface{}))
+	oList := ConvertStringArr(o.([]interface{}))
+	nList := ConvertStringArr(n.([]interface{}))
 
 	parseFunc := func(record string) string {
 		switch d.Get("type") {

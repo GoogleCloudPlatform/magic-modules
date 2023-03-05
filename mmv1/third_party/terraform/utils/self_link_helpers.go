@@ -112,19 +112,19 @@ func getResourcePropertiesFromSelfLinkOrSchema(d *schema.ResourceData, config *C
 	if selfLink, ok := d.GetOk("self_link"); ok {
 		return GetLocationalResourcePropertiesFromSelfLinkString(selfLink.(string))
 	} else {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return "", "", "", err
 		}
 
 		location := ""
 		if locationType == Regional {
-			location, err = getRegion(d, config)
+			location, err = GetRegion(d, config)
 			if err != nil {
 				return "", "", "", err
 			}
 		} else if locationType == Zonal {
-			location, err = getZone(d, config)
+			location, err = GetZone(d, config)
 			if err != nil {
 				return "", "", "", err
 			}

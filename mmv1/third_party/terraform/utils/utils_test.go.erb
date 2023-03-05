@@ -25,7 +25,7 @@ func TestConvertStringArr(t *testing.T) {
 	input[2] = "aaa"
 
 	expected := []string{"aaa", "bbb", "ccc"}
-	actual := convertStringArr(input)
+	actual := google.ConvertStringArr(input)
 
 	if reflect.DeepEqual(expected, actual) {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
@@ -39,7 +39,7 @@ func TestConvertAndMapStringArr(t *testing.T) {
 	input[2] = "aaa"
 
 	expected := []string{"AAA", "BBB", "CCC"}
-	actual := convertAndMapStringArr(input, strings.ToUpper)
+	actual := google.ConvertAndMapStringArr(input, strings.ToUpper)
 
 	if reflect.DeepEqual(expected, actual) {
 		t.Fatalf("(%s) did not match expected value: %s", actual, expected)
@@ -53,7 +53,7 @@ func TestConvertStringMap(t *testing.T) {
 	input["three"] = "3"
 
 	expected := map[string]string{"one": "1", "two": "2", "three": "3"}
-	actual := convertStringMap(input)
+	actual := google.ConvertStringMap(input)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("%s did not match expected value: %s", actual, expected)
@@ -141,48 +141,48 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 		},
 	}
 	for tn, tc := range cases {
-		if rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if google.Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, '%s' => '%s' expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
 }
 
 func TestGetZone(t *testing.T) {
-	d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
+	d := schema.TestResourceDataRaw(t, google.ResourceComputeDisk().Schema, map[string]interface{}{
 		"zone": "foo",
 	})
-	var config Config
+	var config google.Config
 	if err := d.Set("zone", "foo"); err != nil {
 		t.Fatalf("Cannot set zone: %s", err)
 	}
-	if zone, err := getZone(d, &config); err != nil || zone != "foo" {
+	if zone, err := google.GetZone(d, &config); err != nil || zone != "foo" {
 		t.Fatalf("Zone '%s' != 'foo', %s", zone, err)
 	}
 	config.Zone = "bar"
-	if zone, err := getZone(d, &config); err != nil || zone != "foo" {
+	if zone, err := google.GetZone(d, &config); err != nil || zone != "foo" {
 		t.Fatalf("Zone '%s' != 'foo', %s", zone, err)
 	}
 	if err := d.Set("zone", ""); err != nil {
 		t.Fatalf("Error setting zone: %s", err)
 	}
-	if zone, err := getZone(d, &config); err != nil || zone != "bar" {
+	if zone, err := google.GetZone(d, &config); err != nil || zone != "bar" {
 		t.Fatalf("Zone '%s' != 'bar', %s", zone, err)
 	}
 	config.Zone = ""
-	if zone, err := getZone(d, &config); err == nil || zone != "" {
+	if zone, err := google.GetZone(d, &config); err == nil || zone != "" {
 		t.Fatalf("Zone '%s' != '', err=%s", zone, err)
 	}
 }
 
 func TestGetRegion(t *testing.T) {
-	d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
+	d := schema.TestResourceDataRaw(t, google.ResourceComputeDisk().Schema, map[string]interface{}{
 		"zone": "foo",
 	})
-	var config Config
-	barRegionName := GetRegionFromZone("bar")
-	fooRegionName := GetRegionFromZone("foo")
+	var config google.Config
+	barRegionName := google.GetRegionFromZone("bar")
+	fooRegionName := google.GetRegionFromZone("foo")
 
-	if region, err := getRegion(d, &config); err != nil || region != fooRegionName {
+	if region, err := google.GetRegion(d, &config); err != nil || region != fooRegionName {
 		t.Fatalf("Zone '%s' != '%s', %s", region, fooRegionName, err)
 	}
 
@@ -190,11 +190,11 @@ func TestGetRegion(t *testing.T) {
 	if err := d.Set("zone", ""); err != nil {
 		t.Fatalf("Error setting zone: %s", err)
 	}
-	if region, err := getRegion(d, &config); err != nil || region != barRegionName {
+	if region, err := google.GetRegion(d, &config); err != nil || region != barRegionName {
 		t.Fatalf("Zone '%s' != '%s', %s", region, barRegionName, err)
 	}
 	config.Region = "something-else"
-	if region, err := getRegion(d, &config); err != nil || region != config.Region {
+	if region, err := google.GetRegion(d, &config); err != nil || region != config.Region {
 		t.Fatalf("Zone '%s' != '%s', %s", region, config.Region, err)
 	}
 }

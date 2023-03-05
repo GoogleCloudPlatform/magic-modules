@@ -60,7 +60,7 @@ func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceDa
 		return err
 	}
 
-	projectID, err := getProject(d, config)
+	projectID, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

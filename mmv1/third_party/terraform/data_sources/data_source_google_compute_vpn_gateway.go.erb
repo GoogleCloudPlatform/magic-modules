@@ -59,12 +59,12 @@ func dataSourceGoogleComputeVpnGatewayRead(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

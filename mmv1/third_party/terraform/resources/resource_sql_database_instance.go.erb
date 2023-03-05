@@ -927,12 +927,12 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -1150,7 +1150,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}) *sqladmin.Setti
 		DataDiskType:               _settings["disk_type"].(string),
 		PricingPlan:                _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:  _settings["deletion_protection_enabled"].(bool),
-		UserLabels:                 convertStringMap(_settings["user_labels"].(map[string]interface{})),
+		UserLabels:                 ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:        expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:              expandDatabaseFlags(_settings["database_flags"].([]interface{})),
 		IpConfiguration:            expandIpConfiguration(_settings["ip_configuration"].([]interface{})),
@@ -1394,7 +1394,7 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1500,7 +1500,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1736,7 +1736,7 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

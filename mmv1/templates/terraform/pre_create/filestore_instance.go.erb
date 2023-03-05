@@ -1,5 +1,5 @@
     if d.Get("location") == "" {
-        zone, err := getZone(d, config)
+        zone, err := GetZone(d, config)
         if err != nil {
             return err
         }

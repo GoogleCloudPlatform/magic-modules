@@ -25,12 +25,12 @@ func DataSourceArtifactRegistryRepository() *schema.Resource {
 func dataSourceArtifactRegistryRepositoryRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}

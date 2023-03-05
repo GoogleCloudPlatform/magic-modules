@@ -25,11 +25,11 @@ func DataSourceGoogleComputeRegionNetworkEndpointGroup() *schema.Resource {
 func dataSourceComputeRegionNetworkEndpointGroupRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	if name, ok := d.GetOk("name"); ok {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return err
 		}
-		region, err := getRegion(d, config)
+		region, err := GetRegion(d, config)
 		if err != nil {
 			return err
 		}

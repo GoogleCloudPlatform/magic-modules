@@ -85,7 +85,7 @@ func dataSourceGoogleFirebaseWebappConfigRead(d *schema.ResourceData, meta inter
 
 	id := d.Get("web_app_id").(string)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

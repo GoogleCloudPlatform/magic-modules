@@ -84,7 +84,7 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -160,7 +160,7 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 
 	nObj["etag"] = oObj["etag"]
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{})
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

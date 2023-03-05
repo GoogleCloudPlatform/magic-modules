@@ -47,7 +47,7 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

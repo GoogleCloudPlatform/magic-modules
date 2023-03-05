@@ -17,7 +17,7 @@
 	updateMask := []string{}
 
  	updateMask = append(updateMask, "status")
-	url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
 	}

@@ -23,8 +23,8 @@ func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		return false
 	}
 
-	oList := convertStringArr(o.([]interface{}))
-	nList := convertStringArr(n.([]interface{}))
+	oList := ConvertStringArr(o.([]interface{}))
+	nList := ConvertStringArr(n.([]interface{}))
 
 	parseFunc := func(record string) string {
 		switch d.Get("type") {
@@ -304,7 +304,7 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -384,7 +384,7 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -445,7 +445,7 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -518,7 +518,7 @@ func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -613,7 +613,7 @@ func resourceDnsRecordSetImportState(d *schema.ResourceData, meta interface{}) (
 }
 
 func expandDnsRecordSetRrdata(configured []interface{}) []string {
-	return convertStringArr(configured)
+	return ConvertStringArr(configured)
 }
 
 func expandDnsRecordSetRoutingPolicy(configured []interface{}, d TerraformResourceData, config *Config) (*dns.RRSetRoutingPolicy, error) {
@@ -683,7 +683,7 @@ func expandDnsRecordSetRoutingPolicyWrrItem(configured interface{}, d TerraformR
 		return nil, err
 	}
 	return &dns.RRSetRoutingPolicyWrrPolicyWrrPolicyItem{
-		Rrdatas:              convertStringArr(data["rrdatas"].([]interface{})),
+		Rrdatas:              ConvertStringArr(data["rrdatas"].([]interface{})),
 		Weight:               data["weight"].(float64),
 		HealthCheckedTargets: healthCheckedTargets,
 	}, nil
@@ -708,7 +708,7 @@ func expandDnsRecordSetRoutingPolicyGeoItem(configured interface{}, d TerraformR
 		return nil, err
 	}
 	return &dns.RRSetRoutingPolicyGeoPolicyGeoPolicyItem{
-		Rrdatas:              convertStringArr(data["rrdatas"].([]interface{})),
+		Rrdatas:              ConvertStringArr(data["rrdatas"].([]interface{})),
 		Location:             data["location"].(string),
 		HealthCheckedTargets: healthCheckedTargets,
 	}, nil

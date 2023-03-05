@@ -437,7 +437,7 @@ func expandListOrganizationPolicy(configured []interface{}) (*cloudresourcemanag
 		if all {
 			allValues = "ALLOW"
 		} else {
-			allowedValues = convertStringArr(values.List())
+			allowedValues = ConvertStringArr(values.List())
 		}
 	}
 
@@ -449,7 +449,7 @@ func expandListOrganizationPolicy(configured []interface{}) (*cloudresourcemanag
 		if all {
 			allValues = "DENY"
 		} else {
-			deniedValues = convertStringArr(values.List())
+			deniedValues = ConvertStringArr(values.List())
 		}
 	}
 

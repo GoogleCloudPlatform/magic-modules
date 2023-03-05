@@ -96,7 +96,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             }
             at := copy["require_attestations_by"].(*schema.Set)
             if at != nil {
-              t := convertAndMapStringArr(at.List(), GetResourceNameFromSelfLink)
+              t := ConvertAndMapStringArr(at.List(), GetResourceNameFromSelfLink)
               copy["require_attestations_by"] = schema.NewSet(selfLinkNameHash, convertStringArrToInterface(t))
             }
             var buf bytes.Buffer

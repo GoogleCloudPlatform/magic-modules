@@ -83,11 +83,11 @@ func DataSourceGoogleComputeInstanceGroup() *schema.Resource {
 func dataSourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	if name, ok := d.GetOk("name"); ok {
-		zone, err := getZone(d, config)
+		zone, err := GetZone(d, config)
 		if err != nil {
 			return err
 		}
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return err
 		}

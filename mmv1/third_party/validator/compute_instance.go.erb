@@ -54,7 +54,7 @@ func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) ([]Ass
 }
 
 func GetComputeInstanceApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}

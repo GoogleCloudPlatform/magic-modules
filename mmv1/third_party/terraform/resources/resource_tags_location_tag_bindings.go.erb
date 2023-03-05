@@ -170,7 +170,7 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 	//if there are more than 300 bindings - handling pagination over here
 	if pageToken, ok := res["nextPageToken"].(string); ok {
 		for pageToken != "" {
-			url, err = addQueryParams(url, map[string]string{"pageToken": fmt.Sprintf("%s", res["nextPageToken"])})
+			url, err = AddQueryParams(url, map[string]string{"pageToken": fmt.Sprintf("%s", res["nextPageToken"])})
 			if err != nil {
 				return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 			}

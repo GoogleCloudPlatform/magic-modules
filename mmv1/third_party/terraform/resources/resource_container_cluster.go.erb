@@ -943,7 +943,7 @@ func ResourceContainerCluster() *schema.Resource {
 										Type:             schema.TypeString,
 										Required:         true,
 										ValidateFunc:     validateRFC3339Time,
-										DiffSuppressFunc: rfc3339TimeDiffSuppress,
+										DiffSuppressFunc: Rfc3339TimeDiffSuppress,
 									},
 									"duration": {
 										Type:     schema.TypeString,
@@ -1914,12 +1914,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -2226,12 +2226,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -2526,12 +2526,12 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -3438,7 +3438,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		resourceLabels := d.Get("resource_labels").(map[string]interface{})
 		labelFingerprint := d.Get("label_fingerprint").(string)
 		req := &container.SetLabelsRequest{
-			ResourceLabels:   convertStringMap(resourceLabels),
+			ResourceLabels:   ConvertStringMap(resourceLabels),
 			LabelFingerprint: labelFingerprint,
 		}
 		updateF := func() error {
@@ -3580,7 +3580,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
 				DesiredNodePoolAutoConfigNetworkTags: &container.NetworkTags{
-					Tags:            convertStringArr(tags),
+					Tags:            ConvertStringArr(tags),
 					ForceSendFields: []string{"Tags"},
 				},
 			},
@@ -3646,12 +3646,12 @@ func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -3717,12 +3717,12 @@ func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) er
 func cleanFailedContainerCluster(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return err
 	}
@@ -3927,8 +3927,8 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	// We have to perform a full Get() as part of this, to get the fingerprint.  We can't do this
 	// at any other time, because the fingerprint update might happen between plan and apply.
 	// We can omit error checks, since to have gotten this far, a project is definitely configured.
-	project, _ := getProject(d, config)
-	location, _ := getLocation(d, config)
+	project, _ := GetProject(d, config)
+	location, _ := GetLocation(d, config)
 	clusterName := d.Get("name").(string)
 	name := containerClusterFullName(project, location, clusterName)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
@@ -4080,7 +4080,7 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	config := l[0].(map[string]interface{})
 
 	npd := &container.AutoprovisioningNodePoolDefaults{
-		OauthScopes:      convertStringArr(config["oauth_scopes"].([]interface{})),
+		OauthScopes:      ConvertStringArr(config["oauth_scopes"].([]interface{})),
 		ServiceAccount:   config["service_account"].(string),
 		DiskSizeGb:       int64(config["disk_size"].(int)),
 		DiskType:         config["disk_type"].(string),
@@ -4228,7 +4228,7 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 				filter := vv.([]interface{})[0].(map[string]interface{})
 				eventType := filter["event_type"].([]interface{})
 				nc.Pubsub.Filter = &container.Filter{
-					EventType: convertStringArr(eventType),
+					EventType: ConvertStringArr(eventType),
 				}
 			}
 
@@ -4581,7 +4581,7 @@ func expandContainerClusterLoggingConfig(configured interface{}) *container.Logg
 	var components []string
 	if l[0] != nil {
 		config := l[0].(map[string]interface{})
-		components = convertStringArr(config["enable_components"].([]interface{}))
+		components = ConvertStringArr(config["enable_components"].([]interface{}))
 	}
 
 	return &container.LoggingConfig{
@@ -4602,7 +4602,7 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	if v, ok := config["enable_components"]; ok {
 		enable_components := v.([]interface{})
 		mc.ComponentConfig = &container.MonitoringComponentConfig{
-			EnableComponents: convertStringArr(enable_components),
+			EnableComponents: ConvertStringArr(enable_components),
 		}
 	}
 	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
@@ -4698,7 +4698,7 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) *container.Netw
 	config := l[0].(map[string]interface{})
 
 	if v, ok := config["tags"]; ok && len(v.([]interface{})) > 0 {
-		nt.Tags = convertStringArr(v.([]interface{}))
+		nt.Tags = ConvertStringArr(v.([]interface{}))
 	}
 	return nt
 }
@@ -5422,12 +5422,12 @@ func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interfac
 	if err := ParseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -5455,12 +5455,12 @@ func containerClusterFullName(project, location, cluster string) string {
 }
 
 func extractNodePoolInformationFromCluster(d *schema.ResourceData, config *Config, clusterName string) (*NodePoolInformation, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -5496,16 +5496,16 @@ func containerClusterAddedScopesSuppress(k, old, new string, d *schema.ResourceD
 	}
 
 	// combine what the default scopes are with what was passed
-	m := golangSetFromStringSlice(append(addedScopes, convertStringArr(n.([]interface{}))...))
+	m := golangSetFromStringSlice(append(addedScopes, ConvertStringArr(n.([]interface{}))...))
 	combined := stringSliceFromGolangSet(m)
 
 	// compare if the combined new scopes and default scopes differ from the old scopes
-	if len(combined) != len(convertStringArr(o.([]interface{}))) {
+	if len(combined) != len(ConvertStringArr(o.([]interface{}))) {
 		return false
 	}
 
 	for _, i := range combined {
-		if StringInSlice(convertStringArr(o.([]interface{})), i) {
+		if StringInSlice(ConvertStringArr(o.([]interface{})), i) {
 			continue
 		}
 

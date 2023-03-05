@@ -61,7 +61,7 @@ func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return err
 	}
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

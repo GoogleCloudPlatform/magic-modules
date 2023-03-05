@@ -50,7 +50,7 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) err
 	}
 
 	location := d.Get("location").(string)
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

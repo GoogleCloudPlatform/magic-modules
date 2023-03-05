@@ -46,7 +46,7 @@ func dataSourceGoogleAppEngineDefaultServiceAccountRead(d *schema.ResourceData, 
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

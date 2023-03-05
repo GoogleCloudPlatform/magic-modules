@@ -334,7 +334,7 @@ func TestAccStorageObjectAcl_noOwner(t *testing.T) {
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	provider := Provider()
+	provider := google.Provider()
 	oldConfigureFunc := provider.ConfigureContextFunc
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		c, diagnostics := oldConfigureFunc(ctx, d)
@@ -365,7 +365,7 @@ func TestAccStorageObjectAcl_noOwner(t *testing.T) {
 
 func testAccCheckGoogleStorageObjectAcl(t *testing.T, bucket, object, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		roleEntity, _ := getRoleEntityPair(roleEntityS)
+		roleEntity, _ := google.GetRoleEntityPair(roleEntityS)
 		config := acctest.GoogleProviderConfig(t)
 
 		res, err := config.NewStorageClient(config.UserAgent).ObjectAccessControls.Get(bucket,
@@ -385,7 +385,7 @@ func testAccCheckGoogleStorageObjectAcl(t *testing.T, bucket, object, roleEntity
 
 func testAccCheckGoogleStorageObjectAclDelete(t *testing.T, bucket, object, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		roleEntity, _ := getRoleEntityPair(roleEntityS)
+		roleEntity, _ := google.GetRoleEntityPair(roleEntityS)
 		config := acctest.GoogleProviderConfig(t)
 
 		_, err := config.NewStorageClient(config.UserAgent).ObjectAccessControls.Get(bucket,

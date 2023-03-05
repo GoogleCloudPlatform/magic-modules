@@ -57,7 +57,7 @@ func resourceRuntimeconfigConfigCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func resourceRuntimeconfigConfigRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 	// Check to see if project matches our current defined value - if it doesn't, we'll explicitly set it
-	curProject, err := getProject(d, config)
+	curProject, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

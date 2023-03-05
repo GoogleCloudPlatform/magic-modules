@@ -100,13 +100,13 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
 	// Get the zone
-	z, err := getZone(d, config)
+	z, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}

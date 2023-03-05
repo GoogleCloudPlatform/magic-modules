@@ -75,7 +75,7 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *Config) 
 
 func setDefaultValues(idRegex string, d TerraformResourceData, config *Config) error {
 	if _, ok := d.GetOk("project"); !ok && strings.Contains(idRegex, "?P<project>") {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return err
 		}
@@ -84,7 +84,7 @@ func setDefaultValues(idRegex string, d TerraformResourceData, config *Config) e
 		}
 	}
 	if _, ok := d.GetOk("region"); !ok && strings.Contains(idRegex, "?P<region>") {
-		region, err := getRegion(d, config)
+		region, err := GetRegion(d, config)
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ func setDefaultValues(idRegex string, d TerraformResourceData, config *Config) e
 		}
 	}
 	if _, ok := d.GetOk("zone"); !ok && strings.Contains(idRegex, "?P<zone>") {
-		zone, err := getZone(d, config)
+		zone, err := GetZone(d, config)
 		if err != nil {
 			return err
 		}
@@ -159,15 +159,15 @@ func getImportIdQualifiers(idRegexes []string, d TerraformResourceData, config *
 func getDefaultValues(idRegex string, d TerraformResourceData, config *Config) (map[string]string, error) {
 	result := make(map[string]string)
 	if _, ok := d.GetOk("project"); !ok && strings.Contains(idRegex, "?P<project>") {
-		project, _ := getProject(d, config)
+		project, _ := GetProject(d, config)
 		result["project"] = project
 	}
 	if _, ok := d.GetOk("region"); !ok && strings.Contains(idRegex, "?P<region>") {
-		region, _ := getRegion(d, config)
+		region, _ := GetRegion(d, config)
 		result["region"] = region
 	}
 	if _, ok := d.GetOk("zone"); !ok && strings.Contains(idRegex, "?P<zone>") {
-		zone, _ := getZone(d, config)
+		zone, _ := GetZone(d, config)
 		result["zone"] = zone
 	}
 	return result, nil

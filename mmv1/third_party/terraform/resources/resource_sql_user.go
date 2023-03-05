@@ -213,7 +213,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -290,7 +290,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -415,7 +415,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("password") || d.HasChange("password_policy") {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return err
 		}
@@ -472,7 +472,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

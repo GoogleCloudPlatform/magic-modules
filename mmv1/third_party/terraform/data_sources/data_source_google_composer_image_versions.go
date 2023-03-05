@@ -49,12 +49,12 @@ func dataSourceGoogleComposerImageVersionsRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

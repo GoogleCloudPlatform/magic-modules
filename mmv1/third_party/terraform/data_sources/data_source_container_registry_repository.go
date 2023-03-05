@@ -30,7 +30,7 @@ func DataSourceGoogleContainerRepo() *schema.Resource {
 
 func containerRegistryRepoRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

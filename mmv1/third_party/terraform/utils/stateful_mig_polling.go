@@ -21,7 +21,7 @@ func resourceComputePerInstanceConfigPollRead(d *schema.ResourceData, meta inter
 			return nil, err
 		}
 
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -53,7 +53,7 @@ func resourceComputeRegionPerInstanceConfigPollRead(d *schema.ResourceData, meta
 			return nil, err
 		}
 
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +84,7 @@ func findInstanceName(d *schema.ResourceData, config *Config) (string, error) {
 		return "", err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return "", err
 	}

@@ -14,7 +14,7 @@ if v, ok := res["authEnabled"].(bool); ok {
 
 		billingProject := ""
 
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return nil, fmt.Errorf("Error fetching project for Instance: %s", err)
 		}

@@ -206,7 +206,7 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 	log.Printf("[DEBUG] Creating new Bucket: %#v", obj)
 	billingProject := ""
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -299,7 +299,7 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	if d.HasChange("cmek_settings") {
 		updateMask = append(updateMask, "cmekSettings")
 	}
-	url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
 	}

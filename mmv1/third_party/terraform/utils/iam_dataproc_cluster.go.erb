@@ -39,12 +39,12 @@ type DataprocClusterIamUpdater struct {
 }
 
 func NewDataprocClusterUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return nil, err
 	}

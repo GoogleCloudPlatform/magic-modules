@@ -27,12 +27,12 @@ func dataSourceGoogleComputeForwardingRuleRead(d *schema.ResourceData, meta inte
 
 	name := d.Get("name").(string)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

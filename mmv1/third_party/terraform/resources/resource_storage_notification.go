@@ -100,7 +100,7 @@ func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{})
 	topicName := d.Get("topic").(string)
 	computedTopicName := GetComputedTopicName("", topicName)
 	if computedTopicName != topicName {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return err
 		}
@@ -132,7 +132,7 @@ func resourceStorageNotificationRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
+	bucket, notificationID := ResourceStorageNotificationParseID(d.Id())
 
 	res, err := config.NewStorageClient(userAgent).Notifications.Get(bucket, notificationID).Do()
 	if err != nil {
@@ -174,7 +174,7 @@ func resourceStorageNotificationDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
+	bucket, notificationID := ResourceStorageNotificationParseID(d.Id())
 
 	err = config.NewStorageClient(userAgent).Notifications.Delete(bucket, notificationID).Do()
 	if err != nil {
@@ -184,7 +184,7 @@ func resourceStorageNotificationDelete(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func resourceStorageNotificationParseID(id string) (string, string) {
+func ResourceStorageNotificationParseID(id string) (string, string) {
 	//bucket, NotificationID
 	parts := strings.Split(id, "/")
 

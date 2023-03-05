@@ -134,7 +134,7 @@ func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) (
 func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -237,7 +237,7 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 		return nil
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

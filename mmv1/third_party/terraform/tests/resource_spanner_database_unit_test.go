@@ -3,13 +3,11 @@ package google
 import (
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta"
 )
 
 // Unit Tests for type SpannerDatabaseId
 func TestDatabaseNameForApi(t *testing.T) {
-	id := google.SpannerDatabaseId{
+	id := SpannerDatabaseId{
 		Project:  "project123",
 		Instance: "instance456",
 		Database: "db789",
@@ -79,7 +77,7 @@ func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncForceNew(t *testing.T
 	}
 
 	for tn, tc := range cases {
-		d := &google.ResourceDiffMock{
+		d := &ResourceDiffMock{
 			Before: map[string]interface{}{
 				"ddl": tc.before,
 			},
@@ -154,7 +152,7 @@ func TestValidateDatabaseRetentionPeriod(t *testing.T) {
 
 	for tn, tc := range testCases {
 		t.Run(tn, func(t *testing.T) {
-			_, errs := google.ValidateDatabaseRetentionPeriod(tc.input, "foobar")
+			_, errs := ValidateDatabaseRetentionPeriod(tc.input, "foobar")
 			var wantErrCount string
 			if tc.expectError {
 				wantErrCount = "1+"

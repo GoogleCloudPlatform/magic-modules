@@ -38,12 +38,12 @@ func dataSourceTpuTensorFlowVersionsRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}

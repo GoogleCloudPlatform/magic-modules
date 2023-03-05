@@ -1,6 +1,6 @@
 config := meta.(*Config)
 
-zone, err := getZone(d, config)
+zone, err := GetZone(d, config)
 if err != nil {
 	return nil, err
 }

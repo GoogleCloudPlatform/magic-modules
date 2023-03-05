@@ -38,7 +38,7 @@ func GetServiceAccountCaiObject(d TerraformResourceData, config *Config) ([]Asse
 func GetServiceAccountApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}

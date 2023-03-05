@@ -10,7 +10,7 @@ if err != nil {
 
 billingProject := ""
 
-project, err := getProject(d, config)
+project, err := GetProject(d, config)
 if err != nil {
 	return fmt.Errorf("Error fetching project for Config: %s", err)
 }

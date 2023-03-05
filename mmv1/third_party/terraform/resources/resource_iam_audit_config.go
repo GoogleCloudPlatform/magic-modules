@@ -198,7 +198,7 @@ func getResourceIamAuditConfig(d *schema.ResourceData) *cloudresourcemanager.Aud
 		logConfig := y.(map[string]interface{})
 		auditLogConfigs[x] = &cloudresourcemanager.AuditLogConfig{
 			LogType:         logConfig["log_type"].(string),
-			ExemptedMembers: convertStringArr(logConfig["exempted_members"].(*schema.Set).List()),
+			ExemptedMembers: ConvertStringArr(logConfig["exempted_members"].(*schema.Set).List()),
 		}
 	}
 	return &cloudresourcemanager.AuditConfig{

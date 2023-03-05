@@ -22,7 +22,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 	var err error
 	for _, s := range v.(*schema.Set).List() {
 		if !r.MatchString(s.(string)) {
-			project, err = getProject(d, config)
+			project, err = GetProject(d, config)
 			if err != nil {
 				return []interface{}{}, err
 			}
@@ -30,7 +30,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 		}
 	}
 
-	return convertAndMapStringArr(v.(*schema.Set).List(), func(s string) string {
+	return ConvertAndMapStringArr(v.(*schema.Set).List(), func(s string) string {
 		if r.MatchString(s) {
 			return s
 		}

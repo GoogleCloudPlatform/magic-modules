@@ -23,11 +23,11 @@ func DataSourceGoogleComposerEnvironment() *schema.Resource {
 
 func dataSourceGoogleComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

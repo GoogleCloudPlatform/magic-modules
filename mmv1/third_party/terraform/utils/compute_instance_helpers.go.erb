@@ -113,7 +113,7 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 			transformed := &compute.SchedulingNodeAffinity{
 				Key:      nodeAff["key"].(string),
 				Operator: nodeAff["operator"].(string),
-				Values:   convertStringArr(nodeAff["values"].(*schema.Set).List()),
+				Values:   ConvertStringArr(nodeAff["values"].(*schema.Set).List()),
 			}
 			scheduling.NodeAffinities = append(scheduling.NodeAffinities, transformed)
 		}

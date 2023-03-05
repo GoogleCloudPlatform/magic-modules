@@ -121,7 +121,7 @@ func dataSourceGoogleComputeAddressesRead(context context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -38,7 +38,7 @@ func createTagTemplateField(d *schema.ResourceData, config *Config, body map[str
 		return err
 	}
 
-	url_create, err = addQueryParams(url_create, map[string]string{"tagTemplateFieldId": name})
+	url_create, err = AddQueryParams(url_create, map[string]string{"tagTemplateFieldId": name})
 	if err != nil {
 		return err
 	}

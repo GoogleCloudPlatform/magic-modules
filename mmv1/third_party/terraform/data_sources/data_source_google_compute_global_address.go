@@ -47,7 +47,7 @@ func dataSourceGoogleComputeGlobalAddressRead(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

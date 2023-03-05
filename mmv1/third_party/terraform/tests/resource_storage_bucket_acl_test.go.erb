@@ -212,7 +212,7 @@ func TestAccStorageBucketAcl_RemoveOwner(t *testing.T) {
 
 func testAccCheckGoogleStorageBucketAclDelete(t *testing.T, bucket, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		roleEntity, _ := getRoleEntityPair(roleEntityS)
+		roleEntity, _ := google.GetRoleEntityPair(roleEntityS)
 		config := acctest.GoogleProviderConfig(t)
 
 		_, err := config.NewStorageClient(config.UserAgent).BucketAccessControls.Get(bucket, roleEntity.Entity).Do()
@@ -227,7 +227,7 @@ func testAccCheckGoogleStorageBucketAclDelete(t *testing.T, bucket, roleEntityS 
 
 func testAccCheckGoogleStorageBucketAcl(t *testing.T, bucket, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		roleEntity, _ := getRoleEntityPair(roleEntityS)
+		roleEntity, _ := google.GetRoleEntityPair(roleEntityS)
 		config := acctest.GoogleProviderConfig(t)
 
 		res, err := config.NewStorageClient(config.UserAgent).BucketAccessControls.Get(bucket, roleEntity.Entity).Do()

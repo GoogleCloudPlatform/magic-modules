@@ -52,7 +52,7 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 
 		billingProject := ""
 
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return fmt.Errorf("Error fetching project for CertificateAuthority: %s", err)
 		}

@@ -32,7 +32,7 @@ type BigtableInstanceIamUpdater struct {
 }
 
 func NewBigtableInstanceUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}

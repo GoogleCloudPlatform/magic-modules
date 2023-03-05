@@ -36,11 +36,11 @@ func dataSourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta inte
 		}
 		d.SetId(fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s", parsed.Project, parsed.Zone, parsed.Name))
 	} else if name, ok := d.GetOk("name"); ok {
-		zone, err := getZone(d, config)
+		zone, err := GetZone(d, config)
 		if err != nil {
 			return err
 		}
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return err
 		}

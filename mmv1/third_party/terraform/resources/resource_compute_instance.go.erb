@@ -951,11 +951,11 @@ be from 0 to 999,999,999 inclusive.`,
 }
 
 func getInstance(config *Config, d *schema.ResourceData) (*compute.Instance, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -1088,7 +1088,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
 		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
 		DisplayDevice:              expandDisplayDevice(d),
-		ResourcePolicies:           convertStringArr(d.Get("resource_policies").([]interface{})),
+		ResourcePolicies:           ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
 	}, nil
 }
@@ -1153,13 +1153,13 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
 	// Get the zone
-	z, err := getZone(d, config)
+	z, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -1203,7 +1203,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1477,12 +1477,12 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -1588,7 +1588,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
-		resourcePolicies := convertStringArr(d.Get("resource_policies").([]interface{}))
+		resourcePolicies := ConvertStringArr(d.Get("resource_policies").([]interface{}))
 		if len(resourcePolicies) > 0 {
 			req := compute.InstancesAddResourcePoliciesRequest{ResourcePolicies: resourcePolicies}
 
@@ -2148,12 +2148,12 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func startInstanceOperation(d *schema.ResourceData, config *Config) (*compute.Operation, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -2348,12 +2348,12 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}

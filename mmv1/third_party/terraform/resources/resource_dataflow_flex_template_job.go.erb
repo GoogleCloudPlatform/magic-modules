@@ -102,12 +102,12 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -152,12 +152,12 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -193,12 +193,12 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 
 func waitForDataflowJobState(d *schema.ResourceData, config *Config, jobID, userAgent string, timeout time.Duration, targetState string) error {
 	return resource.Retry(timeout, func() *resource.RetryError {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return resource.NonRetryableError(err)
 		}
 
-		region, err := getRegion(d, config)
+		region, err := GetRegion(d, config)
 		if err != nil {
 			return resource.NonRetryableError(err)
 		}
@@ -242,12 +242,12 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}
@@ -299,12 +299,12 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return err
 	}

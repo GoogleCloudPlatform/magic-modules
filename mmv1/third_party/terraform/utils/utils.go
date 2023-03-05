@@ -60,14 +60,14 @@ func GetRegionFromZone(zone string) string {
 // - region extracted from the `zone` field in resource schema
 // - provider-level region
 // - region extracted from the provider-level zone
-func getRegion(d TerraformResourceData, config *Config) (string, error) {
+func GetRegion(d TerraformResourceData, config *Config) (string, error) {
 	return getRegionFromSchema("region", "zone", d, config)
 }
 
-// getProject reads the "project" field from the given resource data and falls
+// GetProject reads the "project" field from the given resource data and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
-func getProject(d TerraformResourceData, config *Config) (string, error) {
+func GetProject(d TerraformResourceData, config *Config) (string, error) {
 	return getProjectFromSchema("project", d, config)
 }
 
@@ -195,10 +195,10 @@ func expandStringMap(d TerraformResourceData, key string) map[string]string {
 		return map[string]string{}
 	}
 
-	return convertStringMap(v.(map[string]interface{}))
+	return ConvertStringMap(v.(map[string]interface{}))
 }
 
-func convertStringMap(v map[string]interface{}) map[string]string {
+func ConvertStringMap(v map[string]interface{}) map[string]string {
 	m := make(map[string]string)
 	for k, val := range v {
 		m[k] = val.(string)
@@ -206,11 +206,11 @@ func convertStringMap(v map[string]interface{}) map[string]string {
 	return m
 }
 
-func convertStringArr(ifaceArr []interface{}) []string {
-	return convertAndMapStringArr(ifaceArr, func(s string) string { return s })
+func ConvertStringArr(ifaceArr []interface{}) []string {
+	return ConvertAndMapStringArr(ifaceArr, func(s string) string { return s })
 }
 
-func convertAndMapStringArr(ifaceArr []interface{}, f func(string) string) []string {
+func ConvertAndMapStringArr(ifaceArr []interface{}, f func(string) string) []string {
 	var arr []string
 	for _, v := range ifaceArr {
 		if v == nil {
@@ -372,7 +372,7 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *C
 
 	// Get the project from the resource or fallback to the project
 	// in the provider configuration
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return "", err
 	}
@@ -537,7 +537,7 @@ func checkStringMap(v interface{}) map[string]string {
 	if ok {
 		return m
 	}
-	return convertStringMap(v.(map[string]interface{}))
+	return ConvertStringMap(v.(map[string]interface{}))
 }
 
 // return a fake 404 so requests get retried or nested objects are considered deleted

@@ -992,7 +992,7 @@ func resourceComputeInstanceTemplateBootDiskCustomizeDiff(_ context.Context, dif
 }
 
 func buildDisks(d *schema.ResourceData, config *Config) ([]*compute.AttachedDisk, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -1148,7 +1148,7 @@ func expandInstanceTemplateGuestAccelerators(d TerraformResourceData, config *Co
 }
 
 func expandInstanceTemplateResourcePolicies(d TerraformResourceData, dataKey string) []string {
-	return convertAndMapStringArr(d.Get(dataKey).([]interface{}), GetResourceNameFromSelfLink)
+	return ConvertAndMapStringArr(d.Get(dataKey).([]interface{}), GetResourceNameFromSelfLink)
 }
 
 func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interface{}) error {
@@ -1158,7 +1158,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1481,7 +1481,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1656,7 +1656,7 @@ func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

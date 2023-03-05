@@ -593,7 +593,7 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -655,7 +655,7 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -712,7 +712,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -855,7 +855,7 @@ func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -923,7 +923,7 @@ func expandSecurityPolicyMatchConfig(configured []interface{}) *compute.Security
 
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyRuleMatcherConfig{
-		SrcIpRanges: convertStringArr(data["src_ip_ranges"].(*schema.Set).List()),
+		SrcIpRanges: ConvertStringArr(data["src_ip_ranges"].(*schema.Set).List()),
 	}
 }
 
@@ -970,7 +970,7 @@ func expandSecurityPolicyRulePreconfiguredWafConfigExclusion(raw interface{}) *c
 		RequestUrisToExclude:        expandSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParams(data["request_uri"].([]interface{})),
 		RequestQueryParamsToExclude: expandSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParams(data["request_query_param"].([]interface{})),
 		TargetRuleSet:               data["target_rule_set"].(string),
-		TargetRuleIds:               convertStringArr(data["target_rule_ids"].(*schema.Set).List()),
+		TargetRuleIds:               ConvertStringArr(data["target_rule_ids"].(*schema.Set).List()),
 	}
 }
 
@@ -1132,7 +1132,7 @@ func expandSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(configured []inte
 
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyAdvancedOptionsConfigJsonCustomConfig{
-		ContentTypes: convertStringArr(data["content_types"].(*schema.Set).List()),
+		ContentTypes: ConvertStringArr(data["content_types"].(*schema.Set).List()),
 	}
 }
 

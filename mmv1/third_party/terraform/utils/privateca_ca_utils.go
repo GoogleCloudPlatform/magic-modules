@@ -181,7 +181,7 @@ func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, p
 		return err
 	}
 	signUrl := fmt.Sprintf("%v%v/certificates?certificateId=%v", PrivatecaBasePath, poolName, certId)
-	signUrl, err = addQueryParams(signUrl, map[string]string{"issuingCertificateAuthorityId": issuerId})
+	signUrl, err = AddQueryParams(signUrl, map[string]string{"issuingCertificateAuthorityId": issuerId})
 	if err != nil {
 		return err
 	}

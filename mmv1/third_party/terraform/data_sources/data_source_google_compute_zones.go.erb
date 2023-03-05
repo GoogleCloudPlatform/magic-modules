@@ -55,7 +55,7 @@ func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) 
 		region = r.(string)
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

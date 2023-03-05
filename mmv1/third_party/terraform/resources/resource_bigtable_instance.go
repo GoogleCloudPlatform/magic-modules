@@ -169,7 +169,7 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -296,7 +296,7 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -353,7 +353,7 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

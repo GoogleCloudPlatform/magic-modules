@@ -416,12 +416,12 @@ func extractNodePoolInformation(d *schema.ResourceData, config *Config) (*NodePo
 	}
 	log.Printf("[DEBUG] parent cluster %s does not match regex %s", cluster, clusterIdRegex.String())
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	location, err := getLocation(d, config)
+	location, err := GetLocation(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -776,7 +776,7 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 
 	d.SetId(id)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -1280,7 +1280,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			if v, ok := d.GetOk(prefix + "node_config.0.resource_labels"); ok {
 				resourceLabels := v.(map[string]interface{})
 				req.ResourceLabels = &container.ResourceLabels{
-					Labels: convertStringMap(resourceLabels),
+					Labels: ConvertStringMap(resourceLabels),
 				}
 			}
 				
@@ -1318,7 +1318,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			if v, ok := d.GetOk(prefix + "node_config.0.labels"); ok {
 				labels := v.(map[string]interface{})
 				req.Labels = &container.NodeLabels{
-					Labels: convertStringMap(labels),
+					Labels: ConvertStringMap(labels),
 				}
 			}
 				

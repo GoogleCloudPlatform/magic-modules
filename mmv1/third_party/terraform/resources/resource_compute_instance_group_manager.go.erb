@@ -528,12 +528,12 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -647,7 +647,7 @@ func flattenFixedOrPercent(fixedOrPercent *compute.FixedOrPercent) []map[string]
 func getManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGroupManager, error) {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -657,7 +657,7 @@ func getManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGrou
 		return nil, err
 	}
 
-	zone, _ := getZone(d, config)
+	zone, _ := GetZone(d, config)
 	name := d.Get("name").(string)
 
 	manager, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Get(project, zone, name).Do()
@@ -683,7 +683,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -691,7 +691,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	operation := d.Get("operation").(string)
 	if operation != "" {
 		log.Printf("[DEBUG] in progress operation detected at %v, attempting to resume", operation)
-		zone, _ := getZone(d, config)
+		zone, _ := GetZone(d, config)
 		op := &compute.Operation{
 			Name: operation,
 			Zone: zone,
@@ -809,12 +809,12 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	zone, err := GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -972,12 +972,12 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	zone, _ := getZone(d, config)
+	zone, _ := GetZone(d, config)
 	name := d.Get("name").(string)
 
 	op, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Delete(project, zone, name).Do()
@@ -1360,11 +1360,11 @@ func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.Ins
 	for _, raw := range new {
 		properties = &compute.InstancePropertiesPatch{}
 		data := raw.(map[string]interface{})
-		properties.Metadata = convertStringMap(data["metadata"].(map[string]interface{}))
+		properties.Metadata = ConvertStringMap(data["metadata"].(map[string]interface{}))
 		if len(properties.Metadata) == 0 {
 			properties.NullFields = append(properties.NullFields, "Metadata")
 		}
-		properties.Labels = convertStringMap(data["labels"].(map[string]interface{}))
+		properties.Labels = ConvertStringMap(data["labels"].(map[string]interface{}))
 		if len(properties.Labels) == 0 {
 			properties.NullFields = append(properties.NullFields, "Labels")
 		}

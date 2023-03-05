@@ -25,7 +25,7 @@ type ProjectLoggingExclusionUpdater struct {
 }
 
 func NewProjectLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (ResourceLoggingExclusionUpdater, error) {
-	pid, err := getProject(d, config)
+	pid, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}

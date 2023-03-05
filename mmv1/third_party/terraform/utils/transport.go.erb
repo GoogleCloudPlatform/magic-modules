@@ -78,7 +78,7 @@ func SendRequestWithTimeout(config *Config, method, project, rawurl, userAgent s
 				}
 			}
 
-			u, err := addQueryParams(rawurl, map[string]string{"alt": "json"})
+			u, err := AddQueryParams(rawurl, map[string]string{"alt": "json"})
 			if err != nil {
 				return err
 			}
@@ -127,7 +127,7 @@ func SendRequestWithTimeout(config *Config, method, project, rawurl, userAgent s
 	return result, nil
 }
 
-func addQueryParams(rawurl string, params map[string]string) (string, error) {
+func AddQueryParams(rawurl string, params map[string]string) (string, error) {
 	u, err := url.Parse(rawurl)
 	if err != nil {
 		return "", err
@@ -187,7 +187,7 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 	var err error
 
 	if strings.Contains(linkTmpl, "{{project}}") {
-		project, err = getProject(d, config)
+		project, err = GetProject(d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -199,7 +199,7 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 			projectID, _ = v.(string)
 		}
 		if projectID == "" {
-			project, err = getProject(d, config)
+			project, err = GetProject(d, config)
 		}
 		if err != nil {
 			return nil, err
@@ -207,14 +207,14 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 	}
 
 	if strings.Contains(linkTmpl, "{{region}}") {
-		region, err = getRegion(d, config)
+		region, err = GetRegion(d, config)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if strings.Contains(linkTmpl, "{{zone}}") {
-		zone, err = getZone(d, config)
+		zone, err = GetZone(d, config)
 		if err != nil {
 			return nil, err
 		}

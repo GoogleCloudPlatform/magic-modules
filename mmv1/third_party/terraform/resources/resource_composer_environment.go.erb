@@ -940,11 +940,11 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 		return handleNotFoundError(err, d, fmt.Sprintf("ComposerEnvironment %q", d.Id()))
 	}
 
-	// Set from getProject(d)
+	// Set from GetProject(d)
 	if err := d.Set("project", envName.Project); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}
-	// Set from getRegion(d)
+	// Set from GetRegion(d)
 	if err := d.Set("region", envName.Region); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}
@@ -2074,7 +2074,7 @@ func expandComposerEnvironmentZone(v interface{}, d *schema.ResourceData, config
 		return zone, nil
 	}
 	if !strings.Contains(zone, "/") {
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return "", err
 		}
@@ -2092,7 +2092,7 @@ func expandComposerEnvironmentMachineType(v interface{}, d *schema.ResourceData,
 	if err != nil {
 
 		// Try to construct machine type with zone/project given in config.
-		project, err := getProject(d, config)
+		project, err := GetProject(d, config)
 		if err != nil {
 			return "", err
 		}
@@ -2133,7 +2133,7 @@ func expandComposerEnvironmentSetList(v interface{}, d *schema.ResourceData, con
 	if v == nil {
 		return nil, nil
 	}
-	return convertStringArr(v.(*schema.Set).List()), nil
+	return ConvertStringArr(v.(*schema.Set).List()), nil
 }
 
 func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.SoftwareConfig, error) {
@@ -2166,7 +2166,7 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 func expandComposerEnvironmentConfigSoftwareConfigStringMap(softwareConfig map[string]interface{}, k string) map[string]string {
 	v, ok := softwareConfig[k]
 	if ok && v != nil {
-		return convertStringMap(v.(map[string]interface{}))
+		return ConvertStringMap(v.(map[string]interface{}))
 	}
 	return map[string]string{}
 }
@@ -2286,12 +2286,12 @@ func getComposerEnvironmentPostCreateUpdateObj(env *composer.Environment) (updat
 }
 
 func resourceComposerEnvironmentName(d *schema.ResourceData, config *Config) (*ComposerEnvironmentName, error) {
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	region, err := getRegion(d, config)
+	region, err := GetRegion(d, config)
 	if err != nil {
 		return nil, err
 	}

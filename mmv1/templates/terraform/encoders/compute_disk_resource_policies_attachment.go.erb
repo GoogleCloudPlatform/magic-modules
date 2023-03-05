@@ -1,10 +1,10 @@
 config := meta.(*Config)
-project, err := getProject(d, config)
+project, err := GetProject(d, config)
 if err != nil {
   return nil, err
 }
 
-zone, err := getZone(d, config)
+zone, err := GetZone(d, config)
 if err != nil {
 	return nil, err
 }

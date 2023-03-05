@@ -100,7 +100,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	// Set the split keys if given.
 	if v, ok := d.GetOk("split_keys"); ok {
-		tblConf.SplitKeys = convertStringArr(v.([]interface{}))
+		tblConf.SplitKeys = ConvertStringArr(v.([]interface{}))
 	}
 
 	// Set the column families if given.
@@ -176,7 +176,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -296,7 +296,7 @@ func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) erro
 
 	ctx := context.Background()
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

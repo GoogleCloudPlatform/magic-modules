@@ -516,7 +516,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -559,7 +559,7 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -619,7 +619,7 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -691,7 +691,7 @@ func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}
@@ -1015,8 +1015,8 @@ func expandObjectConditions(conditions []interface{}) *storagetransfer.ObjectCon
 
 	condition := conditions[0].(map[string]interface{})
 	return &storagetransfer.ObjectConditions{
-		ExcludePrefixes:                     convertStringArr(condition["exclude_prefixes"].([]interface{})),
-		IncludePrefixes:                     convertStringArr(condition["include_prefixes"].([]interface{})),
+		ExcludePrefixes:                     ConvertStringArr(condition["exclude_prefixes"].([]interface{})),
+		IncludePrefixes:                     ConvertStringArr(condition["include_prefixes"].([]interface{})),
 		MaxTimeElapsedSinceLastModification: condition["max_time_elapsed_since_last_modification"].(string),
 		MinTimeElapsedSinceLastModification: condition["min_time_elapsed_since_last_modification"].(string),
 	}
@@ -1124,7 +1124,7 @@ func expandTransferJobNotificationConfig(notificationConfigs []interface{}) *sto
 	}
 
 	if notificationConfig["event_types"] != nil {
-		apiData.EventTypes = convertStringArr(notificationConfig["event_types"].(*schema.Set).List())
+		apiData.EventTypes = ConvertStringArr(notificationConfig["event_types"].(*schema.Set).List())
 	}
 
 	log.Printf("[DEBUG] apiData: %v\n\n", apiData)

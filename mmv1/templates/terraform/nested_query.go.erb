@@ -231,7 +231,7 @@ func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta inte
       return nil, err
   }
   <% if has_project -%>
-  project, err := getProject(d, config)
+  project, err := GetProject(d, config)
   if err != nil {
       return nil, err
   }

@@ -74,12 +74,12 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 	params := map[string]string{
 		"filter": filter,
 	}
-	url, err = addQueryParams(url, params)
+	url, err = AddQueryParams(url, params)
 	if err != nil {
 		return err
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return err
 	}

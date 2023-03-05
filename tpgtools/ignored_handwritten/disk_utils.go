@@ -221,7 +221,7 @@ func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config
 		return nil
 	}
 
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil
 	}
@@ -287,7 +287,7 @@ func flattenComputeDiskImage(v interface{}, d *schema.ResourceData, meta interfa
 	if v == nil {
 		return nil
 	}
-	project, err := getProject(d, config)
+	project, err := GetProject(d, config)
 	if err != nil {
 		return nil
 	}
