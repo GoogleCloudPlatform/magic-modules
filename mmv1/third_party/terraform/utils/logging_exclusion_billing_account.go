@@ -40,7 +40,7 @@ func NewBillingAccountLoggingExclusionUpdater(d *schema.ResourceData, config *Co
 }
 
 func BillingAccountLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) error {
-	loggingExclusionId, err := parseLoggingExclusionId(d.Id())
+	loggingExclusionId, err := ParseLoggingExclusionId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func BillingAccountLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config
 		return fmt.Errorf("Error importing logging exclusion, invalid resourceType %#v", loggingExclusionId.resourceType)
 	}
 
-	if err := d.Set("billing_account", loggingExclusionId.resourceId); err != nil {
+	if err := d.Set("billing_account", loggingExclusionId.ResourceId); err != nil {
 		return fmt.Errorf("Error setting billing_account: %s", err)
 	}
 	return nil

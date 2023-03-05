@@ -276,7 +276,7 @@ func TestGetComputedTopicName(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		computedTopicName := getComputedTopicName(testCase.project, testCase.topic)
+		computedTopicName := google.GetComputedTopicName(testCase.project, testCase.topic)
 		if computedTopicName != testCase.expected {
 			t.Fatalf("bad computed topic name: %s' => expected %s", computedTopicName, testCase.expected)
 		}

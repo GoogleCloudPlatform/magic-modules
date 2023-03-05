@@ -140,13 +140,13 @@ func testAccCheckGoogleHealthcareDicomStoreIamBindingExists(t *testing.T, bindin
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		dicomStoreId, err := gogole.ParseHealthcareDicomStoreId(bindingRs.Primary.Attributes["dicom_store_id"], config)
+		dicomStoreId, err := google.ParseHealthcareDicomStoreId(bindingRs.Primary.Attributes["dicom_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.dicomStoreId()).Do()
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.DicomStoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -176,13 +176,13 @@ func testAccCheckGoogleHealthcareDicomStoreIamMemberExists(t *testing.T, n, role
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		dicomStoreId, err := gogole.ParseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
+		dicomStoreId, err := google.ParseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.dicomStoreId()).Do()
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.DicomStoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -211,13 +211,13 @@ func testAccCheckGoogleHealthcareDicomStoreIamPolicyExists(t *testing.T, n, role
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-		dicomStoreId, err := gogole.ParseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
+		dicomStoreId, err := google.ParseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.dicomStoreId()).Do()
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.DicomStoreId()).Do()
 		if err != nil {
 			return err
 		}

@@ -14,7 +14,7 @@ import (
 // Unit Tests
 
 func TestSpannerInstanceId_instanceUri(t *testing.T) {
-	id := spannerInstanceId{
+	id := SpannerInstanceId{
 		Project:  "project123",
 		Instance: "instance456",
 	}
@@ -24,7 +24,7 @@ func TestSpannerInstanceId_instanceUri(t *testing.T) {
 }
 
 func TestSpannerInstanceId_instanceConfigUri(t *testing.T) {
-	id := spannerInstanceId{
+	id := SpannerInstanceId{
 		Project:  "project123",
 		Instance: "instance456",
 	}
@@ -34,7 +34,7 @@ func TestSpannerInstanceId_instanceConfigUri(t *testing.T) {
 }
 
 func TestSpannerInstanceId_parentProjectUri(t *testing.T) {
-	id := spannerInstanceId{
+	id := SpannerInstanceId{
 		Project:  "project123",
 		Instance: "instance456",
 	}

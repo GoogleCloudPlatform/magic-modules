@@ -125,7 +125,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       secondaryIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        diff_suppress_func: 'SecondaryIpDiffSuppress'
+        diff_suppress_func: 'secondaryIpDiffSuppress'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

@@ -41,7 +41,7 @@ func NewFolderLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (R
 }
 
 func FolderLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) error {
-	loggingExclusionId, err := parseLoggingExclusionId(d.Id())
+	loggingExclusionId, err := ParseLoggingExclusionId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func FolderLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) error 
 		return fmt.Errorf("Error importing logging exclusion, invalid resourceType %#v", loggingExclusionId.resourceType)
 	}
 
-	if err := d.Set("folder", loggingExclusionId.resourceId); err != nil {
+	if err := d.Set("folder", loggingExclusionId.ResourceId); err != nil {
 		return fmt.Errorf("Error setting folder: %s", err)
 	}
 	return nil

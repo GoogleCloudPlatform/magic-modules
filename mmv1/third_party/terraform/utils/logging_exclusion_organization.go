@@ -40,7 +40,7 @@ func NewOrganizationLoggingExclusionUpdater(d *schema.ResourceData, config *Conf
 }
 
 func OrganizationLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) error {
-	loggingExclusionId, err := parseLoggingExclusionId(d.Id())
+	loggingExclusionId, err := ParseLoggingExclusionId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func OrganizationLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) 
 		return fmt.Errorf("Error importing logging exclusion, invalid resourceType %#v", loggingExclusionId.resourceType)
 	}
 
-	if err := d.Set("org_id", loggingExclusionId.resourceId); err != nil {
+	if err := d.Set("org_id", loggingExclusionId.ResourceId); err != nil {
 		return fmt.Errorf("Error setting org_id: %s", err)
 	}
 	return nil

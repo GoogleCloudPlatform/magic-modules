@@ -33,7 +33,7 @@ func NewHealthcareDicomStoreIamUpdater(d TerraformResourceData, config *Config) 
 	}
 
 	return &HealthcareDicomStoreIamUpdater{
-		resourceId: dicomStoreId.dicomStoreId(),
+		resourceId: dicomStoreId.DicomStoreId(),
 		d:          d,
 		Config:     config,
 	}, nil
@@ -44,10 +44,10 @@ func DicomStoreIdParseFunc(d *schema.ResourceData, config *Config) error {
 	if err != nil {
 		return err
 	}
-	if err := d.Set("dicom_store_id", dicomStoreId.dicomStoreId()); err != nil {
+	if err := d.Set("dicom_store_id", dicomStoreId.DicomStoreId()); err != nil {
 		return fmt.Errorf("Error setting dicom_store_id: %s", err)
 	}
-	d.SetId(dicomStoreId.dicomStoreId())
+	d.SetId(dicomStoreId.DicomStoreId())
 	return nil
 }
 

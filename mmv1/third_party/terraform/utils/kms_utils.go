@@ -11,21 +11,21 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
-type kmsKeyRingId struct {
+type KmsKeyRingId struct {
 	Project  string
 	Location string
 	Name     string
 }
 
-func (s *kmsKeyRingId) keyRingId() string {
+func (s *KmsKeyRingId) KeyRingId() string {
 	return fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", s.Project, s.Location, s.Name)
 }
 
-func (s *kmsKeyRingId) terraformId() string {
+func (s *KmsKeyRingId) TerraformId() string {
 	return fmt.Sprintf("%s/%s/%s", s.Project, s.Location, s.Name)
 }
 
-func parseKmsKeyRingId(id string, config *Config) (*kmsKeyRingId, error) {
+func parseKmsKeyRingId(id string, config *Config) (*KmsKeyRingId, error) {
 	parts := strings.Split(id, "/")
 
 	keyRingIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})$")
@@ -33,7 +33,7 @@ func parseKmsKeyRingId(id string, config *Config) (*kmsKeyRingId, error) {
 	keyRingRelativeLinkRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/keyRings/([a-zA-Z0-9_-]{1,63})$")
 
 	if keyRingIdRegex.MatchString(id) {
-		return &kmsKeyRingId{
+		return &KmsKeyRingId{
 			Project:  parts[0],
 			Location: parts[1],
 			Name:     parts[2],
@@ -45,7 +45,7 @@ func parseKmsKeyRingId(id string, config *Config) (*kmsKeyRingId, error) {
 			return nil, fmt.Errorf("The default project for the provider must be set when using the `{location}/{keyRingName}` id format.")
 		}
 
-		return &kmsKeyRingId{
+		return &KmsKeyRingId{
 			Project:  config.Project,
 			Location: parts[0],
 			Name:     parts[1],
@@ -53,7 +53,7 @@ func parseKmsKeyRingId(id string, config *Config) (*kmsKeyRingId, error) {
 	}
 
 	if parts := keyRingRelativeLinkRegex.FindStringSubmatch(id); parts != nil {
-		return &kmsKeyRingId{
+		return &KmsKeyRingId{
 			Project:  parts[1],
 			Location: parts[2],
 			Name:     parts[3],
@@ -73,16 +73,16 @@ func kmsCryptoKeyRingsEquivalent(k, old, new string, d *schema.ResourceData) boo
 }
 
 type KmsCryptoKeyId struct {
-	KeyRingId kmsKeyRingId
+	KeyRingId KmsKeyRingId
 	Name      string
 }
 
 func (s *KmsCryptoKeyId) CryptoKeyId() string {
-	return fmt.Sprintf("%s/cryptoKeys/%s", s.KeyRingId.keyRingId(), s.Name)
+	return fmt.Sprintf("%s/cryptoKeys/%s", s.KeyRingId.KeyRingId(), s.Name)
 }
 
 func (s *KmsCryptoKeyId) TerraformId() string {
-	return fmt.Sprintf("%s/%s", s.KeyRingId.terraformId(), s.Name)
+	return fmt.Sprintf("%s/%s", s.KeyRingId.TerraformId(), s.Name)
 }
 
 type kmsCryptoKeyVersionId struct {
@@ -98,7 +98,7 @@ func (s *kmsCryptoKeyVersionId) terraformId() string {
 	return fmt.Sprintf("%s/%s", s.CryptoKeyId.TerraformId(), s.Name)
 }
 
-func ValidateKmsCryptoKeyRotationPeriod(value interface{}, _ string) (ws []string, errors []error) {
+func validateKmsCryptoKeyRotationPeriod(value interface{}, _ string) (ws []string, errors []error) {
 	period := value.(string)
 	pattern := regexp.MustCompile(`^([0-9.]*\d)s$`)
 	match := pattern.FindStringSubmatch(period)
@@ -150,7 +150,7 @@ func ParseKmsCryptoKeyId(id string, config *Config) (*KmsCryptoKeyId, error) {
 
 	if cryptoKeyIdRegex.MatchString(id) {
 		return &KmsCryptoKeyId{
-			KeyRingId: kmsKeyRingId{
+			KeyRingId: KmsKeyRingId{
 				Project:  parts[0],
 				Location: parts[1],
 				Name:     parts[2],
@@ -165,7 +165,7 @@ func ParseKmsCryptoKeyId(id string, config *Config) (*KmsCryptoKeyId, error) {
 		}
 
 		return &KmsCryptoKeyId{
-			KeyRingId: kmsKeyRingId{
+			KeyRingId: KmsKeyRingId{
 				Project:  config.Project,
 				Location: parts[0],
 				Name:     parts[1],
@@ -176,7 +176,7 @@ func ParseKmsCryptoKeyId(id string, config *Config) (*KmsCryptoKeyId, error) {
 
 	if parts := cryptoKeyRelativeLinkRegex.FindStringSubmatch(id); parts != nil {
 		return &KmsCryptoKeyId{
-			KeyRingId: kmsKeyRingId{
+			KeyRingId: KmsKeyRingId{
 				Project:  parts[1],
 				Location: parts[2],
 				Name:     parts[3],
@@ -193,7 +193,7 @@ func parseKmsCryptoKeyVersionId(id string, config *Config) (*kmsCryptoKeyVersion
 	if parts := cryptoKeyVersionRelativeLinkRegex.FindStringSubmatch(id); parts != nil {
 		return &kmsCryptoKeyVersionId{
 			CryptoKeyId: KmsCryptoKeyId{
-				KeyRingId: kmsKeyRingId{
+				KeyRingId: KmsKeyRingId{
 					Project:  parts[1],
 					Location: parts[2],
 					Name:     parts[3],

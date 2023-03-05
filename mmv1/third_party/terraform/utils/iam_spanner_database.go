@@ -62,7 +62,7 @@ func (u *SpannerDatabaseIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 		return nil, err
 	}
 
-	p, err := u.Config.NewSpannerClient(userAgent).Projects.Instances.Databases.GetIamPolicy(spannerDatabaseId{
+	p, err := u.Config.NewSpannerClient(userAgent).Projects.Instances.Databases.GetIamPolicy(SpannerDatabaseId{
 		Project:  u.project,
 		Database: u.database,
 		Instance: u.instance,
@@ -99,7 +99,7 @@ func (u *SpannerDatabaseIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 		return err
 	}
 
-	_, err = u.Config.NewSpannerClient(userAgent).Projects.Instances.Databases.SetIamPolicy(spannerDatabaseId{
+	_, err = u.Config.NewSpannerClient(userAgent).Projects.Instances.Databases.SetIamPolicy(SpannerDatabaseId{
 		Project:  u.project,
 		Database: u.database,
 		Instance: u.instance,
@@ -115,7 +115,7 @@ func (u *SpannerDatabaseIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 }
 
 func (u *SpannerDatabaseIamUpdater) GetResourceId() string {
-	return spannerDatabaseId{
+	return SpannerDatabaseId{
 		Project:  u.project,
 		Instance: u.instance,
 		Database: u.database,
@@ -148,24 +148,24 @@ func spannerToResourceManagerPolicy(p *spanner.Policy) (*cloudresourcemanager.Po
 	return out, nil
 }
 
-type spannerDatabaseId struct {
+type SpannerDatabaseId struct {
 	Project  string
 	Instance string
 	Database string
 }
 
-func (s spannerDatabaseId) terraformId() string {
+func (s SpannerDatabaseId) TerraformId() string {
 	return fmt.Sprintf("%s/%s/%s", s.Project, s.Instance, s.Database)
 }
 
-func (s spannerDatabaseId) parentProjectUri() string {
+func (s SpannerDatabaseId) parentProjectUri() string {
 	return fmt.Sprintf("projects/%s", s.Project)
 }
 
-func (s spannerDatabaseId) parentInstanceUri() string {
+func (s SpannerDatabaseId) parentInstanceUri() string {
 	return fmt.Sprintf("%s/instances/%s", s.parentProjectUri(), s.Instance)
 }
 
-func (s spannerDatabaseId) databaseUri() string {
+func (s SpannerDatabaseId) databaseUri() string {
 	return fmt.Sprintf("%s/databases/%s", s.parentInstanceUri(), s.Database)
 }

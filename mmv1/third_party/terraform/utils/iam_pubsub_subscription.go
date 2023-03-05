@@ -36,7 +36,7 @@ func NewPubsubSubscriptionIamUpdater(d TerraformResourceData, config *Config) (R
 		return nil, err
 	}
 
-	subscription := getComputedSubscriptionName(project, d.Get("subscription").(string))
+	subscription := GetComputedSubscriptionName(project, d.Get("subscription").(string))
 
 	return &PubsubSubscriptionIamUpdater{
 		subscription: subscription,

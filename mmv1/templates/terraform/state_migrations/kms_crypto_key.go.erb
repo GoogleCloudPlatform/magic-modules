@@ -33,7 +33,7 @@ func ResourceKMSCryptoKeyUpgradeV0(_ context.Context, rawState map[string]interf
 	if err != nil {
 		return nil, err
 	}
-	rawState["key_ring"] = parsed.keyRingId()
+	rawState["key_ring"] = parsed.KeyRingId()
 
 	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
 	return rawState, nil

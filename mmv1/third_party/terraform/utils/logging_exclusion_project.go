@@ -44,7 +44,7 @@ func NewProjectLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (
 }
 
 func ProjectLoggingExclusionIdParseFunc(d *schema.ResourceData, config *Config) error {
-	loggingExclusionId, err := parseLoggingExclusionId(d.Id())
+	loggingExclusionId, err := ParseLoggingExclusionId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -53,8 +53,8 @@ func ProjectLoggingExclusionIdParseFunc(d *schema.ResourceData, config *Config) 
 		return fmt.Errorf("Error importing logging exclusion, invalid resourceType %#v", loggingExclusionId.resourceType)
 	}
 
-	if config.Project != loggingExclusionId.resourceId {
-		if err := d.Set("project", loggingExclusionId.resourceId); err != nil {
+	if config.Project != loggingExclusionId.ResourceId {
+		if err := d.Set("project", loggingExclusionId.ResourceId); err != nil {
 			return fmt.Errorf("Error setting project: %s", err)
 		}
 	}

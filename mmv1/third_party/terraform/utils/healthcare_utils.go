@@ -62,15 +62,15 @@ type healthcareFhirStoreId struct {
 	Name      string
 }
 
-func (s *healthcareFhirStoreId) fhirStoreId() string {
-	return fmt.Sprintf("%s/fhirStores/%s", s.DatasetId.datasetId(), s.Name)
+func (s *healthcareFhirStoreId) FhirStoreId() string {
+	return fmt.Sprintf("%s/fhirStores/%s", s.DatasetId.DatasetId(), s.Name)
 }
 
-func (s *healthcareFhirStoreId) terraformId() string {
-	return fmt.Sprintf("%s/%s", s.DatasetId.terraformId(), s.Name)
+func (s *healthcareFhirStoreId) TerraformId() string {
+	return fmt.Sprintf("%s/%s", s.DatasetId.TerraformId(), s.Name)
 }
 
-func parseHealthcareFhirStoreId(id string, config *Config) (*healthcareFhirStoreId, error) {
+func ParseHealthcareFhirStoreId(id string, config *Config) (*healthcareFhirStoreId, error) {
 	parts := strings.Split(id, "/")
 
 	fhirStoreIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,256})/([a-zA-Z0-9_-]{1,256})$")
@@ -121,15 +121,15 @@ type healthcareHl7V2StoreId struct {
 	Name      string
 }
 
-func (s *healthcareHl7V2StoreId) hl7V2StoreId() string {
-	return fmt.Sprintf("%s/hl7V2Stores/%s", s.DatasetId.datasetId(), s.Name)
+func (s *healthcareHl7V2StoreId) Hl7V2StoreId() string {
+	return fmt.Sprintf("%s/hl7V2Stores/%s", s.DatasetId.DatasetId(), s.Name)
 }
 
-func (s *healthcareHl7V2StoreId) terraformId() string {
-	return fmt.Sprintf("%s/%s", s.DatasetId.terraformId(), s.Name)
+func (s *healthcareHl7V2StoreId) TerraformId() string {
+	return fmt.Sprintf("%s/%s", s.DatasetId.TerraformId(), s.Name)
 }
 
-func parseHealthcareHl7V2StoreId(id string, config *Config) (*healthcareHl7V2StoreId, error) {
+func ParseHealthcareHl7V2StoreId(id string, config *Config) (*healthcareHl7V2StoreId, error) {
 	parts := strings.Split(id, "/")
 
 	hl7V2StoreIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,256})/([a-zA-Z0-9_-]{1,256})$")
@@ -180,12 +180,12 @@ type healthcareDicomStoreId struct {
 	Name      string
 }
 
-func (s *healthcareDicomStoreId) dicomStoreId() string {
-	return fmt.Sprintf("%s/dicomStores/%s", s.DatasetId.datasetId(), s.Name)
+func (s *healthcareDicomStoreId) DicomStoreId() string {
+	return fmt.Sprintf("%s/dicomStores/%s", s.DatasetId.DatasetId(), s.Name)
 }
 
-func (s *healthcareDicomStoreId) terraformId() string {
-	return fmt.Sprintf("%s/%s", s.DatasetId.terraformId(), s.Name)
+func (s *healthcareDicomStoreId) TerraformId() string {
+	return fmt.Sprintf("%s/%s", s.DatasetId.TerraformId(), s.Name)
 }
 
 func ParseHealthcareDicomStoreId(id string, config *Config) (*healthcareDicomStoreId, error) {

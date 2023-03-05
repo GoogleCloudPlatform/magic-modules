@@ -18,5 +18,5 @@ func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d TerraformReso
 		return "", err
 	}
 
-	return getComputedTopicName(project, v.(string)), err
+	return GetComputedTopicName(project, v.(string)), err
 }

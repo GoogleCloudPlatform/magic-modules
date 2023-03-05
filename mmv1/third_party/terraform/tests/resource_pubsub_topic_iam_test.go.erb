@@ -32,7 +32,7 @@ func TestAccPubsubTopicIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_pubsub_topic_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s roles/pubsub.publisher", getComputedTopicName(acctest.GetTestProjectFromEnv(), topic)),
+				ImportStateId:     fmt.Sprintf("%s roles/pubsub.publisher", google.GetComputedTopicName(acctest.GetTestProjectFromEnv(), topic)),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -46,7 +46,7 @@ func TestAccPubsubTopicIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_pubsub_topic_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s roles/pubsub.publisher", getComputedTopicName(acctest.GetTestProjectFromEnv(), topic)),
+				ImportStateId:     fmt.Sprintf("%s roles/pubsub.publisher", google.GetComputedTopicName(acctest.GetTestProjectFromEnv(), topic)),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -96,7 +96,7 @@ func TestAccPubsubTopicIamMember(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_pubsub_topic_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("%s roles/pubsub.publisher serviceAccount:%s", getComputedTopicName(acctest.GetTestProjectFromEnv(), topic), accountEmail),
+				ImportStateId:     fmt.Sprintf("%s roles/pubsub.publisher serviceAccount:%s", google.GetComputedTopicName(acctest.GetTestProjectFromEnv(), topic), accountEmail),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -128,7 +128,7 @@ func TestAccPubsubTopicIamPolicy(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_pubsub_topic_iam_policy.foo",
-				ImportStateId:     getComputedTopicName(acctest.GetTestProjectFromEnv(), topic),
+				ImportStateId:     google.GetComputedTopicName(acctest.GetTestProjectFromEnv(), topic),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -139,7 +139,7 @@ func TestAccPubsubTopicIamPolicy(t *testing.T) {
 func testAccCheckPubsubTopicIam(t *testing.T, topic, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		p, err := config.NewPubsubClient(config.UserAgent).Projects.Topics.GetIamPolicy(getComputedTopicName(acctest.GetTestProjectFromEnv(), topic)).Do()
+		p, err := config.NewPubsubClient(config.UserAgent).Projects.Topics.GetIamPolicy(google.GetComputedTopicName(acctest.GetTestProjectFromEnv(), topic)).Do()
 		if err != nil {
 			return err
 		}

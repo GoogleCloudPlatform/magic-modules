@@ -27,7 +27,7 @@ func TestAccSpannerInstanceIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName: "google_spanner_instance_iam_binding.foo",
-				ImportStateId: fmt.Sprintf("%s %s", spannerInstanceId{
+				ImportStateId: fmt.Sprintf("%s %s", google.SpannerInstanceId{
 					Project:  project,
 					Instance: instance,
 				}.terraformId(), role),
@@ -40,7 +40,7 @@ func TestAccSpannerInstanceIamBinding(t *testing.T) {
 			},
 			{
 				ResourceName: "google_spanner_instance_iam_binding.foo",
-				ImportStateId: fmt.Sprintf("%s %s", spannerInstanceId{
+				ImportStateId: fmt.Sprintf("%s %s", google.SpannerInstanceId{
 					Project:  project,
 					Instance: instance,
 				}.terraformId(), role),
@@ -70,7 +70,7 @@ func TestAccSpannerInstanceIamMember(t *testing.T) {
 			},
 			{
 				ResourceName: "google_spanner_instance_iam_member.foo",
-				ImportStateId: fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com %s", spannerInstanceId{
+				ImportStateId: fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com %s", google.SpannerInstanceId{
 					Instance: instance,
 					Project:  project,
 				}.terraformId(), role, account, project, conditionTitle),
@@ -99,7 +99,7 @@ func TestAccSpannerInstanceIamPolicy(t *testing.T) {
 			// Test a few import formats
 			{
 				ResourceName: "google_spanner_instance_iam_policy.foo",
-				ImportStateId: spannerInstanceId{
+				ImportStateId: google.SpannerInstanceId{
 					Instance: instance,
 					Project:  project,
 				}.terraformId(),

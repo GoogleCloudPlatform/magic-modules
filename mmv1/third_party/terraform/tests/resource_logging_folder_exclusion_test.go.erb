@@ -64,14 +64,14 @@ func testAccLoggingFolderExclusion_folderAcceptsFullFolderPath(t *testing.T) {
 	description := "Description " + acctest.RandString(t, 10)
 
 	checkFn := func(s []*terraform.InstanceState) error {
-		loggingExclusionId, err := parseLoggingExclusionId(s[0].ID)
+		loggingExclusionId, err := google.ParseLoggingExclusionId(s[0].ID)
 		if err != nil {
 			return err
 		}
 
 		folderAttribute := s[0].Attributes["folder"]
-		if loggingExclusionId.resourceId != folderAttribute {
-			return fmt.Errorf("imported folder id does not match: actual = %#v expected = %#v", folderAttribute, loggingExclusionId.resourceId)
+		if loggingExclusionId.ResourceId != folderAttribute {
+			return fmt.Errorf("imported folder id does not match: actual = %#v expected = %#v", folderAttribute, loggingExclusionId.ResourceId)
 		}
 
 		return nil

@@ -166,7 +166,7 @@ func resourceLoggingExclusionImportState(resourceIdParser resourceIdParserFunc) 
 func expandResourceLoggingExclusion(d *schema.ResourceData, resourceType, resourceId string) (LoggingExclusionId, *logging.LogExclusion) {
 	id := LoggingExclusionId{
 		resourceType: resourceType,
-		resourceId:   resourceId,
+		ResourceId:   resourceId,
 		name:         d.Get("name").(string),
 	}
 
@@ -257,7 +257,7 @@ var loggingExclusionResourceTypes = []string{
 // LoggingExclusionId represents the parts that make up the canonical id used within terraform for a logging resource.
 type LoggingExclusionId struct {
 	resourceType string
-	resourceId   string
+	ResourceId   string
 	name         string
 }
 
@@ -266,16 +266,16 @@ var loggingExclusionIdRegex = regexp.MustCompile("(.+)/(.+)/exclusions/(.+)")
 
 // canonicalId returns the LoggingExclusionId as the canonical id used within terraform.
 func (l LoggingExclusionId) canonicalId() string {
-	return fmt.Sprintf("%s/%s/exclusions/%s", l.resourceType, l.resourceId, l.name)
+	return fmt.Sprintf("%s/%s/exclusions/%s", l.resourceType, l.ResourceId, l.name)
 }
 
 // parent returns the "parent-level" resource that the exclusion is in (e.g. `folders/foo` for id `folders/foo/exclusions/bar`)
 func (l LoggingExclusionId) parent() string {
-	return fmt.Sprintf("%s/%s", l.resourceType, l.resourceId)
+	return fmt.Sprintf("%s/%s", l.resourceType, l.ResourceId)
 }
 
-// parseLoggingExclusionId parses a canonical id into a LoggingExclusionId, or returns an error on failure.
-func parseLoggingExclusionId(id string) (*LoggingExclusionId, error) {
+// ParseLoggingExclusionId parses a canonical id into a LoggingExclusionId, or returns an error on failure.
+func ParseLoggingExclusionId(id string) (*LoggingExclusionId, error) {
 	parts := loggingExclusionIdRegex.FindStringSubmatch(id)
 	if parts == nil {
 		return nil, fmt.Errorf("unable to parse logging exclusion id %#v", id)
@@ -295,7 +295,7 @@ func parseLoggingExclusionId(id string) (*LoggingExclusionId, error) {
 	}
 	return &LoggingExclusionId{
 		resourceType: parts[1],
-		resourceId:   parts[2],
+		ResourceId:   parts[2],
 		name:         parts[3],
 	}, nil
 }

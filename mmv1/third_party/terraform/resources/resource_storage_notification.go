@@ -98,13 +98,13 @@ func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 
 	topicName := d.Get("topic").(string)
-	computedTopicName := getComputedTopicName("", topicName)
+	computedTopicName := GetComputedTopicName("", topicName)
 	if computedTopicName != topicName {
 		project, err := getProject(d, config)
 		if err != nil {
 			return err
 		}
-		computedTopicName = getComputedTopicName(project, topicName)
+		computedTopicName = GetComputedTopicName(project, topicName)
 	}
 
 	storageNotification := &storage.Notification{
