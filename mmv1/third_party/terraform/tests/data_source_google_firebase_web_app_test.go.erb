@@ -11,15 +11,15 @@ func TestAccDataSourceGoogleFirebaseWebApp(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":   getTestProjectFromEnv(),
+		"project_id":   GetTestProjectFromEnv(),
 		"display_name": "tf_test Display Name WebApp DataSource",
 	}
 
 	resourceName := "data.google_firebase_web_app.my_app"
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleFirebaseWebApp(context),
