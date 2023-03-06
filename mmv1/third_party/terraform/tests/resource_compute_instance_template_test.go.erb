@@ -310,7 +310,7 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_maintenance_interval(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_maintenance_interval(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -323,7 +323,7 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeInstanceTemplate_basic(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_basic(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
