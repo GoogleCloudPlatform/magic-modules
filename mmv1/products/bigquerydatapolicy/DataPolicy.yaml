@@ -80,4 +80,8 @@ properties:
           - :SHA256
           - :ALWAYS_NULL
           - :DEFAULT_MASKING_VALUE
+          - :LAST_FOUR_CHARACTERS
+          - :FIRST_FOUR_CHARACTERS
+          - :EMAIL_MASK
+          - :DATE_YEAR_MASK
 
