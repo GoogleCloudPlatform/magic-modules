@@ -304,9 +304,9 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
