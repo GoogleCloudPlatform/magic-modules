@@ -1,4 +1,4 @@
-config := googleProviderConfig(t)
+config := GoogleProviderConfig(t)
 
 url, err := replaceVarsForTest(config, rs, "{{ServiceUsageBasePath}}projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/")
 if err != nil {
