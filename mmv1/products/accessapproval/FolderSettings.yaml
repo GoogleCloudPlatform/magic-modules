@@ -136,7 +136,6 @@
         If the field is true, that indicates that an ancestor of this Folder has set active_key_version.
     - !ruby/object:Api::Type::Boolean
       name: invalidKeyVersion
-      output: true
       description: |
         If the field is true, that indicates that there is some configuration issue with the active_key_version
         configured on this Folder (e.g. it doesn't exist or the Access Approval service account doesn't have the
