@@ -11,7 +11,7 @@ import (
 
 func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id": getTestOrgFromEnv(t),
+		"org_id": GetTestOrgFromEnv(t),
 	}
 
 	vcrTest(t, resource.TestCase{
