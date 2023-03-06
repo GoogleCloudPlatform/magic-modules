@@ -14,7 +14,7 @@ func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
 		"org_id": GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerAuthorizedOrgsDescDestroyProducer(t),
