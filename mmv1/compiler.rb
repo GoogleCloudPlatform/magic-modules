@@ -212,7 +212,7 @@ all_product_files.each do |product_name|
       next if File.basename(file_path) == 'product.yaml' \
        || File.basename(file_path) == 'terraform.yaml' \
        || File.extname(file_path) != '.yaml'
-      
+
       if override_dir
         resource_override_path = File.join(override_dir, file_path)
         res_yaml = if File.exist?(resource_override_path)
