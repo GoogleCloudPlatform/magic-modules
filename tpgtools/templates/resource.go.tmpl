@@ -258,7 +258,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	{{/* Resource has no create method, so we skip the BlockModification parameter. */}}
 	directive := UpdateDirective
 {{- end }}
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -349,7 +349,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 {{ end }}
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -437,7 +437,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	{{- if $.StateHint }}
 	directive = append(directive, dcl.WithStateHint(old))
 	{{- end }}
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -522,7 +522,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 {{- end }}
 
 	log.Printf("[DEBUG] Deleting {{$.DCLTitle}} %q", d.Id())
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

@@ -29,7 +29,6 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Database'
-    min_version: beta
     base_url: 'projects/{{project}}/databases'
     create_url: 'projects/{{project}}/databases?databaseId={{name}}'
     update_verb: :PATCH

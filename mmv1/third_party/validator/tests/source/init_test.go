@@ -53,10 +53,10 @@ func init() {
 		log.Fatalf("cannot get current directory: %v", err)
 	}
 	tfvBinary = filepath.Join(cwd, "..", "bin", "terraform-validator")
-	credentials := getTestCredsFromEnv()
-	project := getTestProjectFromEnv()
-	org := getTestOrgFromEnv(nil)
-	billingAccount := getTestBillingAccountFromEnv(nil)
+	credentials := GetTestCredsFromEnv()
+	project := GetTestProjectFromEnv()
+	org := GetTestOrgFromEnv(nil)
+	billingAccount := GetTestBillingAccountFromEnv(nil)
 	folder, ok := os.LookupEnv("TEST_FOLDER_ID")
 	if !ok {
 		log.Printf("Missing required env var TEST_FOLDER_ID. Default (%s) will be used.", defaultFolder)
