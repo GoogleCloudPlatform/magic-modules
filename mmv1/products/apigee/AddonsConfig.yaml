@@ -55,46 +55,46 @@
       properties:
         - !ruby/object:Api::Type::NestedObject
           name: 'advancedApiOpsConfig'
-          description: Configuration for the Monetization add-on.
+          description: Configuration for the Advanced API Ops add-on.
           properties:
             - !ruby/object:Api::Type::Boolean
               name: 'enabled'
               description: Flag that specifies whether the Advanced API Ops add-on is enabled.
         - !ruby/object:Api::Type::NestedObject
           name: 'integrationConfig'
-          description: Configuration for the Monetization add-on.
+          description: Configuration for the Integration add-on.
           properties:
             - !ruby/object:Api::Type::Boolean
               name: 'enabled'
-              description: Flag that specifies whether the Advanced API Ops add-on is enabled.
+              description: Flag that specifies whether the Integration add-on is enabled.
         - !ruby/object:Api::Type::NestedObject
           name: 'monetizationConfig'
           description: Configuration for the Monetization add-on.
           properties:
             - !ruby/object:Api::Type::Boolean
               name: 'enabled'
-              description: Flag that specifies whether the Advanced API Ops add-on is enabled.
+              description: Flag that specifies whether the Monetization add-on is enabled.
         - !ruby/object:Api::Type::NestedObject
           name: 'apiSecurityConfig'
-          description: Configuration for the Monetization add-on.
+          description: Configuration for the API Security add-on.
           properties:
             - !ruby/object:Api::Type::Boolean
               name: 'enabled'
-              description: Flag that specifies whether the Advanced API Ops add-on is enabled.
+              description: Flag that specifies whether the API security add-on is enabled.
             - !ruby/object:Api::Type::String
               name: 'expiresAt'
-              description: Flag that specifies whether the Advanced API Ops add-on is enabled.
+              description: Time at which the API Security add-on expires in in milliseconds since epoch. If unspecified, the add-on will never expire.
               output: true
         - !ruby/object:Api::Type::NestedObject
           name: 'connectorsPlatformConfig'
-          description: Configuration for the Monetization add-on.
+          description: Configuration for the Connectors Platform add-on.
           properties:
             - !ruby/object:Api::Type::Boolean
               name: 'enabled'
-              description: Flag that specifies whether the Advanced API Ops add-on is enabled.
+              description: Flag that specifies whether the Connectors Platform add-on is enabled.
             - !ruby/object:Api::Type::String
               name: 'expiresAt'
-              description: Flag that specifies whether the Advanced API Ops add-on is enabled.
+              description: Time at which the Connectors Platform add-on expires in milliseconds since epoch. If unspecified, the add-on will never expire.
               output: true
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
