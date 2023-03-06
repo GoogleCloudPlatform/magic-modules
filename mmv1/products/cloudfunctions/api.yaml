@@ -69,8 +69,7 @@ objects:
         name: 'name'
         required: true
         description: |
-          A user-defined name of the function. Function names must
-          be unique globally and match pattern `projects/*/locations/*/functions/*`.
+          A user-defined name of the function. Must be unique globally.
         pattern: projects/{{project}}/locations/{{location}}/functions/{{name}}
       - !ruby/object:Api::Type::String
         name: 'description'
