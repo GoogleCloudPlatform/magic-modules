@@ -250,7 +250,7 @@ func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([
 }
 
 func expandBootDisk(d TerraformResourceData, config *Config, project string) (*compute.AttachedDisk, error) {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}

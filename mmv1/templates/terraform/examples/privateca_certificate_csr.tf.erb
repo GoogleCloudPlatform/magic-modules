@@ -1,8 +1,14 @@
 # [START privateca_create_certificate_csr]
-resource "google_privateca_certificate_authority" "test-ca" {
-  pool = "<%= ctx[:vars]["pool"] %>"
-  certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
+resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
+  name = "<%= ctx[:vars]["ca_pool_id"] %>"
+  tier = "ENTERPRISE"
+}
+
+resource "google_privateca_certificate_authority" "default" {
+  location = "us-central1"
+  pool = google_privateca_ca_pool.default.name
+  certificate_authority_id = "my-authority"
   config {
     subject_config {
       subject {
@@ -42,11 +48,11 @@ resource "google_privateca_certificate_authority" "test-ca" {
 
 
 resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
-  pool = "<%= ctx[:vars]["pool"] %>"
   location = "us-central1"
-  certificate_authority = google_privateca_certificate_authority.test-ca.certificate_authority_id
-  lifetime = "860s"
+  pool = google_privateca_ca_pool.default.name
+  certificate_authority = google_privateca_certificate_authority.default.certificate_authority_id
   name = "<%= ctx[:vars]["certificate_name"] %>"
+  lifetime = "860s"
   pem_csr = file("test-fixtures/rsa_csr.pem")
 }
 # [END privateca_create_certificate_csr]
