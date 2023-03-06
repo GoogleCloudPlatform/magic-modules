@@ -23,7 +23,7 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: providerVersion450(),
-				Config:            testAccDataSourceDnsRecordSet_basic(managedZoneName, RandString(t, 10), RandString(t, 10)),
+				Config:            testAccDataSourceDnsRecordSet_basic(managedZoneName, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),
 					testExtractResourceAttr("data.google_dns_record_set.rs", "ttl", &ttl1),
@@ -31,7 +31,7 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 			},
 			{
 				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
-				Config:                   testAccDataSourceDnsRecordSet_basic(managedZoneName, RandString(t, 10), RandString(t, 10)),
+				Config:                   testAccDataSourceDnsRecordSet_basic(managedZoneName, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),
 					testExtractResourceAttr("data.google_dns_record_set.rs", "ttl", &ttl2),
@@ -42,7 +42,7 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 	})
 }
 
-func testAccDataSourceDnsRecordSet_basic(managedZoneName, zoneName, recordSetName string) string {
+func testAccDataSourceDnsRecordSet_basic(managedZoneName, recordSetName string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "zone" {
   name     = "test-zone"
@@ -64,7 +64,7 @@ data "google_dns_record_set" "rs" {
   name         = google_dns_record_set.rs.name
   type         = google_dns_record_set.rs.type
 }
-`, managedZoneName, zoneName, recordSetName)
+`, managedZoneName, recordSetName)
 }
 
 // testAccCheckDnsRecordSetDestroyProducerFramework is the framework version of the generated testAccCheckDnsRecordSetDestroyProducer
