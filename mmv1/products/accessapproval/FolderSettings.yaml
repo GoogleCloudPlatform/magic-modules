@@ -20,6 +20,7 @@
   update_mask: true
   description: |
     Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.
+    Test
   references: !ruby/object:Api::Resource::ReferenceLinks
     api: 'https://cloud.google.com/access-approval/docs/reference/rest/v1/folders'
   legacy_name: "google_folder_access_approval_settings"
