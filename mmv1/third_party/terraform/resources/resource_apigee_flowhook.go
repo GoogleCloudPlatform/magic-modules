@@ -27,7 +27,7 @@ func ResourceApigeeFlowhook() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"description": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: `Description of the flow hook.`,
 			},
@@ -57,8 +57,9 @@ func ResourceApigeeFlowhook() *schema.Resource {
 			},
 			"continue_on_error": {
 				Type:        schema.TypeBool,
-				Required:    true,
 				ForceNew:    true,
+				Optional:     true,
+				Default:      true,
 				Description: `Flag that specifies whether execution should continue if the flow hook throws an exception. Set to true to continue execution. Set to false to stop execution if the flow hook throws an exception. Defaults to true.`,
 			},
 		},
