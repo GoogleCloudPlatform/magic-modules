@@ -77,6 +77,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      options: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        diff_suppress_func: 'instanceOptionsDiffSuppress'
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true 
       accelerators.state: !ruby/object:Overrides::Terraform::PropertyOverride
