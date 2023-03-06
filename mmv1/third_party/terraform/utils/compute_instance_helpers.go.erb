@@ -203,7 +203,7 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	if resp.MaxRunDuration != nil {
 		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(resp.MaxRunDuration)
 	}
-	if resp.MaintenanceInterval != nil {
+	if resp.MaintenanceInterval != "" {
 		schedulingMap["maintenance_interval"] = *resp.MaintenanceInterval
 	}
 <% end -%>
