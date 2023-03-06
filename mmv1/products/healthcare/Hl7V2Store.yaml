@@ -60,7 +60,7 @@ properties:
           - parser_config.0.segment_terminator
           - parser_config.0.schema
         description: |
-          Byte(s) to be used as the segment terminator. If this is unset, '' will be used as segment terminator.
+          Byte(s) to be used as the segment terminator. If this is unset, '\r' will be used as segment terminator.
 
           A base64-encoded string.
       - !ruby/object:Api::Type::String
