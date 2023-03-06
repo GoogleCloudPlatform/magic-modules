@@ -67,6 +67,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "my-instance"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/datafusion_instance_update.go.erb
+      constants: templates/terraform/constants/data_fusion_instance_option.go.erb
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
