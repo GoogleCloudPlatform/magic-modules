@@ -23,7 +23,7 @@ main() {
         echo "unable to find magic-modules-dev container"
         build_dev_container
     fi
-
+    echo $GOPATH
     ${CONTAINER_EXECUTABLE} run --rm \
     -v "$PWD:/magic-modules" -v "$GOPATH:$GOPATH" \
     -it "${DEV_IMAGE}" "$@"
