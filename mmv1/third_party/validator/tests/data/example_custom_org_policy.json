@@ -1,61 +1,37 @@
 [
   {
-    "name": "cloudresourcemanager.googleapis.com/folders/{{.FolderID}}",
-    "asset_type": "cloudresourcemanager.googleapis.com/Folder",
-    "v2_org_policies": [
-      {
-        "name": "folders/{{.FolderID}}/policies/samplePolicy",
-        "spec": {
-          "update_time": "{{.Time.RFC3339Nano}}",
-          "rules": [
-            {
-              "deny_all": true
-            }
-          ],
-          "inherit_from_parent": true
-        }
-      }
-    ],
-    "ancestors":[
-      "organizations/unknown"
-    ]
-  },
-  {
     "name": "cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
     "asset_type": "cloudresourcemanager.googleapis.com/Project",
     "v2_org_policies": [
       {
         "name": "projects/{{.Provider.project}}/policies/gcp.resourceLocations",
         "spec": {
-          "update_time": "{{.Time.RFC3339Nano}}",
+          "update_time": "2021-04-14T15:16:17Z",
           "rules": [
             {
               "values": {
                 "allowed_values": [
-                  "projects/allowed-project1",
-                  "projects/allowed-project2"
+                  "projects/123",
+                  "projects/456"
                 ],
                 "denied_values": [
-                  "projects/denied-project"
+                  "projects/789"
                 ]
               },
               "expression": {
-                "expression": "resource.matchLabels('labelKeys/123', 'labelValues/345')",
-                "title": "sample-condition",
-                "description": "A sample condition for the policy",
-                "location": "sample-location.log"
+                "expression": "resource.matchLabels('label1', 'label2')",
+                "title": "Title of the condition",
+                "description": "Description the policy",
+                "location": "EU"
               }
             },
             {
               "allow_all": true
             }
-          ],
-          "inherit_from_parent": true
+          ]
         }
       }
     ],
-    "ancestors": [
-      "organizations/unknown"
-    ]
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
   }
 ]
