@@ -33,7 +33,7 @@ The following arguments are supported:
   Where in the API call flow the flow hook is invoked. Must be one of PreProxyFlowHook, PostProxyFlowHook, PreTargetFlowHook, or PostTargetFlowHook.
 
 * `description` -
-  (Required)
+  (Optional)
   Description of the flow hook.
 
 * `sharedflow` -
@@ -41,7 +41,7 @@ The following arguments are supported:
   Id of the Sharedflow attaching to a flowhook point.
 
 * `continue_on_error` -
-  (Required)
+  (Optional)
   Flag that specifies whether execution should continue if the flow hook throws an exception. Set to true to continue execution. Set to false to stop execution if the flow hook throws an exception. Defaults to true.
 
 
