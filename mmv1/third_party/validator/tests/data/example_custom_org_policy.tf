@@ -1,3 +1,16 @@
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = "~> {{.Provider.version}}"
+    }
+  }
+}
+
+provider "google" {
+  {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
+}
+
 resource "google_org_policy_policy" "project_policy" {
   name   = "projects/{{.Provider.project}}/policies/gcp.resourceLocations"
   parent = "projects/{{.Provider.project}}"
