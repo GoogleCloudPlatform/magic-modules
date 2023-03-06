@@ -1209,7 +1209,7 @@ func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 	context := map[string]interface{}{
 		"kms_ring_name": GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
 		"kms_key_name":  GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
 
@@ -1244,7 +1244,7 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 	context := map[string]interface{}{
 		"kms_ring_name": GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
 		"kms_key_name":  GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -3149,7 +3149,7 @@ data "google_kms_crypto_key" "key" {
 }
 
 resource "google_service_account" "test" {
-  account_id   = "test-sa-%{random_suffix}"
+  account_id   = "tf-test-sa-%{random_suffix}"
   display_name = "KMS Ops Account"
 }
 
