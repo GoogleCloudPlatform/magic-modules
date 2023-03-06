@@ -1,14 +1,14 @@
 {
   "format_version": "1.1",
-  "terraform_version": "1.3.7",
+  "terraform_version": "1.3.9",
   "planned_values": {
     "root_module": {
       "resources": [
         {
-          "address": "google_org_policy_policy.primary_policy",
+          "address": "google_org_policy_policy.project_policy",
           "mode": "managed",
           "type": "google_org_policy_policy",
-          "name": "primary_policy",
+          "name": "project_policy",
           "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 0,
           "values": {
@@ -16,17 +16,17 @@
             "parent": "projects/{{.Provider.project}}",
             "spec": [
               {
-                "inherit_from_parent": true,
+                "inherit_from_parent": null,
                 "reset": null,
                 "rules": [
                   {
                     "allow_all": null,
                     "condition": [
                       {
-                        "description": "A sample condition for the policy",
-                        "expression": "resource.matchLabels('labelKeys/123', 'labelValues/345')",
-                        "location": "sample-location.log",
-                        "title": "sample-condition"
+                        "description": "Description the policy",
+                        "expression": "resource.matchLabels('label1', 'label2')",
+                        "location": "EU",
+                        "title": "Title of the condition"
                       }
                     ],
                     "deny_all": null,
@@ -34,11 +34,11 @@
                     "values": [
                       {
                         "allowed_values": [
-                          "projects/allowed-project1",
-                          "projects/allowed-project2"
+                          "projects/123",
+                          "projects/456"
                         ],
                         "denied_values": [
-                          "projects/denied-project"
+                          "projects/789"
                         ]
                       }
                     ]
@@ -83,56 +83,16 @@
               }
             ]
           }
-        },
-        {
-          "address": "google_org_policy_policy.secondary_policy",
-          "mode": "managed",
-          "type": "google_org_policy_policy",
-          "name": "secondary_policy",
-          "provider_name": "registry.terraform.io/hashicorp/google",
-          "schema_version": 0,
-          "values": {
-            "name": "folders/{{.FolderID}}/policies/samplePolicy",
-            "parent": "folders/{{.FolderID}}",
-            "spec": [
-              {
-                "inherit_from_parent": true,
-                "reset": null,
-                "rules": [
-                  {
-                    "allow_all": null,
-                    "condition": [],
-                    "deny_all": "TRUE",
-                    "enforce": null,
-                    "values": []
-                  }
-                ]
-              }
-            ],
-            "timeouts": null
-          },
-          "sensitive_values": {
-            "spec": [
-              {
-                "rules": [
-                  {
-                    "condition": [],
-                    "values": []
-                  }
-                ]
-              }
-            ]
-          }
         }
       ]
     }
   },
   "resource_changes": [
     {
-      "address": "google_org_policy_policy.primary_policy",
+      "address": "google_org_policy_policy.project_policy",
       "mode": "managed",
       "type": "google_org_policy_policy",
-      "name": "primary_policy",
+      "name": "project_policy",
       "provider_name": "registry.terraform.io/hashicorp/google",
       "change": {
         "actions": [
@@ -144,17 +104,17 @@
           "parent": "projects/{{.Provider.project}}",
           "spec": [
             {
-              "inherit_from_parent": true,
+              "inherit_from_parent": null,
               "reset": null,
               "rules": [
                 {
                   "allow_all": null,
                   "condition": [
                     {
-                      "description": "A sample condition for the policy",
-                      "expression": "resource.matchLabels('labelKeys/123', 'labelValues/345')",
-                      "location": "sample-location.log",
-                      "title": "sample-condition"
+                      "description": "Description the policy",
+                      "expression": "resource.matchLabels('label1', 'label2')",
+                      "location": "EU",
+                      "title": "Title of the condition"
                     }
                   ],
                   "deny_all": null,
@@ -162,11 +122,11 @@
                   "values": [
                     {
                       "allowed_values": [
-                        "projects/allowed-project1",
-                        "projects/allowed-project2"
+                        "projects/123",
+                        "projects/456"
                       ],
                       "denied_values": [
-                        "projects/denied-project"
+                        "projects/789"
                       ]
                     }
                   ]
@@ -244,67 +204,6 @@
           ]
         }
       }
-    },
-    {
-      "address": "google_org_policy_policy.secondary_policy",
-      "mode": "managed",
-      "type": "google_org_policy_policy",
-      "name": "secondary_policy",
-      "provider_name": "registry.terraform.io/hashicorp/google",
-      "change": {
-        "actions": [
-          "create"
-        ],
-        "before": null,
-        "after": {
-          "name": "folders/{{.FolderID}}/policies/samplePolicy",
-          "parent": "folders/{{.FolderID}}",
-          "spec": [
-            {
-              "inherit_from_parent": true,
-              "reset": null,
-              "rules": [
-                {
-                  "allow_all": null,
-                  "condition": [],
-                  "deny_all": "TRUE",
-                  "enforce": null,
-                  "values": []
-                }
-              ]
-            }
-          ],
-          "timeouts": null
-        },
-        "after_unknown": {
-          "id": true,
-          "spec": [
-            {
-              "etag": true,
-              "rules": [
-                {
-                  "condition": [],
-                  "values": []
-                }
-              ],
-              "update_time": true
-            }
-          ]
-        },
-        "before_sensitive": false,
-        "after_sensitive": {
-          "spec": [
-            {
-              "rules": [
-                {
-                  "condition": [],
-                  "values": []
-                }
-              ]
-            }
-          ]
-        }
-      }
     }
   ],
   "configuration": {
@@ -317,10 +216,10 @@
     "root_module": {
       "resources": [
         {
-          "address": "google_org_policy_policy.primary_policy",
+          "address": "google_org_policy_policy.project_policy",
           "mode": "managed",
           "type": "google_org_policy_policy",
-          "name": "primary_policy",
+          "name": "project_policy",
           "provider_config_key": "google",
           "expressions": {
             "name": {
@@ -331,24 +230,21 @@
             },
             "spec": [
               {
-                "inherit_from_parent": {
-                  "constant_value": true
-                },
                 "rules": [
                   {
                     "condition": [
                       {
                         "description": {
-                          "constant_value": "A sample condition for the policy"
+                          "constant_value": "Description the policy"
                         },
                         "expression": {
-                          "constant_value": "resource.matchLabels('labelKeys/123', 'labelValues/345')"
+                          "constant_value": "resource.matchLabels('label1', 'label2')"
                         },
                         "location": {
-                          "constant_value": "sample-location.log"
+                          "constant_value": "EU"
                         },
                         "title": {
-                          "constant_value": "sample-condition"
+                          "constant_value": "Title of the condition"
                         }
                       }
                     ],
@@ -356,13 +252,13 @@
                       {
                         "allowed_values": {
                           "constant_value": [
-                            "projects/allowed-project1",
-                            "projects/allowed-project2"
+                            "projects/123",
+                            "projects/456"
                           ]
                         },
                         "denied_values": {
                           "constant_value": [
-                            "projects/denied-project"
+                            "projects/789"
                           ]
                         }
                       }
@@ -370,36 +266,6 @@
                   },
                   {
                     "allow_all": {
-                      "constant_value": "TRUE"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "schema_version": 0
-        },
-        {
-          "address": "google_org_policy_policy.secondary_policy",
-          "mode": "managed",
-          "type": "google_org_policy_policy",
-          "name": "secondary_policy",
-          "provider_config_key": "google",
-          "expressions": {
-            "name": {
-              "constant_value": "folders/{{.FolderID}}/policies/samplePolicy"
-            },
-            "parent": {
-              "constant_value": "folders/{{.FolderID}}"
-            },
-            "spec": [
-              {
-                "inherit_from_parent": {
-                  "constant_value": true
-                },
-                "rules": [
-                  {
-                    "deny_all": {
                       "constant_value": "TRUE"
                     }
                   }
