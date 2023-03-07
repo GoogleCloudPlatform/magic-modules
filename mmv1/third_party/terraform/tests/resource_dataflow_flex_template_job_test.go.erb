@@ -426,13 +426,8 @@ func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *te
 	var instanceTemplate *compute.InstanceTemplate
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-<<<<<<< HEAD
 		instanceTemplates, rerr := config.NewComputeClient(config.userAgent).InstanceTemplates.
 			List(config.Project).
-=======
-		instances, rerr := config.NewComputeClient(config.UserAgent).Instances.
-			List(config.Project, zone).
->>>>>>> 0ed8a6b5ee5d3236b642c6cd1c87a71862f1d4a3
 			Filter(filter).
 			MaxResults(2).
 			Fields("items/properties").Do()
