@@ -17,12 +17,12 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
     network       = "default"
     ip_allocation = "${google_compute_global_address.private_ip_alloc.address}/${google_compute_global_address.private_ip_alloc.prefix_length}"
   }
-  <%= ctx[:vars]['prober_test_run'] %>
-  version = "6.7.0"
+
   accelerators {
     accelerator_type = "CDC"
     state = "ENABLED"
   }
+  <%= ctx[:vars]['prober_test_run'] %>
 }
 
 data "google_app_engine_default_service_account" "default" {

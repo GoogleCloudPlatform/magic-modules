@@ -6,14 +6,14 @@ if err != nil {
 	return err
 }
 
-policyRes, err := sendRequest(config, "GET", "", url, userAgent, nil)
+policyRes, err := SendRequest(config, "GET", "", url, userAgent, nil)
 if err != nil {
 	return handleNotFoundError(err, d, fmt.Sprintf("ComputeOrganizationSecurityPolicy %q", d.Get("policy_id")))
 }
 
 parent := flattenComputeOrganizationSecurityPolicyParent(policyRes["parent"], d, config)
 var opRes map[string]interface{}
-err = computeOrgOperationWaitTimeWithResponse(
+err = ComputeOrgOperationWaitTimeWithResponse(
 	config, res, &opRes, parent.(string), "Creating OrganizationSecurityPolicyRule", userAgent,
 	d.Timeout(schema.TimeoutCreate))
 

@@ -566,9 +566,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       failoverPolicy.disableConnectionDrainOnFailover: !ruby/object:Overrides::Terraform::PropertyOverride
-        send_empty_value: true
+        default_from_api: true
       failoverPolicy.dropTrafficIfUnhealthy: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
+        default_from_api: true
       connectionTrackingPolicy.idleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -2448,27 +2449,33 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "resource_policy_basic"
         primary_resource_id: "foo"
         vars:
-          name: "policy"
+          name: "gce-policy"
       - !ruby/object:Provider::Terraform::Examples
         name: "resource_policy_full"
         primary_resource_id: "bar"
         vars:
-          name: "policy"
+          name: "gce-policy"
       - !ruby/object:Provider::Terraform::Examples
         name: "resource_policy_placement_policy"
         primary_resource_id: "baz"
         vars:
-          name: "policy"
+          name: "gce-policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_placement_policy_max_distance"
+        min_version: "beta"
+        primary_resource_id: "baz"
+        vars:
+          name: "gce-policy"
       - !ruby/object:Provider::Terraform::Examples
         name: "resource_policy_instance_schedule_policy"
         primary_resource_id: "hourly"
         vars:
-          name: "policy"
+          name: "gce-policy"
       - !ruby/object:Provider::Terraform::Examples
         name: "resource_policy_snapshot_schedule_chain_name"
         primary_resource_id: "hourly"
         vars:
-          name: "policy"
+          name: "gce-policy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false

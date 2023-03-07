@@ -1,0 +1,88 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'SourceRepresentationInstance'
+kind: 'sql#instance'
+description: |
+  A source representation instance is a Cloud SQL instance that represents
+  the source database server to the Cloud SQL replica. It is visible in the
+  Cloud Console and appears the same as a regular Cloud SQL instance, but it
+  contains no data, requires no configuration or maintenance, and does not
+  affect billing. You cannot update the source representation instance.
+base_url: projects/{{project}}/instances
+input: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+        The name of the source representation instance. Use any valid Cloud SQL instance name.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'region'
+    description: |
+      The region where you want your Cloud SQL replicas to reside.
+    required: true
+  - !ruby/object:Api::Type::Enum
+    name: 'databaseVersion'
+    description: |
+      The MySQL version running on your source database server.
+    required: true
+    values:
+      - :MYSQL_5_5
+      - :MYSQL_5_6
+      - :MYSQL_5_7
+      - :MYSQL_8_0
+  - !ruby/object:Api::Type::NestedObject
+    name: 'onPremisesConfiguration'
+    description: |
+      Configuration specific to on-premises instances.
+    required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'host'
+        description: |
+          The externally accessible IPv4 address for the source database server.
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        default_value: 3306
+        description: |
+          The externally accessible port for the source database server.
+          Defaults to 3306.
+      - !ruby/object:Api::Type::String
+        name: 'username'
+        description: |
+          The replication user account on the external server.
+      - !ruby/object:Api::Type::String
+        name: 'password'
+        description: |
+          The password for the replication user account.
+      - !ruby/object:Api::Type::String
+        name: 'dumpFilePath'
+        description: |
+          A file in the bucket that contains the data from the external server.
+      - !ruby/object:Api::Type::String
+        name: 'caCertificate'
+        description: |
+          The CA certificate on the external server. Include only if SSL/TLS is used on the external server.
+      - !ruby/object:Api::Type::String
+        name: 'clientCertificate'
+        description: |
+          The client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.
+      - !ruby/object:Api::Type::String
+        name: 'clientKey'
+        description: |
+          The private key file for the client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.
+
+
