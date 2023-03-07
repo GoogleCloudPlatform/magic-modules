@@ -142,6 +142,9 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.MaxRunDuration = transformedMaxRunDuration
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
 	}
+	if v, ok := original["maintenance_interval"]; ok {
+		scheduling.MaintenanceInterval = v.(string)
+	}
 <% end -%>
 	return scheduling, nil
 }
@@ -199,6 +202,9 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 <% unless version == 'ga' -%>
 	if resp.MaxRunDuration != nil {
 		schedulingMap["max_run_duration"] = flattenComputeMaxRunDuration(resp.MaxRunDuration)
+	}
+	if resp.MaintenanceInterval != "" {
+		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
 	}
 <% end -%>
 
