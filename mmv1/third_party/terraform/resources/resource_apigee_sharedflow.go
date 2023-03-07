@@ -151,7 +151,7 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, config_bundle=, 	%s", d.Get("config_bundle").(string))
 
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func resourceApigeeSharedFlowUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	log.Printf("[DEBUG] resourceApigeeSharedFlowRead sendRequest")
 	log.Printf("[DEBUG] resourceApigeeSharedFlowRead, url=, 	%s", url)
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ApigeeSharedFlow %q", d.Id()))
 	}
@@ -254,7 +254,6 @@ func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) erro
 
 	//setting hash to suggest update
 	if previousLastModifiedAt != currentLastModifiedAt {
-		log.Printf("yoyo LastModifiedAt previous: %s, current: %s", previousLastModifiedAt, currentLastModifiedAt)
 		d.Set("md5hash", "UNKNOWN")
 		d.Set("detect_md5hash", "UNKNOWN")
 	}
@@ -282,7 +281,7 @@ func getApigeeSharedFlowLastModifiedAt(d *schema.ResourceData) string {
 func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] resourceApigeeSharedFlowDelete")
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -302,7 +301,7 @@ func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) er
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "SharedFlow")
 	}
@@ -398,7 +397,7 @@ func sendRequestRawBodyWithTimeout(config *Config, method, project, rawurl, user
 
 	log.Printf("[DEBUG] sendRequestRawBodyWithTimeout sending request")
 
-	err := retryTimeDuration(
+	err := RetryTimeDuration(
 		func() error {
 			req, err := http.NewRequest(method, rawurl, body)
 			if err != nil {
@@ -406,7 +405,7 @@ func sendRequestRawBodyWithTimeout(config *Config, method, project, rawurl, user
 			}
 
 			req.Header = reqHeaders
-			res, err = config.client.Do(req)
+			res, err = config.Client.Do(req)
 			if err != nil {
 				return err
 			}

@@ -10,20 +10,20 @@ import (
 )
 
 func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	fmt.Printf("from t: org_id %s", getTestOrgFromEnv(t))
+	fmt.Printf("from t: org_id %s", GetTestOrgFromEnv(t))
 
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          GetTestOrgFromEnv(t),
+		"billing_account": GetTestBillingAccountFromEnv(t),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckApigeeSharedFlowDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -125,7 +125,7 @@ func testAccCheckApigeeSharedFlowDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
 			if err != nil {
@@ -138,7 +138,7 @@ func testAccCheckApigeeSharedFlowDestroyProducer(t *testing.T) func(s *terraform
 				billingProject = config.BillingProject
 			}
 			fmt.Printf("testAccCheckApigeeSharedFlowDestroyProducer, url %s", url)
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ApigeeSharedFlow still exists at %s", url)
 			}

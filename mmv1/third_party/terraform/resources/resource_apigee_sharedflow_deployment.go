@@ -62,7 +62,7 @@ func ResourceApigeeSharedFlowDeployment() *schema.Resource {
 
 func resourceApigeeSharedflowDeploymentCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func resourceApigeeSharedflowDeploymentCreate(d *schema.ResourceData, meta inter
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating SharedflowDeployment: %s", err)
 	}
@@ -99,7 +99,7 @@ func resourceApigeeSharedflowDeploymentCreate(d *schema.ResourceData, meta inter
 
 func resourceApigeeSharedflowDeploymentRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func resourceApigeeSharedflowDeploymentRead(d *schema.ResourceData, meta interfa
 
 	log.Printf("[DEBUG] Reading SharedflowDeployment at %s", url)
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ApigeeSharedflowDeployment %q", d.Id()))
 	}
@@ -129,7 +129,7 @@ func resourceApigeeSharedflowDeploymentRead(d *schema.ResourceData, meta interfa
 
 func resourceApigeeSharedflowDeploymentDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func resourceApigeeSharedflowDeploymentDelete(d *schema.ResourceData, meta inter
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "SharedflowDeployment")
 	}

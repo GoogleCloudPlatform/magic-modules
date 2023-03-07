@@ -10,18 +10,18 @@ import (
 )
 
 func TestAccApigeeFlowhook_apigeeFlowhookTestExample(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          GetTestOrgFromEnv(t),
+		"billing_account": GetTestBillingAccountFromEnv(t),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckApigeeFlowhookDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -137,7 +137,7 @@ func testAccCheckApigeeFlowhookDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 			if err != nil {
@@ -149,7 +149,7 @@ func testAccCheckApigeeFlowhookDestroyProducer(t *testing.T) func(s *terraform.S
 			if config.BillingProject != "" {
 				billingProject = config.BillingProject
 			}
-			res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			res, err := SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			// Flowhooks always exist, we treat the binding as a removable resource, thus we check if the sharedFlow field to detect sharedflow attachment
 			if err == nil && res != nil && res["sharedFlow"] != nil {
 				return fmt.Errorf("Flowhook still has an attachment at %s", url)
