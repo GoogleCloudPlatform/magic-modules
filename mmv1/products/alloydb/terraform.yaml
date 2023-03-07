@@ -37,7 +37,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_docs: true
         primary_resource_id: "default"
         vars:
-          alloydb_cluster_name: "alloydb-cont"          
+          alloydb_cluster_name: "alloydb-cluster"
       - !ruby/object:Provider::Terraform::Examples
         name: "alloydb_cluster_full"
         primary_resource_id: "full"
