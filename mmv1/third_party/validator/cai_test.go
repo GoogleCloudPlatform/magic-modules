@@ -54,7 +54,7 @@ func TestAssetName(t *testing.T) {
 func TestRandString(t *testing.T) {
 	memory := make(map[string]bool)
 	for i := 0; i < 100; i++ {
-		s := randString(i)
+		s := RandString(i)
 		if n := len(s); n != i {
 			t.Fatalf("expected len = %v, got %v", i, n)
 		}

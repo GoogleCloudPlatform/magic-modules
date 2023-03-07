@@ -187,7 +187,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "vertex_ai_featurestore_entitytype"
         primary_resource_id: "entity"
-        primary_resource_name: "fmt.Sprintf(\"projects/%s/locations/%s/featurestores/%s\", getTestProjectFromEnv(), getTestRegionFromEnv(), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"projects/%s/locations/%s/featurestores/%s\", GetTestProjectFromEnv(), GetTestRegionFromEnv(), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"])"
         vars:
           name: "terraform"
           project: "vertex-ai"

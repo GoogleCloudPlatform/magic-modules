@@ -8,13 +8,13 @@ import (
 )
 
 // Return the value of the private userAgent field
-func (c *Config) UserAgent() string {
-	return c.userAgent
+func (c *Config) GetUserAgent() string {
+	return c.UserAgent
 }
 
 // Return the value of the private client field
-func (c *Config) Client() *http.Client {
-	return c.client
+func (c *Config) GetClient() *http.Client {
+	return c.Client
 }
 
 func NewConfig(ctx context.Context, project, zone, region string, offline bool, userAgent string, client *http.Client) (*Config, error) {
@@ -22,7 +22,7 @@ func NewConfig(ctx context.Context, project, zone, region string, offline bool, 
 		Project:   project,
 		Zone:      zone,
 		Region:    region,
-		userAgent: userAgent,
+		UserAgent: userAgent,
 	}
 
 	// Search for default credentials
@@ -46,7 +46,7 @@ func NewConfig(ctx context.Context, project, zone, region string, offline bool, 
 			return nil, errors.Wrap(err, "load and validate config")
 		}
 		if client != nil {
-			cfg.client = client
+			cfg.Client = client
 		}
 	}
 

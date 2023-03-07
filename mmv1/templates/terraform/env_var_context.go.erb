@@ -1,27 +1,27 @@
 <% example.test_env_vars&.each do |var_name, var_type| -%>
 	<% if var_type == :ORG_ID  -%>
-		"<%= var_name -%>": getTestOrgFromEnv(t),
+		"<%= var_name -%>": GetTestOrgFromEnv(t),
 	<% elsif var_type == :ORG_DOMAIN  -%>
-		"<%= var_name -%>": getTestOrgDomainFromEnv(t),
+		"<%= var_name -%>": GetTestOrgDomainFromEnv(t),
 	<% elsif var_type == :CREDENTIALS -%>
-		"<%= var_name -%>": getTestCredsFromEnv(t),
+		"<%= var_name -%>": GetTestCredsFromEnv(t),
 	<% elsif var_type == :REGION -%>
-		"<%= var_name -%>": getTestRegionFromEnv(),
+		"<%= var_name -%>": GetTestRegionFromEnv(),
 	<% elsif var_type == :ORG_TARGET -%>
-		"<%= var_name -%>": getTestOrgTargetFromEnv(t),
+		"<%= var_name -%>": GetTestOrgTargetFromEnv(t),
 	<% elsif var_type == :BILLING_ACCT -%>
-		"<%= var_name -%>": getTestBillingAccountFromEnv(t),
+		"<%= var_name -%>": GetTestBillingAccountFromEnv(t),
 	<% elsif var_type == :MASTER_BILLING_ACCT -%>
-		"<%= var_name -%>": getTestMasterBillingAccountFromEnv(t),
+		"<%= var_name -%>": GetTestMasterBillingAccountFromEnv(t),
 	<% elsif var_type == :SERVICE_ACCT -%>
-		"<%= var_name -%>": getTestServiceAccountFromEnv(t),
+		"<%= var_name -%>": GetTestServiceAccountFromEnv(t),
 	<% elsif var_type == :PROJECT_NAME -%>
-		"<%= var_name -%>": getTestProjectFromEnv(),
+		"<%= var_name -%>": GetTestProjectFromEnv(),
 	<% elsif var_type == :FIRESTORE_PROJECT_NAME -%>
-		"<%= var_name -%>": getTestFirestoreProjectFromEnv(t),
+		"<%= var_name -%>": GetTestFirestoreProjectFromEnv(t),
 	<% elsif var_type == :CUST_ID  -%>
-		"<%= var_name -%>": getTestCustIdFromEnv(t),
+		"<%= var_name -%>": GetTestCustIdFromEnv(t),
 	<% elsif var_type == :IDENTITY_USER  -%>
-		"<%= var_name -%>": getTestIdentityUserFromEnv(t),
+		"<%= var_name -%>": GetTestIdentityUserFromEnv(t),
 	<% end -%>
 <% end -%>

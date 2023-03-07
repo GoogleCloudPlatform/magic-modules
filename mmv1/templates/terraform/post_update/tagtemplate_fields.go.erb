@@ -115,7 +115,7 @@ for name, change := range vals {
             return resourceDataCatalogTagTemplateRead(d, meta)
         }
 
-        res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url1, userAgent, changeNewProp, d.Timeout(schema.TimeoutDelete))
+        res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url1, userAgent, changeNewProp, d.Timeout(schema.TimeoutDelete))
         if err != nil {
             return fmt.Errorf("Error updating TagTemplate Field %v: %s", name, err)
         }
