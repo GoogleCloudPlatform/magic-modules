@@ -162,7 +162,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
 	network2 := "tf-test-dataflow-net2" + randStr
-    bucket := "tf-test-dataflow-bucket-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -210,8 +210,8 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 	network := "tf-test-dataflow-net" + randStr
 	subnetwork := "tf-test-dataflow-subnetwork" + randStr
 	subnetwork2 := "tf-test-dataflow-subnetwork" + randStr
-    bucket := "tf-test-dataflow-bucket-" + randStr
-  
+	bucket := "tf-test-dataflow-bucket-" + randStr
+
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -254,8 +254,8 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 	t.Parallel()
 
 	randStr := RandString(t, 10)
-    job := "tf-test-dataflow-job-" + randStr
-    bucket := "tf-test-dataflow-bucket-" + randStr
+	job := "tf-test-dataflow-job-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -288,7 +288,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	key_ring := "tf-test-dataflow-kms-ring-" + randStr
 	crypto_key := "tf-test-dataflow-kms-key-" + randStr
-    bucket := "tf-test-dataflow-bucket-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -320,8 +320,8 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 	randStr := RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	additionalExperiments := []string{"enable_stackdriver_agent_metrics", "shuffle_mode=service"}
-    bucket := "tf-test-dataflow-bucket-" + randStr
-  
+	bucket := "tf-test-dataflow-bucket-" + randStr
+
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -388,9 +388,9 @@ func testAccDataflowFlexTemplateJobHasAdditionalExperiments(t *testing.T, res st
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		job, err := config.NewDataflowClient(config.userAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
+		job, err := config.NewDataflowClient(config.UserAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
 		if err != nil {
 			return fmt.Errorf("dataflow job does not exist")
 		}
@@ -426,7 +426,7 @@ func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *te
 	var instanceTemplate *compute.InstanceTemplate
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-		instanceTemplates, rerr := config.NewComputeClient(config.userAgent).InstanceTemplates.
+		instanceTemplates, rerr := config.NewComputeClient(config.UserAgent).InstanceTemplates.
 			List(config.Project).
 			Filter(filter).
 			MaxResults(2).
@@ -726,7 +726,7 @@ resource "google_dataflow_flex_template_job" "job" {
   ip_configuration = "WORKER_IP_PRIVATE"
 
 }
-`,bucket, job)
+`, bucket, job)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
@@ -789,7 +789,7 @@ resource "google_dataflow_flex_template_job" "job" {
   kms_key_name		= google_kms_crypto_key.crypto_key.id
 
 }
-`,bucket, key_ring, crypto_key, job)
+`, bucket, key_ring, crypto_key, job)
 }
 
 // note: this config creates a job that doesn't actually do anything, but still runs
@@ -829,7 +829,7 @@ resource "google_dataflow_flex_template_job" "job" {
   additional_experiments = ["%s"]
 
 }
-`,bucket, job, strings.Join(experiments, `", "`))
+`, bucket, job, strings.Join(experiments, `", "`))
 }
 
 func testAccDataflowJobHasOption(t *testing.T, res, option, expectedValue string) resource.TestCheckFunc {
