@@ -430,7 +430,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 		return nil
 	}
 
-	projectIDSuffix := strings.Replace(getTestProjectFromEnv(), "ci-test-project-", "", 1)
+	projectIDSuffix := strings.Replace(GetTestProjectFromEnv(), "ci-test-project-", "", 1)
 	projectID := projectIDPrefix + projectIDSuffix
 
 	crmClient := config.NewResourceManagerClient(config.UserAgent)
