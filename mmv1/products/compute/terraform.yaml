@@ -1365,7 +1365,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         vars:
           image_name: "example-image"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "image_basic_storage_location"
+        primary_resource_id: "example"
+        vars:
+          primary_resource_name: "fmt.Sprintf(\"tf-test-sl-example-image%s\", context[\"random_suffix\"])"
     properties:
+      storageLocations: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       diskSizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
