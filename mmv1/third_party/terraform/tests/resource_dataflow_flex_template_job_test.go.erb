@@ -18,16 +18,16 @@ import (
 func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 	// This resource uses custom retry logic that cannot be sped up without
 	// modifying the actual resource
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -49,16 +49,16 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 	// This resource uses custom retry logic that cannot be sped up without
 	// modifying the actual resource
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -86,16 +86,16 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
 	// This resource uses custom retry logic that cannot be sped up without
 	// modifying the actual resource
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -118,16 +118,16 @@ func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -155,7 +155,7 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -202,7 +202,7 @@ func TestAccDataflowFlexTemplateJob_withNetwork(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -250,7 +250,7 @@ func TestAccDataflowFlexTemplateJob_withSubNetwork(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -281,7 +281,7 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -314,7 +314,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -421,13 +421,18 @@ func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *te
 	}
 	filter := fmt.Sprintf("properties.labels.dataflow_job_id = %s", rs.Primary.ID)
 
-	config := googleProviderConfig(t)
+	config := GoogleProviderConfig(t)
 
 	var instanceTemplate *compute.InstanceTemplate
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+<<<<<<< HEAD
 		instanceTemplates, rerr := config.NewComputeClient(config.userAgent).InstanceTemplates.
 			List(config.Project).
+=======
+		instances, rerr := config.NewComputeClient(config.UserAgent).Instances.
+			List(config.Project, zone).
+>>>>>>> 0ed8a6b5ee5d3236b642c6cd1c87a71862f1d4a3
 			Filter(filter).
 			MaxResults(2).
 			Fields("items/properties").Do()
@@ -842,9 +847,9 @@ func testAccDataflowJobHasOption(t *testing.T, res, option, expectedValue string
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		job, err := config.NewDataflowClient(config.userAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
+		job, err := config.NewDataflowClient(config.UserAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
 		if err != nil {
 			return fmt.Errorf("dataflow job does not exist")
 		}

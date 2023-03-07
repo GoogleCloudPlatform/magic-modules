@@ -61,10 +61,10 @@ func expandIamMemberBindings(d TerraformResourceData) ([]IAMBinding, error) {
 // Asset.
 func mergeIamAssets(
 	existing, incoming Asset,
-	mergeBindings func(existing, incoming []IAMBinding) []IAMBinding,
+	MergeBindings func(existing, incoming []IAMBinding) []IAMBinding,
 ) Asset {
 	if existing.IAMPolicy != nil {
-		existing.IAMPolicy.Bindings = mergeBindings(existing.IAMPolicy.Bindings, incoming.IAMPolicy.Bindings)
+		existing.IAMPolicy.Bindings = MergeBindings(existing.IAMPolicy.Bindings, incoming.IAMPolicy.Bindings)
 	} else {
 		existing.IAMPolicy = incoming.IAMPolicy
 	}
@@ -74,10 +74,10 @@ func mergeIamAssets(
 // incoming is the last known state of an asset prior to deletion
 func mergeDeleteIamAssets(
 	existing, incoming Asset,
-	mergeBindings func(existing, incoming []IAMBinding) []IAMBinding,
+	MergeBindings func(existing, incoming []IAMBinding) []IAMBinding,
 ) Asset {
 	if existing.IAMPolicy != nil {
-		existing.IAMPolicy.Bindings = mergeBindings(existing.IAMPolicy.Bindings, incoming.IAMPolicy.Bindings)
+		existing.IAMPolicy.Bindings = MergeBindings(existing.IAMPolicy.Bindings, incoming.IAMPolicy.Bindings)
 	}
 	return existing
 }
@@ -206,7 +206,7 @@ func fetchIamPolicy(
 	}
 
 	iamPolicy, err := updater.GetResourceIamPolicy()
-	if isGoogleApiErrorWithCode(err, 403) || isGoogleApiErrorWithCode(err, 404) {
+	if IsGoogleApiErrorWithCode(err, 403) || IsGoogleApiErrorWithCode(err, 404) {
 		return Asset{}, ErrResourceInaccessible
 	}
 

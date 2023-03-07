@@ -1,6 +1,6 @@
 config := meta.(*Config)
 
-userAgent, err := generateUserAgentString(d, config.userAgent)
+userAgent, err := generateUserAgentString(d, config.UserAgent)
 if err != nil {
   return nil, err
 }
@@ -26,7 +26,7 @@ if v, ok := res["authEnabled"].(bool); ok {
 			billingProject = bp
 		}
 
-		res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+		res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading AuthString: %s", err)
 		}
