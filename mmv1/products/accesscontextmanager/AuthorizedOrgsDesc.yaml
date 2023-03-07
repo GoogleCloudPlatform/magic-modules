@@ -81,7 +81,6 @@
         evaluation, such as a device. Valid values are "ASSET_TYPE_DEVICE" and
         "ASSET_TYPE_CREDENTIAL_STRENGTH".
       values:
-        - :ASSET_TYPE_UNSPECIFIED
         - :ASSET_TYPE_DEVICE
         - :ASSET_TYPE_CREDENTIAL_STRENGTH
     - !ruby/object:Api::Type::Enum
@@ -106,7 +105,6 @@
         "AUTHORIZATION_DIRECTION_FROM" as the authorization direction in their
         "AuthorizedOrgsDesc" resource.
       values:
-        - :AUTHORIZATION_DIRECTION_UNSPECIFIED
         - :AUTHORIZATION_DIRECTION_TO
         - :AUTHORIZATION_DIRECTION_FROM
     - !ruby/object:Api::Type::Enum
@@ -115,7 +113,6 @@
       description: |
         A granular control type for authorization levels. Valid value is "AUTHORIZATION_TYPE_TRUST".
       values:
-        - :AUTHORIZATION_TYPE_UNSPECIFIED
         - :AUTHORIZATION_TYPE_TRUST
   properties:
     - !ruby/object:Api::Type::Time
