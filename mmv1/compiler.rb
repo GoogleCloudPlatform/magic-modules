@@ -225,7 +225,8 @@ all_product_files.each do |product_name|
     end
 
     if override_dir
-      Dir["#{override_dir}#{product_name}/*"].each do |override_path|
+      ovr_prod_dir = File.join(override_dir, product_name)
+      Dir["#{ovr_prod_dir}/*"].each do |override_path|
         next if File.basename(override_path) == 'product.yaml' \
         || File.basename(override_path) == 'terraform.yaml' \
         || File.extname(override_path) != '.yaml'
