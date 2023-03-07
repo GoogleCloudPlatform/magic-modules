@@ -258,7 +258,7 @@ availableSecrets:
   inline:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/environment-keyring/cryptoKeys/ci-project-key
       envMap:
-          GOOGLE_BILLING_ACCOUNT: CiQAis6xrGyvnmGipEEjCQVUzu3o1H4XRJSsp/B8A0IFqwRwnogSPQDOc1nLdG/+VCWpKtYtbEl12+luWkHmOYn/VtkDuMkz3bCj2DNbcuLw2fgvmkha1IjnouGPIah0qLkDmTU=
+          GOOGLE_BILLING_ACCOUNT: CiQAis6xrEd2sO2H8Y8Yxj3E+jkRUh/ShVqxvgvR4AmK87kd3B8SPQDOc1nLASUpyiM+4EyyLLfOwkbVu4hMmWR1Odd6WiavrhJLrqizMsLyCkbRU3zzr6rDuN7lMsEweLBH9JI=
           GOOGLE_CUST_ID: CiQAis6xrAfbX3gtctcnZnt8n5DDZjercDObUGlyN4CqIpWKu5kSMgDOc1nLhLObfpnlhaUxdZ6Aoo38TBtRXoXAW5W4dbdyP+8ILKjtx1+zVL5WV641NM90
           GOOGLE_FIRESTORE_PROJECT: CiQAis6xrGkbSHeyBpgJg7/DkxNbHgqVJn3iaMYL7ybzkvDUzLESQgDOc1nLn0yUyrqLVfEujlbJEO4HDsk+o+6w608UfOXExJ3v3CTL+DwVwhXqIK/Vbo7UIMUyuP+Lu497BlcDIYyOwQ==
           GOOGLE_IDENTITY_USER: CiQAis6xrIAUUrjZprRYZbrKhXrJfDbPrS1U70QL0jjgpiasNKUSOwDOc1nLX7ZFC5iLlRrapGh6ochTC81Qdy8z3IU6z4su2KRXp1ZXV6jQMl1FYkowHbM25+3biRPeIgGb
