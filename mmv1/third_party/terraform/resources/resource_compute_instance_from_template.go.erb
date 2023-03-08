@@ -2,8 +2,10 @@
 package google
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -121,17 +123,54 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	tpl, err := ParseInstanceTemplateFieldValue(d.Get("source_instance_template").(string), d, config)
+	sourceInstanceTemplate := d.Get("source_instance_template").(string)
+
+	tpl, err := ParseInstanceTemplateFieldValue(sourceInstanceTemplate, d, config)
 	if err != nil {
 		return err
 	}
 
-	it, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, tpl.Name).Do()
-	if err != nil {
-		return err
+	it := compute.InstanceTemplate{}
+	var relativeUrl string
+
+	if strings.Contains(sourceInstanceTemplate, "global/instanceTemplates") {
+		instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, tpl.Name).Do()
+		if err != nil {
+			return err
+		}
+
+		it = *instanceTemplate
+		relativeUrl = tpl.RelativeLink()
+
+	} else {
+		relativeUrl, err = replaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceTemplates/"+tpl.Name)
+		if err != nil {
+			return err
+		}
+
+		url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/" + tpl.Name)
+		if err != nil {
+			return err
+		}
+
+		instanceTemplate, err := sendRequest(config, "GET", project, url, userAgent, nil)
+		if err != nil {
+			return err
+		}
+
+		instancePropertiesObj, err := json.Marshal(instanceTemplate)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		if err := json.Unmarshal(instancePropertiesObj, &it); err != nil {
+			fmt.Println(err)
+			return err
+		}
 	}
 
-	instance.Disks, err = adjustInstanceFromTemplateDisks(d, config, it, zone, project)
+	instance.Disks, err = adjustInstanceFromTemplateDisks(d, config, &it, zone, project)
 	if err != nil {
 		return err
 	}
@@ -163,7 +202,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).SourceInstanceTemplate(tpl.RelativeLink()).Do()
+	op, err := config.NewComputeClient(userAgent).Instances.Insert(project, zone.Name, instance).SourceInstanceTemplate(relativeUrl).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
