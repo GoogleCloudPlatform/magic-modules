@@ -13,12 +13,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+type frameworkTestProvider struct {
+	ProdProvider frameworkProvider
+	TestName     string
+}
+
+func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
+	return &frameworkTestProvider{
+		ProdProvider: frameworkProvider{
+			version: "test",
+		},
+		TestName: testName,
+	}
+}
+
 // General test utils
 func MuxedProviders(testName string) (func() tfprotov5.ProviderServer, error) {
 	ctx := context.Background()
 
 	providers := []func() tfprotov5.ProviderServer{
-		providerserver.NewProtocol5(New("test")), // framework provider
+		providerserver.NewProtocol5(New(testName)), // framework provider
 		Provider().GRPCProvider,                  // sdk provider
 	}
 

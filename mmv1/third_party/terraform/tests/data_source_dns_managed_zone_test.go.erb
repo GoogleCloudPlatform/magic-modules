@@ -71,7 +71,7 @@ func testAccDataSourceDnsManagedZone_basic(managedZoneName string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "foo" {
   name        = "tf-test-zone-%s"
-  dns_name    = "tf-test-zone-%s.hashicorptest.com"
+  dns_name    = "tf-test-zone-%s.hashicorptest.com."
   description = "tf test DNS zone"
 }
 

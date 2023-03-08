@@ -31,20 +31,6 @@ import (
 
 var fwProviders map[string]*frameworkTestProvider
 
-type frameworkTestProvider struct {
-	ProdProvider frameworkProvider
-	TestName     string
-}
-
-func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
-	return &frameworkTestProvider{
-		ProdProvider: frameworkProvider{
-			version: "test",
-		},
-		TestName: testName,
-	}
-}
-
 // Configure is here to overwrite the frameworkProvider configure function for VCR testing
 func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	if isVcrEnabled() {
