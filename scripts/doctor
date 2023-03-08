@@ -29,18 +29,18 @@ warn() {
 found=0
 count_in_path() {
     echo "Check for ${1} in path..."
-    found=$(which -a "${1}" | uniq | wc -l)
+    found=$(which -a ${1} | uniq | wc -l)
 }
 
 
-count_in_path "rbenv"
+count_in_path "rbenv asdf"
 if [ $found -eq 0 ]; then
     exitcode=1
-    warn "yel" "   rbenv not found. See https://github.com/rbenv/rbenv for information on installing it."
+    warn "yel" "   rbenv or asdf not found. See https://github.com/rbenv/rbenv for information on installing it."
 else
     warn "grn" "   found!"
     echo "Checking ruby version..."
-    rbenv version
+    rbenv version || asdf current ruby
 
     count_in_path "bundler"
     if [ $found -eq 0 ]; then
