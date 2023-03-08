@@ -8,6 +8,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+type frameworkTestProvider struct {
+	ProdProvider frameworkProvider
+	TestName     string
+}
+
+func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
+	return &frameworkTestProvider{
+		ProdProvider: frameworkProvider{
+			version: "test",
+		},
+		TestName: testName,
+	}
+}
+
 // General test utils
 
 // testExtractResourceAttr navigates a test's state to find the specified resource (or data source) attribute and makes the value
