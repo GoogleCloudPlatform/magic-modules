@@ -525,6 +525,28 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 	return project
 }
 
+// BootstrapConfig returns a Config pulled from the environment.
+func BootstrapConfig(t *testing.T) *Config {
+	if v := os.Getenv("TF_ACC"); v == "" {
+		t.Skip("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
+		return nil
+	}
+
+	config := &Config{
+		Credentials: GetTestCredsFromEnv(),
+		Project:     GetTestProjectFromEnv(),
+		Region:      GetTestRegionFromEnv(),
+		Zone:        GetTestZoneFromEnv(),
+	}
+
+	ConfigureBasePaths(config)
+
+	if err := config.LoadAndValidate(context.Background()); err != nil {
+		t.Fatalf("Bootstrapping failed. Unable to load test config: %s", err)
+	}
+	return config
+}
+
 // SQL Instance names are not reusable for a week after deletion
 const SharedTestSQLInstanceNamePrefix = "tf-bootstrap-"
 
