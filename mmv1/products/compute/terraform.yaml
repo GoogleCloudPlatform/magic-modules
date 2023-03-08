@@ -460,6 +460,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           health_check_name: "rbs-health-check"
         min_version: beta
       - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_external_weighted"
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_ring_hash"
         primary_resource_id: "default"
         vars:
