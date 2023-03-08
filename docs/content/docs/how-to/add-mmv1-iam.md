@@ -102,4 +102,8 @@ annotation can be used. To use it, partially define the resource in the
 product's `api.yaml` file and apply the annotation. MMv1 won't attempt to
 generate the resource itself and will only generate IAM resources targeting it.
 
-The IAP product is a good reference for adding these: https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products/iap
+For tpgtools/DCL resources, you may need to set the `PRODUCT_BASE_PATH` override
+to ensure that MMv1 is the sole library trying to set the base product URL.
+
+The IAP product is a good reference for adding IAM support to nonexistent resources:
+https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products/iap
