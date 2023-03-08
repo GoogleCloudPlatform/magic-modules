@@ -977,7 +977,7 @@ func TestAccComposerEnvironment_fixPyPiPackages(t *testing.T) {
 
 // This bootstraps the IAM roles needed for the service agents.
 func grantServiceAgentsRole(t *testing.T, prefix string, agentNames []string, role string) {
-	if addedBindings := BootstrapAllPSARole(t, prefix, agents, role); len(addedBindings) > 0 {
+	if addedBindings := BootstrapAllPSARole(t, prefix, agentNames, role); len(addedBindings) > 0 {
 		// Fail this test run because the policy needs time to reconcile.
 		msg := "Added the following bindings to the test project's IAM policy:\n"
 		for _, addedBinding := range addedBindings {
