@@ -67,6 +67,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "my-instance"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/datafusion_instance_update.go.erb
+      constants: templates/terraform/constants/data_fusion_instance_option.go.erb
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -77,8 +78,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+      options: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'instanceOptionsDiffSuppress'
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true 
+      accelerators.state: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true       
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
