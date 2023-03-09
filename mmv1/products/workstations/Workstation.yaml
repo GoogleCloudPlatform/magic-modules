@@ -11,7 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
+!ruby/object:Api::Resource
 name: "Workstation"
 self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations/{{workstation_id}}"
 base_url: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations"
@@ -24,6 +25,15 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Workstations": "https://cloud.google.com/workstations/docs/"
   api: "https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs.workstations"
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: ":"
+  fetch_iam_policy_verb: :POST
+  parent_resource_attribute: workstation
+  import_format:
+    [
+      "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations/{{workstation_id}}",
+    ]
+  min_version: beta
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"
@@ -116,4 +126,3 @@ properties:
       - :STATE_RUNNING
       - :STATE_STOPPING
       - :STATE_STOPPED
-
