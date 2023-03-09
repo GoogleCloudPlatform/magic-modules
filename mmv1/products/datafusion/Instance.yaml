@@ -252,3 +252,4 @@ properties:
             values:
               - :ENABLED
               - :DISABLED
+            required: true
