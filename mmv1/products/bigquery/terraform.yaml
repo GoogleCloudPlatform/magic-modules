@@ -93,6 +93,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       maxTimeTravelHours: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      friendlyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
     docs: !ruby/object:Provider::Terraform::Docs
