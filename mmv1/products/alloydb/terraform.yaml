@@ -24,6 +24,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: "projectNumberDiffSuppress"
+      automatedBackupPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      automatedBackupPolicy.weeklySchedule: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
