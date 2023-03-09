@@ -50,6 +50,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       host.gceInstance.bootDiskSizeGb:
         !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      host.gceInstance.serviceAccount:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       host.gceInstance.machineType:
         !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
