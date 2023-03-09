@@ -45,10 +45,11 @@ var loggingProjectBucketConfigSchema = map[string]*schema.Schema{
 		Description: `Logs will be retained by default for this amount of time, after which they will automatically be deleted. The minimum retention period is 1 day. If this value is set to zero at bucket creation time, the default time of 30 days will be used.`,
 	},
 	"enable_analytics": {
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     false,
-		Description: `Enable log analytics for the bucket. Cannot be disabled once enabled.`,
+		Type:             schema.TypeBool,
+		Optional:         true,
+		Default:          false,
+		Description:      `Enable log analytics for the bucket. Cannot be disabled once enabled.`,
+		DiffSuppressFunc: backwardsChangeDiffSuppress,
 	},
 	"lifecycle_state": {
 		Type:        schema.TypeString,
@@ -310,4 +311,14 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	}
 
 	return resourceLoggingProjectBucketConfigRead(d, meta)
+}
+
+func backwardsChangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if d.HasChange("enable_analytics") {
+		if d.Get("enable_analytics").(bool) {
+			return false
+		}
+		return true
+	}
+	return false
 }

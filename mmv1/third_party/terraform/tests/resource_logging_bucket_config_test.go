@@ -100,7 +100,7 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, false),
+				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, true),
 			},
 			{
 				ResourceName:            "google_logging_project_bucket_config.basic",
@@ -109,7 +109,7 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"project"},
 			},
 			{
-				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, true),
+				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, false),
 			},
 			{
 				ResourceName:            "google_logging_project_bucket_config.basic",
