@@ -42,8 +42,8 @@ import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.b
 				<% import_qualifiers.push('context["project_id"]') -%>
 			<% end -%>
 		<% end -%>
-	<% elsif param == 'zone' -%>
-		<% import_qualifiers.push('GetTestZoneFromEnv()') -%>
+        <% elsif param == 'zone' and object.iam_policy.substitute_zone_value -%>
+                <% import_qualifiers.push('GetTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
 		<% if example.region_override.nil? -%>
 				<% import_qualifiers.push('GetTestRegionFromEnv()') -%>
