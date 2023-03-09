@@ -1,0 +1,324 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Page'
+base_url: "{{parent}}/pages"
+update_verb: :PATCH
+update_mask: true
+description: |
+  A Dialogflow CX conversation (session) can be described and visualized as a state machine. The states of a CX session are represented by pages.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation':
+      'https://cloud.google.com/dialogflow/cx/docs'
+  api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.flows.pages'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: parent
+    url_param_only: true
+    input: true
+    description: |
+      The flow to create a page for.
+      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+  - !ruby/object:Api::Type::String
+    name: 'languageCode'
+    description: |
+      The language of the following fields in page:
+
+      Page.entry_fulfillment.messages
+      Page.entry_fulfillment.conditional_cases
+      Page.event_handlers.trigger_fulfillment.messages
+      Page.event_handlers.trigger_fulfillment.conditional_cases
+      Page.form.parameters.fill_behavior.initial_prompt_fulfillment.messages
+      Page.form.parameters.fill_behavior.initial_prompt_fulfillment.conditional_cases
+      Page.form.parameters.fill_behavior.reprompt_event_handlers.messages
+      Page.form.parameters.fill_behavior.reprompt_event_handlers.conditional_cases
+      Page.transition_routes.trigger_fulfillment.messages
+      Page.transition_routes.trigger_fulfillment.conditional_cases
+      If not specified, the agent's default language is used. Many languages are supported. Note: languages must be enabled in the agent before they can be used.
+    input: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      The unique identifier of the page.
+      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    required: true
+    description: |
+      The human-readable name of the page, unique within the agent.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'entryFulfillment'
+    description: |
+      The fulfillment to call when the session is entering the page.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'messages'
+        description: |
+          The list of rich message responses to present to the user.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'text'
+              description: |
+                The text response message.
+              properties:
+                - !ruby/object:Api::Type::Array
+                  name: 'text'
+                  description: |
+                    A collection of text responses.
+                  item_type: Api::Type::String
+                - !ruby/object:Api::Type::Boolean
+                  name: 'allowPlaybackInterruption'
+                  output: true
+                  description: |
+                    Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
+      - !ruby/object:Api::Type::String
+        name: 'webhook'
+        description: |
+          The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+      - !ruby/object:Api::Type::Boolean
+        name: 'returnPartialResponses'
+        description: |
+          Whether Dialogflow should return currently queued fulfillment response messages in streaming APIs. If a webhook is specified, it happens before Dialogflow invokes webhook. Warning: 1) This flag only affects streaming API. Responses are still queued and returned once in non-streaming API. 2) The flag can be enabled in any fulfillment but only the first 3 partial responses will be returned. You may only want to apply it to fulfillments that have slow webhooks.
+      - !ruby/object:Api::Type::String
+        name: 'tag'
+        description: |
+          The tag used by the webhook to identify which fulfillment is being called. This field is required if webhook is specified.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'form'
+    description: |
+      The form associated with the page, used for collecting parameters relevant to the page.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'parameters'
+        description: |
+          Parameters to collect from the user.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'displayName'
+              description: |
+                The human-readable name of the parameter, unique within the form.
+            - !ruby/object:Api::Type::Boolean
+              name: 'required'
+              description: |
+                Indicates whether the parameter is required. Optional parameters will not trigger prompts; however, they are filled if the user specifies them.
+                Required parameters must be filled before form filling concludes.
+            - !ruby/object:Api::Type::String
+              name: 'entityType'
+              description: |
+                The entity type of the parameter.
+                Format: projects/-/locations/-/agents/-/entityTypes/<System Entity Type ID> for system entity types (for example, projects/-/locations/-/agents/-/entityTypes/sys.date), or projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/entityTypes/<Entity Type ID> for developer entity types.
+            - !ruby/object:Api::Type::Boolean
+              name: 'isList'
+              description: |
+                Indicates whether the parameter represents a list of values.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'fillBehavior'
+              description: |
+                Defines fill behavior for the parameter.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'initialPromptFulfillment'
+                  description: |
+                    The fulfillment to provide the initial prompt that the agent can present to the user in order to fill the parameter.
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: 'messages'
+                      description: |
+                        The list of rich message responses to present to the user.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'text'
+                            description: |
+                              The text response message.
+                            properties:
+                              - !ruby/object:Api::Type::Array
+                                name: 'text'
+                                description: |
+                                  A collection of text responses.
+                                item_type: Api::Type::String
+                              - !ruby/object:Api::Type::Boolean
+                                name: 'allowPlaybackInterruption'
+                                output: true
+                                description: |
+                                  Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
+                    - !ruby/object:Api::Type::String
+                      name: 'webhook'
+                      description: |
+                        The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'returnPartialResponses'
+                      description: |
+                        Whether Dialogflow should return currently queued fulfillment response messages in streaming APIs. If a webhook is specified, it happens before Dialogflow invokes webhook. Warning: 1) This flag only affects streaming API. Responses are still queued and returned once in non-streaming API. 2) The flag can be enabled in any fulfillment but only the first 3 partial responses will be returned. You may only want to apply it to fulfillments that have slow webhooks.
+                    - !ruby/object:Api::Type::String
+                      name: 'tag'
+                      description: |
+                        The tag used by the webhook to identify which fulfillment is being called. This field is required if webhook is specified.
+            - !ruby/object:Api::Type::Boolean
+              name: 'redact'
+              description: |
+                Indicates whether the parameter content should be redacted in log.
+                If redaction is enabled, the parameter content will be replaced by parameter name during logging. Note: the parameter content is subject to redaction if either parameter level redaction or entity type level redaction is enabled.
+  - !ruby/object:Api::Type::Array
+    name: 'transitionRouteGroups'
+    description: |
+      Ordered list of TransitionRouteGroups associated with the page. Transition route groups must be unique within a page.
+      If multiple transition routes within a page scope refer to the same intent, then the precedence order is: page's transition route -> page's transition route group -> flow's transition routes.
+      If multiple transition route groups within a page contain the same intent, then the first group in the ordered list takes precedence.
+      Format:projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/transitionRouteGroups/<TransitionRouteGroup ID>.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Array
+    name: 'transitionRoutes'
+    description: |
+      A list of transitions for the transition rules of this page. They route the conversation to another page in the same flow, or another flow.
+      When we are in a certain page, the TransitionRoutes are evalauted in the following order:
+      TransitionRoutes defined in the page with intent specified.
+      TransitionRoutes defined in the transition route groups with intent specified.
+      TransitionRoutes defined in flow with intent specified.
+      TransitionRoutes defined in the transition route groups with intent specified.
+      TransitionRoutes defined in the page with only condition specified.
+      TransitionRoutes defined in the transition route groups with only condition specified.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'name'
+          output: true
+          description: |
+            The unique identifier of this transition route.
+        - !ruby/object:Api::Type::String
+          name: 'intent'
+          description: |
+            The unique identifier of an Intent.
+            Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>. Indicates that the transition can only happen when the given intent is matched. At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
+        - !ruby/object:Api::Type::String
+          name: 'condition'
+          description: |
+            The condition to evaluate against form parameters or session parameters.
+            At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'triggerFulfillment'
+          description: |
+            The fulfillment to call when the event occurs. Handling webhook errors with a fulfillment enabled with webhook could cause infinite loop. It is invalid to specify such fulfillment for a handler handling webhooks.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'messages'
+              description: |
+                The list of rich message responses to present to the user.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'text'
+                    description: |
+                      The text response message.
+                    properties:
+                      - !ruby/object:Api::Type::Array
+                        name: 'text'
+                        description: |
+                          A collection of text responses.
+                        item_type: Api::Type::String
+                      - !ruby/object:Api::Type::Boolean
+                        name: 'allowPlaybackInterruption'
+                        output: true
+                        description: |
+                          Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
+            - !ruby/object:Api::Type::String
+              name: 'webhook'
+              description: |
+                The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+            - !ruby/object:Api::Type::Boolean
+              name: 'returnPartialResponses'
+              description: |
+                Whether Dialogflow should return currently queued fulfillment response messages in streaming APIs. If a webhook is specified, it happens before Dialogflow invokes webhook. Warning: 1) This flag only affects streaming API. Responses are still queued and returned once in non-streaming API. 2) The flag can be enabled in any fulfillment but only the first 3 partial responses will be returned. You may only want to apply it to fulfillments that have slow webhooks.
+            - !ruby/object:Api::Type::String
+              name: 'tag'
+              description: |
+                The tag used by the webhook to identify which fulfillment is being called. This field is required if webhook is specified.
+        - !ruby/object:Api::Type::String
+          name: 'targetPage'
+          description: |
+            The target page to transition to.
+            Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
+        - !ruby/object:Api::Type::String
+          name: 'targetFlow'
+          description: |
+            The target flow to transition to.
+            Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+  - !ruby/object:Api::Type::Array
+    name: 'eventHandlers'
+    description: |
+      Handlers associated with the page to handle events such as webhook errors, no match or no input.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'name'
+          output: true
+          description: |
+            The unique identifier of this event handler.
+        - !ruby/object:Api::Type::String
+          name: 'event'
+          description: |
+            The name of the event to handle.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'triggerFulfillment'
+          description: |
+            The fulfillment to call when the event occurs. Handling webhook errors with a fulfillment enabled with webhook could cause infinite loop. It is invalid to specify such fulfillment for a handler handling webhooks.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'messages'
+              description: |
+                The list of rich message responses to present to the user.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'text'
+                    description: |
+                      The text response message.
+                    properties:
+                      - !ruby/object:Api::Type::Array
+                        name: 'text'
+                        description: |
+                          A collection of text responses.
+                        item_type: Api::Type::String
+                      - !ruby/object:Api::Type::Boolean
+                        name: 'allowPlaybackInterruption'
+                        output: true
+                        description: |
+                          Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
+            - !ruby/object:Api::Type::String
+              name: 'webhook'
+              description: |
+                The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
+            - !ruby/object:Api::Type::Boolean
+              name: 'returnPartialResponses'
+              description: |
+                Whether Dialogflow should return currently queued fulfillment response messages in streaming APIs. If a webhook is specified, it happens before Dialogflow invokes webhook. Warning: 1) This flag only affects streaming API. Responses are still queued and returned once in non-streaming API. 2) The flag can be enabled in any fulfillment but only the first 3 partial responses will be returned. You may only want to apply it to fulfillments that have slow webhooks.
+            - !ruby/object:Api::Type::String
+              name: 'tag'
+              description: |
+                The tag used by the webhook to identify which fulfillment is being called. This field is required if webhook is specified.
+        - !ruby/object:Api::Type::String
+          name: 'targetPage'
+          description: |
+            The target page to transition to.
+            Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
+        - !ruby/object:Api::Type::String
+          name: 'targetFlow'
+          description: |
+            The target flow to transition to.
+            Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
