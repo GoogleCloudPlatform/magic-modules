@@ -95,7 +95,12 @@ module Provider
 
     def force_new?(property, resource)
       !property.output &&
+<<<<<<< HEAD
         (property.immutable || (resource.immutable && property.update_url.nil? && property.immutable.nil? &&
+=======
+        (property.immutable || (resource.immutable && property.update_url.nil? && 
+                              property.immutable.nil? &&
+>>>>>>> f91152713 (Modify resource attribute 'input' to 'immutable')
                             (property.parent.nil? ||
                              force_new?(property.parent, resource))))
     end
