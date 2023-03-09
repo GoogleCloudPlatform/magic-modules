@@ -17,6 +17,7 @@
 #   - Increase project quota for the billing account
 #   - (Internal only) Enable stubbed calls for GKE MultiCloud resources
 #   - Enable Media CDN
+#   - Enable Game Services
 #   - Deploy "Hello World" app: https://cloud.google.com/appengine/docs/flexible/go/create-app
 #     ```
 #     gcloud components install app-engine-go
