@@ -319,7 +319,7 @@ func TestAccComposerEnvironment_withWebServerConfig(t *testing.T) {
 	subnetwork := network + "-1"
 
 
-	grantServiceAgentsRole(t, "", []string{"cloudbuild"}, "roles/cloudbuild.builds.builder")
+	grantServiceAgentsRole(t, "service-", []string{"gcp-sa-cloudbuild"}, "roles/cloudbuild.builds.builder")
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:		 func() { testAccPreCheck(t) },
@@ -977,14 +977,9 @@ func TestAccComposerEnvironment_fixPyPiPackages(t *testing.T) {
 
 // This bootstraps the IAM roles needed for the service agents.
 func grantServiceAgentsRole(t *testing.T, prefix string, agentNames []string, role string) {
-	if addedBindings := BootstrapAllPSARole(t, prefix, agentNames, role); len(addedBindings) > 0 {
+	if BootstrapAllPSARole(t, prefix, agentNames, role) {
 		// Fail this test run because the policy needs time to reconcile.
-		msg := "Added the following bindings to the test project's IAM policy:\n"
-		for _, addedBinding := range addedBindings {
-			msg += addedBinding + "\n"
-		}
-		msg += "Retry the test in a few minutes."
-		t.Fatal(msg)
+		t.Fatal("Stopping test because permissions were added.")
 	}
 }
 

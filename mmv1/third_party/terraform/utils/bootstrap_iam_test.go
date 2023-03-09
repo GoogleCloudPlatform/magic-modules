@@ -14,12 +14,11 @@ import (
 // given prefix before the project number.
 // This is important to bootstrap because using iam policy resources means that
 // deleting them removes permissions for concurrent tests.
-// Return a slice of strings representing any bindings that were added.
-func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []string) []string {
+// Return whether the bindings changed.
+func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []string) bool {
 	config := BootstrapConfig(t)
 	if config == nil {
 		t.Fatal("Could not bootstrap a config for BootstrapAllPSARoles.")
-		return nil
 	}
 	client := config.NewResourceManagerClient(config.UserAgent)
 
@@ -27,14 +26,12 @@ func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []strin
 	project, err := client.Projects.Get(GetTestProjectFromEnv()).Do()
 	if err != nil {
 		t.Fatalf("Error getting project with id %q: %s", project.ProjectId, err)
-		return nil
 	}
 
 	getPolicyRequest := &cloudresourcemanager.GetIamPolicyRequest{}
 	policy, err := client.Projects.GetIamPolicy(project.ProjectId, getPolicyRequest).Do()
 	if err != nil {
 		t.Fatalf("Error getting project iam policy: %v", err)
-		return nil
 	}
 
 	members := make([]string, len(agentNames))
@@ -64,33 +61,33 @@ func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []strin
 		policy, err = client.Projects.SetIamPolicy(project.ProjectId, setPolicyRequest).Do()
 		if err != nil {
 			t.Fatalf("Error setting project iam policy: %v", err)
-			return nil
 		}
-		bindingStrings := make([]string, len(addedBindings))
-		for i, binding := range addedBindings {
-			bindingStrings[i] = fmt.Sprintf("Members: %q, Role: %q", binding.Members, binding.Role)
+		msg := "Added the following bindings to the test project's IAM policy:\n"
+		for _, binding := range addedBindings {
+			msg += fmt.Sprintf("Members: %q, Role: %q\n", binding.Members, binding.Role)
 		}
-		return bindingStrings
+		msg += "Retry the test in a few minutes."
+		t.Error(msg)
+		return true
 	}
-
-	return nil
+	return false
 }
 
 // BootstrapAllPSARole is a version of BootstrapAllPSARoles for granting a
 // single role to multiple service agents.
-func BootstrapAllPSARole(t *testing.T, prefix string, agentNames []string, role string) []string {
+func BootstrapAllPSARole(t *testing.T, prefix string, agentNames []string, role string) bool {
 	return BootstrapAllPSARoles(t, prefix, agentNames, []string{role})
 }
 
 // BootstrapPSARoles is a version of BootstrapAllPSARoles for granting roles to
 // a single service agent.
-func BootstrapPSARoles(t *testing.T, prefix, agentName string, roles []string) []string {
+func BootstrapPSARoles(t *testing.T, prefix, agentName string, roles []string) bool {
 	return BootstrapAllPSARoles(t, prefix, []string{agentName}, roles)
 }
 
 // BootstrapPSARole is a simplified version of BootstrapPSARoles for granting a
 // single role to a single service agent.
-func BootstrapPSARole(t *testing.T, prefix, agentName, role string) []string {
+func BootstrapPSARole(t *testing.T, prefix, agentName, role string) bool {
 	return BootstrapPSARoles(t, prefix, agentName, []string{role})
 }
 
