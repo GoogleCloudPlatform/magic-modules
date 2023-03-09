@@ -427,6 +427,13 @@ resource "google_organization_iam_member" "sa_org2_resource_settings_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_project" "firestore_proj" {
+  name            = var.firestore_project_id
+  project_id      = var.firestore_project_id
+  org_id          = data.google_organization.org.org_id
+  billing_account = var.billing_account_id
+}
+
 output "service_account" {
   value = google_service_account.sa.email
 }
