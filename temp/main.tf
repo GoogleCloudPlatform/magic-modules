@@ -393,6 +393,12 @@ resource "google_project_iam_member" "compute_agent_instance_admin" {
   member  = "serviceAccount:service-${google_project.proj.number}@compute-system.iam.gserviceaccount.com"
 }
 
+resource "google_project_iam_member" "compute_agent_secret_accessor" {
+  project = google_project.proj.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${google_project.proj.number}-compute@developer.gserviceaccount.com"
+}
+
 data "google_organization" "org2" {
   organization = var.org2_id
 }
