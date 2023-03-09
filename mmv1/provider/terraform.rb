@@ -95,7 +95,7 @@ module Provider
 
     def force_new?(property, resource)
       !property.output &&
-        (property.immutable || (resource.immutable && property.update_url.nil? && 
+        (property.immutable || (resource.immutable && property.update_url.nil? &&
                               property.immutable.nil? &&
                             (property.parent.nil? ||
                              force_new?(property.parent, resource))))
