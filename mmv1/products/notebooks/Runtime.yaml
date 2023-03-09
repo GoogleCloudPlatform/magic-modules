@@ -23,7 +23,7 @@ update_verb: :PATCH
 update_mask: true
 # When set, if any parameter change, they will get recreated.
 # Use wisely because any `update_url:` in the hierarchy below this will get ignored.
-# input: true
+# immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation':
@@ -43,7 +43,7 @@ parameters:
     resource: 'Location'
     imports: 'selfLink'
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -51,7 +51,7 @@ properties:
     description: |
         The name specified for the Notebook runtime.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{location}}/runtimes/{{name}}
   - !ruby/object:Api::Type::NestedObject
@@ -177,7 +177,7 @@ properties:
                       Labels to apply to this disk. These can be later modified
                       by the disks.setLabels method. This field is only
                       applicable for persistent disks.
-                input: true
+                immutable: true
               - !ruby/object:Api::Type::String
                 name: "interface"
                 description: |
@@ -219,7 +219,7 @@ properties:
             name: "containerImages"
             description: |
               Use a list of container images to start the notebook instance.
-            input: true
+            immutable: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
@@ -236,7 +236,7 @@ properties:
             name: "encryptionConfig"
             description: |
               Encryption settings for virtual machine data disk.
-            input: true
+            immutable: true
             properties:
               - !ruby/object:Api::Type::String
                 name: "kmsKey"
@@ -250,7 +250,7 @@ properties:
             name: "shieldedInstanceConfig"
             description: |
               Shielded VM Instance configuration settings.
-            input: true
+            immutable: true
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: "enableSecureBoot"
@@ -306,7 +306,7 @@ properties:
                 configuring Private Service Access.
                 * Shared VPC (network & subnet are required). Requires
                 configuring Private Service Access.
-            input: true
+            immutable: true
           - !ruby/object:Api::Type::String
             name: "subnet"
             description: |
@@ -316,7 +316,7 @@ properties:
                 * `https://www.googleapis.com/compute/v1/projects/[project_id]/
                 regions/us-east1/subnetworks/sub0`
                 * `projects/[project_id]/regions/us-east1/subnetworks/sub0`
-            input: true
+            immutable: true
           - !ruby/object:Api::Type::Boolean
             name: "internalIpOnly"
             description: |
@@ -326,7 +326,7 @@ properties:
               `internal_ip_only` restriction can only be enabled for subnetwork
               enabled networks, and all dependencies must be configured to be
               accessible without external IP addresses.
-            input: true
+            immutable: true
           - !ruby/object:Api::Type::Array
             name: "tags"
             description: |
@@ -362,7 +362,7 @@ properties:
             description: |
               The type of vNIC to be used on this interface. This may be gVNIC
               or VirtioNet.
-            input: true
+            immutable: true
             values:
               - UNSPECIFIED_NIC_TYPE
               - VIRTIO_NET
@@ -372,7 +372,7 @@ properties:
             description: |
               Reserved IP Range name is used for VPC Peering. The
               subnetwork allocation will use the range *name* if it's assigned.
-            input: true
+            immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'state'
     values:

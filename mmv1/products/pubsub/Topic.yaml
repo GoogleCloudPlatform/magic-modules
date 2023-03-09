@@ -33,7 +33,7 @@ properties:
     name: 'name'
     required: true
     description: 'Name of the topic.'
-    input: true
+    immutable: true
     pattern: 'projects/{{project}}/topics/{{name}}'
   - !ruby/object:Api::Type::String
     name: 'kmsKeyName'
@@ -78,11 +78,11 @@ properties:
           The value of this field will be _deleted-schema_
           if the schema has been deleted.
         required: true
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::Enum
         name: 'encoding'
         description: The encoding of messages validated against schema.
-        input: true
+        immutable: true
         default_value: :ENCODING_UNSPECIFIED
         values:
           - :ENCODING_UNSPECIFIED

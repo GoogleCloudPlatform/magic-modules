@@ -16,7 +16,7 @@ name: 'TargetSslProxy'
 kind: 'compute#targetSslProxy'
 base_url: projects/{{project}}/global/targetSslProxies
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
   Represents a TargetSslProxy resource, which is used by one or more
@@ -52,7 +52,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Integer
     name: 'id'
     description: 'The unique identifier for the resource.'
@@ -67,7 +67,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Enum
     name: 'proxyHeader'

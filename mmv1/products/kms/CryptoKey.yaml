@@ -27,14 +27,14 @@ parameters:
       The KeyRing that this key belongs to.
       Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'`.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::Boolean
     name: 'skipInitialVersionCreation'
     description: |
       If set to true, the request will create a CryptoKey without any CryptoKeyVersions. 
       You must use the `google_kms_key_ring_import_job` resource to import the CryptoKeyVersion.
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -42,7 +42,7 @@ properties:
     description: |
       The resource name for the CryptoKey.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
@@ -66,7 +66,7 @@ properties:
       - "ASYMMETRIC_DECRYPT"
       - "MAC"
     default_value: :ENCRYPT_DECRYPT
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'rotationPeriod'
     description: |
@@ -89,7 +89,7 @@ properties:
         name: 'protectionLevel'
         description: |
           The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC". Defaults to "SOFTWARE".
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::Time
     name: 'nextRotationTime'
     description: |
@@ -97,13 +97,13 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'destroyScheduledDuration'
-    input: true
+    immutable: true
     description: |
       The period of time that versions of this key spend in the DESTROY_SCHEDULED state before transitioning to DESTROYED.
       If not specified at creation time, the default duration is 24 hours.
   - !ruby/object:Api::Type::Boolean
     name: 'importOnly'
-    input: true
+    immutable: true
     description: |
       Whether this key may contain imported versions only.
 references: !ruby/object:Api::Resource::ReferenceLinks

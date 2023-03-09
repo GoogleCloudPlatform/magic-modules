@@ -90,12 +90,12 @@ module Provider
     end
 
     def updatable?(resource, properties)
-      !resource.input || !properties.reject { |p| p.update_url.nil? }.empty?
+      !resource.immutable || !properties.reject { |p| p.update_url.nil? }.empty?
     end
 
     def force_new?(property, resource)
       !property.output &&
-        (property.input || (resource.input && property.update_url.nil? && property.input.nil? &&
+        (property.immutable || (resource.immutable && property.update_url.nil? && property.immutable.nil? &&
                             (property.parent.nil? ||
                              force_new?(property.parent, resource))))
     end

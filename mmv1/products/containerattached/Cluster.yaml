@@ -50,7 +50,7 @@ properties:
     name: location
     description: |
       The location for the resource
-    input: true
+    immutable: true
     required: true
     url_param_only: true
   - !ruby/object:Api::Type::String
@@ -58,7 +58,7 @@ properties:
     description: |
       The name of this resource.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: description
     description: |
@@ -85,12 +85,12 @@ properties:
         description: |
           A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://`
         required: true
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::String
         name: jwks
         description: |
           OIDC verification keys in JWKS format (RFC 7517).
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::String
     name: platformVersion
     description: |
@@ -102,7 +102,7 @@ properties:
       The Kubernetes distribution of the underlying attached cluster. Supported values:
       "eks", "aks".
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: clusterRegion
     description: |
@@ -129,7 +129,7 @@ properties:
         description: |
           The number of the Fleet host project where this cluster will be registered.
         required: true
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::String
     name: state
     description: |

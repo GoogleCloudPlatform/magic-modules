@@ -28,7 +28,7 @@ parameters:
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
     required: true
-    input: true
+    immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
     url_param_only: true
@@ -40,7 +40,7 @@ properties:
 
       ** Changing this property may recreate the Hl7v2 store (removing all data) **
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: parserConfig
     required: false
@@ -77,7 +77,7 @@ properties:
         name: version
         description: |
           The version of the unschematized parser to be used when a custom `schema` is not set.
-        input: true
+        immutable: true
         default_value: :V1
         values:
           - :V1

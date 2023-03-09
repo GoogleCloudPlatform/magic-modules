@@ -46,13 +46,13 @@ parameters:
     name: 'bitbucketServerConfigId'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The ID to use for the BitbucketServerConfig, which will become the final component of the BitbucketServerConfig's resource name.
   - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true
-    input: true
+    immutable: true
     required: true
     description: |
       The location of this bitbucket server config.
@@ -87,7 +87,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'webhookSecretVersionName'
         required: true
-        input: true
+        immutable: true
         description: |
           Immutable. The resource name for the webhook secret's secret version. Once this field has been set, it cannot be changed.
           Changing this field will result in deleting/ recreating the resource.
@@ -104,7 +104,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'apiKey'
     required: true
-    input: true
+    immutable: true
     description: |
       Immutable. API Key that will be attached to webhook. Once this field has been set, it cannot be changed.
       Changing this field will result in deleting/ recreating the resource.

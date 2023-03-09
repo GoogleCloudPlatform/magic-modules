@@ -55,7 +55,7 @@ properties:
     description: |
       The client-provided identifier of the membership.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -74,13 +74,13 @@ properties:
       Labels to apply to this membership.
   - !ruby/object:Api::Type::NestedObject
     name: 'endpoint'
-    input: true
+    immutable: true
     description: |
       If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'gkeCluster'
-        input: true
+        immutable: true
         description: |
           If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
         properties:
@@ -92,7 +92,7 @@ properties:
               It can be at the most 1000 characters in length. If the cluster is provisioned with Terraform,
               this can be `"//container.googleapis.com/${google_container_cluster.my-cluster.id}"` or
               `google_container_cluster.my-cluster.id`.
-            input: true
+            immutable: true
             required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'authority'
@@ -103,7 +103,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'issuer'
-        input: true
+        immutable: true
         required: true
         description: |
           A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://` and // be a valid 

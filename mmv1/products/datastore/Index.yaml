@@ -15,7 +15,7 @@
 name: 'Index'
 base_url: "projects/{{project}}/indexes"
 self_link: "projects/{{project}}/indexes/{{indexId}}"
-input: true
+immutable: true
 collection_url_key: indexes
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:

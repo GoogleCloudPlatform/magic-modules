@@ -15,7 +15,7 @@
 name: 'RegionTargetHttpsProxy'
 base_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies
 has_self_link: true
-input: true
+immutable: true
 description: |
   Represents a RegionTargetHttpsProxy resource, which is used by one or more
   forwarding rules to route incoming HTTPS requests to a URL map.
@@ -46,7 +46,7 @@ parameters:
     name: 'region'
     resource: 'Region'
     imports: 'name'
-    input: true
+    immutable: true
     required: true
     description: |
       The region where the regional proxy resides.
@@ -58,7 +58,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Integer
     name: 'id'
     description: 'The unique identifier for the resource.'
@@ -73,7 +73,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
  # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
  # a 400 "QUIC override is supported only with global TargetHttpsProxy". jamessynge@ said in an

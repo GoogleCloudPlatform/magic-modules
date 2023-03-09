@@ -27,7 +27,7 @@ parameters:
       The name of the Cloud SQL instance. This does not include the project
       ID.
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'charset'
@@ -48,7 +48,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       The name of the database in the Cloud SQL instance.
       This does not include the project ID or instance name.

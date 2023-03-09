@@ -24,7 +24,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation':
       'https://cloud.google.com/compute/docs/os-patch-management'
   api: 'https://cloud.google.com/compute/docs/osconfig/rest'
-input: true
+immutable: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'patchDeploymentId'

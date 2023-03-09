@@ -15,7 +15,7 @@
 name: 'Brand'
 base_url: 'projects/{{project}}/brands'
 self_link: '{{name}}'
-input: true
+immutable: true
 identity:
   - name
 description: |

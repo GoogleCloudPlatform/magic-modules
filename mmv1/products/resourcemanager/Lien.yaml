@@ -26,11 +26,11 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
 identity:
   - name
 description: A Lien represents an encumbrance on the actions that can be performed on a resource.
-input: true
+immutable: true
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
-    input: true
+    immutable: true
     required: true
     description: |
       A reference to the resource this Lien is attached to.
@@ -46,7 +46,7 @@ parameters:
       list is meaningless and will be rejected.
       e.g. ['resourcemanager.projects.delete']
     item_type: 'Api::Type::String'
-    input: true
+    immutable: true
     required: true
 properties:
   - !ruby/object:Api::Type::String
@@ -58,7 +58,7 @@ properties:
     description: |
       Concise user-visible strings indicating why an action cannot be performed
       on a resource. Maximum length of 200 characters.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: origin
@@ -66,7 +66,7 @@ properties:
       A stable, user-visible/meaningful string identifying the origin
       of the Lien, intended to be inspected programmatically. Maximum length of
       200 characters.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'

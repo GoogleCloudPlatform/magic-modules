@@ -49,14 +49,14 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"
-    input: true
+    immutable: true
     url_param_only: true
     description: The location of the cloud run job
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       Name of the Job.

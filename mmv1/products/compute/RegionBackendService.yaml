@@ -663,7 +663,7 @@ properties:
           OAuth2 Client Secret SHA-256 for IAP
   - !ruby/object:Api::Type::Enum
     name: 'loadBalancingScheme'
-    input: true
+    immutable: true
     description: |
       Indicates what kind of load balancing this regional backend service
       will be used for. A backend service created for one type of load
@@ -729,7 +729,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with

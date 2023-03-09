@@ -150,7 +150,7 @@ properties:
     description: |
       Default access controls to apply to new objects when no ACL is
       provided.
-    input: true
+    immutable: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::ResourceRef
@@ -459,7 +459,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'project'
     description: 'A valid API project identifier.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'predefinedDefaultObjectAcl'
     description: |
@@ -485,4 +485,4 @@ parameters:
       - :private
       - :projectPrivate
       - :publicRead
-    input: true
+    immutable: true

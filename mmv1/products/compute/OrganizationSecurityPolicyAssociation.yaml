@@ -21,7 +21,7 @@ delete_verb: :POST
 delete_url: 'locations/global/securityPolicies/{{policy_id}}/removeAssociation?name={{name}}'
 description: |
   An association for the OrganizationSecurityPolicy.
-input: true
+immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Associating a policy with the organization or folder':

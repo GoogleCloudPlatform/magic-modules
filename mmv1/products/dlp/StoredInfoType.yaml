@@ -36,7 +36,7 @@ parameters:
       * `organizations/{{organization_id}}`
       * `organizations/{{organization_id}}/locations/{{location}}`
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -55,7 +55,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'regex'
     description: Regular expression which defines the rule.
-    input: true
+    immutable: true
     exactly_one_of:
       - dictionary
       - regex
@@ -69,14 +69,14 @@ properties:
           Its syntax (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
       - !ruby/object:Api::Type::Array
         name: 'groupIndexes'
-        input: true
+        immutable: true
         description: |
           The index of the submatch to extract as findings. When not specified, the entire match is returned. No more than 3 may be included.
         item_type: Api::Type::Integer
   - !ruby/object:Api::Type::NestedObject
     name: 'dictionary'
     description: Dictionary which defines the rule.
-    input: true
+    immutable: true
     exactly_one_of:
       - dictionary
       - regex
@@ -111,7 +111,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'largeCustomDictionary'
     description: Dictionary which defines the rule.
-    input: true
+    immutable: true
     exactly_one_of:
       - dictionary
       - regex

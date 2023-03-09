@@ -17,7 +17,7 @@ min_version: beta
 base_url: projects/{{project}}
 self_link: projects/{{project}}
 create_url: projects/{{project}}:addFirebase
-input: true
+immutable: true
 description: |
   A Google Cloud Firebase instance. This enables Firebase resources on a given google project.
   Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP

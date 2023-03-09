@@ -34,7 +34,7 @@ parameters:
     description: |
       The ID of the OrganizationSecurityPolicy this rule applies to.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -48,7 +48,7 @@ properties:
       between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
       highest priority and 2147483647 is the lowest prority.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'match'
     description:

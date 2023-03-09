@@ -49,14 +49,14 @@ async: !ruby/object:Api::OpAsync
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"
-    input: true
+    immutable: true
     url_param_only: true
     description: The location of the cloud run service
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       Name of the Service.

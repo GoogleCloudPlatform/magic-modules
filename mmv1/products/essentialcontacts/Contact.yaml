@@ -30,7 +30,7 @@ parameters:
     name: parent
     description: |
       The resource to save this contact for. Format: organizations/{organization_id}, folders/{folder_id} or projects/{project_id}
-    input: true
+    immutable: true
     url_param_only: true
     required: true
 properties:
@@ -41,7 +41,7 @@ properties:
       The identifier for the contact. Format: {resourceType}/{resource_id}/contacts/{contact_id}
   - !ruby/object:Api::Type::String
     name: 'email'
-    input: true
+    immutable: true
     required: true
     description: |
       The email address to send notifications to. This does not need to be a Google account.

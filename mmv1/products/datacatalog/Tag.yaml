@@ -35,7 +35,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: parent
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The name of the parent this tag is attached to. This can be the name of an entry or an entry group. If an entry group, the tag will be attached to
       all entries in that group.
@@ -55,7 +55,7 @@ properties:
       projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
       This field cannot be modified after creation.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: templateDisplayName
     description: |

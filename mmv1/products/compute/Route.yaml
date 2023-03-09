@@ -16,7 +16,7 @@ name: 'Route'
 kind: 'compute#route'
 base_url: projects/{{project}}/global/routes
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
   Represents a Route resource.
@@ -92,7 +92,7 @@ properties:
     resource: 'Network'
     imports: 'selfLink'
     description: 'The network that this route applies to.'
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Integer
     name: 'priority'
@@ -104,15 +104,15 @@ properties:
       lowest-numbered priority value wins.
 
       Default value is 1000. Valid range is 0 through 65535.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Array
     name: 'tags'
     description: 'A list of instance tags to which this route applies.'
     item_type: Api::Type::String
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'nextHopGateway'
-    input: true
+    immutable: true
     exactly_one_of:
       - next_hop_gateway
       - next_hop_instance
@@ -133,7 +133,7 @@ properties:
     name: 'nextHopInstance'
     resource: 'Instance'
     imports: 'selfLink'
-    input: true
+    immutable: true
     exactly_one_of:
       - next_hop_gateway
       - next_hop_instance
@@ -152,7 +152,7 @@ properties:
     name: 'nextHopIp'
     description: |
       Network IP address of an instance that should handle matching packets.
-    input: true
+    immutable: true
     exactly_one_of:
       - next_hop_gateway
       - next_hop_instance
@@ -163,7 +163,7 @@ properties:
     name: 'nextHopVpnTunnel'
     resource: 'VpnTunnel'
     imports: 'selfLink'
-    input: true
+    immutable: true
     exactly_one_of:
       - next_hop_gateway
       - next_hop_instance
@@ -196,7 +196,7 @@ properties:
 
       Note that this can only be used when the destinationRange is
       a public (non-RFC 1918) IP CIDR range.
-    input: true
+    immutable: true
     exactly_one_of:
       - next_hop_gateway
       - next_hop_instance

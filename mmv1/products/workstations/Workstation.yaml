@@ -48,27 +48,27 @@ parameters:
   - !ruby/object:Api::Type::String
     name: "workstationId"
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       ID to use for the workstation.
   - !ruby/object:Api::Type::String
     name: "workstationConfigId"
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The ID of the workstation cluster config.
   - !ruby/object:Api::Type::String
     name: "workstationClusterId"
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The name of the workstation cluster.
   - !ruby/object:Api::Type::String
     name: "location"
-    input: true
+    immutable: true
     required: true
     url_param_only: true
     description: |

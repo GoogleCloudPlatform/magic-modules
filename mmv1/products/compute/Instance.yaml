@@ -16,7 +16,7 @@ name: 'Instance'
 kind: 'compute#instance'
 base_url: projects/{{project}}/zones/{{zone}}/instances
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
    An instance is a virtual machine (VM) hosted on Google's infrastructure.
@@ -72,7 +72,7 @@ properties:
     description: |
       An array of disks that are associated with the instances that are
       created from this template.
-    input: true
+    immutable: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Boolean
@@ -138,7 +138,7 @@ properties:
             created alongside the new instance. Use initialization
             parameters to create boot disks or local SSDs attached to
             the new instance.
-          input: true
+          immutable: true
           properties:
             - !ruby/object:Api::Type::String
               name: 'diskName'

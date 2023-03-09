@@ -41,7 +41,7 @@
     - !ruby/object:Api::Type::String
       name: 'name'
       required: true
-      input: true
+      immutable: true
       # url_param_only: true
       description: |
         A user-defined name of the Certificate Map Entry. Certificate Map Entry 
@@ -50,7 +50,7 @@
     - !ruby/object:Api::Type::ResourceRef
       name: 'map'
       required: true
-      input: true
+      immutable: true
       url_param_only: true
       imports: 'name'
       resource: 'CertificateMap'

@@ -38,7 +38,7 @@ parameters:
     exactly_one_of:
       - 'zone'
       - 'location'
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -47,7 +47,7 @@ parameters:
     exactly_one_of:
       - zone
       - location
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -83,7 +83,7 @@ properties:
       The service tier of the instance.
       Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD and ENTERPRISE
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
@@ -102,7 +102,7 @@ properties:
           description: |
             The name of the fileshare (16 characters or less)
           required: true
-          input: true
+          immutable: true
         - !ruby/object:Api::Type::Integer
           name: 'capacityGb'
           description: |
@@ -167,7 +167,7 @@ properties:
       only a single network is supported.
     required: true
     min_size: 1
-    input: true
+    immutable: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -176,14 +176,14 @@ properties:
             The name of the GCE VPC network to which the
             instance is connected.
           required: true
-          input: true
+          immutable: true
         - !ruby/object:Api::Type::Array
           name: 'modes'
           description: |
             IP versions for which the instance has
             IP addresses assigned.
           required: true
-          input: true
+          immutable: true
           item_type: !ruby/object:Api::Type::Enum
             name: 'mode'
             description: An IP version.
@@ -193,7 +193,7 @@ properties:
               - MODE_IPV6
         - !ruby/object:Api::Type::String
           name: 'reservedIpRange'
-          input: true
+          immutable: true
           description: |
             A /29 CIDR block that identifies the range of IP
             addresses reserved for this instance.
@@ -209,7 +209,7 @@ properties:
             The network connect mode of the Filestore instance.
             If not provided, the connect mode defaults to
             DIRECT_PEERING.
-          input: true
+          immutable: true
           default_value: :DIRECT_PEERING
           values:
             - :DIRECT_PEERING
@@ -222,6 +222,6 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'kmsKeyName'
-    input: true
+    immutable: true
     description: |
       KMS key name used for data encryption.

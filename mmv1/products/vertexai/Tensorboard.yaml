@@ -46,7 +46,7 @@ parameters:
     name: region
     description: The region of the tensorboard. eg us-central1
     url_param_only: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -61,7 +61,7 @@ properties:
     description: Description of this Tensorboard.
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionSpec'
-    input: true
+    immutable: true
     description: |
       Customer-managed encryption key spec for a Tensorboard. If set, this Tensorboard and all sub-resources of this Tensorboard will be secured by this key.
     properties:
@@ -71,7 +71,7 @@ properties:
         description: |
           The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
           Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::String
     name: 'blobStoragePathPrefix'
     description: Consumer project Cloud Storage path prefix used to store blob data, which can either be a bucket or directory. Does not end with a '/'.

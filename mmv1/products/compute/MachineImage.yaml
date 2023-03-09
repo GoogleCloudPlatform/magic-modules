@@ -16,7 +16,7 @@ name: 'MachineImage'
 kind: 'compute#machineImage'
 base_url: projects/{{project}}/global/machineImages
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
   Represents a Machine Image resource. Machine images store all the configuration,

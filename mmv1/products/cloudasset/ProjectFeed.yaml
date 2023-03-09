@@ -30,7 +30,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: billing_project
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The project whose identity will be used when sending messages to the
       destination pubsub topic. It also specifies the project for API 
@@ -46,7 +46,7 @@ properties:
     description: |
       This is the client-assigned asset feed identifier and it needs to be unique under a specific parent.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::Array
     name: assetNames

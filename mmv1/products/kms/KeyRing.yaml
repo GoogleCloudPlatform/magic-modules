@@ -16,7 +16,7 @@ name: 'KeyRing'
 base_url: 'projects/{{project}}/locations/{{location}}/keyRings'
 create_url: 'projects/{{project}}/locations/{{location}}/keyRings?keyRingId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/keyRings/{{name}}'
-input: true
+immutable: true
 description: |
   A `KeyRing` is a toplevel logical grouping of `CryptoKeys`.
 parameters:

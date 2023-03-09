@@ -140,7 +140,7 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-    input: true
+    immutable: true
   # fingerprint ignored as it is an internal locking detail
   - !ruby/object:Api::Type::Integer
     name: 'id'

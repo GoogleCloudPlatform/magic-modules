@@ -30,7 +30,7 @@ parameters:
       A reference to the region where the Firebase Realtime database resides.
       Check all [available regions](https://firebase.google.com/docs/projects/locations#rtdb-locations)
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'instance_id'
@@ -38,7 +38,7 @@ parameters:
       The globally unique identifier of the Firebase Realtime Database instance. 
       Instance IDs cannot be reused after deletion.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -62,7 +62,7 @@ properties:
       Each project can create one default Firebase Realtime Database, which cannot be deleted once created.
       Creating user Databases is only available for projects on the Blaze plan.
       Projects can be upgraded using the Cloud Billing API https://cloud.google.com/billing/reference/rest/v1/projects/updateBillingInfo.
-    input: true
+    immutable: true
     values:
       - :DEFAULT_DATABASE
       - :USER_DATABASE
