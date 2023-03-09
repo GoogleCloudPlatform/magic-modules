@@ -1,0 +1,208 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'BackendBucket'
+kind: 'compute#backendBucket'
+base_url: projects/{{project}}/global/backendBuckets
+collection_url_key: 'items'
+has_self_link: true
+description: |
+  Backend buckets allow you to use Google Cloud Storage buckets with HTTP(S)
+  load balancing.
+
+  An HTTP(S) load balancer can direct traffic to specified URLs to a
+  backend bucket rather than a backend service. It can send requests for
+  static content to a Cloud Storage bucket and requests for dynamic content
+  to a virtual machine instance.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
+  api: 'https://cloud.google.com/compute/docs/reference/v1/backendBuckets'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  min_version: beta
+  exclude: false
+  parent_resource_attribute: 'name'
+  import_format: ["projects/{{project}}/global/backendBuckets/{{name}}", "{{name}}"]    
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'bucketName'
+    description: 'Cloud Storage bucket name.'
+    required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'cdnPolicy'
+    description: 'Cloud CDN configuration for this Backend Bucket.'
+    properties:
+    - !ruby/object:Api::Type::NestedObject
+      name: 'cacheKeyPolicy'
+      description: 'The CacheKeyPolicy for this CdnPolicy.'
+      properties:
+      - !ruby/object:Api::Type::Array
+        send_empty_value: true
+        name: 'queryStringWhitelist'
+        at_least_one_of:
+          - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+          - cdn_policy.0.cache_key_policy.0.include_http_headers
+        description: |
+          Names of query string parameters to include in cache keys.
+          Default parameters are always included. '&' and '=' will
+          be percent encoded and not treated as delimiters.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        send_empty_value: true
+        name: 'includeHttpHeaders'
+        at_least_one_of:
+          - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+          - cdn_policy.0.cache_key_policy.0.include_http_headers
+        description: |
+          Allows HTTP request headers (by name) to be used in the
+          cache key.
+        item_type: Api::Type::String
+    - !ruby/object:Api::Type::Integer
+      name: 'signedUrlCacheMaxAgeSec'
+      description: |
+        Maximum number of seconds the response to a signed URL request will
+        be considered fresh. After this time period,
+        the response will be revalidated before being served.
+        When serving responses to signed URL requests,
+        Cloud CDN will internally behave as though
+        all responses from this backend had a "Cache-Control: public,
+        max-age=[TTL]" header, regardless of any existing Cache-Control
+        header. The actual headers served in responses will not be altered.
+    - !ruby/object:Api::Type::Integer
+      name: 'defaultTtl'
+      description: |
+        Specifies the default TTL for cached content served by this origin for responses
+        that do not have an existing valid TTL (max-age or s-max-age).
+    - !ruby/object:Api::Type::Integer
+      name: 'maxTtl'
+      description: |
+        Specifies the maximum allowed TTL for cached content served by this origin.
+    - !ruby/object:Api::Type::Integer
+      name: 'clientTtl'
+      description: |
+        Specifies the maximum allowed TTL for cached content served by this origin.
+    - !ruby/object:Api::Type::Boolean
+      name: 'negativeCaching'
+      send_empty_value: true
+      description: |
+        Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
+    - !ruby/object:Api::Type::Array
+      name: 'negativeCachingPolicy'
+      description: |
+        Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
+        Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'code'
+            description: |
+              The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
+              can be specified as values, and you cannot specify a status code more than once.
+          - !ruby/object:Api::Type::Integer
+            name: 'ttl'
+            description: |
+              The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
+              (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
+    - !ruby/object:Api::Type::Enum
+      name: 'cacheMode'
+      description: |
+        Specifies the cache setting for all responses from this backend.
+        The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
+      values:
+        - :USE_ORIGIN_HEADERS
+        - :FORCE_CACHE_ALL
+        - :CACHE_ALL_STATIC
+    - !ruby/object:Api::Type::Integer
+      name: 'serveWhileStale'
+      send_empty_value: true
+      description: |
+        Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
+    - !ruby/object:Api::Type::Boolean        
+      name: 'requestCoalescing'
+      send_empty_value: true
+      description: |
+        If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests to the origin.
+    - !ruby/object:Api::Type::Array
+      name: 'bypassCacheOnRequestHeaders'
+      description: |
+        Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified. The cache is bypassed for all cdnPolicy.cacheMode settings.
+      max_size: 5  
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'headerName'
+            description: |
+              The header field name to match on when bypassing cache. Values are case-insensitive.
+  - !ruby/object:Api::Type::Enum
+      name: 'compressionMode'
+      description: |
+        Compress text responses using Brotli or gzip compression, based on the client's Accept-Encoding header.
+      values:
+        - :AUTOMATIC
+        - :DISABLED
+  - !ruby/object:Api::Type::String
+    name: 'edgeSecurityPolicy'
+    description: |
+      The security policy associated with this backend bucket.
+  - !ruby/object:Api::Type::Array
+    name: 'customResponseHeaders'
+    description: |
+      Headers that the HTTP/S load balancer should add to proxied responses.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional textual description of the resource; provided by the
+      client when the resource is created.
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableCdn'
+    description: 'If true, enable Cloud CDN for this BackendBucket.'
+  - !ruby/object:Api::Type::Integer
+    name: 'id'
+    description: 'Unique identifier for the resource.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the resource. Provided by the client when the resource is
+      created. The name must be 1-63 characters long, and comply with
+      RFC1035.  Specifically, the name must be 1-63 characters long and
+      match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
+      the first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the
+      last character, which cannot be a dash.
+    input: true
+    required: true

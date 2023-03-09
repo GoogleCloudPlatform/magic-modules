@@ -53,6 +53,11 @@ resource "google_firebase_apple_app" "my_app" {
 data "google_firebase_apple_app" "my_app" {
   app_id = google_firebase_apple_app.my_app.app_id
 }
+
+data "google_firebase_apple_app" "my_app_project" {
+  project = "%{project_id}"
+  app_id = google_firebase_apple_app.my_app.app_id
+}
 `, context)
 }
 <% end -%>
