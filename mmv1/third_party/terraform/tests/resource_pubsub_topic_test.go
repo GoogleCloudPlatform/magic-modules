@@ -12,10 +12,6 @@ func TestAccPubsubTopic_update(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
-	if BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
-
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    TestAccProviders,
@@ -48,6 +44,10 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 
 	kms := BootstrapKMSKey(t)
 	topicName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+
+	if BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
