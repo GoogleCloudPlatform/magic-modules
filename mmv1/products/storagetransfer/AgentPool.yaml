@@ -38,7 +38,7 @@ properties:
         * One or more numerals or lowercase ASCII characters.
 
       As expressed by the regular expression: ^(?!goog)[a-z]([a-z0-9-._~]*[a-z0-9])?$.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
   - !ruby/object:Api::Type::String

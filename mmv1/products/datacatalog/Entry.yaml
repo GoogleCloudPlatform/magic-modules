@@ -34,14 +34,14 @@ parameters:
     name: entryGroup
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The name of the entry group this entry is in.
   - !ruby/object:Api::Type::String
     name: entryId
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The id of the entry to create.
 properties:
@@ -86,7 +86,7 @@ properties:
       Currently, only FILESET enum value is allowed. All other entries created through Data Catalog must use userSpecifiedType.
     values:
       - :FILESET
-    input: true
+    immutable: true
     exactly_one_of:
       - type
       - user_specified_type

@@ -18,7 +18,7 @@ base_url: projects/{{project}}/hmacKeys
 create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{serviceAccountEmail}}
 self_link: projects/{{project}}/hmacKeys/{{accessId}}
 # technically updatable, but implemented as custom update for new fingerprint support
-input: true
+immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/storage/docs/authentication/managing-hmackeys'

@@ -34,7 +34,7 @@ parameters:
   name: 'name'
   description: 'Name of the reservation.'
   required: true
-  input: true
+  immutable: true
   url_param_only: true
 properties:
 - !ruby/object:Api::Type::Integer

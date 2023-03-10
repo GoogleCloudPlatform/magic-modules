@@ -22,21 +22,21 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.privateConnections'
 description: |
   The PrivateConnection resource is used to establish private connectivity between Datastream and a customer's network.
-input: true
+immutable: true
 parameters:
   - !ruby/object:Api::Type::String
     name: privateConnectionId
     description: |-
       The private connectivity identifier.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
       The name of the location this private connection is located in.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String

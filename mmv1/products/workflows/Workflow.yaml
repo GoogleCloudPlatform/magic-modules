@@ -30,12 +30,12 @@ parameters:
     name: region
     description: The region of the workflow.
     url_param_only: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: Name of the Workflow.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |

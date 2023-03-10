@@ -30,7 +30,7 @@ parameters:
     name: 'region'
     description: |
       The region of the Memcache instance. If it is not provided, the provider region is used.
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -38,7 +38,7 @@ properties:
     description: |
       The resource name of the instance.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{region}}/instances/{{name}}
   - !ruby/object:Api::Type::String
@@ -112,14 +112,14 @@ properties:
       The full version of memcached server running on this instance.
   - !ruby/object:Api::Type::Array
     name: 'zones'
-    input: true
+    immutable: true
     description: |
       Zones where memcache nodes should be provisioned.  If not
       provided, all zones will be used.
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'authorizedNetwork'
-    input: true
+    immutable: true
     description: |
       The full name of the GCE network to connect the instance to.  If not provided,
       'default' will be used.
@@ -142,7 +142,7 @@ properties:
     description: |
       Configuration for memcache nodes.
     required: true
-    input: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::Integer
         name: cpuCount
@@ -158,7 +158,7 @@ properties:
     name: parameters
     description: |
       User-specified parameters for this memcache instance.
-    input: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: id

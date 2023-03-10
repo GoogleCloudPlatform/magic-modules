@@ -68,7 +68,7 @@
         Full path to the Version resource in the API. Example, "v1".
     - !ruby/object:Api::Type::String
       name: 'id'
-      input: true
+      immutable: true
       description: |
         Relative name of the version within the service. For example, `v1`. Version names can contain only lowercase letters, numbers, or hyphens.
         Reserved names,"default", "latest", and any name with the prefix "ah-".

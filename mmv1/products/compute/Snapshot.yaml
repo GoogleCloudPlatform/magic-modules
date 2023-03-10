@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'Snapshot'
 kind: 'compute#snapshot'
-input: true
+immutable: true
 base_url: projects/{{project}}/global/snapshots
 create_url: projects/{{project}}/zones/{{zone}}/disks/{{sourceDisk}}/createSnapshot
 collection_url_key: 'items'
@@ -67,7 +67,7 @@ parameters:
     resource: 'Disk'
     imports: 'name'
     description: 'A reference to the disk used to create this snapshot.'
-    input: true
+    immutable: true
     required: true
   # ignore_read in providers - this is only used in Create
   - !ruby/object:Api::Type::ResourceRef
@@ -75,7 +75,7 @@ parameters:
     resource: 'Zone'
     imports: 'name'
     description: 'A reference to the zone where the disk is hosted.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'snapshotEncryptionKey'
     description: |
@@ -171,7 +171,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       Name of the resource; provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -182,7 +182,7 @@ properties:
       character, which cannot be a dash.
   - !ruby/object:Api::Type::String
     name: 'description'
-    input: true
+    immutable: true
     description: 'An optional description of this resource.'
   # 'sourceDiskId' not useful for object convergence.
   - !ruby/object:Api::Type::Integer

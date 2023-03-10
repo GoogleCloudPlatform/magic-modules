@@ -34,7 +34,7 @@ properties:
     name: 'name'
     description: 'Name of the subscription.'
     required: true
-    input: true
+    immutable: true
     pattern: 'projects/{{project}}/subscriptions/{{name}}'
   - !ruby/object:Api::Type::ResourceRef
     name: 'topic'
@@ -43,7 +43,7 @@ properties:
     description: |
       A reference to a Topic resource.
     required: true
-    input: true
+    immutable: true
     pattern: 'projects/{{project}}/topics/{{topic}}'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
@@ -213,7 +213,7 @@ properties:
       Pub/Sub automatically acknowledges the messages that don't match the filter. You can filter messages
       by their attributes. The maximum length of a filter is 256 bytes. After creating the subscription, 
       you can't modify the filter.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'deadLetterPolicy'
     send_empty_value: true
@@ -276,7 +276,7 @@ properties:
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
   - !ruby/object:Api::Type::Boolean
     name: 'enableMessageOrdering'
-    input: true
+    immutable: true
     description: |
       If `true`, messages published with the same orderingKey in PubsubMessage will be delivered to
       the subscribers in the order in which they are received by the Pub/Sub system. Otherwise, they

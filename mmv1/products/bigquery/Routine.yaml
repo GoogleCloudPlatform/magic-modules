@@ -32,22 +32,22 @@ properties:
         name: 'datasetId'
         description: The ID of the dataset containing this routine
         required: true
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::String
         name: 'projectId'
         description: The ID of the project containing this routine
         required: true
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::String
         name: 'routineId'
         description: The ID of the the routine. The ID must contain only
           letters (a-z, A-Z), numbers (0-9), or underscores (_).
           The maximum length is 256 characters.
         required: true
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'routineType'
-    input: true
+    immutable: true
     description: The type of routine.
     values:
       - :SCALAR_FUNCTION

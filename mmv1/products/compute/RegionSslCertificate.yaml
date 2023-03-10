@@ -20,7 +20,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSslCertificates'
-input: true
+immutable: true
 has_self_link: true
 description: |
   A RegionSslCertificate resource, used for HTTPS load balancing. This resource
@@ -50,7 +50,7 @@ parameters:
     resource: 'Region'
     imports: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       The region where the regional ssl certificate resides.
 properties:
@@ -90,4 +90,4 @@ properties:
     name: 'privateKey'
     description: 'The write-only private key in PEM format.'
     required: true
-    input: true
+    immutable: true

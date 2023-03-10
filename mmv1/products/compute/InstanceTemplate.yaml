@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'InstanceTemplate'
 kind: 'compute#instanceTemplate'
-input: true
+immutable: true
 base_url: projects/{{project}}/global/instanceTemplates
 collection_url_key: 'items'
 has_self_link: true
@@ -161,7 +161,7 @@ properties:
                 created alongside the new instance. Use initialization
                 parameters to create boot disks or local SSDs attached to
                 the new instance.
-              input: true
+              immutable: true
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'diskName'

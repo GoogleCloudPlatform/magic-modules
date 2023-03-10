@@ -46,13 +46,13 @@ parameters:
   description: The location of the cloud run instance. eg us-central1
   url_param_only: true
   required: true
-  input: true
+  immutable: true
 properties:
 - !ruby/object:Api::Type::String
   name: name
   # This is a convenience field as terraform expects `name` to be a top level property
   url_param_only: true
-  input: true
+  immutable: true
   description: |-
     Name must be unique within a namespace, within a Cloud Run region.
     Is required when creating resources. Name is primarily intended
@@ -208,7 +208,7 @@ properties:
           - !ruby/object:Api::Type::String
             deprecation_message: "Not supported by Cloud Run fully managed"
             name: workingDir
-            input: true
+            immutable: true
             description: |-
               Container's working directory.
               If not specified, the container runtime's default will be used, which
@@ -229,7 +229,7 @@ properties:
           - !ruby/object:Api::Type::Array
             name: envFrom
             deprecation_message: "Not supported by Cloud Run fully managed"
-            input: true
+            immutable: true
             description: |-
               List of sources to populate environment variables in the container.
               All invalid keys will be reported as an event when the container is starting.

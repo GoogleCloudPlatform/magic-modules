@@ -20,7 +20,7 @@ description: |
   Represents a NodeTemplate resource. Node templates specify properties
   for creating sole-tenant nodes, such as node type, vCPU and memory
   requirements, node affinity labels, and region.
-input: true
+immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'

@@ -67,21 +67,21 @@ parameters:
     name: 'service'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The service that the metrics belong to, e.g. `compute.googleapis.com`.
   - !ruby/object:Api::Type::String
     name: 'metric'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The metric that should be limited, e.g. `compute.googleapis.com/cpus`.
   - !ruby/object:Api::Type::String
     name: 'limit'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The limit on the metric, e.g. `/project/region`.
 
@@ -95,7 +95,7 @@ properties:
       The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'dimensions'
-    input: true
+    immutable: true
     description: |
       If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
 

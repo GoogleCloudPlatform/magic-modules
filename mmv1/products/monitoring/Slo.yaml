@@ -37,14 +37,14 @@ parameters:
   name: service
   required: true
   url_param_only: true
-  input: true
+  immutable: true
   description: |
     ID of the service to which this SLO belongs.
 - !ruby/object:Api::Type::String
   name: sloId
   description: |
     The id to use for this ServiceLevelObjective. If omitted, an id will be generated instead.
-  input: true
+  immutable: true
 properties:
 - !ruby/object:Api::Type::String
   name: name

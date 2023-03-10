@@ -54,12 +54,12 @@ parameters:
     name: region
     description: The region of the dataset. eg us-central1
     url_param_only: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: The name of the Featurestore. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
-    input: true
+    immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{region}}/featurestores/{{name}}
   - !ruby/object:Api::Type::String

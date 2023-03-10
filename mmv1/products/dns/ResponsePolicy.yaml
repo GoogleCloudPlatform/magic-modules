@@ -31,7 +31,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'responsePolicyName'
     description: The user assigned name for this Response Policy, such as `myresponsepolicy`.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'description'

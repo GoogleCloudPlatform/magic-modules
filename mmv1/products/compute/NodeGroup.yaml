@@ -19,7 +19,7 @@ create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount={{si
 has_self_link: true
 description: |
   Represents a NodeGroup resource to manage a group of sole-tenant nodes.
-input: true
+immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
@@ -78,7 +78,7 @@ properties:
     name: 'size'
     description: |
       The total number of nodes in the node group.
-    input: true
+    immutable: true
     send_empty_value: true
   - !ruby/object:Api::Type::Integer
     name: 'initialSize'

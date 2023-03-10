@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'Disk'
 kind: 'compute#disk'
-input: true
+immutable: true
 base_url: projects/{{project}}/zones/{{zone}}/disks
 collection_url_key: 'items'
 has_self_link: true
@@ -91,7 +91,7 @@ parameters:
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'sourceImageId'
     description: |
@@ -147,7 +147,7 @@ parameters:
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceSnapshot'
     resource: 'Snapshot'
@@ -189,7 +189,7 @@ parameters:
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'sourceSnapshotId'
     description: |
@@ -249,7 +249,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Integer
     name: 'sizeGb'
@@ -346,7 +346,7 @@ properties:
       image name with family/family-name:
 
       global/images/family/my-private-family
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Array
     name: 'resourcePolicies'
     min_version: beta
