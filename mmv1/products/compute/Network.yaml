@@ -179,3 +179,12 @@ properties:
       fail if the speficied /48 is already in used by another resource. 
       If the field is not speficied, then a /48 range will be randomly allocated from fd20::/20 and returned via this field.
     input: true
+  - !ruby/object:Api::Type::Enum
+    name: 'networkFirewallPolicyEnforcementOrder'
+    description: |
+      Set the order that Firewall Rules and Firewall Policies are evaluated. Needs to be either 'AFTER_CLASSIC_FIREWALL' or 'BEFORE_CLASSIC_FIREWALL' Default 'AFTER_CLASSIC_FIREWALL'
+    input: true
+    values:
+      - :BEFORE_CLASSIC_FIREWALL
+      - :AFTER_CLASSIC_FIREWALL
+    default_value: :AFTER_CLASSIC_FIREWALL

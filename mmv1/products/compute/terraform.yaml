@@ -1576,6 +1576,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       internalIpv6Range: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      networkFirewallPolicyEnforcementOrder: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
