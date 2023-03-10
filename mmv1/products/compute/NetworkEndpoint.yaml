@@ -21,7 +21,7 @@ description: |
   collections of these endpoints for GCP resources within a
   single subnet. **NOTE**: Network endpoints cannot be created outside of a
   network endpoint group.
-input: true
+immutable: true
 create_verb: :POST
 create_url: projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/attachNetworkEndpoints
 delete_verb: :POST

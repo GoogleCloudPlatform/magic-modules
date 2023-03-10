@@ -68,7 +68,7 @@ properties:
               The user name of the Google account.
           - !ruby/object:Api::Type::String
             name: password
-            input: true
+            immutable: true
             required: true
             description: |
               The password of the Google account. The credential is stored encrypted
@@ -88,7 +88,7 @@ properties:
               The user name of the custom account.
           - !ruby/object:Api::Type::String
             name: password
-            input: true
+            immutable: true
             required: true
             description: |
               The password of the custom account. The credential is stored encrypted

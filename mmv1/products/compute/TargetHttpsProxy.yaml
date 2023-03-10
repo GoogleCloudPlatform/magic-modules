@@ -17,7 +17,7 @@ kind: 'compute#targetHttpsProxy'
 base_url: projects/{{project}}/global/targetHttpsProxies
 collection_url_key: 'items'
 has_self_link: true
-input: true
+immutable: true
 description: |
   Represents a TargetHttpsProxy resource, which is used by one or more
   global forwarding rule to route incoming HTTPS requests to a URL map.
@@ -51,7 +51,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Integer
     name: 'id'
     description: 'The unique identifier for the resource.'
@@ -66,7 +66,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Enum
     name: 'quicOverride'

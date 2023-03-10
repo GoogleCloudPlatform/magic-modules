@@ -29,14 +29,14 @@
     - !ruby/object:Api::Type::String
       name: muteConfigId
       required: true
-      input: true
+      immutable: true
       url_param_only: true
       description: |
         Unique identifier provided by the client within the parent scope.
     - !ruby/object:Api::Type::String
       name: parent
       required: true
-      input: true
+      immutable: true
       url_param_only: true
       description: |
         Resource name of the new mute configs's parent. Its format is

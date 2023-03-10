@@ -36,11 +36,11 @@ properties:
     description: |
       Optional connection id that should be assigned to the created connection. 
     required: false
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'location'
     required: false
-    input: true
+    immutable: true
     url_param_only: true
     description: |-
       The geographic location where the connection should reside.

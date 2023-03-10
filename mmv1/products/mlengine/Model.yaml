@@ -16,7 +16,7 @@ name: 'Model'
 base_url: projects/{{project}}/models
 self_link: projects/{{project}}/models/{{name}}
 # This resources is not updatable (outside of versions, which is a version-level method)
-input: true
+immutable: true
 async: !ruby/object:Api::OpAsync
   actions: ['delete']
   operation: !ruby/object:Api::OpAsync::Operation

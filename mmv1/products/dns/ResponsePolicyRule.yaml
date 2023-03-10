@@ -38,7 +38,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'ruleName'
     description: An identifier for this rule. Must be unique with the ResponsePolicy.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'dnsName'

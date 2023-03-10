@@ -28,7 +28,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       Resource name of the repository, of the form projects/{{project}}/repos/{{repo}}.
       The repo name may contain slashes. eg, projects/myproject/repos/name/with/slash

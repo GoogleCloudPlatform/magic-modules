@@ -26,7 +26,7 @@ parameters:
     description: |
       The location for the Dataset.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -34,7 +34,7 @@ properties:
     description: |
       The resource name for the Dataset.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: "timeZone"
     description: |

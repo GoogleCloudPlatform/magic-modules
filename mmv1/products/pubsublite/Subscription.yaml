@@ -39,7 +39,7 @@ parameters:
     name: 'name'
     description: 'Name of the subscription.'
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::ResourceRef
@@ -49,7 +49,7 @@ properties:
     description: |
       A reference to a Topic resource.
     required: true
-    input: true
+    immutable: true
     pattern: 'projects/{{project}}/locations/{{zone}}/topics/{{name}}'
   - !ruby/object:Api::Type::NestedObject
     name: 'deliveryConfig'

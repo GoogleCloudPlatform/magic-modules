@@ -161,7 +161,7 @@ properties:
     name: 'datasetReference'
     description: 'A reference that identifies the dataset.'
     required: true
-    input: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'datasetId'
@@ -170,11 +170,11 @@ properties:
           must contain only letters (a-z, A-Z), numbers (0-9), or
           underscores (_). The maximum length is 1,024 characters.
         required: true
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::String
         name: 'projectId'
         description: The ID of the project containing this dataset.
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::Integer
     name: 'defaultTableExpirationMs'
     description: |

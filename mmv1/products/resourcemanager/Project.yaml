@@ -44,7 +44,7 @@ parameters:
       lowercase letters, digits, or hyphens. It must start with a letter.
       Trailing hyphens are prohibited.
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'number'

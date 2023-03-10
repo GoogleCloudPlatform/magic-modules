@@ -53,7 +53,7 @@ properties:
     name: 'backupPool'
     resource: 'TargetPool'
     imports: 'selfLink'
-    input: true
+    immutable: true
     description: |
       This field is applicable only when the containing target pool is
       serving a forwarding rule as the primary pool, and its failoverRatio
@@ -129,7 +129,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Enum
     name: 'sessionAffinity'
@@ -143,7 +143,7 @@ properties:
       * CLIENT_IP_PROTO: Connections from the same client IP with the same
         IP protocol will go to the same instance in the pool while that
         instance remains healthy.
-    input: true
+    immutable: true
     values:
       - :NONE
       - :CLIENT_IP

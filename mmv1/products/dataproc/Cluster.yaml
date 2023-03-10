@@ -21,7 +21,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The region in which the cluster and associated nodes will be created in.
 properties:

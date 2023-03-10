@@ -36,7 +36,7 @@ parameters:
       * `organizations/{{organization_id}}`
       * `organizations/{{organization_id}}/locations/{{location}}`
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -343,7 +343,7 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'regex'
               description: Regular expression which defines the rule.
-              input: true
+              immutable: true
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'pattern'
@@ -359,7 +359,7 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'dictionary'
               description: Dictionary which defines the rule.
-              input: true
+              immutable: true
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'wordList'
@@ -384,7 +384,7 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'storedType'
               description: A reference to a StoredInfoType to use with scanning.
-              input: true
+              immutable: true
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'name'

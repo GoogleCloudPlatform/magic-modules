@@ -17,7 +17,7 @@ kind: 'compute#targetHttpProxy'
 base_url: projects/{{project}}/global/targetHttpProxies
 collection_url_key: 'items'
 has_self_link: true
-input: true
+immutable: true
 description: |
   Represents a TargetHttpProxy resource, which is used by one or more global
   forwarding rule to route incoming HTTP requests to a URL map.

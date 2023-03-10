@@ -50,14 +50,14 @@ parameters:
     description: The location for the resource
     url_param_only: true
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: The resource name of the Endpoint. The name must be numeric with no leading zeros and can be at most 10 digits.
     url_param_only: true
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: displayName
     description: Required. The display name of the Endpoint. The name can be up to 128 characters long and can consist of any UTF-8 characters.
@@ -207,17 +207,17 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: encryptionSpec
     description: Customer-managed encryption key spec for an Endpoint. If set, this Endpoint and all sub-resources of this Endpoint will be secured by this key.
-    input: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: kmsKeyName
         description: 'Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`. The key needs to be in the same region as where the compute resource is created.'
         required: true
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::String
     name: network
     description: 'The full name of the Google Compute Engine [network](https://cloud.google.com//compute/docs/networks-and-firewalls#networks) to which the Endpoint should be peered. Private services access must already be configured for the network. If left unspecified, the Endpoint is not peered with any network. Only one of the fields, network or enable_private_service_connect, can be set. [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert): `projects/{project}/global/networks/{network}`. Where `{project}` is a project number, as in `12345`, and `{network}` is network name.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: modelDeploymentMonitoringJob
     description: 'Output only. Resource name of the Model Monitoring job associated with this Endpoint if monitoring is enabled by CreateModelDeploymentMonitoringJob. Format: `projects/{project}/locations/{location}/modelDeploymentMonitoringJobs/{model_deployment_monitoring_job}`'

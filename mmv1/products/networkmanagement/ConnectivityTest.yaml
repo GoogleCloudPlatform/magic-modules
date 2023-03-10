@@ -37,7 +37,7 @@ properties:
     description: |-
       Unique name for the connectivity test.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: description
     description: |-

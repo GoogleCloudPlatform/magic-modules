@@ -48,13 +48,13 @@ parameters:
   - !ruby/object:Api::Type::String
     name: "workstationClusterId"
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The ID of the workstation cluster.
   - !ruby/object:Api::Type::String
     name: "location"
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The location where the workstation cluster should reside.
@@ -75,14 +75,14 @@ properties:
   - !ruby/object:Api::Type::String
     name: "network"
     required: true
-    input: true
+    immutable: true
     description: |
       The relative resource name of the VPC network on which the instance can be accessed. 
       It is specified in the following form: "projects/{projectNumber}/global/networks/{network_id}".
   - !ruby/object:Api::Type::String
     name: "subnetwork"
     required: true
-    input: true
+    immutable: true
     description: |
       Name of the Compute Engine subnetwork in which instances associated with this cluster will be created. 
       Must be part of the subnetwork specified for this cluster.
@@ -116,7 +116,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: "enablePrivateEndpoint"
-        input: true
+        immutable: true
         required: true
         description: |
           Whether Workstations endpoint is private.

@@ -60,14 +60,14 @@ parameters:
     description: |
       The name of the Cloud Router in which this NAT will be configured.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::ResourceRef
     name: region
     resource: Region
     imports: name
     description: Region where the router and NAT reside.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
 properties:
@@ -77,7 +77,7 @@ properties:
       Name of the NAT service. The name must be 1-63 characters long and
       comply with RFC1035.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'natIpAllocateOption'
     required: true

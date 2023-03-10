@@ -34,7 +34,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: region
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       Taxonomy location region.
 properties:

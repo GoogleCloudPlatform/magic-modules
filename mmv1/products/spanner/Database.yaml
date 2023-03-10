@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'Database'
 base_url: projects/{{project}}/instances/{{instance}}/databases
-input: true
+immutable: true
 description: |
   A Cloud Spanner Database which is hosted on a Spanner instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -55,7 +55,7 @@ properties:
     description: |
       A unique identifier for the database, which cannot be changed after
       the instance is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'versionRetentionPeriod'

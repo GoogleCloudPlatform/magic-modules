@@ -20,7 +20,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 create_url: projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}/configs?configId={{config_id}}
 base_url: projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}/configs
 self_link: projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}/configs/{{config_id}}
-input: true
+immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -49,7 +49,7 @@ properties:
     `projects/{project_id}/locations/{location}/gameServerDeployments/{deployment_id}/configs/{config_id}`.
 - !ruby/object:Api::Type::String
   name: configId
-  input: true
+  immutable: true
   required: true
   url_param_only: true
   description: |
@@ -65,7 +65,7 @@ properties:
   name: deploymentId
   resource: 'GameServerDeployment'
   imports: 'deploymentId'
-  input: true
+  immutable: true
   required: true
   url_param_only: true
   description: |

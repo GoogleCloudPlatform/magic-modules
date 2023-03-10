@@ -28,7 +28,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       The name of the OauthIdpConfig. Must start with `oidc.`.
   - !ruby/object:Api::Type::String

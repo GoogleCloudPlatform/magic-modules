@@ -15,7 +15,7 @@
 name: 'InstanceGroupNamedPort'
 base_url:  'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
 self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
-input: true
+immutable: true
 description: |
   Mange the named ports setting for a managed instance group without
   managing the group as whole. This resource is primarily intended for use

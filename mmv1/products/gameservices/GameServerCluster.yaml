@@ -42,7 +42,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 properties:
 - !ruby/object:Api::Type::String
-  input: true
+  immutable: true
   name: clusterId
   required: true
   url_param_only: true
@@ -79,7 +79,7 @@ properties:
 - !ruby/object:Api::Type::NestedObject
   name: connectionInfo
   required: true
-  input: true
+  immutable: true
   description: |-
     Game server cluster connection information. This information is used to
     manage game server clusters.
@@ -87,13 +87,13 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: gkeClusterReference
     required: true
-    input: true
+    immutable: true
     description: Reference of the GKE cluster where the game servers are installed.
     properties:
     - !ruby/object:Api::Type::String
       name: cluster
       required: true
-      input: true
+      immutable: true
       description: |-
         The full or partial name of a GKE cluster, using one of the following
         forms:

@@ -35,14 +35,14 @@ parameters:
   - !ruby/object:Api::Type::String
     name: region
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       Template location region.
   - !ruby/object:Api::Type::String
     name: tagTemplateId
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The id of the tag template to create.
   - !ruby/object:Api::Type::Boolean

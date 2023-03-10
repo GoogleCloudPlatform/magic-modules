@@ -28,7 +28,7 @@ parameters:
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
     required: true
-    input: true
+    immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
     url_param_only: true
@@ -40,7 +40,7 @@ properties:
 
       ** Changing this property may recreate the Dicom store (removing all data) **
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
     required: false

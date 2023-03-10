@@ -17,7 +17,7 @@ kind: 'compute#targetInstance'
 base_url: projects/{{project}}/zones/{{zone}}/targetInstances
 collection_url_key: 'items'
 has_self_link: true
-input: true
+immutable: true
 description: |
   Represents a TargetInstance resource which defines an endpoint instance
   that terminates traffic of certain protocols. In particular, they are used
@@ -55,7 +55,7 @@ parameters:
     description: |
       URL of the zone where the target instance resides.
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -75,7 +75,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'network'
     description: 'The URL of the network this target instance uses to forward traffic. If not specified, the traffic will be forwarded to the network that the default network interface belongs to.'
-    input: true
+    immutable: true
     min_version: beta
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -90,13 +90,13 @@ properties:
       `projects/project/zones/zone/instances/instance' or
       `zones/zone/instances/instance`
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'natPolicy'
     description: |
       NAT option controlling how IPs are NAT'ed to the instance.
       Currently only NO_NAT (default value) is supported.
-    input: true
+    immutable: true
     default_value: :NO_NAT
     values:
       - :NO_NAT

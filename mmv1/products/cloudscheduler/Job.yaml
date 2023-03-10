@@ -30,7 +30,7 @@ parameters:
     description: |
       Region where the scheduler job resides
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -38,7 +38,7 @@ properties:
     description: |
       The name of the job.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: description
     description: |

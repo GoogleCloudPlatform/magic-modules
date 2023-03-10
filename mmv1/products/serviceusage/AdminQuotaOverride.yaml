@@ -22,7 +22,7 @@ update_verb: :PATCH
 delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}?force={{force}}
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Getting Started': 'https://cloud.google.com/service-usage/docs/manage-quota#create_consumer_quota_override'
+    'Managing Service Quota': 'https://cloud.google.com/service-usage/docs/manage-quota'
     'REST API documentation': 'https://cloud.google.com/service-usage/docs/reference/rest/v1beta1/services.consumerQuotaMetrics.limits.adminOverrides'
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys:
@@ -68,21 +68,21 @@ parameters:
     name: 'service'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The service that the metrics belong to, e.g. `compute.googleapis.com`.
   - !ruby/object:Api::Type::String
     name: 'metric'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The metric that should be limited, e.g. `compute.googleapis.com/cpus`.
   - !ruby/object:Api::Type::String
     name: 'limit'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The limit on the metric, e.g. `/project/region`.
 
@@ -96,7 +96,7 @@ properties:
       The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'dimensions'
-    input: true
+    immutable: true
     description: |
       If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
 

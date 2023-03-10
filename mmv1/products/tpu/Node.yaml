@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Node'
-input: true
+immutable: true
 base_url: projects/{{project}}/locations/{{zone}}/nodes
 create_url: projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}
 self_link: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
@@ -29,24 +29,24 @@ parameters:
     name: 'zone'
     description: |
       The GCP location for the TPU. If it is not provided, the provider zone is used.
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
     required: true
-    input: true
+    immutable: true
     description: |
       The immutable name of the TPU.
   - !ruby/object:Api::Type::String
     name: 'description'
-    input: true
+    immutable: true
     description: |
       The user-supplied description of the TPU. Maximum of 512 characters.
   - !ruby/object:Api::Type::String
     name: 'acceleratorType'
     required: true
-    input: true
+    immutable: true
     description: |
       The type of hardware accelerators associated with this node.
   - !ruby/object:Api::Type::String
@@ -58,7 +58,7 @@ properties:
       The version of Tensorflow running in the Node.
   - !ruby/object:Api::Type::String
     name: 'network'
-    input: true
+    immutable: true
     description: |
       The name of a network to peer the TPU node to. It must be a
       preexisting Compute Engine network inside of the project on which
@@ -66,7 +66,7 @@ properties:
       used.
   - !ruby/object:Api::Type::String
     name: 'cidrBlock'
-    input: true
+    immutable: true
     conflicts:
       - use_service_networking
     description: |
@@ -94,13 +94,13 @@ properties:
       The VPC Peering should be set up before provisioning the node. If this field is set,
       cidr_block field should not be specified. If the network that you want to peer the
       TPU Node to is a Shared VPC network, the node must be created with this this field enabled.
-    input: true
+    immutable: true
     default_value: false
     conflicts:
       - cidr_block
   - !ruby/object:Api::Type::NestedObject
     name: 'schedulingConfig'
-    input: true
+    immutable: true
     description: |
       Sets the scheduling options for this TPU instance.
     properties:
@@ -130,6 +130,6 @@ properties:
             The port of this network endpoint.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
-    input: true
+    immutable: true
     description: Resource labels to represent user provided metadata.
 

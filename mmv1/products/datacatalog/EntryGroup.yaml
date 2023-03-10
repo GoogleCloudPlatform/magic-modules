@@ -34,14 +34,14 @@ parameters:
   - !ruby/object:Api::Type::String
     name: region
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       EntryGroup location region.
   - !ruby/object:Api::Type::String
     name: entryGroupId
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The id of the entry group to create. The id must begin with a letter or underscore,
       contain only English letters, numbers and underscores, and be at most 64 characters.
