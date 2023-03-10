@@ -84,7 +84,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "workstation_config_container"
         min_version: beta
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-cluster-config%s", context["random_suffix"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"])"
         vars:
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"
@@ -92,7 +92,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "workstation_config_persistent_directories"
         min_version: beta
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-cluster-config%s", context["random_suffix"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"])"
         vars:
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"
@@ -100,7 +100,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "workstation_config_shielded_instance_config"
         min_version: beta
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-cluster-config%s", context["random_suffix"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"])"
         vars:
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"
@@ -108,7 +108,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "workstation_config_encryption_key"
         min_version: beta
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-cluster-config%s", context["random_suffix"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"])"
         # TODO: https://github.com/hashicorp/terraform-provider-google/issues/13923
         skip_test: true
         vars:
@@ -126,7 +126,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "workstation_basic"
         min_version: beta
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-cluster-config%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation%s", context["random_suffix"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation%s\", context[\"random_suffix\"])"
         vars:
           workstation_cluster_name: "workstation-cluster"
           workstation_config_name: "workstation-config"
