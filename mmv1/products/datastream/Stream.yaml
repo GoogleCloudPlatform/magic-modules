@@ -30,14 +30,14 @@ parameters:
     description: |-
       The stream identifier.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
       The name of the location this stream is located in.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -59,7 +59,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'sourceConnectionProfile'
-        input: true
+        immutable: true
         required: true
         description: |
           Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
@@ -632,7 +632,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'destinationConnectionProfile'
-        input: true
+        immutable: true
         required: true
         description: |
           Destination connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
@@ -744,7 +744,7 @@ properties:
                       The prefix and name will be separated by an underscore. i.e. _.
                   - !ruby/object:Api::Type::String
                     name: 'kmsKeyName'
-                    input: true
+                    immutable: true
                     description: |
                       Describes the Cloud KMS encryption key that will be used to protect destination BigQuery
                       table. The BigQuery Service Account associated with your project requires access to this
@@ -1015,7 +1015,7 @@ properties:
     properties: []
   - !ruby/object:Api::Type::String
     name: 'customerManagedEncryptionKey'
-    input: true
+    immutable: true
     description: |
       A reference to a KMS encryption key. If provided, it will be used to encrypt the data. If left blank, data
       will be encrypted using an internal Stream-specific encryption key provisioned through KMS.

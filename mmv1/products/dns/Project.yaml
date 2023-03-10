@@ -19,7 +19,7 @@ description: |
   including Cloud DNS ManagedZones.
 base_url: 'projects'
 readonly: true
-input: true
+immutable: true
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'number'

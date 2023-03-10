@@ -32,7 +32,7 @@ parameters:
       The parent of the trigger, either in the format `projects/{{project}}`
       or `projects/{{project}}/locations/{{location}}`
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String

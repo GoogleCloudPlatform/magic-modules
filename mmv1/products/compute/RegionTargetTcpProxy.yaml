@@ -15,7 +15,7 @@
 name: 'RegionTargetTcpProxy'
 base_url: projects/{{project}}/regions/{{region}}/targetTcpProxies
 has_self_link: true
-input: true
+immutable: true
 description: |
   Represents a RegionTargetTcpProxy resource, which is used by one or more
   forwarding rules to route incoming TCP requests to a regional TCP proxy load
@@ -49,7 +49,7 @@ parameters:
     resource: 'Region'
     imports: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       The region where the regional proxy resides.
 properties:
@@ -60,7 +60,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Integer
     name: 'proxyId'
     api_name: 'id'
@@ -76,7 +76,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Enum
     name: 'proxyHeader'

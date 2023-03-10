@@ -19,7 +19,7 @@ base_url: projects/{{project}}/locations/{{location}}/instances
 create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
 self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
 create_verb: :POST
-input: true
+immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation':
@@ -38,7 +38,7 @@ parameters:
     resource: 'Location'
     imports: 'selfLink'
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -46,7 +46,7 @@ properties:
     description: |
         The name specified for the Notebook instance.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
   - !ruby/object:Api::Type::String
@@ -200,7 +200,7 @@ properties:
         Whether the end user authorizes Google Cloud to install GPU driver
         on this instance. If this field is empty or set to false, the GPU driver
         won't be installed. Only applicable to instances with GPUs.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'customGpuDriverPath'
     description: |

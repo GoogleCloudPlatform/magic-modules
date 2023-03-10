@@ -28,7 +28,7 @@ description: |
 parameters:
   - !ruby/object:Api::Type::String
     name: 'service'
-    input: true
+    immutable: true
     description: |
       The resource name of the service that this endpoint provides.
     required: true
@@ -39,7 +39,7 @@ parameters:
       The Resource ID must be 1-63 characters long, including digits,
       lowercase letters or the hyphen character.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -66,7 +66,7 @@ properties:
       Metadata that goes beyond any these limits will be rejected.
   - !ruby/object:Api::Type::String
     name: 'network'
-    input: true
+    immutable: true
     description: |
       The URL to the network, such as projects/PROJECT_NUMBER/locations/global/networks/NETWORK_NAME.          
 

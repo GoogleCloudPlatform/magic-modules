@@ -37,7 +37,7 @@ properties:
     name: parent
     description: |
       Input only. The resource name of the new TagKey's parent. Must be of the form organizations/{org_id}.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: shortName
@@ -45,7 +45,7 @@ properties:
       Input only. The user friendly name for a TagKey. The short name should be unique for TagKeys within the same tag namespace.
 
       The short name must be 1-63 characters, beginning and ending with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: namespacedName
@@ -78,12 +78,12 @@ properties:
       A purpose denotes that this Tag is intended for use in policies of a specific policy engine, and will involve that policy engine in management operations involving this Tag.
     values:
       - :GCE_FIREWALL
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: purposeData
     description: |
       Optional. Purpose data cannot be changed once set.
       
       Purpose data corresponds to the policy system that the tag is intended for. For example, the GCE_FIREWALL purpose expects data in the following format: `network = "<project-name>/<vpc-name>"`.
-    input: true
+    immutable: true
 

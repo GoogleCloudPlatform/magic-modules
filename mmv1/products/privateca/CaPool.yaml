@@ -46,7 +46,7 @@ parameters:
       Location of the CaPool. A full list of valid locations can be found by
       running `gcloud privateca locations list`.
     required: true
-    input: true
+    immutable: true
     url_param_only: true        
 properties:
   - !ruby/object:Api::Type::String
@@ -54,7 +54,7 @@ properties:
     description: |
       The name for this CaPool.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::Enum
     name: 'tier'
@@ -63,7 +63,7 @@ properties:
     values:
       - "ENTERPRISE"
       - "DEVOPS"
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'issuancePolicy'

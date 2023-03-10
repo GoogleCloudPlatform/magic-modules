@@ -38,7 +38,7 @@ properties:
        This is a one time step but at the moment you can only [configure location settings](https://cloud.google.com/dialogflow/cx/docs/concept/region#location-settings) via the Dialogflow CX console.
        Another options is to use global location so you don't need to manually configure location settings.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
@@ -50,7 +50,7 @@ properties:
     description: |
      The default language of the agent as a language tag. [See Language Support](https://cloud.google.com/dialogflow/cx/docs/reference/language)
      for a list of the currently supported language codes. This field cannot be updated after creation.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Array
     name: 'supportedLanguageCodes'

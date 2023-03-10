@@ -50,7 +50,7 @@ parameters:
     resource: 'Region'
     imports: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       The region where the regional SSL policy resides.
 properties:
@@ -61,7 +61,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'id'
     description: 'The unique identifier for the resource.'
@@ -76,7 +76,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Enum
     name: 'profile'

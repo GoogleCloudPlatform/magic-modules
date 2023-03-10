@@ -51,7 +51,7 @@ parameters:
     resource: Region
     imports: name
     description: Region where the router resides.
-    input: true
+    immutable: true
     required: true
 properties:
   - !ruby/object:Api::Type::Integer
@@ -71,7 +71,7 @@ properties:
       which means the first character must be a lowercase letter, and all
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: description
@@ -85,7 +85,7 @@ properties:
     description: |
       A reference to the network to which this router belongs.
     required: true
-    input: true
+    immutable: true
   # TODO: Figure out the story for interfaces/bgpPeers. Right
   # now in Terraform we have three separate resources: router,
   # router_interface, and router_peer. Decide whether we want to keep that
@@ -166,7 +166,7 @@ properties:
         default_value: 20
   - !ruby/object:Api::Type::Boolean
     name: encryptedInterconnectRouter
-    input: true
+    immutable: true
     description: |
       Indicates if a router is dedicated for use with encrypted VLAN
       attachments (interconnectAttachments).

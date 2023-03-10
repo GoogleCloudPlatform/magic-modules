@@ -34,7 +34,7 @@
     error: !ruby/object:Api::OpAsync::Error
       path: 'error'
       message: 'message'
-  input: true
+  immutable: true
   description: |
     An `Instance attachment` in Apigee.
   parameters:

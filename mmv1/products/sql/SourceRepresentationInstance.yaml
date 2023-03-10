@@ -21,7 +21,7 @@ description: |
   contains no data, requires no configuration or maintenance, and does not
   affect billing. You cannot update the source representation instance.
 base_url: projects/{{project}}/instances
-input: true
+immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

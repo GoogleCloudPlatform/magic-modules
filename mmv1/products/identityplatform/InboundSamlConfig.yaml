@@ -28,7 +28,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       The name of the InboundSamlConfig resource. Must start with 'saml.' and can only have alphanumeric characters,
       hyphens, underscores or periods. The part after 'saml.' must also start with a lowercase letter, end with an

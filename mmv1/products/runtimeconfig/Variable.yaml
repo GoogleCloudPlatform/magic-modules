@@ -24,14 +24,14 @@ parameters:
     description: |
       The name of the variable resource.
     required: true
-    input: true
+    immutable: true
     pattern: projects/{{project}}/configs/{{config}}/variables/{{name}}
   - !ruby/object:Api::Type::String
     name: 'config'
     description: |
       The name of the runtime config that this variable belongs to.
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'value'

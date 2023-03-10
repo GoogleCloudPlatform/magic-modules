@@ -58,7 +58,7 @@ parameters:
     description: |
       The zone where the reservation is made.
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -67,7 +67,7 @@ properties:
       Creation timestamp in RFC3339 text format.
   - !ruby/object:Api::Type::String
     name: 'description'
-    input: true
+    immutable: true
     description: |
       An optional description of this resource.
   - !ruby/object:Api::Type::Integer
@@ -78,7 +78,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -95,7 +95,7 @@ properties:
       reservations that are tied to a commitment.
   - !ruby/object:Api::Type::Boolean
     name: 'specificReservationRequired'
-    input: true
+    immutable: true
     # Not a hard API default, but this should help avoid a unset/true/false
     # trinary.
     default_value: false
@@ -155,19 +155,19 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'instanceProperties'
         required: true
-        input: true
+        immutable: true
         description: |
           The instance properties for the reservation.
         properties:
           - !ruby/object:Api::Type::String
             name: 'machineType'
             required: true
-            input: true
+            immutable: true
             description: |
               The name of the machine type to reserve.
           - !ruby/object:Api::Type::String
             name: 'minCpuPlatform'
-            input: true
+            immutable: true
             description: |
               The minimum CPU platform for the reservation. For example,
               `"Intel Skylake"`. See
@@ -177,13 +177,13 @@ properties:
             name: 'guestAccelerators'
             description: |
               Guest accelerator type and count.
-            input: true
+            immutable: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'acceleratorType'
                   required: true
-                  input: true
+                  immutable: true
                   description: |
                     The full or partial URL of the accelerator type to
                     attach to this instance. For example:
@@ -193,13 +193,13 @@ properties:
                 - !ruby/object:Api::Type::Integer
                   name: 'acceleratorCount'
                   required: true
-                  input: true
+                  immutable: true
                   description: |
                     The number of the guest accelerator cards exposed to
                     this instance.
           - !ruby/object:Api::Type::Array
             name: 'localSsds'
-            input: true
+            immutable: true
             description: |
               The amount of local ssd to reserve with each instance. This
               reserves disks of type `local-ssd`.
@@ -207,7 +207,7 @@ properties:
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'interface'
-                  input: true
+                  immutable: true
                   default_value: :SCSI
                   values:
                     - :SCSI
@@ -217,6 +217,6 @@ properties:
                 - !ruby/object:Api::Type::Integer
                   name: 'diskSizeGb'
                   required: true
-                  input: true
+                  immutable: true
                   description: |
                    The size of the disk in base-2 GB.

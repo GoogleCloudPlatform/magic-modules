@@ -29,7 +29,7 @@ parameters:
       The [Cloud Build location](https://cloud.google.com/build/docs/locations) for the trigger.
       If not specified, "global" is used.
     default_value: global
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -844,7 +844,7 @@ properties:
                 completes or the build itself times out.
             - !ruby/object:Api::Type::String
               name: 'timing'
-              input: false
+              immutable: false
               description: |
                 Output only. Stores timing information for executing this
                 build step.

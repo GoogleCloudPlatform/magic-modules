@@ -16,7 +16,7 @@ name: 'ExternalVpnGateway'
 kind: 'compute#externalVpnGateway'
 base_url: projects/{{project}}/global/externalVpnGateways
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
   Represents a VPN gateway managed outside of GCP.

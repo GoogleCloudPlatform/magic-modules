@@ -32,7 +32,7 @@ parameters:
     name: 'location'
     description: |
       The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
 properties:
@@ -48,7 +48,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{location}}/backups/{{backupId}}
   - !ruby/object:Api::Type::String
@@ -94,7 +94,7 @@ properties:
     name: 'sourceFileShare'
     description: |
       Name of the file share in the source Cloud Filestore instance that the backup is created from.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Enum
     name: 'sourceInstanceTier'

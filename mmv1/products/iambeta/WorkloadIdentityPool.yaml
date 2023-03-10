@@ -34,7 +34,7 @@ properties:
        value should be 4-32 characters, and may contain the characters [a-z0-9-]. The prefix
        `gcp-` is reserved for use by Google, and may not be specified.
      required: true
-     input: true
+     immutable: true
      url_param_only: true
   - !ruby/object:Api::Type::Enum
     name: 'state'

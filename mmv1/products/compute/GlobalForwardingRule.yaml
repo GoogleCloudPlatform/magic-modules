@@ -15,7 +15,7 @@
 name: 'GlobalForwardingRule'
 kind: 'compute#forwardingRule'
 base_url: projects/{{project}}/global/forwardingRules
-input: true
+immutable: true
 has_self_link: true
 collection_url_key: 'items'
 description: |

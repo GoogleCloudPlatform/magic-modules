@@ -40,21 +40,21 @@ properties:
     description: |-
       The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: listing_id
     description: |-
       The ID of the listing. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     required: true
-    input: true
+    immutable: true
     url_param_only: true   
   - !ruby/object:Api::Type::String
     name: "location"
     description: |
       The name of the location this data exchange listing.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: displayName

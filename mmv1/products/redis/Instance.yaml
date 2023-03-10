@@ -30,7 +30,7 @@ parameters:
     description: |
       The name of the Redis region of the instance.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -40,7 +40,7 @@ properties:
       against zonal failures by provisioning it across two zones.
       If provided, it must be a different zone from the one provided in
       [locationId].
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Boolean
     name: authEnabled
     description: |
@@ -54,12 +54,12 @@ properties:
       The full name of the Google Compute Engine network to which the
       instance is connected. If left unspecified, the default network
       will be used.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Enum
     name: connectMode
     description: |
       The connection mode of the Redis instance.
-    input: true
+    immutable: true
     values:
       - :DIRECT_PEERING
       - :PRIVATE_SERVICE_ACCESS
@@ -106,13 +106,13 @@ properties:
       instances will be created across two zones for protection against
       zonal failures. If [alternativeLocationId] is also provided, it must
       be different from [locationId].
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: name
     description: |
       The ID of the instance or a fully qualified identifier for the instance.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: persistenceConfig
     description: Persistence configuration for an instance.
@@ -305,7 +305,7 @@ properties:
       block, for example, 10.0.0.0/29 or 192.168.0.0/29. Ranges must be
       unique and non-overlapping with existing subnets in an authorized
       network.
-    input: true
+    immutable: true
     # In some situations the returned IP range may not match the sent value
     # but will be a subset of the range.
     ignore_read: true
@@ -320,10 +320,10 @@ properties:
       - :BASIC
       - :STANDARD_HA
     default_value: :BASIC
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Enum
     name: transitEncryptionMode
-    input: true
+    immutable: true
     description: |
       The TLS mode of the Redis instance, If not provided, TLS is disabled for the instance.
 
@@ -422,7 +422,7 @@ properties:
       range associated with the private service access connection, or "auto".
   - !ruby/object:Api::Type::String
     name: customerManagedKey
-    input: true
+    immutable: true
     description: |
       Optional. The KMS key reference that you want to use to encrypt the data at rest for this Redis
       instance. If this is provided, CMEK is enabled.

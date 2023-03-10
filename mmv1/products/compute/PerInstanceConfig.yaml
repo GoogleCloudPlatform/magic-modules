@@ -61,7 +61,7 @@ parameters:
       Zone where the containing instance group manager is located
     required: true
     url_param_only: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'instanceGroupManager'
     resource: 'InstanceGroupManager'
@@ -70,14 +70,14 @@ parameters:
       The instance group manager this instance config is part of.
     required: true
     url_param_only: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
       The name for this per-instance config and its corresponding instance.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'preservedState'
     description: 'The preserved state for this instance.'

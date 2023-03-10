@@ -107,7 +107,7 @@ properties:
               description: |
                 The label key.
               required: true
-              input: true
+              immutable: true
             - !ruby/object:Api::Type::String
               name: description
               description: |
@@ -123,7 +123,7 @@ properties:
                 - :STRING
               required: false
               default_value: :STRING
-              input: true
+              immutable: true
       - !ruby/object:Api::Type::String
         name: displayName
         description: |

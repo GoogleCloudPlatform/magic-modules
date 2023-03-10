@@ -16,7 +16,7 @@ name: 'Subnetwork'
 kind: 'compute#subnetwork'
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
   A VPC network is a virtual version of the traditional physical networks
@@ -108,11 +108,11 @@ properties:
     description: |
       The network this subnet belongs to.
       Only networks that are in the distributed mode can have subnetworks.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'purpose'
-    input: true
+    immutable: true
     description: |
       The purpose of the resource. A subnetwork with purpose set to
       INTERNAL_HTTPS_LOAD_BALANCER is a user-created subnetwork that is
@@ -183,7 +183,7 @@ properties:
     description: |
       The GCP region for this subnetwork.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'logConfig'
     update_verb: :PATCH
