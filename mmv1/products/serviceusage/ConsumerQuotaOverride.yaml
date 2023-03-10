@@ -22,7 +22,7 @@ update_verb: :PATCH
 delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
+    'Managing Service Quota': 'https://cloud.google.com/service-usage/docs/manage-quota '
     'REST API documentation': 'https://cloud.google.com/service-usage/docs/reference/rest/v1beta1/services.consumerQuotaMetrics.limits.consumerOverrides'
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys:
