@@ -956,6 +956,7 @@ properties:
             name: 'critical'
             description: Indicates whether or not the name constraints are marked critical.
             immutable: true
+            required: true
           - !ruby/object:Api::Type::Array
             name: 'permittedDnsNames'
             description: |

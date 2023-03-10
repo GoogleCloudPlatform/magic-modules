@@ -351,6 +351,7 @@ properties:
             - !ruby/object:Api::Type::Boolean
               name: 'critical'
               description: Indicates whether or not the name constraints are marked critical.
+              required: true
             - !ruby/object:Api::Type::Array
               name: 'permittedDnsNames'
               description: |

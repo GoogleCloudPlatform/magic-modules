@@ -317,12 +317,13 @@ properties:
             name: 'nameConstraints'
             description: |
               Describes the X.509 name constraints extension.
-            input: true
+            immutable: true
             properties:
             - !ruby/object:Api::Type::Boolean
               name: 'critical'
               description: Indicates whether or not the name constraints are marked critical.
-              input: true
+              immutable: true
+              required: true
             - !ruby/object:Api::Type::Array
               name: 'permittedDnsNames'
               description: |
@@ -331,7 +332,7 @@ properties:
                 the left-hand side of the name satisfies the name constraint.
                 For example, `example.com`, `www.example.com`, `www.sub.example.com`
                 would satisfy `example.com` while `example1.com` does not.
-              input: true
+              immutable: true
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'excludedDnsNames'
@@ -341,7 +342,7 @@ properties:
                 the left-hand side of the name satisfies the name constraint.
                 For example, `example.com`, `www.example.com`, `www.sub.example.com`
                 would satisfy `example.com` while `example1.com` does not.
-              input: true
+              immutable: true
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'permittedIpRanges'
@@ -350,7 +351,7 @@ properties:
                 are expressed using CIDR notation as specified in RFC 4632.
                 For IPv6 addresses, the ranges are expressed in similar encoding as IPv4
                 addresses.
-              input: true
+              immutable: true
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'excludedIpRanges'
@@ -359,7 +360,7 @@ properties:
                 are expressed using CIDR notation as specified in RFC 4632.
                 For IPv6 addresses, the ranges are expressed in similar encoding as IPv4
                 addresses.
-              input: true
+              immutable: true
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'permittedEmailAddresses'
@@ -368,7 +369,7 @@ properties:
                 email address, a hostname to indicate all email addresses on that host or
                 a domain with a leading period (e.g. `.example.com`) to indicate
                 all email addresses in that domain.
-              input: true
+              immutable: true
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'excludedEmailAddresses'
@@ -377,7 +378,7 @@ properties:
                 email address, a hostname to indicate all email addresses on that host or
                 a domain with a leading period (e.g. `.example.com`) to indicate
                 all email addresses in that domain.
-              input: true
+              immutable: true
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'permittedUris'
@@ -385,7 +386,7 @@ properties:
                 Contains the permitted URIs that apply to the host part of the name.
                 The value can be a hostname or a domain with a
                 leading period (like `.example.com`)
-              input: true
+              immutable: true
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'excludedUris'
@@ -393,7 +394,7 @@ properties:
                 Contains the excluded URIs that apply to the host part of the name.
                 The value can be a hostname or a domain with a
                 leading period (like `.example.com`)
-              input: true
+              immutable: true
               item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'subjectConfig'
