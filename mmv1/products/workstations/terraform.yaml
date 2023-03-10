@@ -107,8 +107,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "workstation_config_encryption_key"
         min_version: beta
         primary_resource_id: "default"
-        # TODO: https://github.com/hashicorp/terraform-provider-google/issues/13923
-        skip_test: true
         vars:
           account_id: "my-account"
           workstation_cluster_name: "workstation-cluster"
