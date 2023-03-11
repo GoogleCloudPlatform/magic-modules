@@ -36,7 +36,7 @@ count_in_path() {
 count_in_path "rbenv asdf"
 if [ $found -eq 0 ]; then
     exitcode=1
-    warn "yel" "   rbenv or asdf not found. See https://github.com/rbenv/rbenv for information on installing it."
+    warn "yel" "   Could not find rbenv or asdf. See https://github.com/rbenv/rbenv for information on installing rbenv (recommended), or https://asdf-vm.com/guide/getting-started.html for information on installing asdf"
 else
     warn "grn" "   found!"
     echo "Checking ruby version..."
