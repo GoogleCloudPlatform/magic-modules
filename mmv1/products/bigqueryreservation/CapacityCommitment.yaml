@@ -79,7 +79,7 @@ properties:
     name: 'plan'
     required: true
     description: |
-      Capacity commitment plan. Valid values are FLEX, TRIAL, MONTHLY, ANNUAL
+      Capacity commitment plan. Valid values are FLEX, TRIAL, MONTHLY, ANNUAL, THREE_YEAR
   - !ruby/object:Api::Type::String
     name: 'state'
     output: true
@@ -99,3 +99,7 @@ properties:
     name: 'renewalPlan'
     description: |
       The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable for ANNUAL and TRIAL commitments.
+  - !ruby/object:Api::Type::String
+    name: 'edition'
+    description: |
+      The edition type. Valid values are STANDARD, ENTERPRISE, ENTERPRISE_PLUS

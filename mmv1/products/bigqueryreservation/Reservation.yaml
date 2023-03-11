@@ -70,3 +70,21 @@ properties:
     description: |
       Applicable only for reservations located within one of the BigQuery multi-regions (US or EU).
       If set to true, this reservation is placed in the organization's secondary region which is designated for disaster recovery purposes. If false, this reservation is placed in the organization's default region.
+  - !ruby/object:Api::Type::String
+    name: 'edition'
+    description: |
+      The edition type. Valid values are STANDARD, ENTERPRISE, ENTERPRISE_PLUS
+  - !ruby/object:Api::Type::NestedObject
+    name: 'autoscale'
+    description: |
+      Block that will tune the autoscale functionality of the reservation.
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: current_slots
+        output: true
+        description: |
+          The slot capacity added to this reservation when autoscale happens. Will be between [0, max_slots].
+      - !ruby/object:Api::Type::Integer
+        name: max_slots
+        description: |
+          Number of slots to be scaled when needed.

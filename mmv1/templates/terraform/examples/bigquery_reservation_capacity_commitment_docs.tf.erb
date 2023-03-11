@@ -4,4 +4,6 @@ resource "google_bigquery_capacity_commitment" "example" {
 	location   = "us-west1"
 	slot_count = 100
 	plan       = "FLEX"
+	edition    = "STANDARD"
+
 }
