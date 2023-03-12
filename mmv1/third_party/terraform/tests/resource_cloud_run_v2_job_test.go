@@ -47,7 +47,7 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
     location = "us-central1"
     launch_stage = "BETA"
     labels = {
-      label-1 = "value-1"
+      label-1 = "value-1-test"
     }
     client = "client-1"
     client_version = "client-version-1"
