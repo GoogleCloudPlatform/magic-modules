@@ -38,11 +38,11 @@ func main() {
 	fmt.Println("Branch Name: ", baseBranch)
 
 	substitutions := map[string]string{
-		"$BRANCH_NAME":    branchName,
-		"$_PR_NUMBER":     prNumber,
-		"$_HEAD_REPO_URL": headRepoUrl,
-		"$_HEAD_BRANCH":   headBranch,
-		"$_BASE_BRANCH":   baseBranch,
+		"BRANCH_NAME":    branchName,
+		"_PR_NUMBER":     prNumber,
+		"_HEAD_REPO_URL": headRepoUrl,
+		"_HEAD_BRANCH":   headBranch,
+		"_BASE_BRANCH":   baseBranch,
 	}
 
 	author, err := getPullRequestAuthor(prNumber, GITHUB_TOKEN)
