@@ -8,6 +8,7 @@ steps:
           - "check_auto_run_contributor"
           - $_PR_NUMBER
           - $COMMIT_SHA
+          - $BRANCH_NAME
 
 availableSecrets:
   secretManager:
