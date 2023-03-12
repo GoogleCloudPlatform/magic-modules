@@ -1,4 +1,4 @@
-module membership_checker
+module membership-checker
 
 go 1.18
 
