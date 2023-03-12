@@ -1,0 +1,19 @@
+---
+steps:
+    - name: 'gcr.io/graphite-docker-images/membership_checker'
+      id: community-checker
+      secretEnv: ["GITHUB_TOKEN", "PRESUBMIT_TRIGGER", "RAKE_TESTS_TRIGGER"]
+      timeout: 8000s
+      args:
+          - "check_community_contributor"
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
+      env: GITHUB_TOKEN
+    - versionName: projects/673497134629/secrets/ci-trigger-presubmit/versions/latest
+      env: PRESUBMIT_TRIGGER
+    - versionName: projects/673497134629/secrets/ci-trigger-rake-test/versions/latest
+      env: RAKE_TESTS_TRIGGER
