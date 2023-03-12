@@ -5,4 +5,4 @@ COPY . ./
 
 RUN go build
 
-ENTRYPOINT [ "/src/membership_checker" ]
+ENTRYPOINT [ "/src/membership-checker" ]

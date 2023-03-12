@@ -1,6 +1,6 @@
 ---
 steps:
-    - name: 'gcr.io/graphite-docker-images/membership_checker'
+    - name: 'gcr.io/graphite-docker-images/membership-checker'
       id: contributor-membership-checker
       secretEnv: ["GITHUB_TOKEN", "PRESUBMIT_TRIGGER", "RAKE_TESTS_TRIGGER"]
       timeout: 8000s
