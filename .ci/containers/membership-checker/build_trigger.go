@@ -8,7 +8,7 @@ import (
 	"google.golang.org/api/cloudbuild/v1"
 )
 
-func triggerMMPresubmitRuns(projectId, repoName, commitSha, branchName string) error {
+func triggerMMPresubmitRuns(projectId, repoName, commitSha string, substitutions map[string]string) error {
 	presubmitTriggerId, ok := os.LookupEnv("PRESUBMIT_TRIGGER")
 	if !ok {
 		return fmt.Errorf("Did not provide PRESUBMIT_TRIGGER environment variable")
@@ -19,12 +19,12 @@ func triggerMMPresubmitRuns(projectId, repoName, commitSha, branchName string) e
 		return fmt.Errorf("Did not provide RAKE_TESTS_TRIGGER environment variable")
 	}
 
-	err := triggerCloudBuildRun(projectId, presubmitTriggerId, repoName, commitSha, branchName)
+	err := triggerCloudBuildRun(projectId, presubmitTriggerId, repoName, commitSha, substitutions)
 	if err != nil {
 		return err
 	}
 
-	err = triggerCloudBuildRun(projectId, rakeTestTriggerId, repoName, commitSha, branchName)
+	err = triggerCloudBuildRun(projectId, rakeTestTriggerId, repoName, commitSha, substitutions)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func triggerMMPresubmitRuns(projectId, repoName, commitSha, branchName string) e
 	return nil
 }
 
-func triggerCloudBuildRun(projectId, triggerId, repoName, commitSha, branchName string) error {
+func triggerCloudBuildRun(projectId, triggerId, repoName, commitSha string, substitutions map[string]string) error {
 	ctx := context.Background()
 	c, err := cloudbuild.NewService(ctx)
 	if err != nil {
@@ -43,7 +43,7 @@ func triggerCloudBuildRun(projectId, triggerId, repoName, commitSha, branchName 
 		ProjectId:     projectId,
 		RepoName:      repoName,
 		CommitSha:     commitSha,
-		Substitutions: map[string]string{"BRANCH_NAME": branchName},
+		Substitutions: substitutions,
 	}
 
 	_, err = c.Projects.Triggers.Run(projectId, triggerId, repoSource).Do()
