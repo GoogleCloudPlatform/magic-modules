@@ -44,7 +44,7 @@
         The Apigee Organization associated with the Apigee environment group,
         in the format `organizations/{{org_name}}`.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::String
@@ -52,7 +52,7 @@
       description: |
         The resource ID of the environment group.
       required: true
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::Array
       name: 'hostnames'
       description: |

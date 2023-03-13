@@ -18,6 +18,10 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
     ip_allocation = "${google_compute_global_address.private_ip_alloc.address}/${google_compute_global_address.private_ip_alloc.prefix_length}"
   }
 
+  accelerators {
+    accelerator_type = "CDC"
+    state = "ENABLED"
+  }
   <%= ctx[:vars]['prober_test_run'] %>
 }
 

@@ -52,7 +52,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       state: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "enabled"
         output: false
-        input: false
+        immutable: false
         default_value: true
         custom_expand: templates/terraform/custom_expand/secret_version_enable.go.erb
         custom_flatten: templates/terraform/custom_flatten/secret_version_enable.go.erb

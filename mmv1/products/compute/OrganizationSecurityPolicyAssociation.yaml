@@ -1,0 +1,53 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'OrganizationSecurityPolicyAssociation'
+min_version: beta
+base_url: 'locations/global/securityPolicies/{{policy_id}}'
+self_link: 'locations/global/securityPolicies/{{policy_id}}/getAssociation?name={{name}}'
+create_url: 'locations/global/securityPolicies/{{policy_id}}/addAssociation'
+delete_verb: :POST
+delete_url: 'locations/global/securityPolicies/{{policy_id}}/removeAssociation?name={{name}}'
+description: |
+  An association for the OrganizationSecurityPolicy.
+immutable: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Associating a policy with the organization or folder':
+      'https://cloud.google.com/vpc/docs/using-firewall-policies#associate'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addAssociation'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'policyId'
+    description: |
+      The security policy ID of the association.
+    required: true
+    url_param_only: true
+    api_name: 'securityPolicyId'
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: |
+      The name for an association.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'attachmentId'
+    description: |
+      The resource that the security policy is attached to.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description: |
+      The display name of the security policy of the association.
+    output: true

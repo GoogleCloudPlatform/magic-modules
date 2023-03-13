@@ -56,7 +56,7 @@
       name: 'id'
       description: |
         Relative name of the domain serving the application. Example: example.com.
-      input: true
+      immutable: true
       required: true
   properties:
     - !ruby/object:Api::Type::String

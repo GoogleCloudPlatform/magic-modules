@@ -30,7 +30,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true
-    input: true
+    immutable: true
     default_value: US
     description: |
       The geographic location where the transfer config should reside.
@@ -41,7 +41,7 @@ parameters:
     # The API would support PATCHing the service account, but setting the
     # update_mask accordingly for a url_param_only is currently not
     # supported in magic-modules
-    input: true
+    immutable: true
     default_value: ''
     description: |
       Service account email. If this field is set, transfer config will
@@ -67,7 +67,7 @@ properties:
       The BigQuery target dataset id.
   - !ruby/object:Api::Type::String
     name: 'dataSourceId'
-    input: true
+    immutable: true
     required: true
     description: |
       The data source id. Cannot be changed once the transfer config is created.

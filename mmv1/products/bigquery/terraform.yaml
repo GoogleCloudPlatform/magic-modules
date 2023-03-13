@@ -84,7 +84,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       location: !ruby/object:Overrides::Terraform::PropertyOverride
-        input: true
+        immutable: true
         custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.erb
         diff_suppress_func: 'caseDiffSuppress'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -93,6 +93,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       maxTimeTravelHours: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      friendlyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
     docs: !ruby/object:Provider::Terraform::Docs

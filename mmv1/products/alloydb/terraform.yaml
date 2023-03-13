@@ -24,6 +24,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: "projectNumberDiffSuppress"
+      automatedBackupPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      automatedBackupPolicy.weeklySchedule: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -76,11 +80,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           alloydb_instance_name: "alloydb-instance"
           network_name: "alloydb-network"
         test_vars_overrides:
-          network_name: 'BootstrapSharedTestNetwork(t, "alloydb")'
+          network_name: 'BootstrapSharedTestNetwork(t, "alloydb-basic")'
         ignore_read_extra:
           - "reconciling"
           - "update_time"
-    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "alloydb_backup_full"
         primary_resource_id: "default"
@@ -90,7 +93,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           alloydb_instance_name: "alloydb-instance"
           network_name: "alloydb-network"
         test_vars_overrides:
-          network_name: 'BootstrapSharedTestNetwork(t, "alloydb")'
+          network_name: 'BootstrapSharedTestNetwork(t, "alloydb-full")'
         ignore_read_extra:
           - "reconciling"
           - "update_time"

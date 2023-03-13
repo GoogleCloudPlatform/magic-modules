@@ -1,0 +1,248 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'RegionNetworkEndpointGroup'
+kind: 'compute#networkEndpointGroup'
+base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups'
+immutable: true
+has_self_link: true
+collection_url_key: 'items'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
+description: |
+  A regional NEG that can support Serverless Products.
+
+  Recreating a region network endpoint group that's in use by another resource will give a
+  `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+  to avoid this type of error.
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'region'
+    resource: 'Region'
+    imports: 'name'
+    description: |
+      A reference to the region where the Serverless NEGs Reside.
+    required: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the resource; provided by the client when the resource is
+      created. The name must be 1-63 characters long, and comply with
+      RFC1035. Specifically, the name must be 1-63 characters long and match
+      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+      first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the last
+      character, which cannot be a dash.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource. Provide this property when
+      you create the resource.
+  - !ruby/object:Api::Type::Enum
+    name: 'networkEndpointType'
+    description: |
+      Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
+    values:
+      - :SERVERLESS
+      - :PRIVATE_SERVICE_CONNECT
+    default_value: :SERVERLESS
+  - !ruby/object:Api::Type::String
+    name: 'pscTargetService'
+    description: |
+      The target service url used to set up private service connection to
+      a Google API or a PSC Producer Service Attachment.
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'network'
+    resource: 'Network'
+    imports: 'selfLink'
+    description: |
+      This field is only used for PSC.
+      The URL of the network to which all network endpoints in the NEG belong. Uses
+      "default" project network if unspecified.
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'subnetwork'
+    resource: 'Subnetwork'
+    imports: 'selfLink'
+    description: |
+      This field is only used for PSC.
+      Optional URL of the subnetwork to which all network endpoints in the NEG belong.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'cloudRun'
+    conflicts:
+      - cloud_function
+      - app_engine
+      - serverless_deployment
+    description: |
+      Only valid when networkEndpointType is "SERVERLESS".
+      Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'service'
+        at_least_one_of:
+          - cloud_run.0.service
+          - cloud_run.0.url_mask
+        description: |
+          Cloud Run service is the main resource of Cloud Run.
+          The service must be 1-63 characters long, and comply with RFC1035.
+          Example value: "run-service".
+      - !ruby/object:Api::Type::String
+        name: 'tag'
+        description: |
+          Cloud Run tag represents the "named-revision" to provide
+          additional fine-grained traffic routing information.
+          The tag must be 1-63 characters long, and comply with RFC1035.
+          Example value: "revision-0010".
+      - !ruby/object:Api::Type::String
+        name: 'urlMask'
+        at_least_one_of:
+          - cloud_run.0.service
+          - cloud_run.0.url_mask
+        description: |
+          A template to parse service and tag fields from a request URL.
+          URL mask allows for routing to multiple Run services without having
+          to create multiple network endpoint groups and backend services.
+
+          For example, request URLs "foo1.domain.com/bar1" and "foo1.domain.com/bar2"
+          an be backed by the same Serverless Network Endpoint Group (NEG) with
+          URL mask ".domain.com/". The URL mask will parse them to { service="bar1", tag="foo1" }
+          and { service="bar2", tag="foo2" } respectively.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'appEngine'
+    conflicts:
+      - cloud_run
+      - cloud_function
+      - serverless_deployment
+    allow_empty_object: true
+    description: |
+      Only valid when networkEndpointType is "SERVERLESS".
+      Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'service'
+        description: |
+          Optional serving service.
+          The service name must be 1-63 characters long, and comply with RFC1035.
+          Example value: "default", "my-service".
+      - !ruby/object:Api::Type::String
+        name: 'version'
+        description: |
+          Optional serving version.
+          The version must be 1-63 characters long, and comply with RFC1035.
+          Example value: "v1", "v2".
+      - !ruby/object:Api::Type::String
+        name: 'urlMask'
+        description: |
+          A template to parse service and version fields from a request URL.
+          URL mask allows for routing to multiple App Engine services without
+          having to create multiple Network Endpoint Groups and backend services.
+
+          For example, the request URLs "foo1-dot-appname.appspot.com/v1" and
+          "foo1-dot-appname.appspot.com/v2" can be backed by the same Serverless NEG with
+          URL mask "-dot-appname.appspot.com/". The URL mask will parse
+          them to { service = "foo1", version = "v1" } and { service = "foo1", version = "v2" } respectively.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'cloudFunction'
+    conflicts:
+      - cloud_run
+      - app_engine
+      - serverless_deployment
+    description: |
+      Only valid when networkEndpointType is "SERVERLESS".
+      Only one of cloud_run, app_engine, cloud_function or serverless_deployment may be set.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'function'
+        at_least_one_of:
+          - cloud_function.0.function
+          - cloud_function.0.url_mask
+        description: |
+          A user-defined name of the Cloud Function.
+          The function name is case-sensitive and must be 1-63 characters long.
+          Example value: "func1".
+      - !ruby/object:Api::Type::String
+        name: 'urlMask'
+        at_least_one_of:
+          - cloud_function.0.function
+          - cloud_function.0.url_mask
+        description: |
+          A template to parse function field from a request URL. URL mask allows
+          for routing to multiple Cloud Functions without having to create
+          multiple Network Endpoint Groups and backend services.
+
+          For example, request URLs "mydomain.com/function1" and "mydomain.com/function2"
+          can be backed by the same Serverless NEG with URL mask "/". The URL mask
+          will parse them to { function = "function1" } and { function = "function2" } respectively.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'serverlessDeployment'
+    min_version: beta
+    conflicts:
+      - cloud_run
+      - cloud_function
+      - app_engine
+    allow_empty_object: true
+    description: |
+      Only valid when networkEndpointType is "SERVERLESS".
+      Only one of cloudRun, appEngine, cloudFunction or serverlessDeployment may be set.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'platform'
+        required: true
+        # Docs (https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups) say support is offered for:
+        # API Gateway: apigateway.googleapis.com, App Engine: appengine.googleapis.com,
+        # Cloud Functions: cloudfunctions.googleapis.com, Cloud Run: run.googleapis.com
+        # However, only API Gateway is currently supported
+        description: |
+          The platform of the NEG backend target(s). Possible values:
+          API Gateway: apigateway.googleapis.com
+      - !ruby/object:Api::Type::String
+        name: 'resource'
+        description: |
+          The user-defined name of the workload/instance. This value must be provided explicitly or in the urlMask.
+          The resource identified by this value is platform-specific and is as follows: API Gateway: The gateway ID, App Engine: The service name,
+          Cloud Functions: The function name, Cloud Run: The service name
+      - !ruby/object:Api::Type::String
+        name: 'version'
+        description: |
+          The optional resource version. The version identified by this value is platform-specific and is follows:
+          API Gateway: Unused, App Engine: The service version, Cloud Functions: Unused, Cloud Run: The service tag
+      - !ruby/object:Api::Type::String
+        name: 'urlMask'
+        required: false
+        description: |
+          A template to parse platform-specific fields from a request URL. URL mask allows for routing to multiple resources
+          on the same serverless platform without having to create multiple Network Endpoint Groups and backend resources.
+          The fields parsed by this template are platform-specific and are as follows: API Gateway: The gateway ID,
+          App Engine: The service and version, Cloud Functions: The function name, Cloud Run: The service and tag
