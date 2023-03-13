@@ -106,7 +106,6 @@ func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
 			// Unmarshal payload from testfile into `want` variable.
 			f := filepath.Join(dir, c.name+"_without_default_project.json")
 
-
 			want, err := readExpectedTestFile(f)
 			if err != nil {
 				t.Fatal(err)
