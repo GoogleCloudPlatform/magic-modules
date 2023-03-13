@@ -83,6 +83,7 @@
         },
         "after_unknown": {
           "create_time": true,
+          "folder_id": true,
           "id": true,
           "lifecycle_state": true,
           "name": true
