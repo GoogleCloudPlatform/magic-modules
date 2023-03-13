@@ -1,0 +1,47 @@
+resource "google_sql_database_instance" "postgresqldb" {
+  name             = "<%= ctx[:vars]["postgresqldb"] %>"
+  database_version = "POSTGRES_12"
+  settings {
+    tier = "db-custom-2-13312"
+  }
+}
+
+resource "google_sql_ssl_cert" "postgresql_client_cert" {
+  common_name = "<%= ctx[:vars]["postgresqldb_cert"] %>"
+  instance    = google_sql_database_instance.postgresqldb.name
+
+	depends_on = [google_sql_database_instance.postgresqldb]
+}
+
+resource "google_sql_user" "postgresql_user" {
+  name     = "<%= ctx[:vars]["postgresqldb_user"] %>"
+  instance = google_sql_database_instance.postgresqldb.name
+  password = "<%= ctx[:vars]["postgresqldb_pass"] %>"
+
+
+	depends_on = [google_sql_database_instance.postgresqldb]
+}
+
+resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+	location = "us-central1"		
+	connection_profile_id = "<%= ctx[:vars]["postgresql_cp"] %>"
+	display_name = "<%= ctx[:vars]["postgresql_cp"] %>_display"
+	name = "projects/${data.google_project.project.number}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["postgresql_cp"] %>"
+	labels	= { 
+					testanno = "testanno" 
+				}
+	postgresql {
+	  host = google_sql_database_instance.postgresqldb.ip_address.0.ip_address
+	  port = 5432
+	  username = "testusernamepostgre"
+	  password = "testpasswordpostgre"
+	  ssl {
+	  	client_key = google_sql_ssl_cert.postgresql_client_cert.private_key
+	  	client_certificate = google_sql_ssl_cert.postgresql_client_cert.cert
+	  	ca_certificate = google_sql_ssl_cert.postgresql_client_cert.server_ca_cert
+	  }
+  	  cloud_sql_id = "postgresqldb"
+
+	}
+	depends_on = [google_sql_database_instance.postgresqldb]
+}
