@@ -49,7 +49,7 @@ parameters:
     description: |
       URL of the region where the resource resides.
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -61,7 +61,7 @@ properties:
       which means the first character must be a lowercase letter, and all
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -99,7 +99,7 @@ properties:
   - !ruby/object:Api::Type::ResourceRef
     name: targetService
     required: true
-    input: true
+    immutable: true
     resource: 'ForwardingRule'
     imports: 'selfLink'
     description: |
@@ -120,14 +120,14 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'enableProxyProtocol'
     required: true
-    input: true
+    immutable: true
     description: |
       If true, enable the proxy protocol which is for supplying client TCP/IP
       address data in TCP connections that traverse proxies on their way to
       destination servers.
   - !ruby/object:Api::Type::Array
     name: 'domainNames'
-    input: true
+    immutable: true
     item_type: Api::Type::String
     description: |
       If specified, the domain name will be used during the integration between

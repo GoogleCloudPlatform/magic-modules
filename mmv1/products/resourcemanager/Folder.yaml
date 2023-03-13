@@ -19,7 +19,7 @@ description: A Folder in an Organization's resource hierarchy, used to organize 
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
-    input: true
+    immutable: true
     required: true
     description: |
       The Folder’s parent's resource name. Updates to the folder's parent

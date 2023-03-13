@@ -27,7 +27,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 parameters:
   - !ruby/object:Api::Type::String
     name: registry
-    input: true
+    immutable: true
     url_param_only: true
     required: true
     description: |
@@ -35,7 +35,7 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'id'
-    input: true
+    immutable: true
     required: true
     description: |
       The unique identifier for the device. For example,
@@ -198,7 +198,7 @@ properties:
       - !ruby/object:Api::Type::Enum
         name: 'gatewayType'
         default_value: :NON_GATEWAY
-        input: true
+        immutable: true
         description: |
           Indicates whether the device is a gateway.
         values:

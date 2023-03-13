@@ -31,7 +31,7 @@ properties:
     description: |
       The name of the note.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: shortDescription
     description: |

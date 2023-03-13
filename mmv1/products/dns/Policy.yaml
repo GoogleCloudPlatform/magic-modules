@@ -15,7 +15,7 @@
 name: 'Policy'
 kind: 'dns#policy'
 base_url: 'projects/{{project}}/policies'
-input: true
+immutable: true
 description: |
   A policy is a collection of DNS rules applied to one or more Virtual
   Private Cloud resources.

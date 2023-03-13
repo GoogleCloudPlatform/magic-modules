@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'Processor'
 base_url: 'projects/{{project}}/locations/{{location}}/processors'
-input: true
+immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation':
@@ -27,7 +27,7 @@ parameters:
     name: location
     description: |
       The location of the resource.
-    input: true
+    immutable: true
     url_param_only: true
     required: true
 properties:
@@ -39,17 +39,17 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'type'
     required: true
-    input: true
+    immutable: true
     description: |
       The type of processor. For possible types see the [official list](https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations/fetchProcessorTypes#google.cloud.documentai.v1.DocumentProcessorService.FetchProcessorTypes)
   - !ruby/object:Api::Type::String
     name: 'displayName'
     required: true
-    input: true
+    immutable: true
     description: |
       The display name. Must be unique.
   - !ruby/object:Api::Type::String
     name: 'kmsKeyName'
-    input: true
+    immutable: true
     description: |
       The KMS key used for encryption/decryption in CMEK scenarios. See https://cloud.google.com/security-key-management.

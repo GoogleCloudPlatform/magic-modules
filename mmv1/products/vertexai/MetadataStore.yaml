@@ -17,7 +17,7 @@ base_url: projects/{{project}}/locations/{{region}}/metadataStores
 self_link: 'projects/{{project}}/locations/{{region}}/metadataStores/{{name}}'
 create_url: projects/{{project}}/locations/{{region}}/metadataStores?metadataStoreId={{name}}
 min_version: beta
-input: true
+immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation':
@@ -47,18 +47,18 @@ parameters:
     name: region
     description: The region of the Metadata Store. eg us-central1
     url_param_only: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: The name of the MetadataStore. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
-    input: true
+    immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{region}}/metadataStores/{{name}}
   - !ruby/object:Api::Type::String
     name: 'description'
     description: Description of the MetadataStore.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true
@@ -71,7 +71,7 @@ properties:
       The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionSpec'
-    input: true
+    immutable: true
     description: |
       Customer-managed encryption key spec for a MetadataStore. If set, this MetadataStore and all sub-resources of this MetadataStore will be secured by this key.
     properties:
@@ -80,7 +80,7 @@ properties:
         description: |
           Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
           Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'state'
     output: true

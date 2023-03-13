@@ -31,14 +31,14 @@ parameters:
     name: user
     description: |
       The user email.
-    input: true
+    immutable: true
     url_param_only: true
     required: true
   - !ruby/object:Api::Type::String
     name: project
     description: |
       The project ID of the Google Cloud Platform project.
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -46,7 +46,7 @@ properties:
     description: |
       Public key text in SSH format, defined by RFC4253 section 6.6.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'expirationTimeUsec'
     description: |

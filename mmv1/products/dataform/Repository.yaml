@@ -28,13 +28,13 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
     description: 'A reference to the region'
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: The repository's name.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'gitRemoteSettings'

@@ -27,7 +27,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: parent
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The agent to create a flow for.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
@@ -40,7 +40,7 @@ parameters:
       Flow.transition_routes.trigger_fulfillment.messages
       Flow.transition_routes.trigger_fulfillment.conditional_cases
       If not specified, the agent's default language is used. Many languages are supported. Note: languages must be enabled in the agent before they can be used.
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

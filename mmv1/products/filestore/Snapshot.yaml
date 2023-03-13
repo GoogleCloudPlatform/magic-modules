@@ -32,14 +32,14 @@ parameters:
     name: 'location'
     description: |
       The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'instance'
     description: |
       The resource name of the filestore instance.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
 properties:
@@ -55,7 +55,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots/{{name}}
   - !ruby/object:Api::Type::String

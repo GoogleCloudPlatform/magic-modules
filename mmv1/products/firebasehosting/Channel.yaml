@@ -33,14 +33,14 @@ parameters:
     name: site_id
     description: |
       Required. The ID of the site in which to create this channel.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: channel_id
     description: |
       Required. Immutable. A unique ID within the site that identifies the channel.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
 properties:
@@ -71,7 +71,7 @@ properties:
     name: ttl
     conflicts:
       - expireTime
-    input: true
+    immutable: true
     description: |
       Input only. A time-to-live for this channel. Sets `expire_time` to the provided
       duration past the time of the request. A duration in seconds with up to nine fractional

@@ -28,7 +28,7 @@
       description: |
         Name of the Apigee organization.
       url_param_only: true
-      input: true
+      immutable: true
   properties:
     - !ruby/object:Api::Type::Array
       name: 'identities'

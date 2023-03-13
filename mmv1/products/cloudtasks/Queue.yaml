@@ -38,12 +38,12 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     required: true
-    input: true
+    immutable: true
     description: The location of the queue
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    input: true
+    immutable: true
     description: The queue name.
     pattern: projects/{{project}}/locations/{{location}}/queues/{{name}}
   - !ruby/object:Api::Type::NestedObject

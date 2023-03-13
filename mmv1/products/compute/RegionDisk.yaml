@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'RegionDisk'
 kind: 'compute#disk'
-input: true
+immutable: true
 base_url: projects/{{project}}/regions/{{region}}/disks
 collection_url_key: 'items'
 has_self_link: true
@@ -96,7 +96,7 @@ parameters:
         name: 'kmsKeyName'
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceSnapshot'
     resource: 'Snapshot'
@@ -133,7 +133,7 @@ parameters:
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'sourceSnapshotId'
     description: |
@@ -193,7 +193,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Integer
     name: 'sizeGb'

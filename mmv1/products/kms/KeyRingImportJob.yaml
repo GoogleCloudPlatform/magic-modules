@@ -16,7 +16,7 @@ name: 'KeyRingImportJob'
 base_url: '{{key_ring}}/importJobs'
 create_url: '{{key_ring}}/importJobs?importJobId={{import_job_id}}'
 self_link: '{{name}}'
-input: true
+immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Importing a key':
@@ -34,7 +34,7 @@ parameters:
       The KeyRing that this import job belongs to.
       Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'`.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'importJobId'
@@ -42,7 +42,7 @@ parameters:
     description: |
       It must be unique within a KeyRing and match the regular expression [a-zA-Z0-9_-]{1,63}
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -52,7 +52,7 @@ properties:
     output: true
   - !ruby/object:Api::Type::Enum
     name: 'importMethod'
-    input: true
+    immutable: true
     required: true
     description: |
       The wrapping method to be used for incoming key material.
@@ -61,7 +61,7 @@ properties:
       - :RSA_OAEP_4096_SHA1_AES_256
   - !ruby/object:Api::Type::Enum
     name: 'protectionLevel'
-    input: true
+    immutable: true
     required: true
     description: |
       The protection level of the ImportJob. This must match the protectionLevel of the

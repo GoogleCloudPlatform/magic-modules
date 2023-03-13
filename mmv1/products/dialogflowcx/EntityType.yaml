@@ -28,7 +28,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: parent
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The agent to create a entity type for.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
@@ -40,7 +40,7 @@ parameters:
       EntityType.entities.synonyms
       EntityType.excluded_phrases.value
       If not specified, the agent's default language is used. Many languages are supported. Note: languages must be enabled in the agent before they can be used.
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String

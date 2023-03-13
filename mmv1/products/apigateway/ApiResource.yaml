@@ -34,7 +34,7 @@
       description: |
         Identifier to assign to the API. Must be unique within scope of the parent resource(project)
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::String
@@ -48,7 +48,7 @@
         A user-visible name for the API.
     - !ruby/object:Api::Type::String
       name: 'managedService'
-      input: true
+      immutable: true
       description: |
         Immutable. The name of a Google Managed Service ( https://cloud.google.com/service-infrastructure/docs/glossary#managed).
         If not specified, a new Service will automatically be created in the same project as this API.

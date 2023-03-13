@@ -30,7 +30,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: folder
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The folder this feed should be created in.
@@ -38,7 +38,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: billing_project
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The project whose identity will be used when sending messages to the
@@ -60,7 +60,7 @@ properties:
     description: |
       This is the client-assigned asset feed identifier and it needs to be unique under a specific parent.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::Array
     name: assetNames

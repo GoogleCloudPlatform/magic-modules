@@ -45,7 +45,7 @@ parameters:
     name: region
     description: The region of the index. eg us-central1
     url_param_only: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -82,7 +82,7 @@ properties:
         default_value: false
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
-        input: true
+        immutable: true
         description: The configuration of the Matching Engine Index.
         properties:
           - !ruby/object:Api::Type::Integer
@@ -195,7 +195,7 @@ properties:
         description: The number of shards in the Index.
   - !ruby/object:Api::Type::String
     name: 'indexUpdateMethod'
-    input: true
+    immutable: true
     default_value: BATCH_UPDATE
     description: |-
       The update method to use with this Index. The value must be the followings. If not set, BATCH_UPDATE will be used by default.

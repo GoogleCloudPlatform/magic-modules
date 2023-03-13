@@ -60,7 +60,7 @@ properties:
       means the first character must be a lowercase letter, and all
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -75,12 +75,12 @@ properties:
       URL to the UrlMap resource that defines the mapping from URL to
       the BackendService. The protocol field in the BackendService
       must be set to GRPC.
-    input: true
+    immutable: true
     update_id: 'urlMap'
     fingerprint_name: 'fingerprint'
   - !ruby/object:Api::Type::Boolean
     name: 'validateForProxyless'
-    input: true
+    immutable: true
     description: |
       If true, indicates that the BackendServices referenced by
       the urlMap may be accessed by gRPC applications without using

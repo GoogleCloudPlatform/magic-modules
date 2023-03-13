@@ -33,14 +33,14 @@
       name: 'region'
       description: |
         The region of the gateway for the API.
-      input: true
+      immutable: true
       url_param_only: true
     - !ruby/object:Api::Type::String
       name: gatewayId
       description: |
         Identifier to assign to the Gateway. Must be unique within scope of the parent resource(project).
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::String

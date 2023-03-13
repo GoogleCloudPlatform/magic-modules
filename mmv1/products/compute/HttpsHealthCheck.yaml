@@ -85,7 +85,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the
       last character, which cannot be a dash.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Integer
     name: 'port'
     description: |

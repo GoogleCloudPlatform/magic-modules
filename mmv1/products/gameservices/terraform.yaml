@@ -29,6 +29,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "game_service_cluster_basic"
         primary_resource_id: "default"
+        # NO_TEST: Not worth setting up as it is complicated and game servers are being deprecated
+        skip_test: true
         vars:
           realm_id: "realm"
         test_vars_overrides:

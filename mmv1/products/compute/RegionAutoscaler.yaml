@@ -54,7 +54,7 @@ parameters:
     description: |
       URL of the region where the instance group resides.
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'id'
@@ -73,7 +73,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |

@@ -36,7 +36,7 @@ parameters:
       * `organizations/{{organization_id}}`
       * `organizations/{{organization_id}}/locations/{{location}}`
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String

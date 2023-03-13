@@ -25,7 +25,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Reserving a Static External IP Address':
       'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
   api: 'https://cloud.google.com/compute/docs/reference/v1/globalAddresses'
-input: true
+immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'

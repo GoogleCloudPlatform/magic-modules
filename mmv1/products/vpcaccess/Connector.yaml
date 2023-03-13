@@ -15,7 +15,7 @@
 name: 'Connector'
 kind: 'vpcaccess#Connector'
 description: 'Serverless VPC Access connector resource.'
-input: true
+immutable: true
 base_url: projects/{{project}}/locations/{{region}}/connectors
 create_url: projects/{{project}}/locations/{{region}}/connectors?connectorId={{name}}
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -44,7 +44,7 @@ parameters:
     name: 'region'
     description: |
       Region where the VPC Access connector resides. If it is not provided, the provider region is used.
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -110,7 +110,7 @@ properties:
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'subnet'
-    input: true
+    immutable: true
     description: |
       The subnet in which to house the connector
     properties:
@@ -122,10 +122,10 @@ properties:
         exactly_one_of:
           - network
           - subnet.0.name
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::String
         name: 'projectId'
         description: |
           Project in which the subnet exists. If not set, this project is assumed to be the project for which the connector create request was issued.
-        input: true
+        immutable: true
 

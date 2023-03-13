@@ -15,7 +15,7 @@
 name: 'Client'
 base_url: '{{brand}}/identityAwareProxyClients'
 self_link: '{{client_id}}'
-input: true
+immutable: true
 description: |
   Contains the data that describes an Identity Aware Proxy owned client.
 
@@ -40,7 +40,7 @@ parameters:
       Identifier of the brand to which this client
       is attached to. The format is
       `projects/{project_number}/brands/{brand_id}/identityAwareProxyClients/{client_id}`.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
 properties:

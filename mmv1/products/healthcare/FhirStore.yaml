@@ -28,7 +28,7 @@ parameters:
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
     required: true
-    input: true
+    immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
     url_param_only: true
@@ -40,7 +40,7 @@ properties:
 
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: true
-    input: true
+    immutable: true
   # Version is duplicated because it is optional in beta but required in GA.
   - !ruby/object:Api::Type::Enum
     name: version
@@ -48,7 +48,7 @@ properties:
       The FHIR specification version.
     exact_version: beta
     required: false
-    input: true
+    immutable: true
     default_value: :STU3
     values:
       - :DSTU2
@@ -60,7 +60,7 @@ properties:
       The FHIR specification version.
     exact_version: ga
     required: true
-    input: true
+    immutable: true
     values:
       - :DSTU2
       - :STU3
@@ -86,7 +86,7 @@ properties:
 
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: false
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Boolean
     name: 'disableResourceVersioning'
     description: |
@@ -98,7 +98,7 @@ properties:
 
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: false
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Boolean
     name: 'enableHistoryImport'
     description: |
@@ -111,7 +111,7 @@ properties:
 
       ** This property can be changed manually in the Google Cloud Healthcare admin console without recreating the FHIR store **
     required: false
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
     required: false

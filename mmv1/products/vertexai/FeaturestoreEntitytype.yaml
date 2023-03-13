@@ -59,13 +59,13 @@ parameters:
     name: featurestore
     description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}.
     url_param_only: true
-    input: true
+    immutable: true
     required: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: The name of the EntityType. This value may be up to 60 characters, and valid characters are [a-z0-9_]. The first character cannot be a number.
-    input: true
+    immutable: true
     url_param_only: true
     pattern: '{featurestore}}/entityTypes/{{name}}'
   - !ruby/object:Api::Type::String

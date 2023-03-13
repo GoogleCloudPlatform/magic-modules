@@ -37,7 +37,7 @@ properties:
       the occurrence applies. For example,
       https://gcr.io/project/image@sha256:123abc for a Docker image.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: noteName
     description: |
@@ -45,7 +45,7 @@ properties:
       projects/[PROJECT]/notes/[NOTE_ID]. This field can be used as a
       filter in list requests.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: kind
     description: |

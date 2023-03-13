@@ -37,7 +37,7 @@ properties:
     description: |
      The default language of the agent as a language tag. [See Language Support](https://cloud.google.com/dialogflow/docs/reference/language) 
      for a list of the currently supported language codes. This field cannot be updated after creation.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Array
     name: 'supportedLanguageCodes'
