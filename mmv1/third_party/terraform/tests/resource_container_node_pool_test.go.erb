@@ -1271,9 +1271,16 @@ func TestAccContainerNodePool_localNvmeSsdBlockConfig(t *testing.T) {
 
 func testAccContainerNodePool_localNvmeSsdBlockConfig(cluster, np string) string {
 	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+	location       = "us-central1-a"
+	// this feature became available in 1.25.3-gke.1800, not sure if theres a better way to do
+	version_prefix = "1.25"
+}
+
 resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
   initial_node_count = 1
 }
 
@@ -1293,10 +1300,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 <% end %>
-
-
-
-
 
 func TestAccContainerNodePool_gcfsConfig(t *testing.T) {
 	t.Parallel()

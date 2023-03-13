@@ -742,10 +742,10 @@ ephemeral_storage_config {
 }
 ```
 
-* `local_nvme_ssd_config` - (Optional, [Beta]) Parameters for the local NVMe SSDs. Structure is [documented below](#nested_local_nvme_ssd_config).
+* `local_nvme_ssd_block_config` - (Optional, [Beta]) Parameters for the local NVMe SSDs. Structure is [documented below](#nested_local_nvme_ssd_block_config).
 
 ```hcl
-local_nvme_ssd_config {
+local_nvme_ssd_block_config {
   local_ssd_count = 2
 }
 ```
@@ -886,9 +886,10 @@ linux_node_config {
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
 
-<a name="nested_local_nvme_ssd_config"></a>The `local_nvme_ssd_config` block supports:
+<a name="nested_local_nvme_ssd_block_config"></a>The `local_nvme_ssd_block_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local NVMe SSDs attached to the instance. Each NVMe SSD is 375 GB in size.
+-> Note: Only supported in GKE versions v1.25.3-gke.1800 or later.
 
 <a name="nested_gcfs_config"></a>The `gcfs_config` block supports:
 
