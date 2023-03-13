@@ -18,6 +18,7 @@
 #   - (Internal only) Enable stubbed calls for GKE MultiCloud resources
 #   - Enable Media CDN
 #   - Enable Game Services
+#   - Enable Access Boundary permissions
 #   - Deploy "Hello World" app: https://cloud.google.com/appengine/docs/flexible/go/create-app
 #     ```
 #     gcloud components install app-engine-go
@@ -70,6 +71,12 @@ resource "google_service_account" "sa" {
   project      = google_project.proj.project_id
   account_id   = "hashicorp-test-runner"
   display_name = "HashiCorp Test Runner"
+}
+
+resource "google_organization_iam_member" "sa_access_boundary_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/iam.accessBoundaryAdmin"
+  member = google_service_account.sa.member
 }
 
 resource "google_organization_iam_member" "sa_assuredworkloads_admin" {
