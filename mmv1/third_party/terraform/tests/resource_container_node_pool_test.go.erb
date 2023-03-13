@@ -1258,7 +1258,7 @@ func TestAccContainerNodePool_localNvmeSsdBlockConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_localNVMeStorageConfig(cluster, np),
+				Config: testAccContainerNodePool_localNvmeSsdBlockConfig(cluster, np),
 			},
 			{
 				ResourceName:      "google_container_node_pool.np",
