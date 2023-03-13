@@ -6,7 +6,6 @@ func resourceConverterFolder() ResourceConverter {
 	return ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Folder",
 		Convert:           GetFolderCaiObject,
-		MergeCreateUpdate: MergeFolder,
 	}
 }
 
@@ -36,13 +35,13 @@ func GetFolderCaiObject(d TerraformResourceData, config *Config) ([]Asset, error
 func GetFolderApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
 
 	folder := &Folder{
-		Name:      d.Get("name").(string),
-		Parent:	d.Get("parent").(string),
+		Name:        d.Get("name").(string),
+		Parent:	     d.Get("parent").(string),
 		DisplayName: d.Get("display_name").(string),
-		State: d.Get("lifecycle_state").(string), 
+		State:       d.Get("lifecycle_state").(string), 
 	}
 
-	if v, ok := d.GetOkExists("service"); ok {
+	if v, ok := d.GetOkExists("create_time"); ok {
 		folder.CreateTime = constructTime(v.(string))
 	}
 
@@ -58,9 +57,4 @@ func constructTime(create_time string) *Timestamp{
 		Seconds: t.Unix(),
 		Nanos: t.UnixNano(),
 	}
-}
-
-func MergeFolder(existing, incoming Asset) Asset {
-	existing.Resource = incoming.Resource
-	return existing
 }

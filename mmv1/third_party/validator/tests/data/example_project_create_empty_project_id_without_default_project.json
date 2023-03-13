@@ -38,12 +38,12 @@
       "version": "v1",
       "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
       "discovery_name": "Folder",
-      "parent": "//cloudresourcemanager.googleapis.com/organizations/unknown",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
       "data": {
         "display_name": "Department 1",
-        "parent": "organizations/1234567"
+        "parent": "organizations/{{.OrgID}}"
       }
     },
-    "ancestry_path": "organization/unknown"
+    "ancestry_path": "organization/{{.OrgID}}"
   }
 ]

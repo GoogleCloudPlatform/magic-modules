@@ -84,7 +84,7 @@ func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
 	cases := []struct {
 		name string
 	}{
-		{name: "example_project_create_empty_project_id_without_default_project"},
+		{name: "example_project_create_empty_project_id"},
 		{name: "example_storage_bucket"},
 		{name: "example_project_iam_member_empty_project"},
 	}
@@ -100,19 +100,12 @@ func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
 			}
 			defer os.RemoveAll(dir)
 
-			var f string
-
-			if c.name == "example_project_create_empty_project_id_without_default_project"{
-				generateTestFiles(t, "../testdata/templates", dir, c.name+".json")
-				// Unmarshal payload from testfile into `want` variable.
-				f = filepath.Join(dir, c.name+".json")
-			} else {
-				generateTestFiles(t, "../testdata/templates", dir, c.name+"_without_default_project.json")
-				// Unmarshal payload from testfile into `want` variable.
-				f = filepath.Join(dir, c.name+"_without_default_project.json")
-			}
-
+			generateTestFiles(t, "../testdata/templates", dir, c.name+"_without_default_project.json")
 			generateTestFiles(t, "../testdata/templates", dir, c.name+".tfplan.json")
+
+			// Unmarshal payload from testfile into `want` variable.
+			f := filepath.Join(dir, c.name+"_without_default_project.json")
+
 
 			want, err := readExpectedTestFile(f)
 			if err != nil {

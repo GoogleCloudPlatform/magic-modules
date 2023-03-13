@@ -34,7 +34,7 @@
     }
   },
   {
-    "name": "//cloudresourcemanager.googleapis.com/folders/{{.FolderID}}",
+    "name": "//cloudresourcemanager.googleapis.com/folders/placeholder-foobar",
     "asset_type": "cloudresourcemanager.googleapis.com/Folder",
     "resource": {
       "version": "v1",
@@ -46,6 +46,6 @@
         "parent": "organizations/{{.OrgID}}"
       }
     },
-    "ancestry_path": "{{.Ancestry}}"
+    "ancestry_path": "organizations/{{.OrgID}}"
   }
 ]
