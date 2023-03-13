@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleLoggingSink() *schema.Resource {
+func DataSourceGoogleLoggingSink() *schema.Resource {
 	dsSchema := datasourceSchemaFromResourceSchema(resourceLoggingSinkSchema())
 	dsSchema["id"] = &schema.Schema{
 		Type:        schema.TypeString,
@@ -22,7 +22,7 @@ func dataSourceGoogleLoggingSink() *schema.Resource {
 
 func dataSourceGoogleLoggingSinkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

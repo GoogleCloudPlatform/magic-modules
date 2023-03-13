@@ -1,0 +1,345 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: Budget
+base_url: billingAccounts/{{billing_account}}/budgets
+self_link: 'billingAccounts/{{billing_account}}/budgets/{{name}}'
+update_verb: :PATCH
+update_mask: true
+description: |
+  Budget configuration for a billing account.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Creating a budget':
+      'https://cloud.google.com/billing/docs/how-to/budgets'
+  api: 'https://cloud.google.com/billing/docs/reference/budget/rest/v1/billingAccounts.budgets'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: billingAccount
+    description: |
+      ID of the billing account to set a budget on.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: |
+      Resource name of the budget. The resource name
+      implies the scope of a budget. Values are of the form
+      billingAccounts/{billingAccountId}/budgets/{budgetId}.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: |
+      User data for display name in UI. Must be <= 60 chars.
+  - !ruby/object:Api::Type::NestedObject
+    name: budgetFilter
+    description: |
+      Filters that define which resources are used to compute the actual
+      spend against the budget.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: projects
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod              
+        description: |
+          A set of projects of the form projects/{project_number},
+          specifying that usage from only this set of projects should be
+          included in the budget. If omitted, the report will include
+          all usage for the billing account, regardless of which project
+          the usage occurred on.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Enum
+        name: creditTypesTreatment
+        description: |
+          Specifies how credits should be treated when determining spend
+          for threshold calculations.
+        default_value: :INCLUDE_ALL_CREDITS
+        values:
+          - :INCLUDE_ALL_CREDITS
+          - :EXCLUDE_ALL_CREDITS
+          - :INCLUDE_SPECIFIED_CREDITS
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod
+      - !ruby/object:Api::Type::Array
+        name: services
+        description: |
+          A set of services of the form services/{service_id},
+          specifying that usage from only this set of services should be
+          included in the budget. If omitted, the report will include
+          usage for all the services. The service names are available
+          through the Catalog API:
+          https://cloud.google.com/billing/v1/how-tos/catalog-api.
+        item_type: Api::Type::String
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod              
+      - !ruby/object:Api::Type::Array
+        name: creditTypes
+        description: |
+          Optional. If creditTypesTreatment is INCLUDE_SPECIFIED_CREDITS,
+          this is a list of credit types to be subtracted from gross cost to determine the spend for threshold calculations. See a list of acceptable credit type values.
+          If creditTypesTreatment is not INCLUDE_SPECIFIED_CREDITS, this field must be empty.
+
+          **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
+        item_type: Api::Type::String
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod            
+      - !ruby/object:Api::Type::Array
+        name: subaccounts
+        description: |
+          A set of subaccounts of the form billingAccounts/{account_id},
+          specifying that usage from only this set of subaccounts should
+          be included in the budget. If a subaccount is set to the name of
+          the parent account, usage from the parent account will be included.
+          If the field is omitted, the report will include usage from the parent
+          account and all subaccounts, if they exist.
+
+          **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
+        item_type: Api::Type::String
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A single label and value pair specifying that usage from only
+          this set of labeled resources should be included in the budget.
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod
+      - !ruby/object:Api::Type::Enum
+        name: calendarPeriod
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod
+        description: |
+          A CalendarPeriod represents the abstract concept of a recurring time period that has a
+          canonical start. Grammatically, "the start of the current CalendarPeriod".
+          All calendar times begin at 12 AM US and Canadian Pacific Time (UTC-8).
+        values:
+          - :MONTH
+          - :QUARTER
+          - :YEAR
+          - :CALENDAR_PERIOD_UNSPECIFIED
+      - !ruby/object:Api::Type::NestedObject
+        name: customPeriod
+        at_least_one_of:
+          - budget_filter.0.projects
+          - budget_filter.0.credit_types_treatment
+          - budget_filter.0.services
+          - budget_filter.0.subaccounts
+          - budget_filter.0.labels
+          - budget_filter.0.calendarPeriod
+          - budget_filter.0.customPeriod
+        description: |
+          Specifies to track usage from any start date (required) to any end date (optional).
+          This time period is static, it does not recur.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: startDate
+            required: true
+            description: |
+              A start date is required. The start date must be after January 1, 2017.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: year
+                required: true
+                description: |
+                  Year of the date. Must be from 1 to 9999.
+              - !ruby/object:Api::Type::Integer
+                name: month
+                required: true
+                description: |
+                  Month of a year. Must be from 1 to 12.
+              - !ruby/object:Api::Type::Integer
+                name: day
+                required: true
+                description: |
+                  Day of a month. Must be from 1 to 31 and valid for the year and month.
+          - !ruby/object:Api::Type::NestedObject
+            name: endDate
+            description: |
+              Optional. The end date of the time period. Budgets with elapsed end date won't be processed. 
+              If unset, specifies to track all usage incurred since the startDate.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: year
+                required: true
+                description: |
+                  Year of the date. Must be from 1 to 9999.
+              - !ruby/object:Api::Type::Integer
+                name: month
+                required: true
+                description: |
+                  Month of a year. Must be from 1 to 12.
+              - !ruby/object:Api::Type::Integer
+                name: day
+                required: true
+                description: |
+                  Day of a month. Must be from 1 to 31 and valid for the year and month.
+  - !ruby/object:Api::Type::NestedObject
+    name: amount
+    required: true
+    description: |
+      The budgeted amount for each usage period.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: specifiedAmount
+        exactly_one_of:
+          - amount.0.specified_amount
+          - amount.0.last_period_amount
+        description: |
+          A specified amount to use as the budget. currencyCode is
+          optional. If specified, it must match the currency of the
+          billing account. The currencyCode is provided on output.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: currencyCode
+            description: |
+              The 3-letter currency code defined in ISO 4217.
+          - !ruby/object:Api::Type::String
+            name: units
+            description: |
+              The whole units of the amount. For example if currencyCode
+              is "USD", then 1 unit is one US dollar.
+          - !ruby/object:Api::Type::Integer
+            name: nanos
+            description: |
+              Number of nano (10^-9) units of the amount.
+              The value must be between -999,999,999 and +999,999,999
+              inclusive. If units is positive, nanos must be positive or
+              zero. If units is zero, nanos can be positive, zero, or
+              negative. If units is negative, nanos must be negative or
+              zero. For example $-1.75 is represented as units=-1 and
+              nanos=-750,000,000.
+      - !ruby/object:Api::Type::Boolean
+        name: 'lastPeriodAmount'
+        exactly_one_of:
+          - amount.0.specified_amount
+          - amount.0.last_period_amount
+        description: |
+          Configures a budget amount that is automatically set to 100% of
+          last period's spend.
+          Boolean. Set value to true to use. Do not set to false, instead
+          use the `specified_amount` block.
+  - !ruby/object:Api::Type::Array
+    name: thresholdRules
+    description: |
+      Rules that trigger alerts (notifications of thresholds being
+      crossed) when spend exceeds the specified percentages of the
+      budget.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Double
+          name: thresholdPercent
+          required: true
+          description: |
+            Send an alert when this threshold is exceeded. This is a
+            1.0-based percentage, so 0.5 = 50%. Must be >= 0.
+          send_empty_value: true
+        - !ruby/object:Api::Type::Enum
+          name: spendBasis
+          description: |
+            The type of basis used to determine if spend has passed
+            the threshold.
+          default_value: :CURRENT_SPEND
+          values:
+            - :CURRENT_SPEND
+            - :FORECASTED_SPEND
+  - !ruby/object:Api::Type::NestedObject
+    name: allUpdatesRule
+    api_name: notificationsRule
+    description: |
+      Defines notifications that are sent on every update to the
+      billing account's spend, regardless of the thresholds defined
+      using threshold rules.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: pubsubTopic
+        at_least_one_of:
+          - all_updates_rule.0.pubsub_topic
+          - all_updates_rule.0.monitoring_notification_channels
+        description: |
+          The name of the Cloud Pub/Sub topic where budget related
+          messages will be published, in the form
+          projects/{project_id}/topics/{topic_id}. Updates are sent
+          at regular intervals to the topic.
+      - !ruby/object:Api::Type::String
+        name: schemaVersion
+        default_value: "1.0"
+        description: |
+          The schema version of the notification. Only "1.0" is
+          accepted. It represents the JSON schema as defined in
+          https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
+      - !ruby/object:Api::Type::Array
+        name: monitoringNotificationChannels
+        max_size: 5
+        at_least_one_of:
+          - all_updates_rule.0.pubsub_topic
+          - all_updates_rule.0.monitoring_notification_channels
+        description: |
+          The full resource name of a monitoring notification
+          channel in the form
+          projects/{project_id}/notificationChannels/{channel_id}.
+          A maximum of 5 channels are allowed.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Boolean
+        name: disableDefaultIamRecipients
+        default_value: false
+        description: |
+          Boolean. When set to true, disables default notifications sent
+          when a threshold is exceeded. Default recipients are
+          those with Billing Account Administrators and Billing
+          Account Users IAM roles for the target account.
+

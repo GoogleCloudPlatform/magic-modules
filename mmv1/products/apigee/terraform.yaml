@@ -359,6 +359,48 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       test_env_vars:
         org_id: :ORG_ID
         billing_account: :BILLING_ACCT
+  EnvKeystore: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    import_format: ["{{env_id}}/keystores/{{name}}", "{{env_id}}/{{name}}"]
+    delete_url: '{{env_id}}/keystores/{{name}}'
+    skip_sweeper: true
+    examples:
+    - !ruby/object:Provider::Terraform::Examples
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+      name: "apigee_environment_keystore_test"
+      primary_resource_id: "apigee_environment_keystore"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+          # Resource creation race
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 1
+      delete_minutes: 1
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/apigee_environment_keystore.go.erb
+  EnvReferences: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    import_format: ["{{env_id}}/references/{{name}}", "{{env_id}}/{{name}}"]
+    delete_url: '{{env_id}}/references/{{name}}'
+    skip_sweeper: true
+    examples:
+    - !ruby/object:Provider::Terraform::Examples
+      # This is a more verbose version of the above that creates all
+      # the resources needed for the acceptance test.
+      name: "apigee_environment_reference_test"
+      primary_resource_id: "apigee_environment_reference"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      # Resource creation race
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 1
+      delete_minutes: 1
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/apigee_environment_reference.go.erb
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.

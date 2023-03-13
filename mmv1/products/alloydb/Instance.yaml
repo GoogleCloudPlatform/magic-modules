@@ -50,14 +50,14 @@
         Identifies the alloydb cluster. Must be in the format
         'projects/{project}/locations/{location}/clusters/{cluster_id}'
       required: true
-      input: true
+      immutable: true
       resource: 'Cluster'
       imports: 'name'
       url_param_only: true
     - !ruby/object:Api::Type::String
       name: "instanceId"
       required: true
-      input: true
+      immutable: true
       url_param_only: true
       description: |
         The ID of the alloydb instance.
@@ -120,7 +120,7 @@
     - !ruby/object:Api::Type::Enum
       name: "instanceType"
       required: true
-      input: true
+      immutable: true
       description: |
         The type of the instance.
       values:

@@ -32,6 +32,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_identity_groups_basic"
+        # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+        skip_test: true
         primary_resource_id: "cloud_identity_group_basic"
         vars:
           id_group: "my-identity-group"
@@ -40,7 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cust_id: :CUST_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/set_computed_name.erb
-      custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
+      custom_import: templates/terraform/custom_import/cloud_identity_group_import.go.erb
   GroupMembership: !ruby/object:Overrides::Terraform::ResourceOverride
     read_error_transform: "transformCloudIdentityGroupMembershipReadError"
     docs: !ruby/object:Provider::Terraform::Docs
@@ -56,6 +58,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_identity_group_membership"
+        # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+        skip_test: true
         primary_resource_id: "cloud_identity_group_membership_basic"
         vars:
           id_group: "my-identity-group"
@@ -64,6 +68,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cust_id: :CUST_ID
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_identity_group_membership_user"
+        # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+        skip_test: true
         primary_resource_id: "cloud_identity_group_membership_basic"
         vars:
           id_group: "my-identity-group"

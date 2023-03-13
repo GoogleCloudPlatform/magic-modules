@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceDnsManagedZone() *schema.Resource {
+func DataSourceDnsManagedZone() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceDnsManagedZoneRead,
 
@@ -56,7 +56,7 @@ func dataSourceDnsManagedZone() *schema.Resource {
 
 func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) erro
 	zone, err := config.NewDnsClient(userAgent).ManagedZones.Get(
 		project, name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("dataSourceDnsManagedZone %q", name))
+		return handleNotFoundError(err, d, fmt.Sprintf("DataSourceDnsManagedZone %q", name))
 	}
 
 	if err := d.Set("dns_name", zone.DnsName); err != nil {

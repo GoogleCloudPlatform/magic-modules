@@ -12,7 +12,7 @@ import (
 	"cloud.google.com/go/bigtable"
 )
 
-func resourceBigtableInstance() *schema.Resource {
+func ResourceBigtableInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBigtableInstanceCreate,
 		Read:   resourceBigtableInstanceRead,
@@ -162,7 +162,7 @@ func resourceBigtableInstance() *schema.Resource {
 
 func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -223,7 +223,7 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -290,7 +290,7 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -346,7 +346,7 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

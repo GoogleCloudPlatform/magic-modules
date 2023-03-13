@@ -8,7 +8,7 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-func dataSourceSqlDatabaseInstances() *schema.Resource {
+func DataSourceSqlDatabaseInstances() *schema.Resource {
 
 	return &schema.Resource{
 		Read: dataSourceSqlDatabaseInstancesRead,
@@ -48,7 +48,7 @@ func dataSourceSqlDatabaseInstances() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
-					Schema: datasourceSchemaFromResourceSchema(resourceSqlDatabaseInstance().Schema),
+					Schema: datasourceSchemaFromResourceSchema(ResourceSqlDatabaseInstance().Schema),
 				},
 			},
 		},
@@ -57,7 +57,7 @@ func dataSourceSqlDatabaseInstances() *schema.Resource {
 
 func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -98,10 +98,10 @@ func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}
 	databaseInstances := make([]map[string]interface{}, 0)
 	for {
 		var instances *sqladmin.InstancesListResponse
-		err = retryTimeDuration(func() (rerr error) {
+		err = RetryTimeDuration(func() (rerr error) {
 			instances, rerr = config.NewSqlAdminClient(userAgent).Instances.List(project).Filter(filter).PageToken(pageToken).Do()
 			return rerr
-		}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
+		}, d.Timeout(schema.TimeoutRead), IsSqlOperationInProgressError)
 		if err != nil {
 			return err
 		}

@@ -37,7 +37,7 @@ module Api
       attr_reader :removed_message
 
       attr_reader :output # If set value will not be sent to server on sync
-      attr_reader :input # If set to true value is used only on creation
+      attr_reader :immutable # If set to true value is used only on creation
 
       # url_param_only will not send the field in the resource body and will
       # not attempt to read the field from the API response.
@@ -214,7 +214,7 @@ module Api
       check :allow_empty_object, type: :boolean
       check :url_param_only, type: :boolean
       check :read_query_params, type: ::String
-      check :input, type: :boolean
+      check :immutable, type: :boolean
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required

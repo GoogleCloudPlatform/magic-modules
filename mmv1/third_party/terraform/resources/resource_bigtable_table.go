@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceBigtableTable() *schema.Resource {
+func ResourceBigtableTable() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBigtableTableCreate,
 		Read:   resourceBigtableTableRead,
@@ -93,7 +93,7 @@ func resourceBigtableTable() *schema.Resource {
 
 func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -224,7 +224,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -289,7 +289,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

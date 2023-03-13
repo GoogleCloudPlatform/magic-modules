@@ -18,7 +18,7 @@ import (
 )
 
 const maxBackoffSeconds = 30
-const iamPolicyVersion = 3
+const IamPolicyVersion = 3
 
 // These types are implemented per GCP resource type and specify how to do per-resource IAM operations.
 // They are used in the generic Terraform IAM resource definitions
@@ -85,7 +85,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 	for {
 		log.Printf("[DEBUG]: Retrieving policy for %s\n", updater.DescribeResource())
 		p, err := updater.GetResourceIamPolicy()
-		if isGoogleApiErrorWithCode(err, 429) {
+		if IsGoogleApiErrorWithCode(err, 429) {
 			log.Printf("[DEBUG] 429 while attempting to read policy for %s, waiting %v before attempting again", updater.DescribeResource(), backoff)
 			time.Sleep(backoff)
 			continue
@@ -112,7 +112,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 				new_p, err := updater.GetResourceIamPolicy()
 				if err != nil {
 					// Quota for Read is pretty limited, so watch out for running out of quota.
-					if isGoogleApiErrorWithCode(err, 429) {
+					if IsGoogleApiErrorWithCode(err, 429) {
 						fetchBackoff = fetchBackoff * 2
 					} else {
 						return err
@@ -182,7 +182,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 }
 
 // Flattens a list of Bindings so each role+condition has a single Binding with combined members
-func mergeBindings(bindings []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
+func MergeBindings(bindings []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
 	bm := createIamBindingsMap(bindings)
 	return listFromIamBindingMap(bm)
 }
@@ -446,6 +446,65 @@ func compareBindings(a, b []*cloudresourcemanager.Binding) bool {
 	aMap := createIamBindingsMap(a)
 	bMap := createIamBindingsMap(b)
 	return reflect.DeepEqual(aMap, bMap)
+}
+
+// Returns a map representing iam bindings that are in one map but not the other.
+func missingBindingsMap(aMap, bMap map[iamBindingKey]map[string]struct{}) map[iamBindingKey]map[string]struct{} {
+	results := make(map[iamBindingKey]map[string]struct{})
+	for key, aMembers := range aMap {
+		if bMembers, ok := bMap[key]; ok {
+			// The key is in both maps.
+			resultMembers := make(map[string]struct{})
+
+			for aMember := range aMembers {
+				if _, ok := bMembers[aMember]; !ok {
+					// The member is in a but not in b.
+					resultMembers[aMember] = struct{}{}
+				}
+			}
+			for bMember := range bMembers {
+				if _, ok := aMembers[bMember]; !ok {
+					// The member is in b but not in a.
+					resultMembers[bMember] = struct{}{}
+				}
+			}
+
+			if len(resultMembers) > 0 {
+				results[key] = resultMembers
+			}
+		} else {
+			// The key is in map a but not map b.
+			results[key] = aMembers
+		}
+	}
+
+	for key, bMembers := range bMap {
+		if _, ok := aMap[key]; !ok {
+			// The key is in map b but not map a.
+			results[key] = bMembers
+		}
+	}
+
+	return results
+}
+
+// Returns the bindings that are in one set of bindings and not the other.
+func missingBindings(a, b []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
+	aMap := createIamBindingsMap(a)
+	bMap := createIamBindingsMap(b)
+
+	var results []*cloudresourcemanager.Binding
+	for key, membersSet := range missingBindingsMap(aMap, bMap) {
+		members := make([]string, 0, len(membersSet))
+		for member := range membersSet {
+			members = append(members, member)
+		}
+		results = append(results, &cloudresourcemanager.Binding{
+			Role: key.Role,
+			Members: members,
+		})
+	}
+	return results
 }
 
 func compareAuditConfigs(a, b []*cloudresourcemanager.AuditConfig) bool {

@@ -1,0 +1,182 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'PerInstanceConfig'
+base_url:  'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}'
+description: |
+  A config defined for a single managed instance that belongs to an instance group manager. It preserves the instance name
+  across instance group manager operations and can define stateful disks or metadata that are unique to the instance.
+create_verb: :POST
+create_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/createInstances
+update_verb: :POST
+update_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/updatePerInstanceConfigs
+delete_verb: :POST
+delete_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/deletePerInstanceConfigs
+read_verb: :POST
+self_link: projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/listPerInstanceConfigs
+identity:
+  - name
+nested_query: !ruby/object:Api::Resource::NestedQuery
+  keys:
+    - items
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/stateful-migs#per-instance_configs'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'zone'
+    resource: 'Zone'
+    imports: 'name'
+    description: |
+      Zone where the containing instance group manager is located
+    required: true
+    url_param_only: true
+    immutable: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'instanceGroupManager'
+    resource: 'InstanceGroupManager'
+    imports: 'name'
+    description: |
+      The instance group manager this instance config is part of.
+    required: true
+    url_param_only: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The name for this per-instance config and its corresponding instance.
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'preservedState'
+    description: 'The preserved state for this instance.'
+    properties:
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'metadata'
+        description: |
+          Preserved metadata defined for this instance. This is a list of key->value pairs.
+      - !ruby/object:Api::Type::Array
+        name: 'disk'
+        api_name: disks
+        description: |
+          Stateful disks for the instance.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: deviceName
+              required: true
+              description: |
+                A unique device name that is reflected into the /dev/ tree of a Linux operating system running within the instance.
+            - !ruby/object:Api::Type::String
+              name: source
+              required: true
+              description: |
+                The URI of an existing persistent disk to attach under the specified device-name in the format
+                `projects/project-id/zones/zone/disks/disk-name`.
+            - !ruby/object:Api::Type::Enum
+              name: mode
+              description: |
+                The mode of the disk.
+              values:
+                - :READ_ONLY
+                - :READ_WRITE
+              default_value: :READ_WRITE
+            - !ruby/object:Api::Type::Enum
+              name: deleteRule
+              description: |
+                A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
+                The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
+                `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
+                `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
+                deleted from the instance group.
+              values:
+                - :NEVER
+                - :ON_PERMANENT_INSTANCE_DELETION
+              default_value: :NEVER
+      - !ruby/object:Api::Type::Map
+        name: 'internalIp'
+        api_name: internalIPs
+        min_version: beta
+        key_name: "interface_name"
+        description: |
+          Preserved internal IPs defined for this instance. This map is keyed with the name of the network interface.
+        value_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: autoDelete
+              description: |
+                These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
+              values:
+                - :NEVER
+                - :ON_PERMANENT_INSTANCE_DELETION
+              default_value: :NEVER
+            - !ruby/object:Api::Type::NestedObject
+              name: 'ipAddress'
+              description: |
+                Ip address representation
+              properties:
+                - !ruby/object:Api::Type::ResourceRef
+                  name: 'address'
+                  resource: 'Address'
+                  imports: 'selfLink'
+                  description: |
+                    The URL of the reservation for this IP address.
+      - !ruby/object:Api::Type::Map
+        name: 'externalIp'
+        min_version: beta
+        api_name: externalIPs
+        key_name: "interface_name"
+        description: |
+          Preserved external IPs defined for this instance. This map is keyed with the name of the network interface.
+        value_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: autoDelete
+              description: |
+                These stateful IPs will never be released during autohealing, update or VM instance recreate operations. This flag is used to configure if the IP reservation should be deleted after it is no longer used by the group, e.g. when the given instance or the whole group is deleted.
+              values:
+                - :NEVER
+                - :ON_PERMANENT_INSTANCE_DELETION
+              default_value: :NEVER
+            - !ruby/object:Api::Type::NestedObject
+              name: 'ipAddress'
+              description: |
+                Ip address representation
+              properties:
+                - !ruby/object:Api::Type::ResourceRef
+                  name: 'address'
+                  resource: 'Address'
+                  imports: 'selfLink'
+                  description: |
+                    The URL of the reservation for this IP address.

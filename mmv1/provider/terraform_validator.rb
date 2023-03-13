@@ -331,7 +331,9 @@ module Provider
                        ['converters/google/resources/storage_bucket_iam.go',
                         'third_party/validator/storage_bucket_iam.go'],
                        ['converters/google/resources/organization_policy.go',
-                        'third_party/validator/organization_policy.go']
+                        'third_party/validator/organization_policy.go'],
+                       ['converters/google/resources/iam_storage_bucket.go',
+                        'third_party/validator/iam_storage_bucket.go']
                      ])
     end
 

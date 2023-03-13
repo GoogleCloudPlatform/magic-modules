@@ -131,46 +131,37 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "privateca_certificate_config"
         primary_resource_id: "default"
         vars:
-          certificate_authority_id: "my-certificate-authority"
+          ca_pool_id: "my-pool"
           certificate_name: "my-certificate"
         test_env_vars:
           project: :PROJECT_NAME
-        test_vars_overrides:
-          pool: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_with_template"
         primary_resource_id: "default"
         vars:
+          ca_pool_id: "my-pool"
           certificate_name: "my-certificate"
-          certificate_authority_id: "my-certificate-authority"
           certificate_template_name: "my-certificate-template"
         test_env_vars:
           project: :PROJECT_NAME
-        test_vars_overrides:
-          pool: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_csr"
         primary_resource_id: "default"
         vars:
           certificate_name: "my-certificate"
-          certificate_authority_id: "my-certificate-authority"
+          ca_pool_id: "my-pool"
         test_env_vars:
           project: :PROJECT_NAME
-        test_vars_overrides:
-          pool: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       - !ruby/object:Provider::Terraform::Examples
         name: "privateca_certificate_no_authority"
         primary_resource_id: "default"
         vars:
           certificate_name: "my-certificate"
-          certificate_authority_id: "my-authority"
+          ca_pool_id: "my-pool"
         test_env_vars:
           project: :PROJECT_NAME
-        test_vars_overrides:
-          pool: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_create: templates/terraform/pre_create/privateca_certificate.go.erb
-      test_check_destroy: templates/terraform/custom_check_destroy/privateca_certificate.go.erb
   CaPool: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       issuancePolicy.baselineValues: !ruby/object:Overrides::Terraform::PropertyOverride
