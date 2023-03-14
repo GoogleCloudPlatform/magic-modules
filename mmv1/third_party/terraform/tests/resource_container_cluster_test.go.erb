@@ -3438,6 +3438,14 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccContainerCluster_withDNSConfig(clusterName, "PLATFORM_DEFAULT", domainName, "VPC_SCOPE"),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_dns_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

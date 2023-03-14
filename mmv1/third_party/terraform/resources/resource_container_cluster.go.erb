@@ -3701,6 +3701,19 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s Protect Config has been updated to %#v", d.Id(), req.Update.DesiredProtectConfig)
 	}
 <% end -%>
+	if d.HasChange("dns_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredDnsConfig: expandDnsConfig(d.Get("dns_config")),
+			},
+		}
+		updateF := updateFunc(req, "updating GKE cluster DNS Config")
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s DNS Config has been updated to %#v", d.Id(), req.Update.DesiredDnsConfig)
+	}
 
 	return resourceContainerClusterRead(d, meta)
 }
