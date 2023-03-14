@@ -52,7 +52,7 @@
         The Apigee Organization associated with the Apigee environment,
         in the format `organizations/{{org_name}}`.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::String
@@ -60,19 +60,19 @@
       description: |
         The resource ID of the environment.
       required: true
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::String
       name: 'displayName'
       description: |
         Display name of the environment.
       required: false
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::String
       name: 'description'
       description: |
         Description of the environment.
       required: false
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::Enum
       name: 'deploymentType'
       description: |
@@ -87,7 +87,7 @@
         - "DEPLOYMENT_TYPE_UNSPECIFIED"
         - "PROXY"
         - "ARCHIVE"
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::Enum
       name: 'apiProxyType'
       description: |
@@ -97,7 +97,7 @@
         - "API_PROXY_TYPE_UNSPECIFIED"
         - "PROGRAMMABLE"
         - "CONFIGURABLE"
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::NestedObject
       name: 'nodeConfig'
       description: |

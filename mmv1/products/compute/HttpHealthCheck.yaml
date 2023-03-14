@@ -1,0 +1,110 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'HttpHealthCheck'
+kind: 'compute#httpHealthCheck'
+base_url: projects/{{project}}/global/httpHealthChecks
+collection_url_key: 'items'
+has_self_link: true
+description: |
+  An HttpHealthCheck resource. This resource defines a template for how
+  individual VMs should be checked for health, via HTTP.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
+  api: 'https://cloud.google.com/compute/docs/reference/v1/httpHealthChecks'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+properties:
+  - !ruby/object:Api::Type::Integer
+    name: 'checkIntervalSec'
+    description: |
+      How often (in seconds) to send a health check. The default value is 5
+      seconds.
+    default_value: 5
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource. Provide this property when
+      you create the resource.
+  - !ruby/object:Api::Type::Integer
+    name: 'healthyThreshold'
+    description: |
+      A so-far unhealthy instance will be marked healthy after this many
+      consecutive successes. The default value is 2.
+  - !ruby/object:Api::Type::String
+    name: 'host'
+    description: |
+      The value of the host header in the HTTP health check request. If
+      left empty (default value), the public IP on behalf of which this
+      health check is performed will be used.
+  - !ruby/object:Api::Type::Integer
+    name: 'id'
+    description: |
+      The unique identifier for the resource. This identifier is defined by
+      the server.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the resource. Provided by the client when the resource is
+      created. The name must be 1-63 characters long, and comply with
+      RFC1035.  Specifically, the name must be 1-63 characters long and
+      match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
+      the first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the
+      last character, which cannot be a dash.
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::Integer
+    name: 'port'
+    description: |
+      The TCP port number for the HTTP health check request.
+      The default value is 80.
+  - !ruby/object:Api::Type::String
+    name: 'requestPath'
+    description: |
+      The request path of the HTTP health check request.
+      The default value is /.
+  - !ruby/object:Api::Type::Integer
+    name: 'timeoutSec'
+    description: |
+      How long (in seconds) to wait before claiming failure.
+      The default value is 5 seconds.  It is invalid for timeoutSec to have
+      greater value than checkIntervalSec.
+  - !ruby/object:Api::Type::Integer
+    name: 'unhealthyThreshold'
+    description: |
+      A so-far healthy instance will be marked unhealthy after this many
+      consecutive failures. The default value is 2.

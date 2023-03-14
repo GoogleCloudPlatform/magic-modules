@@ -33,7 +33,7 @@
     error: !ruby/object:Api::OpAsync::Error
       path: 'error'
       message: 'message'
-  input: true
+  immutable: true
   description: |
     An `Instance` is the runtime dataplane in Apigee.
   parameters:
@@ -43,7 +43,7 @@
         The Apigee Organization associated with the Apigee instance,
         in the format `organizations/{{org_name}}`.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::String
@@ -84,7 +84,7 @@
       description: |
         Customer Managed Encryption Key (CMEK) used for disk and volume encryption. Required for Apigee paid subscriptions only.
         Use the following format: `projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)/cryptoKeys/([^/]+)`
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::String
       name: 'host'
       description: |

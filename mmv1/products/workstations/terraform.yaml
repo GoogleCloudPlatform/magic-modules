@@ -15,7 +15,10 @@
 !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   WorkstationCluster: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}", "{{workstation_cluster_id}}"]
+    import_format:
+      [
+        "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}",
+      ]
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -30,3 +33,95 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           workstation_cluster_name: "workstation-cluster-private"
+  WorkstationConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format:
+      [
+        "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}",
+      ]
+    autogen_async: true
+    properties:
+      host: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      host.gceInstance: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      host.gceInstance.poolSize:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      host.gceInstance.bootDiskSizeGb:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      host.gceInstance.machineType:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      container: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      container.image: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories.gcePd:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories.gcePd.diskType:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories.gcePd.fsType:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      persistentDirectories.gcePd.sizeGb:
+        !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_config_basic"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_config_container"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_config_persistent_directories"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_config_shielded_instance_config"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_config_encryption_key"
+        min_version: beta
+        primary_resource_id: "default"
+        # TODO: https://github.com/hashicorp/terraform-provider-google/issues/13923
+        skip_test: true
+        vars:
+          account_id: "my-account"
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
+  Workstation: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format:
+      [
+        "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations/{{workstation_id}}",
+      ]
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "workstation_basic"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          workstation_cluster_name: "workstation-cluster"
+          workstation_config_name: "workstation-config"
+          workstation_name: "workstation"

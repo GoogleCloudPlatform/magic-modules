@@ -1,0 +1,135 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'RegionTargetHttpsProxy'
+base_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies
+has_self_link: true
+immutable: true
+description: |
+  Represents a RegionTargetHttpsProxy resource, which is used by one or more
+  forwarding rules to route incoming HTTPS requests to a URL map.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetHttpsProxies'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'region'
+    resource: 'Region'
+    imports: 'name'
+    immutable: true
+    required: true
+    description: |
+      The region where the regional proxy resides.
+properties:
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: 'An optional description of this resource.'
+    immutable: true
+  - !ruby/object:Api::Type::Integer
+    name: 'id'
+    description: 'The unique identifier for the resource.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the resource. Provided by the client when the resource is
+      created. The name must be 1-63 characters long, and comply with
+      RFC1035. Specifically, the name must be 1-63 characters long and match
+      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+      first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the last
+      character, which cannot be a dash.
+    immutable: true
+    required: true
+ # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
+ # a 400 "QUIC override is supported only with global TargetHttpsProxy". jamessynge@ said in an
+ # email sent on 2019 Sep 20 that support for this "is probably far in the future."
+ #- !ruby/object:Api::Type::Enum
+ #  name: 'quicOverride'
+ #  description: |
+ #    Specifies the QUIC override policy for this resource. This determines
+ #    whether the load balancer will attempt to negotiate QUIC with clients
+ #    or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
+ #    specified, uses the QUIC policy with no user overrides, which is
+ #    equivalent to DISABLE. Not specifying this field is equivalent to
+ #    specifying NONE.
+ #  values:
+ #    - :NONE
+ #    - :ENABLE
+ #    - :DISABLE
+ #  update_verb: :POST
+ #  update_url:
+ #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'
+  - !ruby/object:Api::Type::Array
+    name: 'sslCertificates'
+    description: |
+      A list of RegionSslCertificate resources that are used to authenticate
+      connections between users and the load balancer. Currently, exactly
+      one SSL certificate must be specified.
+    required: true
+    update_verb: :POST
+    update_url:
+      'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'sslCertificate'
+      resource: 'RegionSslCertificate'
+      imports: 'selfLink'
+      description: 'The SSL certificates used by this TargetHttpsProxy'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'sslPolicy'
+    resource: 'RegionSslPolicy'
+    imports: 'selfLink'
+    min_version: beta 
+    description: |
+      A reference to the Region SslPolicy resource that will be associated with
+      the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
+      resource will not have any SSL policy configured.
+ # 2022 May 28 - setSslPolicy method not yet listed
+ # https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies
+ #  update_verb: :POST
+ #  update_url:
+ #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'urlMap'
+    resource: 'RegionUrlMap'
+    imports: 'selfLink'
+    description: |
+      A reference to the RegionUrlMap resource that defines the mapping from URL
+      to the RegionBackendService.
+    required: true
+    update_verb: :POST
+    update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'

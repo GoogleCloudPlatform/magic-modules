@@ -46,7 +46,7 @@
     # This must be done at the provider level.
     - !ruby/object:Api::Type::String
       name: parent
-      input: true
+      immutable: true
       required: true
       description: |
         The AccessPolicy this ServicePerimeter lives in.
@@ -62,7 +62,7 @@
         properties:
           - !ruby/object:Api::Type::String
             name: name
-            input: true
+            immutable: true
             required: true
             description: |
               Resource name for the ServicePerimeter. The short_name component must
@@ -112,7 +112,7 @@
               - :PERIMETER_TYPE_BRIDGE
             default_value: :PERIMETER_TYPE_REGULAR
             custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
-            input: true
+            immutable: true
           - !ruby/object:Api::Type::NestedObject
             name: 'status'
             description: |

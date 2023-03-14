@@ -55,12 +55,12 @@
 
     log.Printf("[DEBUG] Deleting DomainTrust %q", d.Id())
 
-    res, err := sendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+    res, err := SendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
     if err != nil {
         return handleNotFoundError(err, d, "DomainTrust")
     }
 
-    err = activeDirectoryOperationWaitTime(
+    err = ActiveDirectoryOperationWaitTime(
         config, res, project, "Deleting DomainTrust", userAgent,
         d.Timeout(schema.TimeoutDelete))
 

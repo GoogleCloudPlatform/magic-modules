@@ -1,8 +1,14 @@
 # [START privateca_create_certificate_config]
-resource "google_privateca_certificate_authority" "test-ca" {
-  certificate_authority_id = "<%= ctx[:vars]["certificate_authority_id"] %>"
+resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
-  pool = "<%= ctx[:vars]["pool"] %>"
+  name = "<%= ctx[:vars]["ca_pool_id"] %>"
+  tier = "ENTERPRISE"
+}
+
+resource "google_privateca_certificate_authority" "default" {
+  location = "us-central1"
+  pool = google_privateca_ca_pool.default.name
+  certificate_authority_id = "my-authority"
   config {
     subject_config {
       subject {
@@ -39,10 +45,10 @@ resource "google_privateca_certificate_authority" "test-ca" {
 }
 
 resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
-  pool = "<%= ctx[:vars]["pool"] %>"
   location = "us-central1"
-  certificate_authority = google_privateca_certificate_authority.test-ca.certificate_authority_id
-  lifetime = "860s"
+  pool = google_privateca_ca_pool.default.name
+  certificate_authority = google_privateca_certificate_authority.default.certificate_authority_id
+  lifetime = "86000s"
   name = "<%= ctx[:vars]["certificate_name"] %>"
   config {
     subject_config  {
@@ -63,7 +69,7 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
     }
     x509_config {
       ca_options {
-        is_ca = false
+        is_ca = true
       }
       key_usage {
         base_key_usage {
@@ -73,6 +79,17 @@ resource "google_privateca_certificate" "<%= ctx[:primary_resource_id] %>" {
         extended_key_usage {
           server_auth = false
         }
+      }
+      name_constraints {
+        critical                  = true
+        permitted_dns_names       = ["*.example.com"]
+        excluded_dns_names        = ["*.deny.example.com"]
+        permitted_ip_ranges       = ["10.0.0.0/8"]
+        excluded_ip_ranges        = ["10.1.1.0/24"]
+        permitted_email_addresses = [".example.com"]
+        excluded_email_addresses  = [".deny.example.com"]
+        permitted_uris            = [".example.com"]
+        excluded_uris             = [".deny.example.com"]
       }
     }
     public_key {

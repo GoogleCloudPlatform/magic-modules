@@ -208,7 +208,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "basic_taxonomy"
         primary_resource_name: "fmt.Sprintf(\"tf_test_my_taxonomy%s\", context[\"random_suffix\"])"
         vars:
-          display_name: "my_display_name"
+          display_name: "my_taxonomy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
