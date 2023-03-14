@@ -32,7 +32,7 @@ properties:
     description: |
       The resource name.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: description
     description: |
@@ -55,7 +55,7 @@ properties:
           ATTESTATION_AUTHORITY Occurrence that names a container image
           and that links to this Note.
         required: true
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::Array
         name: publicKeys
         description: |

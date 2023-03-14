@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'DatasetAccess'
-input: true
+immutable: true
 base_url: projects/{{project}}/datasets/{{dataset_id}}
 self_link: projects/{{project}}/datasets/{{dataset_id}}
 create_verb: :PATCH

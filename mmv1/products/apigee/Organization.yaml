@@ -43,7 +43,7 @@
       description: |
         The project ID associated with the Apigee organization.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
     - !ruby/object:Api::Type::Enum
       name: 'retention'
@@ -76,7 +76,7 @@
       name: 'analyticsRegion'
       description: |
         Primary GCP region for analytics data storage. For valid values, see [Create an Apigee organization](https://cloud.google.com/apigee/docs/api-platform/get-started/create-org).
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::String
       name: 'authorizedNetwork'
       description: |
@@ -91,7 +91,7 @@
         - "CLOUD"
         - "HYBRID"
       default_value: :CLOUD
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::String
       name: 'subscriptionType'
       description: |
@@ -102,7 +102,7 @@
       name: 'billingType'
       description: |
         Billing type of the Apigee organization. See [Apigee pricing](https://cloud.google.com/apigee/pricing).
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::String
       name: 'caCertificate'
       description: |
@@ -116,7 +116,7 @@
         Update is not allowed after the organization is created.
         If not specified, a Google-Managed encryption key will be used.
         Valid only when `RuntimeType` is CLOUD. For example: `projects/foo/locations/us/keyRings/bar/cryptoKeys/baz`.
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::NestedObject
       name: 'properties'
       description: Properties defined in the Apigee organization profile.

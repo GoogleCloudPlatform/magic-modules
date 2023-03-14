@@ -3,7 +3,7 @@ if err != nil {
 	return err
 }
 
-getRes, err := sendRequest(config, "GET", project, getUrl, userAgent, nil)
+getRes, err := SendRequest(config, "GET", project, getUrl, userAgent, nil)
 if err != nil {
 	return handleNotFoundError(err, d, fmt.Sprintf("StorageHmacKey %q", d.Id()))
 }
@@ -18,7 +18,7 @@ if v := getRes["state"]; v == "ACTIVE" {
 	}
 
 	log.Printf("[DEBUG] Deactivating HmacKey %q: %#v", d.Id(), getRes)
-	_, err = sendRequestWithTimeout(config, "PUT", project, updateUrl, userAgent, getRes, d.Timeout(schema.TimeoutUpdate))
+	_, err = SendRequestWithTimeout(config, "PUT", project, updateUrl, userAgent, getRes, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 			return fmt.Errorf("Error deactivating HmacKey %q: %s", d.Id(), err)
 	}

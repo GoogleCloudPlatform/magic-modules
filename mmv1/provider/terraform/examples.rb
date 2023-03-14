@@ -77,7 +77,7 @@ module Provider
       #   - tests config will have `"network = my-vpc%{random_suffix}"`
       #     with context
       #       map[string]interface{}{
-      #         "random_suffix": randString()
+      #         "random_suffix": RandString()
       #       }
       #
       # If test_vars_overrides["network"] = "nameOfVpc()"

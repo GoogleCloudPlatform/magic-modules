@@ -32,7 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # This property expects input like: network = "<project-id>/<vpc-name or vpc-id>" or selfLinkWithId (selfLink is not supported)
         # However, the API response stored in Terraform state looks like: network = "https://www.googleapis.com/compute/v1/projects/<project-id>/global/networks/<vpc-id>"
         # This results in persistent diffs, so we surpress them by using ignore_read. The API will reject incorrect references to non-existent or inaccessible VPCs.
-        # Since this property is configured as 'input: true', any modifications to this property will result in a forced replacement of the resource.
+        # Since this property is configured as 'immutable: true', any modifications to this property will result in a forced replacement of the resource.
         ignore_read: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -42,7 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           short_name: "keyname"
         test_vars_overrides:
-          short_name: '"tf-test-key-" + randString(t, 10)'
+          short_name: '"tf-test-key-" + RandString(t, 10)'
         test_env_vars:
           org_id: :ORG_ID
   TagValue: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -69,8 +69,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           key_short_name: "keyname"
           value_short_name: "valuename"
         test_vars_overrides:
-          key_short_name: '"tf-test-key-" + randString(t, 10)'
-          value_short_name: '"tf-test-value-" + randString(t, 10)'
+          key_short_name: '"tf-test-key-" + RandString(t, 10)'
+          value_short_name: '"tf-test-value-" + RandString(t, 10)'
         test_env_vars:
           org_id: :ORG_ID
   TagBinding: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -93,8 +93,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           value_short_name: "valuename"
           project_id: project_id
         test_vars_overrides:
-          key_short_name: '"tf-test-key-" + randString(t, 10)'
-          value_short_name: '"tf-test-value-" + randString(t, 10)'
-          project_id: '"tf-test-" + randString(t, 10)'
+          key_short_name: '"tf-test-key-" + RandString(t, 10)'
+          value_short_name: '"tf-test-value-" + RandString(t, 10)'
+          project_id: '"tf-test-" + RandString(t, 10)'
         test_env_vars:
           org_id: :ORG_ID

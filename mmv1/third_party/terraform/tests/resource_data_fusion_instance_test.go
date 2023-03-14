@@ -10,11 +10,11 @@ import (
 func TestAccDataFusionInstance_update(t *testing.T) {
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstance_basic(instanceName),
@@ -48,6 +48,10 @@ resource "google_data_fusion_instance" "foobar" {
   options = {
   	prober_test_run = "true"
   }
+  accelerators {
+    accelerator_type = "CDC"
+    state = "DISABLED"
+  }
 }
 `, instanceName)
 }
@@ -66,6 +70,11 @@ resource "google_data_fusion_instance" "foobar" {
     label2 = "value2"
   }
   version = "6.8.0"
+
+  accelerators {
+    accelerator_type = "CCAI_INSIGHTS"
+    state = "ENABLED"
+  }
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
   	prober_test_run = "true"
@@ -77,11 +86,11 @@ resource "google_data_fusion_instance" "foobar" {
 func TestAccDataFusionInstanceEnterprise_update(t *testing.T) {
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstanceEnterprise_basic(instanceName),
@@ -143,18 +152,18 @@ func TestAccDataFusionInstanceVersion_dataFusionInstanceUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 		"version":       "6.7.2",
 	}
 
 	contextUpdate := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 		"version":       "6.8.0",
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckDataFusionInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{

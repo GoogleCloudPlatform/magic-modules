@@ -45,13 +45,13 @@ properties:
     description: |-
       User-assigned (human readable) ID of the data policy that needs to be unique within a project. Used as {dataPolicyId} in part of the resource name.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: location
     description: |
       The name of the location of the data policy.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: policyTag
@@ -80,4 +80,8 @@ properties:
           - :SHA256
           - :ALWAYS_NULL
           - :DEFAULT_MASKING_VALUE
+          - :LAST_FOUR_CHARACTERS
+          - :FIRST_FOUR_CHARACTERS
+          - :EMAIL_MASK
+          - :DATE_YEAR_MASK
 
