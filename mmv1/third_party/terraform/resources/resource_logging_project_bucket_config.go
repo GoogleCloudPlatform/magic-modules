@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -47,7 +48,6 @@ var loggingProjectBucketConfigSchema = map[string]*schema.Schema{
 	"enable_analytics": {
 		Type:             schema.TypeBool,
 		Optional:         true,
-		Default:          false,
 		Description:      `Enable log analytics for the bucket. Cannot be disabled once enabled.`,
 		DiffSuppressFunc: backwardsChangeDiffSuppress,
 	},
@@ -314,10 +314,8 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 }
 
 func backwardsChangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if d.HasChange("enable_analytics") {
-		if d.Get("enable_analytics").(bool) {
-			return false
-		}
+	oldValue, _ := strconv.ParseBool(old)
+	if oldValue {
 		return true
 	}
 	return false
