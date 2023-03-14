@@ -38,8 +38,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dns_auth_name2: "dns-auth2"
           dns_auth_subdomain2: "subdomain2"
           cert_name: "dns-cert"
-        ignore_read_extra:
-          - "managed.0.dns_authorizations"
       - !ruby/object:Provider::Terraform::Examples
         name: "certificate_manager_self_managed_certificate"
         primary_resource_id: "default"
