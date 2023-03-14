@@ -199,7 +199,6 @@ func schemaNodeConfig() *schema.Schema {
 				},
 	<% end -%>
 
-	<% unless version == 'ga' -%>
 				"local_nvme_ssd_block_config": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -213,12 +212,11 @@ func schemaNodeConfig() *schema.Schema {
 								Required:     true,
 								ForceNew:     true,
 								ValidateFunc: validation.IntAtLeast(0),
-								Description:  `Number of raw-block local NVMe SSDs attached to each node. Each local SSD is 375 GB in size.`,
+								Description:  `Number of raw-block local NVMe SSD disks to be attached to the node. Each local SSD is 375 GB in size.`,
 							},
 						},
 					},
 				},
-	<% end -%>
 
 				"gcfs_config": schemaGcfsConfig(true),
 
@@ -867,9 +865,7 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 <% unless version == 'ga' -%>
 		"ephemeral_storage_config": flattenEphemeralStorageConfig(c.EphemeralStorageConfig),
 <% end -%>
-<% unless version == 'ga' -%>
 		"local_nvme_ssd_block_config": flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
-<% end -%>
 		"gcfs_config":              flattenGcfsConfig(c.GcfsConfig),
 		"gvnic":										flattenGvnic(c.Gvnic),
 		"reservation_affinity":     flattenGKEReservationAffinity(c.ReservationAffinity),
@@ -945,7 +941,6 @@ func flattenEphemeralStorageConfig(c *container.EphemeralStorageConfig) []map[st
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func flattenLocalNvmeSsdBlockConfig(c *container.LocalNvmeSsdBlockConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -955,7 +950,6 @@ func flattenLocalNvmeSsdBlockConfig(c *container.LocalNvmeSsdBlockConfig) []map[
 	}
 	return result
 }
-<% end -%>
 
 func flattenLoggingVariant(c *container.NodePoolLoggingConfig) string {
 	variant := "DEFAULT"
