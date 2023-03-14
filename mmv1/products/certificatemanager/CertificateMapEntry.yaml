@@ -96,6 +96,7 @@
         A serving state of this Certificate Map Entry.
     - !ruby/object:Api::Type::String
       name: 'hostname'
+      immutable: true
       description: |
         A Hostname (FQDN, e.g. example.com) or a wildcard hostname expression (*.example.com)
         for a set of hostnames with common suffix. Used as Server Name Indication (SNI) for
@@ -105,6 +106,7 @@
         - matcher
     - !ruby/object:Api::Type::String
       name: 'matcher'
+      immutable: true
       exactly_one_of:
         - hostname
         - matcher

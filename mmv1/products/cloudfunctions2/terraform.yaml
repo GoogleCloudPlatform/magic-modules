@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   function:  !ruby/object:Overrides::Terraform::ResourceOverride
@@ -69,6 +69,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           zip_path: "\"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip\""
           primary_resource_id: "\"terraform-test\""
+          policyChanged: "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\")"
         # ignore these fields during import step
         ignore_read_extra:
           - "build_config.0.source.0.storage_source.0.object"
@@ -87,6 +88,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           zip_path: "\"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip\""
           primary_resource_id: "\"terraform-test\""
+          policyChanged: "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\")"
         # ignore these fields during import step
         ignore_read_extra:
           - "build_config.0.source.0.storage_source.0.object"
@@ -104,6 +106,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
           location: "\"us-central1\""
+          policyChanged: "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\")"
         # ignore these fields during import step
         ignore_read_extra:
           - "build_config.0.source.0.storage_source.0.object"
@@ -121,6 +124,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_vars_overrides:
           zip_path: "\"./test-fixtures/cloudfunctions2/function-source.zip\""
           location: "\"us-central1\""
+          policyChanged: "BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\")"
         # ignore these fields during import step
         ignore_read_extra:
           - "build_config.0.source.0.storage_source.0.object"
@@ -141,7 +145,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # ignore these fields during import step
         ignore_read_extra:
           - "build_config.0.source.0.storage_source.0.object"
-          - "build_config.0.source.0.storage_source.0.bucket"            
+          - "build_config.0.source.0.storage_source.0.bucket"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
@@ -161,7 +165,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       serviceConfig.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       serviceConfig.secretVolumes.versions: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true        
+        default_from_api: true
       eventTrigger.pubsubTopic: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       eventTrigger.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride

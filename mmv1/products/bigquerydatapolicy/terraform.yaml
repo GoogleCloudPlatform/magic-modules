@@ -20,12 +20,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       [
         "projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}",
         "{{project}}/{{location}}/{{data_policy_id}}",
-         "{{location}}/{{data_policy_id}}"
+        "{{location}}/{{data_policy_id}}",
       ]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_datapolicy_data_policy_basic"
-        min_version: beta
         primary_resource_id: "data_policy"
         primary_resource_name: 'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
         vars:
