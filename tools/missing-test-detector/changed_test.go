@@ -45,6 +45,48 @@ func TestResourceMapChanges(t *testing.T) {
 			expectedChangedFields: map[string]ResourceChanges{},
 		},
 		{
+			name: "unchanged-nested-field",
+			oldResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_one": {
+					Schema: map[string]*schema.Schema{
+						"field_one": {
+							Type: schema.TypeString,
+						},
+						"field_two": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"field_three": {
+										Type: schema.TypeString,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_service_one_resource_one": {
+					Schema: map[string]*schema.Schema{
+						"field_one": {
+							Type: schema.TypeString,
+						},
+						"field_two": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"field_three": {
+										Type: schema.TypeString,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedChangedFields: map[string]ResourceChanges{},
+		},
+		{
 			name: "new-nested-field",
 			oldResourceMap: map[string]*schema.Resource{
 				"google_service_one_resource_one": {
