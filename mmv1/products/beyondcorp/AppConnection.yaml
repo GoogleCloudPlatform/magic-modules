@@ -51,7 +51,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       ID of the AppConnection.
     url_param_only: true
@@ -59,7 +59,7 @@ properties:
     name: 'region'
     description: |
       The region of the AppConnection.
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
@@ -75,7 +75,7 @@ properties:
       The type of network connectivity used by the AppConnection. Refer to
       https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#type
       for a list of possible values.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'applicationEndpoint'
     description: |

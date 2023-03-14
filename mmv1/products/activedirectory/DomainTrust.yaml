@@ -53,7 +53,7 @@
         name: domain
         required: true
         url_param_only: true
-        input: true
+        immutable: true
         description: |
           The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions, 
           https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.  
@@ -65,7 +65,7 @@
       - !ruby/object:Api::Type::Enum
         name: 'trustType'
         required: true
-        input: true
+        immutable: true
         description: 'The type of trust represented by the trust resource.'
         values:
           - FOREST
@@ -73,7 +73,7 @@
       - !ruby/object:Api::Type::Enum
         name: 'trustDirection'
         required: true
-        input: true
+        immutable: true
         description: 'The trust direction, which decides if the current domain is trusted, trusting, or both.'
         values:
           - INBOUND
@@ -81,7 +81,7 @@
           - BIDIRECTIONAL
       - !ruby/object:Api::Type::Boolean
           name: 'selectiveAuthentication'
-          input: true
+          immutable: true
           description: |
             Whether the trusted side has forest/domain wide access or selective access to an approved set of resources.
       - !ruby/object:Api::Type::Array
@@ -93,6 +93,6 @@
       - !ruby/object:Api::Type::String
         name: 'trustHandshakeSecret'
         required: true
-        input: true
+        immutable: true
         description: |
           The trust secret used for the handshake with the target domain. This will not be stored.

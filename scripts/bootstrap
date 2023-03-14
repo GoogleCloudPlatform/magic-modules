@@ -1,6 +1,6 @@
 #!/bin/bash
 # Runs initial set up tasks for Magic Modules. This script
-# if safe to run multiple times.
+# is safe to run multiple times.
 
 set -e
 

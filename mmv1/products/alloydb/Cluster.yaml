@@ -47,13 +47,13 @@
     - !ruby/object:Api::Type::String
       name: "clusterId"
       required: true
-      input: true
+      immutable: true
       url_param_only: true
       description: |
         The ID of the alloydb cluster.
     - !ruby/object:Api::Type::String
       name: "location"
-      input: true
+      immutable: true
       url_param_only: true
       description: |
         The location where the alloydb cluster should reside.
@@ -89,7 +89,7 @@
         The database engine major version. This is an output-only field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
     - !ruby/object:Api::Type::NestedObject
       name: "initialUser"
-      input: true
+      immutable: true
       description: |
         Initial user to setup during cluster creation.
       properties:
@@ -126,7 +126,7 @@
           description: "Labels to apply to backups created using this configuration."
         - !ruby/object:Api::Type::NestedObject
           name: "weeklySchedule"
-          input: true
+          immutable: true
           required: true
           description: "Weekly schedule for the Backup."
           properties:
