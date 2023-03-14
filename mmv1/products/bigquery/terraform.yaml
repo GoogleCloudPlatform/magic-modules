@@ -57,6 +57,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           public_routine: "public_routine"
         test_env_vars:
           service_account: :SERVICE_ACCT
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_case_insensitive_names"
+        primary_resource_id: "dataset"
+        skip_docs: true
+        vars:
+          dataset_id: "example_dataset"
+          account_name: "bqowner"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_default_collation_set"
+        primary_resource_id: "dataset"
+        skip_docs: true
+        vars:
+          dataset_id: "example_dataset"
+          account_name: "bqowner"
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'delete_contents_on_destroy'
@@ -95,6 +109,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       friendlyName: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
+      isCaseInsensitive: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      defaultCollation: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateDefaultCollation'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
     docs: !ruby/object:Provider::Terraform::Docs

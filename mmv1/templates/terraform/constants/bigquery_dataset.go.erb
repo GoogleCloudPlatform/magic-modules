@@ -23,3 +23,12 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
 
     return
 }
+
+func validateDefaultCollation(v interface{}, k string) (ws []string, errors []error) {
+    value := v.(string)
+    if value != "und:ci" && value != "" {
+        errors = append(errors, fmt.Errorf("%q must be set to 'und:ci' or '' (empty string), got: %v", k, v))
+    }
+
+    return
+}
