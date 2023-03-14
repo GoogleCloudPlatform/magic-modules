@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'Gateway'
-base_url: 'projects/{{project}}/locations/{{locations}}/gateways'
-create_url: 'projects/{{project}}/locations/{{locations}}/gateways?gatewayId={{name}}'
-self_link: 'projects/{{project}}/locations/global/edgeCacheServices/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/gateways'
+create_url: 'projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
 description: |
   Gateway represents the configuration for a proxy, typically a load balancer.
   It captures the ip:port over which the services are exposed by the proxy,
@@ -49,6 +49,13 @@ parameters:
     url_param_only: true
     description: |
       Short name of the Gateway resource to be created.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    url_param_only: true
+    input: true
+    required: true
+    description: |
+      The location of this gateway.
 properties:
   - !ruby/object:Api::Type::String
     name: 'scope'

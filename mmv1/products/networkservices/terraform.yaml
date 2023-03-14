@@ -164,3 +164,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  Gateway: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/locations/{{location}}/gateways/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_services_gateway_basic"
+        primary_resource_id: "default"
+        vars:
+          resource_name: "my-gateway"
