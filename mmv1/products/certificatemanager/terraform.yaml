@@ -40,7 +40,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cert_name: "dns-cert"
         ignore_read_extra:
           - "managed.0.dns_authorizations"
-    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "certificate_manager_self_managed_certificate"
         primary_resource_id: "default"
@@ -48,9 +47,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cert_name: "self-managed-cert"
     properties:
       managed.dnsAuthorizations: !ruby/object:Overrides::Terraform::PropertyOverride
-        # We don't support ignore_read on nested fields
-        ignore_read: true
-        custom_flatten: "templates/terraform/custom_flatten/certificate_manager_certificate_managed_dns_auth.go.erb"
+        diff_suppress_func: "projectNumberDiffSuppress"
       selfManaged.certificatePem: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       selfManaged.privateKeyPem: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -83,7 +80,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "certificate_manager_certificate_map_entry_full"
         primary_resource_id: "default"
-        vars: 
+        vars:
           dns_auth_name: "dns-auth"
           dns_auth_subdomain: "subdomain"
           dns_auth_name2: "dns-auth2"
