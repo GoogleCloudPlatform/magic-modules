@@ -18,7 +18,8 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
+				ExternalProviders: ProviderVersion450(),
+				SkipFunc:          SkipStepIfVcr,
 				Config:            testAccDataSourceDnsManagedZone_basic(RandString(t, 10)),
 				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
@@ -29,8 +30,8 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 						"peering_config.#":                      {},
 						"forwarding_config.#":                   {},
 						"force_destroy":                         {},
-						"labels.#": 				                     {},
-						"creation_time": 			                   {},
+						"labels.#":                              {},
+						"creation_time":                         {},
 						"cloud_logging_config.#":                {},
 						"cloud_logging_config.0.%":              {},
 						"cloud_logging_config.0.enable_logging": {},
@@ -52,8 +53,8 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 						"peering_config.#":                      {},
 						"forwarding_config.#":                   {},
 						"force_destroy":                         {},
-						"labels.#": 				                     {},
-						"creation_time": 			                   {},
+						"labels.#":                              {},
+						"creation_time":                         {},
 						"cloud_logging_config.#":                {},
 						"cloud_logging_config.0.%":              {},
 						"cloud_logging_config.0.enable_logging": {},
@@ -93,20 +94,20 @@ func testAccCheckDNSManagedZoneDestroyProducerFramework(t *testing.T) func(s *te
 				continue
 			}
 
-			p := GetTestFwProvider(t)
+			p := GetFwTestProvider(t)
 
-			url, err := replaceVarsForFrameworkTest(&p.ProdProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
+			url, err := replaceVarsForFrameworkTest(&p.frameworkProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
 			if err != nil {
 				return err
 			}
 
 			billingProject := ""
 
-			if !p.ProdProvider.billingProject.IsNull() && p.ProdProvider.billingProject.String() != "" {
-				billingProject = p.ProdProvider.billingProject.String()
+			if !p.billingProject.IsNull() && p.billingProject.String() != "" {
+				billingProject = p.billingProject.String()
 			}
 
-			_, diags := sendFrameworkRequest(&p.ProdProvider, "GET", billingProject, url, p.ProdProvider.userAgent, nil)
+			_, diags := sendFrameworkRequest(&p.frameworkProvider, "GET", billingProject, url, p.userAgent, nil)
 			if !diags.HasError() {
 				return fmt.Errorf("DNSManagedZone still exists at %s", url)
 			}

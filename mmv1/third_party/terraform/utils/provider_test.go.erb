@@ -101,6 +101,7 @@ var masterBillingAccountEnvVars = []string{
 
 func init() {
 	configs = make(map[string]*Config)
+	fwProviders = make(map[string]*frameworkTestProvider)
 	sources = make(map[string]VcrSource)
 	testAccProvider = Provider()
 	TestAccProviders = map[string]*schema.Provider{
@@ -552,6 +553,10 @@ func SkipIfVcr(t *testing.T) {
 	if isVcrEnabled() {
 		t.Skipf("VCR enabled, skipping test: %s", t.Name())
 	}
+}
+
+func SkipStepIfVcr() (bool, error) {
+	return isVcrEnabled(), nil
 }
 
 func SleepInSecondsForTest(t int) resource.TestCheckFunc {
