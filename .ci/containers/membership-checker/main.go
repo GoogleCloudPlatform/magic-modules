@@ -29,13 +29,13 @@ func main() {
 	fmt.Println("Branch Name: ", branchName)
 
 	headRepoUrl := os.Args[5]
-	fmt.Println("Branch Name: ", headRepoUrl)
+	fmt.Println("Head Repo URL: ", headRepoUrl)
 
 	headBranch := os.Args[6]
-	fmt.Println("Branch Name: ", headBranch)
+	fmt.Println("Head Branch: ", headBranch)
 
 	baseBranch := os.Args[7]
-	fmt.Println("Branch Name: ", baseBranch)
+	fmt.Println("Base Branch: ", baseBranch)
 
 	substitutions := map[string]string{
 		"BRANCH_NAME":    branchName,
@@ -51,8 +51,8 @@ func main() {
 		return
 	}
 
-	if target == "check_auto_run_contributor" {
-		err = reviewerAssignment(author, prNumber, GITHUB_TOKEN)
+	if target == "auto_run_and_gcbrun" {
+		err = requestReviewer(author, prNumber, GITHUB_TOKEN)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -61,7 +61,9 @@ func main() {
 
 	trusted := isTrustedUser(author, GITHUB_TOKEN)
 
-	if (target == "check_auto_run_contributor" && trusted) || (target == "check_community_contributor" && !trusted) {
+	// auto_run_and_gcbrun will be run on every commit or /gcbrun: only trigger builds for trusted users
+	// gcbrun_only will be run on every /gcbrun: only trigger builds for untrusted users (because trusted users will be handled by check_auto_run_contributor)
+	if (target == "auto_run_and_gcbrun" && trusted) || (target == "gcbrun_only" && !trusted) {
 		err = triggerMMPresubmitRuns("graphite-docker-images", "magic-modules", commitSha, substitutions)
 		if err != nil {
 			fmt.Println(err)

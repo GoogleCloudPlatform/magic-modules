@@ -3,59 +3,47 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
-func reviewerAssignment(author, prNumber, GITHUB_TOKEN string) error {
-	if isNoAssigneeUser(author) {
-		fmt.Println("User is on the list, not assigning")
+func requestReviewer(author, prNumber, GITHUB_TOKEN string) error {
+	if isTeamMember(author) {
+		fmt.Println("author is a team member, not assigning")
 		return nil
 	}
 
-	requestedReviewer, err := getPullRequestRequestedReviewer(prNumber, GITHUB_TOKEN)
+	firstRequestedReviewer, err := getPullRequestRequestedReviewer(prNumber, GITHUB_TOKEN)
 	if err != nil {
 		return err
 	}
 
-	previousAssignedReviewers, err := getPullRequestPreviousAssignedReviewers(prNumber, GITHUB_TOKEN)
+	previouslyInvolvedReviewers, err := getPullRequestPreviousAssignedReviewers(prNumber, GITHUB_TOKEN)
 	if err != nil {
 		return err
 	}
 
-	if requestedReviewer != "" {
-		fmt.Println("Issue is assigned")
-		if previousAssignedReviewers != nil {
-			fmt.Println("Retrieving previous reviewers to re-request reviews")
-			for _, reviewer := range previousAssignedReviewers {
-				if isTeamReviewer(reviewer) {
-					err = assignPullRequestReviewer(prNumber, reviewer, GITHUB_TOKEN)
-					if err != nil {
-						return err
-					}
-				}
-			}
-		}
-		return nil
+	foundTeamReviewer := false
+
+	if firstRequestedReviewer != "" {
+		foundTeamReviewer = true
 	}
 
-	if previousAssignedReviewers == nil {
-		assignRandomReviewer(prNumber, GITHUB_TOKEN)
-	} else {
-		foundTeamReviewer := false
-		for _, reviewer := range previousAssignedReviewers {
+	if previouslyInvolvedReviewers != nil {
+		for _, reviewer := range previouslyInvolvedReviewers {
 			if isTeamReviewer(reviewer) {
 				foundTeamReviewer = true
-				err = assignPullRequestReviewer(prNumber, reviewer, GITHUB_TOKEN)
+				err = requestPullRequestReviewer(prNumber, reviewer, GITHUB_TOKEN)
 				if err != nil {
 					return err
 				}
 			}
 		}
+	}
 
-		if !foundTeamReviewer {
-			err = assignRandomReviewer(prNumber, GITHUB_TOKEN)
-			if err != nil {
-				return err
-			}
+	if !foundTeamReviewer {
+		err = requestRandomReviewer(prNumber, GITHUB_TOKEN)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -127,7 +115,7 @@ func getPullRequestPreviousAssignedReviewers(prNumber, GITHUB_TOKEN string) ([]s
 	return result, nil
 }
 
-func assignPullRequestReviewer(prNumber, assignee, GITHUB_TOKEN string) error {
+func requestPullRequestReviewer(prNumber, assignee, GITHUB_TOKEN string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
 	body := map[string][]string{
@@ -149,9 +137,9 @@ func assignPullRequestReviewer(prNumber, assignee, GITHUB_TOKEN string) error {
 	return nil
 }
 
-func assignRandomReviewer(prNumber, GITHUB_TOKEN string) error {
-	assignee := getRamdomReviewer()
-	err := assignPullRequestReviewer(prNumber, assignee, GITHUB_TOKEN)
+func requestRandomReviewer(prNumber, GITHUB_TOKEN string) error {
+	assignee := getRandomReviewer()
+	err := requestPullRequestReviewer(prNumber, assignee, GITHUB_TOKEN)
 	if err != nil {
 		return err
 	}
@@ -163,29 +151,14 @@ func assignRandomReviewer(prNumber, GITHUB_TOKEN string) error {
 
 }
 
-func postComment(prNumber, assignee, GITHUB_TOKEN string) error {
+func postComment(prNumber, reviewer, GITHUB_TOKEN string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
-	comment := fmt.Sprintf(`Hello!  I am a robot who works on Magic Modules PRs.
+	comment, err := readFile("./reviewer_assignment_comment.md")
+	if err != nil {
+		return err
+	}
 
-I've detected that you're a community contributor. @%s, a repository maintainer, has been assigned to assist you and help review your changes. 
-
-<details>
-  <summary>:question: First time contributing? Click here for more details</summary>
-
----
-
-Your assigned reviewer will help review your code by: 
-* Ensuring it's backwards compatible, covers common error cases, etc.
-* Summarizing the change into a user-facing changelog note.
-* Passes tests, either our "VCR" suite, a set of presubmit tests, or with manual test runs.
-
-You can help make sure that review is quick by running local tests and ensuring they're passing in between each push you make to your PR's branch. Also, try to leave a comment with each push you make, as pushes generally don't generate emails.
-
-If your reviewer doesn't get back to you within a week after your most recent change, please feel free to leave a comment on the issue asking them to take a look! In the absence of a dedicated review dashboard most maintainers manage their pending reviews through email, and those will sometimes get lost in their inbox.
-
----
-
-</details>`, assignee)
+	comment = strings.Replace(comment, "{{reviewer}}", reviewer, 1)
 
 	body := map[string]string{
 		"body": comment,

@@ -4,17 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
-
-func onList(user string, userList []string) bool {
-	for _, v := range userList {
-		if v == user {
-			return true
-		}
-	}
-	return false
-}
 
 func requestCall(url, method, GITHUB_TOKEN string, result interface{}, body interface{}) (int, error) {
 	client := &http.Client{}
@@ -41,4 +33,12 @@ func requestCall(url, method, GITHUB_TOKEN string, result interface{}, body inte
 	}
 
 	return resp.StatusCode, nil
+}
+
+func readFile(filename string) (string, error) {
+	contents, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	return string(contents), nil
 }

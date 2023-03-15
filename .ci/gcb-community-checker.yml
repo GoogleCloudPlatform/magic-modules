@@ -5,7 +5,7 @@ steps:
       secretEnv: ["GITHUB_TOKEN", "PRESUBMIT_TRIGGER", "RAKE_TESTS_TRIGGER"]
       timeout: 8000s
       args:
-          - "check_community_contributor"
+          - "gcbrun_only"
           - $_PR_NUMBER
           - $COMMIT_SHA
           - $BRANCH_NAME
