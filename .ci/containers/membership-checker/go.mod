@@ -2,7 +2,10 @@ module membership-checker
 
 go 1.18
 
-require google.golang.org/api v0.112.0
+require (
+	golang.org/x/exp v0.0.0-20230314191032-db074128a8ec
+	google.golang.org/api v0.112.0
+)
 
 require (
 	cloud.google.com/go/compute v1.18.0 // indirect

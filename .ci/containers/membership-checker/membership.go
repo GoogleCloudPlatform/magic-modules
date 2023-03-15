@@ -4,34 +4,36 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"golang.org/x/exp/slices"
 )
 
 var (
-	// This is where you add users who do not need to have an assignee chosen for them
-	noAssigneeList = []string{"megan07", "slevenick", "c2thorn", "rileykarson", "melinath", "ScottSuarez", "shuyama1", "SarahFrench", "roaks3", "zli82016", "trodge", "hao-nan-li"}
+	// TODO: add unit tests to ensure that
+	// 1. people in vacationList are also  in reviewers
+	// 2. people in trustedContributors are not in reviewers
 
-	// This is where you add people to the random-assignee rotation.
-	reviewerRotationList = []string{"megan07", "slevenick", "c2thorn", "rileykarson", "melinath", "ScottSuarez", "shuyama1", "SarahFrench", "roaks3", "zli82016", "trodge", "hao-nan-li"}
+	// This is for the random-assignee rotation.
+	reviewerRotation = []string{"megan07", "slevenick", "c2thorn", "rileykarson", "melinath", "ScottSuarez", "shuyama1", "SarahFrench", "roaks3", "zli82016", "trodge", "hao-nan-li"}
 
-	// This is where your add reviewers who will be re-requested reviews when PR authors make new commits
-	// This should mostly be identical to reviewerRotationList, but if someone is temporally removed from assignee list, they can still be on this list to keep getting review alert for current PRs
-	rerequestReviewerRotationList = []string{"megan07", "slevenick", "c2thorn", "rileykarson", "melinath", "ScottSuarez", "shuyama1", "SarahFrench", "roaks3", "zli82016", "trodge", "hao-nan-li"}
+	// This is for new team members who are onboarding
+	trustedContributors = []string{"NickElliot"}
 
-	// This is where you add trusted users (besides the users who are already in noAssigneeList) that do not need a '/gcbrun' comment from team to run tests
-	trustedMemberList = []string{}
+	// This is for reviewers who are "on vacation" will not receive new review assignments but will still receive re-requests for assigned PRs.
+	vacationList = []string{"zli82016"}
 )
 
-func isNoAssigneeUser(author string) bool {
-	return onList(author, noAssigneeList)
+func isTeamMember(author string) bool {
+	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
 }
 
 func isTeamReviewer(reviewer string) bool {
-	return onList(reviewer, rerequestReviewerRotationList)
+	return slices.Contains(reviewerRotation, reviewer)
 }
 
 // Check if a user is safe to run tests automatically
 func isTrustedUser(author, GITHUB_TOKEN string) bool {
-	if isTrustedMember(author) {
+	if isTeamMember(author) {
 		fmt.Println("User is on the list")
 		return true
 	}
@@ -49,10 +51,6 @@ func isTrustedUser(author, GITHUB_TOKEN string) bool {
 	return false
 }
 
-func isTrustedMember(author string) bool {
-	return onList(author, noAssigneeList) || onList(author, trustedMemberList)
-}
-
 func isOrgMember(author, org, GITHUB_TOKEN string) bool {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
 	res, _ := requestCall(url, "GET", GITHUB_TOKEN, nil, nil)
@@ -60,8 +58,8 @@ func isOrgMember(author, org, GITHUB_TOKEN string) bool {
 	return res != 404
 }
 
-func getRamdomReviewer() string {
-	assignee := reviewerRotationList[rand.Intn(len(reviewerRotationList))]
+func getRandomReviewer() string {
 	rand.Seed(time.Now().Unix())
-	return assignee
+	reviewer := reviewerRotation[rand.Intn(len(reviewerRotationList))]
+	return reviewer
 }
