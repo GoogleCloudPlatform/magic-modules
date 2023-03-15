@@ -608,14 +608,12 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		}
 	}
 <% end -%>
-<% unless version == 'ga' -%>
 	if v, ok := nodeConfig["local_nvme_ssd_block_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.LocalNvmeSsdBlockConfig = &container.LocalNvmeSsdBlockConfig{
 			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
 		}
 	}
-<% end -%>
 
 	if v, ok := nodeConfig["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
