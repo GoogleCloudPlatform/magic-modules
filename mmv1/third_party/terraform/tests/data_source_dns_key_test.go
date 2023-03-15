@@ -34,7 +34,7 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 				),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config:                   testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
@@ -71,7 +71,7 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 				),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config:                   testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "0"),
