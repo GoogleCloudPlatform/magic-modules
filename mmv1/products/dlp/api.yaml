@@ -308,6 +308,8 @@ objects:
                     values: 
                       - :TOP
                       - :RANDOM_START
+                      - :SAMPLE_METHOD_UNSPECIFIED
+                    default_value: :TOP
                   - !ruby/object:Api::Type::Array
                     name: 'identifyingFields'
                     description: |
