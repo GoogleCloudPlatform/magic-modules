@@ -168,7 +168,7 @@ terraform {
 provider "google" {}
 
 resource "google_dns_managed_zone" "zone" {
-  name     = "test-zone"
+  name     = "%s-hashicorptest-com"
   dns_name = "%s.hashicorptest.com."
 }
 
@@ -186,7 +186,7 @@ data "google_dns_record_set" "rs" {
   managed_zone = google_dns_record_set.rs.managed_zone
   name         = google_dns_record_set.rs.name
   type         = google_dns_record_set.rs.type
-}`, key, managedZoneName, recordSetName)
+}`, key, managedZoneName, managedZoneName, recordSetName)
 }
 
 func testAccFrameworkProviderBasePath_setBasePath(endpoint, name string) string {
