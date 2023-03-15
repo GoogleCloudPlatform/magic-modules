@@ -52,7 +52,7 @@
       name: domainName
       required: true
       url_param_only: true
-      input: true
+      immutable: true
       description: |
         The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions, 
         https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
@@ -73,7 +73,7 @@
     - !ruby/object:Api::Type::String
       name: 'reservedIpRange'
       required: true
-      input: true
+      immutable: true
       description: |
         The CIDR range of internal addresses that are reserved for this domain. Reserved networks must be /24 or larger. 
         Ranges must be unique and non-overlapping with existing subnets in authorizedNetworks
@@ -87,7 +87,7 @@
     - !ruby/object:Api::Type::String
       name: 'admin'
       default_value: 'setupadmin'
-      input: true
+      immutable: true
       description: |
         The name of delegated administrator account used to perform Active Directory operations. 
         If not specified, setupadmin will be used.

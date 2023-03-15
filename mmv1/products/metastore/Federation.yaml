@@ -47,7 +47,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'federationId'
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The ID of the metastore federation. The id must contain only letters (a-z, A-Z), numbers (0-9), underscores (_),
@@ -56,7 +56,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The location where the metastore federation should reside.
 properties:
@@ -90,7 +90,7 @@ properties:
       The globally unique resource identifier of the metastore federation.
   - !ruby/object:Api::Type::String
     name: 'version'
-    input: true
+    immutable: true
     required: true
     description: |
       The Apache Hive metastore version of the federation. All backend metastore versions must be compatible with the federation version.

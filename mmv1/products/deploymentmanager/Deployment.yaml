@@ -19,7 +19,7 @@ self_link: projects/{{project}}/global/deployments/{{name}}
 create_url: projects/{{project}}/global/deployments?preview={{preview}}&createPolicy={{create_policy}}
 delete_url: projects/{{project}}/global/deployments/{{name}}?deletePolicy={{delete_policy}}
 # A deployment is updatable, but we need to have custom update behavior.
-input: true
+immutable: true
 update_verb: :PATCH
 update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
 description: |

@@ -16,7 +16,7 @@ name: 'VpnGateway'
 kind: 'compute#vpnGateway'
 base_url: projects/{{project}}/regions/{{region}}/vpnGateways
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
   Represents a VPN gateway running in GCP. This virtual device is managed
@@ -61,7 +61,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -73,7 +73,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Integer
     name: 'id'
     description: 'The unique identifier for the resource.'
@@ -85,7 +85,7 @@ properties:
     description: |
       The network this VPN gateway is accepting traffic for.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Array
     name: 'vpnInterfaces'
     description: |
@@ -111,4 +111,4 @@ properties:
               specified interconnect attachment resource.
 
               Not currently available publicly.
-          input: true
+          immutable: true

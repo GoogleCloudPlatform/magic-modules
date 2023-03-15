@@ -51,14 +51,14 @@
   parameters:
     - !ruby/object:Api::Type::String
       name: parent
-      input: true
+      immutable: true
       required: true
       description: |
         Required. Resource name for the access policy which owns this `AuthorizedOrgsDesc`.
       ignore_read: true
     - !ruby/object:Api::Type::String
       name: name
-      input: true
+      immutable: true
       required: true
       description: |
         Resource name for the `AuthorizedOrgsDesc`. Format:
@@ -75,7 +75,7 @@
       item_type: Api::Type::String
     - !ruby/object:Api::Type::Enum
       name: assetType
-      input: true
+      immutable: true
       description: |
         The type of entities that need to use the authorization relationship during
         evaluation, such as a device. Valid values are "ASSET_TYPE_DEVICE" and
@@ -85,7 +85,7 @@
         - :ASSET_TYPE_CREDENTIAL_STRENGTH
     - !ruby/object:Api::Type::Enum
       name: authorizationDirection
-      input: true
+      immutable: true
       description: |
         The direction of the authorization relationship between this organization
         and the organizations listed in the "orgs" field. The valid values for this
@@ -109,7 +109,7 @@
         - :AUTHORIZATION_DIRECTION_FROM
     - !ruby/object:Api::Type::Enum
       name: authorizationType
-      input: true
+      immutable: true
       description: |
         A granular control type for authorization levels. Valid value is "AUTHORIZATION_TYPE_TRUST".
       values:

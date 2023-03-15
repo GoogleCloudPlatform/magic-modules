@@ -34,7 +34,7 @@ parameters:
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
     required: true
-    input: true
+    immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
     url_param_only: true
@@ -45,7 +45,7 @@ properties:
       The name of this ConsentStore, for example:
       "consent1"
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'defaultConsentTtl'

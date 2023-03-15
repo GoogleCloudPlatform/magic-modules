@@ -15,7 +15,7 @@
 name: 'RegionNetworkEndpointGroup'
 kind: 'compute#networkEndpointGroup'
 base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups'
-input: true
+immutable: true
 has_self_link: true
 collection_url_key: 'items'
 references: !ruby/object:Api::Resource::ReferenceLinks

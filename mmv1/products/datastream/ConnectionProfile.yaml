@@ -30,14 +30,14 @@ parameters:
     description: |-
       The connection profile identifier.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
       The name of the location this connection profile is located in.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -139,7 +139,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'password'
         required: true
-        input: true
+        immutable: true
         description: |
           Password for the MySQL connection.
       - !ruby/object:Api::Type::NestedObject
@@ -149,7 +149,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: 'clientKey'
-            input: true
+            immutable: true
             description: |
               PEM-encoded private key associated with the Client Certificate.
               If this field is used then the 'client_certificate' and the
@@ -161,7 +161,7 @@ properties:
               Indicates whether the clientKey field is set.
           - !ruby/object:Api::Type::String
             name: 'clientCertificate'
-            input: true
+            immutable: true
             description: |
               PEM-encoded certificate that will be used by the replica to
               authenticate against the source database server. If this field
@@ -174,7 +174,7 @@ properties:
               Indicates whether the clientCertificate field is set.
           - !ruby/object:Api::Type::String
             name: 'caCertificate'
-            input: true
+            immutable: true
             description: |
               PEM-encoded certificate of the CA that signed the source database
               server's certificate.
@@ -256,14 +256,14 @@ properties:
           Port for the SSH tunnel.
       - !ruby/object:Api::Type::String
         name: 'password'
-        input: true
+        immutable: true
         description: |
           SSH password.
         conflicts:
           - forward_ssh_connectivity.0.private_key
       - !ruby/object:Api::Type::String
         name: 'privateKey'
-        input: true
+        immutable: true
         description: |
           SSH private key.
         conflicts:

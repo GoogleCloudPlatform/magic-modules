@@ -25,7 +25,7 @@ base_url: projects/{{project}}/locations/{{region}}/appGateways
 self_link: projects/{{project}}/locations/{{region}}/appGateways/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/appGateways?app_gateway_id={{name}}
 # This resources is not updatable
-input: true
+immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -50,7 +50,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       ID of the AppGateway.
     url_param_only: true
@@ -58,7 +58,7 @@ properties:
     name: 'region'
     description: |
       The region of the AppGateway.
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::Enum
     name: 'type'

@@ -27,7 +27,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: parent
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The agent to create a webhook for.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
@@ -65,7 +65,7 @@ properties:
         name: 'requestHeaders'
         description: |
           The HTTP request headers to send together with webhook requests.
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::Array
         name: 'allowedCaCerts'
         description: |
@@ -96,7 +96,7 @@ properties:
             name: 'requestHeaders'
             description: |
               The HTTP request headers to send together with webhook requests.
-            input: true
+            immutable: true
           - !ruby/object:Api::Type::Array
             name: 'allowedCaCerts'
             description: |

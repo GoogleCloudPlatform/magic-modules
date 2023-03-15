@@ -32,7 +32,7 @@ parameters:
       Required. Immutable. A globally unique identifier for the Hosting site. This identifier is
       used to construct the Firebase-provisioned subdomains for the site, so it must also be a valid
       domain name label.
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String

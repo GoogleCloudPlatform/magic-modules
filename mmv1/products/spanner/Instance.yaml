@@ -47,7 +47,7 @@ properties:
       A unique identifier for the instance, which cannot be changed after
       the instance is created. The name must be between 6 and 30 characters
       in length.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'config'
@@ -60,7 +60,7 @@ properties:
       is stored. Values are typically of the form `regional-europe-west1` , `us-central` etc.
       In order to obtain a valid list please consult the
       [Configuration section of the docs](https://cloud.google.com/spanner/docs/instances).
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'displayName'

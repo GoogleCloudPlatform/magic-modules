@@ -15,7 +15,7 @@
 name: 'VpnTunnel'
 kind: 'compute#vpnTunnel'
 description: 'VPN tunnel resource.'
-input: true
+immutable: true
 base_url: projects/{{project}}/regions/{{region}}/vpnTunnels
 collection_url_key: 'items'
 has_self_link: true
@@ -73,7 +73,7 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'targetVpnGateway'
     description: |
@@ -81,7 +81,7 @@ properties:
       associated.
     resource: 'TargetVpnGateway'
     imports: 'selfLink'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'vpnGateway'
     description: |
@@ -89,18 +89,18 @@ properties:
       This must be used if a High Availability VPN gateway resource is created.
     resource: 'VpnGateway'
     imports: 'selfLink'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Integer
     name: 'vpnGatewayInterface'
     description: |
       The interface ID of the VPN gateway with which this VPN tunnel is associated.
-    input: true
+    immutable: true
     send_empty_value: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'peerExternalGateway'
     resource: 'ExternalVpnGateway'
     imports: 'selfLink'
-    input: true
+    immutable: true
     conflicts:
       - peer_gcp_gateway
     description: |
@@ -126,7 +126,7 @@ properties:
       URL of router resource to be used for dynamic routing.
     resource: 'Router'
     imports: 'selfLink'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'peerIp'
     description: |

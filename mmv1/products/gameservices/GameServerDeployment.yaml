@@ -56,7 +56,7 @@ properties:
   description: Human readable description of the game server deployment.
 - !ruby/object:Api::Type::String
   name: deploymentId
-  input: true
+  immutable: true
   required: true
   url_param_only: true
   description: |

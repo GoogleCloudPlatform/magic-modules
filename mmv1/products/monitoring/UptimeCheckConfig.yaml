@@ -42,7 +42,7 @@ properties:
 - !ruby/object:Api::Type::String
   name: period
   default_value: "300s"
-  input: true
+  immutable: true
   description: How often, in seconds, the uptime check is performed. Currently,
     the only supported values are 60s (1 minute), 300s (5 minutes), 600s (10 minutes),
     and 900s (15 minutes). Optional, defaults to 300s.
@@ -105,7 +105,7 @@ properties:
   item_type: Api::Type::String
 - !ruby/object:Api::Type::Enum
   name: checkerType
-  input: true
+  immutable: true
   description: The checker type to use for the check. If the monitored resource type 
     is servicedirectory_service, checkerType must be set to VPC_CHECKERS.
   values:
@@ -120,7 +120,7 @@ properties:
   properties:
   - !ruby/object:Api::Type::Enum
     name: requestMethod
-    input: true
+    immutable: true
     description: The HTTP request method to use for the check. If set to
       METHOD_UNSPECIFIED then requestMethod defaults to GET.
     default_value: :GET
@@ -266,7 +266,7 @@ properties:
       with host (specified within the MonitoredResource) to construct the full URL.
 - !ruby/object:Api::Type::NestedObject
   name: resourceGroup
-  input: true
+  immutable: true
   description: The group resource associated with the configuration.
   exactly_one_of:
     - monitored_resource
@@ -274,7 +274,7 @@ properties:
   properties:
   - !ruby/object:Api::Type::Enum
     name: resourceType
-    input: true
+    immutable: true
     at_least_one_of:
       - resource_group.0.resource_type
       - resource_group.0.group_id
@@ -285,7 +285,7 @@ properties:
     - :AWS_ELB_LOAD_BALANCER
   - !ruby/object:Api::Type::ResourceRef
     name: groupId
-    input: true
+    immutable: true
     at_least_one_of:
       - resource_group.0.resource_type
       - resource_group.0.group_id
@@ -294,7 +294,7 @@ properties:
     description: The group of resources being monitored. Should be the `name` of a group
 - !ruby/object:Api::Type::NestedObject
   name: monitoredResource
-  input: true
+  immutable: true
   description: 'The monitored resource (https://cloud.google.com/monitoring/api/resources)
     associated with the configuration. The following monitored resource types are
     supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance 
@@ -305,7 +305,7 @@ properties:
   properties:
   - !ruby/object:Api::Type::String
     name: type
-    input: true
+    immutable: true
     required: true
     description: The monitored resource type. This field must match the type field of a MonitoredResourceDescriptor
       (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors#MonitoredResourceDescriptor)
@@ -314,7 +314,7 @@ properties:
       and Logging resource types (https://cloud.google.com/logging/docs/api/v2/resource-list).
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
-    input: true
+    immutable: true
     required: true
     description: Values for all of the labels listed in the associated
       monitored resource descriptor. For example, Compute Engine VM instances use

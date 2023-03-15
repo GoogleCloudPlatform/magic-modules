@@ -35,7 +35,7 @@ parameters:
     name: taxonomy
     url_param_only: true
     required: true
-    input: true
+    immutable: true
     description: |
       Taxonomy the policy tag is associated with
 properties:

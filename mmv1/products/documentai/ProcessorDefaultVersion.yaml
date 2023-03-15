@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'ProcessorDefaultVersion'
-input: true
+immutable: true
 base_url: '{{processor}}'
 create_url: '{{processor}}:setDefaultProcessorVersion'
 create_verb: :POST
@@ -28,7 +28,7 @@ parameters:
     description: |
       The processor to set the version on.
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'version'
@@ -37,5 +37,5 @@ properties:
       The version to set. Using `stable` or `rc` will cause the API to return the latest version in that release channel.
       Apply `lifecycle.ignore_changes` to the `version` field to suppress this diff.
     required: true
-    input: true
+    immutable: true
 

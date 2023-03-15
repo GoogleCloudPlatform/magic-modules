@@ -27,7 +27,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true
-    input: true
+    immutable: true
     default_value: US
     description: |
       The geographic location where the transfer config should reside.
@@ -35,7 +35,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     url_param_only: true
-    input: true
+    immutable: true
     required: true
     description: |
       The name of the reservation. This field must only contain alphanumeric characters or dash.

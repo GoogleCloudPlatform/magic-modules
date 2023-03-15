@@ -33,7 +33,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 parameters:
   - !ruby/object:Api::Type::String
     name: region
-    input: true
+    immutable: true
     url_param_only: true
     required: true
     description: |
@@ -41,7 +41,7 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'id'
-    input: true
+    immutable: true
     required: true
     description: |
       The unique identifier for the device registry. For example,

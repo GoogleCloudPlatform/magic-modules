@@ -53,7 +53,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceId'
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The ID of the metastore service. The id must contain only letters (a-z, A-Z), numbers (0-9), underscores (_),
@@ -62,7 +62,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true
-    input: true
+    immutable: true
     default_value: global
     description: |
       The location where the metastore service should reside.
@@ -79,7 +79,7 @@ properties:
   # This is an x-product resource reference.
   - !ruby/object:Api::Type::String
     name: 'network'
-    input: true
+    immutable: true
     description: |
       The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
 
@@ -152,7 +152,7 @@ properties:
           The fully qualified customer provided Cloud KMS key name to use for customer data encryption.
           Use the following format: `projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)/cryptoKeys/([^/]+)`
         required: true
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'hiveMetastoreConfig'
     description: |
@@ -161,7 +161,7 @@ properties:
       - !ruby/object:Api::Type::Enum
         name: 'endpointProtocol'
         min_version: beta
-        input: true
+        immutable: true
         default_value: :THRIFT
         description: |
           The protocol to use for the metastore service endpoint. If unspecified, defaults to `THRIFT`.
@@ -170,7 +170,7 @@ properties:
           - :GRPC         
       - !ruby/object:Api::Type::String
         name: 'version'
-        input: true
+        immutable: true
         required: true
         description: |
           The Hive metastore schema version.
@@ -233,7 +233,7 @@ properties:
                 If keys are present in both the auxiliary version's overrides and the primary version's overrides, the value from the auxiliary version's overrides takes precedence.
   - !ruby/object:Api::Type::NestedObject
     name: 'networkConfig'
-    input: true
+    immutable: true
     description: |
       The configuration specifying the network settings for the Dataproc Metastore service.
     properties:
@@ -242,7 +242,7 @@ properties:
       description: |
         The consumer-side network configuration for the Dataproc Metastore instance.
       required: true
-      input: true
+      immutable: true
       item_type: !ruby/object:Api::Type::NestedObject
         properties:
         - !ruby/object:Api::Type::String
@@ -260,7 +260,7 @@ properties:
             `projects/{projectNumber}/regions/{region_id}/subnetworks/{subnetwork_id}
   - !ruby/object:Api::Type::Enum
     name: 'databaseType'
-    input: true
+    immutable: true
     default_value: :MYSQL
     description: |
       The database type that the Metastore service stores its data.
@@ -269,7 +269,7 @@ properties:
       - :SPANNER
   - !ruby/object:Api::Type::Enum
     name: 'releaseChannel'
-    input: true
+    immutable: true
     default_value: :STABLE
     description: |
       The release channel of the service. If unspecified, defaults to `STABLE`.

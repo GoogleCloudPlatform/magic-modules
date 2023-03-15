@@ -40,7 +40,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       A user-defined name of the certificate. Certificate names must be unique
@@ -56,7 +56,7 @@ properties:
     description: 'Set of label tags associated with the Certificate resource.'
   - !ruby/object:Api::Type::String
     name: scope
-    input: true
+    immutable: true
     description: |
       The scope of the certificate.
 
@@ -69,7 +69,7 @@ properties:
     default_value: DEFAULT
   - !ruby/object:Api::Type::NestedObject
     name: selfManaged
-    input: true
+    immutable: true
     exactly_one_of:
       - self_managed
       - managed
@@ -114,7 +114,7 @@ properties:
           The private key of the leaf certificate in PEM-encoded form.
   - !ruby/object:Api::Type::NestedObject
     name: managed
-    input: true
+    immutable: true
     exactly_one_of:
       - self_managed
       - managed
@@ -125,14 +125,14 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: domains
-        input: true
+        immutable: true
         description: |
           The domains for which a managed SSL certificate will be generated.
           Wildcard domains are only supported with DNS challenge resolution
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: dnsAuthorizations
-        input: true
+        immutable: true
         description: |
           Authorizations that will be used for performing domain authorization
         item_type: Api::Type::String

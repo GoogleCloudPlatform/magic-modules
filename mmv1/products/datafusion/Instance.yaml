@@ -31,21 +31,21 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The region of the Data Fusion instance.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       The ID of the instance or a fully qualified identifier for the instance.
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
      An optional description of the instance.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'type'
     required: true
@@ -64,7 +64,7 @@ properties:
       - :BASIC
       - :ENTERPRISE
       - :DEVELOPER
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Boolean
     name: 'enableStackdriverLogging'
     description: |
@@ -86,7 +86,7 @@ properties:
     name: 'options'
     description: |
       Map of additional options used to configure the behavior of Data Fusion instance.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true
@@ -142,12 +142,12 @@ properties:
       Specifies whether the Data Fusion instance should be private. If set to
       true, all Data Fusion nodes will have private IP addresses and will not be
       able to access the public internet.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'dataprocServiceAccount'
     description: |
       User-managed service account to set on Dataproc when Cloud Data Fusion creates Dataproc to run data processing pipelines.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'tenantProjectId'
     description: |
@@ -162,7 +162,7 @@ properties:
     name: 'networkConfig'
     description: |
       Network configuration options. These are required when a private Data Fusion instance is to be created.
-    input: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'ipAllocation'
@@ -170,7 +170,7 @@ properties:
           The IP range in CIDR notation to use for the managed Data Fusion instance
           nodes. This range must not overlap with any other ranges used in the Data Fusion instance network.
         required: true
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::String
         name: 'network'
         description: |
@@ -178,17 +178,17 @@ properties:
           will be peered for executing pipelines. In case of shared VPC where the network resides in another host
           project the network should specified in the form of projects/{host-project-id}/global/networks/{network}
         required: true
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::String
     name: 'zone'
     description: |
       Name of the zone in which the Data Fusion instance will be created. Only DEVELOPER instances use this field.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
       Display name for an instance.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'apiEndpoint'
     description: |
@@ -203,14 +203,14 @@ properties:
     name: 'cryptoKeyConfig'
     description: |
       The crypto key configuration. This field is used by the Customer-Managed Encryption Keys (CMEK) feature.
-    input: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'keyReference'
         description: |
           The name of the key which is used to encrypt/decrypt customer data. For key in Cloud KMS, the key should be in the format of projects/*/locations/*/keyRings/*/cryptoKeys/*.
         required: true
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'eventPublishConfig'
     description: |
@@ -226,7 +226,7 @@ properties:
         description: |
           The resource name of the Pub/Sub topic. Format: projects/{projectId}/topics/{topic_id}
         required: true
-        input: true            
+        immutable: true            
   - !ruby/object:Api::Type::Array
       name: 'accelerators'
       description: |
@@ -252,3 +252,4 @@ properties:
             values:
               - :ENABLED
               - :DISABLED
+            required: true

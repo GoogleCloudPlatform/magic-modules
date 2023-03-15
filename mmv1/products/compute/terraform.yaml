@@ -672,7 +672,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
         default_value: 'pd-standard'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        input: true
+        immutable: true
       licenses: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -814,7 +814,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # for a user to wind up in a broken state if they switch a rule from
         # being ingress to egress without examining the diff carefully.
         # See terraform issue #2713 for more context.
-        input: true
+        immutable: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           This field denotes the logging options for a particular firewall rule.
@@ -2150,7 +2150,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
         default_value: 'pd-standard'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        input: true
+        immutable: true
       licenses: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride

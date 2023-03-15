@@ -17,7 +17,7 @@ kind: 'compute#address'
 base_url: projects/{{project}}/regions/{{region}}/addresses
 collection_url_key: 'items'
 has_self_link: true
-input: true
+immutable: true
 description: |
   Represents an Address resource.
 

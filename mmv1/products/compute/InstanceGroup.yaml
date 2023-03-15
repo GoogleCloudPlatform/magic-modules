@@ -40,7 +40,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-input: true
+immutable: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'

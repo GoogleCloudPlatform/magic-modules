@@ -17,7 +17,7 @@
   create_url: '{{env_id}}/references/'
   delete_url: '{{env_id}}/references/{{name}}'
   self_link: '{{env_id}}/references/{{name}}'
-  input: true
+  immutable: true
   description: |
     An `Environment Reference` in Apigee.
   parameters:
@@ -27,31 +27,31 @@
         The Apigee environment group associated with the Apigee environment,
         in the format `organizations/{{org_name}}/environments/{{env_name}}`.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::String
       name: 'name'
       description: |
           Required. The resource id of this reference. Values must match the regular expression [\w\s-.]+.
-      input: true
+      immutable: true
       required: true
     - !ruby/object:Api::Type::String
       name: 'description'
       description: |
           Optional. A human-readable description of this reference.
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::String
       name: 'resourceType'
       description: |
           The type of resource referred to by this reference. Valid values are 'KeyStore' or 'TrustStore'.
-      input: true
+      immutable: true
       required: true
     - !ruby/object:Api::Type::String
       name: 'refers'
       description: |
         Required. The id of the resource to which this reference refers. Must be the id of a resource that exists in the parent environment and is of the given resourceType.
-      input: true
+      immutable: true
       required: true
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:

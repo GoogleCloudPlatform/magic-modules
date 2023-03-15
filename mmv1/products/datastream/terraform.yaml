@@ -194,6 +194,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           source_connection_profile_id: "source-profile"
           destination_connection_profile_id: "destination-profile"
       - !ruby/object:Provider::Terraform::Examples
+        name: "datastream_stream_postgresql_bigquery_dataset_id"
+        primary_resource_id: "default"
+        pull_external: true
+        # Random provider
+        skip_vcr: true
+      - !ruby/object:Provider::Terraform::Examples
         name: "datastream_stream_bigquery"
         pull_external: true
         primary_resource_id: "default"

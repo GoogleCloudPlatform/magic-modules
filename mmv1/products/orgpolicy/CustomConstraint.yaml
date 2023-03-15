@@ -31,14 +31,14 @@ parameters:
     name: parent
     description: |
       The parent of the resource, an organization. Format should be `organizations/{organization_id}`.
-    input: true
+    immutable: true
     url_param_only: true
     required: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       Immutable. The name of the custom constraint. This is unique within the organization.
   - !ruby/object:Api::Type::String
@@ -71,7 +71,7 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: 'resourceTypes'
-    input: true
+    immutable: true
     min_size: 1
     required: true
     description: |

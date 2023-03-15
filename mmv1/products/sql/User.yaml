@@ -36,7 +36,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'password'
     description: 'The password for the user.'
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'host'

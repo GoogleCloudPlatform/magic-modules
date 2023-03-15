@@ -17,7 +17,7 @@ min_version: beta
 base_url: sites/{{site_id}}/versions
 self_link: sites/{{site_id}}/versions/{{version_id}}
 create_url: sites/{{site_id}}/versions
-input: true # not updatable
+immutable: true # not updatable
 description: |
   A `Version` is a configuration which determine how a site is displayed. Static files are not supported at the moment.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -29,7 +29,7 @@ parameters:
     name: site_id
     description: |
       Required. The ID of the site in which to create this Version.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
 properties:

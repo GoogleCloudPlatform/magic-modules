@@ -35,7 +35,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: organization
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The organization whose Cloud Security Command Center the Notification
@@ -43,7 +43,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: configId
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       This must be unique within the organization.

@@ -19,7 +19,7 @@ description: |
   A Global Network endpoint represents a IP address and port combination that exists outside of GCP.
   **NOTE**: Global network endpoints cannot be created outside of a
   global network endpoint group.
-input: true
+immutable: true
 create_verb: :POST
 create_url: projects/{{project}}/global/networkEndpointGroups/{{global_network_endpoint_group}}/attachNetworkEndpoints
 delete_verb: :POST

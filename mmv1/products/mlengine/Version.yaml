@@ -15,7 +15,7 @@
 name: 'Version'
 base_url: projects/{{project}}/models/{{model}}/versions
 self_link: projects/{{project}}/models/{{model}}/versions/{{name}}
-input: true
+immutable: true
 description: |
   Each version is a trained model deployed in the cloud, ready to handle
   prediction requests. A model can have multiple versions
@@ -101,7 +101,7 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: One or more labels that you can add, to organize your model versions
-    # no etag since it's input: true
+    # no etag since it's immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'framework'
     description: The machine learning framework AI Platform uses to train this version of the model

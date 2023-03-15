@@ -116,7 +116,7 @@ properties:
     description: |
      The unique identifier of the parent intent in the chain of followup intents.
      Format: projects/<Project ID>/agent/intents/<Intent ID>.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Array
     name: 'followupIntentInfo'
     output: true

@@ -20,7 +20,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates'
-input: true
+immutable: true
 has_self_link: true
 description: |
   An SslCertificate resource, used for HTTPS load balancing.  This resource
