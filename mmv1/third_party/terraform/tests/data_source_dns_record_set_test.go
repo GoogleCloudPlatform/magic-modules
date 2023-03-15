@@ -45,7 +45,7 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 func testAccDataSourceDnsRecordSet_basic(managedZoneName, recordSetName string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "zone" {
-  name     = "test-zone"
+  name     = "%s-hashicorptest-com"
   dns_name = "%s.hashicorptest.com."
 }
 
@@ -64,7 +64,7 @@ data "google_dns_record_set" "rs" {
   name         = google_dns_record_set.rs.name
   type         = google_dns_record_set.rs.type
 }
-`, managedZoneName, recordSetName)
+`, managedZoneName, managedZoneName, recordSetName)
 }
 
 // testAccCheckDnsRecordSetDestroyProducerFramework is the framework version of the generated testAccCheckDnsRecordSetDestroyProducer
