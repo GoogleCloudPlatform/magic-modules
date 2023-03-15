@@ -1,0 +1,123 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Note'
+base_url: projects/{{project}}/notes?noteId={{name}}
+self_link: projects/{{project}}/notes/{{name}}
+update_verb: :PATCH
+update_mask: true
+description: |
+  A Container Analysis note is a high-level piece of metadata that
+  describes a type of analysis that can be done for a resource.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/container-analysis/'
+    'Creating Attestations (Occurrences)': 'https://cloud.google.com/binary-authorization/docs/making-attestations'
+  api: 'https://cloud.google.com/container-analysis/api/reference/rest/'
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: |
+      The name of the note.
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: shortDescription
+    description: |
+      A one sentence description of the note.
+  - !ruby/object:Api::Type::String
+    name: longDescription
+    description: |
+      A detailed description of the note
+  - !ruby/object:Api::Type::Enum
+    name: 'kind'
+    description: |
+      The type of analysis this note describes
+    values:
+      - NOTE_KIND_UNSPECIFIED
+      - VULNERABILITY
+      - BUILD
+      - IMAGE
+      - PACKAGE
+      - DEPLOYMENT
+      - DISCOVERY
+      - ATTESTATION
+      - UPGRADE
+    output: true
+  - !ruby/object:Api::Type::Array
+    name: relatedUrl
+    description: |
+      URLs associated with this note and related metadata.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: url
+          description: |
+            Specific URL associated with the resource.
+          required: true
+        - !ruby/object:Api::Type::String
+          name: label
+          description: |
+            Label to describe usage of the URL
+  - !ruby/object:Api::Type::Time
+    name: expirationTime
+    description: |
+      Time of expiration for this note. Leave empty if note does not expire.
+  - !ruby/object:Api::Type::Time
+    name: createTime
+    description: The time this note was created.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: updateTime
+    description: The time this note was last updated.
+    output: true
+  - !ruby/object:Api::Type::Array
+    name: relatedNoteNames
+    description: |
+      Names of other notes related to this note.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: attestationAuthority
+    description: |
+      Note kind that represents a logical attestation "role" or "authority".
+      For example, an organization might have one AttestationAuthority for
+      "QA" and one for "build". This Note is intended to act strictly as a
+      grouping mechanism for the attached Occurrences (Attestations). This
+      grouping mechanism also provides a security boundary, since IAM ACLs
+      gate the ability for a principle to attach an Occurrence to a given
+      Note. It also provides a single point of lookup to find all attached
+      Attestation Occurrences, even if they don't all live in the same
+      project.
+    required: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: hint
+        description: |
+          This submessage provides human-readable hints about the purpose of
+          the AttestationAuthority. Because the name of a Note acts as its
+          resource reference, it is important to disambiguate the canonical
+          name of the Note (which might be a UUID for security purposes)
+          from "readable" names more suitable for debug output. Note that
+          these hints should NOT be used to look up AttestationAuthorities
+          in security sensitive contexts, such as when looking up
+          Attestations to verify.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: humanReadableName
+            description: |
+              The human readable name of this Attestation Authority, for
+              example "qa".
+            required: true
+

@@ -46,7 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "ha-memory-cache-persis"
           network_name: "redis-test-network"
         test_vars_overrides:
-          network_name: 'BootstrapSharedTestNetwork(t, "redis-mrr")'
+          network_name: 'BootstrapSharedTestNetwork(t, "redis-full-persis")'
       - !ruby/object:Provider::Terraform::Examples
         name: "redis_instance_private_service"
         # Temporary for servicenetworking problems

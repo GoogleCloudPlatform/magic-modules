@@ -48,7 +48,7 @@
       name: peeringId
       required: true
       url_param_only: true
-      input: true
+      immutable: true
       description: ""
   properties:
     - !ruby/object:Api::Type::String
@@ -62,13 +62,13 @@
     - !ruby/object:Api::Type::String
       name: authorizedNetwork
       required: true
-      input: true
+      immutable: true
       description: |
         The full names of the Google Compute Engine networks to which the instance is connected. Caller needs to make sure that CIDR subnets do not overlap between networks, else peering creation will fail.
     - !ruby/object:Api::Type::String
       name: domainResource
       required: true
-      input: true
+      immutable: true
       description: |
         Full domain resource path for the Managed AD Domain involved in peering. The resource path should be in the form projects/{projectId}/locations/global/domains/{domainName}
     - !ruby/object:Api::Type::String

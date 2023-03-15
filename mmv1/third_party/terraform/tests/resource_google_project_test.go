@@ -23,6 +23,15 @@ var (
 )
 
 func init() {
+	// SKIP_PROJECT_SWEEPER can be set for a sweeper run to prevent it from
+	// sweeping projects. This can be useful when running sweepers in
+	// organizations where acceptance tests intiated by another project may
+	// already be in-progress.
+	// Example: SKIP_PROJECT_SWEEPER=1 go test ./google -v -sweep=us-central1 -sweep-run=
+	if os.Getenv("SKIP_PROJECT_SWEEPER") != "" {
+		return
+	}
+
 	resource.AddTestSweepers("GoogleProject", &resource.Sweeper{
 		Name: "GoogleProject",
 		F:    testSweepProject,

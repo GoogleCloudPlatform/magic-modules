@@ -1,0 +1,57 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Client'
+base_url: '{{brand}}/identityAwareProxyClients'
+self_link: '{{client_id}}'
+immutable: true
+description: |
+  Contains the data that describes an Identity Aware Proxy owned client.
+
+  ~> **Note:** Only internal org clients can be created via declarative tools. External clients must be
+  manually created via the GCP console. This restriction is due to the existing APIs and not lack of support
+  in this tool.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Setting up IAP Client':
+      'https://cloud.google.com/iap/docs/authentication-howto'
+  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'clientId'
+    api_name: name
+    description: |
+      Output only. Unique identifier of the OAuth client.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'brand'
+    description: |
+      Identifier of the brand to which this client
+      is attached to. The format is
+      `projects/{project_number}/brands/{brand_id}/identityAwareProxyClients/{client_id}`.
+    immutable: true
+    required: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'secret'
+    description: |
+      Output only. Client secret of the OAuth client.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description: |
+      Human-friendly name given to the OAuth client.
+    required: true
+

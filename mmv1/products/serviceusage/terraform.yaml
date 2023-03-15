@@ -71,5 +71,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/consumer_quote_override_override_value.go.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       test_check_destroy: templates/terraform/custom_check_destroy/consumer_quota_override.go.erb
-  Service: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
