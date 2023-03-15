@@ -59,7 +59,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
-        We recomment using the `google_cloud_run_v2_service` resource which offers a better
+        We recommend using the `google_cloud_run_v2_service` resource which offers a better
         developer experience and broader support of Cloud Run features.
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
