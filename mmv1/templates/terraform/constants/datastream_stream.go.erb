@@ -63,4 +63,19 @@ func waitForDatastreamStreamReady(d *schema.ResourceData, config *Config, timeou
 		}
 	})
 }
+
+func resourceDatastreamStreamDatabaseIdDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	re := regexp.MustCompile(`projects/(.+)/datasets/([^\.\?\#]+)`)
+	paths := re.FindStringSubmatch(new)
+
+	// db returns value in form <project>:<dataset_id>
+	if len(paths) == 3 {
+		project := paths[1]
+		datasetId := paths[2]
+		new = fmt.Sprintf("%s:%s", project, datasetId)
+	}
+
+	return old == new
+}
+
 <% end -%>

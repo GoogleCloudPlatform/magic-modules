@@ -716,7 +716,10 @@ properties:
                 name: 'datasetId'
                 required: true
                 description: |
-                  Dataset ID in the format projects/{project}/datasets/{dataset_id}
+                  Dataset ID in the format projects/{project}/datasets/{dataset_id} or
+                  {project}:{dataset_id}
+                custom_expand: 'templates/terraform/custom_expand/datastream_stream_dataset_id.go.erb'
+                diff_suppress_func: resourceDatastreamStreamDatabaseIdDiffSuppress
           - !ruby/object:Api::Type::NestedObject
             name: 'sourceHierarchyDatasets'
             exactly_one_of:
