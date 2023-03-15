@@ -41,7 +41,7 @@ func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
@@ -113,7 +113,7 @@ func TestAccFrameworkProviderBasePath_setInvalidBasePath(t *testing.T) {
 				ExpectError:       regexp.MustCompile("got HTTP response code 404 with body"),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config:                   testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", RandString(t, 10)),
 				ExpectError:              regexp.MustCompile("got HTTP response code 404 with body"),
 			},
@@ -139,17 +139,17 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config:                   testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", RandString(t, 10)),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				ResourceName:             "google_dns_managed_zone.foo",
 				ImportState:              true,
 				ImportStateVerify:        true,
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config:                   testAccFrameworkProviderBasePath_setBasePathstep3("https://www.googleapis.com/dns/v1beta2/", RandString(t, 10)),
 			},
 		},
