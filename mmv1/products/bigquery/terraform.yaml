@@ -112,8 +112,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       isCaseInsensitive: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       defaultCollation: !ruby/object:Overrides::Terraform::PropertyOverride
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateDefaultCollation'
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
     docs: !ruby/object:Provider::Terraform::Docs
