@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -135,11 +134,11 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
+				ExternalProviders: ProviderVersion450(),
 				Config:            testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", RandString(t, 10)),
 			},
 			{
-				ExternalProviders: providerVersion450(),
+				ExternalProviders: ProviderVersion450(),
 				ResourceName:      "google_dns_managed_zone.foo",
 				ImportState:       true,
 				ImportStateVerify: true,
