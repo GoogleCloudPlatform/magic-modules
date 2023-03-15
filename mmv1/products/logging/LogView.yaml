@@ -34,10 +34,9 @@ parameters:
     description: 'The location of the resource. The supported locations are: global, us-central1, us-east1, us-west1, asia-east1, europe-west1.'
     url_param_only: true
     immutable: true
-  - !ruby/object:Api::Type::ResourceRef
+  - !ruby/object:Api::Type::String
+    # Make this a String for now since we don't have a good way to reference multiple resources.
     name: bucket
-    resource: log_bucket
-    imports: name
     description: The bucket of the resource
     url_param_only: true
     required: true
