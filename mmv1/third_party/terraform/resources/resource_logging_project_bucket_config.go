@@ -3,8 +3,8 @@ package google
 import (
 	"fmt"
 	"log"
-	"strings"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
