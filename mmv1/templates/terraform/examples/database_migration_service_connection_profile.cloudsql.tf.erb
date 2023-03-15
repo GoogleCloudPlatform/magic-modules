@@ -27,7 +27,6 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 	location = "us-central1"		
 	connection_profile_id = "<%= ctx[:vars]["cloudsqldb_from_profile"] %>"
 	display_name = "<%= ctx[:vars]["cloudsqldb_from_profile"] %>_display"
-	name = "projects/${data.google_project.project.number}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["cloudsqldb_from_profile"] %>"
 	labels	= { 
 					testanno = "testanno" 
 				}
@@ -53,7 +52,6 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 	location = "us-central1"		
 	connection_profile_id = "<%= ctx[:vars]["cloudsqldb_to_profile"] %>"
 	display_name = "<%= ctx[:vars]["cloudsqldb_to_profile"] %>_displayname"
-	name = "projects/${data.google_project.project.number}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["cloudsqldb_to_profile"] %>"
 	dbprovider            = "CLOUDSQL"
 	labels	= { 
 					testlabela = "testlabelb" 

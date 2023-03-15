@@ -26,7 +26,6 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 	location = "us-central1"		
 	connection_profile_id = "<%= ctx[:vars]["postgresql_cp"] %>"
 	display_name = "<%= ctx[:vars]["postgresql_cp"] %>_display"
-	name = "projects/${data.google_project.project.number}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["postgresql_cp"] %>"
 	labels	= { 
 					testanno = "testanno" 
 				}

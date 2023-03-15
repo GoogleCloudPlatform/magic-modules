@@ -23,7 +23,6 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 	location = "us-central1"		
 	connection_profile_id = "<%= ctx[:vars]["alloydb_cp"] %>"
 	display_name = "<%= ctx[:vars]["alloydb_cp"] %>_display"
-	name = "projects/${data.google_project.project.number}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["alloydb_cp"] %>"
 	dbprovider = "ALLOYDB"
 	labels	= { 
 					testanno = "testanno" 

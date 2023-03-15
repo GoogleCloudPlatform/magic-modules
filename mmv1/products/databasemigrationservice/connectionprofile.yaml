@@ -27,19 +27,20 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'connectionProfileId'
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The ID of the connection profile.
   - !ruby/object:Api::Type::String
     name: 'location'
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The location where the connection profile should reside.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
+    output: true
     description: |
       The name of this connection profile resource in the form of projects/{project}/locations/{location}/connectionProfiles/{connectionProfile}.
   - !ruby/object:Api::Type::String
@@ -51,17 +52,13 @@ properties:
     output: true
     description: |
       Output only. The timestamp when the resource was created. A timestamp in RFC3339 UTC 'Zulu' format, accurate to nanoseconds. Example: '2014-10-02T15:01:23.045123456Z'.
-  - !ruby/object:Api::Type::Time
-    name: 'updateime'
-    output: true
-    description: |
-      Output only. The timestamp when the resource was last updated. A timestamp in RFC3339 UTC 'Zulu' format, accurate to nanoseconds. Example: '2014-10-02T15:01:23.045123456Z'.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
       The resource labels for connection profile to use to annotate any related underlying resources such as Compute Engine VMs.
   - !ruby/object:Api::Type::Enum
     name: 'state'
+    output: true
     description: |
       The current connection profile state.
     values:
@@ -128,7 +125,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'password'
         required: true
-        input: true
+        immutable: true
         description: |
           Required. Input only. The password for the user that Database Migration Service will be using to connect to the database. 
           This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
@@ -152,19 +149,19 @@ properties:
               - :SERVER_CLIENT
           - !ruby/object:Api::Type::String
             name: 'clientKey'
-            input: true
+            immutable: true
             description: |
               Input only. The unencrypted PKCS#1 or PKCS#8 PEM-encoded private key associated with the Client Certificate. 
               If this field is used then the 'clientCertificate' field is mandatory.
           - !ruby/object:Api::Type::String
             name: 'clientCertificate'
-            input: true
+            immutable: true
             description: |
               Input only. The x509 PEM-encoded certificate that will be used by the replica to authenticate against the source database server.
               If this field is used then the 'clientKey' field is mandatory
           - !ruby/object:Api::Type::String
             name: 'caCertificate'
-            input: true
+            immutable: true
             required: true
             description: |
               Required. Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate. 
@@ -201,7 +198,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'password'
         required: true
-        input: true
+        immutable: true
         description: |
           Required. Input only. The password for the user that Database Migration Service will be using to connect to the database. 
           This field is not returned on request, and the value is encrypted when stored in Database Migration Service.
@@ -225,7 +222,7 @@ properties:
               - :SERVER_CLIENT
           - !ruby/object:Api::Type::String
             name: 'clientKey'
-            input: true
+            immutable: true
             required_with: 
               - client_certificate
             description: |
@@ -233,7 +230,7 @@ properties:
               If this field is used then the 'clientCertificate' field is mandatory.
           - !ruby/object:Api::Type::String
             name: 'clientCertificate'
-            input: true
+            immutable: true
             required_with: 
               - client_key
             description: |
@@ -241,7 +238,7 @@ properties:
               If this field is used then the 'clientKey' field is mandatory
           - !ruby/object:Api::Type::String
             name: 'caCertificate'
-            input: true
+            immutable: true
             required: true
             description: |
               Required. Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate. 
@@ -346,7 +343,7 @@ properties:
                         The time when this access control entry expires in RFC 3339 format.
                     - !ruby/object:Api::Type::Time
                       name: 'ttl'
-                      input: true
+                      immutable: true
                       description: |
                         Input only. The time-to-leave of this access control entry.
           - !ruby/object:Api::Type::Boolean
@@ -380,7 +377,7 @@ properties:
               The Database Migration Service source connection profile ID, in the format: projects/my_project_name/locations/us-central1/connectionProfiles/connection_profile_ID 
           - !ruby/object:Api::Type::String
             name: 'rootPassword'
-            input: true
+            immutable: true
             description: |
               Input only. Initial root password.
           - !ruby/object:Api::Type::Boolean
@@ -423,14 +420,14 @@ properties:
           Required. The AlloyDB cluster ID that this connection profile is associated with.
       - !ruby/object:Api::Type::NestedObject
         name: 'settings'
-        input: true
+        immutable: true
         description: |
           Immutable. Metadata used to create the destination AlloyDB cluster.
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'initialUser'
             required: true
-            input: true
+            immutable: true
             description: |
               Required. Input only. Initial user to setup during cluster creation.
             properties: 
@@ -472,7 +469,7 @@ properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'machineConfig'
                 required: true
-                input: true
+                immutable: true
                 description: |
                   Configuration for the machines that host the underlying database engine.
                 properties: 
