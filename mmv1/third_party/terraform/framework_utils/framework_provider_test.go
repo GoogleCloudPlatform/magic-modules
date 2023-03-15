@@ -174,67 +174,67 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 func testAccFrameworkProviderMeta_setModuleName(key, managedZoneName, recordSetName string) string {
 	return fmt.Sprintf(`
 terraform {
-	provider_meta "google" {
-		module_name = "%s"
-	}
+  provider_meta "google" {
+    module_name = "%s"
+  }
 }
 
 provider "google" {}
 
 resource "google_dns_managed_zone" "zone" {
-	name     = "%s-hashicorptest-com"
-	dns_name = "%s.hashicorptest.com."
+  name     = "%s-hashicorptest-com"
+  dns_name = "%s.hashicorptest.com."
 }
 
 resource "google_dns_record_set" "rs" {
-	managed_zone = google_dns_managed_zone.zone.name
-	name         = "%s.${google_dns_managed_zone.zone.dns_name}"
-	type         = "A"
-	ttl          = 300
-	rrdatas      = [
-	"192.168.1.0",
-	]
+  managed_zone = google_dns_managed_zone.zone.name
+  name         = "%s.${google_dns_managed_zone.zone.dns_name}"
+  type         = "A"
+  ttl          = 300
+  rrdatas      = [
+  "192.168.1.0",
+  ]
 }
 
 data "google_dns_record_set" "rs" {
-	managed_zone = google_dns_record_set.rs.managed_zone
-	name         = google_dns_record_set.rs.name
-	type         = google_dns_record_set.rs.type
+  managed_zone = google_dns_record_set.rs.managed_zone
+  name         = google_dns_record_set.rs.name
+  type         = google_dns_record_set.rs.type
 }`, key, managedZoneName, managedZoneName, recordSetName)
 }
 
 func testAccFrameworkProviderBasePath_setBasePath(endpoint, name string) string {
 	return fmt.Sprintf(`
 provider "google" {
-	alias               = "dns_custom_endpoint"
-	dns_custom_endpoint = "%s"
+  alias               = "dns_custom_endpoint"
+  dns_custom_endpoint = "%s"
 }
 
 resource "google_dns_managed_zone" "foo" {
-	provider    = google.dns_custom_endpoint
-	name        = "tf-test-zone-%s"
-	dns_name    = "tf-test-zone-%s.hashicorptest.com."
-	description = "QA DNS zone"
+  provider    = google.dns_custom_endpoint
+  name        = "tf-test-zone-%s"
+  dns_name    = "tf-test-zone-%s.hashicorptest.com."
+  description = "QA DNS zone"
 }
 
 data "google_dns_managed_zone" "qa" {
-	provider    = google.dns_custom_endpoint
-	name = google_dns_managed_zone.foo.name
+  provider    = google.dns_custom_endpoint
+  name = google_dns_managed_zone.foo.name
 }`, endpoint, name, name)
 }
 
 func testAccFrameworkProviderBasePath_setBasePathstep3(endpoint, name string) string {
 	return fmt.Sprintf(`
 provider "google" {
-	alias               = "dns_custom_endpoint"
-	dns_custom_endpoint = "%s"
+  alias               = "dns_custom_endpoint"
+  dns_custom_endpoint = "%s"
 }
 
 resource "google_dns_managed_zone" "foo" {
-	provider    = google.dns_custom_endpoint
-	name        = "tf-test-zone-%s"
-	dns_name    = "tf-test-zone-%s.hashicorptest.com."
-	description = "QA DNS zone"
+  provider    = google.dns_custom_endpoint
+  name        = "tf-test-zone-%s"
+  dns_name    = "tf-test-zone-%s.hashicorptest.com."
+  description = "QA DNS zone"
 }
 `, endpoint, name, name)
 }
