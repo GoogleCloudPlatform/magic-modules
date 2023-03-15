@@ -555,6 +555,10 @@ func SkipIfVcr(t *testing.T) {
 	}
 }
 
+func SkipStepIfVcr() (bool, error) {
+	return isVcrEnabled(), nil
+}
+
 func SleepInSecondsForTest(t int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		time.Sleep(time.Duration(t) * time.Second)

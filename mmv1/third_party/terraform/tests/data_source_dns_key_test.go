@@ -20,7 +20,7 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
+				ExternalProviders: ProviderVersion450(),
 				Config:            testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
@@ -62,7 +62,8 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
+				ExternalProviders: ProviderVersion450(),
+				SkipFunc:          SkipStepIfVcr,
 				Config:            testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "0"),
@@ -100,7 +101,7 @@ func testAccDataSourceDNSKeysConfig(dnsZoneName, dnssecStatus string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "foo" {
   name     = "%s"
-  dns_name = "%s.hashicorptest.com"
+  dns_name = "%s.hashicorptest.com."
 
   dnssec_config {
     state         = "%s"
