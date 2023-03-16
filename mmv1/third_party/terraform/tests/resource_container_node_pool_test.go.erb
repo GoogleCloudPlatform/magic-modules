@@ -1299,6 +1299,56 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
+func TestAccContainerNodePool_ephemeralStorageLocalSsdConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccContainerNodePool_ephemeralStorageLocalSsdConfig(cluster, np),
+			},
+			resource.TestStep{
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_ephemeralStorageLocalSsdConfig(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-c"
+  initial_node_count = 1
+  release_channel {
+    channel = "RAPID"
+  }
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-c"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+
+  node_config {
+    machine_type = "n1-standard-1"
+    ephemeral_storage_local_ssd_config {
+      local_ssd_count = 1
+    }
+  }
+}
+`, cluster, np)
+}
+
 func TestAccContainerNodePool_gcfsConfig(t *testing.T) {
 	t.Parallel()
 
