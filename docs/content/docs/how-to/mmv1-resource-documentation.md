@@ -6,7 +6,7 @@ weight: 13
 
 # MMv1 resource documentation
 
-A majority of the provider's documentation is generated using the same information that's used for generating the provider's Go code. For example, when adding a new field to a resource in the relevant `api.yaml` file we include a `description` field. This is used to set a field description in the resource's schema and is also used to document the field in generated markdown files.
+A majority of the provider's documentation is generated using the same information that's used for generating the provider's Go code. For example, when adding a new field to a resource in the relevant `ResourceName.yaml` file we include a `description` field. This is used to set a field description in the resource's schema and is also used to document the field in generated markdown files.
 
 ## Updating an existing MMv1 resource's documentation
 
@@ -33,7 +33,7 @@ Below are descriptions of fields that are directly referenced in the documentati
 
 ### Top level fields for a product
 
-These fields are found at the top of `api.yaml` files, and describe an overall product (ruby/object:Api::Product).
+These fields are found in the `product.yaml` files, and describe an overall product (ruby/object:Api::Product).
 
 | Field | Type | Relation to documentation | Example value |
 | ----- | ---- |------------------------- | ------------- |
@@ -41,7 +41,7 @@ These fields are found at the top of `api.yaml` files, and describe an overall p
 
 ### Top level fields within resources
 
-These can be top-level properties of a resource (ruby/object:Api::Resource) or overrides for the resource (ruby/object:Overrides::Terraform::ResourceOverride), i.e. in `api.yaml` or `terraform.yaml`.
+These are top-level properties of a resource (ruby/object:Api::Resource) in `ResourceName.yaml`.
 
 | Field | Type | Relation to documentation | Example value |
 | ----- | ---- |------------------------- | ------------- |

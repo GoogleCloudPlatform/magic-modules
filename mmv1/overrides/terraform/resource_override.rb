@@ -20,7 +20,7 @@ require 'provider/terraform/virtual_fields'
 module Overrides
   module Terraform
     # A class to control overridden properties on terraform.yaml in lieu of
-    # values from api.yaml.
+    # values from ResourceName.yaml.
     class ResourceOverride < Overrides::ResourceOverride
       def self.attributes
         []

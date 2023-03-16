@@ -67,9 +67,9 @@ two ways:
     appending suffixes to them, and are typically only used for names- most
     values should be constant within the configuration.
 
-## `terraform.yaml` metadata
+## `Topic.yaml` metadata
 
-Once your configuration is written, go in `terraform.yaml` and find the
+Once your configuration is written, go in `Topic.yaml` and find the
 `examples` block for the resource. Generally it'll be above the `properties`
 block. In there, append an entry such as the
 [following](https://github.com/GoogleCloudPlatform/magic-modules/blob/e7ef590f6007796f446b2d41875b3d26f4469ff4/mmv1/products/pubsub/terraform.yaml#L108-L113):
