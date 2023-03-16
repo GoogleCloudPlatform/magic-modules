@@ -144,10 +144,10 @@ Assuming that a configuration file was created at `~/tf-dev-override.tfrc`, you 
 
 ```bash
 # either export the environment variable for your session
-export TF_CLI_CONFIG_FILE="~/tf-dev-override.tfrc"
+export TF_CLI_CONFIG_FILE=~/tf-dev-override.tfrc
 
 # OR, set the environment variable value per command
-TF_CLI_CONFIG_FILE="~/tf-dev-override.tfrc" terraform plan
+TF_CLI_CONFIG_FILE=~/tf-dev-override.tfrc terraform plan
 ```
 
 To check that the developer override is working, run a `terraform plan` command and look for a warning near the start of the terminal output that looks like the example below. It is not necessary to run the terraform init command to use development overrides.
