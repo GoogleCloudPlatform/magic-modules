@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'AutoscalingPolicy'
 base_url: "projects/{{project}}/locations/{{location}}/autoscalingPolicies"
-self_link: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{id}}"
+self_link: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}"
 collection_url_key: 'policies'
 description: |
   Describes an autoscaling policy for Dataproc cluster autoscaler.
@@ -22,7 +22,24 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'policy_id'
   fetch_iam_policy_verb: :POST
-  import_format: ["projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}", "{{policy_id}}"]        
+  import_format: ["projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}",
+    "{{policy_id}}"]
+id_format: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}"
+import_format: ["projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dataproc_autoscaling_policy_basic"
+    skip_docs: true
+    primary_resource_id: "basic"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-dataproc-policy%s\", context[\"\
+      random_suffix\"])"
+    vars:
+      name: "dataproc-policy"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dataproc_autoscaling_policy"
+    primary_resource_id: "asp"
+    vars:
+      name: "dataproc-policy"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -34,7 +51,8 @@ parameters:
       The default value is `global`.
 properties:
   - !ruby/object:Api::Type::String
-    name: 'id'
+    name: 'policy_id'
+    api_name: 'id'
     required: true
     description: |
       The policy id. The id must contain only letters (a-z, A-Z), numbers (0-9), underscores (_),

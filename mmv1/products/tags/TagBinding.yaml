@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -19,18 +19,41 @@ delete_url: "tagBindings/{{name}}"
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys: ['tagBindings']
 immutable: true
-description: A TagBinding represents a connection between a TagValue and a cloud resource (currently project, folder, or organization). Once a TagBinding is created, the TagValue is applied to all the descendants of the cloud resource.
+description: A TagBinding represents a connection between a TagValue and a cloud resource
+  (currently project, folder, or organization). Once a TagBinding is created, the
+  TagValue is applied to all the descendants of the cloud resource.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
+    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
   api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagBindings'
+autogen_async: true
+id_format: "tagBindings/{{name}}"
+import_format: ["tagBindings/{{name}}", "{{name}}"]
+mutex: tagBindings/{{parent}}
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/tags_tag_binding.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "tag_binding_basic"
+    skip_test: true
+    primary_resource_id: "binding"
+    vars:
+      key_short_name: "keyname"
+      value_short_name: "valuename"
+      project_id: project_id
+    test_vars_overrides:
+      key_short_name: '"tf-test-key-" + RandString(t, 10)'
+      value_short_name: '"tf-test-value-" + RandString(t, 10)'
+      project_id: '"tf-test-" + RandString(t, 10)'
+    test_env_vars:
+      org_id: :ORG_ID
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: |
       The generated id for the TagBinding. This is a string of the form: `tagBindings/{full-resource-name}/{tag-value-name}`
     output: true
+    custom_flatten: 'templates/terraform/custom_flatten/tags_tag_binding_name.erb'
   - !ruby/object:Api::Type::String
     name: parent
     description: |

@@ -16,13 +16,12 @@
   description: |
     A domain serving an App Engine application.
   base_url: 'apps/{{project}}/domainMappings'
-  self_link: 'apps/{{project}}/domainMappings/{{id}}'
+  self_link: 'apps/{{project}}/domainMappings/{{domain_name}}'
   update_verb: :PATCH
   update_mask: true
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
-      'Official Documentation':
-        'https://cloud.google.com/appengine/docs/standard/python/mapping-custom-domains'
+      'Official Documentation': 'https://cloud.google.com/appengine/docs/standard/python/mapping-custom-domains'
     api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.domainMappings'
   async: !ruby/object:Api::OpAsync
     operation: !ruby/object:Api::OpAsync::Operation
@@ -34,13 +33,22 @@
       resource_inside_response: true
     status: !ruby/object:Api::OpAsync::Status
       path: 'done'
-      complete: True
+      complete: true
       allowed:
-        - True
-        - False
+        - true
+        - false
     error: !ruby/object:Api::OpAsync::Error
       path: 'error'
       message: 'message'
+  id_format: 'apps/{{project}}/domainMappings/{{domain_name}}'
+  import_format: ['apps/{{project}}/domainMappings/{{domain_name}}']
+  mutex: "apps/{{project}}"
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "app_engine_domain_mapping_basic"
+      primary_resource_id: "domain_mapping"
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    constants: templates/terraform/constants/domain_mapping.erb
   parameters:
     - !ruby/object:Api::Type::Enum
       name: 'overrideStrategy'
@@ -52,8 +60,10 @@
         - :STRICT
         - :OVERRIDE
       default_value: :STRICT
+      ignore_read: true
     - !ruby/object:Api::Type::String
-      name: 'id'
+      name: 'domainName'
+      api_name: 'id'
       description: |
         Relative name of the domain serving the application. Example: example.com.
       immutable: true
@@ -68,6 +78,10 @@
       name: 'sslSettings'
       description: |
         SSL configuration for this domain. If unconfigured, this domain will not serve with SSL.
+      diff_suppress_func: 'sslSettingsDiffSuppress'
+      update_mask_fields:
+        - "ssl_settings.certificate_id"
+        - "ssl_settings.ssl_management_type"
       properties:
         - !ruby/object:Api::Type::String
           name: 'certificateId'
@@ -78,6 +92,7 @@
             or to configure SSL manually, specify `SslManagementType.MANUAL` on a `CREATE` or `UPDATE` request. You must be
             authorized to administer the `AuthorizedCertificate` resource to manually map it to a DomainMapping resource.
             Example: 12345.
+          default_from_api: true
         - !ruby/object:Api::Type::Enum
           name: 'sslManagementType'
           required: true
@@ -123,4 +138,4 @@
               - :A
               - :AAAA
               - :CNAME
-
+  

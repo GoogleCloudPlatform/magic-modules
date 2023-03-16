@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -17,8 +17,7 @@ description: |
   A named resource to which messages are sent by publishers.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Managing Topics':
-      'https://cloud.google.com/pubsub/docs/admin#managing_topics'
+    'Managing Topics': 'https://cloud.google.com/pubsub/docs/admin#managing_topics'
   api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics'
 base_url: projects/{{project}}/topics
 create_verb: :PUT
@@ -26,8 +25,55 @@ update_verb: :PATCH
 update_mask: true
 update_url: projects/{{project}}/topics/{{name}}
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: false
+  parent_resource_attribute: 'topic'
   method_name_separator: ':'
+docs: !ruby/object:Provider::Terraform::Docs
+  note: |
+    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding 
+    by using the `google_project_service_identity` resource.
+   # PubSub resources don't have operations but are negatively cached
+    # and eventually consistent.
+    # Because some users check whether the PubSub resource exists prior
+    # to applying a new resource, we need to add this PollAsync to GET the
+    # resource until it exists and the negative cached result goes away.
+    # Context: hashicorp/terraform-provider-google#4993
+async: !ruby/object:Provider::Terraform::PollAsync
+  check_response_func_existence: PollCheckForExistence
+  actions: ['create']
+  suppress_error: true
+error_retry_predicates: ["pubsubTopicProjectNotReady"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "pubsub_topic_basic"
+    primary_resource_id: "example"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      topic_name: "example-topic"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "pubsub_topic_cmek"
+    primary_resource_id: "example"
+    skip_test: true
+    vars:
+      topic_name: "example-topic"
+      key_name: "example-key"
+      keyring_name: "example-keyring"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "pubsub_topic_geo_restricted"
+    primary_resource_id: "example"
+    vars:
+      topic_name: "example-topic"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "pubsub_topic_schema_settings"
+    primary_resource_id: "example"
+    vars:
+      topic_name: "example-topic"
+      schema_name: "example"
+    test_env_vars:
+      project_name: :PROJECT_NAME
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/no_send_name.go.erb
+  update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -35,6 +81,9 @@ properties:
     description: 'Name of the topic.'
     immutable: true
     pattern: 'projects/{{project}}/topics/{{name}}'
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'kmsKeyName'
     description: |
@@ -53,6 +102,7 @@ properties:
       Policy constraining the set of Google Cloud Platform regions where
       messages published to the topic may be stored. If not present, then no
       constraints are in effect.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Array
         name: 'allowedPersistenceRegions'
@@ -69,6 +119,7 @@ properties:
     name: 'schemaSettings'
     description: |
       Settings for validating messages published against a schema.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'schema'
