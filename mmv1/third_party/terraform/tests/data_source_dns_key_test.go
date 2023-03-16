@@ -63,7 +63,6 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: ProviderVersion450(),
-				SkipFunc:          SkipStepIfVcr,
 				Config:            testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "0"),
