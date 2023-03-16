@@ -165,10 +165,12 @@ func (d *GoogleDnsKeysDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	clientResp, err := d.client.DnsKeys.List(data.Project.ValueString(), data.ManagedZone.ValueString()).Do()
 	if err != nil {
-		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceDnsKeys %q", data.Id.ValueString()), &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
-			return
+		if !IsGoogleApiErrorWithCode(err, 404) {
+			resp.Diagnostics.AddError(fmt.Sprintf("Error when reading or editing dataSourceDnsKeys"), err.Error())
 		}
+		// Save data into Terraform state
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		return
 	}
 
 	tflog.Trace(ctx, "read dns keys data source")
