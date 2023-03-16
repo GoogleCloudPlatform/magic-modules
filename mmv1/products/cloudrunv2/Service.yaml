@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -19,8 +19,7 @@ create_url: projects/{{project}}/locations/{{location}}/services?serviceId={{nam
 update_verb: :PATCH
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/run/docs/'
+    'Official Documentation': 'https://cloud.google.com/run/docs/'
   api: "https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services"
 description: |
   Service acts as a top-level container that manages a set of configurations and revision templates which implement a network service. Service exists to provide a singular abstraction which can be access controlled, reasoned about, and which encapsulates software lifecycle decisions such as rollout policy and team resource ownership.
@@ -28,7 +27,8 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: projects/{{project}}/locations/{{location}}/services/{{name}}
-  import_format: ["projects/{{project}}/locations/{{location}}/services/{{name}}", "{{name}}"]
+  import_format: ["projects/{{project}}/locations/{{location}}/services/{{name}}",
+    "{{name}}"]
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"
@@ -41,11 +41,61 @@ async: !ruby/object:Api::OpAsync
     path: "done"
     complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
+id_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
+import_format: ["projects/{{project}}/locations/{{location}}/services/{{name}}"]
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudrunv2_service_basic"
+    primary_resource_id: "default"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"\
+      random_suffix\"])"
+    vars:
+      cloud_run_service_name: "cloudrun-service"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudrunv2_service_sql"
+    primary_resource_id: "default"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_service_name: "cloudrun-service"
+      secret_id: "secret-1"
+      cloud_run_sql_name: "cloudrun-sql"
+      deletion_protection: "true"
+    test_vars_overrides:
+      deletion_protection: "false"
+    oics_vars_overrides:
+      deletion_protection: "false"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudrunv2_service_vpcaccess"
+    primary_resource_id: "default"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_service_name: "cloudrun-service"
+      vpc_access_connector_name: "run-vpc"
+      vpc_compute_subnetwork_name: "run-subnetwork"
+      compute_network_name: "run-network"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudrunv2_service_probes"
+    primary_resource_id: "default"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_service_name: "cloudrun-service"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudrunv2_service_secret"
+    primary_resource_id: "default"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_service_name: "cloudrun-service"
+      secret_id: "secret-1"
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"
@@ -61,6 +111,9 @@ properties:
     description: |
       Name of the Service.
     pattern: projects/{{project}}/locations/{{location}}/services/{{name}}
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: "description"
     description: |
@@ -99,6 +152,7 @@ properties:
       - :INGRESS_TRAFFIC_ALL
       - :INGRESS_TRAFFIC_INTERNAL_ONLY
       - :INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: "launchStage"
     description: |
@@ -111,6 +165,7 @@ properties:
       - :BETA
       - :GA
       - :DEPRECATED
+    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: "binaryAuthorization"
     description: |
@@ -146,6 +201,7 @@ properties:
         name: "scaling"
         description: |
           Scaling settings for this Revision.
+        default_from_api: true
         properties:
           - !ruby/object:Api::Type::Integer
             name: "minInstanceCount"
@@ -177,10 +233,12 @@ properties:
           Max allowed time for an instance to respond to a request.
 
           A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: "serviceAccount"
         description: |-
           Email address of the IAM service account associated with the revision of the service. The service account represents the identity of the running revision, and determines what permissions the revision has. If not provided, the revision will use the project's default service account.
+        default_from_api: true
       - !ruby/object:Api::Type::Array
         name: "containers"
         description: |-
@@ -250,11 +308,13 @@ properties:
               name: "resources"
               description: |-
                 Compute Resource requirements by this container. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources
+              default_from_api: true
               properties:
                 - !ruby/object:Api::Type::KeyValuePairs
                   name: "limits"
                   description: |-
                     Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                  default_from_api: true
                 - !ruby/object:Api::Type::Boolean
                   name: "cpuIdle"
                   description: |-
@@ -265,12 +325,14 @@ properties:
                 List of ports to expose from the container. Only a single port can be specified. The specified ports must be listening on all interfaces (0.0.0.0) within the container to be accessible.
 
                 If omitted, a port number will be chosen and passed to the container through the PORT environment variable for the container to listen on
+              default_from_api: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "name"
                     description: |-
                       If specified, used to specify which protocol to use. Allowed values are "http1" and "h2c".
+                    default_from_api: true
                   - !ruby/object:Api::Type::Integer
                     name: "containerPort"
                     description: |-
@@ -299,68 +361,71 @@ properties:
               name: "livenessProbe"
               description: |-
                 Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+              default_from_api: true
               properties:
                 - !ruby/object:Api::Type::Integer
-                    name: "initialDelaySeconds"
-                    description: |-
-                      Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                    default_value: 0
+                  name: "initialDelaySeconds"
+                  description: |-
+                    Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                  default_value: 0
                 - !ruby/object:Api::Type::Integer
-                    name: "timeoutSeconds"
-                    description: |-
-                      Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                    default_value: 1
+                  name: "timeoutSeconds"
+                  description: |-
+                    Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                  default_value: 1
                 - !ruby/object:Api::Type::Integer
-                    name: "periodSeconds"
-                    description: |-
-                      How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
-                    default_value: 10
+                  name: "periodSeconds"
+                  description: |-
+                    How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
+                  default_value: 10
                 - !ruby/object:Api::Type::Integer
-                    name: "failureThreshold"
-                    description: |-
-                      Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
-                    default_value: 3
+                  name: "failureThreshold"
+                  description: |-
+                    Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+                  default_value: 3
                 - !ruby/object:Api::Type::NestedObject
-                    name: "httpGet"
-                    description: |-
-                      HTTPGet specifies the http request to perform.
-                    send_empty_value: true
-                    allow_empty_object: true
-                    properties:
-                      - !ruby/object:Api::Type::String
-                        name: "path"
-                        default_value: "/"
-                        description: |-
-                          Path to access on the HTTP server. Defaults to '/'.
-                      - !ruby/object:Api::Type::Array
-                        name: "httpHeaders"
-                        description: |-
-                          Custom headers to set in the request. HTTP allows repeated headers.
-                        item_type: !ruby/object:Api::Type::NestedObject
-                          properties:
-                            - !ruby/object:Api::Type::String
-                              name: name
-                              required: true
-                              description: |-
-                                The header field name
-                            - !ruby/object:Api::Type::String
-                              name: value
-                              description: |-
-                                The header field value
-                              default_value: ""
-                              send_empty_value: true
+                  name: "httpGet"
+                  description: |-
+                    HTTPGet specifies the http request to perform.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: "path"
+                      default_value: "/"
+                      description: |-
+                        Path to access on the HTTP server. Defaults to '/'.
+                    - !ruby/object:Api::Type::Array
+                      name: "httpHeaders"
+                      description: |-
+                        Custom headers to set in the request. HTTP allows repeated headers.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: name
+                            required: true
+                            description: |-
+                              The header field name
+                          - !ruby/object:Api::Type::String
+                            name: value
+                            description: |-
+                              The header field value
+                            default_value: ""
+                            send_empty_value: true
                 - !ruby/object:Api::Type::NestedObject
-                    name: "tcpSocket"
-                    description: |-
-                      TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
-                    deprecation_message: Cloud Run does not support tcp socket in liveness probe and `liveness_probe.tcp_socket` field will be removed in a future major release.
-                    send_empty_value: true
-                    allow_empty_object: true
-                    properties:
-                      - !ruby/object:Api::Type::Integer
-                        name: port
-                        description: |-
-                          Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+                  name: "tcpSocket"
+                  description: |-
+                    TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
+                  deprecation_message: Cloud Run does not support tcp socket in liveness
+                    probe and `liveness_probe.tcp_socket` field will be removed in
+                    a future major release.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
                 - !ruby/object:Api::Type::NestedObject
                   name: grpc
                   description: |-
@@ -372,6 +437,7 @@ properties:
                       name: port
                       description: |-
                         Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to the same value as container.ports[0].containerPort.
+                      default_from_api: true
                     - !ruby/object:Api::Type::String
                       name: service
                       description: |-
@@ -382,75 +448,77 @@ properties:
               name: "startupProbe"
               description: |-
                 Startup probe of application within the container. All other probes are disabled if a startup probe is provided, until it succeeds. Container will not be added to service endpoints if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+              default_from_api: true
               properties:
                 - !ruby/object:Api::Type::Integer
-                    name: "initialDelaySeconds"
-                    description: |-
-                      Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                    default_value: 0
+                  name: "initialDelaySeconds"
+                  description: |-
+                    Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                  default_value: 0
                 - !ruby/object:Api::Type::Integer
-                    name: "timeoutSeconds"
-                    description: |-
-                      Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                    default_value: 1
+                  name: "timeoutSeconds"
+                  description: |-
+                    Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+                  default_value: 1
                 - !ruby/object:Api::Type::Integer
-                    name: "periodSeconds"
-                    description: |-
-                      How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
-                    default_value: 10
+                  name: "periodSeconds"
+                  description: |-
+                    How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
+                  default_value: 10
                 - !ruby/object:Api::Type::Integer
-                    name: "failureThreshold"
-                    description: |-
-                      Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
-                    default_value: 3
+                  name: "failureThreshold"
+                  description: |-
+                    Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+                  default_value: 3
                 - !ruby/object:Api::Type::NestedObject
-                    name: "httpGet"
-                    description: |-
-                      HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
-                    send_empty_value: true
-                    allow_empty_object: true
+                  name: "httpGet"
+                  description: |-
+                    HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
+                  send_empty_value: true
+                  allow_empty_object: true
                     # exactly_one_of:
                     #   - template.0.containers.0.startupProbe.0.httpGet
                     #   - template.0.containers.0.startupProbe.0.tcpSocket
                     #   - template.0.containers.0.startupProbe.0.grpc
-                    properties:
-                      - !ruby/object:Api::Type::String
-                        name: "path"
-                        default_value: "/"
-                        description: |-
-                          Path to access on the HTTP server. Defaults to '/'.
-                      - !ruby/object:Api::Type::Array
-                        name: "httpHeaders"
-                        description: |-
-                          Custom headers to set in the request. HTTP allows repeated headers.
-                        item_type: !ruby/object:Api::Type::NestedObject
-                          properties:
-                            - !ruby/object:Api::Type::String
-                              name: name
-                              required: true
-                              description: |-
-                                The header field name
-                            - !ruby/object:Api::Type::String
-                              name: value
-                              description: |-
-                                The header field value
-                              default_value: ""
-                              send_empty_value: true
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: "path"
+                      default_value: "/"
+                      description: |-
+                        Path to access on the HTTP server. Defaults to '/'.
+                    - !ruby/object:Api::Type::Array
+                      name: "httpHeaders"
+                      description: |-
+                        Custom headers to set in the request. HTTP allows repeated headers.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: name
+                            required: true
+                            description: |-
+                              The header field name
+                          - !ruby/object:Api::Type::String
+                            name: value
+                            description: |-
+                              The header field value
+                            default_value: ""
+                            send_empty_value: true
                 - !ruby/object:Api::Type::NestedObject
-                    name: "tcpSocket"
-                    description: |-
-                      TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
-                    send_empty_value: true
-                    allow_empty_object: true
+                  name: "tcpSocket"
+                  description: |-
+                    TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
+                  send_empty_value: true
+                  allow_empty_object: true
                     # exactly_one_of:
                     #   - template.0.containers.0.startupProbe.0.httpGet
                     #   - template.0.containers.0.startupProbe.0.tcpSocket
                     #   - template.0.containers.0.startupProbe.0.grpc
-                    properties:
-                      - !ruby/object:Api::Type::Integer
-                        name: port
-                        description: |-
-                          Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+                      default_from_api: true
                 - !ruby/object:Api::Type::NestedObject
                   name: grpc
                   description: |-
@@ -466,6 +534,7 @@ properties:
                       name: port
                       description: |-
                         Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to the same value as container.ports[0].containerPort.
+                      default_from_api: true
                     - !ruby/object:Api::Type::String
                       name: service
                       description: |-
@@ -548,31 +617,34 @@ properties:
         name: "maxInstanceRequestConcurrency"
         description: |-
           Sets the maximum number of requests that each serving instance can receive.
+        default_from_api: true
   - !ruby/object:Api::Type::Array
     name: "traffic"
     description: |-
       Specifies how to distribute traffic over a collection of Revisions belonging to the Service. If traffic is empty or not provided, defaults to 100% traffic to the latest Ready Revision.
+    default_from_api: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
-      - !ruby/object:Api::Type::Enum
-        name: "type"
-        description: |
-          The allocation type for this traffic target.
-        values:
-          - :TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST
-          - :TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION
-      - !ruby/object:Api::Type::String
-        name: "revision"
-        description: |
-          Revision to which to send this portion of traffic, if traffic allocation is by revision.
-      - !ruby/object:Api::Type::Integer
-        name: "percent"
-        description: |
-          Specifies percent of the traffic to this Revision. This defaults to zero if unspecified.
-      - !ruby/object:Api::Type::String
-        name: "tag"
-        description: |
-          Indicates a string to be part of the URI to exclusively reference this target.
+        - !ruby/object:Api::Type::Enum
+          name: "type"
+          description: |
+            The allocation type for this traffic target.
+          values:
+            - :TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST
+            - :TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION
+        - !ruby/object:Api::Type::String
+          name: "revision"
+          description: |
+            Revision to which to send this portion of traffic, if traffic allocation is by revision.
+        - !ruby/object:Api::Type::Integer
+          name: "percent"
+          description: |
+            Specifies percent of the traffic to this Revision. This defaults to zero if unspecified.
+          default_from_api: true
+        - !ruby/object:Api::Type::String
+          name: "tag"
+          description: |
+            Indicates a string to be part of the URI to exclusively reference this target.
   - !ruby/object:Api::Type::String
     name: "observedGeneration"
     output: true

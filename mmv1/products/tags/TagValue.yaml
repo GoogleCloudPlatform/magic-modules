@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -17,22 +17,41 @@ base_url: tagValues
 self_link: "tagValues/{{name}}"
 update_verb: :PATCH
 update_mask: true
-description: A TagValue is a child of a particular TagKey. TagValues are used to group cloud resources for the purpose of controlling them using policies.
+description: A TagValue is a child of a particular TagKey. TagValues are used to group
+  cloud resources for the purpose of controlling them using policies.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
+    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
   api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagValues'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'tag_value'
   fetch_iam_policy_verb: :POST
+autogen_async: true
+exclude_validator: true
+mutex: tagValues/{{parent}}
+id_format: "tagValues/{{name}}"
+import_format: ["tagValues/{{name}}", "{{name}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "tag_value_basic"
+    skip_test: true
+    primary_resource_id: "value"
+    vars:
+      key_short_name: "keyname"
+      value_short_name: "valuename"
+    test_vars_overrides:
+      key_short_name: '"tf-test-key-" + RandString(t, 10)'
+      value_short_name: '"tf-test-value-" + RandString(t, 10)'
+    test_env_vars:
+      org_id: :ORG_ID
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: |
       The generated numeric id for the TagValue.
     output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: parent
     description: |
@@ -47,6 +66,8 @@ properties:
       The short name must be 63 characters or less, beginning and ending with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
     immutable: true
     required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(1, 63)'
   - !ruby/object:Api::Type::String
     name: namespacedName
     description: |
@@ -56,6 +77,8 @@ properties:
     name: description
     description: |
       User-assigned description of the TagValue. Must not exceed 256 characters.
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(0, 256)'
   - !ruby/object:Api::Type::String
     name: createTime
     description: |

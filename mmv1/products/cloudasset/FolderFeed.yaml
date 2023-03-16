@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -23,9 +23,24 @@ description: |
   Describes a Cloud Asset Inventory feed used to to listen to asset updates.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/asset-inventory/docs'
+    'Official Documentation': 'https://cloud.google.com/asset-inventory/docs'
   api: 'https://cloud.google.com/asset-inventory/docs/reference/rest/'
+supports_indirect_user_project_override: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/cloud_asset_feed.go.erb
+  post_create: templates/terraform/post_create/cloud_asset_feed.go.erb
+  custom_import: templates/terraform/custom_import/cloud_asset_feed.go.erb
+  encoder: templates/terraform/encoders/cloud_asset_feed.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloud_asset_folder_feed"
+    primary_resource_id: "folder_feed"
+    vars:
+      feed_id: "network-updates"
+      folder_name: "Networking"
+    test_env_vars:
+      project: :PROJECT_NAME
+      org_id: :ORG_ID
 parameters:
   - !ruby/object:Api::Type::String
     name: folder

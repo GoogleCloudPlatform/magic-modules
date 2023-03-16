@@ -28,10 +28,10 @@ spec:
 <%
   product.objects.reject { |r| r.exclude || r.exclude_resource || r.not_in_version?(product.version_obj_or_closest(version)) }.each do |object|
     if object.legacy_name.nil?
-      if @config.legacy_name.nil?
+      if product.legacy_name.nil?
         terraform_name = "google_" + (product.name + object.name).underscore
       else
-        terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
+        terraform_name = "google_" + product.legacy_name + '_' + object.name.underscore
       end
     else
       terraform_name = object.legacy_name

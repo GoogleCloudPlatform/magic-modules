@@ -43,6 +43,37 @@
     error: !ruby/object:Api::OpAsync::Error
       path: "error"
       message: "message"
+  import_format: ["projects/{{project}}/locations/{{location}}/backups/{{backup_id}}"]
+  autogen_async: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "alloydb_backup_basic"
+      primary_resource_id: "default"
+      vars:
+        alloydb_backup_id: "alloydb-backup"
+        alloydb_cluster_name: "alloydb-cluster"
+        alloydb_instance_name: "alloydb-instance"
+        network_name: "alloydb-network"
+      test_vars_overrides:
+        network_name: 'BootstrapSharedTestNetwork(t, "alloydb-basic")'
+      ignore_read_extra:
+        - "reconciling"
+        - "update_time"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "alloydb_backup_full"
+      primary_resource_id: "default"
+      vars:
+        alloydb_backup_id: "alloydb-backup"
+        alloydb_cluster_name: "alloydb-cluster"
+        alloydb_instance_name: "alloydb-instance"
+        network_name: "alloydb-network"
+      test_vars_overrides:
+        network_name: 'BootstrapSharedTestNetwork(t, "alloydb-full")'
+      ignore_read_extra:
+        - "reconciling"
+        - "update_time"
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    encoder: templates/terraform/encoders/alloydb_backup.erb
   parameters:
     - !ruby/object:Api::Type::String
       name: "backupId"
@@ -73,6 +104,7 @@
       description: "The full resource name of the backup source cluster (e.g., projects/{project}/locations/{location}/clusters/{clusterId})."
       required: true
       immutable: true
+      diff_suppress_func: "projectNumberDiffSuppress"
     - !ruby/object:Api::Type::KeyValuePairs
       name: "labels"
       description: "User-defined labels for the alloydb backup."
