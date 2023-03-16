@@ -70,6 +70,9 @@ properties:
     name: 'proxyUri'
     description: |
         The proxy endpoint that is used to access the Jupyter notebook.
+        Only returned when the resource is in a `PROVISIONED` state. If
+        needed you can utilize `terraform apply -refresh-only` to await
+        the population of this value.
     output: true
   - !ruby/object:Api::Type::Array
     name: 'instanceOwners'
