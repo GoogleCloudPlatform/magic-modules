@@ -23,6 +23,7 @@ var (
 	vacationList = []string{"zli82016"}
 )
 
+// Check if a user is team member to not request a random reviewer
 func isTeamMember(author string) bool {
 	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
 }
@@ -58,8 +59,10 @@ func isOrgMember(author, org, GITHUB_TOKEN string) bool {
 	return res != 404
 }
 
+func getAvailableReviewers()
+
 func getRandomReviewer() string {
 	rand.Seed(time.Now().Unix())
-	reviewer := reviewerRotation[rand.Intn(len(reviewerRotationList))]
-	return reviewer
+	reviewer := reviewerRotation[rand.Intn(len(reviewerRotation))]
+	return reviewer, nil
 }

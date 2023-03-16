@@ -62,7 +62,7 @@ func main() {
 	trusted := isTrustedUser(author, GITHUB_TOKEN)
 
 	// auto_run_and_gcbrun will be run on every commit or /gcbrun: only trigger builds for trusted users
-	// gcbrun_only will be run on every /gcbrun: only trigger builds for untrusted users (because trusted users will be handled by check_auto_run_contributor)
+	// gcbrun_only will be run on every /gcbrun: only trigger builds for untrusted users (because trusted users will be handled by auto_run_and_gcbrun)
 	if (target == "auto_run_and_gcbrun" && trusted) || (target == "gcbrun_only" && !trusted) {
 		err = triggerMMPresubmitRuns("graphite-docker-images", "magic-modules", commitSha, substitutions)
 		if err != nil {
