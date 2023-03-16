@@ -9,10 +9,10 @@ BUILDER_IMAGE="gcr.io/graphite-docker-images/downstream-builder:latest"
 DEV_IMAGE="gcr.io/graphite-docker-images/magic-modules-dev:latest"
 
 main() {
-    if which podman > /dev/null; then
-        CONTAINER_EXECUTABLE="podman"
-    elif which docker > /dev/null; then
+    if which docker > /dev/null; then
         CONTAINER_EXECUTABLE="docker"
+    elif which podman > /dev/null; then
+        CONTAINER_EXECUTABLE="podman"
     else
         echo "Unable to find podman or docker executable. Please install podman or docker and try again." && exit 1;
     fi
