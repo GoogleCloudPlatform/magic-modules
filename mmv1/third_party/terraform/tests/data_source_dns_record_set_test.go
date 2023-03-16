@@ -22,7 +22,6 @@ func TestAccDataSourceDnsRecordSet_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: ProviderVersion450(),
-				SkipFunc:          SkipStepIfVcr,
 				Config:            testAccDataSourceDnsRecordSet_basic(managedZoneName, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),

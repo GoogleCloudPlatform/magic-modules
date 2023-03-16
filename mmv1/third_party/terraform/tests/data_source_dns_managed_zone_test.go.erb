@@ -19,7 +19,6 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: ProviderVersion450(),
-				SkipFunc:          SkipStepIfVcr,
 				Config:            testAccDataSourceDnsManagedZone_basic(RandString(t, 10)),
 				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
