@@ -49,7 +49,7 @@ var loggingProjectBucketConfigSchema = map[string]*schema.Schema{
 		Type:             schema.TypeBool,
 		Optional:         true,
 		Description:      `Enable log analytics for the bucket. Cannot be disabled once enabled.`,
-		DiffSuppressFunc: backwardsChangeDiffSuppress,
+		DiffSuppressFunc: enableAnalyticsBackwardsChangeDiffSuppress,
 	},
 	"lifecycle_state": {
 		Type:        schema.TypeString,
@@ -313,7 +313,7 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	return resourceLoggingProjectBucketConfigRead(d, meta)
 }
 
-func backwardsChangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+func enableAnalyticsBackwardsChangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	oldValue, _ := strconv.ParseBool(old)
 	if oldValue {
 		return true
