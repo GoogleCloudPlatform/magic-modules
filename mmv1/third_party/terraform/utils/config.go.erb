@@ -73,6 +73,7 @@ import (
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
+	alloydb "cloud.google.com/go/alloydb/apiv1"
 )
 
 type providerMeta struct {
@@ -573,6 +574,16 @@ func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
 	clientSqlAdmin.BasePath = sqlClientBasePath
 
 	return clientSqlAdmin
+}
+
+func (c *Config) NewAlloydbClient() *alloydb.AlloyDBAdminClient {
+	log.Printf("[INFO] Instantiating Alloydb client")
+	clientAlloydb, err := alloydb.NewAlloyDBAdminClient(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client storage: %s", err)
+		return nil
+	}
+	return clientAlloydb
 }
 
 func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {

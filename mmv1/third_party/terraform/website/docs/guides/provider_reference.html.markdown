@@ -307,6 +307,7 @@ followed by `google-beta` if they differ), and an environment variable that can
 be used for configuration are below:
 
 * `access_context_manager_custom_endpoint` (`GOOGLE_ACCESS_CONTEXT_MANAGER_CUSTOM_ENDPOINT`) - `https://accesscontextmanager.googleapis.com/v1/`
+* `alloydb_custom_endpoint` (`GOOGLE_ALLOYDB_CUSTOM_ENDPOINT`) - `https://alloydb.googleapis.com/v1/`
 * `app_engine_custom_endpoint` (`GOOGLE_APP_ENGINE_CUSTOM_ENDPOINT`) - `https://appengine.googleapis.com/v1/`
 * `bigquery_custom_endpoint` (`GOOGLE_BIGQUERY_CUSTOM_ENDPOINT`) - `https://www.googleapis.com/bigquery/v2/`
 * `bigtable_custom_endpoint` (`GOOGLE_BIGTABLE_CUSTOM_ENDPOINT`) - `https://bigtableadmin.googleapis.com/v2/`
