@@ -18,9 +18,9 @@ and open the `ResourceName.yaml` and `product.yaml` files.
 
 For example, for `google_spanner_database`:
 
-*   [`Database.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/8728bc89c37d5033b530c7d7157bb43865d9df58/mmv1/products/spanner/api.yaml#L123-L158)
+*   [`Database.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/spanner/Database.yaml)
 
-*   [`product.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/8728bc89c37d5033b530c7d7157bb43865d9df58/mmv1/products/spanner/terraform.yaml#L16-L51)
+*   [`product.yaml`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/spanner/product.yaml)
 
 In short, `properties` is an array of the resource's fields. `Database.yaml` is named after the resource 
 in PascalCase and contains the fields of the resource based on how it behaves in the API.
@@ -289,11 +289,11 @@ tests) for your diff suppress func.
 
 Example: DomainMapping (domainMappingLabelDiffSuppress)
 
--   [DomainMapping.yaml resource file](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L16)
-    -   [`custom_code`](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L31)
-    -   [`diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'`](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/products/cloudrun/terraform.yaml#L46)
--   [constants file](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/templates/terraform/constants/cloud_run_domain_mapping.go.erb)
--   [unit tests](https://github.com/GoogleCloudPlatform/magic-modules/blob/15fd46f60ed49ec1a6488d1b34394dcbd7cd3a41/mmv1/third_party/terraform/tests/resource_cloud_run_domain_mapping_test.go#L9)
+-   [DomainMapping.yaml resource file](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/cloudrun/DomainMapping.yaml)
+    -   [`custom_code`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/cloudrun/DomainMapping.yaml#L40)
+    -   [`diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/bigquery/DatasetAccess.yaml#L112)
+-   [constants file](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/templates/terraform/constants/cloud_run_domain_mapping.go.erb)
+-   [unit tests](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/third_party/terraform/tests/resource_cloud_run_domain_mapping_test.go#L9)
 
 ## Documentation
 
