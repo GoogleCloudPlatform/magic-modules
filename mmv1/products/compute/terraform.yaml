@@ -1499,7 +1499,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       machineImageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: compareCryptoKeyVersions
     iam_policy: !ruby/object:Api::Resource::IamPolicy
-      skip_import_test: true
       allowed_iam_role: 'roles/compute.admin'
       parent_resource_attribute: 'machine_image'
       iam_conditions_request_type: :QUERY_PARAM
@@ -1507,15 +1506,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "machine_image_basic"
         primary_resource_id: "image"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-image%s\", context[\"random_suffix\"])"
         vars:
-          vm_name: "vm"
-          image_name: "image"
+          vm_name: "my-vm"
+          image_name: "my-image"
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_machine_image_kms"
         primary_resource_id: "image"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-image%s\", context[\"random_suffix\"])"
         vars:
-          vm_name: "vm"
-          image_name: "image"
+          vm_name: "my-vm"
+          image_name: "my-image"
           key_name: "key"
           keyring_name: "keyring"
 
