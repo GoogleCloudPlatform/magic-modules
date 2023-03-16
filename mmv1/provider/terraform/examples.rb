@@ -311,6 +311,24 @@ module Provider
         check :skip_vcr, type: TrueClass
         check :pull_external, type: :boolean, default: false
       end
+
+      def merge(other)
+        result = self.class.new
+        instance_variables.each do |v|
+          result.instance_variable_set(v, instance_variable_get(v))
+        end
+  
+        other.instance_variables.each do |v|
+          if other.instance_variable_get(v).instance_of?(Array)
+            result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
+                                                       other.instance_variable_get(v)))
+          else
+            result.instance_variable_set(v, other.instance_variable_get(v))
+          end
+        end
+  
+        result
+      end
     end
   end
 end
