@@ -24,7 +24,7 @@
   description: Creates a Peering for Managed AD instance.
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
-        'Active Directory Domain Peering': 'https://cloud.google.com/managed-microsoft-ad/docs/domain-peering'
+      'Active Directory Domain Peering': 'https://cloud.google.com/managed-microsoft-ad/docs/domain-peering'
     api: 'https://cloud.google.com/managed-microsoft-ad/reference/rest/v1beta1/projects.locations.global.peerings'
   async: !ruby/object:Api::OpAsync
     operation: !ruby/object:Api::OpAsync::Operation
@@ -43,6 +43,19 @@
     error: !ruby/object:Api::OpAsync::Error
       path: 'error'
       message: 'message'
+  id_format: "projects/{{project}}/locations/global/domains/{{peering_id}}"
+  exclude_import: true
+  autogen_async: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "active_directory_peering_basic"
+      primary_resource_id: "ad-domain-peering"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_import_test: true
+          # skip the test until Active Directory setup issue got resolved
+      skip_test: true
   parameters:
     - !ruby/object:Api::Type::String
       name: peeringId
@@ -76,8 +89,10 @@
       url_param_only: true
       description: |
         The current state of this Peering.
+      ignore_read: true
     - !ruby/object:Api::Type::String
       name: statusMessage
       description: |
         Additional information about the current status of this peering, if available.
-
+  
+      ignore_read: true

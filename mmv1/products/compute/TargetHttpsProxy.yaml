@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -43,6 +43,16 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "target_https_proxy_basic"
+    primary_resource_id: "default"
+    vars:
+      target_https_proxy_name: "test-proxy"
+      ssl_certificate_name: "my-certificate"
+      url_map_name: "url-map"
+      backend_service_name: "backend-service"
+      http_health_check_name: "http-health-check"
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -53,7 +63,8 @@ properties:
     description: 'An optional description of this resource.'
     immutable: true
   - !ruby/object:Api::Type::Integer
-    name: 'id'
+    name: 'proxyId'
+    api_name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
   - !ruby/object:Api::Type::String
@@ -81,8 +92,9 @@ properties:
       - :ENABLE
       - :DISABLE
     update_verb: :POST
-    update_url:
-      'projects/{{project}}/global/targetHttpsProxies/{{name}}/setQuicOverride'
+    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setQuicOverride'
+    default_value: :NONE
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Array
     name: 'sslCertificates'
     description: |
@@ -90,8 +102,7 @@ properties:
       connections between users and the load balancer. At least one SSL
       certificate must be specified.
     update_verb: :POST
-    update_url:
-      'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
+    update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
     item_type: !ruby/object:Api::Type::ResourceRef
       name: 'sslCertificate'
       resource: 'SslCertificate'
@@ -104,8 +115,7 @@ properties:
       associated with the given target proxy. This field can only be set for global target proxies.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
     update_verb: :POST
-    update_url:
-      'projects/{{project}}/global/targetHttpsProxies/{{name}}/setCertificateMap'
+    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setCertificateMap'
   - !ruby/object:Api::Type::ResourceRef
     name: 'sslPolicy'
     resource: 'SslPolicy'
@@ -115,8 +125,7 @@ properties:
       the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
       resource will not have any SSL policy configured.
     update_verb: :POST
-    update_url:
-      'projects/{{project}}/global/targetHttpsProxies/{{name}}/setSslPolicy'
+    update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setSslPolicy'
   - !ruby/object:Api::Type::ResourceRef
     name: 'urlMap'
     resource: 'UrlMap'
@@ -132,3 +141,4 @@ properties:
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+    default_from_api: true

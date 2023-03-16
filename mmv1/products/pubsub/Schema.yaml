@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -19,17 +19,38 @@ description: |
   creating a contract between publisher and subscriber that Pub/Sub will enforce.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Creating and managing schemas':
-      'https://cloud.google.com/pubsub/docs/schemas'
+    'Creating and managing schemas': 'https://cloud.google.com/pubsub/docs/schemas'
   api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.schemas'
 base_url: projects/{{project}}/schemas
 create_url: projects/{{project}}/schemas?schemaId={{name}}
+async: !ruby/object:Provider::Terraform::PollAsync
+  check_response_func_existence: PollCheckForExistence
+  check_response_func_absence: PollCheckForAbsence
+  target_occurrences: 10
+  actions: ['delete']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "pubsub_schema_basic"
+    primary_resource_id: "example"
+    vars:
+      schema_name: "example"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "pubsub_schema_protobuf"
+    primary_resource_id: "example"
+    vars:
+      schema_name: "example"
+    test_env_vars:
+      project_name: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
-    description: The ID to use for the schema, which will become the final component of the schema's resource name.
+    description: The ID to use for the schema, which will become the final component
+      of the schema's resource name.
     required: true
     immutable: true
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
 properties:
   - !ruby/object:Api::Type::Enum
     name: 'type'
@@ -46,3 +67,4 @@ properties:
       This should contain a string representing the full definition of the schema
       that is a valid schema definition of the type specified in type.
 
+    ignore_read: true

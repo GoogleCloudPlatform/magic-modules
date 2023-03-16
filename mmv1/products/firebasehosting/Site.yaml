@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,9 +22,29 @@ update_mask: true
 description: 'A `Site` represents a Firebase Hosting site.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://firebase.google.com/docs/hosting'
+    'Official Documentation': 'https://firebase.google.com/docs/hosting'
   api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites'
+import_format: ['projects/{{project}}/sites/{{site_id}}', 'sites/{{site_id}}', '{{site_id}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "firebasehosting_site_basic"
+    min_version: "beta"
+    primary_resource_id: "default"
+    vars:
+      site_id: site-no-app
+    test_env_vars:
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: "firebasehosting_site_full"
+    min_version: "beta"
+    primary_resource_id: "full"
+    vars:
+      site_id: site-with-app
+      display_name: "Test web app for Firebase Hosting"
+    test_env_vars:
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      display_name: '"tf-test Test web app for Firebase Hosting"'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'site_id'
