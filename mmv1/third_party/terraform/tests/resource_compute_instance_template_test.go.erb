@@ -173,26 +173,45 @@ func TestComputeInstanceTemplate_scratchDiskSizeCustomizeDiff(t *testing.T) {
 		Typee       string // misspelled on purpose, type is a special symbol
 		DiskType    string
 		DiskSize    int
+		Interfacee  string
 		ExpectError bool
 	}{
-		"scratch disk correct size": {
+		"scratch disk correct size 1": {
 			Typee:       "SCRATCH",
 			DiskType:    "local-ssd",
 			DiskSize:    375,
+			Interfacee:  "NVME",
+			ExpectError: false,
+		},
+		"scratch disk correct size 2": {
+			Typee:       "SCRATCH",
+			DiskType:    "local-ssd",
+			DiskSize:    375,
+			Interfacee:  "NVME",
 			ExpectError: false,
 		},
 		"scratch disk incorrect size": {
 			Typee:       "SCRATCH",
 			DiskType:    "local-ssd",
 			DiskSize:    300,
+			Interfacee:  "NVME",
+			ExpectError: true,
+		},
+		"scratch disk incorrect interface": {
+			Typee:       "SCRATCH",
+			DiskType:    "local-ssd",
+			DiskSize:    3000,
+			Interfacee:  "SCSI",
 			ExpectError: true,
 		},
 		"non-scratch disk": {
 			Typee:       "PERSISTENT",
 			DiskType:    "",
 			DiskSize:    300,
+			Interfacee:  "NVME",
 			ExpectError: false,
 		},
+
 	}
 
 	for tn, tc := range cases {
@@ -202,6 +221,7 @@ func TestComputeInstanceTemplate_scratchDiskSizeCustomizeDiff(t *testing.T) {
 				"disk.0.type":         tc.Typee,
 				"disk.0.disk_type":    tc.DiskType,
 				"disk.0.disk_size_gb": tc.DiskSize,
+				"disk.0.interface":    tc.Interfacee,
 			},
 		}
 		err := resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(d)
