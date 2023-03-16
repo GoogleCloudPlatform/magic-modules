@@ -394,8 +394,8 @@ type frameworkTestProvider struct {
 
 // Configure is here to overwrite the frameworkProvider configure function for VCR testing
 func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	p.frameworkProvider.Configure(ctx, req, resp)
 	if isVcrEnabled() {
-		p.frameworkProvider.Configure(ctx, req, resp)
 		if resp.Diagnostics.HasError() {
 			return
 		}
