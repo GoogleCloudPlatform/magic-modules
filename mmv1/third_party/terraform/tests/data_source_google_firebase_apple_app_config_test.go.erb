@@ -21,19 +21,18 @@ func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		PreCheck: func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: providerVersion450(),
-				Config: testAccDataSourceGoogleFirebaseAppleAppConfig(context),
+				Config:            testAccDataSourceGoogleFirebaseAppleAppConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceFirebaseAppleAppConfigCheck("data.google_firebase_apple_app_config.my_app_config"),
 				),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
-				Config: testAccDataSourceGoogleFirebaseAppleAppConfig(context),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				Config:                   testAccDataSourceGoogleFirebaseAppleAppConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceFirebaseAppleAppConfigCheck("data.google_firebase_apple_app_config.my_app_config"),
 				),

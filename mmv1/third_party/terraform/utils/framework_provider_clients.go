@@ -35,7 +35,7 @@ func (p *frameworkProvider) NewDnsClient(userAgent string, diags *diag.Diagnosti
 }
 
 func (p *frameworkProvider) NewFirebaseClient(userAgent string, diags *diag.Diagnostics) *firebase.Service {
-	firebaseClientBasePath := removeBasePathVersion(p.FirebaseBasePath)
+	firebaseClientBasePath := RemoveBasePathVersion(p.FirebaseBasePath)
 	firebaseClientBasePath = strings.ReplaceAll(firebaseClientBasePath, "/firebase/", "")
 	tflog.Info(p.context, fmt.Sprintf("Instantiating Google Cloud firebase client for path %s", firebaseClientBasePath))
 	clientFirebase, err := firebase.NewService(p.context, option.WithHTTPClient(p.client))
