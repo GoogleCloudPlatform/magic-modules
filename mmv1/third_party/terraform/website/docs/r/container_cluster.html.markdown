@@ -752,13 +752,6 @@ ephemeral_storage_local_ssd_config {
   local_ssd_count = 2
 }
 ```
-* `local_nvme_ssd_block_config` - (Optional) Parameters for the raw block local NVMe SSD. Structure is [documented below](#nested_local_nvme_ssd_block_config).
-
-```hcl
-local_nvme_ssd_block_config {
-  local_ssd_count = 2
-}
-```
 
 * `local_nvme_ssd_block_config` - (Optional) Parameters for the local NVMe SSDs. Structure is [documented below](#nested_local_nvme_ssd_block_config).
 

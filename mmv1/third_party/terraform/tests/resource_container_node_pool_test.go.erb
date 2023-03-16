@@ -1306,11 +1306,11 @@ func TestAccContainerNodePool_ephemeralStorageLocalSsdConfig(t *testing.T) {
 	np := fmt.Sprintf("tf-test-nodepool-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_ephemeralStorageLocalSsdConfig(cluster, np),
 			},
 			{
