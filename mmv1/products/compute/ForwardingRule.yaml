@@ -300,6 +300,13 @@ properties:
           description: |
             Service Directory service to register the forwarding rule under.
           immutable: true
+        - !ruby/object:Api::Type::String
+          name: 'serviceDirectoryRegion'
+          description: |
+            Service Directory region to register this global forwarding rule under. 
+            Default to "us-central1". Only used for PSC for Google APIs. 
+            All PSC for Google APIs Forwarding Rules on the same network should use the same Service Directory region.
+          immutable: true
   - !ruby/object:Api::Type::String
     name: 'serviceLabel'
     description: |
