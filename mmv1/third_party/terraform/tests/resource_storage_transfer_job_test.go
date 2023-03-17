@@ -924,7 +924,7 @@ resource "google_storage_transfer_job" "transfer_job" {
       bucket_name = google_storage_bucket.data_sink.name
       path  = "foo/bar/"
     }
-    transfer_options {
+    object_conditions {
       last_modified_since = %s
       last_modified_before = %s
     }
