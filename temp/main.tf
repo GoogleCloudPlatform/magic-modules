@@ -405,6 +405,8 @@ resource "google_project_iam_member" "compute_agent_instance_admin" {
   member  = "serviceAccount:service-${google_project.proj.number}@compute-system.iam.gserviceaccount.com"
 }
 
+# TestAccCloudfunctions2function_cloudfunctions2SecretEnvExample
+# TestAccCloudfunctions2function_cloudfunctions2SecretVolumeExample
 resource "google_project_iam_member" "compute_agent_secret_accessor" {
   project = google_project.proj.project_id
   role    = "roles/secretmanager.secretAccessor"
