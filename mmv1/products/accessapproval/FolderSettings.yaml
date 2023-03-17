@@ -22,6 +22,29 @@
     Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.
   references: !ruby/object:Api::Resource::ReferenceLinks
     api: 'https://cloud.google.com/access-approval/docs/reference/rest/v1/folders'
+  legacy_name: "google_folder_access_approval_settings"
+  import_format: ["folders/{{folder_id}}/accessApprovalSettings"]
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      skip_test: true
+      name: 'folder_access_approval_full'
+      primary_resource_id: 'folder_access_approval'
+      vars:
+        folder_name: 'my-folder'
+      test_env_vars:
+        org_id: :ORG_ID
+    - !ruby/object:Provider::Terraform::Examples
+      skip_test: true
+      name: 'folder_access_approval_active_key_version'
+      primary_resource_id: 'folder_access_approval'
+      vars:
+        folder_name: 'my-folder'
+      test_env_vars:
+        org_id: :ORG_ID
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    custom_delete: templates/terraform/custom_delete/clear_folder_access_approval_settings.go.erb
+    pre_create: templates/terraform/update_mask.erb
+    constants: templates/terraform/constants/access_approval.go.erb
   parameters:
     - !ruby/object:Api::Type::String
       name: folder_id
@@ -44,6 +67,8 @@
         resources of that resource. A maximum of 50 email addresses are allowed.
       max_size: 50
       item_type: Api::Type::String
+      is_set: true
+      default_from_api: true
     - !ruby/object:Api::Type::Array
       name: enrolledServices
       required: true
@@ -51,8 +76,10 @@
         A list of Google Cloud Services for which the given resource has Access Approval enrolled.
         Access requests for the resource given by name against any of these services contained here will be required
         to have explicit approval. Enrollment can only be done on an all or nothing basis.
-        
+  
         A maximum of 10 enrolled services will be enforced, to be expanded as the set of supported services is expanded.
+      is_set: true
+      set_hash_func: accessApprovalEnrolledServicesHash
       item_type: !ruby/object:Api::Type::NestedObject
         properties:
           - !ruby/object:Api::Type::String
@@ -71,7 +98,7 @@
                 * Cloud Pub/Sub
                 * Cloud Storage
                 * Persistent Disk
-
+  
               Note: These values are supported as input, but considered a legacy format:
                 * all
                 * appengine.googleapis.com
@@ -114,4 +141,4 @@
         configured on this Folder (e.g. it doesn't exist or the Access Approval service account doesn't have the
         correct permissions on it, etc.) This key version is not necessarily the effective key version at this level,
         as key versions are inherited top-down.
-
+  

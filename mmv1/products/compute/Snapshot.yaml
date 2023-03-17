@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -16,7 +16,7 @@ name: 'Snapshot'
 kind: 'compute#snapshot'
 immutable: true
 base_url: projects/{{project}}/global/snapshots
-create_url: projects/{{project}}/zones/{{zone}}/disks/{{sourceDisk}}/createSnapshot
+create_url: PRE_CREATE_REPLACE_ME/createSnapshot
 collection_url_key: 'items'
 has_self_link: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -26,7 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
   parent_resource_attribute: 'name'
-  import_format: ["projects/{{project}}/global/snapshots/{{name}}", "{{name}}"]      
+  import_format: ["projects/{{project}}/global/snapshots/{{name}}", "{{name}}"]
 description: |
   Represents a Persistent Disk Snapshot resource.
 
@@ -61,6 +61,27 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "snapshot_basic"
+    primary_resource_id: "snapshot"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-snapshot%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      snapshot_name: "my-snapshot"
+      disk_name: "debian-disk"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "snapshot_chainname"
+    primary_resource_id: "snapshot"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-snapshot-chainname%s\", context[\"\
+      random_suffix\"])"
+    vars:
+      snapshot_name: "my-snapshot"
+      disk_name: "debian-disk"
+      chain_name: 'snapshot-chain'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/snapshot.go.erb
+  pre_create: templates/terraform/pre_create/compute_snapshot_precreate_url.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceDisk'
@@ -70,12 +91,16 @@ parameters:
     immutable: true
     required: true
   # ignore_read in providers - this is only used in Create
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'
     imports: 'name'
     description: 'A reference to the zone where the disk is hosted.'
     immutable: true
+    ignore_read: true
+    default_from_api: true
+    required: false
   - !ruby/object:Api::Type::NestedObject
     name: 'snapshotEncryptionKey'
     description: |
@@ -98,15 +123,19 @@ parameters:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        ignore_read: true
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.erb
       - !ruby/object:Api::Type::String
         name: 'sha256'
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
-      - !ruby/object:Api::Type::String
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
-        name: 'kmsKeyName'
+      - !ruby/object:Api::Type::String
+        name: "kmsKeySelfLink"
+        api_name: 'kmsKeyName'
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
       - !ruby/object:Api::Type::String
@@ -114,13 +143,14 @@ parameters:
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
-  - !ruby/object:Api::Type::NestedObject
     # ignore_read in providers - this is only used in Create
+  - !ruby/object:Api::Type::NestedObject
     name: 'sourceDiskEncryptionKey'
     description: |
       The customer-supplied encryption key of the source snapshot. Required
       if the source snapshot is protected by a customer-supplied encryption
       key.
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'rawKey'
@@ -128,6 +158,7 @@ parameters:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
       # The docs list this field but it is never returned.
+        sensitive: true
       - !ruby/object:Api::Type::String
         name: 'sha256'
         exclude: true
@@ -135,11 +166,12 @@ parameters:
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
-      - !ruby/object:Api::Type::String
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+      - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+        exclude: true
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |
@@ -151,7 +183,8 @@ properties:
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
   - !ruby/object:Api::Type::Integer
-    name: 'id'
+    name: 'snapshot_id'
+    api_name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
   # 'status' not useful for object convergence.
@@ -197,6 +230,7 @@ properties:
     name: 'storageLocations'
     description: |
       Cloud Storage bucket storage location of the snapshot (regional or multi-regional).
+    default_from_api: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: 'licenses'

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -51,6 +51,42 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+legacy_name: 'google_compute_router_peer'
+exclude_validator: true
+id_format: "projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}"
+mutex: router/{{region}}/{{router}}
+examples:
+  # These examples are not used to autogenerate tests, as fine-grained
+  # resources do not fit the normal test flow - we need to test deletion
+  # in a test step while parent resource still exists vs in CheckDestroy
+  # when all resources have been deleted.
+  - !ruby/object:Provider::Terraform::Examples
+    name: "router_peer_basic"
+    primary_resource_id: "peer"
+    skip_test: true
+    vars:
+      router_name: "my-router"
+      peer_name: "my-router-peer"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "router_peer_disabled"
+    primary_resource_id: "peer"
+    skip_test: true
+    vars:
+      router_name: "my-router"
+      peer_name: "my-router-peer"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "router_peer_bfd"
+    primary_resource_id: "peer"
+    skip_test: true
+    vars:
+      router_name: "my-router"
+      peer_name: "my-router-peer"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "router_peer_router_appliance"
+    primary_resource_id: "peer"
+    vars:
+      router_name: "my-router"
+      peer_name: "my-router-peer"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'
@@ -65,10 +101,14 @@ parameters:
     name: region
     resource: Region
     imports: name
-    description: Region where the router and BgpPeer reside.
+    description: |
+      Region where the router and BgpPeer reside.
+      If it is not provided, the provider region is used.
     immutable: true
-    required: true
+    required: false
     url_param_only: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -81,8 +121,11 @@ properties:
       except the last character, which cannot be a dash.
     required: true
     immutable: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validateRFC1035Name(2, 63)'
   - !ruby/object:Api::Type::String
-    name: 'interfaceName'
+    name: 'interface'
+    api_name: 'interfaceName'
     description: |
       Name of the interface the BGP peer is associated with.
     required: true
@@ -92,6 +135,7 @@ properties:
     description: |
       IP address of the interface inside Google Cloud Platform.
       Only IPv4 is supported.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'peerIpAddress'
     description: |
@@ -120,6 +164,7 @@ properties:
       - :DEFAULT
       - :CUSTOM
     default_value: :DEFAULT
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Array
     name: advertisedGroups
     description: |
@@ -147,18 +192,18 @@ properties:
       Leave this field blank to advertise no custom IP ranges.
     send_empty_value: true
     item_type: !ruby/object:Api::Type::NestedObject
-        properties:
-          - !ruby/object:Api::Type::String
-            name: range
-            required: true
-            description: |
-              The IP range to advertise. The value must be a
-              CIDR-formatted string.
-          - !ruby/object:Api::Type::String
-            name: description
-            description: |
-              User-specified description for the IP range.
-            send_empty_value: true
+      properties:
+        - !ruby/object:Api::Type::String
+          name: range
+          required: true
+          description: |
+            The IP range to advertise. The value must be a
+            CIDR-formatted string.
+        - !ruby/object:Api::Type::String
+          name: description
+          description: |
+            User-specified description for the IP range.
+          send_empty_value: true
   - !ruby/object:Api::Type::String
     name: 'managementType'
     description: |
@@ -177,6 +222,7 @@ properties:
     name: bfd
     description: |
       BFD configuration for the BGP peering.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: sessionInitializationMode
@@ -224,6 +270,9 @@ properties:
       If set to true, the peer connection can be established with routing information.
       The default is true.
     default_value: true
+    custom_expand: 'templates/terraform/custom_expand/bool_to_upper_string.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/string_to_bool_default_true.erb'
+    send_empty_value: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'routerApplianceInstance'
     resource: 'Instance'
