@@ -291,7 +291,7 @@ properties:
 
               You may add a maximum of 5 request headers.
             min_size: 1
-            max_size: 5
+            max_size: 25
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
