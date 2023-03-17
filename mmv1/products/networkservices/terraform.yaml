@@ -168,7 +168,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/locations/{{location}}/gateways/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
         name: "network_services_gateway_basic"
+        primary_resource_id: "default"
+        vars:
+          resource_name: "my-gateway"
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "network_services_gateway_advanced"
         primary_resource_id: "default"
         vars:
           resource_name: "my-gateway"

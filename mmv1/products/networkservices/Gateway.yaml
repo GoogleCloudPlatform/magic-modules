@@ -13,22 +13,30 @@
 
 --- !ruby/object:Api::Resource
 name: 'Gateway'
+# TODO(felipegc) Using location is not working so we may change the location to global and also change the tests.
 base_url: 'projects/{{project}}/locations/{{location}}/gateways'
 create_url: 'projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
+min_version: beta
+update_verb: :PATCH
+# TODO(felipegc) evaluate if this impacts the test.
+update_mask: true
 description: |
   Gateway represents the configuration for a proxy, typically a load balancer.
   It captures the ip:port over which the services are exposed by the proxy,
   along with any policy configurations. Routes have reference to to Gateways
   to dictate how requests should be routed by this Gateway.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.gateways'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
+    # TODO(felipegc) where I find these timeouts?
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
-      # update_minutes: 30
+      update_minutes: 30
       delete_minutes: 30
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
@@ -49,6 +57,8 @@ parameters:
     url_param_only: true
     description: |
       Short name of the Gateway resource to be created.
+  # TODO(felipegc) Evaluate if location and project should be on the final terraform documentation because they are part of the resource path
+  # OR WE MAY TEST IF THE PROJECT CAN BE PROVIDED
   - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true
@@ -58,15 +68,32 @@ parameters:
       The location of this gateway.
 properties:
   - !ruby/object:Api::Type::String
-    name: 'scope'
-    required: true
+    name: selfLink
+    description: |-
+      Server-defined URL of this resource.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
     description: |
-      Scope determines how configuration across multiple Gateway instances are merged.
-      The configuration for multiple Gateway instances with the same scope will be merged as presented as
-      a single coniguration to the proxy/load balancer. 
-      Max length 64 characters. Scope should start with a letter and can only have letters, numbers, hyphens.
+      Time the AccessPolicy was created in UTC.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    description: |
+      Time the AccessPolicy was updated in UTC.
+    output: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    required: false
+    description: Set of label tags associated with the Gateway resource.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    required: false
+    description: |
+      A free-text description of the resource. Max length 1024 characters.
   - !ruby/object:Api::Type::Enum
     name: 'type'
+    required: true
     description: |
       The type of the customer-managed gateway. Possible values are: * OPEN_MESH * SECURE_WEB_GATEWAY
     values:
@@ -77,7 +104,15 @@ properties:
     name: 'ports'
     required: true
     description: |
-      One or more port numbers (1-65535), on which the Gateway will receive traffic.
+      Immutable. One or more port numbers (1-65535), on which the Gateway will receive traffic.
       The proxy binds to the specified ports. Gateways of type 'SECURE_WEB_GATEWAY' are 
       limited to 1 port. Gateways of type 'OPEN_MESH' listen on 0.0.0.0 and support multiple ports.
     item_type: Api::Type::Integer
+  - !ruby/object:Api::Type::String
+    name: 'scope'
+    required: true
+    description: |
+      Scope determines how configuration across multiple Gateway instances are merged.
+      The configuration for multiple Gateway instances with the same scope will be merged as presented as
+      a single coniguration to the proxy/load balancer. 
+      Max length 64 characters. Scope should start with a letter and can only have letters, numbers, hyphens.
