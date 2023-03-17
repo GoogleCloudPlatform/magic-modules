@@ -51,9 +51,8 @@
   examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "app_engine_service_network_settings"
-      primary_resource_id: 'liveapp'
+      primary_resource_id: 'internalapp'
       vars:
-        service_id: "default"
         bucket_name: "appengine-static-content"
   properties:
     - !ruby/object:Api::Type::String
