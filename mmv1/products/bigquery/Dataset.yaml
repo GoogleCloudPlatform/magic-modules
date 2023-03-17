@@ -362,6 +362,7 @@ properties:
       TRUE if the dataset and its table names are case-insensitive, otherwise FALSE.
       By default, this is FALSE, which means the dataset and its table names are
       case-sensitive. This field does not affect routine references.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'defaultCollation'
     description: |
@@ -375,3 +376,4 @@ properties:
       The following values are supported:
       - 'und:ci': undetermined locale, case insensitive.
       - '': empty string. Default to case-sensitive behavior.
+    default_from_api: true
