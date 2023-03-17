@@ -297,14 +297,14 @@ func objectConditionsSchema() *schema.Schema {
 				},
 				"last_modified_since": {
 					Type:         schema.TypeString,
-					ValidateFunc: validateRFC3339Date(),
+					ValidateFunc: validateRFC3339Date,
 					Optional:     true,
 					AtLeastOneOf: objectConditionsKeys,
 					Description:  `If specified, only objects with a "last modification time" on or after this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
 				},
 				"last_modified_before": {
 					Type:         schema.TypeString,
-					ValidateFunc: validateRFC3339Date(),
+					ValidateFunc: validateRFC3339Date,
 					Optional:     true,
 					AtLeastOneOf: objectConditionsKeys,
 					Description:  `If specified, only objects with a "last modification time" before this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
