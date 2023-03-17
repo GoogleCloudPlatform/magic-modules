@@ -843,10 +843,6 @@ be from 0 to 999,999,999 inclusive.`,
 	}
 }
 
-func expandInstanceTemplateResourcePolicies(d TerraformResourceData, dataKey string) []string {
-	return convertAndMapStringArr(d.Get(dataKey).([]interface{}), GetResourceNameFromSelfLink)
-}
-
 func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
