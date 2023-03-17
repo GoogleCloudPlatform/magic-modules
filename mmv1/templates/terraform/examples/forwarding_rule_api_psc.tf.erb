@@ -1,0 +1,37 @@
+// Forwarding rule for Google APIs private service connect
+resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
+  provider              = google-beta
+  name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  region                = "global"
+  load_balancing_scheme = ""
+  target                = "all-apis"
+  network               = google_compute_network.consumer_net.name
+  ip_address            = google_compute_address.consumer_address.id
+
+  serviceDirectoryRegistrations {
+    serviceDirectoryRegion = "northamerica-northeast1"
+  }
+
+// Consumer service endpoint
+
+resource "google_compute_network" "consumer_net" {
+  provider                = google-beta
+  name                    = "<%= ctx[:vars]['consumer_network_name'] %>"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "consumer_subnet" {
+  provider      = google-beta
+  name          = "<%= ctx[:vars]['consumer_network_name'] %>"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.consumer_net.id
+}
+
+resource "google_compute_address" "consumer_address" {
+  name         = "<%= ctx[:vars]['ip_name'] %>-1"
+  provider     = google-beta
+  region       = "us-central1"
+  subnetwork   = google_compute_subnetwork.consumer_subnet.id
+  address_type = "INTERNAL"
+}
