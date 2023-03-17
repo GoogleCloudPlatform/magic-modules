@@ -21,235 +21,278 @@
   description: A repository for storing artifacts
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
-      'Official Documentation':
-        'https://cloud.google.com/artifact-registry/docs/overview'
+      'Official Documentation': 'https://cloud.google.com/artifact-registry/docs/overview'
     api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
   iam_policy: !ruby/object:Api::Resource::IamPolicy
     exclude: false
     method_name_separator: ':'
-    # TODO (camthornton): Change to repository_id in 4.0
+      # TODO (camthornton): Change to repository_id in 4.0
     parent_resource_attribute: 'repository'
-    import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository}}", "{{repository}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository}}",
+      "{{repository}}"]
     base_url: projects/{{project}}/locations/{{location}}/repositories/{{name}}
     self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
     allowed_iam_role: 'roles/artifactregistry.reader'
+  id_format: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
+  import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}",
+    "{{repository_id}}"]
+  autogen_async: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "artifact_registry_repository_basic"
+      primary_resource_id: "my-repo"
+      primary_resource_name: "fmt.Sprintf(\"tf-test-my-repository%s\", context[\"random_suffix\"\
+        ])"
+      vars:
+        repository_id: "my-repository"
+        description: "example docker repository"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "artifact_registry_repository_cmek"
+      primary_resource_id: "my-repo"
+      vars:
+        repository_id: "my-repository"
+        kms_key_name: "kms-key"
+      test_vars_overrides:
+        kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    - !ruby/object:Provider::Terraform::Examples
+      name: "artifact_registry_repository_virtual"
+      min_version: beta
+      primary_resource_id: "my-repo"
+      vars:
+        repository_id: "my-repository"
+        description: "example virtual docker repository"
+        upstream_repository_id: "my-repository-upstream"
+        upstream_description: "example docker repository (upstream source)"
+        upstream_policy_id: "my-repository-upstream"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "artifact_registry_repository_remote"
+      min_version: beta
+      primary_resource_id: "my-repo"
+      vars:
+        repository_id: "my-repository"
+        description: "example remote docker repository"
   properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    description: |-
-      The name of the repository, for example:
-      "projects/p1/locations/us-central1/repositories/repo1"
-    output: true
-  - !ruby/object:Api::Type::String
-    name: repository_id
-    description: |-
-      The last part of the repository name, for example:
-      "repo1"
-    required: true
-    input: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    description: |
-      The name of the location this repository is located in.
-    required: true
-    input: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: format
-    description: |-
-      The format of packages that are stored in the repository. Supported formats
-      can be found [here](https://cloud.google.com/artifact-registry/docs/supported-formats).
-      You can only create alpha formats if you are a member of the
-      [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
-    required: true
-    input: true
-  - !ruby/object:Api::Type::String
-    name: description
-    description: |-
-      The user-provided description of the repository.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'labels'
-    description: |
-      Labels with user-defined metadata.
-      This field may contain up to 64 entries. Label keys and values may be no
-      longer than 63 characters. Label keys must begin with a lowercase letter
-      and may only contain lowercase letters, numeric characters, underscores,
-      and dashes.
-  - !ruby/object:Api::Type::String
-    name: 'kmsKeyName'
-    description: |-
-      The Cloud KMS resource name of the customer managed encryption key that’s
-      used to encrypt the contents of the Repository. Has the form:
-      `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
-      This value may not be changed after the Repository has been created.
-    input: true
-  - !ruby/object:Api::Type::Time
-    name: createTime
-    description: The time when the repository was created.
-    output: true
-  - !ruby/object:Api::Type::Time
-    name: updateTime
-    description: The time when the repository was last updated.
-    output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'mavenConfig'
-    description: |-
-      MavenRepositoryConfig is maven related repository details.
-      Provides additional configuration details for repositories of the maven
-      format type.
-    properties:
-      # Maven properties.
-      - !ruby/object:Api::Type::Boolean
-        name: 'allowSnapshotOverwrites'
-        description: |-
-          The repository with this flag will allow publishing the same
-          snapshot versions.
-        input: true
-      - !ruby/object:Api::Type::Enum
-        name: 'versionPolicy'
-        description: |-
-          Version policy defines the versions that the registry will accept.
-        input: true
-        values:
-        - :VERSION_POLICY_UNSPECIFIED
-        - :RELEASE
-        - :SNAPSHOT
-        default_value: :VERSION_POLICY_UNSPECIFIED
-  - !ruby/object:Api::Type::Enum
-    name: 'mode'
-    min_version: beta
-    description: |-
-      The mode configures the repository to serve artifacts from different sources.
-    input: true
-    values:
-      - :STANDARD_REPOSITORY
-      - :VIRTUAL_REPOSITORY
-      - :REMOTE_REPOSITORY
-    default_value: :STANDARD_REPOSITORY
-  - !ruby/object:Api::Type::NestedObject
-    name: 'virtualRepositoryConfig'
-    min_version: beta
-    conflicts:
-      - remote_repository_config
-    description: |-
-      Configuration specific for a Virtual Repository.
-    properties:
-      - !ruby/object:Api::Type::Array
-        name: 'upstreamPolicies'
-        description: |-
-          Policies that configure the upstream artifacts distributed by the Virtual
-          Repository. Upstream policies cannot be set on a standard repository.
-        item_type: !ruby/object:Api::Type::NestedObject
+    - !ruby/object:Api::Type::String
+      name: name
+      description: |-
+        The name of the repository, for example:
+        "projects/p1/locations/us-central1/repositories/repo1"
+      output: true
+      custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+      custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    - !ruby/object:Api::Type::String
+      name: repository_id
+      description: |-
+        The last part of the repository name, for example:
+        "repo1"
+      required: true
+      immutable: true
+      url_param_only: true
+      custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    - !ruby/object:Api::Type::String
+      name: 'location'
+      description: |
+        The name of the location this repository is located in.
+      required: false
+      immutable: true
+      url_param_only: true
+      default_from_api: true
+    - !ruby/object:Api::Type::String
+      name: format
+      description: |-
+        The format of packages that are stored in the repository. Supported formats
+        can be found [here](https://cloud.google.com/artifact-registry/docs/supported-formats).
+        You can only create alpha formats if you are a member of the
+        [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
+      required: true
+      immutable: true
+      diff_suppress_func: 'compareCaseInsensitive'
+    - !ruby/object:Api::Type::String
+      name: description
+      description: |-
+        The user-provided description of the repository.
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'labels'
+      description: |
+        Labels with user-defined metadata.
+        This field may contain up to 64 entries. Label keys and values may be no
+        longer than 63 characters. Label keys must begin with a lowercase letter
+        and may only contain lowercase letters, numeric characters, underscores,
+        and dashes.
+    - !ruby/object:Api::Type::String
+      name: 'kmsKeyName'
+      description: |-
+        The Cloud KMS resource name of the customer managed encryption key that’s
+        used to encrypt the contents of the Repository. Has the form:
+        `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
+        This value may not be changed after the Repository has been created.
+      immutable: true
+    - !ruby/object:Api::Type::Time
+      name: createTime
+      description: The time when the repository was created.
+      output: true
+    - !ruby/object:Api::Type::Time
+      name: updateTime
+      description: The time when the repository was last updated.
+      output: true
+    - !ruby/object:Api::Type::NestedObject
+      name: 'mavenConfig'
+      description: |-
+        MavenRepositoryConfig is maven related repository details.
+        Provides additional configuration details for repositories of the maven
+        format type.
+      properties:
+        # Maven properties.
+        - !ruby/object:Api::Type::Boolean
+          name: 'allowSnapshotOverwrites'
+          description: |-
+            The repository with this flag will allow publishing the same
+            snapshot versions.
+          immutable: true
+        - !ruby/object:Api::Type::Enum
+          name: 'versionPolicy'
+          description: |-
+            Version policy defines the versions that the registry will accept.
+          immutable: true
+          values:
+            - :VERSION_POLICY_UNSPECIFIED
+            - :RELEASE
+            - :SNAPSHOT
+          default_value: :VERSION_POLICY_UNSPECIFIED
+    - !ruby/object:Api::Type::Enum
+      name: 'mode'
+      min_version: beta
+      description: |-
+        The mode configures the repository to serve artifacts from different sources.
+      immutable: true
+      values:
+        - :STANDARD_REPOSITORY
+        - :VIRTUAL_REPOSITORY
+        - :REMOTE_REPOSITORY
+      default_value: :STANDARD_REPOSITORY
+    - !ruby/object:Api::Type::NestedObject
+      name: 'virtualRepositoryConfig'
+      min_version: beta
+      conflicts:
+        - remote_repository_config
+      description: |-
+        Configuration specific for a Virtual Repository.
+      properties:
+        - !ruby/object:Api::Type::Array
+          name: 'upstreamPolicies'
+          description: |-
+            Policies that configure the upstream artifacts distributed by the Virtual
+            Repository. Upstream policies cannot be set on a standard repository.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'id'
+                description: |-
+                  The user-provided ID of the upstream policy.
+              - !ruby/object:Api::Type::String
+                name: 'repository'
+                description: |
+                  A reference to the repository resource, for example:
+                  "projects/p1/locations/us-central1/repository/repo1".
+              - !ruby/object:Api::Type::Integer
+                name: 'priority'
+                description: |-
+                  Entries with a greater priority value take precedence in the pull order.
+    - !ruby/object:Api::Type::NestedObject
+      name: 'remoteRepositoryConfig'
+      min_version: beta
+      conflicts:
+        - virtual_repository_config
+      description: |-
+        Configuration specific for a Remote Repository.
+      immutable: true
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'description'
+          description: |-
+            The description of the remote source.
+          immutable: true
+        - !ruby/object:Api::Type::NestedObject
+          name: 'dockerRepository'
+          exactly_one_of:
+            - remoteRepositoryConfig.0.docker_repository
+            - remoteRepositoryConfig.0.maven_repository
+            - remoteRepositoryConfig.0.npm_repository
+            - remoteRepositoryConfig.0.python_repository
+          description: |-
+            Specific settings for a Docker remote repository.
+          immutable: true
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'id'
+            - !ruby/object:Api::Type::Enum
+              name: 'publicRepository'
+              exactly_one_of:
+                - remoteRepositoryConfig.0.docker_repository.0.public_repository
               description: |-
-                The user-provided ID of the upstream policy.
-            - !ruby/object:Api::Type::String
-              name: 'repository'
-              description: |+
-                A reference to the repository resource, for example:
-                "projects/p1/locations/us-central1/repository/repo1".
-            - !ruby/object:Api::Type::Integer
-              name: 'priority'
+                Address of the remote repository.
+              immutable: true
+              values:
+                - :DOCKER_HUB
+              default_value: :DOCKER_HUB
+        - !ruby/object:Api::Type::NestedObject
+          name: 'mavenRepository'
+          exactly_one_of:
+            - remoteRepositoryConfig.0.docker_repository
+            - remoteRepositoryConfig.0.maven_repository
+            - remoteRepositoryConfig.0.npm_repository
+            - remoteRepositoryConfig.0.python_repository
+          description: |-
+            Specific settings for a Maven remote repository.
+          immutable: true
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'publicRepository'
+              exactly_one_of:
+                - remoteRepositoryConfig.0.maven_repository.0.public_repository
               description: |-
-                Entries with a greater priority value take precedence in the pull order.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'remoteRepositoryConfig'
-    min_version: beta
-    conflicts:
-      - virtual_repository_config
-    description: |-
-      Configuration specific for a Remote Repository.
-    input: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'description'
-        description: |-
-          The description of the remote source.
-        input: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'dockerRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-        description: |-
-          Specific settings for a Docker remote repository.
-        input: true
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.docker_repository.0.public_repository
-            description: |-
-              Address of the remote repository.
-            input: true
-            values:
-              - :DOCKER_HUB
-            default_value: :DOCKER_HUB
-      - !ruby/object:Api::Type::NestedObject
-        name: 'mavenRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-        description: |-
-          Specific settings for a Maven remote repository.
-        input: true
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.maven_repository.0.public_repository
-            description: |-
-              Address of the remote repository.
-            input: true
-            values:
-              - :MAVEN_CENTRAL
-            default_value: :MAVEN_CENTRAL
-      - !ruby/object:Api::Type::NestedObject
-        name: 'npmRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-        description: |-
-          Specific settings for an Npm remote repository.
-        input: true
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.npm_repository.0.public_repository
-            description: |-
-              Address of the remote repository.
-            input: true
-            values:
-              - :NPMJS
-            default_value: :NPMJS
-      - !ruby/object:Api::Type::NestedObject
-        name: 'pythonRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-        description: |-
-          Specific settings for a Python remote repository.
-        input: true
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.python_repository.0.public_repository
-            description: |-
-              Address of the remote repository.
-            input: true
-            values:
-              - :PYPI
-            default_value: :PYPI
+                Address of the remote repository.
+              immutable: true
+              values:
+                - :MAVEN_CENTRAL
+              default_value: :MAVEN_CENTRAL
+        - !ruby/object:Api::Type::NestedObject
+          name: 'npmRepository'
+          exactly_one_of:
+            - remoteRepositoryConfig.0.docker_repository
+            - remoteRepositoryConfig.0.maven_repository
+            - remoteRepositoryConfig.0.npm_repository
+            - remoteRepositoryConfig.0.python_repository
+          description: |-
+            Specific settings for an Npm remote repository.
+          immutable: true
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'publicRepository'
+              exactly_one_of:
+                - remoteRepositoryConfig.0.npm_repository.0.public_repository
+              description: |-
+                Address of the remote repository.
+              immutable: true
+              values:
+                - :NPMJS
+              default_value: :NPMJS
+        - !ruby/object:Api::Type::NestedObject
+          name: 'pythonRepository'
+          exactly_one_of:
+            - remoteRepositoryConfig.0.docker_repository
+            - remoteRepositoryConfig.0.maven_repository
+            - remoteRepositoryConfig.0.npm_repository
+            - remoteRepositoryConfig.0.python_repository
+          description: |-
+            Specific settings for a Python remote repository.
+          immutable: true
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'publicRepository'
+              exactly_one_of:
+                - remoteRepositoryConfig.0.python_repository.0.public_repository
+              description: |-
+                Address of the remote repository.
+              immutable: true
+              values:
+                - :PYPI
+              default_value: :PYPI

@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Product
 name: BigQuery
 display_name: BigQuery
+legacy_name: 'bigquery'
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -20,6 +20,13 @@ has_self_link: true
 description: |
   An HttpHealthCheck resource. This resource defines a template for how
   individual VMs should be checked for health, via HTTP.
+
+
+  ~> **Note:** google_compute_http_health_check is a legacy health check.
+  The newer [google_compute_health_check](/docs/providers/google/r/compute_health_check.html)
+  should be preferred for all uses except
+  [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
+  which still require the legacy version.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
@@ -42,6 +49,12 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "http_health_check_basic"
+    primary_resource_id: "default"
+    vars:
+      http_health_check_name: "authentication-health-check"
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'checkIntervalSec'
@@ -63,6 +76,7 @@ properties:
     description: |
       A so-far unhealthy instance will be marked healthy after this many
       consecutive successes. The default value is 2.
+    default_value: 2
   - !ruby/object:Api::Type::String
     name: 'host'
     description: |
@@ -75,6 +89,7 @@ properties:
       The unique identifier for the resource. This identifier is defined by
       the server.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -86,25 +101,29 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the
       last character, which cannot be a dash.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Integer
     name: 'port'
     description: |
       The TCP port number for the HTTP health check request.
       The default value is 80.
+    default_value: 80
   - !ruby/object:Api::Type::String
     name: 'requestPath'
     description: |
       The request path of the HTTP health check request.
       The default value is /.
+    default_value: "/"
   - !ruby/object:Api::Type::Integer
     name: 'timeoutSec'
     description: |
       How long (in seconds) to wait before claiming failure.
       The default value is 5 seconds.  It is invalid for timeoutSec to have
       greater value than checkIntervalSec.
+    default_value: 5
   - !ruby/object:Api::Type::Integer
     name: 'unhealthyThreshold'
     description: |
       A so-far healthy instance will be marked unhealthy after this many
       consecutive failures. The default value is 2.
+    default_value: 2

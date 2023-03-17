@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -20,8 +20,7 @@ description: 'Represents a TargetPool resource, used for Load Balancing.'
 has_self_link: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/compute/docs/load-balancing/network/target-pools'
+    'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/network/target-pools'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetPools'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -41,19 +40,20 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+exclude: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
     description: 'The region where the target pool resides.'
-    required: true
+    required: false
 properties:
   - !ruby/object:Api::Type::ResourceRef
     name: 'backupPool'
     resource: 'TargetPool'
     imports: 'selfLink'
-    input: true
+    immutable: true
     description: |
       This field is applicable only when the containing target pool is
       serving a forwarding rule as the primary pool, and its failoverRatio
@@ -108,6 +108,7 @@ properties:
     name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::Array
     name: 'instances'
     description: |
@@ -129,7 +130,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Enum
     name: 'sessionAffinity'
@@ -143,8 +144,9 @@ properties:
       * CLIENT_IP_PROTO: Connections from the same client IP with the same
         IP protocol will go to the same instance in the pool while that
         instance remains healthy.
-    input: true
+    immutable: true
     values:
       - :NONE
       - :CLIENT_IP
       - :CLIENT_IP_PROTO
+    default_value: :NONE

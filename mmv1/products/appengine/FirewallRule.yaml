@@ -22,17 +22,30 @@
   update_mask: true
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
-      'Official Documentation':
-        'https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules'
+      'Official Documentation': 'https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules'
     api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.firewall.ingressRules'
   collection_url_key: 'ingressRules'
+  import_format: ["apps/{{project}}/firewall/ingressRules/{{priority}}"]
+  mutex: "apps/{{project}}"
+  async: !ruby/object:Provider::Terraform::PollAsync
+    check_response_func_existence: PollCheckForExistence
+    actions: ['create']
+  skip_sweeper: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "app_engine_firewall_rule_basic"
+      primary_resource_id: "rule"
+      vars:
+        project_id: "ae-project"
+      test_env_vars:
+        org_id: :ORG_ID
   parameters:
     - !ruby/object:Api::Type::Integer
       name: 'priority'
       description: |
         A positive integer that defines the order of rule evaluation.
         Rules with the lowest priority are evaluated first.
-
+  
         A default rule at priority Int32.MaxValue matches all IPv4 and
         IPv6 traffic when no previous rule matches. Only the action of
         this rule can be modified by the user.
@@ -56,4 +69,4 @@
         - UNSPECIFIED_ACTION
         - ALLOW
         - DENY
-
+  

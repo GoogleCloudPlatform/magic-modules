@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -33,13 +33,54 @@ async: !ruby/object:Api::OpAsync
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+autogen_async: true
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+id_format: "{{project}}/{{name}}"
+import_format:
+  - "projects/{{project}}/instances/{{name}}"
+  - "{{project}}/{{name}}"
+  - "{{name}}"
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "spanner_instance_basic"
+    primary_resource_id: "example"
+        # Randomness
+    skip_vcr: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "spanner_instance_processing_units"
+    primary_resource_id: "example"
+        # Randomness
+    skip_vcr: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "spanner_instance_multi_regional"
+    primary_resource_id: "example"
+        # Randomness
+    skip_vcr: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_destroy'
+    default_value: false
+    description: |
+      When deleting a spanner instance, this boolean option will delete all backups of this instance.
+      This must be set to true if you created a backup manually in the console.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/spanner_instance.go.erb
+  update_encoder: templates/terraform/encoders/spanner_instance_update.go.erb
+  decoder: templates/terraform/decoders/spanner_instance.go.erb
+  post_create: templates/terraform/post_create/sleep.go.erb
+  pre_delete: 'templates/terraform/pre_delete/spanner_instance.go.erb'
+  constants: 'templates/terraform/constants/spanner_instance.go.erb'
+  pre_update: 'templates/terraform/pre_update/spanner_instance.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -47,8 +88,18 @@ properties:
       A unique identifier for the instance, which cannot be changed after
       the instance is created. The name must be between 6 and 30 characters
       in length.
-    input: true
+
+
+      If not provided, a random string starting with `tf-` will be selected.
+    immutable: true
     required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[a-z][-a-z0-9]*[a-z0-9]$'
+        # This resource supports a sort of odd autogenerate-if-not-set
+        # system, which is done in the encoder.  Consequently we have
+        # to interpret "not set" as "use the name in state".
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'config'
     resource: 'InstanceConfig'
@@ -60,8 +111,9 @@ properties:
       is stored. Values are typically of the form `regional-europe-west1` , `us-central` etc.
       In order to obtain a valid list please consult the
       [Configuration section of the docs](https://cloud.google.com/spanner/docs/instances).
-    input: true
+    immutable: true
     required: true
+    custom_expand: templates/terraform/custom_expand/spanner_instance_config.go.erb
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
@@ -69,7 +121,9 @@ properties:
       unique per project and between 4 and 30 characters in length.
     required: true
   - !ruby/object:Api::Type::Integer
-    name: 'nodeCount'
+    name: 'num_nodes'
+    api_name: nodeCount
+    default_from_api: true
     description: |
       The number of nodes allocated to this instance. Exactly one of either node_count or processing_units
       must be present in terraform.
@@ -84,6 +138,7 @@ properties:
     exactly_one_of:
       - num_nodes
       - processing_units
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
@@ -96,7 +151,7 @@ properties:
     output: true
     # This attribute is not useful - we include it in Terraform for historical
     # reasons, but you should most likely not use it.
-    exclude: true
+    exclude: false
     values:
       - :READY
       - :CREATING

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -20,6 +20,38 @@ update_verb: :PATCH
 update_mask: true
 description: |
   A `CryptoKey` represents a logical key that can be used for cryptographic operations.
+
+
+  ~> **Note:** CryptoKeys cannot be deleted from Google Cloud Platform.
+  Destroying a Terraform-managed CryptoKey will remove it from state
+  and delete all CryptoKeyVersions, rendering the key unusable, but *will
+  not delete the resource from the project.* When Terraform destroys these keys,
+  any data previously encrypted with these keys will be irrecoverable.
+  For this reason, it is strongly recommended that you add lifecycle hooks
+  to the resource to prevent accidental destruction.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Creating a key': 'https://cloud.google.com/kms/docs/creating-keys#create_a_key'
+  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys'
+id_format: "{{key_ring}}/cryptoKeys/{{name}}"
+import_format: ["{{key_ring}}/cryptoKeys/{{name}}"]
+supports_indirect_user_project_override: true
+schema_version: 1
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "kms_crypto_key_basic"
+    primary_resource_id: "example-key"
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "kms_crypto_key_asymmetric_sign"
+    primary_resource_id: "example-asymmetric-sign-key"
+    skip_test: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
+  custom_import: templates/terraform/custom_import/kms_crypto_key.go.erb
+  decoder: templates/terraform/decoders/kms.go.erb
+  encoder: templates/terraform/encoders/kms_crypto_key.go.erb
+  update_encoder: templates/terraform/update_encoder/kms_crypto_key.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'keyRing'
@@ -27,14 +59,16 @@ parameters:
       The KeyRing that this key belongs to.
       Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'`.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
+    diff_suppress_func: 'kmsCryptoKeyRingsEquivalent'
+    ignore_read: true
   - !ruby/object:Api::Type::Boolean
     name: 'skipInitialVersionCreation'
     description: |
       If set to true, the request will create a CryptoKey without any CryptoKeyVersions. 
       You must use the `google_kms_key_ring_import_job` resource to import the CryptoKeyVersion.
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -42,14 +76,16 @@ properties:
     description: |
       The resource name for the CryptoKey.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
+    ignore_read: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
       The time that this resource was created on the server.
       This is in RFC3339 text format.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
@@ -66,7 +102,7 @@ properties:
       - "ASYMMETRIC_DECRYPT"
       - "MAC"
     default_value: :ENCRYPT_DECRYPT
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'rotationPeriod'
     description: |
@@ -74,40 +110,47 @@ properties:
       The first rotation will take place after the specified period. The rotation period has
       the format of a decimal number with up to 9 fractional digits, followed by the
       letter `s` (seconds). It must be greater than a day (ie, 86400).
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'orEmpty(validateKmsCryptoKeyRotationPeriod)'
+    update_mask_fields:
+      - "rotationPeriod"
+      - "nextRotationTime"
   - !ruby/object:Api::Type::NestedObject
     name: 'versionTemplate'
     description: |
       A template describing settings for new crypto key versions.
+    default_from_api: true
+    update_mask_fields:
+      - "versionTemplate.algorithm"
     properties:
       - !ruby/object:Api::Type::String
         name: 'algorithm'
         description: |
-           The algorithm to use when creating a version based on this template.
-           See the [algorithm reference](https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm) for possible inputs.
+          The algorithm to use when creating a version based on this template.
+          See the [algorithm reference](https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm) for possible inputs.
         required: true
       - !ruby/object:Api::Type::String
         name: 'protectionLevel'
         description: |
           The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC". Defaults to "SOFTWARE".
-        input: true
+        immutable: true
+        default_value: "SOFTWARE"
   - !ruby/object:Api::Type::Time
     name: 'nextRotationTime'
     description: |
       The time when KMS will create a new version of this Crypto Key.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'destroyScheduledDuration'
-    input: true
+    immutable: true
     description: |
       The period of time that versions of this key spend in the DESTROY_SCHEDULED state before transitioning to DESTROYED.
       If not specified at creation time, the default duration is 24 hours.
+    default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: 'importOnly'
-    input: true
+    immutable: true
     description: |
       Whether this key may contain imported versions only.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Creating a key':
-      'https://cloud.google.com/kms/docs/creating-keys#create_a_key'
-  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys'
+    default_from_api: true

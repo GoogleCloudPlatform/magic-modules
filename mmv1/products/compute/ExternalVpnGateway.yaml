@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -16,7 +16,7 @@ name: 'ExternalVpnGateway'
 kind: 'compute#externalVpnGateway'
 base_url: projects/{{project}}/global/externalVpnGateways
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
   Represents a VPN gateway managed outside of GCP.
@@ -40,6 +40,24 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "external_vpn_gateway"
+    primary_resource_id: "external_gateway"
+        # Multiple fine-grained resources
+    skip_vcr: true
+    vars:
+      ha_vpn_gateway_name: "ha-vpn"
+      network_name: "network-1"
+      external_gateway_name: "external-gateway"
+      global_address_name: "global-address"
+      router_name: "ha-vpn-router1"
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: "only_external_vpn_gateway_full"
+    primary_resource_id: "external_gateway"
+    vars:
+      external_gateway_name: "external-gateway"
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -67,7 +85,8 @@ properties:
       - :SINGLE_IP_INTERNALLY_REDUNDANT
       - :TWO_IPS_REDUNDANCY
   - !ruby/object:Api::Type::Array
-    name: 'interfaces'
+    name: 'interface'
+    api_name: 'interfaces'
     description: |
       A list of interfaces on this external VPN gateway.
     item_type: !ruby/object:Api::Type::NestedObject

@@ -40,7 +40,7 @@ as the following adding support for a `fooBar` field in the API:
       - !ruby/object:Api::Type::String
         name: 'fooBar'
         min_version: beta
-        input: true
+        immutable: true
         description: |
           The cloud.google.com description of this field.
 ```
@@ -59,7 +59,7 @@ setting values to `false`, and omit them instead.
 *   `required: true` indicates that a field is required. New top-level fields
     should not be considered required, as that is a breaking change. Subfields
     of newly-added optional fields can be added as required.
-*   `input: true` indicates that a field can only be set when the API resource is
+*   `immutable: true` indicates that a field can only be set when the API resource is
     created. Changing the field will force the resource to be recreated.
 *   `output: true` indicates that a field is output-only in the API and cannot
     be configured by the user.
@@ -445,17 +445,17 @@ When writing a changelog entry for a promotion, write it as if it was a new
 field or resource, and suffix it with `(ga only)`. For example, if the
 `google_container_cluster` resource was promoted to GA in your change:
 
-```
-\`\`\`release-note:new-resource
+~~~
+```release-note:new-resource
 `google_container_cluster` (ga only)
-\`\`\`
 ```
+~~~
 
-Alternatively, for field promotions, you may use "{{service}}: promoted
-{{field}} in {{resource}} to GA", i.e.
+Alternatively, for field promotions, you may use `{{service}}: promoted
+{{field}} in {{resource}} to GA`, i.e.
 
-```
-\`\`\`release-note:enhancement
+~~~
+```release-note:enhancement
 container: promoted `node_locations` field in google_container_cluster` to GA
-\`\`\`
 ```
+~~~

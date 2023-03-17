@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -23,11 +23,18 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Introduction to Reservations": "https://cloud.google.com/bigquery/docs/reservations-intro"
   api: "https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservations/create"
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_reservation_basic"
+    primary_resource_id: "reservation"
+    vars:
+      name: 'my-reservation'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     url_param_only: true
-    input: true
+    immutable: true
     default_value: US
     description: |
       The geographic location where the transfer config should reside.
@@ -35,7 +42,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     url_param_only: true
-    input: true
+    immutable: true
     required: true
     description: |
       The name of the reservation. This field must only contain alphanumeric characters or dash.

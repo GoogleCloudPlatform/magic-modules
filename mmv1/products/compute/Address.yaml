@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -17,7 +17,7 @@ kind: 'compute#address'
 base_url: projects/{{project}}/regions/{{region}}/addresses
 collection_url_key: 'items'
 has_self_link: true
-input: true
+immutable: true
 description: |
   Represents an Address resource.
 
@@ -55,15 +55,56 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "address_basic"
+    primary_resource_id: "ip_address"
+    vars:
+      address_name: "my-address"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "address_with_subnetwork"
+    primary_resource_id: "internal_with_subnet_and_address"
+    vars:
+      address_name: "my-internal-address"
+      network_name: "my-network"
+      subnetwork_name: "my-subnet"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "address_with_gce_endpoint"
+    primary_resource_id: "internal_with_gce_endpoint"
+    vars:
+      address_name: "my-internal-address-"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "address_with_shared_loadbalancer_vip"
+    primary_resource_id: "internal_with_shared_loadbalancer_vip"
+    vars:
+      address_name: "my-internal-address"
+    skip_docs: true      # It is almost identical to internal_with_gce_endpoint
+      # TODO(rileykarson): Remove this example when instance is supported
+  - !ruby/object:Provider::Terraform::Examples
+    name: "instance_with_ip"
+    primary_resource_id: "static"
+    vars:
+      address_name: "ipv4-address"
+      instance_name: "vm-instance"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "compute_address_ipsec_interconnect"
+    primary_resource_id: "ipsec-interconnect-address"
+    vars:
+      address_name: "test-address"
+      network_name: "test-network"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/labels.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
     description: |
-      URL of the region where the regional address resides.
-      This field is not applicable to global addresses.
-    required: true
+      The Region in which the created address should reside.
+      If it is not provided, the provider region is used.
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'address'
@@ -72,6 +113,7 @@ properties:
       IPv4 is supported. An address may only be specified for INTERNAL
       address types. The IP address must be inside the specified subnetwork,
       if any. Set by the API if undefined.
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'addressType'
     description: |
@@ -80,6 +122,7 @@ properties:
       - :INTERNAL
       - :EXTERNAL
     default_value: :EXTERNAL
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -91,6 +134,7 @@ properties:
     name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -101,6 +145,8 @@ properties:
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
     required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
   - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |
@@ -124,6 +170,7 @@ properties:
 
 
       This should only be set when using an Internal address.
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'networkTier'
     description: |
@@ -134,6 +181,7 @@ properties:
       - :STANDARD
   # TODO(alexstephen): Add in status with exclude attribute. What does this
   # mean?
+    default_from_api: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
     resource: 'Subnetwork'
@@ -143,6 +191,7 @@ properties:
       address is specified, it must be within the subnetwork's IP range.
       This field can only be used with INTERNAL type with
       GCE_ENDPOINT/DNS_RESOLVER purposes.
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'users'
     description: 'The URLs of the resources that are using this address.'
@@ -163,6 +212,7 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
     update_verb: :POST
     min_version: beta
+    exclude: false
   - !ruby/object:Api::Type::Enum
     name: 'status'
     output: true
@@ -175,6 +225,7 @@ properties:
       - :RESERVING
       - :RESERVED
       - :IN_USE
+    exclude: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'

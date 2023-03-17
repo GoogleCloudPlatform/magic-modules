@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -50,6 +50,27 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "reservation_basic"
+    primary_resource_id: "gce_reservation"
+    vars:
+      reservation_name: "gce-reservation"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "shared_reservation_basic"
+    primary_resource_id: "gce_reservation"
+    test_env_vars:
+      project: :PROJECT_NAME
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    vars:
+      reservation_name: "gce-shared-reservation"
+    skip_docs: true
+        # Resource creation race
+    skip_vcr: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  update_encoder: templates/terraform/update_encoder/reservation.go.erb
+  pre_update: templates/terraform/pre_update/shared_reservation_update.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -58,7 +79,7 @@ parameters:
     description: |
       The zone where the reservation is made.
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -67,7 +88,7 @@ properties:
       Creation timestamp in RFC3339 text format.
   - !ruby/object:Api::Type::String
     name: 'description'
-    input: true
+    immutable: true
     description: |
       An optional description of this resource.
   - !ruby/object:Api::Type::Integer
@@ -75,10 +96,11 @@ properties:
     output: true
     description: |
       The unique identifier for the resource.
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -95,7 +117,7 @@ properties:
       reservations that are tied to a commitment.
   - !ruby/object:Api::Type::Boolean
     name: 'specificReservationRequired'
-    input: true
+    immutable: true
     # Not a hard API default, but this should help avoid a unset/true/false
     # trinary.
     default_value: false
@@ -112,6 +134,8 @@ properties:
     name: 'shareSettings'
     description: |
       The share setting for reservations.
+    default_from_api: true
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'shareType'
@@ -120,6 +144,7 @@ properties:
           - :SPECIFIC_PROJECTS
         description: |
           Type of sharing for this shared-reservation
+        default_from_api: true
       - !ruby/object:Api::Type::Map
         name: 'projectMap'
         description: |
@@ -133,7 +158,7 @@ properties:
             - !ruby/object:Api::Type::String
               name: 'projectId'
               description: |
-                The project id/number should be the same as the key of this project config in the project map.
+                The project id/number, should be same as the key of this project config in the project map.
   - !ruby/object:Api::Type::NestedObject
     name: 'specificReservation'
     required: true
@@ -146,7 +171,9 @@ properties:
         name: 'count'
         required: true
         description: |
-         The number of resources that are allocated.
+          The number of resources that are allocated.
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(1)'
       - !ruby/object:Api::Type::Integer
         name: 'inUseCount'
         output: true
@@ -155,35 +182,36 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'instanceProperties'
         required: true
-        input: true
+        immutable: true
         description: |
           The instance properties for the reservation.
         properties:
           - !ruby/object:Api::Type::String
             name: 'machineType'
             required: true
-            input: true
+            immutable: true
             description: |
               The name of the machine type to reserve.
           - !ruby/object:Api::Type::String
             name: 'minCpuPlatform'
-            input: true
+            immutable: true
             description: |
               The minimum CPU platform for the reservation. For example,
               `"Intel Skylake"`. See
               the CPU platform availability reference](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform#availablezones)
               for information on available CPU platforms.
+            default_from_api: true
           - !ruby/object:Api::Type::Array
             name: 'guestAccelerators'
             description: |
               Guest accelerator type and count.
-            input: true
+            immutable: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'acceleratorType'
                   required: true
-                  input: true
+                  immutable: true
                   description: |
                     The full or partial URL of the accelerator type to
                     attach to this instance. For example:
@@ -193,13 +221,13 @@ properties:
                 - !ruby/object:Api::Type::Integer
                   name: 'acceleratorCount'
                   required: true
-                  input: true
+                  immutable: true
                   description: |
                     The number of the guest accelerator cards exposed to
                     this instance.
           - !ruby/object:Api::Type::Array
             name: 'localSsds'
-            input: true
+            immutable: true
             description: |
               The amount of local ssd to reserve with each instance. This
               reserves disks of type `local-ssd`.
@@ -207,7 +235,7 @@ properties:
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'interface'
-                  input: true
+                  immutable: true
                   default_value: :SCSI
                   values:
                     - :SCSI
@@ -217,6 +245,6 @@ properties:
                 - !ruby/object:Api::Type::Integer
                   name: 'diskSizeGb'
                   required: true
-                  input: true
+                  immutable: true
                   description: |
-                   The size of the disk in base-2 GB.
+                    The size of the disk in base-2 GB.
