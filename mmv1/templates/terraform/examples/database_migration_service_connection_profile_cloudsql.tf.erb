@@ -1,57 +1,57 @@
 resource "google_sql_database_instance" "cloudsqldb" {
-  name             = "<%= ctx[:vars]["cloudsqldb"] %>"
+  name             = "<%= ctx[:vars]["sqldb"] %>"
   database_version = "MYSQL_5_7"
   settings {
     tier = "db-n1-standard-1"
   }
 }
 
-resource "google_sql_ssl_cert" "cloudsqldb_client_cert" {
-  common_name = "<%= ctx[:vars]["cloudsqldb_cert"] %>"
+resource "google_sql_ssl_cert" "sql_client_cert" {
+  common_name = "<%= ctx[:vars]["sqldb_cert"] %>"
   instance    = google_sql_database_instance.cloudsqldb.name
   
   depends_on = [google_sql_database_instance.cloudsqldb]
 }
 
-resource "google_sql_user" "coudsqldb_user" {
-  name     = "<%= ctx[:vars]["cloudsqldb_user"] %>"
+resource "google_sql_user" "sqldb_user" {
+  name     = "<%= ctx[:vars]["sqldb_user"] %>"
   instance = google_sql_database_instance.cloudsqldb.name
-  password = "<%= ctx[:vars]["cloudsqldb_pass"] %>"
+  password = "<%= ctx[:vars]["sqldb_pass"] %>"
   
-  depends_on = [google_sql_database_instance.cloudsqldb]
+	depends_on = [google_sql_ssl_cert.sql_client_cert]
 }
 
 
 
 resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
 	location = "us-central1"		
-	connection_profile_id = "<%= ctx[:vars]["cloudsqldb_from_profile"] %>"
-	display_name = "<%= ctx[:vars]["cloudsqldb_from_profile"] %>_display"
+	connection_profile_id = "<%= ctx[:vars]["from_profile"] %>"
+	display_name = "<%= ctx[:vars]["from_profile"] %>_display"
 	labels	= { 
 					testanno = "testanno" 
 				}
 	mysql {
 	  host = google_sql_database_instance.main.ip_address.0.ip_address
 	  port = 3306
-	  username = "testusernamecloudsql"
-	  password = "testpasswordcloudsql"
+	  username = google_sql_user.sqldb_user.name
+	  password = google_sql_user.sqldb_user.password
 	  ssl {
-	  	client_key = google_sql_ssl_cert.cloudsqldb_client_cert.private_key
-	  	client_certificate = google_sql_ssl_cert.cloudsqldb_client_cert.cert
-	  	ca_certificate = google_sql_ssl_cert.cloudsqldb_client_cert.server_ca_cert
+	  	client_key = google_sql_ssl_cert.sql_client_cert.private_key
+	  	client_certificate = google_sql_ssl_cert.sql_client_cert.cert
+	  	ca_certificate = google_sql_ssl_cert.sql_client_cert.server_ca_cert
 	  }
-	  cloud_sql_id = "<%= ctx[:vars]["cloudsqldb"] %>"
+	  cloud_sql_id = "<%= ctx[:vars]["sqldb"] %>"
 	}
 	dbprovider            = "CLOUDSQL"
 
-	depends_on = [google_sql_database_instance.cloudsqldb]
+	depends_on = [google_sql_user.sql_user]
 }
 
 
 resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
 	location = "us-central1"		
-	connection_profile_id = "<%= ctx[:vars]["cloudsqldb_to_profile"] %>"
-	display_name = "<%= ctx[:vars]["cloudsqldb_to_profile"] %>_displayname"
+	connection_profile_id = "<%= ctx[:vars]["to_profile"] %>"
+	display_name = "<%= ctx[:vars]["to_profile"] %>_displayname"
 	dbprovider            = "CLOUDSQL"
 	labels	= { 
 					testlabela = "testlabelb" 
@@ -77,11 +77,11 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 		data_disk_type = "PD_HDD"
 		data_disk_size_gb = "11"
 		zone = "us-central1-b"
-		source_id = "projects/${data.google_project.project.number}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["cloudsqldb_from_profile"] %>"
+		source_id = "projects/${data.google_project.project.number}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["sqldb_from_profile"] %>"
 		root_password = "testpasscloudsql"
 	  }
 
 
-	depends_on = [google_sql_database_instance.main]
+	depends_on = [google_database_migration_service_connection_profile.<%= ctx[:primary_resource_id] %>]
 	}
 }
