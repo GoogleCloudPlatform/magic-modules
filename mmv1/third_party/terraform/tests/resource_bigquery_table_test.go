@@ -501,6 +501,9 @@ func TestAccBigQueryExternalDataTable_objectTable(t *testing.T) {
 			{
 				Config: testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName),
 			},
+			{
+				Config: testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName),
+			},
 		},
 	})
 }

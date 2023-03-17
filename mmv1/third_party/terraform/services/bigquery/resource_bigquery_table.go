@@ -668,7 +668,6 @@ func ResourceBigQueryTable() *schema.Resource {
 							Type:          schema.TypeString,
 							Optional:      true,
 							Description:   `Object Metadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If ObjectMetadata is set, sourceFormat should be omitted.`,
-							ValidateFunc:  validation.StringInSlice([]string{"SIMPLE"}, false),
 							ConflictsWith: []string{"external_data_configuration.0.source_format"},
 						},
 					},
