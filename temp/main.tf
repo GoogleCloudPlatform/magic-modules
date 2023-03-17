@@ -13,8 +13,6 @@
 #   - A BeyondCorp subscription on the organization
 #
 # After applying this configuration:
-#   - Increase project quota for the new service account
-#   - Increase project quota for the billing account
 #   - (Internal only) Enable stubbed calls for GKE MultiCloud resources
 #   - (Internal only) Verify ownership of hashicorptest.com for new service account
 #   - Enable Media CDN
@@ -49,6 +47,12 @@
 #   - Add a new test user in the Google Workspace Admin Console: https://admin.google.com/ac/users
 #   - Create a support@ group in the Google Workspace Admin Console, add new service account as a member, and make it an owner
 #   - Create a Service Account key for the new service account
+#
+# Quotas that will need to be adjusted to support all tests:
+#   - Project quota for the new service account
+#   - Project quota for the billing account
+#   - AlloyDB cluster quota in us-central1
+#   - Cloud Workstation cluster quota in us-central1
 #
 
 provider "google" {}
