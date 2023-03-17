@@ -16,6 +16,7 @@
 #   - Increase project quota for the new service account
 #   - Increase project quota for the billing account
 #   - (Internal only) Enable stubbed calls for GKE MultiCloud resources
+#   - (Internal only) Verify ownership of hashicorptest.com for new service account
 #   - Enable Media CDN
 #   - Enable Game Services
 #   - Enable Access Boundary permissions
