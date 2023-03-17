@@ -64,6 +64,20 @@ examples:
       public_routine: "public_routine"
     test_env_vars:
       service_account: :SERVICE_ACCT
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_dataset_case_insensitive_names"
+    primary_resource_id: "dataset"
+    skip_docs: true
+    vars:
+      dataset_id: "example_dataset"
+      account_name: "bqowner"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_dataset_default_collation_set"
+    primary_resource_id: "dataset"
+    skip_docs: true
+    vars:
+      dataset_id: "example_dataset"
+      account_name: "bqowner"
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'delete_contents_on_destroy'
