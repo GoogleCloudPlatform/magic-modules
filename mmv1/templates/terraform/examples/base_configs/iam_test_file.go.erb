@@ -18,7 +18,7 @@ import (
 individual_url = object.iam_policy.self_link || object.self_link_url
 -%>
 <%
-  tf_product = (@config.legacy_name || product_ns).underscore
+  tf_product = (object.__product.legacy_name || product_ns).underscore
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = resource_ns + '_iam'
 -%>

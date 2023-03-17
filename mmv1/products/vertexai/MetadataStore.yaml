@@ -1,0 +1,106 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: MetadataStore
+base_url: projects/{{project}}/locations/{{region}}/metadataStores
+self_link: 'projects/{{project}}/locations/{{region}}/metadataStores/{{name}}'
+create_url: projects/{{project}}/locations/{{region}}/metadataStores?metadataStoreId={{name}}
+min_version: beta
+immutable: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.metadataStores'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+description: |-
+  Instance of a metadata store. Contains a set of metadata that can be queried.
+autogen_async: false
+id_format: '{{name}}'
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_metadata_store"
+    skip_test: true
+    primary_resource_id: "store"
+    vars:
+      name: "test-store"
+parameters:
+  - !ruby/object:Api::Type::String
+    name: region
+    description: The region of the Metadata Store. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: The name of the MetadataStore. This value may be up to 60 characters,
+      and valid characters are [a-z0-9_]. The first character cannot be a number.
+    immutable: true
+    url_param_only: true
+    pattern: projects/{{project}}/locations/{{region}}/metadataStores/{{name}}
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: Description of the MetadataStore.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    output: true
+    description: |
+      The timestamp of when the MetadataStore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
+    output: true
+    description: |
+      The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryptionSpec'
+    immutable: true
+    description: |
+      Customer-managed encryption key spec for a MetadataStore. If set, this MetadataStore and all sub-resources of this MetadataStore will be secured by this key.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        description: |
+          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+        immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'state'
+    output: true
+    description: |
+      State information of the MetadataStore.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'diskUtilizationBytes'
+        description: |
+          The disk utilization of the MetadataStore in bytes.
+        output: true

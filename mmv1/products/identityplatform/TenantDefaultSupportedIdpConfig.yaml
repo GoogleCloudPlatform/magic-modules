@@ -1,0 +1,87 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'TenantDefaultSupportedIdpConfig'
+base_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs'
+self_link: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}'
+create_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs?idpId={{idp_id}}'
+update_verb: :PATCH
+update_mask: true
+description: |
+  Configurations options for the tenant for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
+
+  You must enable the
+  [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+  the marketplace prior to using this resource.
+import_format: ["projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}"]
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "identity_platform_tenant_default_supported_idp_config_basic"
+    primary_resource_id: "idp_config"
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      The name of the default supported IDP config resource
+  - !ruby/object:Api::Type::String
+    name: 'idpId'
+    description: |
+      ID of the IDP. Possible values include:
+
+      * `apple.com`
+
+      * `facebook.com`
+
+      * `gc.apple.com`
+
+      * `github.com`
+
+      * `google.com`
+
+      * `linkedin.com`
+
+      * `microsoft.com`
+
+      * `playgames.google.com`
+
+      * `twitter.com`
+
+      * `yahoo.com`
+
+    immutable: true
+    url_param_only: true
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'tenant'
+    required: true
+    url_param_only: true
+    immutable: true
+    description: |
+      The name of the tenant where this DefaultSupportedIdpConfig resource exists
+  - !ruby/object:Api::Type::String
+    name: 'clientId'
+    required: true
+    description: |
+      OAuth client ID
+  - !ruby/object:Api::Type::String
+    name: 'clientSecret'
+    required: true
+    description: |
+      OAuth client secret
+  - !ruby/object:Api::Type::Boolean
+    name: 'enabled'
+    description: |
+      If this IDP allows the user to sign in

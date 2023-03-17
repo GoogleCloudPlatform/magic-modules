@@ -63,7 +63,7 @@ terraform build provider:
 mmv1:
 	cd mmv1;\
 		bundle; \
-		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
+		bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
 
 tpgtools:
 	make serialize
@@ -73,7 +73,7 @@ tpgtools:
 validator:
 	cd mmv1;\
 		bundle; \
-		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
+		bundle exec compiler.rb -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
 
 test:
 	cd mmv1; \

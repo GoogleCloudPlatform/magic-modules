@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -23,16 +23,38 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/binary-authorization/'
+    'Official Documentation': 'https://cloud.google.com/binary-authorization/'
   api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
+import_format: ["projects/{{project}}/attestors/{{name}}"]
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/binaryauthorization_attestor.go'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "binary_authorization_attestor_basic"
+    primary_resource_id: "attestor"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-attestor%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      attestor_name: "test-attestor"
+      note_name: "test-attestor-note"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "binary_authorization_attestor_kms"
+    primary_resource_id: "attestor"
+    skip_test: true
+    vars:
+      attestor_name: "test-attestor"
+      note_name: "test-attestor-note"
+      key_name: "test-attestor-key"
+      keyring_name: "test-attestor-key-ring"
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: |
       The resource name.
     required: true
-    input: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
   - !ruby/object:Api::Type::String
     name: description
     description: |
@@ -49,13 +71,16 @@ properties:
         name: noteReference
         description: |
           The resource name of a ATTESTATION_AUTHORITY Note, created by the
-          user, in the format: `projects/*/notes/*` (or the legacy
+          user. If the Note is in a different project from the Attestor, it
+          should be specified in the format `projects/*/notes/*` (or the legacy
           `providers/*/notes/*`). This field may not be updated.
           An attestation by this attestor is stored as a Container Analysis
           ATTESTATION_AUTHORITY Occurrence that names a container image
           and that links to this Note.
         required: true
-        input: true
+        immutable: true
+        custom_expand: 'templates/terraform/custom_expand/container_analysis_note.erb'
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::Array
         name: publicKeys
         description: |
@@ -81,6 +106,7 @@ properties:
                 field exactly. Additional restrictions on this field can
                 be imposed based on which public key type is encapsulated.
                 See the documentation on publicKey cases below for details.
+              default_from_api: true
             - !ruby/object:Api::Type::String
               name: asciiArmoredPgpPublicKey
               # TODO (mbang): Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
@@ -99,25 +125,26 @@ properties:
               # TODO (mbang): Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
               description: |
                 A raw PKIX SubjectPublicKeyInfo format public key.
-                
+
                 NOTE: id may be explicitly provided by the caller when using this
                 type of public key, but it MUST be a valid RFC3986 URI. If id is left
                 blank, a default one will be computed based on the digest of the DER
                 encoding of the public key.
               properties:
-              - !ruby/object:Api::Type::String
-                name: publicKeyPem
-                description: |
-                  A PEM-encoded public key, as described in
-                  `https://tools.ietf.org/html/rfc7468#section-13`
-              - !ruby/object:Api::Type::String
-                name: signatureAlgorithm
-                description: |
-                  The signature algorithm used to verify a message against
-                  a signature using this key. These signature algorithm must
-                  match the structure and any object identifiers encoded in
-                  publicKeyPem (i.e. this algorithm must match that of the
-                  public key).
+                - !ruby/object:Api::Type::String
+                  name: publicKeyPem
+                  description: |
+                    A PEM-encoded public key, as described in
+                    `https://tools.ietf.org/html/rfc7468#section-13`
+                - !ruby/object:Api::Type::String
+                  name: signatureAlgorithm
+                  description: |
+                    The signature algorithm used to verify a message against
+                    a signature using this key. These signature algorithm must
+                    match the structure and any object identifiers encoded in
+                    publicKeyPem (i.e. this algorithm must match that of the
+                    public key).
+                  diff_suppress_func: 'compareSignatureAlgorithm'
       - !ruby/object:Api::Type::String
         name: delegationServiceAccountEmail
         description: |
