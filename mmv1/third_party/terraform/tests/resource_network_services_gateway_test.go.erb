@@ -43,7 +43,6 @@ func testAccNetworkServicesGateway_basic(gatewayName string) string {
 	return fmt.Sprintf(`
 resource "google_network_services_gateway" "foobar" {
   name        = "%s"
-  location    = "global"
   scope       = "default-scope"
   type        = "OPEN_MESH"
   ports       = [443]
@@ -56,7 +55,6 @@ func testAccNetworkServicesGateway_update(gatewayName string) string {
 	return fmt.Sprintf(`
 resource "google_network_services_gateway" "foobar" {
   name        = "%s"
-  location    = "global"
   scope       = "default-scope"
   type        = "OPEN_MESH"
   ports       = [443]

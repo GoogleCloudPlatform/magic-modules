@@ -13,13 +13,11 @@
 
 --- !ruby/object:Api::Resource
 name: 'Gateway'
-# TODO(felipegc) Using location is not working so we may change the location to global and also change the tests.
-base_url: 'projects/{{project}}/locations/{{location}}/gateways'
-create_url: 'projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}'
-self_link: 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
+base_url: 'projects/{{project}}/locations/global/gateways'
+create_url: 'projects/{{project}}/locations/global/gateways?gatewayId={{name}}'
+self_link: 'projects/{{project}}/locations/global/gateways/{{name}}'
 min_version: beta
 update_verb: :PATCH
-# TODO(felipegc) evaluate if this impacts the test.
 update_mask: true
 description: |
   Gateway represents the configuration for a proxy, typically a load balancer.
@@ -33,7 +31,6 @@ async: !ruby/object:Api::OpAsync
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-    # TODO(felipegc) where I find these timeouts?
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
       update_minutes: 30
@@ -50,7 +47,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
-import_format: ['projects/{{project}}/locations/{{location}}/gateways/{{name}}']
+import_format: ['projects/{{project}}/locations/global/gateways/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
@@ -71,14 +68,6 @@ parameters:
     url_param_only: true
     description: |
       Short name of the Gateway resource to be created.
-  # TODO(felipegc) Evaluate if location and project should be on the final terraform documentation because they are part of the resource path
-  # OR WE MAY TEST IF THE PROJECT CAN BE PROVIDED
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    url_param_only: true
-    required: true
-    description: |
-      The location of this gateway.
 properties:
   - !ruby/object:Api::Type::String
     name: 'selfLink'
@@ -108,7 +97,7 @@ properties:
     name: 'type'
     required: true
     description: |
-      The type of the customer-managed gateway. Possible values are: * OPEN_MESH * SECURE_WEB_GATEWAY
+      The type of the customer-managed gateway. Possible values are: * OPEN_MESH * SECURE_WEB_GATEWAY.
     values:
       - :TYPE_UNSPECIFIED
       - :OPEN_MESH
