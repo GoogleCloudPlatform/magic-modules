@@ -105,11 +105,11 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		<% unless object.min_version.name == "ga" -%>
-			ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
-		<% else -%>
-			ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		<% end -%>
+<% unless object.min_version.name == "ga" -%>
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+<% else -%>
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+<% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
