@@ -1,0 +1,13 @@
+resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
+  name                 = "${data.google_project.project.id}/locations/global/gateways/<%= ctx[:vars]['gateway_name'] %>"
+  location             ="global"
+  description          = "The test gateway"
+  gateway              = "<%= ctx[:vars]['gateway_name'] %>"
+  type                 = "OPEN_MESH"
+  scope                = "<%= ctx[:vars]['gateway_name'] %>"
+  ports                = [80, 443]
+}
+
+data "google_project" "project" {
+}
+
