@@ -845,7 +845,7 @@ be from 0 to 999,999,999 inclusive.`,
 
 func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -927,7 +927,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		return err
 	}
 
-	op, err := sendRequestWithTimeout(config, "POST", project, url, userAgent, instanceTemplate, d.Timeout(schema.TimeoutCreate))
+	op, err := SendRequestWithTimeout(config, "POST", project, url, userAgent, instanceTemplate, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating RegionInstanceTemplate: %s", err)
 	}
@@ -935,7 +935,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 	// Store the ID now
 	d.SetId(fmt.Sprintf("projects/%s/regions/%s/instanceTemplates/%s", project, region, instanceTemplate["name"]))
 
-	err = computeOperationWaitTime(config, op, project, "Creating Region Instance Template", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, op, project, "Creating Region Instance Template", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -945,7 +945,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 
 func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -963,7 +963,7 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	instanceTemplate, err := sendRequest(config, "GET", project, url, userAgent, nil)
+	instanceTemplate, err := SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ComputeRegionInstanceTemplate %q", d.Id()))
 	}
@@ -1130,7 +1130,7 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 
 func resourceComputeRegionInstanceTemplateDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1147,12 +1147,12 @@ func resourceComputeRegionInstanceTemplateDelete(d *schema.ResourceData, meta in
 
 	var obj map[string]interface{}
 
-	op, err := sendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	op, err := SendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "RegionInstanceTemplate")
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Deleting Region Instance Template", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, op, project, "Deleting Region Instance Template", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}
