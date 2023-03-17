@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,6 +22,20 @@ identity:
   - processor
 description: |
   The default version for the processor. Deleting this resource is a no-op, and does not unset the default version.
+skip_delete: true
+import_format: ["{{%processor}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "documentai_default_version"
+    primary_resource_id: "processor"
+    vars:
+      processor_name: "test-processor"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
+  pre_update: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
+  pre_delete: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
+  pre_read: templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.erb
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'processor'
@@ -29,6 +43,7 @@ parameters:
       The processor to set the version on.
     required: true
     immutable: true
+    ignore_read: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'version'
@@ -39,3 +54,4 @@ properties:
     required: true
     immutable: true
 
+    diff_suppress_func: projectNumberDiffSuppress

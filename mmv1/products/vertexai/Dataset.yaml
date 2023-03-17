@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -19,8 +19,7 @@ update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/vertex-ai/docs'
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.datasets'
 async: !ruby/object:Api::OpAsync
   actions:
@@ -35,21 +34,33 @@ async: !ruby/object:Api::OpAsync
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
 description: |-
   A collection of DataItems and Annotations on them.
+autogen_async: false
+id_format: '{{name}}'
+exclude_import: true
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_dataset"
+    skip_import_test: true
+    primary_resource_id: "dataset"
+    vars:
+      display_name: "terraform"
 parameters:
   - !ruby/object:Api::Type::String
     name: region
     description: The region of the dataset. eg us-central1
     url_param_only: true
     immutable: true
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -74,6 +85,7 @@ properties:
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this Workflow.
+    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionSpec'
     immutable: true

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Resource
+--- !ruby/object:Api::Resource
 name: "DataPolicy"
 base_url: projects/{{project}}/locations/{{location}}/dataPolicies
 create_url: projects/{{project}}/locations/{{location}}/dataPolicies
@@ -29,11 +28,19 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ":"
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: "data_policy_id"
-  import_format:
-    [
-      "projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}",
-      "{{data_policy_id}}",
-    ]
+  import_format: ["projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}",
+    "{{data_policy_id}}"]
+id_format: projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}
+import_format: ["projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}",
+  "{{project}}/{{location}}/{{data_policy_id}}", "{{location}}/{{data_policy_id}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_datapolicy_data_policy_basic"
+    primary_resource_id: "data_policy"
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
+    vars:
+      data_policy_id: "data_policy"
+      taxonomy: "taxonomy"
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -58,6 +65,7 @@ properties:
     description: |-
       Policy tag resource name, in the format of projects/{project_number}/locations/{locationId}/taxonomies/{taxonomyId}/policyTags/{policyTag_id}.
     required: true
+    diff_suppress_func: "projectNumberDiffSuppress"
   - !ruby/object:Api::Type::Enum
     name: dataPolicyType
     description: |

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -22,11 +22,25 @@ description: |
   A Google Cloud Filestore snapshot.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/filestore/docs/snapshots'
-    'Creating Snapshots':
-      'https://cloud.google.com/filestore/docs/create-snapshots'
+    'Official Documentation': 'https://cloud.google.com/filestore/docs/snapshots'
+    'Creating Snapshots': 'https://cloud.google.com/filestore/docs/create-snapshots'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.snapshots'
+mutex: "filestore/{{project}}"
+error_retry_predicates: ["isNotFilestoreQuotaError"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "filestore_snapshot_basic"
+    primary_resource_id: "snapshot"
+    vars:
+      snapshot_name: "test-snapshot"
+      instance_name: "test-instance-for-snapshot"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "filestore_snapshot_full"
+    primary_resource_id: "snapshot"
+    vars:
+      snapshot_name: "test-snapshot"
+      instance_name: "test-instance-for-snapshot"
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

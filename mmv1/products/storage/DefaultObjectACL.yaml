@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'DefaultObjectACL'
+name: "DefaultObjectAccessControl"
 kind: 'storage#objectAccessControl'
 base_url: b/{{bucket}}/defaultObjectAcl
 self_link: b/{{bucket}}/defaultObjectAcl/{{entity}}
@@ -34,6 +34,16 @@ description: |
   object is always an OWNER.
   For more information, see Access Control, with the caveat that this API
   uses READER and OWNER instead of READ and FULL_CONTROL.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "storage_default_object_access_control_public"
+    primary_resource_id: "public_rule"
+    vars:
+      bucket_name: "static-content-bucket"
+id_format: "{{bucket}}/{{entity}}"
+import_format: ["{{bucket}}/{{entity}}"]
+mutex: "storage/buckets/{{bucket}}"
+skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
@@ -41,6 +51,8 @@ properties:
     imports: 'name'
     description: 'The name of the bucket.'
     required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'domain'
     description: 'The domain associated with the entity.'
@@ -75,6 +87,7 @@ properties:
     name: 'id'
     description: 'The ID of the access-control entry.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'object'
     description: 'The name of the object, if applied to an object.'

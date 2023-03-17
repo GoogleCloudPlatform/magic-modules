@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,17 +21,80 @@ description: |
   A Google Cloud Redis instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/memorystore/docs/redis/'
+    'Official Documentation': 'https://cloud.google.com/memorystore/docs/redis/'
   api: 'https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/redis_location_id_for_fallback_zone.go.erb
+  decoder: templates/terraform/decoders/redis_instance.go.erb
+  extra_schema_entry: templates/terraform/extra_schema_entry/redis_instance.erb
+  constants: templates/terraform/constants/redis_instance.go
+  resource_definition: templates/terraform/resource_definition/redis_instance.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "redis_instance_basic"
+    primary_resource_id: "cache"
+    vars:
+      instance_name: "memory-cache"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "redis_instance_full"
+    primary_resource_id: "cache"
+    vars:
+      instance_name: "ha-memory-cache"
+      network_name: "redis-test-network"
+    test_vars_overrides:
+      network_name: 'BootstrapSharedTestNetwork(t, "redis-full")'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "redis_instance_full_with_persistence_config"
+    primary_resource_id: "cache-persis"
+    vars:
+      instance_name: "ha-memory-cache-persis"
+      network_name: "redis-test-network"
+    test_vars_overrides:
+      network_name: 'BootstrapSharedTestNetwork(t, "redis-full-persis")'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "redis_instance_private_service"
+        # Temporary for servicenetworking problems
+    skip_vcr: true
+    primary_resource_id: "cache"
+    vars:
+      instance_name: "private-cache"
+      address_name: "address"
+      network_name: "redis-test-network"
+    test_vars_overrides:
+      network_name: 'BootstrapSharedTestNetwork(t, "redis-private")'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "redis_instance_mrr"
+    primary_resource_id: "cache"
+    vars:
+      instance_name: "mrr-memory-cache"
+      network_name: "redis-test-network"
+    test_vars_overrides:
+      network_name: 'BootstrapSharedTestNetwork(t, "redis-mrr")'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "redis_instance_cmek"
+    primary_resource_id: "cache"
+    skip_test: true
+    vars:
+      instance_name: "cmek-memory-cache"
+      network_name: "redis-test-network"
+    test_vars_overrides:
+      network_name: 'BootstrapSharedTestNetwork(t, "redis-cmek")'
 parameters:
-  - !ruby/object:Api::Type::String # TODO: resourceref?
+                                   # TODO: resourceref?
+  - !ruby/object:Api::Type::String
     name: 'region'
     description: |
       The name of the Redis region of the instance.
-    required: true
+    required: false
     immutable: true
     url_param_only: true
+    ignore_read: true
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
     name: alternativeLocationId
@@ -41,6 +104,7 @@ properties:
       If provided, it must be a different zone from the one provided in
       [locationId].
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: authEnabled
     description: |
@@ -55,6 +119,9 @@ properties:
       instance is connected. If left unspecified, the default network
       will be used.
     immutable: true
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/redis_instance_authorized_network.erb'
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Enum
     name: connectMode
     description: |
@@ -107,15 +174,21 @@ properties:
       zonal failures. If [alternativeLocationId] is also provided, it must
       be different from [locationId].
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: name
     description: |
       The ID of the instance or a fully qualified identifier for the instance.
     required: true
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[a-z][a-z0-9-]{0,39}[a-z0-9]$'
   - !ruby/object:Api::Type::NestedObject
     name: persistenceConfig
     description: Persistence configuration for an instance.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'persistenceMode'
@@ -128,6 +201,7 @@ properties:
         values:
           - :DISABLED
           - :RDB
+        default_from_api: true
       - !ruby/object:Api::Type::Enum
         name: 'rdbSnapshotPeriod'
         required: false
@@ -160,6 +234,7 @@ properties:
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution
           and up to nine fractional digits.
           Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+        default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: maintenancePolicy
     description: Maintenance policy for an instance.
@@ -236,19 +311,27 @@ properties:
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23.
                     An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,23)'
                 - !ruby/object:Api::Type::Integer
                   name: 'minutes'
                   description: |
                     Minutes of hour of day. Must be from 0 to 59.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,59)'
                 - !ruby/object:Api::Type::Integer
                   name: 'seconds'
                   description: |
                     Seconds of minutes of the time. Must normally be from 0 to 59.
                     An API may allow the value 60 if it allows leap-seconds.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,60)'
                 - !ruby/object:Api::Type::Integer
                   name: 'nanos'
                   description: |
                     Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,999999999)'
   - !ruby/object:Api::Type::NestedObject
     name: maintenanceSchedule
     description: Upcoming maintenance schedule.
@@ -297,6 +380,9 @@ properties:
       The version of Redis software. If not provided, latest supported
       version will be used. Please check the API documentation linked
       at the top for the latest valid values.
+    default_from_api: true
+    update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
+    update_verb: :POST
   - !ruby/object:Api::Type::String
     name: reservedIpRange
     description: |
@@ -309,6 +395,7 @@ properties:
     # In some situations the returned IP range may not match the sent value
     # but will be a subset of the range.
     ignore_read: true
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: tier
     description: |
@@ -371,6 +458,7 @@ properties:
       read replicas enabled is [1-5] and defaults to 2. If read replicas are not enabled
       for a Standard Tier instance, the only valid value is 1 and the default is 1.
       The valid value for basic tier is 0 and the default is also 0.
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: nodes
     description: |
@@ -413,6 +501,7 @@ properties:
     values:
       - :READ_REPLICAS_DISABLED
       - :READ_REPLICAS_ENABLED
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: secondaryIpRange
     description: |
@@ -420,6 +509,8 @@ properties:
       an existing instance. For DIRECT_PEERING mode value must be a CIDR range of size /28, or
       "auto". For PRIVATE_SERVICE_ACCESS mode value must be the name of an allocated address
       range associated with the private service access connection, or "auto".
+    default_from_api: true
+    diff_suppress_func: 'secondaryIpDiffSuppress'
   - !ruby/object:Api::Type::String
     name: customerManagedKey
     immutable: true

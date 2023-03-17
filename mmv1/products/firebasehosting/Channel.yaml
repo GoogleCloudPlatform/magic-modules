@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -25,9 +25,28 @@ description: |
   connected custom domains.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://firebase.google.com/docs/hosting'
+    'Official Documentation': 'https://firebase.google.com/docs/hosting'
   api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.channels'
+import_format: ['sites/{{site_id}}/channels/{{channel_id}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "firebasehosting_channel_basic"
+    min_version: "beta"
+    primary_resource_id: "default"
+    vars:
+      site_id: site-with-channel
+      channel_id: channel-basic
+    test_env_vars:
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: "firebasehosting_channel_full"
+    min_version: "beta"
+    primary_resource_id: "full"
+    vars:
+      site_id: site-with-channel
+      channel_id: channel-full
+    test_env_vars:
+      project_id: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
     name: site_id
@@ -56,6 +75,7 @@ properties:
     description: |
       The number of previous releases to retain on the channel for rollback or other
       purposes. Must be a number between 1-100. Defaults to 10 for new channels.
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
     description: Text labels used for extra metadata and/or filtering
@@ -67,6 +87,7 @@ properties:
       The time at which the channel will be automatically deleted. If null, the channel
       will not be automatically deleted. This field is present in the output whether it's
       set directly or via the `ttl` field.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: ttl
     conflicts:
@@ -76,3 +97,4 @@ properties:
       Input only. A time-to-live for this channel. Sets `expire_time` to the provided
       duration past the time of the request. A duration in seconds with up to nine fractional
       digits, terminated by 's'. Example: "86400s" (one day).
+    ignore_read: true

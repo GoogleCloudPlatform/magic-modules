@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -18,6 +18,8 @@ self_link: '{{name}}'
 immutable: true
 description: |
   Cloud Firestore indexes enable simple and complex queries against documents in a database.
+   This resource manages composite indexes and not single
+  field indexes.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/firestore/docs/query-data/indexing'
@@ -39,6 +41,33 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+autogen_async: true
+skip_sweeper: true
+import_format: ["{{name}}"]
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    This resource creates a Firestore Index on a project that already has
+    a Firestore database. If you haven't already created it, you may
+    create a `google_firestore_database` resource with `type` set to
+    `"FIRESTORE_NATIVE"` and `location_id` set to your chosen location.
+    If you wish to use App Engine, you may instead create a
+    `google_app_engine_application` resource with `database_type` set to
+    `"CLOUD_FIRESTORE"`. Your Firestore location will be the same as
+    the App Engine location specified.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "firestore_index_basic"
+    primary_resource_id: "my-index"
+        # This example relies on a well-known collection having been created and
+        # Firestore being enabled on the project. We can't do that automatically
+        # so we need a pre-created project.
+    test_env_vars:
+      project_id: :FIRESTORE_PROJECT_NAME
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/index_self_link_as_name_set_project.go.erb
+  encoder: templates/terraform/encoders/index.go.erb
+  post_create: templates/terraform/post_create/index.go.erb
+  constants: templates/terraform/constants/firestore_index.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -51,11 +80,13 @@ properties:
     default_value: '(default)'
     description: |
       The Firestore database id. Defaults to `"(default)"`.
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: collection
     required: true
     description: |
       The collection being indexed.
+    ignore_read: true
   - !ruby/object:Api::Type::Enum
     name: queryScope
     description: |
@@ -76,6 +107,7 @@ properties:
     required: true
     # Single field indexes _exist_, but the API only lets us manage composite ones.
     min_size: 2
+    diff_suppress_func: firestoreIFieldsDiffSuppress
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
