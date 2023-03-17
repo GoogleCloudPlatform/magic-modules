@@ -117,8 +117,6 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     find ./test/** -type f -exec git rm {} \;
 
     popd
-    rm -rf third_party/validator/tests/source
-    cp -rf third_party/validator/tests/tfv-source third_party/validator/tests/source
     bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     pushd $LOCAL_PATH
 
