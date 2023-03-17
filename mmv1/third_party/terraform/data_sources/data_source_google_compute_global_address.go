@@ -2,73 +2,87 @@ package google
 
 import (
 	"fmt"
+	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func DataSourceGoogleComputeGlobalAddress() *schema.Resource {
-	return &schema.Resource{
-		Read: dataSourceGoogleComputeGlobalAddressRead,
+func TestAccDataSourceComputeGlobalAddress(t *testing.T) {
+	t.Parallel()
 
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
+	rsName := "foobar"
+	rsFullName := fmt.Sprintf("google_compute_global_address.%s", rsName)
+	dsName := "my_address"
+	dsFullName := fmt.Sprintf("data.google_compute_global_address.%s", dsName)
+	addressName := fmt.Sprintf("tf-test-address-%s", RandString(t, 10))
 
-			"address": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"self_link": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"project": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckComputeGlobalAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceComputeGlobalAddressConfig(rsName, dsName, addressName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataSourceComputeGlobalAddressCheck(dsFullName, rsFullName),
+				),
 			},
 		},
+	})
+}
+
+func testAccDataSourceComputeGlobalAddressCheck(data_source_name string, resource_name string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		ds, ok := s.RootModule().Resources[data_source_name]
+		if !ok {
+			return fmt.Errorf("root module has no resource called %s", data_source_name)
+		}
+
+		rs, ok := s.RootModule().Resources[resource_name]
+		if !ok {
+			return fmt.Errorf("can't find %s in state", resource_name)
+		}
+
+		ds_attr := ds.Primary.Attributes
+		rs_attr := rs.Primary.Attributes
+
+		address_attrs_to_test := []string{
+			"name",
+			"address",
+		}
+
+		for _, attr_to_check := range address_attrs_to_test {
+			if ds_attr[attr_to_check] != rs_attr[attr_to_check] {
+				return fmt.Errorf(
+					"%s is %s; want %s",
+					attr_to_check,
+					ds_attr[attr_to_check],
+					rs_attr[attr_to_check],
+				)
+			}
+		}
+
+		if !compareSelfLinkOrResourceName("", ds_attr["self_link"], rs_attr["self_link"], nil) && ds_attr["self_link"] != rs_attr["self_link"] {
+			return fmt.Errorf("self link does not match: %s vs %s", ds_attr["self_link"], rs_attr["self_link"])
+		}
+
+		if ds_attr["status"] != "RESERVED" {
+			return fmt.Errorf("status is %s; want RESERVED", ds_attr["status"])
+		}
+
+		return nil
 	}
 }
 
-func dataSourceGoogleComputeGlobalAddressRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
-	}
+func testAccDataSourceComputeGlobalAddressConfig(rsName, dsName, addressName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_global_address" "%s" {
+  name = "%s"
+}
 
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-	name := d.Get("name").(string)
-	address, err := config.NewComputeClient(userAgent).GlobalAddresses.Get(project, name).Do()
-	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Global Address Not Found : %s", name))
-	}
-
-	if err := d.Set("address", address.Address); err != nil {
-		return fmt.Errorf("Error setting address: %s", err)
-	}
-	if err := d.Set("status", address.Status); err != nil {
-		return fmt.Errorf("Error setting status: %s", err)
-	}
-	if err := d.Set("self_link", address.SelfLink); err != nil {
-		return fmt.Errorf("Error setting self_link: %s", err)
-	}
-	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
-	}
-	d.SetId(fmt.Sprintf("projects/%s/global/addresses/%s", project, name))
-	return nil
+data "google_compute_global_address" "%s" {
+  name = google_compute_global_address.%s.name
+}
+`, rsName, addressName, dsName, rsName)
 }
