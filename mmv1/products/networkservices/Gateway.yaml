@@ -118,3 +118,9 @@ properties:
       The configuration for multiple Gateway instances with the same scope will be merged as presented as
       a single coniguration to the proxy/load balancer. 
       Max length 64 characters. Scope should start with a letter and can only have letters, numbers, hyphens.
+  - !ruby/object:Api::Type::String
+    name: 'serverTlsPolicy'
+    required: false
+    description: |
+      A fully-qualified ServerTLSPolicy URL reference. Specifies how TLS traffic is terminated.
+      If empty, TLS termination is disabled.
