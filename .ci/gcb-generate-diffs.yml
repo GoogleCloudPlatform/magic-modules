@@ -112,7 +112,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tfv-head
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged", "tpg-head"]
+      waitFor: ["merged", "tpg-test"]
       args:
           - 'head'
           - 'terraform-validator'
@@ -122,7 +122,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tfv-base
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged", "tpg-base"]
+      waitFor: ["merged", "tpg-test"]
       args:
           - 'base'
           - 'terraform-validator'
