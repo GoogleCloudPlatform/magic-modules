@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -20,8 +20,7 @@ update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/vertex-ai/docs'
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features'
 async: !ruby/object:Api::OpAsync
   actions:
@@ -36,16 +35,37 @@ async: !ruby/object:Api::OpAsync
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
   include_project: true
 description: |-
   Feature Metadata information that describes an attribute of an entity type. For example, apple is an entity type, and color is a feature that describes apple.
+import_format: ["{{%entitytype}}/features/{{name}}"]
+autogen_async: false
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_featurestore_entitytype_feature"
+    primary_resource_id: "feature"
+    vars:
+      name: "terraform"
+      project: "vertex-ai"
+      kms_key_name: "kms-name"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_featurestore_entitytype_feature_with_beta_fields"
+    primary_resource_id: "feature"
+    vars:
+      name: "terraform2"
+      project: "vertex-ai"
+      kms_key_name: "kms-name"
+    min_version: beta
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
+  pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: entitytype
@@ -56,14 +76,19 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    description: The name of the feature. The feature can be up to 64 characters long and can consist only of ASCII Latin letters A-Z and a-z, underscore(_), and ASCII digits 0-9 starting with a letter. The value will be unique given an entity type.
+    description: The name of the feature. The feature can be up to 64 characters long
+      and can consist only of ASCII Latin letters A-Z and a-z, underscore(_), and
+      ASCII digits 0-9 starting with a letter. The value will be unique given an entity
+      type.
     immutable: true
     url_param_only: true
     pattern: '{{entitytype}}/features/{{name}}'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: Used to perform consistent read-modify-write updates.
     output: true
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true
@@ -73,7 +98,7 @@ properties:
     name: 'updateTime'
     output: true
     description: |
-       The timestamp when the entity type was most recently updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      The timestamp when the entity type was most recently updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |

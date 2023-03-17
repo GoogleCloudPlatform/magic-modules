@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -26,6 +26,24 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Official Documentation": "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/"
   api: "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create"
+import_format: ["{{name}}"]
+id_format: "{{name}}"
+error_retry_predicates: ["iamMemberMissing"]
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: templates/terraform/resource_definition/bigquery_data_transfer.go.erb
+  constants: templates/terraform/constants/bigquery_data_transfer.go.erb
+  decoder: templates/terraform/decoders/bigquery_data_transfer.go.erb
+  encoder: templates/terraform/encoders/bigquery_data_transfer.go.erb
+  custom_import: templates/terraform/custom_import/self_link_as_name.erb
+  post_create: templates/terraform/post_create/set_computed_name.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: "bigquerydatatransfer_config_scheduled_query"
+    primary_resource_id: "query_config"
+    vars:
+      display_name: "my-query"
+      dataset_id: "my_dataset"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -35,6 +53,7 @@ parameters:
     description: |
       The geographic location where the transfer config should reside.
       Examples: US, EU, asia-northeast1. The default value is US.
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'serviceAccountName'
     url_param_only: true
@@ -134,10 +153,10 @@ properties:
         description: |
           If true, email notifications will be sent on transfer run failures.
   - !ruby/object:Api::Type::String
-      name: 'notificationPubsubTopic'
-      description: |
-        Pub/Sub topic where notifications will be sent after transfer runs
-        associated with this transfer config finish.
+    name: 'notificationPubsubTopic'
+    description: |
+      Pub/Sub topic where notifications will be sent after transfer runs
+      associated with this transfer config finish.
   - !ruby/object:Api::Type::Integer
     name: 'dataRefreshWindowDays'
     description: |
@@ -159,13 +178,20 @@ properties:
       https://cloud.google.com/bigquery-transfer/docs/cloud-storage-transfer#bq
 
       **NOTE** : If you are attempting to update a parameter that cannot be updated (due to api limitations) [please force recreation of the resource](https://www.terraform.io/cli/state/taint#forcing-re-creation-of-resources).
+    custom_flatten: templates/terraform/custom_flatten/json_to_string_map.go.erb
   - !ruby/object:Api::Type::NestedObject
     name: sensitiveParams
     # This is a helper object for Terraform only
-    exclude: true
+    exclude: false
     url_param_only: true
     description: |
-      Terraform only field
+      Different parameters are configured primarily using the the `params` field on this
+      resource. This block contains the parameters which contain secrets or passwords so that they can be marked
+      sensitive and hidden from plan output. The name of the field, eg: secret_access_key, will be the key
+      in the `params` map in the api request.
+
+      Credentials may not be specified in both locations and will cause an error. Changing from one location
+      to a different credential configuration in the config will require an apply to update state.
     properties:
       - !ruby/object:Api::Type::String
         name: secretAccessKey
@@ -173,3 +199,4 @@ properties:
         description: |
           The Secret Access Key of the AWS account transferring data from.
 
+        sensitive: true

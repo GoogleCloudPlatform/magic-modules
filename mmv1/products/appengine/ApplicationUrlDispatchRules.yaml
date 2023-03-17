@@ -41,6 +41,19 @@
     error: !ruby/object:Api::OpAsync::Error
       path: 'error/errors'
       message: 'message'
+  id_format: "{{project}}"
+  import_format: ["{{project}}"]
+  mutex: "apps/{{project}}"
+  error_retry_predicates: ["isAppEngineRetryableError"]
+  skip_sweeper: true
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "app_engine_application_url_dispatch_rules_basic"
+      primary_resource_id: "web_service"
+      vars:
+        bucket_name: "appengine-test-bucket"
   properties:
     - !ruby/object:Api::Type::Array
       name: 'dispatchRules'
@@ -67,4 +80,4 @@
               Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
               The sum of the lengths of the domain and path may not exceed 100 characters.
             required: true
-
+  

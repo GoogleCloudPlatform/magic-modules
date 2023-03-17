@@ -28,15 +28,66 @@
       resource_inside_response: true
     status: !ruby/object:Api::OpAsync::Status
       path: 'done'
-      complete: True
+      complete: true
       allowed:
-        - True
-        - False
+        - true
+        - false
     error: !ruby/object:Api::OpAsync::Error
       path: 'error'
       message: 'message'
   description: |
     An `Organization` is the top-level container in Apigee.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Creating an API organization': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
+    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations'
+  
+  autogen_async: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_organization_cloud_basic"
+      skip_test: true
+        # This is a more verbose version of the above that creates all
+        # the resources needed for the acceptance test.
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_organization_cloud_basic_test"
+      primary_resource_id: "org"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+        # Resource creation race
+      skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_organization_cloud_full"
+      skip_test: true
+        # This is a more verbose version of the above that creates all
+        # the resources needed for the acceptance test. While all Apigee
+        # resources in this test are in the GA API, we depend on a service
+        # identity resource which is only available in the beta provider.
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_organization_cloud_full_test"
+      primary_resource_id: "org"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      min_version: beta
+        # Resource creation race
+      skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_organization_retention_test"
+      primary_resource_id: "org"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      min_version: beta
+        # Resource creation race
+      skip_vcr: true
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    custom_import: templates/terraform/custom_import/apigee_organization.go.erb
+    encoder: templates/terraform/encoders/apigee_organization.go.erb
   parameters:
     - !ruby/object:Api::Type::String
       name: 'projectId'
@@ -103,6 +154,7 @@
       description: |
         Billing type of the Apigee organization. See [Apigee pricing](https://cloud.google.com/apigee/pricing).
       immutable: true
+      default_from_api: true
     - !ruby/object:Api::Type::String
       name: 'caCertificate'
       description: |
@@ -120,6 +172,7 @@
     - !ruby/object:Api::Type::NestedObject
       name: 'properties'
       description: Properties defined in the Apigee organization profile.
+      default_from_api: true
       properties:
         - !ruby/object:Api::Type::Array
           name: 'property'
@@ -132,9 +185,3 @@
               - !ruby/object:Api::Type::String
                 name: 'value'
                 description: Value of the property.
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Creating an API organization':
-        'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
-    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations'
-

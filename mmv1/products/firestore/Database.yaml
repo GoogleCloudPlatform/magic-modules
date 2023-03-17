@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -25,7 +25,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/firestore/docs/'
   api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases'
 async: !ruby/object:Api::OpAsync
-  actions: ['create','update']
+  actions: ['create', 'update']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
@@ -42,6 +42,32 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+skip_delete: true
+autogen_async: true
+id_format: "projects/{{project}}/databases/{{name}}"
+import_format:
+  - "projects/{{project}}/databases/{{name}}"
+  - "{{project}}/{{name}}"
+  - "{{name}}"
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "firestore_database"
+    primary_resource_id: "database"
+    pull_external: true
+    test_env_vars:
+      org_id: :ORG_ID
+    ignore_read_extra:
+      - project
+      - etag
+  - !ruby/object:Provider::Terraform::Examples
+    name: "firestore_database_datastore_mode"
+    primary_resource_id: "datastore_mode_database"
+    pull_external: true
+    test_env_vars:
+      org_id: :ORG_ID
+    ignore_read_extra:
+      - project
+      - etag
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -54,6 +80,8 @@ properties:
       UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
       "(default)" database id is also valid.
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: locationId
     required: true
@@ -79,6 +107,7 @@ properties:
       - :OPTIMISTIC
       - :PESSIMISTIC
       - :OPTIMISTIC_WITH_ENTITY_GROUPS
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: appEngineIntegrationMode
     description: |
@@ -86,6 +115,7 @@ properties:
     values:
       - :ENABLED
       - :DISABLED
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: key_prefix
     description: |

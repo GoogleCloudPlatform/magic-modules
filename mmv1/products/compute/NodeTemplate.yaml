@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -44,14 +44,28 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 collection_url_key: 'items'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "node_template_basic"
+    primary_resource_id: "template"
+    vars:
+      template_name: "soletenant-tmpl"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "node_template_server_binding"
+    primary_resource_id: "template"
+    vars:
+      template_name: "soletenant-with-licenses"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'selfLink'
-    required: true
+    required: false
     description: |
-      Region where nodes using the node template will be created
+      Region where nodes using the node template will be created.
+      If it is not provided, the provider region is used.
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -91,7 +105,7 @@ properties:
           - node_type_flexibility.0.cpus
           - node_type_flexibility.0.memory
         description: |
-           Number of virtual CPUs to use.
+          Number of virtual CPUs to use.
       - !ruby/object:Api::Type::String
         name: memory
         at_least_one_of:
@@ -109,6 +123,7 @@ properties:
     description: |
       The server binding policy for nodes using this template. Determines
       where the nodes should restart following a maintenance event.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'type'
