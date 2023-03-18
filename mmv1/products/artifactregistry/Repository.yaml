@@ -71,6 +71,8 @@
       vars:
         repository_id: "my-repository"
         description: "example remote docker repository"
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    encoder: templates/terraform/encoders/location_from_region.go.erb
   properties:
     - !ruby/object:Api::Type::String
       name: name
