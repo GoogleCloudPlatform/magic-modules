@@ -25,17 +25,9 @@ func diffSuppressIamUserName(_, old, new string, d *schema.ResourceData) bool {
 }
 
 func handleUserNotFoundError(err error, d *schema.ResourceData, resource string) error {
-	if IsGoogleApiErrorWithCode(err, 404) {
+	if IsGoogleApiErrorWithCode(err, 404) || IsGoogleApiErrorWithCode(err, 403) {
 		log.Printf("[WARN] Removing %s because it's gone", resource)
 		// The resource doesn't exist anymore
-		d.SetId("")
-
-		return nil
-	}
-
-	if IsGoogleApiErrorWithCode(err, 403) {
-		log.Printf("[WARN] Removing %s because it's gone", resource)
-		// Error 403: The client is not authorized to make this request.
 		d.SetId("")
 
 		return nil
