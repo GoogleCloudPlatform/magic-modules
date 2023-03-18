@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = "~> {{.Provider.version}}"
+    }
+  }
+}
+
+provider "google" {
+  {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
+}
+
 resource "google_logging_metric" "logging_metric" {
   name   = "my-test/metric"
   filter = "resource.type=gae_app AND severity>=ERROR"
