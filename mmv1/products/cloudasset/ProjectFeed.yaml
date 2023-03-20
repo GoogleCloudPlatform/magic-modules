@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -23,14 +23,26 @@ description: |
   Describes a Cloud Asset Inventory feed used to to listen to asset updates.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/asset-inventory/docs'
+    'Official Documentation': 'https://cloud.google.com/asset-inventory/docs'
   api: 'https://cloud.google.com/asset-inventory/docs/reference/rest/'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/cloud_asset_feed.go.erb
+  post_create: templates/terraform/post_create/cloud_asset_feed.go.erb
+  custom_import: templates/terraform/custom_import/cloud_asset_feed.go.erb
+  encoder: templates/terraform/encoders/cloud_asset_feed.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloud_asset_project_feed"
+    primary_resource_id: "project_feed"
+    vars:
+      feed_id: "network-updates"
+    test_env_vars:
+      project: :PROJECT_NAME
 properties:
   - !ruby/object:Api::Type::String
     name: billing_project
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The project whose identity will be used when sending messages to the
       destination pubsub topic. It also specifies the project for API 
@@ -46,7 +58,7 @@ properties:
     description: |
       This is the client-assigned asset feed identifier and it needs to be unique under a specific parent.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::Array
     name: assetNames

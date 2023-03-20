@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -37,11 +37,20 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+docs: !ruby/object:Provider::Terraform::Docs
+autogen_async: true
+import_format: ["projects/{{project}}/locations/global/certificateMaps/{{name}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "certificate_manager_certificate_map_basic"
+    primary_resource_id: "default"
+    vars:
+      cert_map_name: "cert-map"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/global/certificateMaps/{{name}}
     description: |
@@ -70,6 +79,7 @@ properties:
     name: 'labels'
     description: |
       Set of labels associated with a Certificate Map resource.
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'gclbTargets'
     description: |
@@ -85,11 +95,11 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: 'ipAddress'
-                description : |
+                description: |
                   An external IP address
               - !ruby/object:Api::Type::Array
                 name: 'ports'
-                description : |
+                description: |
                   A list of ports
                 item_type: Api::Type::Integer
         - !ruby/object:Api::Type::String

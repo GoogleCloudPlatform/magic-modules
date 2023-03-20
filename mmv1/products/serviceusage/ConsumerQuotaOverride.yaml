@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -43,19 +43,61 @@ async: !ruby/object:Api::OpAsync
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "consumer_quota_override"
+    primary_resource_id: "override"
+    min_version: 'beta'
+    vars:
+      project_id: "quota"
+    test_env_vars:
+      org_id: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: "consumer_quota_override_zero_value"
+    primary_resource_id: "override"
+    min_version: 'beta'
+    skip_docs: true
+    vars:
+      project_id: "quota"
+    test_env_vars:
+      org_id: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_consumer_quota_override"
+    primary_resource_id: "override"
+    min_version: 'beta'
+    vars:
+      project_id: "quota"
+    test_env_vars:
+      org_id: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: "consumer_quota_override_custom_dimension"
+    primary_resource_id: "override"
+    min_version: 'beta'
+    vars:
+      project_id: "quota"
+    test_env_vars:
+      org_id: :ORG_ID
+id_format: "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}"
+import_format: ["services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}",
+  "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}"]
+skip_sweeper: true
+autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  test_check_destroy: templates/terraform/custom_check_destroy/consumer_quota_override.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     output: true
     description: |
       The server-generated name of the quota override.
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'force'
     url_param_only: true
@@ -67,21 +109,21 @@ parameters:
     name: 'service'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The service that the metrics belong to, e.g. `compute.googleapis.com`.
   - !ruby/object:Api::Type::String
     name: 'metric'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The metric that should be limited, e.g. `compute.googleapis.com/cpus`.
   - !ruby/object:Api::Type::String
     name: 'limit'
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The limit on the metric, e.g. `/project/region`.
 
@@ -93,9 +135,10 @@ properties:
     required: true
     description: |
       The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
+    custom_flatten: 'templates/terraform/custom_flatten/consumer_quote_override_override_value.go.erb'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'dimensions'
-    input: true
+    immutable: true
     description: |
       If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
 

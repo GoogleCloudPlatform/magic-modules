@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -46,6 +46,78 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_basic"
+    primary_resource_id: "default"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\", context[\"\
+      random_suffix\"])"
+    vars:
+      backend_service_name: "backend-service"
+      http_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_cache_simple"
+    primary_resource_id: "default"
+    vars:
+      backend_service_name: "backend-service"
+      http_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_cache_include_http_headers"
+    primary_resource_id: "default"
+    vars:
+      backend_service_name: "backend-service"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_cache_include_named_cookies"
+    primary_resource_id: "default"
+    vars:
+      backend_service_name: "backend-service"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_cache"
+    primary_resource_id: "default"
+    vars:
+      backend_service_name: "backend-service"
+      http_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_traffic_director_round_robin"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      backend_service_name: "backend-service"
+      health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_traffic_director_ring_hash"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      backend_service_name: "backend-service"
+      health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_network_endpoint"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      backend_service_name: "backend-service"
+      neg_name: "network-endpoint"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_external_managed"
+    primary_resource_id: "default"
+    vars:
+      backend_service_name: "backend-service"
+      health_check_name: "health-check"
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: '/'
+  fetch_iam_policy_verb: :GET
+  min_version: beta
+  iam_conditions_request_type: :QUERY_PARAM
+  parent_resource_attribute: 'name'
+  allowed_iam_role: 'roles/compute.admin'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/backend_service.go.erb'
+  encoder: 'templates/terraform/encoders/backend_service.go.erb'
+  decoder: 'templates/terraform/decoders/backend_service.go.erb'
+  post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
+  post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
+  resource_definition: 'templates/terraform/resource_definition/backend_service.go.erb'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'affinityCookieTtlSec'
@@ -57,7 +129,10 @@ properties:
 
       When the load balancing scheme is INTERNAL, this field is not used.
   - !ruby/object:Api::Type::Array
-    name: 'backends'
+    name: 'backend'
+    api_name: 'backends'
+    is_set: true
+    set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
     description: |
       The set of backends that serve this BackendService.
     item_type: !ruby/object:Api::Type::NestedObject
@@ -116,8 +191,11 @@ properties:
             Group resource using the fully-qualified URL, rather than a
             partial URL.
           required: true
+          custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
+          diff_suppress_func: 'compareSelfLinkRelativePaths'
         - !ruby/object:Api::Type::Integer
           name: 'maxConnections'
+          default_from_api: true
           description: |
             The max number of simultaneous connections for the group. Can
             be used with either CONNECTION or UTILIZATION balancing modes.
@@ -127,6 +205,7 @@ properties:
             as appropriate for group type, must be set.
         - !ruby/object:Api::Type::Integer
           name: 'maxConnectionsPerInstance'
+          default_from_api: true
           description: |
             The max number of simultaneous connections that a single
             backend instance can handle. This is used to calculate the
@@ -137,6 +216,7 @@ properties:
             maxConnectionsPerInstance must be set.
         - !ruby/object:Api::Type::Integer
           name: 'maxConnectionsPerEndpoint'
+          default_from_api: true
           description: |
             The max number of simultaneous connections that a single backend
             network endpoint can handle. This is used to calculate the
@@ -147,6 +227,7 @@ properties:
             maxConnections or maxConnectionsPerEndpoint must be set.
         - !ruby/object:Api::Type::Integer
           name: 'maxRate'
+          default_from_api: true
           description: |
             The max requests per second (RPS) of the group.
 
@@ -156,6 +237,7 @@ properties:
             group type, must be set.
         - !ruby/object:Api::Type::Double
           name: 'maxRatePerInstance'
+          default_from_api: true
           description: |
             The max requests per second (RPS) that a single backend
             instance can handle. This is used to calculate the capacity of
@@ -163,6 +245,7 @@ properties:
             either maxRate or maxRatePerInstance must be set.
         - !ruby/object:Api::Type::Double
           name: 'maxRatePerEndpoint'
+          default_from_api: true
           description: |
             The max requests per second (RPS) that a single backend network
             endpoint can handle. This is used to calculate the capacity of
@@ -170,6 +253,7 @@ properties:
             either maxRate or maxRatePerEndpoint must be set.
         - !ruby/object:Api::Type::Double
           name: 'maxUtilization'
+          default_from_api: true
           description: |
             Used when balancingMode is UTILIZATION. This ratio defines the
             CPU utilization target for the group. Valid range is [0.0, 1.0].
@@ -272,12 +356,12 @@ properties:
           The maximum number of parallel retries to the backend cluster.
           Defaults to 3.
   - !ruby/object:Api::Type::Enum
-      name: 'compressionMode'
-      description: |
-        Compress text responses using Brotli or gzip compression, based on the client's Accept-Encoding header.
-      values:
-        - :AUTOMATIC
-        - :DISABLED
+    name: 'compressionMode'
+    description: |
+      Compress text responses using Brotli or gzip compression, based on the client's Accept-Encoding header.
+    values:
+      - :AUTOMATIC
+      - :DISABLED
   - !ruby/object:Api::Type::NestedObject
     name: 'consistentHash'
     description: |
@@ -366,6 +450,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'cdnPolicy'
     description: 'Cloud CDN configuration for this BackendService.'
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'cacheKeyPolicy'
@@ -437,6 +522,7 @@ properties:
               query_string_whitelist or query_string_blacklist, not both.
               '&' and '=' will be percent encoded and not treated as
               delimiters.
+            is_set: true
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             send_empty_value: true
@@ -456,6 +542,7 @@ properties:
               query_string_whitelist or query_string_blacklist, not both.
               '&' and '=' will be percent encoded and not treated as
               delimiters.
+            is_set: true
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: 'includeHttpHeaders'
@@ -508,19 +595,23 @@ properties:
         description: |
           Specifies the default TTL for cached content served by this origin for responses
           that do not have an existing valid TTL (max-age or s-max-age).
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'maxTtl'
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'clientTtl'
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
+        default_from_api: true
       - !ruby/object:Api::Type::Boolean
         name: 'negativeCaching'
         send_empty_value: true
         description: |
           Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
+        default_from_api: true
       - !ruby/object:Api::Type::Array
         name: 'negativeCachingPolicy'
         description: |
@@ -538,6 +629,7 @@ properties:
               description: |
                 The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                 (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
+              send_empty_value: true
       - !ruby/object:Api::Type::Enum
         name: 'cacheMode'
         description: |
@@ -547,18 +639,22 @@ properties:
           - :USE_ORIGIN_HEADERS
           - :FORCE_CACHE_ALL
           - :CACHE_ALL_STATIC
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: 'serveWhileStale'
         send_empty_value: true
         description: |
           Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
+        default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'connectionDraining'
     description: |
       Settings for connection draining
+    flatten_object: true
     properties:
       - !ruby/object:Api::Type::Integer
-        name: 'drainingTimeoutSec'
+        name: 'connection_draining_timeout_sec'
+        api_name: 'drainingTimeoutSec'
         default_value: 300
         description: |
           Time for which instance will be drained (not accept new
@@ -570,16 +666,18 @@ properties:
     output: true
   - !ruby/object:Api::Type::Array
     name: 'customRequestHeaders'
-    item_type: Api::Type::String
     description: |
       Headers that the HTTP/S load balancer should add to proxied
       requests.
+    is_set: true
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: 'customResponseHeaders'
-    item_type: Api::Type::String
     description: |
       Headers that the HTTP/S load balancer should add to proxied
       responses.
+    is_set: true
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::Fingerprint
     name: 'fingerprint'
     output: true
@@ -596,29 +694,36 @@ properties:
       If true, enable Cloud CDN for this BackendService.
   - !ruby/object:Api::Type::Array
     name: 'healthChecks'
-    item_type: Api::Type::String
     min_size: 1
     max_size: 1
     description: |
-       The set of URLs to the HttpHealthCheck or HttpsHealthCheck resource
-       for health checking this BackendService. Currently at most one health
-       check can be specified.
+      The set of URLs to the HttpHealthCheck or HttpsHealthCheck resource
+      for health checking this BackendService. Currently at most one health
+      check can be specified.
 
-       A health check must be specified unless the backend service uses an internet
-       or serverless NEG as a backend.
+      A health check must be specified unless the backend service uses an internet
+      or serverless NEG as a backend.
 
-       For internal load balancing, a URL to a HealthCheck resource must be specified instead.
+      For internal load balancing, a URL to a HealthCheck resource must be specified instead.
+    is_set: true
+    set_hash_func: 'selfLinkRelativePathHash'
+    custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::Integer
-    name: 'id'
-    description: 'The unique identifier for the resource. This identifier is defined by the server.'
+    name: 'generated_id'
+    api_name: 'id'
+    description: 'The unique identifier for the resource. This identifier is defined
+      by the server.'
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'iap'
     description: Settings for enabling Cloud Identity Aware Proxy
+    send_empty_value: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
         description: Enables IAP.
+        exclude: true
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
         required: true
@@ -629,14 +734,19 @@ properties:
         required: true
         description: |
           OAuth2 Client Secret for IAP
+        send_empty_value: true
+        ignore_read: true
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/compute_backend_service_iap_oauth2_client_secret.go.erb
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecretSha256'
         output: true
         description: |
           OAuth2 Client Secret SHA-256 for IAP
+        sensitive: true
   - !ruby/object:Api::Type::Enum
     name: 'loadBalancingScheme'
-    input: true
+    immutable: true
     description: |
       Indicates whether the backend service will be used with internal or
       external load balancing. A backend service created for one type of
@@ -801,7 +911,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -1061,6 +1171,7 @@ properties:
       Name of backend port. The same name should appear in the instance
       groups referenced by this service. Required when the load balancing
       scheme is EXTERNAL.
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'protocol'
     description: |
@@ -1075,14 +1186,17 @@ properties:
       - :SSL
       - :GRPC
   # TODO: make a ResourceRef to Security Policy
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'securityPolicy'
     description: |
       The security policy associated with this backend service.
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'edgeSecurityPolicy'
     description: |
       The resource URL for the edge security policy associated with this backend service.
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'securitySettings'
     description: |
@@ -1121,16 +1235,19 @@ properties:
       - :GENERATED_COOKIE
       - :HEADER_FIELD
       - :HTTP_COOKIE
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'timeoutSec'
     description: |
       How many seconds to wait for the backend before considering it a
       failed request. Default is 30 seconds. Valid range is [1, 86400].
+    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'logConfig'
     description: |
       This field denotes the logging options for the load balancer traffic served by this backend service.
       If logging is enabled, logs will be exported to Stackdriver.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enable'
@@ -1139,6 +1256,7 @@ properties:
           - log_config.0.sample_rate
         description: |
           Whether to enable logging for the load balancer traffic served by this backend service.
+        send_empty_value: true
       - !ruby/object:Api::Type::Double
         name: 'sampleRate'
         at_least_one_of:
@@ -1149,3 +1267,4 @@ properties:
           the field must be in [0, 1]. This configures the sampling rate of requests to the load balancer
           where 1.0 means all logged requests are reported and 0.0 means no logged requests are reported.
           The default value is 1.0.
+        diff_suppress_func: 'suppressWhenDisabled'

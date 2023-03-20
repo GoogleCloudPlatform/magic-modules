@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Product
 name: SQL
 display_name: Cloud SQL
+client_name: 'SqlAdmin'
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

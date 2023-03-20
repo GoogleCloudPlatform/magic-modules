@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Product
 name: ServiceManagement
 display_name: Cloud Endpoints
+legacy_name: endpoints
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

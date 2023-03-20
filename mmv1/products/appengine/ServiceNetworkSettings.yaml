@@ -42,6 +42,18 @@
     error: !ruby/object:Api::OpAsync::Error
       path: 'error/errors'
       message: 'message'
+  id_format: "apps/{{project}}/services/{{service}}"
+  import_format: ["apps/{{project}}/services/{{service}}"]
+  mutex: "apps/{{project}}"
+  skip_delete: true
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "app_engine_service_network_settings"
+      primary_resource_id: 'internalapp'
+      vars:
+        bucket_name: "appengine-static-content"
   properties:
     - !ruby/object:Api::Type::String
       name: 'service'

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,8 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'Client'
 base_url: '{{brand}}/identityAwareProxyClients'
-self_link: '{{client_id}}'
-input: true
+self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
+immutable: true
 description: |
   Contains the data that describes an Identity Aware Proxy owned client.
 
@@ -24,9 +24,27 @@ description: |
   in this tool.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Setting up IAP Client':
-      'https://cloud.google.com/iap/docs/authentication-howto'
+    'Setting up IAP Client': 'https://cloud.google.com/iap/docs/authentication-howto'
   api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients'
+id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
+import_format: ['{{brand}}/identityAwareProxyClients/{{client_id}}']
+error_retry_predicates: ["iapClient409Operation"]
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "iap_client"
+    primary_resource_id: "project_client"
+    vars:
+      project_id: 'brand-proj-'
+    test_env_vars:
+      org_id: :ORG_ID
+      org_domain: :ORG_DOMAIN
+docs: !ruby/object:Provider::Terraform::Docs
+  attributes: |
+    * `client_id`: The OAuth2 ID of the client.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/iap_client.go.erb
+  custom_import: templates/terraform/custom_import/iap_client.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clientId'
@@ -34,13 +52,14 @@ parameters:
     description: |
       Output only. Unique identifier of the OAuth client.
     output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'brand'
     description: |
       Identifier of the brand to which this client
       is attached to. The format is
       `projects/{project_number}/brands/{brand_id}/identityAwareProxyClients/{client_id}`.
-    input: true
+    immutable: true
     required: true
     url_param_only: true
 properties:
@@ -49,6 +68,7 @@ properties:
     description: |
       Output only. Client secret of the OAuth client.
     output: true
+    sensitive: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |

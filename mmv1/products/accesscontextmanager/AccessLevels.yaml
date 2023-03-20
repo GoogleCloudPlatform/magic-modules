@@ -46,7 +46,7 @@
     # This must be done at the provider level.
     - !ruby/object:Api::Type::String
       name: parent
-      input: true
+      immutable: true
       required: true
       url_param_only: true
       description: |
@@ -63,7 +63,7 @@
         properties:
           - !ruby/object:Api::Type::String
             name: name
-            input: true
+            immutable: true
             required: true
             description: |
               Resource name for the Access Level. The short_name component must begin

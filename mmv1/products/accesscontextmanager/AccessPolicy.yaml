@@ -63,7 +63,7 @@
   parameters:
     - !ruby/object:Api::Type::String
       name: parent
-      input: true
+      immutable: true
       required: true
       description: |
         The parent of this AccessPolicy in the Cloud Resource Hierarchy.

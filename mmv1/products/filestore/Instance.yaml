@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,22 +13,42 @@
 
 --- !ruby/object:Api::Resource
 name: 'Instance'
-create_url:  projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
+create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
 self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
-base_url:  projects/{{project}}/locations/{{location}}/instances
+base_url: projects/{{project}}/locations/{{location}}/instances
 update_verb: :PATCH
 update_mask: true
 description: |
   A Google Cloud Filestore instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/filestore/docs/creating-instances'
-    'Use with Kubernetes':
-      'https://cloud.google.com/filestore/docs/accessing-fileshares'
-    'Copying Data In/Out':
-      'https://cloud.google.com/filestore/docs/copying-data'
+    'Official Documentation': 'https://cloud.google.com/filestore/docs/creating-instances'
+    'Use with Kubernetes': 'https://cloud.google.com/filestore/docs/accessing-fileshares'
+    'Copying Data In/Out': 'https://cloud.google.com/filestore/docs/copying-data'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
+error_retry_predicates: ["isNotFilestoreQuotaError"]
+autogen_async: true
+schema_version: 1
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "filestore_instance_basic"
+    primary_resource_id: "instance"
+    vars:
+      instance_name: "test-instance"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "filestore_instance_full"
+    primary_resource_id: "instance"
+    vars:
+      instance_name: "test-instance"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "filestore_instance_enterprise"
+    primary_resource_id: "instance"
+    skip_test: true
+    vars:
+      instance_name: "test-instance"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/filestore.erb
+  pre_create: templates/terraform/pre_create/filestore_instance.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'zone'
@@ -38,8 +58,10 @@ parameters:
     exactly_one_of:
       - 'zone'
       - 'location'
-    input: true
+    immutable: true
     url_param_only: true
+    ignore_read: true
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
@@ -47,8 +69,10 @@ parameters:
     exactly_one_of:
       - zone
       - location
-    input: true
+    immutable: true
     url_param_only: true
+    ignore_read: true
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -57,6 +81,7 @@ properties:
     required: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -83,7 +108,7 @@ properties:
       The service tier of the instance.
       Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD and ENTERPRISE
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |
@@ -102,7 +127,7 @@ properties:
           description: |
             The name of the fileshare (16 characters or less)
           required: true
-          input: true
+          immutable: true
         - !ruby/object:Api::Type::Integer
           name: 'capacityGb'
           description: |
@@ -167,7 +192,7 @@ properties:
       only a single network is supported.
     required: true
     min_size: 1
-    input: true
+    immutable: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -176,14 +201,15 @@ properties:
             The name of the GCE VPC network to which the
             instance is connected.
           required: true
-          input: true
+          immutable: true
+          diff_suppress_func: 'compareSelfLinkOrResourceName'
         - !ruby/object:Api::Type::Array
           name: 'modes'
           description: |
             IP versions for which the instance has
             IP addresses assigned.
           required: true
-          input: true
+          immutable: true
           item_type: !ruby/object:Api::Type::Enum
             name: 'mode'
             description: An IP version.
@@ -193,10 +219,11 @@ properties:
               - MODE_IPV6
         - !ruby/object:Api::Type::String
           name: 'reservedIpRange'
-          input: true
+          immutable: true
           description: |
             A /29 CIDR block that identifies the range of IP
             addresses reserved for this instance.
+          default_from_api: true
         - !ruby/object:Api::Type::Array
           name: 'ipAddresses'
           description: |
@@ -209,11 +236,12 @@ properties:
             The network connect mode of the Filestore instance.
             If not provided, the connect mode defaults to
             DIRECT_PEERING.
-          input: true
+          immutable: true
           default_value: :DIRECT_PEERING
           values:
             - :DIRECT_PEERING
             - :PRIVATE_SERVICE_ACCESS
+          custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: |
@@ -222,6 +250,6 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'kmsKeyName'
-    input: true
+    immutable: true
     description: |
       KMS key name used for data encryption.

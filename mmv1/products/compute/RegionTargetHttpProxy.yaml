@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -15,14 +15,13 @@
 name: 'RegionTargetHttpProxy'
 base_url: projects/{{project}}/regions/{{region}}/targetHttpProxies
 has_self_link: true
-input: true
+immutable: true
 description: |
   Represents a RegionTargetHttpProxy resource, which is used by one or more
   forwarding rules to route incoming HTTP requests to a URL map.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
+    'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetHttpProxies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -42,15 +41,33 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_target_http_proxy_basic"
+    primary_resource_id: "default"
+    vars:
+      region_target_http_proxy_name: "test-proxy"
+      region_url_map_name: "url-map"
+      region_backend_service_name: "backend-service"
+      region_health_check_name: "http-health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_target_http_proxy_https_redirect"
+    primary_resource_id: "default"
+    vars:
+      region_target_http_proxy_name: "test-https-redirect-proxy"
+      region_url_map_name: "url-map"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
-    required: true
-    input: true
+    required: false
+    immutable: true
     description: |
-      The region where the regional proxy resides.
+      The Region in which the created target https proxy should reside.
+      If it is not provided, the provider region is used.
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -60,7 +77,8 @@ properties:
     name: 'description'
     description: 'An optional description of this resource.'
   - !ruby/object:Api::Type::Integer
-    name: 'id'
+    name: 'proxyId'
+    api_name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
   - !ruby/object:Api::Type::String

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -31,29 +31,61 @@ async: !ruby/object:Api::OpAsync
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
 description: |-
   A representation of a collection of database items organized in a way that allows for approximate nearest neighbor (a.k.a ANN) algorithms search.
+autogen_async: false
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index"
+    primary_resource_id: "index"
+    vars:
+      display_name: "test-index"
+      bucket_name: "vertex-ai-index-test"
+    test_env_vars:
+      project: :PROJECT_NAME
+    ignore_read_extra:
+      - metadata.0.contents_delta_uri
+      - metadata.0.is_complete_overwrite
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_streaming"
+    primary_resource_id: "index"
+    vars:
+      display_name: "test-index"
+      bucket_name: "vertex-ai-index-test"
+    test_env_vars:
+      project: :PROJECT_NAME
+    ignore_read_extra:
+      - metadata.0.contents_delta_uri
+      - metadata.0.is_complete_overwrite
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_update: templates/terraform/pre_update/vertex_ai_index.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
     description: The region of the index. eg us-central1
     url_param_only: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: The resource name of the Index.
     output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'displayName'
-    description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+    description: The display name of the Index. The name can be up to 128 characters
+      long and can consist of any UTF-8 characters.
     required: true
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -74,15 +106,17 @@ properties:
           Index field can be also updated as part of the same call.
           The expected structure and format of the files this URI points to is
           described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
       - !ruby/object:Api::Type::Boolean
         name: 'isCompleteOverwrite'
         description: |-
           If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
           then existing content of the Index will be replaced by the data from the contentsDeltaUri.
         default_value: false
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
-        input: true
+        immutable: true
         description: The configuration of the Matching Engine Index.
         properties:
           - !ruby/object:Api::Type::Integer
@@ -114,7 +148,8 @@ properties:
             default_value: "NONE"
           - !ruby/object:Api::Type::NestedObject
             name: 'algorithmConfig'
-            description: The configuration with regard to the algorithms used for efficient search.
+            description: The configuration with regard to the algorithms used for
+              efficient search.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'treeAhConfig'
@@ -127,7 +162,8 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'leafNodeEmbeddingCount'
-                    description: Number of embeddings on each leaf node. The default value is 1000 if not set.
+                    description: Number of embeddings on each leaf node. The default
+                      value is 1000 if not set.
                     default_value: 1000
                   - !ruby/object:Api::Type::Integer
                     name: 'leafNodesToSearchPercent'
@@ -149,37 +185,41 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'metadataSchemaUri'
     description: |-
-     Points to a YAML file stored on Google Cloud Storage describing additional information about the Index, that is specific to it. Unset if the Index does not have any additional information.
+      Points to a YAML file stored on Google Cloud Storage describing additional information about the Index, that is specific to it. Unset if the Index does not have any additional information.
     output: true
   - !ruby/object:Api::Type::Array
     name: 'deployedIndexes'
     output: true
-    description: The pointers to DeployedIndexes created from this Index. An Index can be only deleted if all its DeployedIndexes had been undeployed first.
+    description: The pointers to DeployedIndexes created from this Index. An Index
+      can be only deleted if all its DeployedIndexes had been undeployed first.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
-      - !ruby/object:Api::Type::String
-        name: 'indexEndpoint'
-        output: true
-        description: A resource name of the IndexEndpoint.
-      - !ruby/object:Api::Type::String
-        name: 'deployedIndexId'
-        output: true
-        description: The ID of the DeployedIndex in the above IndexEndpoint.
+        - !ruby/object:Api::Type::String
+          name: 'indexEndpoint'
+          output: true
+          description: A resource name of the IndexEndpoint.
+        - !ruby/object:Api::Type::String
+          name: 'deployedIndexId'
+          output: true
+          description: The ID of the DeployedIndex in the above IndexEndpoint.
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: Used to perform consistent read-modify-write updates.
     output: true
+    ignore_read: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: The labels with user-defined metadata to organize your Indexes.
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true
-    description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    description: The timestamp of when the Index was created in RFC3339 UTC "Zulu"
+      format, with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::String
     name: 'updateTime'
     output: true
-    description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu"
+      format, with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::NestedObject
     name: 'indexStats'
     output: true
@@ -195,7 +235,7 @@ properties:
         description: The number of shards in the Index.
   - !ruby/object:Api::Type::String
     name: 'indexUpdateMethod'
-    input: true
+    immutable: true
     default_value: BATCH_UPDATE
     description: |-
       The update method to use with this Index. The value must be the followings. If not set, BATCH_UPDATE will be used by default.
