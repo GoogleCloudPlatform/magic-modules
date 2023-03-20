@@ -24,7 +24,7 @@ func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
 		PreCheck: func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
+				ExternalProviders: ProviderVersion450(),
 				Config:            testAccDataSourceGoogleFirebaseAppleAppConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceFirebaseAppleAppConfigCheck("data.google_firebase_apple_app_config.my_app_config"),
