@@ -57,7 +57,7 @@
     # This must be done at the provider level.
     - !ruby/object:Api::Type::String
       name: parent
-      input: true
+      immutable: true
       required: true
       description: |
         The AccessPolicy this AccessLevel lives in.
@@ -65,7 +65,7 @@
       ignore_read: true
     - !ruby/object:Api::Type::String
       name: name
-      input: true
+      immutable: true
       required: true
       description: |
         Resource name for the Access Level. The short_name component must begin

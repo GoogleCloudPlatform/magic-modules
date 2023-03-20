@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -28,43 +28,63 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
     'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
+legacy_name: 'google_monitoring_custom_service'
+id_format: "{{name}}"
+import_format: ["{{name}}"]
+error_retry_predicates: ["isMonitoringConcurrentEditError"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "monitoring_service_custom"
+    primary_resource_id: "custom"
+    vars:
+      service_id: "custom-srv"
+      resource_name: "//product.googleapis.com/foo/foo/services/test"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/self_link_as_name.erb
+  encoder: templates/terraform/encoders/monitoring_service.go.erb
+
 parameters:
-- !ruby/object:Api::Type::String
-  name: serviceId
-  description: |
-    An optional service ID to use. If not given, the server will generate a
-    service ID.
-  input: true
+  - !ruby/object:Api::Type::String
+    name: serviceId
+    description: |
+      An optional service ID to use. If not given, the server will generate a
+      service ID.
+    immutable: true
+    api_name: 'name'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    default_from_api: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[a-z0-9\-]+$'
 properties:
-- !ruby/object:Api::Type::String
-  name: name
-  description: |
-    The full resource name for this service. The syntax is:
-    projects/[PROJECT_ID]/services/[SERVICE_ID].
-  output: true
-- !ruby/object:Api::Type::String
-  name: displayName
-  description: |
-    Name used for UI elements listing this Service.
-- !ruby/object:Api::Type::KeyValuePairs
-  name: 'userLabels'
-  description: |
-    Labels which have been used to annotate the service. Label keys must start
-    with a letter. Label keys and values may contain lowercase letters,
-    numbers, underscores, and dashes. Label keys and values have a maximum
-    length of 63 characters, and must be less than 128 bytes in size. Up to 64
-    label entries may be stored. For labels which do not have a semantic value,
-    the empty string may be supplied for the label value.
-  send_empty_value: true
-- !ruby/object:Api::Type::NestedObject
-  name: telemetry
-  description: |
-    Configuration for how to query telemetry on a Service.
-  properties:
-    - !ruby/object:Api::Type::String
-      name: resourceName
-      description: |
-        The full name of the resource that defines this service.
-        Formatted as described in
-        https://cloud.google.com/apis/design/resource_names.
+  - !ruby/object:Api::Type::String
+    name: name
+    description: |
+      The full resource name for this service. The syntax is:
+      projects/[PROJECT_ID]/services/[SERVICE_ID].
+    output: true
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: |
+      Name used for UI elements listing this Service.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'userLabels'
+    description: |
+      Labels which have been used to annotate the service. Label keys must start
+      with a letter. Label keys and values may contain lowercase letters,
+      numbers, underscores, and dashes. Label keys and values have a maximum
+      length of 63 characters, and must be less than 128 bytes in size. Up to 64
+      label entries may be stored. For labels which do not have a semantic value,
+      the empty string may be supplied for the label value.
+    send_empty_value: true
+  - !ruby/object:Api::Type::NestedObject
+    name: telemetry
+    description: |
+      Configuration for how to query telemetry on a Service.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: resourceName
+        description: |
+          The full name of the resource that defines this service.
+          Formatted as described in
+          https://cloud.google.com/apis/design/resource_names.
 

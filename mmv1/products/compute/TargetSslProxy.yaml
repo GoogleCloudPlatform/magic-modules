@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -16,7 +16,7 @@ name: 'TargetSslProxy'
 kind: 'compute#targetSslProxy'
 base_url: projects/{{project}}/global/targetSslProxies
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
   Represents a TargetSslProxy resource, which is used by one or more
@@ -44,6 +44,15 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "target_ssl_proxy_basic"
+    primary_resource_id: "default"
+    vars:
+      target_ssl_proxy_name: "test-proxy"
+      ssl_certificate_name: "default-cert"
+      backend_service_name: "backend-service"
+      health_check_name: "health-check"
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -52,9 +61,10 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: 'An optional description of this resource.'
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Integer
-    name: 'id'
+    name: 'proxyId'
+    api_name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
   - !ruby/object:Api::Type::String
@@ -67,7 +77,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Enum
     name: 'proxyHeader'
@@ -79,8 +89,10 @@ properties:
       - :PROXY_V1
     update_verb: :POST
     update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setProxyHeader'
+    default_value: :NONE
   - !ruby/object:Api::Type::ResourceRef
-    name: 'service'
+    name: 'backendService'
+    api_name: service
     resource: 'BackendService'
     imports: 'selfLink'
     description: |
@@ -114,8 +126,7 @@ properties:
       - sslCertificates
       - certificateMap
     update_verb: :POST
-    update_url:
-      'projects/{{project}}/global/targetSslProxies/{{name}}/setCertificateMap'
+    update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setCertificateMap'
   - !ruby/object:Api::Type::ResourceRef
     name: 'sslPolicy'
     resource: 'SslPolicy'
@@ -125,5 +136,4 @@ properties:
       the TargetSslProxy resource. If not set, the TargetSslProxy
       resource will not have any SSL policy configured.
     update_verb: :POST
-    update_url:
-      'projects/{{project}}/global/targetSslProxies/{{name}}/setSslPolicy'
+    update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslPolicy'

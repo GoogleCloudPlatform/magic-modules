@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -39,14 +39,35 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "interconnect_attachment_basic"
+    primary_resource_id: "on_prem"
+    vars:
+      interconnect_attachment_name: "on-prem-attachment"
+      router_name: "router-1"
+      network_name: "network-1"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "compute_interconnect_attachment_ipsec_encryption"
+    primary_resource_id: "ipsec-encrypted-interconnect-attachment"
+    vars:
+      interconnect_attachment_name: "test-interconnect-attachment"
+      address_name: "test-address"
+      router_name: "test-router"
+      network_name: "test-network"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/interconnect_attachment.go.erb
+  post_create: templates/terraform/post_create/interconnect_attachment.go.erb
+  pre_delete: templates/terraform/pre_delete/interconnect_attachment.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'selfLink'
-    required: true
+    required: false
     description: |
       Region where the regional interconnect attachment resides.
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::Boolean
     name: 'adminEnabled'
@@ -69,11 +90,12 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'interconnect'
-    input: true
+    immutable: true
     description: |
       URL of the underlying Interconnect object that this attachment's
       traffic will traverse through. Required if type is DEDICATED, must not
       be set if type is PARTNER.
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -83,6 +105,8 @@ properties:
     description: |
       Maximum Transmission Unit (MTU), in bytes, of packets passing through
       this interconnect attachment. Currently, only 1440 and 1500 are allowed. If not specified, the value will default to 1440.
+    custom_flatten: templates/terraform/custom_flatten/float64_to_int_to_string.go.erb
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'bandwidth'
     description: |
@@ -104,9 +128,10 @@ properties:
       - :BPS_10G
       - :BPS_20G
       - :BPS_50G
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'edgeAvailabilityDomain'
-    input: true
+    immutable: true
     description: |
       Desired availability domain for the attachment. Only available for type
       PARTNER, at creation time. For improved reliability, customers should
@@ -114,6 +139,7 @@ properties:
       selected availability domain will be provided to the Partner via the
       pairing key so that the provisioned circuit will lie in the specified
       domain. If not specified, the value will default to AVAILABILITY_DOMAIN_ANY.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'pairingKey'
     description: |
@@ -143,7 +169,7 @@ properties:
         output: true
   - !ruby/object:Api::Type::Enum
     name: 'type'
-    input: true
+    immutable: true
     description: |
       The type of InterconnectAttachment you wish to create. Defaults to
       DEDICATED.
@@ -151,6 +177,7 @@ properties:
       - :DEDICATED
       - :PARTNER
       - :PARTNER_PROVIDER
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
@@ -186,7 +213,8 @@ properties:
       automatically connect the Interconnect to the network & region within which the
       Cloud Router is configured.
     required: true
-    input: true
+    immutable: true
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: |
@@ -198,6 +226,7 @@ properties:
       The unique identifier for the resource. This identifier is
       defined by the server.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -208,10 +237,12 @@ properties:
       lowercase letter, and all following characters must be a dash, lowercase
       letter, or digit, except the last character, which cannot be a dash.
     required: true
-    input: true
+    immutable: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
   - !ruby/object:Api::Type::Array
     name: candidateSubnets
-    input: true
+    immutable: true
     description: |
       Up to 16 candidate prefixes that can be used to restrict the allocation
       of cloudRouterIpAddress and customerRouterIpAddress for this attachment.
@@ -220,36 +251,37 @@ properties:
       an unused /29 from the supplied candidate prefix(es). The request will
       fail if all possible /29s are in use on Google's edge. If not supplied,
       Google will randomly select an unused /29 from all of link-local space.
+    ignore_read: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Integer
     name: vlanTag8021q
-    input: true
+    immutable: true
     description: |
       The IEEE 802.1Q VLAN tag for this attachment, in the range 2-4094. When
       using PARTNER type this will be managed upstream.
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ipsecInternalAddresses'
     description: |
-      URL of addresses that have been reserved for the interconnect
-      attachment, Used only for interconnect attachment that has the
-      encryption option as IPSEC.
+      URL of addresses that have been reserved for the interconnect attachment,
+      Used only for interconnect attachment that has the encryption option as
+      IPSEC.
 
-      The addresses must be RFC 1918 IP address ranges. When creating HA
-      VPN gateway over the interconnect attachment, if the attachment is
-      configured to use an RFC 1918 IP address, then the VPN gateway's IP
-      address will be allocated from the IP address range specified
-      here.
+      The addresses must be RFC 1918 IP address ranges. When creating HA VPN
+      gateway over the interconnect attachment, if the attachment is configured
+      to use an RFC 1918 IP address, then the VPN gateway's IP address will be
+      allocated from the IP address range specified here.
 
       For example, if the HA VPN gateway's interface 0 is paired to this
-      interconnect attachment, then an RFC 1918 IP address for the VPN
-      gateway interface 0 will be allocated from the IP address specified
-      for this interconnect attachment.
+      interconnect attachment, then an RFC 1918 IP address for the VPN gateway
+      interface 0 will be allocated from the IP address specified for this
+      interconnect attachment.
 
       If this field is not specified for interconnect attachment that has
-      encryption option as IPSEC, later on when creating HA VPN gateway on
-      this interconnect attachment, the HA VPN gateway's IP address will be
+      encryption option as IPSEC, later on when creating HA VPN gateway on this
+      interconnect attachment, the HA VPN gateway's IP address will be
       allocated from regional external IP address pool.
-    input: true
+    immutable: true
     item_type: !ruby/object:Api::Type::ResourceRef
       name: 'ipsecInternalAddress'
       resource: 'Address'
@@ -261,21 +293,21 @@ properties:
     name: 'encryption'
     description: |
       Indicates the user-supplied encryption option of this interconnect
-      attachment:
+      attachment. Can only be specified at attachment creation for PARTNER or
+      DEDICATED attachments.
 
-      NONE is the default value, which means that the attachment carries
-      unencrypted traffic. VMs can send traffic to, or receive traffic
-      from, this type of attachment.
+      * NONE - This is the default value, which means that the VLAN attachment
+      carries unencrypted traffic. VMs are able to send traffic to, or receive
+      traffic from, such a VLAN attachment.
 
-      IPSEC indicates that the attachment carries only traffic encrypted by
-      an IPsec device such as an HA VPN gateway. VMs cannot directly send
-      traffic to, or receive traffic from, such an attachment. To use
-      IPsec-encrypted Cloud Interconnect create the attachment using this
-      option.
-
-      Not currently available publicly.
-    input: true
+      * IPSEC - The VLAN attachment carries only encrypted traffic that is
+      encrypted by an IPsec device, such as an HA VPN gateway or third-party
+      IPsec VPN. VMs cannot directly send traffic to, or receive traffic from,
+      such a VLAN attachment. To use HA VPN over Cloud Interconnect, the VLAN
+      attachment must be created with this option.
+    immutable: true
     values:
       - :NONE
       - :IPSEC
     default_value: :NONE
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb

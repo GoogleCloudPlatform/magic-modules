@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -18,6 +18,7 @@ self_link: projects/{{project}}
 readonly: true
 description: |
   Information about the project specifically for compute.
+exclude: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -69,7 +70,8 @@ properties:
           description: 'Current usage of this metric'
         - !ruby/object:Api::Type::String
           name: 'owner'
-          description: Owning resource. This is the resource on which this quota is applied.
+          description: Owning resource. This is the resource on which this quota is
+            applied.
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'

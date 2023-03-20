@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,19 +14,18 @@
 --- !ruby/object:Api::Resource
 name: 'Flag'
 kind: 'sql#flag'
-description:
-  'Represents a flag that can be configured for a Cloud SQL instance.'
+description: 'Represents a flag that can be configured for a Cloud SQL instance.'
 base_url: flags
 self_link: flags
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys: ['items']
 readonly: true
+exclude: true
 properties:
   - !ruby/object:Api::Type::Array
     name: 'allowedStringValues'
     item_type: Api::Type::String
-    description:
-      'For STRING flags, List of strings that the value can be set to.'
+    description: 'For STRING flags, List of strings that the value can be set to.'
     output: true
   - !ruby/object:Api::Type::Array
     name: 'appliesTo'

@@ -90,12 +90,13 @@ module Provider
     end
 
     def updatable?(resource, properties)
-      !resource.input || !properties.reject { |p| p.update_url.nil? }.empty?
+      !resource.immutable || !properties.reject { |p| p.update_url.nil? }.empty?
     end
 
     def force_new?(property, resource)
       !property.output &&
-        (property.input || (resource.input && property.update_url.nil? && property.input.nil? &&
+        (property.immutable || (resource.immutable && property.update_url.nil? &&
+                              property.immutable.nil? &&
                             (property.parent.nil? ||
                              force_new?(property.parent, resource))))
     end
@@ -320,7 +321,7 @@ module Provider
         data.object.legacy_name.sub(/^google_/, '')
       else
         name = data.object.filename_override || data.object.name.underscore
-        product_name = @config.legacy_name || data.product.name.underscore
+        product_name = data.product.legacy_name || data.product.name.underscore
         "#{product_name}_#{name}"
       end
     end

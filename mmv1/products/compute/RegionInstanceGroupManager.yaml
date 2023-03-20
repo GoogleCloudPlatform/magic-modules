@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -44,6 +44,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+exclude: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -140,7 +141,7 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-    input: true
+    immutable: true
   # fingerprint ignored as it is an internal locking detail
   - !ruby/object:Api::Type::Integer
     name: 'id'
@@ -171,8 +172,7 @@ properties:
   # TODO(nelsonjr): Make namedPorts a NameValue(name[string], port[integer])
   - !ruby/object:Api::Type::Array
     name: 'namedPorts'
-    description:
-      Named ports configured for the Instance Groups complementary to this
+    description: Named ports configured for the Instance Groups complementary to this
       Instance Group Manager.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -183,8 +183,7 @@ properties:
             long, and comply with RFC1035.
         - !ruby/object:Api::Type::Integer
           name: 'port'
-          description:
-            The port number, which can be a value between 1 and 65535.
+          description: The port number, which can be a value between 1 and 65535.
   - !ruby/object:Api::Type::Array
     name: 'targetPools'
     description: |

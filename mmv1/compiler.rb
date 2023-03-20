@@ -225,7 +225,8 @@ all_product_files.each do |product_name|
     end
 
     if override_dir
-      Dir["#{override_dir}#{product_name}/*"].each do |override_path|
+      ovr_prod_dir = File.join(override_dir, product_name)
+      Dir["#{ovr_prod_dir}/*"].each do |override_path|
         next if File.basename(override_path) == 'product.yaml' \
         || File.basename(override_path) == 'terraform.yaml' \
         || File.extname(override_path) != '.yaml'
@@ -239,6 +240,11 @@ all_product_files.each do |product_name|
                    else
                      File.read(override_path)
                    end
+        unless override_dir.nil?
+          # Replace overrides directory if we are running with a provider override
+          # This allows providers to reference files in their override path
+          res_yaml = res_yaml.gsub('{{override_path}}', override_dir)
+        end
         resource = Api::Compiler.new(res_yaml).run
         resource.validate
         resources.push(resource)

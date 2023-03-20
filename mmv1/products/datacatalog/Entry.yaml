@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -29,19 +29,42 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': https://cloud.google.com/data-catalog/docs
   api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries
+import_format: ["{{name}}"]
+supports_indirect_user_project_override: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "data_catalog_entry_basic"
+    primary_resource_id: "basic_entry"
+    vars:
+      entry_id: "my_entry"
+      entry_group_id: "my_group"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "data_catalog_entry_fileset"
+    primary_resource_id: "basic_entry"
+    vars:
+      entry_id: "my_entry"
+      entry_group_id: "my_group"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "data_catalog_entry_full"
+    primary_resource_id: "basic_entry"
+    vars:
+      entry_id: "my_entry"
+      entry_group_id: "my_group"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/data_catalog_entry.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: entryGroup
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The name of the entry group this entry is in.
   - !ruby/object:Api::Type::String
     name: entryId
     required: true
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The id of the entry to create.
 properties:
@@ -61,6 +84,7 @@ properties:
       //bigquery.googleapis.com/projects/projectId/datasets/datasetId/tables/tableId
       Output only when Entry is of type in the EntryType enum. For entries with userSpecifiedType,
       this field is optional and defaults to an empty string.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: displayName
     description: |
@@ -70,15 +94,21 @@ properties:
     name: description
     description: |
       Entry description, which can consist of several sentences or paragraphs that describe entry contents.
-  - !ruby/object:Api::Type::String
     # This is a string instead of a NestedObject because schemas contain ColumnSchemas, which can contain nested ColumnSchemas.
     # We'll have people provide the json blob for the schema instead.
+  - !ruby/object:Api::Type::String
     name: schema
     description: |
       Schema of the entry (e.g. BigQuery, GoogleSQL, Avro schema), as a json string. An entry might not have any schema
       attached to it. See
       https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries#schema
       for what fields this schema can contain.
+    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+      return s }'
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringIsJSON'
   - !ruby/object:Api::Type::Enum
     name: type
     description: |
@@ -86,7 +116,7 @@ properties:
       Currently, only FILESET enum value is allowed. All other entries created through Data Catalog must use userSpecifiedType.
     values:
       - :FILESET
-    input: true
+    immutable: true
     exactly_one_of:
       - type
       - user_specified_type
@@ -101,6 +131,8 @@ properties:
     exactly_one_of:
       - type
       - user_specified_type
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[A-z_][A-z0-9_]{0,63}$'
   - !ruby/object:Api::Type::String
     name: integratedSystem
     description: |
@@ -112,6 +144,8 @@ properties:
       This field indicates the entry's source system that Data Catalog does not integrate with.
       userSpecifiedSystem strings must begin with a letter or underscore and can only contain letters, numbers,
       and underscores; are case insensitive; must be at least 1 character and at most 64 characters long.
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[A-z_][A-z0-9_]{0,63}$'
   - !ruby/object:Api::Type::NestedObject
     name: gcsFilesetSpec
     description: |

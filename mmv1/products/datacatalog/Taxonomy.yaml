@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -28,15 +28,29 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'taxonomy'
-  import_format: ["projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}", "{{taxonomy}}"]
+  import_format: ["projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}",
+    "{{taxonomy}}"]
   base_url: "projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}"
+import_format: ["{{name}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "data_catalog_taxonomy_basic"
+    primary_resource_id: "basic_taxonomy"
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_taxonomy%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      display_name: "my_taxonomy"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/data_catalog_taxonomy.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       Taxonomy location region.
+    required: false
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
@@ -63,7 +77,8 @@ properties:
     description: |
       A list of policy types that are activated for this taxonomy. If not set,
       defaults to an empty list.
-    item_type: !ruby/object:Api::Type::Enum # TOOD: should this be enum or string
+    item_type: !ruby/object:Api::Type::Enum
+                                            # TOOD: should this be enum or string
       name: 'policyType'
       description: 'Defines policy types where policy tag can be used for'
       values:
