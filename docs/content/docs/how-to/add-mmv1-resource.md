@@ -445,17 +445,17 @@ When writing a changelog entry for a promotion, write it as if it was a new
 field or resource, and suffix it with `(ga only)`. For example, if the
 `google_container_cluster` resource was promoted to GA in your change:
 
-```
-\`\`\`release-note:new-resource
+~~~
+```release-note:new-resource
 `google_container_cluster` (ga only)
-\`\`\`
 ```
+~~~
 
-Alternatively, for field promotions, you may use "{{service}}: promoted
-{{field}} in {{resource}} to GA", i.e.
+Alternatively, for field promotions, you may use `{{service}}: promoted
+{{field}} in {{resource}} to GA`, i.e.
 
-```
-\`\`\`release-note:enhancement
+~~~
+```release-note:enhancement
 container: promoted `node_locations` field in google_container_cluster` to GA
-\`\`\`
 ```
+~~~

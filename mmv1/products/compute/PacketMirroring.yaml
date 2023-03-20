@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -42,27 +42,44 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "compute_packet_mirroring_full"
+    primary_resource_id: "foobar"
+    vars:
+      instance_name: "my-instance"
+      subnetwork_name: "my-subnetwork"
+      service_name: "my-service"
+      hc_name: "my-healthcheck"
+      mirroring_name: "my-mirroring"
+      ilb_rule_name: "my-ilb"
+      network_name: "my-network"
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: The name of the packet mirroring rule
     required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validateGCEName'
   - !ruby/object:Api::Type::String
     name: description
     description: A human-readable description of the rule.
     immutable: true
   - !ruby/object:Api::Type::String
     name: region
-    description: The region where this rule is active.
-    required: true
+    description: |
+      The Region in which the created address should reside.
+      If it is not provided, the provider region is used.
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::NestedObject
     name: network
     immutable: true
     description: |
-        Specifies the mirrored VPC network. Only packets in this network
-        will be mirrored. All mirrored VMs should have a NIC in the given
-        network. All mirrored subnetworks should belong to the given network.
+      Specifies the mirrored VPC network. Only packets in this network
+      will be mirrored. All mirrored VMs should have a NIC in the given
+      network. All mirrored subnetworks should belong to the given network.
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: url
@@ -75,17 +92,18 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: priority
     description: |
-        Since only one rule can be active at a time, priority is
-        used to break ties in the case of two rules that apply to
-        the same instances.
-    required: true
+      Since only one rule can be active at a time, priority is
+      used to break ties in the case of two rules that apply to
+      the same instances.
+    required: false
+    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: collectorIlb
     description: |
-        The Forwarding Rule resource (of type loadBalancingScheme=INTERNAL)
-        that will be used as collector for mirrored traffic. The
-        specified forwarding rule must have isMirroringCollector
-        set to true.
+      The Forwarding Rule resource (of type load_balancing_scheme=INTERNAL)
+      that will be used as collector for mirrored traffic. The
+      specified forwarding rule must have is_mirroring_collector
+      set to true.
     required: true
     properties:
       - !ruby/object:Api::Type::ResourceRef

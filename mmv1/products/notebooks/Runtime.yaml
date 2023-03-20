@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,7 +14,12 @@
 --- !ruby/object:Api::Resource
 name: 'Runtime'
 description: |
-    A Cloud AI Platform Notebook runtime.
+  A Cloud AI Platform Notebook runtime.
+
+
+  ~> **Note:** Due to limitations of the Notebooks Runtime API, many fields
+  in this resource do not properly detect drift. These fields will also not
+  appear in state once imported.
 base_url: projects/{{project}}/locations/{{location}}/runtimes
 create_url: projects/{{project}}/locations/{{location}}/runtimes?runtimeId={{name}}
 self_link: projects/{{project}}/locations/{{location}}/runtimes/{{name}}
@@ -26,16 +31,60 @@ update_mask: true
 # immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/ai-platform-notebooks'
+    'Official Documentation': 'https://cloud.google.com/ai-platform-notebooks'
   api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'runtime_name'
-  import_format: ["projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}", "{{runtime_name}}"]
+  import_format: ["projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}",
+    "{{runtime_name}}"]
   # Sets the base url for base_url:GetIamPolicy and base_url:SetIamPolicy in function `qualifyRuntimeUrl`
   base_url: projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "notebook_runtime_basic"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime%s\", context[\"\
+      random_suffix\"])"
+    primary_resource_id: "runtime"
+    region_override: "us-central1"
+    vars:
+      runtime_name: "notebooks-runtime"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "notebook_runtime_basic_gpu"
+    primary_resource_id: "runtime_gpu"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-gpu%s\", context[\"\
+      random_suffix\"])"
+    region_override: "us-central1"
+    vars:
+      runtime_name: "notebooks-runtime-gpu"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "notebook_runtime_basic_container"
+    primary_resource_id: "runtime_container"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\"\
+      , context[\"random_suffix\"])"
+    region_override: "us-central1"
+    vars:
+      runtime_name: "notebooks-runtime-container"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "notebook_runtime_kernels"
+    primary_resource_id: "runtime_container"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\"\
+      , context[\"random_suffix\"])"
+    region_override: "us-central1"
+    vars:
+      runtime_name: "notebooks-runtime-kernel"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "notebook_runtime_script"
+    primary_resource_id: "runtime_container"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-container%s\"\
+      , context[\"random_suffix\"])"
+    region_override: "us-central1"
+    vars:
+      runtime_name: "notebooks-runtime-script"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/notebooks_runtime.go
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'location'
@@ -49,7 +98,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-        The name specified for the Notebook runtime.
+      The name specified for the Notebook runtime.
     required: true
     immutable: true
     url_param_only: true
@@ -177,6 +226,7 @@ properties:
                       Labels to apply to this disk. These can be later modified
                       by the disks.setLabels method. This field is only
                       applicable for persistent disks.
+                    default_from_api: true
                 immutable: true
               - !ruby/object:Api::Type::String
                 name: "interface"
@@ -220,6 +270,7 @@ properties:
             description: |
               Use a list of container images to start the notebook instance.
             immutable: true
+            default_from_api: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
@@ -231,7 +282,7 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: 'tag'
                   description: |
-                      The tag of the container image. If not specified, this defaults to the latest tag.
+                    The tag of the container image. If not specified, this defaults to the latest tag.
           - !ruby/object:Api::Type::NestedObject
             name: "encryptionConfig"
             description: |
@@ -327,12 +378,14 @@ properties:
               enabled networks, and all dependencies must be configured to be
               accessible without external IP addresses.
             immutable: true
+            send_empty_value: true
           - !ruby/object:Api::Type::Array
             name: "tags"
             description: |
               The Compute Engine tags to add to runtime (see [Tagging instances]
               (https://cloud.google.com/compute/docs/
               label-or-tag-resources#tags)).
+            default_from_api: true
             item_type: Api::Type::String
           - !ruby/object:Api::Type::KeyValuePairs
             name: "guestAttributes"
@@ -348,6 +401,7 @@ properties:
               (see [Project and instance metadata](https://cloud.google.com
               /compute/docs/storing-retrieving-metadata#project_and_instance
               _metadata)).
+            default_from_api: true
           - !ruby/object:Api::Type::KeyValuePairs
             name: "labels"
             description: |
@@ -357,6 +411,8 @@ properties:
               empty, but, if present, must contain 1 to 63 characters, and must
               conform to [RFC 1035](https://www.ietf.org/rfc/rfc1035.txt). No
               more than 32 labels can be associated with a cluster.
+            default_from_api: true
+            diff_suppress_func: NotebooksRuntimeLabelDiffSuppress
           - !ruby/object:Api::Type::Enum
             name: "nicType"
             description: |
@@ -386,14 +442,14 @@ properties:
       - UPGRADING
       - INITIALIZING
     description: |
-        The state of this runtime.
+      The state of this runtime.
     output: true
   - !ruby/object:Api::Type::String
     name: 'healthState'
     description: |
-        The health state of this runtime. For a list of possible output
-        values, see `https://cloud.google.com/vertex-ai/docs/workbench/
-        reference/rest/v1/projects.locations.runtimes#healthstate`.
+      The health state of this runtime. For a list of possible output
+      values, see `https://cloud.google.com/vertex-ai/docs/workbench/
+      reference/rest/v1/projects.locations.runtimes#healthstate`.
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'accessConfig'
@@ -420,6 +476,12 @@ properties:
     name: "softwareConfig"
     description: |
       The config settings for software inside the runtime.
+    default_from_api: true
+    update_mask_fields:
+      - "softwareConfig.idleShutdown"
+      - "softwareConfig.idleShutdownTimeout"
+      - "softwareConfig.customGpuDriverPath"
+      - "softwareConfig.postStartupScript"
     properties:
       - !ruby/object:Api::Type::String
         name: "notebookUpgradeSchedule"
@@ -469,23 +531,23 @@ properties:
           - RUN_EVERY_START
           - DOWNLOAD_AND_RUN_EVERY_START
         description: |
-            Behavior for the post startup script.
+          Behavior for the post startup script.
       - !ruby/object:Api::Type::Array
         name: 'kernels'
         description: |
-            Use a list of container images to use as Kernels in the notebook instance.
+          Use a list of container images to use as Kernels in the notebook instance.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: 'repository'
               description: |
-                 The path to the container image repository.
-                 For example: gcr.io/{project_id}/{imageName}
+                The path to the container image repository.
+                For example: gcr.io/{project_id}/{imageName}
               required: true
             - !ruby/object:Api::Type::String
               name: 'tag'
               description: |
-                  The tag of the container image. If not specified, this defaults to the latest tag.                
+                The tag of the container image. If not specified, this defaults to the latest tag.                
   - !ruby/object:Api::Type::NestedObject
     name: "metrics"
     description: |
