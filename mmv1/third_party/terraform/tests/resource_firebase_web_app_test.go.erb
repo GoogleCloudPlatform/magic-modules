@@ -22,12 +22,26 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
+				ExternalProviders: ProviderVersion450(),
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, ""),
 			},
 			{
+				ExternalProviders: ProviderVersion450(),
+				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "api_key"),
+					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "auth_domain"),
+					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "storage_bucket"),
+				),
+			},
+			{
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, ""),
+			},
+			{
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "api_key"),
