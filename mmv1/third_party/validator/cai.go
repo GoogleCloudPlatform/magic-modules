@@ -102,7 +102,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	// workaround for empty project
 	placeholderSet := false
 	if config.Project == "" {
-		config.Project = fmt.Sprintf("placeholder-%s", randString(8))
+		config.Project = fmt.Sprintf("placeholder-%s", RandString(8))
 		placeholderSet = true
 	}
 
@@ -117,7 +117,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	fWithPlaceholder := func(key string) string {
 		val := f(key)
 		if val == "" {
-			val = fmt.Sprintf("placeholder-%s", randString(8))
+			val = fmt.Sprintf("placeholder-%s", RandString(8))
 		}
 		return val
 	}
@@ -125,7 +125,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	return re.ReplaceAllStringFunc(linkTmpl, fWithPlaceholder), nil
 }
 
-func randString(n int) string {
+func RandString(n int) string {
 	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, n)
 	for i := range b {

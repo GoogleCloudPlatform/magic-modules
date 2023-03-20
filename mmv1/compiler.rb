@@ -175,7 +175,7 @@ all_product_files.each do |product_name|
     product_yaml = File.read(api_yaml_path)
   elsif File.exist?(product_override_path)
     result = if File.exist?(product_yaml_path)
-               YAML.load_file(product_yaml_pat, permitted_classes: allowed_classes) \
+               YAML.load_file(product_yaml_path, permitted_classes: allowed_classes) \
                    .merge(YAML.load_file(product_override_path, permitted_classes: allowed_classes))
              else
                YAML.load_file(product_override_path, permitted_classes: allowed_classes)
@@ -210,12 +210,45 @@ all_product_files.each do |product_name|
     resources = []
     Dir["#{product_name}/*"].each do |file_path|
       next if File.basename(file_path) == 'product.yaml' \
-       || File.basename(file_path) == 'terraform.yaml'
+       || File.basename(file_path) == 'terraform.yaml' \
+       || File.extname(file_path) != '.yaml'
 
-      resource_yaml = File.read(file_path)
-      resource = Api::Compiler.new(resource_yaml).run
+      if override_dir
+        # Skip if resource will be merged in the override loop
+        resource_override_path = File.join(override_dir, file_path)
+        next if File.exist?(resource_override_path)
+      end
+      res_yaml = File.read(file_path)
+      resource = Api::Compiler.new(res_yaml).run
       resource.validate
       resources.push(resource)
+    end
+
+    if override_dir
+      ovr_prod_dir = File.join(override_dir, product_name)
+      Dir["#{ovr_prod_dir}/*"].each do |override_path|
+        next if File.basename(override_path) == 'product.yaml' \
+        || File.basename(override_path) == 'terraform.yaml' \
+        || File.extname(override_path) != '.yaml'
+
+        file_path = File.join(product_name, File.basename(override_path))
+        res_yaml = if File.exist?(file_path)
+                     YAML.load_file(file_path, permitted_classes: allowed_classes) \
+                         .merge(YAML \
+                           .load_file(override_path, permitted_classes: allowed_classes)) \
+                         .to_yaml
+                   else
+                     File.read(override_path)
+                   end
+        unless override_dir.nil?
+          # Replace overrides directory if we are running with a provider override
+          # This allows providers to reference files in their override path
+          res_yaml = res_yaml.gsub('{{override_path}}', override_dir)
+        end
+        resource = Api::Compiler.new(res_yaml).run
+        resource.validate
+        resources.push(resource)
+      end
     end
     product_api.set_variable(resources, 'objects')
   end

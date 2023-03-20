@@ -55,7 +55,7 @@
       primary_resource_id: "access-policy"
       test_env_vars:
         org_id: :ORG_ID
-        project: '"acm-tf-test-" + randString(t, 10)'
+        project: '"acm-tf-test-" + RandString(t, 10)'
   # Skipping the sweeper due to the non-standard base_url
   skip_sweeper: true
   custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -63,7 +63,7 @@
   parameters:
     - !ruby/object:Api::Type::String
       name: parent
-      input: true
+      immutable: true
       required: true
       description: |
         The parent of this AccessPolicy in the Cloud Resource Hierarchy.

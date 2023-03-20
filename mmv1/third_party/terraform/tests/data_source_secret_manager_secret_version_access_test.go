@@ -12,12 +12,12 @@ import (
 func TestAccDatasourceSecretManagerSecretVersionAccess_basic(t *testing.T) {
 	t.Parallel()
 
-	randomString := randString(t, 10)
+	randomString := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretManagerSecretVersionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecretManagerSecretVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatasourceSecretManagerSecretVersionAccess_basic(randomString),
@@ -32,12 +32,12 @@ func TestAccDatasourceSecretManagerSecretVersionAccess_basic(t *testing.T) {
 func TestAccDatasourceSecretManagerSecretVersionAccess_latest(t *testing.T) {
 	t.Parallel()
 
-	randomString := randString(t, 10)
+	randomString := RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecretManagerSecretVersionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecretManagerSecretVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatasourceSecretManagerSecretVersionAccess_latest(randomString),

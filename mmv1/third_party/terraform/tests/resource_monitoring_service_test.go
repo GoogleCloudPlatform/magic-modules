@@ -10,11 +10,11 @@ import (
 func TestAccMonitoringService_basic(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringServiceDestroyProducer(t),
+	randomSuffix := RandString(t, 10)
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringSlo_cloudEndpoints(randomSuffix, "an-endpoint"),

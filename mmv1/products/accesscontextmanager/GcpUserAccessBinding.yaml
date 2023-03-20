@@ -45,7 +45,7 @@
     # This must be done at the provider level.
     - !ruby/object:Api::Type::String
       name: organizationId
-      input: true
+      immutable: true
       required: true
       url_param_only: true
       description: |
@@ -59,7 +59,7 @@
     - !ruby/object:Api::Type::String
       name: 'groupKey'
       required: true
-      input: true
+      immutable: true
       description: |
         Required. Immutable. Google Group id whose members are subject to this binding's restrictions. See "id" in the G Suite Directory API's Groups resource. If a group's email address/alias is changed, this resource will continue to point at the changed group. This field does not accept group email addresses or aliases. Example: "01d520gv4vjcrht"
     - !ruby/object:Api::Type::Array

@@ -10,12 +10,12 @@ import (
 func TestAccDataSourceGoogleStorageBucket_basic(t *testing.T) {
 	t.Parallel()
 
-	bucket := "tf-bucket-" + randString(t, 10)
+	bucket := "tf-bucket-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccStorageBucketDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleStorageBucketConfig(bucket),

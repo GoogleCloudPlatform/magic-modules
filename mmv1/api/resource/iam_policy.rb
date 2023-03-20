@@ -103,7 +103,7 @@ module Api
       attr_reader :self_link
 
       # [Optional] Version number in the request payload.
-      # if set, it overrides the default iamPolicyVersion
+      # if set, it overrides the default IamPolicyVersion
       attr_reader :iam_policy_version
 
       # [Optional] Min version to make IAM resources available at

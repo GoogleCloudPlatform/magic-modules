@@ -1,0 +1,217 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Network'
+kind: 'compute#network'
+base_url: projects/{{project}}/global/networks
+collection_url_key: 'items'
+immutable: true
+has_self_link: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks'
+description: |
+  Manages a VPC network or legacy network resource on GCP.
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "network_basic"
+    primary_resource_id: "vpc_network"
+    vars:
+      network_name: "vpc-network"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "network_custom_mtu"
+    primary_resource_id: "vpc_network"
+    vars:
+      network_name: "vpc-network"
+    test_env_vars:
+      project: :PROJECT_NAME
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'delete_default_routes_on_create'
+    default_value: false
+    description: |
+      If set to `true`, default routes (`0.0.0.0/0`) will be deleted
+      immediately after network creation. Defaults to `false`.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource. The resource must be
+      recreated to modify this field.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'gateway_ipv4'
+    # We override this in api.yaml so that the name is more aesthetic
+    api_name: 'gatewayIPv4'
+    output: true
+    description: |
+      The gateway address for default routing out of the network. This value
+      is selected by GCP.
+  - !ruby/object:Api::Type::Integer
+    name: 'id'
+    description: 'The unique identifier for the resource.'
+    output: true
+    exclude: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the resource. Provided by the client when the resource is
+      created. The name must be 1-63 characters long, and comply with
+      RFC1035. Specifically, the name must be 1-63 characters long and match
+      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+      first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the last
+      character, which cannot be a dash.
+    immutable: true
+    required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validateGCEName'
+    # TODO: Change subnetworks to ResourceRef
+  - !ruby/object:Api::Type::Array
+    name: 'subnetworks'
+    description: |
+      Server-defined fully-qualified URLs for all subnetworks in this
+      network.
+    output: true
+    exclude: true
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Boolean
+    name: 'autoCreateSubnetworks'
+    description: |
+      When set to `true`, the network is created in "auto subnet mode" and
+      it will create a subnet for each region automatically across the
+      `10.128.0.0/9` address range.
+
+      When set to `false`, the network is created in "custom subnet mode" so
+      the user can explicitly connect subnetwork resources.
+    immutable: true
+    default_value: true
+    send_empty_value: true
+    conflicts: []
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+    exclude: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'routingConfig'
+    update_verb: :PATCH
+    update_url: projects/{{project}}/global/networks/{{name}}
+    description: |
+      The network-level routing configuration for this network. Used by Cloud
+      Router to determine what type of network-wide routing behavior to
+      enforce.
+    flatten_object: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'routingMode'
+        required: false
+        description: |
+          The network-wide routing mode to use. If set to `REGIONAL`, this
+          network's cloud routers will only advertise routes with subnetworks
+          of this network in the same region as the router. If set to `GLOBAL`,
+          this network's cloud routers will advertise routes with all
+          subnetworks of this network, across regions.
+        values:
+          - :REGIONAL
+          - :GLOBAL
+        update_verb: :PATCH
+        update_url: projects/{{project}}/global/networks/{{name}}
+        default_from_api: true
+  - !ruby/object:Api::Type::Array
+    name: 'peerings'
+    # This is only used in InSpec, handled via fine-grained in Terraform
+    exclude: true
+    output: true
+    description: |
+      Peerings for a network
+    item_type: !ruby/object:Api::Type::NestedObject
+      name: subnetworks
+      description: The subnetworks that should be mirrored.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'name'
+          description: |
+            Name of the peering.
+        - !ruby/object:Api::Type::String
+          name: 'state'
+          description: |
+            State of the peering.
+        - !ruby/object:Api::Type::String
+          name: 'stateDetails'
+          description: |
+            Details about the current state of the peering.
+        - !ruby/object:Api::Type::String
+          name: 'network'
+          description: |
+            URL of the peer network
+        - !ruby/object:Api::Type::Boolean
+          name: 'exportCustomRoutes'
+          description: |
+            Whether to export the custom routes to the peer network.
+        - !ruby/object:Api::Type::Boolean
+          name: 'importCustomRoutes'
+          description: |
+            Whether to import the custom routes to the peer network.
+        - !ruby/object:Api::Type::Integer
+          name: 'peerMtu'
+          description: |
+            Maximum Transmission Unit in bytes.
+  - !ruby/object:Api::Type::Integer
+    name: 'mtu'
+    description: |
+      Maximum Transmission Unit in bytes. The default value is 1460 bytes. 
+      The minimum value for this field is 1300 and the maximum value is 8896 bytes (jumbo frames).
+      Note that packets larger than 1500 bytes (standard Ethernet) can be subject to TCP-MSS clamping or dropped
+      with an ICMP `Fragmentation-Needed` message if the packets are routed to the Internet or other VPCs 
+      with varying MTUs.
+    immutable: true
+    default_from_api: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableUlaInternalIpv6'
+    description: |
+      Enable ULA internal ipv6 on this network. Enabling this feature will assign 
+      a /48 from google defined ULA prefix fd20::/20.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'internalIpv6Range'
+    description: |
+      When enabling ula internal ipv6, caller optionally can specify the /48 range 
+      they want from the google defined ULA prefix fd20::/20. The input must be a 
+      valid /48 ULA IPv6 address and must be within the fd20::/20. Operation will 
+      fail if the speficied /48 is already in used by another resource. 
+      If the field is not speficied, then a /48 range will be randomly allocated from fd20::/20 and returned via this field.
+    immutable: true
+    default_from_api: true

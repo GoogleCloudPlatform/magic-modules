@@ -26,16 +26,45 @@
       resource_inside_response: true
     status: !ruby/object:Api::OpAsync::Status
       path: 'done'
-      complete: True
+      complete: true
       allowed:
-        - True
-        - False
+        - true
+        - false
     error: !ruby/object:Api::OpAsync::Error
       path: 'error'
       message: 'message'
-  input: true
+  immutable: true
   description: |
     Apigee Endpoint Attachment.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
+    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.endpointAttachments/create'
+  
+  autogen_async: true
+  import_format: ["{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}", "{{org_id}}/{{endpoint_attachment_id}}"]
+  delete_url: '{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}'
+  skip_sweeper: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_endpoint_attachment_basic"
+      skip_test: true
+        # This is a more verbose version of the above that creates all
+        # the resources needed for the acceptance test.
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_endpoint_attachment_basic_test"
+      primary_resource_id: "apigee_endpoint_attachment"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+        # Resource creation race
+      skip_vcr: true
+  timeouts: !ruby/object:Api::Timeouts
+    insert_minutes: 30
+    delete_minutes: 30
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    custom_import: templates/terraform/custom_import/apigee_endpoint_attachment.go.erb
   parameters:
     - !ruby/object:Api::Type::String
       name: 'orgId'
@@ -43,14 +72,14 @@
         The Apigee Organization associated with the Apigee instance,
         in the format `organizations/{{org_name}}`.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
     - !ruby/object:Api::Type::String
       name: 'endpointAttachmentId'
       description: |
         ID of the endpoint attachment.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::String
@@ -79,9 +108,3 @@
       description: |
         State of the endpoint attachment connection to the service attachment.
       output: true
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Creating an environment':
-        'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
-    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.endpointAttachments/create'
-

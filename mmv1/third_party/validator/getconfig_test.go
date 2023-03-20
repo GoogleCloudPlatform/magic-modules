@@ -122,7 +122,7 @@ func TestNewConfigUserAgent(t *testing.T) {
 				t.Fatalf("error building config: %s", err)
 			}
 
-			assert.Equal(t, c.expected, cfg.GetUserAgent())
+			assert.Equal(t, c.expected, cfg.UserAgent)
 		})
 	}
 }
@@ -135,7 +135,7 @@ func TestNewConfigUserAgent_nilClientUsesDefault(t *testing.T) {
 		t.Fatalf("error building config: %s", err)
 	}
 
-	assert.NotEmpty(t, cfg.GetClient())
+	assert.NotEmpty(t, cfg.Client)
 }
 
 func TestNewConfigUserAgent_usesPassedClient(t *testing.T) {
@@ -147,5 +147,5 @@ func TestNewConfigUserAgent_usesPassedClient(t *testing.T) {
 		t.Fatalf("error building config: %s", err)
 	}
 
-	assert.Exactly(t, client, cfg.GetClient())
+	assert.Exactly(t, client, cfg.Client)
 }

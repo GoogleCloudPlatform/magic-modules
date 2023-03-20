@@ -10,14 +10,14 @@ import (
 func TestAccComputeBackendBucket_basicModified(t *testing.T) {
 	t.Parallel()
 
-	backendName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	storageName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	secondStorageName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	backendName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	storageName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	secondStorageName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeBackendBucketDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeBackendBucket_basic(backendName, storageName),
@@ -43,13 +43,13 @@ func TestAccComputeBackendBucket_basicModified(t *testing.T) {
 func TestAccComputeBackendBucket_withCdnPolicy(t *testing.T) {
 	t.Parallel()
 
-	backendName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	storageName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	backendName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	storageName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeBackendBucketDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeBackendBucket_withCdnPolicy(backendName, storageName),
@@ -98,13 +98,13 @@ func TestAccComputeBackendBucket_withCdnPolicy(t *testing.T) {
 func TestAccComputeBackendBucket_withSecurityPolicy(t *testing.T) {
 	t.Parallel()
 
-	bucketName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	polName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	bucketName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	polName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeBackendBucket_withSecurityPolicy(bucketName, polName, "google_compute_security_policy.policy.self_link"),
@@ -129,13 +129,13 @@ func TestAccComputeBackendBucket_withSecurityPolicy(t *testing.T) {
 func TestAccComputeBackendBucket_withCompressionMode(t *testing.T) {
 	t.Parallel()
 
-	backendName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	storageName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	backendName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	storageName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeBackendBucket_withCompressionMode(backendName, storageName, "DISABLED"),

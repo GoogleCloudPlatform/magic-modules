@@ -11,12 +11,12 @@ import (
 func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 	t.Parallel()
 
-	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
+	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
@@ -35,12 +35,12 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 	t.Parallel()
 
-	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
+	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
@@ -72,7 +72,7 @@ func testAccDataSourceDNSKeysConfig(dnsZoneName, dnssecStatus string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "foo" {
   name     = "%s"
-  dns_name = "dnssec.tf-test.club."
+  dns_name = "dnssec.gcp.tfacc.hashicorptest.com."
 
   dnssec_config {
     state         = "%s"

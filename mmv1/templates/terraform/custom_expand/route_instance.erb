@@ -7,7 +7,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 				return nil, err
 		}
 
-		userAgent, err := generateUserAgentString(d, config.userAgent)
+		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return nil, err
 		}

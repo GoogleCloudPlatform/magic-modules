@@ -17,17 +17,17 @@ func TestAccOsConfigOsPolicyAssignment_basicOsPolicyAssignment(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"zone":          getTestZoneFromEnv(),
-		"random_suffix": randString(t, 10),
-		"org_id":        getTestOrgFromEnv(t),
-		"billing_act":   getTestBillingAccountFromEnv(t),
+		"project_name":  GetTestProjectFromEnv(),
+		"zone":          GetTestZoneFromEnv(),
+		"random_suffix": RandString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+		"billing_act":   GetTestBillingAccountFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOsConfigOsPolicyAssignmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckOsConfigOsPolicyAssignmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOsConfigOsPolicyAssignment_PercentOsPolicyAssignment(context),
@@ -164,7 +164,7 @@ func testAccCheckOsConfigOsPolicyAssignmentDestroyProducer(t *testing.T) func(s 
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {
@@ -187,7 +187,7 @@ func testAccCheckOsConfigOsPolicyAssignmentDestroyProducer(t *testing.T) func(s 
 				Uid:                dcl.StringOrNil(rs.Primary.Attributes["uid"]),
 			}
 
-			client := NewDCLOsConfigClient(config, config.userAgent, billingProject, 0)
+			client := NewDCLOsConfigClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetOSPolicyAssignment(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_os_config_os_policy_assignment still exists %v", obj)
