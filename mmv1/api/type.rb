@@ -128,9 +128,6 @@ module Api
       # This should be avoided for new fields, and only used with old ones.
       attr_reader :schema_config_mode_attr
 
-      # Names of attributes that can't be set alongside this one
-      attr_reader :conflicts_with
-
       # Names of fields that should be included in the updateMask.
       attr_reader :update_mask_fields
 

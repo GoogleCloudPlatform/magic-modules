@@ -126,7 +126,7 @@ OpenAPI spec.
     * `set_hash_func`: `"SET_HASH_FUNC"` in `tpgtools`.
     * `default_from_api`: `x-dcl-server-default` in the DCL OpenAPI spec.
     * `schema_config_mode_attr`: Requires a future override in `tpgtools`.
-    * `conflicts_with`, `at_least_one_of`, `exactly_one_of`: Will be exposed by
+    * `at_least_one_of`, `exactly_one_of`: Will be exposed by
 the DCL in the future. http://b/159243366
     * `update_mask_fields`: Handled by the DCL.
     * `key_expander`, `key_diff_suppress_func`: Unknown. Likely implemented in
