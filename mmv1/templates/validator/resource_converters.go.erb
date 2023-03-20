@@ -94,7 +94,7 @@ func ResourceConverters() map[string][]ResourceConverter {
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
                     <% if !object.exclude && !object.exclude_validator -%>
-						<% tf_product = (product[:overrides].legacy_name || object.__product.name).underscore -%>
+						<% tf_product = (object.__product.legacy_name || object.__product.name).underscore -%>
 						<% terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}" -%>
                         <% cai_name =  object.__product.name + object.name -%>
                         <% if (!object.iam_policy.nil?) && (!object.iam_policy.exclude) && (!object.iam_policy.exclude_validator) -%>

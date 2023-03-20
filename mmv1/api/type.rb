@@ -600,6 +600,24 @@ module Api
         check :values, type: ::Array, item_type: [Symbol, ::String, ::Integer], required: true
         check :skip_docs_values, type: :boolean
       end
+
+      def merge(other)
+        result = self.class.new
+        instance_variables.each do |v|
+          result.instance_variable_set(v, instance_variable_get(v))
+        end
+
+        other.instance_variables.each do |v|
+          if other.instance_variable_get(v).instance_of?(Array)
+            result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
+                                                       other.instance_variable_get(v)))
+          else
+            result.instance_variable_set(v, other.instance_variable_get(v))
+          end
+        end
+
+        result
+      end
     end
 
     # Represents a 'selfLink' property, which returns the URI of the resource.

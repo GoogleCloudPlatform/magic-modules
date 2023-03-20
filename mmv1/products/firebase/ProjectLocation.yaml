@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -32,9 +32,18 @@ description: |
   return a 409 error.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://firebase.google.com/'
+    'Official Documentation': 'https://firebase.google.com/'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.defaultLocation/finalize'
+import_format: ['projects/{{project}}', '{{project}}']
+skip_delete: true
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "firebase_project_location_basic"
+    min_version: 'beta'
+    primary_resource_id: "basic"
+    test_env_vars:
+      org_id: :ORG_ID
 properties:
   - !ruby/object:Api::Type::String
     name: locationId

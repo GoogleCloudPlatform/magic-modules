@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -43,6 +43,51 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+id_format: "projects/{{project}}/deployments/{{name}}"
+import_format: ["projects/{{project}}/deployments/{{name}}"]
+timeouts: !ruby/object:Api::Timeouts
+      # Very long to support very long deployments
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    Deployment Manager shares similar behavior with Terraform as both
+    products manage GCP resource lifecycle and state. This Terraform
+    resource is intended only to manage a Deployment resource,
+    and attempts to manage the Deployment's resources in Terraform as well
+    will likely result in errors or unexpected behavior as the two tools
+    fight over ownership. We strongly discourage doing so unless you are an
+    experienced user of both tools.
+
+    In addition, due to limitations of the API, Terraform will treat
+    deployments in preview as recreate-only for any update operation other
+    than actually deploying an in-preview deployment (i.e. `preview=true` to
+    `preview=false`).
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "deployment_manager_deployment_basic"
+    primary_resource_id: "deployment"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      deployment_name: "my-deployment"
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "deployment_manager_deployment_imports"
+    primary_resource_id: "deployment"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      deployment_name: "my-deployment"
+    skip_test: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+      # post-create failure: Delete deployment if an invalid deployment was created
+  post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'
+      # Custom diff to force new if 'preview' is true
+  constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'
+  resource_definition: 'templates/terraform/resource_definition/deployment_manager_deployment.go.erb'
+
 parameters:
   # These properties are query parameters given on create/update/delete.
   # They should be tracked and updatable.
@@ -80,6 +125,10 @@ parameters:
       that are not actually instantiated. This allows you to preview a
       deployment. It can be updated to false to actually deploy
       with real resources.
+       ~>**NOTE:** Deployment Manager does not allow update
+      of a deployment in preview (unless updating to preview=false). Thus,
+      Terraform will force-recreate deployments if either preview is updated
+      to true or if other fields are updated while preview is true.
     default_value: false
     url_param_only: true
     # Custom Update
@@ -112,6 +161,7 @@ properties:
     update_id: '1_non-preview'
     update_verb: :PATCH
     update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
+    is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -133,6 +183,7 @@ properties:
     update_id: '1_non-preview'
     update_verb: :PATCH
     update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
@@ -163,7 +214,8 @@ properties:
                 The name of the template to import, as declared in the YAML
                 configuration.
   - !ruby/object:Api::Type::String
-    name: 'id'
+    name: 'deployment_id'
+    api_name: id
     output: true
     description: |
       Unique identifier for deployment. Output only.

@@ -240,6 +240,11 @@ all_product_files.each do |product_name|
                    else
                      File.read(override_path)
                    end
+        unless override_dir.nil?
+          # Replace overrides directory if we are running with a provider override
+          # This allows providers to reference files in their override path
+          res_yaml = res_yaml.gsub('{{override_path}}', override_dir)
+        end
         resource = Api::Compiler.new(res_yaml).run
         resource.validate
         resources.push(resource)

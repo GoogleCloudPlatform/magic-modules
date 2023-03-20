@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Product
 name: SourceRepo
 display_name: Cloud Source Repositories
+legacy_name: 'sourcerepo'
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

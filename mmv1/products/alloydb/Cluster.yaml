@@ -43,6 +43,20 @@
     error: !ruby/object:Api::OpAsync::Error
       path: "error"
       message: "message"
+  import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}",
+    "{{cluster_id}}"]
+  autogen_async: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "alloydb_cluster_basic"
+      primary_resource_id: "default"
+      vars:
+        alloydb_cluster_name: "alloydb-cluster"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "alloydb_cluster_full"
+      primary_resource_id: "full"
+      vars:
+        alloydb_cluster_name: "alloydb-cluster-full"
   parameters:
     - !ruby/object:Api::Type::String
       name: "clusterId"
@@ -76,8 +90,9 @@
       required: true
       description: |
         The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
-
+  
         "projects/{projectNumber}/global/networks/{network_id}".
+      diff_suppress_func: "projectNumberDiffSuppress"
     - !ruby/object:Api::Type::String
       name: "displayName"
       description: |
@@ -92,6 +107,8 @@
       immutable: true
       description: |
         Initial user to setup during cluster creation.
+      custom_flatten: "templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.erb"
+      ignore_read: true
       properties:
         - !ruby/object:Api::Type::String
           name: "user"
@@ -102,20 +119,22 @@
           description: |
             The initial password for the user.
           required: true
+          sensitive: true
     - !ruby/object:Api::Type::NestedObject
       name: "automatedBackupPolicy"
       description: |
         The automated backup policy for this cluster.
-
+  
         If no policy is provided then the default policy will be used. The default policy takes one backup a day, has a backup window of 1 hour, and retains backups for 14 days.
+      default_from_api: true
       properties:
         - !ruby/object:Api::Type::String
           name: "backupWindow"
           description: |
             The length of the time window during which a backup can be taken. If a backup does not succeed within this time window, it will be canceled and considered failed.
-
+  
             The backup window must be at least 5 minutes long. There is no upper bound on the window. If not set, it will default to 1 hour.
-
+  
             A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".          
         - !ruby/object:Api::Type::String
           name: "location"
@@ -129,6 +148,7 @@
           immutable: true
           required: true
           description: "Weekly schedule for the Backup."
+          default_from_api: true
           properties:
             - !ruby/object:Api::Type::Array
               name: "daysOfWeek"
@@ -175,8 +195,8 @@
           name: "timeBasedRetention"
           description: |
             Time-based Backup retention policy.
-          conflicts: 
-            - automated_backup_policy.0.quantity_based_retention  
+          conflicts:
+            - automated_backup_policy.0.quantity_based_retention
           properties:
             - !ruby/object:Api::Type::String
               name: "retentionPeriod"
@@ -185,8 +205,8 @@
                 A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
         - !ruby/object:Api::Type::NestedObject
           name: "quantityBasedRetention"
-          conflicts: 
-            - automated_backup_policy.0.time_based_retention            
+          conflicts:
+            - automated_backup_policy.0.time_based_retention
           description: |
             Quantity-based Backup retention policy to retain recent backups.
           properties:
@@ -216,8 +236,9 @@
           description: "The host and port of the on-premises instance in host:port format"
         - !ruby/object:Api::Type::String
           name: "referenceId"
-          description: "Place holder for the external source identifier(e.g DMS job name) that created the cluster."
+          description: "Place holder for the external source identifier(e.g DMS job\
+            \ name) that created the cluster."
         - !ruby/object:Api::Type::String
           name: "sourceType"
           description: "Type of migration source."
-
+  
