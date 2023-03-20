@@ -153,4 +153,3 @@ data "google_compute_region_instance_template" "default" {
 }
 `, map[string]interface{}{"project": project, "suffix": suffix})
 }
-
