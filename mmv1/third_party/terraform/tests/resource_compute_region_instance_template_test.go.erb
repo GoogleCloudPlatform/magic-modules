@@ -217,13 +217,13 @@ func TestAccComputeRegionInstanceTemplate_basic(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_basic(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_basic(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -247,13 +247,13 @@ func TestAccComputeRegionInstanceTemplate_imageShorthand(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_imageShorthand(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_imageShorthand(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -273,13 +273,13 @@ func TestAccComputeRegionInstanceTemplate_preemptible(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_preemptible(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_preemptible(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -301,13 +301,13 @@ func TestAccComputeRegionInstanceTemplate_IP(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_ip(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_ip(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -328,13 +328,13 @@ func TestAccComputeRegionInstanceTemplate_IPv6(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_ipv6(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_ipv6(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -352,13 +352,13 @@ func TestAccComputeRegionInstanceTemplate_IPv6(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_networkTier(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_networkTier(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_networkTier(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_region_instance_template.foobar",
@@ -375,13 +375,13 @@ func TestAccComputeRegionInstanceTemplate_networkIP(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	networkIP := "10.128.0.2"
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_networkIP(randString(t, 10), networkIP),
+				Config: testAccComputeRegionInstanceTemplate_networkIP(RandString(t, 10), networkIP),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -405,13 +405,13 @@ func TestAccComputeRegionInstanceTemplate_networkIPAddress(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	ipAddress := "10.128.0.2"
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_networkIPAddress(randString(t, 10), ipAddress),
+				Config: testAccComputeRegionInstanceTemplate_networkIPAddress(RandString(t, 10), ipAddress),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -432,13 +432,13 @@ func TestAccComputeRegionInstanceTemplate_networkIPAddress(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_disks(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_disks(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_disks(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_region_instance_template.foobar",
@@ -452,13 +452,13 @@ func TestAccComputeRegionInstanceTemplate_disks(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_disksInvalid(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccComputeRegionInstanceTemplate_disksInvalid(randString(t, 10)),
+				Config:      testAccComputeRegionInstanceTemplate_disksInvalid(RandString(t, 10)),
 				ExpectError: regexp.MustCompile("Cannot use `source`.*"),
 			},
 		},
@@ -468,13 +468,13 @@ func TestAccComputeRegionInstanceTemplate_disksInvalid(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_regionDisks(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_regionDisks(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_regionDisks(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_region_instance_template.foobar",
@@ -489,15 +489,15 @@ func TestAccComputeRegionInstanceTemplate_subnet_auto(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	network := "tf-test-network-" + randString(t, 10)
+	network := "tf-test-network-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_subnet_auto(network, randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_subnet_auto(network, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -518,13 +518,13 @@ func TestAccComputeRegionInstanceTemplate_subnet_custom(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_subnet_custom(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_subnet_custom(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -550,13 +550,13 @@ func TestAccComputeRegionInstanceTemplate_subnet_xpn(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectName := fmt.Sprintf("tf-testxpn-%d", time.Now().Unix())
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_subnet_xpn(org, billingId, projectName, randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_subnet_xpn(org, billingId, projectName, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExistsInProject(
 						t, "google_compute_region_instance_template.foobar", fmt.Sprintf("%s-service", projectName),
@@ -573,13 +573,13 @@ func TestAccComputeRegionInstanceTemplate_metadata_startup_script(t *testing.T) 
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_startup_script(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_startup_script(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -595,13 +595,13 @@ func TestAccComputeRegionInstanceTemplate_primaryAliasIpRange(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_primaryAliasIpRange(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_primaryAliasIpRange(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateHasAliasIpRange(&instanceTemplate, "", "/24"),
@@ -621,13 +621,13 @@ func TestAccComputeRegionInstanceTemplate_secondaryAliasIpRange(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_secondaryAliasIpRange(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_secondaryAliasIpRange(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateHasAliasIpRange(&instanceTemplate, "inst-test-secondary", "/24"),
@@ -647,13 +647,13 @@ func TestAccComputeRegionInstanceTemplate_guestAccelerator(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_guestAccelerator(randString(t, 10), 1),
+				Config: testAccComputeRegionInstanceTemplate_guestAccelerator(RandString(t, 10), 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateHasGuestAccelerator(&instanceTemplate, "nvidia-tesla-k80", 1),
@@ -674,13 +674,13 @@ func TestAccComputeRegionInstanceTemplate_guestAcceleratorSkip(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_guestAccelerator(randString(t, 10), 0),
+				Config: testAccComputeRegionInstanceTemplate_guestAccelerator(RandString(t, 10), 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateLacksGuestAccelerator(&instanceTemplate),
@@ -696,13 +696,13 @@ func TestAccComputeRegionInstanceTemplate_minCpuPlatform(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_minCpuPlatform(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_minCpuPlatform(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateHasMinCpuPlatform(&instanceTemplate, DEFAULT_MIN_CPU_TEST_VALUE),
@@ -723,13 +723,13 @@ func TestAccComputeRegionInstanceTemplate_EncryptKMS(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	kms := BootstrapKMSKey(t)
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_encryptionKMS(randString(t, 10), kms.CryptoKey.Name),
+				Config: testAccComputeRegionInstanceTemplate_encryptionKMS(RandString(t, 10), kms.CryptoKey.Name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 				),
@@ -746,13 +746,13 @@ func TestAccComputeRegionInstanceTemplate_EncryptKMS(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_soleTenantNodeAffinities(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_soleTenantInstanceTemplate(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_soleTenantInstanceTemplate(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_region_instance_template.foobar",
@@ -767,15 +767,15 @@ func TestAccComputeRegionInstanceTemplate_instanceResourcePolicies(t *testing.T)
 	t.Parallel()
 
 	var template compute.InstanceTemplate
-	var policyName = "tf-test-policy-" + randString(t, 10)
+	var policyName = "tf-test-policy-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 				{
-				Config: testAccComputeRegionInstanceTemplate_instanceResourcePolicyCollocated(randString(t, 10), policyName),
+				Config: testAccComputeRegionInstanceTemplate_instanceResourcePolicyCollocated(RandString(t, 10), policyName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &template),
 					testAccCheckComputeRegionInstanceTemplateHasInstanceResourcePolicies(&template, policyName),
@@ -794,11 +794,11 @@ func TestAccComputeRegionInstanceTemplate_reservationAffinities(t *testing.T) {
 	t.Parallel()
 
 	var template compute.InstanceTemplate
-	var templateName = randString(t, 10)
+	var templateName = RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -846,13 +846,13 @@ func TestAccComputeRegionInstanceTemplate_shieldedVmConfig1(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_shieldedVmConfig(randString(t, 10), true, true, true),
+				Config: testAccComputeRegionInstanceTemplate_shieldedVmConfig(RandString(t, 10), true, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateHasShieldedVmConfig(&instanceTemplate, true, true, true),
@@ -872,13 +872,13 @@ func TestAccComputeRegionInstanceTemplate_shieldedVmConfig2(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_shieldedVmConfig(randString(t, 10), true, true, false),
+				Config: testAccComputeRegionInstanceTemplate_shieldedVmConfig(RandString(t, 10), true, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateHasShieldedVmConfig(&instanceTemplate, true, true, false),
@@ -898,13 +898,13 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplateConfidentialInstanceConfig(randString(t, 10), true),
+				Config: testAccComputeRegionInstanceTemplateConfidentialInstanceConfig(RandString(t, 10), true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, true),
@@ -919,13 +919,13 @@ func TestAccComputeRegionInstanceTemplate_AdvancedMachineFeatures(t *testing.T) 
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAcctestAccComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplateAdvancedMachineFeatures(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplateAdvancedMachineFeatures(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 				),
@@ -938,13 +938,13 @@ func TestAccComputeRegionInstanceTemplate_AdvancedMachineFeatures(t *testing.T) 
 func TestAccComputeRegionInstanceTemplate_enableDisplay(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_enableDisplay(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_enableDisplay(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_region_instance_template.foobar",
@@ -959,12 +959,12 @@ func TestAccComputeRegionInstanceTemplate_enableDisplay(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_invalidDiskType(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccComputeRegionInstanceTemplate_invalidDiskType(randString(t, 10)),
+				Config:      testAccComputeRegionInstanceTemplate_invalidDiskType(RandString(t, 10)),
 				ExpectError: regexp.MustCompile("SCRATCH disks must have a disk_type of local-ssd"),
 			},
 		},
@@ -974,12 +974,12 @@ func TestAccComputeRegionInstanceTemplate_invalidDiskType(t *testing.T) {
 func TestAccComputeRegionInstanceTemplate_withScratchDisk(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_withScratchDisk(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_withScratchDisk(RandString(t, 10)),
 			},
 			{
 				ResourceName:            "google_compute_region_instance_template.foobar",
@@ -995,14 +995,14 @@ func TestAccComputeRegionInstanceTemplate_imageResourceTest(t *testing.T) {
 	// Multiple fine-grained resources
 	skipIfVcr(t)
 	t.Parallel()
-	diskName := "tf-test-disk-" + randString(t, 10)
-	computeImage := "tf-test-image-" + randString(t, 10)
+	diskName := "tf-test-disk-" + RandString(t, 10)
+	computeImage := "tf-test-image-" + RandString(t, 10)
 	imageDesc1 := "Some description"
 	imageDesc2 := "Some other description"
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1031,15 +1031,15 @@ func TestAccComputeRegionInstanceTemplate_diskResourcePolicies(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	policyName := "tf-test-policy-" + randString(t, 10)
+	policyName := "tf-test-policy-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_diskResourcePolicies(randString(t, 10), policyName),
+				Config: testAccComputeRegionInstanceTemplate_diskResourcePolicies(RandString(t, 10), policyName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeRegionInstanceTemplateHasDiskResourcePolicy(&instanceTemplate, policyName),
@@ -1058,11 +1058,11 @@ func TestAccComputeRegionInstanceTemplate_nictype_update(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	var instanceTemplateName = fmt.Sprintf("tf-test-%s", randString(t, 10))
+	var instanceTemplateName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1087,11 +1087,11 @@ func TestAccComputeRegionInstanceTemplate_queueCount(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	var instanceTemplateName = fmt.Sprintf("tf-test-%s", randString(t, 10))
+	var instanceTemplateName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1110,13 +1110,13 @@ func TestAccComputeRegionInstanceTemplate_managedEnvoy(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_managedEnvoy(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_managedEnvoy(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -1135,13 +1135,13 @@ func TestAccComputeRegionInstanceTemplate_spot(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_spot(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_spot(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -1169,13 +1169,13 @@ func TestAccComputeRegionInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 	expectedMaxRunDuration.Nanos = 123
 	expectedMaxRunDuration.Seconds = 60
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_spot_maxRunDuration(randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_spot_maxRunDuration(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
@@ -1206,13 +1206,13 @@ func TestAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(t *testing
 	kmsKeyName := GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
 	kmsRingName := GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(kmsRingName, kmsKeyName, randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(kmsRingName, kmsKeyName, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.template", &instanceTemplate),
@@ -1236,13 +1236,13 @@ func TestAccComputeRegionInstanceTemplate_sourceImageEncryptionKey(t *testing.T)
 	kmsKeyName := GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
 	kmsRingName := GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    TestAccProviders,
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionInstanceTemplate_sourceImageEncryptionKey(kmsRingName, kmsKeyName, randString(t, 10)),
+				Config: testAccComputeRegionInstanceTemplate_sourceImageEncryptionKey(kmsRingName, kmsKeyName, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.template", &instanceTemplate),
@@ -1284,7 +1284,7 @@ func testAccCheckComputeRegionInstanceTemplateExists(t *testing.T, n string, ins
 		panic("Attempted to check existence of Instance template that was nil.")
 	}
 
-	return testAccCheckComputeRegionInstanceTemplateExistsInProject(t, n, getTestProjectFromEnv(), instanceTemplate.(*compute.InstanceTemplate))
+	return testAccCheckComputeRegionInstanceTemplateExistsInProject(t, n, GetTestProjectFromEnv(), instanceTemplate.(*compute.InstanceTemplate))
 }
 
 func testAccCheckComputeRegionInstanceTemplateExistsInProject(t *testing.T, n, p string, instanceTemplate *compute.InstanceTemplate) resource.TestCheckFunc {

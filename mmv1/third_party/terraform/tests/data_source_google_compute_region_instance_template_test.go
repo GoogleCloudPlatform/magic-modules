@@ -9,12 +9,12 @@ import (
 func TestAccRegionInstanceTemplateDatasource_name(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRegionInstanceTemplate_name(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccRegionInstanceTemplate_name(GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_region_instance_template.default",
@@ -30,12 +30,12 @@ func TestAccRegionInstanceTemplateDatasource_name(t *testing.T) {
 func TestAccRegionInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRegionInstanceTemplate_filter_mostRecent(getTestProjectFromEnv(), randString(t, 10)),
+				Config: testAccRegionInstanceTemplate_filter_mostRecent(GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					checkDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_region_instance_template.default",
