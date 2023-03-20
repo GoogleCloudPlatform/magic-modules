@@ -1038,7 +1038,27 @@ func TestAccComputeInstanceTemplate_withScratchDisk(t *testing.T) {
 		Providers: TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_withScratchDisk(RandString(t, 10)),
+				Config: testAccComputeInstanceTemplate_with375GbScratchDisk(RandString(t, 10)),
+			},
+			{
+				ResourceName:            "google_compute_instance_template.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name_prefix"},
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceTemplate_with18TbScratchDisk(t *testing.T) {
+	t.Parallel()
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: TestAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_with18TbScratchDisk(RandString(t, 10)),
 			},
 			{
 				ResourceName:            "google_compute_instance_template.foobar",

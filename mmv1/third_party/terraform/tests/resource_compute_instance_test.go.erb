@@ -729,7 +729,7 @@ func TestAccComputeInstance_bootDisk_mode(t *testing.T) {
 	})
 }
 
-func TestAccComputeInstance_scratchDisk(t *testing.T) {
+func TestAccComputeInstance_with375GbScratchDisk(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
@@ -741,7 +741,31 @@ func TestAccComputeInstance_scratchDisk(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_scratchDisk(instanceName),
+				Config: testAccComputeInstance_with375GbScratchDisk(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME", "SCSI"}),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
+func TestAccComputeInstance_with18TbScratchDisk(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_with18TbScratchDisk(instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -4540,7 +4564,7 @@ resource "google_compute_instance" "foobar" {
 `, instance, diskMode)
 }
 
-func testAccComputeInstance_scratchDisk(instance string) string {
+func testAccComputeInstance_with375GbScratchDisk(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -4573,7 +4597,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-func testAccComputeInstance_18TbScratchDisk(instance string) string {
+func testAccComputeInstance_with18TbScratchDisk(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
