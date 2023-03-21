@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'Gateway'
-base_url: 'projects/{{project}}/locations/global/gateways'
-create_url: 'projects/{{project}}/locations/global/gateways?gatewayId={{name}}'
-self_link: 'projects/{{project}}/locations/global/gateways/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/gateways'
+create_url: 'projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
 min_version: beta
 update_verb: :PATCH
 update_mask: true
@@ -47,7 +47,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
-import_format: ['projects/{{project}}/locations/global/gateways/{{name}}']
+import_format: ['projects/{{project}}/locations/{{location}}/gateways/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
@@ -68,10 +68,17 @@ parameters:
     url_param_only: true
     description: |
       Short name of the Gateway resource to be created.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    default_value: 'global'
+    description: |
+      The location of the gateway.
+      The default value is `global`.
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'selfLink'
-    description: |-
+    description: |
       Server-defined URL of this resource.
     output: true
   - !ruby/object:Api::Type::Time
