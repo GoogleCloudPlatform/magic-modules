@@ -4599,7 +4599,7 @@ resource "google_compute_instance" "foobar" {
 
 func testAccComputeInstance_with18TbScratchDisk(instance string) string {
 	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
+data "google_compute_image" "my-image" {
   family  = "debian-11"
   project = "debian-cloud"
 }
