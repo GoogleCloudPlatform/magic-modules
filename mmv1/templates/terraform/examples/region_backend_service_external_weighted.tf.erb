@@ -11,7 +11,7 @@ resource "google_compute_region_health_check" "health_check" {
   name               = "<%= ctx[:vars]['health_check_name'] %>"
   region             = "us-central1"
 
-  tcp_health_check {
+  http_health_check {
     port = 80
   }
 }
