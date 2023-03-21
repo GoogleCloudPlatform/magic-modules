@@ -769,7 +769,7 @@ func TestAccComputeInstance_with18TbScratchDisk(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME", "SCSI"}),
+					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME", "NVME", "NVME", "NVME", "NVME", "NVME"}),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -4606,7 +4606,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "n2-standard-16"   // must be a large n2 to be paired with 18Tb local-ssd
+  machine_type = "n2-standard-64"   // must be a large n2 to be paired with 18Tb local-ssd
   zone         = "us-central1-a"
 
   boot_disk {
@@ -4648,8 +4648,7 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     network = "default"
   }
-}
-`, instance)
+}`, instance)
 }
 
 func testAccComputeInstance_serviceAccount(instance string) string {
