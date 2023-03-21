@@ -173,7 +173,7 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 												"request_uri": resourceComputeSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParamsSchema(
 													`Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation. When specifying this field, the query or fragment part should be excluded.`,
 												),
-												
+
 												"request_query_param": resourceComputeSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParamsSchema(
 													`Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation.  Note that the parameter can be in the query string or in the POST body.`,
 												),
@@ -1159,7 +1159,7 @@ func expandSecurityPolicyAdaptiveProtectionConfig(configured []interface{}) *com
 		<% unless version == 'ga' -%>
 		AutoDeployConfig: expandAutoDeployConfig(data["auto_deploy_config"].([]interface{})),
 		<% end -%>
-		
+
 	}
 }
 
@@ -1255,6 +1255,11 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute
 		<% end -%>
 		BanDurationSec:        int64(data["ban_duration_sec"].(int)),
 		ExceedRedirectOptions: expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})),
+		<% if version == 'ga' -%>
+		ForceSendFields:       []string{"EnforceOnKey", "EnforceOnKeyName"},
+		<% else -%>
+		ForceSendFields:       []string{"EnforceOnKey", "EnforceOnKeyName", "EnforceOnKeyConfigs"},
+		<% end -%>
 	}
 }
 
@@ -1273,7 +1278,7 @@ func expandThreshold(configured []interface{}) *compute.SecurityPolicyRuleRateLi
 <% unless version == 'ga' -%>
 func expandSecurityPolicyEnforceOnKeyConfigs(configured []interface{}) []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig {
 	params := make([]*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig, 0, len(configured))
-	
+
 	for _, raw := range configured {
 		params = append(params, expandSecurityPolicyEnforceOnKeyConfigsFields(raw))
 	}
@@ -1305,7 +1310,7 @@ func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleR
 		"enforce_on_key_name":     conf.EnforceOnKeyName,
 		<% unless version == 'ga' -%>
 		"enforce_on_key_configs": flattenSecurityPolicyEnforceOnKeyConfigs(conf.EnforceOnKeyConfigs),
-		<% end -%> 
+		<% end -%>
 		"ban_duration_sec":        conf.BanDurationSec,
 		"exceed_redirect_options": flattenSecurityPolicyRedirectOptions(conf.ExceedRedirectOptions),
 	}

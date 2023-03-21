@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -17,14 +17,33 @@ description: |
   Workflow program to be executed by Workflows.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Managing Workflows':
-      'https://cloud.google.com/workflows/docs/creating-updating-workflow'
+    'Managing Workflows': 'https://cloud.google.com/workflows/docs/creating-updating-workflow'
   api: 'https://cloud.google.com/workflows/docs/reference/rest/v1/projects.locations.workflows'
 base_url: projects/{{project}}/locations/{{region}}/workflows
 create_url: projects/{{project}}/locations/{{region}}/workflows?workflowId={{name}}
 self_link: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
 update_verb: :PATCH
 update_mask: true
+docs: !ruby/object:Provider::Terraform::Docs
+  optional_properties: |
+    * `name_prefix` - (Optional) Creates a unique name beginning with the
+     specified prefix. If this and name are unspecified, a random value is chosen for the name.
+autogen_async: true
+id_format: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
+exclude_import: true
+schema_version: 1
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "workflow_basic"
+    primary_resource_id: "example"
+    vars:
+      name: "workflow"
+      account_id: "my-account"
+    skip_import_test: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  extra_schema_entry: templates/terraform/extra_schema_entry/workflow.erb
+  encoder: templates/terraform/encoders/workflow.go.erb
+
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -36,10 +55,13 @@ properties:
     name: 'name'
     description: Name of the Workflow.
     immutable: true
+    default_from_api: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       Description of the workflow provided by the user. Must be at most 1000 unicode characters long.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true
@@ -65,6 +87,8 @@ properties:
       account represents the identity of the workflow and determines what permissions the workflow has.
 
       Format: projects/{project}/serviceAccounts/{account}.
+    default_from_api: true
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'sourceContents'
     description: |
