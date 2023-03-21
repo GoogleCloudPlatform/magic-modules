@@ -29,6 +29,9 @@ examples:
     primary_resource_id: 'logging_log_view'
     test_env_vars:
       project: :PROJECT_NAME
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/logging_log_view.go.erb
+  pre_read: templates/terraform/pre_read/logging_log_view.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
