@@ -754,8 +754,8 @@ func TestAccComputeInstance_with375GbScratchDisk(t *testing.T) {
 }
 
 func TestAccComputeInstance_with18TbScratchDisk(t *testing.T) {
-	# Skip this test until the quota for the GitHub presubmit GCP project is increased
-	# to handle the size of the resource this test spins up.
+	// Skip this test until the quota for the GitHub presubmit GCP project is increased
+	// to handle the size of the resource this test spins up.
 	t.Skip()
 	t.Parallel()
 
