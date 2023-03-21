@@ -761,7 +761,7 @@ func TestAccComputeInstance_with18TbScratchDisk(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
