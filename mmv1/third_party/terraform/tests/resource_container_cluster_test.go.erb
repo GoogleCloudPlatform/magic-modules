@@ -2158,7 +2158,7 @@ func TestAccContainerCluster_stackType_withDualStack(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2186,7 +2186,7 @@ func TestAccContainerCluster_stackType_withSingleStack(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2214,7 +2214,7 @@ func TestAccContainerCluster_stackType_withDefaultStack(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -6339,36 +6339,36 @@ resource "google_container_cluster" "with_ip_allocation_policy" {
 func testAccContainerCluster_stackType_withDualStack(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
-	name                    = "%s"
-	auto_create_subnetworks = false
+    name                    = "%s"
+    auto_create_subnetworks = false
 }
 	
-	resource "google_compute_subnetwork" "container_subnetwork" {
-	name    = google_compute_network.container_network.name
-	network = google_compute_network.container_network.name
-	region  = "us-central1"
+    resource "google_compute_subnetwork" "container_subnetwork" {
+    name    = google_compute_network.container_network.name
+    network = google_compute_network.container_network.name
+    region  = "us-central1"
 	
-	ip_cidr_range = "10.2.0.0/16"
-	stack_type = "IPV4_IPV6"
-	ipv6_access_type = "EXTERNAL"
+    ip_cidr_range = "10.2.0.0/16"
+    stack_type = "IPV4_IPV6"
+    ipv6_access_type = "EXTERNAL"
 }
 	
 resource "google_container_cluster" "with_stack_type" {
-	name       = "%s"
-	location   = "us-central1-a"
-	network    = google_compute_network.container_network.name
-	subnetwork = google_compute_subnetwork.container_subnetwork.name
+    name       = "%s"
+    location   = "us-central1-a"
+    network    = google_compute_network.container_network.name
+    subnetwork = google_compute_subnetwork.container_subnetwork.name
 	
-	min_master_version = "1.25"
-	initial_node_count = 1
-	datapath_provider = "ADVANCED_DATAPATH"
-	enable_l4_ilb_subsetting = true
+    min_master_version = "1.25"
+    initial_node_count = 1
+    datapath_provider = "ADVANCED_DATAPATH"
+    enable_l4_ilb_subsetting = true
 	
-	ip_allocation_policy {
-		cluster_ipv4_cidr_block  = "10.0.0.0/16"
-		services_ipv4_cidr_block = "10.1.0.0/16"
-		stack_type = "IPV4_IPV6"
-	}
+    ip_allocation_policy {
+        cluster_ipv4_cidr_block  = "10.0.0.0/16"
+        services_ipv4_cidr_block = "10.1.0.0/16"
+        stack_type = "IPV4_IPV6"
+    }
 }
 `, containerNetName, clusterName)
 }
@@ -6376,33 +6376,33 @@ resource "google_container_cluster" "with_stack_type" {
 func testAccContainerCluster_stackType_withSingleStack(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
-	name                    = "%s"
-	auto_create_subnetworks = false
+    name                    = "%s"
+    auto_create_subnetworks = false
 }
 	
-	resource "google_compute_subnetwork" "container_subnetwork" {
-	name    = google_compute_network.container_network.name
-	network = google_compute_network.container_network.name
-	region  = "us-central1"
+    resource "google_compute_subnetwork" "container_subnetwork" {
+    name    = google_compute_network.container_network.name
+    network = google_compute_network.container_network.name
+    region  = "us-central1"
 	
-	ip_cidr_range = "10.2.0.0/16"
+    ip_cidr_range = "10.2.0.0/16"
 }
 	
 resource "google_container_cluster" "with_stack_type" {
-	name       = "%s"
-	location   = "us-central1-a"
-	network    = google_compute_network.container_network.name
-	subnetwork = google_compute_subnetwork.container_subnetwork.name
+    name       = "%s"
+    location   = "us-central1-a"
+    network    = google_compute_network.container_network.name
+    subnetwork = google_compute_subnetwork.container_subnetwork.name
 	
-	min_master_version = "1.25"
-	initial_node_count = 1
-	enable_l4_ilb_subsetting = true
+    min_master_version = "1.25"
+    initial_node_count = 1
+    enable_l4_ilb_subsetting = true
 	
-	ip_allocation_policy {
-		cluster_ipv4_cidr_block  = "10.0.0.0/16"
-		services_ipv4_cidr_block = "10.1.0.0/16"
-		stack_type = "IPV4"
-	}
+    ip_allocation_policy {
+        cluster_ipv4_cidr_block  = "10.0.0.0/16"
+        services_ipv4_cidr_block = "10.1.0.0/16"
+        stack_type = "IPV4"
+    }
 }
 `, containerNetName, clusterName)
 }
@@ -6410,31 +6410,31 @@ resource "google_container_cluster" "with_stack_type" {
 func testAccContainerCluster_stackType_withDefaultStack(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
-	name                    = "%s"
-	auto_create_subnetworks = false
+    name                    = "%s"
+    auto_create_subnetworks = false
 }
 	
-	resource "google_compute_subnetwork" "container_subnetwork" {
-	name    = google_compute_network.container_network.name
-	network = google_compute_network.container_network.name
-	region  = "us-central1"
+    resource "google_compute_subnetwork" "container_subnetwork" {
+    name    = google_compute_network.container_network.name
+    network = google_compute_network.container_network.name
+    region  = "us-central1"
 	
-	ip_cidr_range = "10.2.0.0/16"
+    ip_cidr_range = "10.2.0.0/16"
 }
 	
 resource "google_container_cluster" "with_stack_type" {
-	name       = "%s"
-	location   = "us-central1-a"
-	network    = google_compute_network.container_network.name
-	subnetwork = google_compute_subnetwork.container_subnetwork.name
+    name       = "%s"
+    location   = "us-central1-a"
+    network    = google_compute_network.container_network.name
+    subnetwork = google_compute_subnetwork.container_subnetwork.name
 	
-	min_master_version = "1.25"
-	initial_node_count = 1
+    min_master_version = "1.25"
+    initial_node_count = 1
 	
-	ip_allocation_policy {
-		cluster_ipv4_cidr_block  = "10.0.0.0/16"
-		services_ipv4_cidr_block = "10.1.0.0/16"
-	}
+    ip_allocation_policy {
+        cluster_ipv4_cidr_block  = "10.0.0.0/16"
+        services_ipv4_cidr_block = "10.1.0.0/16"
+    }
 }
 `, containerNetName, clusterName)
 }

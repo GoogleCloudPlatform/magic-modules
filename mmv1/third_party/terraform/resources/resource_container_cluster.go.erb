@@ -1462,6 +1462,7 @@ func ResourceContainerCluster() *schema.Resource {
 						"stack_type": {
 							Type:             schema.TypeString,
 							Optional:    	  true,
+							ForceNew:         true,
 							Default:          "IPV4",
 							ValidateFunc:     validation.StringInSlice([]string{"IPV4", "IPV4_IPV6"}, false),
 							Description: 	  `The IP Stack type of the cluster. Choose between IPV4 and IPV4_IPV6. Default type is IPV4 Only if not set`,
@@ -2873,6 +2874,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		policy := d.Get("ip_allocation_policy").([]interface{})
 		config := policy[0].(map[string]interface{})
 		stackType := config["stack_type"].(string)
+		log.Printf("[INFO] stack type in the configuration is %s\n", stackType)
 		
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -5187,7 +5189,6 @@ func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, con
 		}
 
 	p := c.IpAllocationPolicy
-	log.Printf("[INFO] stack type in the configuration is %s\n", p.StackType)
 
 	return []map[string]interface{}{
 		{
