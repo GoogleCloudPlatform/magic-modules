@@ -4606,7 +4606,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "n2-standard-64"   // must be a large n2 to be paired with 18Tb local-ssd
+  machine_type = "n2-standard-16"   // must be a large n2 to be paired with 18Tb local-ssd
   zone         = "us-central1-a"
 
   boot_disk {
