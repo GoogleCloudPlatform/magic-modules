@@ -321,7 +321,7 @@ Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 * `enable_batching` - (Optional) Defaults to true. If false, disables global
 batching and each request is sent normally.
 
-## User Agent Extension
+---
 
 You can extend the user agent header for each request made by the provider by setting the `GOOGLE_TERRAFORM_USERAGENT_EXTENSION` environment variable. This can be helpful for tracking (e.g. compliance through [audit logs](https://cloud.google.com/logging/docs/audit)) or debugging purposes.
 
