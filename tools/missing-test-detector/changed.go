@@ -84,6 +84,6 @@ func changedFieldsUnder(oldFieldSchema, newFieldSchema *schema.Schema) any {
 	if oldFieldSchema.Type != newFieldSchema.Type {
 		return &Field{Changed: true}
 	}
-	// TODO(thomasrodgers) handle the case where something under Elem changed but Elem is not a schema.Resource
+	// TODO(trodge) handle the case where something under Elem changed but Elem is not a schema.Resource
 	return nil
 }
