@@ -335,7 +335,7 @@ properties:
                         description: |
                           Describes a header to add.
                         min_size: 1
-                        max_size: 5
+                        max_size: 25
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -361,7 +361,7 @@ properties:
 
                           Response headers are only sent to the client, and do not have an effect on the cache serving the response.
                         min_size: 1
-                        max_size: 5
+                        max_size: 25
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -385,7 +385,7 @@ properties:
                         description: |
                           A list of header names for headers that need to be removed from the request prior to forwarding the request to the origin.
                         min_size: 1
-                        max_size: 10
+                        max_size: 25
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -399,7 +399,7 @@ properties:
                         description: |
                           A list of header names for headers that need to be removed from the request prior to forwarding the request to the origin.
                         min_size: 1
-                        max_size: 10
+                        max_size: 25
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
                             - !ruby/object:Api::Type::String
@@ -780,13 +780,13 @@ properties:
                             name: allowHeaders
                             description: |
                               Specifies the content for the Access-Control-Allow-Headers response header.
-                            max_size: 5
+                            max_size: 25
                             item_type: Api::Type::String
                           - !ruby/object:Api::Type::Array
                             name: exposeHeaders
                             description: |
                               Specifies the content for the Access-Control-Allow-Headers response header.
-                            max_size: 5
+                            max_size: 25
                             item_type: Api::Type::String
                           - !ruby/object:Api::Type::Boolean
                             name: 'disabled'

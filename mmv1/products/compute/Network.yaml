@@ -80,7 +80,7 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'gateway_ipv4'
-    # We override this in api.yaml so that the name is more aesthetic
+    # We override this here so that the name is more aesthetic
     api_name: 'gatewayIPv4'
     output: true
     description: |
