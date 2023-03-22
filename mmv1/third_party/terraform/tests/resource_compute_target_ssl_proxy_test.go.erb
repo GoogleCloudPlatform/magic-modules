@@ -55,7 +55,7 @@ func TestAccComputeTargetSslProxy_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeTargetSslProxyExists(
 						t, "google_compute_target_ssl_proxy.with_certificate_map", &proxy),
-					testAccCheckComputeTargetSslProxyHasCertificateMap(t, "certificatemap-test-1-"+resourceSuffix, &proxy),
+					testAccCheckComputeTargetSslProxyHasCertificateMap(t, "tf-test-certmap-1-"+resourceSuffix, &proxy),
 				),
 			},
 			{
@@ -63,7 +63,7 @@ func TestAccComputeTargetSslProxy_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeTargetSslProxyExists(
 						t, "google_compute_target_ssl_proxy.with_certificate_map", &proxy),
-					testAccCheckComputeTargetSslProxyHasCertificateMap(t, "certificatemap-test-2-"+resourceSuffix, &proxy),
+					testAccCheckComputeTargetSslProxyHasCertificateMap(t, "tf-test-certmap-2-"+resourceSuffix, &proxy),
 				),
 			},
 		},

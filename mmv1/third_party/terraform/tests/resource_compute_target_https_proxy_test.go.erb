@@ -36,7 +36,7 @@ func TestAccComputeTargetHttpsProxy_update(t *testing.T) {
 					testAccCheckComputeTargetHttpsProxyExists(
 						t, "google_compute_target_https_proxy.foobar", &proxy),
 					testAccComputeTargetHttpsProxyDescription("Resource created for Terraform acceptance testing", &proxy),
-					testAccComputeTargetHttpsProxyHasSslCertificate(t, "httpsproxy-test-cert1-"+resourceSuffix, &proxy),
+					testAccComputeTargetHttpsProxyHasSslCertificate(t, "tf-test-httpsproxy-cert1-"+resourceSuffix, &proxy),
 				),
 			},
 
@@ -46,8 +46,8 @@ func TestAccComputeTargetHttpsProxy_update(t *testing.T) {
 					testAccCheckComputeTargetHttpsProxyExists(
 						t, "google_compute_target_https_proxy.foobar", &proxy),
 					testAccComputeTargetHttpsProxyDescription("Resource created for Terraform acceptance testing", &proxy),
-					testAccComputeTargetHttpsProxyHasSslCertificate(t, "httpsproxy-test-cert1-"+resourceSuffix, &proxy),
-					testAccComputeTargetHttpsProxyHasSslCertificate(t, "httpsproxy-test-cert2-"+resourceSuffix, &proxy),
+					testAccComputeTargetHttpsProxyHasSslCertificate(t, "tf-test-httpsproxy-cert1-"+resourceSuffix, &proxy),
+					testAccComputeTargetHttpsProxyHasSslCertificate(t, "tf-test-httpsproxy-cert2-"+resourceSuffix, &proxy),
 				),
 			},
 		},
@@ -71,7 +71,7 @@ func TestAccComputeTargetHttpsProxy_certificateMap(t *testing.T) {
                     testAccCheckComputeTargetHttpsProxyExists(
                         t, "google_compute_target_https_proxy.foobar", &proxy),
                     testAccComputeTargetHttpsProxyDescription("Resource created for Terraform acceptance testing", &proxy),
-                    testAccComputeTargetHttpsProxyHasCertificateMap(t, "certificatemap-test-"+resourceSuffix, &proxy),
+                    testAccComputeTargetHttpsProxyHasCertificateMap(t, "tf-test-certmap-"+resourceSuffix, &proxy),
                 ),
             },
         },
