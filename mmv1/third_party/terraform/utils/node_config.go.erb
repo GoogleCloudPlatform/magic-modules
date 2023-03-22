@@ -192,7 +192,7 @@ func schemaNodeConfig() *schema.Schema {
 								Required:     true,
 								ForceNew:     true,
 								ValidateFunc: validation.IntAtLeast(0),
-								Description:  `Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size.`,
+								Description:  `Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD must be 375 or 3000 GB in size, and all local SSDs must share the same size.`,
 							},
 						},
 					},
