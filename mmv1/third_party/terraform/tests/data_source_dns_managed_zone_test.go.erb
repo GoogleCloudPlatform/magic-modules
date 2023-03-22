@@ -22,6 +22,7 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",
 					map[string]struct{}{
+						"cloud_logging_config.#".      {},
 						"dnssec_config.#":             {},
 						"private_visibility_config.#": {},
 						"peering_config.#":            {},
