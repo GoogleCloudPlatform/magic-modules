@@ -55,6 +55,13 @@ examples:
       network_name: "vpc-network"
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: "network_custom_firewall_enforcement_order"
+    primary_resource_id: "vpc_network"
+    vars:
+      network_name: "vpc-network"
+    test_env_vars:
+      project: :PROJECT_NAME
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'delete_default_routes_on_create'
