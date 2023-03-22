@@ -68,7 +68,8 @@ func untestedFields(fieldCoverage ResourceChanges, path []string) []string {
 	for fieldName, coverage := range fieldCoverage {
 		if field, ok := coverage.(*Field); ok {
 			if !field.Tested {
-				fields = append(fields, strings.Join(append(path, fieldName), "."))
+				backtickedField := fmt.Sprintf("`%s`", strings.Join(append(path, fieldName), "."))
+				fields = append(fields, backtickedField)
 			}
 		} else if objectCoverage, ok := coverage.(ResourceChanges); ok {
 			fields = append(fields, untestedFields(objectCoverage, append(path, fieldName))...)

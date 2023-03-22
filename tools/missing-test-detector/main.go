@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 
 	"github.com/golang/glog"
 )
@@ -23,11 +24,15 @@ func main() {
 	if err != nil {
 		glog.Errorf("error detecting missing tests: %v", err)
 	}
-	for resourceName, missingTestInfo := range missingTests {
-		fmt.Printf("Resource %s changed\n", resourceName)
-		glog.Infof("Tests parsed: %v", missingTestInfo.Tests)
-		if len(missingTestInfo.UntestedFields) > 0 {
-			fmt.Printf("Untested fields: %v\n", missingTestInfo.UntestedFields)
+	if len(missingTests) > 0 {
+		fmt.Println("## Missing test report\nYour PR includes resource fields which are not covered by any test.")
+		for resourceName, missingTestInfo := range missingTests {
+			fmt.Printf("\nResource: `%s` (%d total tests)\n", resourceName, len(missingTestInfo.Tests))
+			glog.Infof("%s tests parsed: %v", resourceName, missingTestInfo.Tests)
+			if len(missingTestInfo.UntestedFields) > 0 {
+				fmt.Printf("Untested fields: %s\n", strings.Join(missingTestInfo.UntestedFields, ", "))
+			}
 		}
+		fmt.Println("\nPlease add acceptance tests which include these fields.")
 	}
 }

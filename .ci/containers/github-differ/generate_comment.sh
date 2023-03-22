@@ -174,15 +174,14 @@ if [ -n "$BREAKINGCHANGES" ]; then
   fi
 fi
 
-if [ -n "$MISSINGTESTS" ]; then
-  MESSAGE="${MESSAGE}${MISSINGTESTS}${NEWLINE}${NEWLINE}"
-fi
-
 
 if [ -z "$DIFFS" ]; then
   MESSAGE="${MESSAGE}## Diff report ${NEWLINE}Your PR hasn't generated any diffs, but I'll let you know if a future commit does."
 else
   MESSAGE="${MESSAGE}## Diff report ${NEWLINE}Your PR generated some diffs in downstreams - here they are.${NEWLINE}${DIFFS}"
+  if [ -n "$MISSINGTESTS" ]; then
+    MESSAGE="${MESSAGE}${NEWLINE}${MISSINGTESTS}${NEWLINE}"
+  fi
 fi
 
 
