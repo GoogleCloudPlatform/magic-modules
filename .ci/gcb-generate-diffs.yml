@@ -110,9 +110,64 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      args:
+          - 'head'
+          - 'tf-oics'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      args:
+          - 'base'
+          - 'tf-oics'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/terraform-tester'
+      id: tpgb-test
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tpgb-head", "tpgb-base"]
+      args:
+          - 'beta'
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - GoogleCloudPlatform/magic-modules
+          - "15"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/terraform-tester'
+      id: tpg-test
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tpg-head", "tpg-base"]
+      args:
+          - 'ga'
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - GoogleCloudPlatform/magic-modules
+          - "16"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
+      id: gcb-tpg-vcr-test
+      secretEnv: ["GITHUB_TOKEN", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY"]
+      waitFor: ["diff"]
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "17"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tfv-head
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged", "tpg-head"]
+      waitFor: ["merged", "tpg-test"]
       args:
           - 'head'
           - 'terraform-validator'
@@ -122,29 +177,11 @@ steps:
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tfv-base
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged", "tpg-base"]
+      waitFor: ["merged", "tpg-test"]
       args:
           - 'base'
           - 'terraform-validator'
           - 'ga'
-          - $_PR_NUMBER
-
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
-      args:
-          - 'head'
-          - 'tf-oics'
-          - 'beta'
-          - $_PR_NUMBER
-
-    - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
-      args:
-          - 'base'
-          - 'tf-oics'
-          - 'beta'
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/github-differ'
@@ -157,7 +194,7 @@ steps:
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
       args:
-          - $_PR_NUMBER
+          - $_PR_NUMBER      
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester'
       id: tfv-test
@@ -173,7 +210,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "18"  # Build step
+          - "21"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.12.31
@@ -190,7 +227,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "19"  # Build step
+          - "22"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.13.7
@@ -207,45 +244,8 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "20"  # Build step
-
-    - name: 'gcr.io/graphite-docker-images/terraform-tester'
-      id: tpgb-test
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tpgb-head", "tpgb-base"]
-      args:
-          - 'beta'
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - GoogleCloudPlatform/magic-modules
-          - "21"  # Build step
-
-    - name: 'gcr.io/graphite-docker-images/terraform-tester'
-      id: tpg-test
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tpg-head", "tpg-base"]
-      args:
-          - 'ga'
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - GoogleCloudPlatform/magic-modules
-          - "22"  # Build step
-
-    - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
-      id: gcb-tpg-vcr-test
-      secretEnv: ["GITHUB_TOKEN", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY"]
-      waitFor: ["diff"]
-      args:
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
           - "23"  # Build step
-
+    
 # Long timeout to enable waiting on VCR test
 timeout: 20000s
 options:
