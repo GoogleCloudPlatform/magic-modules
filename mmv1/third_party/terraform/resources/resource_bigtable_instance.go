@@ -48,7 +48,7 @@ func ResourceBigtableInstance() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				Description: `A block of cluster configuration options. This can be specified at least once.`,
+				Description: `Changed. A block of cluster configuration options. This can be specified at least once.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cluster_id": {
