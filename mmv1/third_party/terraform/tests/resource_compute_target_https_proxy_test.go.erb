@@ -333,7 +333,7 @@ resource "google_certificate_manager_certificate" "certificate" {
 }
 
 resource "google_certificate_manager_dns_authorization" "instance" {
-  name   = "dnsauthorization-test-%s"
+  name   = "tf-test-dnsauthorization-%s"
   domain = "mysite.com"
 }
 
