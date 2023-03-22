@@ -50,6 +50,10 @@
 # Quotas that will need to be adjusted to support all tests:
 #   - Project quota for the new service account
 #   - Project quota for the billing account
+#   - Compute Networks quota in us-central1
+#   - CPUS quota in us-central1
+#   - Filestore Basic SSD quota in us-central1
+#   - Compute Disk IOPS quota  in us-central1
 #   - AlloyDB cluster quota in us-central1
 #   - Cloud Workstation cluster quota in us-central1
 #
