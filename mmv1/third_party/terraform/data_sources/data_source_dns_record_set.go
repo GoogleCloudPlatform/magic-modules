@@ -138,8 +138,8 @@ func (d *GoogleDnsRecordSetDataSource) Read(ctx context.Context, req datasource.
 
 	data.Type = types.StringValue(clientResp.Rrsets[0].Type)
 	data.Ttl = types.Int64Value(clientResp.Rrsets[0].Ttl)
-	data.Rrdatas, diags = types.ListValueFrom(ctx, types.StringType, clientResp.Rrsets[0].Rrdatas)
-	resp.Diagnostics.Append(diags...)
+	data.Rrdatas, *diags = types.ListValueFrom(ctx, types.StringType, clientResp.Rrsets[0].Rrdatas)
+	resp.Diagnostics.Append(*diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
