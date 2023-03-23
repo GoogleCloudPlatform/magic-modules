@@ -163,8 +163,8 @@ func (d *GoogleDnsManagedZoneDataSource) Read(ctx context.Context, req datasourc
 	data.Description = types.StringValue(clientResp.Description)
 	data.ManagedZoneId = types.Int64Value(int64(clientResp.Id))
 	data.Visibility = types.StringValue(clientResp.Visibility)
-	data.NameServers, diags = types.ListValueFrom(ctx, types.StringType, clientResp.NameServers)
-	resp.Diagnostics.Append(diags...)
+	data.NameServers, *diags = types.ListValueFrom(ctx, types.StringType, clientResp.NameServers)
+	resp.Diagnostics.Append(*diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
