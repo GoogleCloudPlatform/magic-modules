@@ -62,7 +62,7 @@ func ConfigureDCLProvider(provider *schema.Provider) {
 {{- end}}
 }
 
-func HandleDCLProviderDefaults(d *schema.ResourceData) {
+func HandleDCLCustomEndpointDefaults(d *schema.ResourceData) {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
 	if d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey) == "" {
@@ -75,7 +75,7 @@ func HandleDCLProviderDefaults(d *schema.ResourceData) {
 }
 
 // plugin-framework provider set-up
-func configureDCLFrameworkProvider(frameworkSchema *framework_schema.Schema) {
+func configureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_schema.Schema) {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
 	frameworkSchema.Attributes["{{$pkg.BasePathIdentifier}}_custom_endpoint"] = framework_schema.StringAttribute{

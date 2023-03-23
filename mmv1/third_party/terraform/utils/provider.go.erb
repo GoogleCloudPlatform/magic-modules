@@ -530,7 +530,7 @@ end     # products.each do
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
 	HandleSDKDefaults(d)
-	HandleDCLProviderDefaults(d)
+	HandleDCLCustomEndpointDefaults(d)
 
 	config := Config{
 		Project:             d.Get("project").(string),

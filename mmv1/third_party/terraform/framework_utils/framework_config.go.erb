@@ -27,9 +27,9 @@ import (
 
 // Provider methods
 
-// ConfigureWithData handles the bulk of configuring the provider
+// LoadAndValidateFramework handles the bulk of configuring the provider
 // it is pulled out so that we can manually call this from our testing provider as well
-func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data ProviderModel, tfVersion string, diags *diag.Diagnostics) {
+func (p *frameworkProvider) LoadAndValidateFramework(ctx context.Context, data ProviderModel, tfVersion string, diags *diag.Diagnostics) {
 	// Set defaults if needed
 	p.HandleDefaults(ctx, &data, diags)
 	if diags.HasError() {
@@ -479,7 +479,7 @@ func (p *frameworkProvider) SetupGrpcLogging() {
 }
 
 func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data ProviderModel, diags *diag.Diagnostics) {
-	// getCurrUserEmail doesn't pass an error back from logGoogleIdentities, so we want
+	// GetCurrentUserEmailFramework doesn't pass an error back from logGoogleIdentities, so we want
 	// a separate diagnostics here
 	var d diag.Diagnostics
 
@@ -492,7 +492,7 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 
 		p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
 
-		email := getCurrUserEmail(p, p.userAgent, &d)
+		email := GetCurrentUserEmailFramework(p, p.userAgent, &d)
 		if d.HasError() {
 			tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 		}
@@ -508,7 +508,7 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 	}
 
 	p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
-	email := getCurrUserEmail(p, p.userAgent, &d)
+	email := GetCurrentUserEmailFramework(p, p.userAgent, &d)
 	if d.HasError() {
 		tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
 	}

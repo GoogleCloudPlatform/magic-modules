@@ -427,7 +427,7 @@ func configureApiClient(ctx context.Context, p *frameworkProvider, diags *fwDiag
 	if diags.HasError() {
 		return
 	}
-	p.ConfigureWithData(ctx, data, "test", diags)
+	p.LoadAndValidateFramework(ctx, data, "test", diags)
 }
 
 // GetSDKProvider gets the SDK provider with an overwritten configure function to be called by MuxedProviders

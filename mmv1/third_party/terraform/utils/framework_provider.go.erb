@@ -236,7 +236,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
         },
     }
 
-    configureDCLFrameworkProvider(&resp.Schema)
+    configureDCLCustomEndpointAttributesFramework(&resp.Schema)
 }
 
 // Configure prepares an API client for data sources and resources.
@@ -250,7 +250,7 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
     }
 
     // Configuration values are now available.
-    p.ConfigureWithData(ctx, data, req.TerraformVersion, &resp.Diagnostics)
+    p.LoadAndValidateFramework(ctx, data, req.TerraformVersion, &resp.Diagnostics)
     if resp.Diagnostics.HasError() {
         return
     }
