@@ -20,7 +20,7 @@ var (
 	trustedContributors = []string{"NickElliot"}
 
 	// This is for reviewers who are "on vacation" will not receive new review assignments but will still receive re-requests for assigned PRs.
-	vacationList = []string{"zli82016"}
+	onVacationReviewers = []string{"zli82016"}
 )
 
 // Check if a user is team member to not request a random reviewer
@@ -59,10 +59,9 @@ func isOrgMember(author, org, GITHUB_TOKEN string) bool {
 	return res != 404
 }
 
-func getAvailableReviewers()
-
 func getRandomReviewer() string {
+	availableReviewers := removes(reviewerRotation, onVacationReviewers)
 	rand.Seed(time.Now().Unix())
-	reviewer := reviewerRotation[rand.Intn(len(reviewerRotation))]
-	return reviewer, nil
+	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
+	return reviewer
 }
