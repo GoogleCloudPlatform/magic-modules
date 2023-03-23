@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -34,6 +35,7 @@ func (p *frameworkProvider) NewDnsClient(userAgent string, diags *diag.Diagnosti
 	return clientDns
 }
 
+<% unless version == 'ga' -%>
 func (p *frameworkProvider) NewFirebaseClient(userAgent string, diags *diag.Diagnostics) *firebase.Service {
 	firebaseClientBasePath := RemoveBasePathVersion(p.FirebaseBasePath)
 	firebaseClientBasePath = strings.ReplaceAll(firebaseClientBasePath, "/firebase/", "")
@@ -48,3 +50,4 @@ func (p *frameworkProvider) NewFirebaseClient(userAgent string, diags *diag.Diag
 
 	return clientFirebase
 }
+<% end -%>
