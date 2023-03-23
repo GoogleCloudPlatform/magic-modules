@@ -136,7 +136,7 @@ func (d *GoogleDnsKeysDataSource) Configure(ctx context.Context, req datasource.
 func (d *GoogleDnsKeysDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleDnsKeysModel
 	var metaData *ProviderMetaModel
-	var diags *diag.Diagnostics
+	var diags diag.Diagnostics
 
 	// Read Provider meta into the meta model
 	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
@@ -182,15 +182,15 @@ func (d *GoogleDnsKeysDataSource) Read(ctx context.Context, req datasource.ReadR
 	}
 
 	zskObjType := types.ObjectType{}.WithAttributeTypes(getDnsKeyAttrs("zoneSigning"))
-	data.ZoneSigningKeys, *diags = types.ListValueFrom(ctx, zskObjType, zoneSigningKeys)
-	resp.Diagnostics.Append(*diags...)
+	data.ZoneSigningKeys, diags = types.ListValueFrom(ctx, zskObjType, zoneSigningKeys)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	kskObjType := types.ObjectType{}.WithAttributeTypes(getDnsKeyAttrs("keySigning"))
-	data.KeySigningKeys, *diags = types.ListValueFrom(ctx, kskObjType, keySigningKeys)
-	resp.Diagnostics.Append(*diags...)
+	data.KeySigningKeys, diags = types.ListValueFrom(ctx, kskObjType, keySigningKeys)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}

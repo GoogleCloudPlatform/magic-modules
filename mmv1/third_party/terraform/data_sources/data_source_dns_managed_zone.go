@@ -127,7 +127,7 @@ func (d *GoogleDnsManagedZoneDataSource) Configure(ctx context.Context, req data
 func (d *GoogleDnsManagedZoneDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleDnsManagedZoneModel
 	var metaData *ProviderMetaModel
-	var diags *diag.Diagnostics
+	var diags diag.Diagnostics
 
 	// Read Provider meta into the meta model
 	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
@@ -163,8 +163,8 @@ func (d *GoogleDnsManagedZoneDataSource) Read(ctx context.Context, req datasourc
 	data.Description = types.StringValue(clientResp.Description)
 	data.ManagedZoneId = types.Int64Value(int64(clientResp.Id))
 	data.Visibility = types.StringValue(clientResp.Visibility)
-	data.NameServers, *diags = types.ListValueFrom(ctx, types.StringType, clientResp.NameServers)
-	resp.Diagnostics.Append(*diags...)
+	data.NameServers, diags = types.ListValueFrom(ctx, types.StringType, clientResp.NameServers)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
