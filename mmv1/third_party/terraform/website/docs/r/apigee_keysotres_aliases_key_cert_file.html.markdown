@@ -150,6 +150,6 @@ This resource provides the following
 KeysotresAliasesKeyCertFile can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_apigee_keysotres_aliases_key_cert_file.default organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases&format=keycertfile?alias{{alias}}/{{name}}
-$ terraform import google_apigee_keysotres_aliases_key_cert_file.default {{org_id}}/{{environment}}/{{keystore}}/{{alias}}/{{name}}
+$ terraform import google_apigee_keysotres_aliases_key_cert_file.default organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}
+$ terraform import google_apigee_keysotres_aliases_key_cert_file.default {{org_id}}/{{environment}}/{{keystore}}/{{alias}}
 ```
