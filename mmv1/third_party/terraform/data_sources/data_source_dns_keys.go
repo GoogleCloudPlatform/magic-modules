@@ -136,7 +136,7 @@ func (d *GoogleDnsKeysDataSource) Configure(ctx context.Context, req datasource.
 func (d *GoogleDnsKeysDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleDnsKeysModel
 	var metaData *ProviderMetaModel
-	var diags diag.Diagnostics
+	var diags *diag.Diagnostics
 
 	// Read Provider meta into the meta model
 	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
