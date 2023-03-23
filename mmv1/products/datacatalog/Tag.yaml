@@ -19,6 +19,7 @@ update_url: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 delete_url: '{{name}}'
+read_query_params: '?pageSize=1000'
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys:
     - tags
