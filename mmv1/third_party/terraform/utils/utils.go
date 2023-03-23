@@ -613,7 +613,7 @@ func MultiEnvDefault(ks []string, dv interface{}) interface{} {
 }
 
 func frameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
-	var diags *diag.Diagnostics
+	var diags diag.Diagnostics
 	for _, e := range fwD.Errors() {
 		diags = append(diags, diag.Diagnostic{
 			Detail:   e.Detail(),
@@ -629,5 +629,5 @@ func frameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
 		})
 	}
 
-	return diags
+	return &diags
 }

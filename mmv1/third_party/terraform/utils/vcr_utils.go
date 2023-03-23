@@ -466,7 +466,7 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 	config := c.(*Config)
 	config.PollInterval, config.Client.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval)
 	if fwD.HasError() {
-		diags = append(diags, frameworkDiagsToSdkDiags(fwD)...)
+		diags = append(diags, *frameworkDiagsToSdkDiags(fwD)...)
 		return nil, diags
 	}
 
