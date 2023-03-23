@@ -18,8 +18,13 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: ProviderVersion450(),
-				Config:            testAccDataSourceDnsManagedZone_basic(RandString(t, 10)),
+				ExternalProviders: map[string]resource.ExternalProvider{
+					"google": {
+						VersionConstraint: "4.58.0",
+						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
+					},
+				},
+				Config: testAccDataSourceDnsManagedZone_basic(RandString(t, 10)),
 				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",

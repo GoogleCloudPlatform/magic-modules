@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -20,8 +21,13 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: ProviderVersion450(),
-				Config:            testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
+				ExternalProviders: map[string]resource.ExternalProvider{
+					"google": {
+						VersionConstraint: "4.58.0",
+						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
+					},
+				},
+				Config: testAccDataSourceDNSKeysConfig(dnsZoneName, "on"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "1"),
@@ -62,7 +68,12 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: ProviderVersion450(),
+				ExternalProviders: map[string]resource.ExternalProvider{
+					"google": {
+						VersionConstraint: "4.58.0",
+						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
+					},
+				},
 				Config:            testAccDataSourceDNSKeysConfig(dnsZoneName, "off"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "0"),
