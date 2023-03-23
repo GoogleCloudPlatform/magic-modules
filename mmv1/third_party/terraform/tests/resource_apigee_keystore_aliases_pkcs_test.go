@@ -107,7 +107,7 @@ resource "google_apigee_env_keystore" "apigee_environment_keystore_alias" {
 }
 
 resource "google_apigee_keystore_aliases_pkcs" "apigee_environment_keystore_aliases_pkcs" {
-  environment 			= google_apigee_environment.apigee_environment_keystore_alias.name
+  environment 			= google_apigee_environment.apigee_environment_keystore.name
   org_id				= google_apigee_organization.apigee_org.name
   keystore				= google_apigee_env_keystore.apigee_environment_keystore_alias.name
   alias                 = "tf-test%{random_suffix}"
