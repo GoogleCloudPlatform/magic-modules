@@ -35,7 +35,7 @@ func isTeamReviewer(reviewer string) bool {
 // Check if a user is safe to run tests automatically
 func isTrustedUser(author, GITHUB_TOKEN string) bool {
 	if isTeamMember(author) {
-		fmt.Println("User is on the list")
+		fmt.Println("User is a team member")
 		return true
 	}
 
@@ -61,7 +61,7 @@ func isOrgMember(author, org, GITHUB_TOKEN string) bool {
 
 func getRandomReviewer() string {
 	availableReviewers := removes(reviewerRotation, onVacationReviewers)
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
 	return reviewer
 }

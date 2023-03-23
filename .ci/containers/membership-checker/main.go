@@ -17,7 +17,7 @@ func main() {
 	}
 
 	target := os.Args[1]
-	fmt.Println("PR Number: ", target)
+	fmt.Println("Trigger Target: ", target)
 
 	prNumber := os.Args[2]
 	fmt.Println("PR Number: ", prNumber)
