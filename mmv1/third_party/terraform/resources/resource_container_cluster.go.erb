@@ -1979,9 +1979,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 	clusterName := d.Get("name").(string)
 
-	ipAllocationBlock, err := expandIPAllocationPolicy(
-		d.Get("ip_allocation_policy"), d.Get("networking_mode").(string), d.Get("datapath_provider").(string), 
-		d.Get("private_ipv6_google_access").(string), d.Get("enable_l4_ilb_subsetting").(bool))
+	ipAllocationBlock, err := expandIPAllocationPolicy(d.Get("ip_allocation_policy"), d.Get("networking_mode").(string))
 	if err != nil {
 		return err
 	}
@@ -2867,28 +2865,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s Private IPv6 Google Access has been updated", d.Id())
-	}
-
-	if d.HasChange("ip_allocation_policy") {
-		// Stack type change is not supported in GKE at the moment
-		policy := d.Get("ip_allocation_policy").([]interface{})
-		config := policy[0].(map[string]interface{})
-		stackType := config["stack_type"].(string)
-		log.Printf("[INFO] stack type in the configuration is %s\n", stackType)
-		
-		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
-				DesiredStackType: stackType,
-			},
-		}
-		updateF:= updateFunc(req, "updating Cluster stack type")
-
-		// Call update serially.
-		if err := lockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s stack type has been updated to %s", d.Id(), stackType)
 	}
 
 	if d.HasChange("enable_l4_ilb_subsetting") {
@@ -3996,9 +3972,7 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 	return ac
 }
 
-func expandIPAllocationPolicy(
-	configured interface{}, networkingMode string, datapathProvider string, 
-	privateIpv6GoogleAccess string, enableL4ilbSubnetting bool) (*container.IPAllocationPolicy, error) {
+func expandIPAllocationPolicy(configured interface{}, networkingMode string) (*container.IPAllocationPolicy, error) {
 		
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -4015,18 +3989,6 @@ func expandIPAllocationPolicy(
 
 	config := l[0].(map[string]interface{})
 	stackType := config["stack_type"].(string)
-
-	if stackType == "IPV4_IPV6" {
-		if datapathProvider != "ADVANCED_DATAPATH" {
-			return nil, fmt.Errorf("Dual-stack networking is only available for VPC-native clusters with GKE DataplaneV2 enabled.")
-		}
-		if privateIpv6GoogleAccess == "PRIVATE_IPV6_GOOGLE_ACCESS_TO_GOOGLE" ||  privateIpv6GoogleAccess == "PRIVATE_IPV6_GOOGLE_ACCESS_BIDIRECTIONAL" {
-			return nil, fmt.Errorf("Dual-stack clusters doesn't support Private Google Access over IPv6.")
-		}
-		if !enableL4ilbSubnetting {
-			return nil, fmt.Errorf("For dual-stack clusters, GKE will enable L4 ILB Subnetting automatically. Enable L4 ILB Subnetting to avoid drift.")
-		}
-	}
 
 	return &container.IPAllocationPolicy{
 		UseIpAliases:          networkingMode == "VPC_NATIVE" || networkingMode == "",

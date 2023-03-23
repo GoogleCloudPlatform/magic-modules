@@ -691,8 +691,9 @@ to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.
 from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
 pick a specific range to use.
 
-* `stack_type` - (Optional) The IP Stack Type of the cluster.
-One of: *IPV4 | IPV4_IPV6*. Default to IPV4 if not set.
+* `stack_type` - (Optional) The IP Stack Type of the cluster. 
+Default value is `IPV4`.
+Possible values are `IPV4` and `PV4_IPV6`.
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
