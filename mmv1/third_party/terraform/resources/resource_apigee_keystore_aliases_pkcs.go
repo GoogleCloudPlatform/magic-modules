@@ -179,7 +179,8 @@ func resourceApigeeKeystoreAliasesPkcsCreate(d *schema.ResourceData, meta interf
 		return err
 	}
 
-	file, err := os.Open(filePath)
+	filePath, _ := d.GetOk("file")
+	file, err := os.Open(filePath.(string))
 	if err != nil {
 		return err
 	}
