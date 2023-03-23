@@ -1,0 +1,10 @@
+---
+steps:
+  - name: 'golang:1.18'
+    args:
+      - '-c'
+      - |
+        go test
+    dir: .ci/containers/membership_checker
+    id: membership-checker-unit-test
+    entrypoint: bash
