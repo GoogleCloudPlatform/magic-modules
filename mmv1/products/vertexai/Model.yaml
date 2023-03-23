@@ -34,7 +34,14 @@ description: "A trained machine learning Model."
 id_format: 'projects/{{project}}/locations/{{location}}/models/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_model"
+    name: "vertex_ai_model_basic"
+    primary_resource_id: "model"
+    vars:
+      name: "vertex_ai_model"
+      project: "vertex-ai"
+      model_name: "model-name"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_model_advanced"
     skip_test: true
     primary_resource_id: "model"
     vars:
@@ -52,13 +59,13 @@ parameters:
     description: The location for the resource
     url_param_only: true
     required: true
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: The resource name of the Model.
     required: true
-    input: true
+    immutable: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: versionId
@@ -67,7 +74,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: versionAliases
     description: User provided version aliases so that a model version can be referenced via alias (i.e. projects/{project}/locations/{location}/models/{model_id}@{version_alias} instead of auto-generated version id (i.e. projects/{project}/locations/{location}/models/{model_id}@{version_id}). The format is a-z{0,126}[a-z0-9] to distinguish from version_id. A default version alias will be created for the first version of the model, and there must be exactly one default version alias for a model.
-    input: true
+    immutable: true
     default_from_api: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
@@ -88,7 +95,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: versionDescription
     description: The description of this version.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Array
     name: supportedExportFormats
     description: Output only. The formats in which this Model may be exported. If empty, this Model is not available for export.
@@ -123,27 +130,27 @@ properties:
     name: containerSpec
     description: The specification of the container that is to be used when deploying this Model. The specification is ingested upon ModelService.UploadModel, and all binaries it contains are copied and stored internally by Vertex AI. Not present for AutoML Models.
     required: true
-    input: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: imageUri
         description: Required. Immutable. URI of the Docker image to be used as the custom container for serving predictions. This URI must identify an image in Artifact Registry or Container Registry. Learn more about the [container publishing requirements](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#publishing), including permissions requirements for the Vertex AI Service Agent. The container image is ingested upon ModelService.UploadModel, stored internally, and this original path is afterwards not used. To learn about the requirements for the Docker image itself, see [Custom container requirements](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#). You can use the URI to one of Vertex AI's [pre-built container images for prediction](https://cloud.google.com/vertex-ai/docs/predictions/pre-built-containers) in this field.
         required: true
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::Array
         name: command
         description: 'Immutable. Specifies the command that runs when the container starts. This overrides the container''s [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint). Specify this field as an array of executable and arguments, similar to a Docker `ENTRYPOINT`''s "exec" form, not its "shell" form. If you do not specify this field, then the container''s `ENTRYPOINT` runs, in conjunction with the args field or the container''s [`CMD`](https://docs.docker.com/engine/reference/builder/#cmd), if either exists. If this field is not specified and the container does not have an `ENTRYPOINT`, then refer to the Docker documentation about [how `CMD` and `ENTRYPOINT` interact](https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact). If you specify this field, then you can also specify the `args` field to provide additional arguments for this command. However, if you specify this field, then the container''s `CMD` is ignored. See the [Kubernetes documentation about how the `command` and `args` fields interact with a container''s `ENTRYPOINT` and `CMD`](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#notes). In this field, you can reference [environment variables set by Vertex AI](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables) and environment variables set in the env field. You cannot reference environment variables set in the Docker image. In order for environment variables to be expanded, reference them by using the following syntax: `$(VARIABLE_NAME)` Note that this differs from Bash variable expansion, which does not use parentheses. If a variable cannot be resolved, the reference in the input string is used unchanged. To avoid variable expansion, you can escape this syntax with `$$`; for example: `$$(VARIABLE_NAME)` This field corresponds to the `command` field of the Kubernetes Containers [v1 core API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).'
-        input: true
+        immutable: true
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: args
         description: 'Immutable. Specifies arguments for the command that runs when the container starts. This overrides the container''s [`CMD`](https://docs.docker.com/engine/reference/builder/#cmd). Specify this field as an array of executable and arguments, similar to a Docker `CMD`''s "default parameters" form. If you don''t specify this field but do specify the command field, then the command from the `command` field runs without any additional arguments. See the [Kubernetes documentation about how the `command` and `args` fields interact with a container''s `ENTRYPOINT` and `CMD`](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#notes). If you don''t specify this field and don''t specify the `command` field, then the container''s [`ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#cmd) and `CMD` determine what runs based on their default behavior. See the Docker documentation about [how `CMD` and `ENTRYPOINT` interact](https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact). In this field, you can reference [environment variables set by Vertex AI](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables) and environment variables set in the env field. You cannot reference environment variables set in the Docker image. In order for environment variables to be expanded, reference them by using the following syntax: `$(VARIABLE_NAME)` Note that this differs from Bash variable expansion, which does not use parentheses. If a variable cannot be resolved, the reference in the input string is used unchanged. To avoid variable expansion, you can escape this syntax with `$$`; for example: `$$(VARIABLE_NAME)` This field corresponds to the `args` field of the Kubernetes Containers [v1 core API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).'
-        input: true
+        immutable: true
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: env
         description: 'Immutable. List of environment variables to set in the container. After the container starts running, code running in the container can read these environment variables. Additionally, the command and args fields can reference these variables. Later entries in this list can also reference earlier entries. For example, the following example sets the variable `VAR_2` to have the value `foo bar`: ```json [ { "name": "VAR_1", "value": "foo" }, { "name": "VAR_2", "value": "$(VAR_1) bar" } ] ``` If you switch the order of the variables in the example, then the expansion does not occur. This field corresponds to the `env` field of the Kubernetes Containers [v1 core API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).'
-        input: true
+        immutable: true
         item_type: !ruby/object:Api::Type::NestedObject
           name: env
           description: 'Immutable. List of environment variables to set in the container. After the container starts running, code running in the container can read these environment variables. Additionally, the command and args fields can reference these variables. Later entries in this list can also reference earlier entries. For example, the following example sets the variable `VAR_2` to have the value `foo bar`: ```json [ { "name": "VAR_1", "value": "foo" }, { "name": "VAR_2", "value": "$(VAR_1) bar" } ] ``` If you switch the order of the variables in the example, then the expansion does not occur. This field corresponds to the `env` field of the Kubernetes Containers [v1 core API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).'
@@ -152,16 +159,16 @@ properties:
                 name: name
                 description: Required. Name of the environment variable. Must be a valid C identifier.
                 required: true
-                input: true
+                immutable: true
               - !ruby/object:Api::Type::String
                 name: value
                 description: 'Required. Variables that reference a $(VAR_NAME) are expanded using the previous defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not.'
                 required: true
-                input: true
+                immutable: true
       - !ruby/object:Api::Type::Array
         name: ports
         description: 'Immutable. List of ports to expose from the container. Vertex AI sends any prediction requests that it receives to the first port on this list. Vertex AI also sends [liveness and health checks](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#liveness) to this port. If you do not specify this field, it defaults to following value: ```json [ { "containerPort": 8080 } ] ``` Vertex AI does not use ports other than the first one listed. This field corresponds to the `ports` field of the Kubernetes Containers [v1 core API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).'
-        input: true
+        immutable: true
         item_type: !ruby/object:Api::Type::NestedObject
           name: port
           description: 'Immutable. List of ports to expose from the container. Vertex AI sends any prediction requests that it receives to the first port on this list. Vertex AI also sends [liveness and health checks](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#liveness) to this port. If you do not specify this field, it defaults to following value: ```json [ { "containerPort": 8080 } ] ``` Vertex AI does not use ports other than the first one listed. This field corresponds to the `ports` field of the Kubernetes Containers [v1 core API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).'
@@ -169,19 +176,19 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: containerPort
                 description: The number of the port to expose on the pod's IP address. Must be a valid port number, between 1 and 65535 inclusive.
-                input: true
+                immutable: true
       - !ruby/object:Api::Type::String
         name: predictRoute
         description: 'Immutable. HTTP path on the container to send prediction requests to. Vertex AI forwards requests sent using projects.locations.endpoints.predict to this path on the container''s IP address and port. Vertex AI then returns the container''s response in the API response. For example, if you set this field to `/foo`, then when Vertex AI receives a prediction request, it forwards the request body in a POST request to the `/foo` path on the port of your container specified by the first value of this `ModelContainerSpec`''s ports field. If you don''t specify this field, it defaults to the following value when you deploy this Model to an Endpoint: `/v1/endpoints/ENDPOINT/deployedModels/DEPLOYED_MODEL:predict` The placeholders in this value are replaced as follows: * ENDPOINT: The last segment (following `endpoints/`)of the Endpoint.name][] field of the Endpoint where this Model has been deployed. (Vertex AI makes this value available to your container code as the [`AIP_ENDPOINT_ID` environment variable](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables).) * DEPLOYED_MODEL: DeployedModel.id of the `DeployedModel`. (Vertex AI makes this value available to your container code as the [`AIP_DEPLOYED_MODEL_ID` environment variable](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables).)'
-        input: true
+        immutable: true
       - !ruby/object:Api::Type::String
         name: healthRoute
         description: 'Immutable. HTTP path on the container to send health checks to. Vertex AI intermittently sends GET requests to this path on the container''s IP address and port to check that the container is healthy. Read more about [health checks](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#health). For example, if you set this field to `/bar`, then Vertex AI intermittently sends a GET request to the `/bar` path on the port of your container specified by the first value of this `ModelContainerSpec`''s ports field. If you don''t specify this field, it defaults to the following value when you deploy this Model to an Endpoint: `/v1/endpoints/ENDPOINT/deployedModels/DEPLOYED_MODEL:predict` The placeholders in this value are replaced as follows: * ENDPOINT: The last segment (following `endpoints/`)of the Endpoint.name][] field of the Endpoint where this Model has been deployed. (Vertex AI makes this value available to your container code as the [`AIP_ENDPOINT_ID` environment variable](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables).) * DEPLOYED_MODEL: DeployedModel.id of the `DeployedModel`. (Vertex AI makes this value available to your container code as the [`AIP_DEPLOYED_MODEL_ID` environment variable](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables).)'
-        input: true
+        immutable: true
   - !ruby/object:Api::Type::String
     name: artifactUri
     description: Immutable. The path to the directory containing the Model artifact and any of its supporting files. Not present for AutoML Models.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Array
     name: supportedDeploymentResourcesTypes
     description: Output only. When this Model is deployed, its prediction resources are described by the `prediction_resources` field of the Endpoint.deployed_models object. Because not all Models support all resource configuration types, the configuration types this Model supports are listed here. If no configuration types are listed, the Model cannot be deployed to an Endpoint and does not support online predictions (PredictionService.Predict or PredictionService.Explain). Such a Model can serve predictions by using a BatchPredictionJob, if it has at least one entry each in supported_input_storage_formats and supported_output_storage_formats.
@@ -216,21 +223,21 @@ properties:
           - !ruby/object:Api::Type::String
             name: endpoint
             description: Immutable. A resource name of an Endpoint.
-            input: true
+            immutable: true
           - !ruby/object:Api::Type::String
             name: deployedModelId
             description: Immutable. An ID of a DeployedModel in the above Endpoint.
-            input: true
+            immutable: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
     description: The labels with user-defined metadata to organize your Models. Label keys and values can be no longer than 64 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and dashes. International characters are allowed. See https://goo.gl/xmQnxf for more information and examples of labels.
   - !ruby/object:Api::Type::NestedObject
     name: encryptionSpec
     description: Customer-managed encryption key spec for a Model. If set, this Model and all sub-resources of this Model will be secured by this key.
-    input: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: kmsKeyName
         description: 'Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`. The key needs to be in the same region as where the compute resource is created.'
         required: true
-        input: true
+        immutable: true
