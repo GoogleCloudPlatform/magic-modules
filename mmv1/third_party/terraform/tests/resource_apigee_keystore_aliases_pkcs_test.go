@@ -27,10 +27,10 @@ func TestAccApigeeEnvKeystoreAliasesPkcs_apigeeKeystoreAliasesPkcsExample(t *tes
 				Config: testAccApigeeEnvKeystoreAliasesPkcs_apigeeKeystoreAliasesPkcsExample(context),
 			},
 			{
-				ResourceName:            "google_apigee_env_keystore_aliases_pkcs.apigee_environment_keystore_aliases_pkcs",
+				ResourceName:            "google_apigee_keystore_aliases_pkcs.apigee_environment_keystore_aliases_pkcs",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"keystore_id", "format"},
+				ImportStateVerifyIgnore: []string{"file", "filehash", "password", "org_id", "environment"},
 			},
 		},
 	})
@@ -103,15 +103,16 @@ resource "google_apigee_environment" "apigee_environment_keystore" {
 
 resource "google_apigee_env_keystore" "apigee_environment_keystore_alias" {
   name       = "tf-test-keystore%{random_suffix}"
-  env_id     = "organizations/liquid-fulcrum-363817/environments/prod"
+  env_id     = google_apigee_environment.apigee_environment_keystore.id
 }
 
 resource "google_apigee_keystore_aliases_pkcs" "apigee_environment_keystore_aliases_pkcs" {
-  environment 			= "prod"
-  org_id				= "liquid-fulcrum-363817"
+  environment 			= google_apigee_environment.apigee_environment_keystore_alias.name
+  org_id				= google_apigee_organization.apigee_org.name
   keystore				= google_apigee_env_keystore.apigee_environment_keystore_alias.name
-  alias                 = "aliaspkcstest"
-  file                  = filesha256("./test-fixtures/apigee/keyStore.p12")
+  alias                 = "tf-test%{random_suffix}"
+  file                  = "./test-fixtures/apigee/keyStore.p12"
+  filehash				= filemd5("./test-fixtures/apigee/keyStore.p12")
   password              = sensitive("abcd")
 }
 `, context)
