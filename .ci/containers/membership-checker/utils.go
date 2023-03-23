@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"golang.org/x/exp/slices"
 )
 
 func requestCall(url, method, GITHUB_TOKEN string, result interface{}, body interface{}) (int, error) {
@@ -41,4 +43,15 @@ func readFile(filename string) (string, error) {
 		return "", err
 	}
 	return string(contents), nil
+}
+
+func removes(s1 []string, s2 []string) []string {
+	result := make([]string, 0, len(s1))
+
+	for _, v := range s1 {
+		if !slices.Contains(s2, v) {
+			result = append(result, v)
+		}
+	}
+	return result
 }
