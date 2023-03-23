@@ -59,6 +59,12 @@ func ResourceApigeeKeystoreAliasesPkcs() *schema.Resource {
 				Required:    true,
 				Description: `Organization ID associated with the alias`,
 			},
+			"filehash": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:	 true,
+				Description: "Hash of the pkcs file",
+			},
 			"certs_info": {
 				Type:        schema.TypeList,
 				Optional:    true,
