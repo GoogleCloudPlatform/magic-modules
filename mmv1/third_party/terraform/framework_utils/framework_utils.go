@@ -38,7 +38,7 @@ func GetCurrentUserEmailFramework(p *frameworkProvider, userAgent string, diags 
 	// See https://github.com/golang/oauth2/issues/306 for a recommendation to do this from a Go maintainer
 	// URL retrieved from https://accounts.google.com/.well-known/openid-configuration
 	res, d := sendFrameworkRequest(p, "GET", "NO_BILLING_PROJECT_OVERRIDE", "https://openidconnect.googleapis.com/v1/userinfo", userAgent, nil)
-	diags.Append(*d...)
+	diags.Append(d...)
 
 	if diags.HasError() {
 		tflog.Info(p.context, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
