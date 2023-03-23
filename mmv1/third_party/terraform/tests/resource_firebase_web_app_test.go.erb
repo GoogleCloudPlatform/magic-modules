@@ -24,11 +24,21 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 		PreCheck:                 func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: ProviderVersion450(),
+				ExternalProviders: map[string]resource.ExternalProvider{
+					"google": {
+						VersionConstraint: "4.58.0",
+						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
+					},
+				},
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, ""),
 			},
 			{
-				ExternalProviders: ProviderVersion450(),
+				ExternalProviders: map[string]resource.ExternalProvider{
+					"google": {
+						VersionConstraint: "4.58.0",
+						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
+					},
+				},
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "api_key"),
