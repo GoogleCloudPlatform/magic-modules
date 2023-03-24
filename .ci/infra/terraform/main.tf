@@ -18,6 +18,7 @@
 #   - Enable Media CDN
 #   - Enable Game Services
 #   - Enable Access Boundary permissions
+#   - Enable BigQuery Table IAM conditions
 #   - Deploy "Hello World" app: https://cloud.google.com/appengine/docs/flexible/go/create-app
 #     ```
 #     gcloud components install app-engine-go
