@@ -132,6 +132,26 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tgc-head
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged", "tpg-head"]
+      args:
+          - 'head'
+          - 'terraform-google-conversion'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      id: tgc-base
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged", "tpg-base"]
+      args:
+          - 'base'
+          - 'terraform-google-conversion'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged"]
       args:
@@ -176,7 +196,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "18"  # Build step
+          - "20"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.12.31
@@ -194,7 +214,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "19"  # Build step
+          - "21"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.13.7
@@ -212,7 +232,64 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "20"  # Build step
+          - "22"  # Build step
+          - terraform-validator
+
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester'
+      id: tgc-test
+      allowFailure: true
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tgc-head", "tgc-base"]
+      env:
+        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
+        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
+        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "23"  # Build step
+          - terraform-google-conversion
+
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
+      id: tgc-test-integration-0.12.31
+      allowFailure: true
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tgc-head", "tgc-base"]
+      env:
+        - TERRAFORM_VERSION=0.12.31
+        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
+        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
+        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "24"  # Build step
+          - terraform-google-conversion
+
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
+      id: tgc-test-integration-0.13.7
+      allowFailure: true
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tgc-head", "tgc-base"]
+      env:
+        - TERRAFORM_VERSION=0.13.7
+        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
+        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
+        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
+        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
+      args:
+          - $_PR_NUMBER
+          - $COMMIT_SHA
+          - $BUILD_ID
+          - $PROJECT_ID
+          - "25"  # Build step
+          - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
@@ -225,7 +302,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "21"  # Build step
+          - "26"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpg-test
@@ -238,7 +315,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - GoogleCloudPlatform/magic-modules
-          - "22"  # Build step
+          - "27"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/gcb-terraform-vcr-tester'
       id: gcb-tpg-vcr-test
@@ -249,7 +326,7 @@ steps:
           - $COMMIT_SHA
           - $BUILD_ID
           - $PROJECT_ID
-          - "23"  # Build step
+          - "28"  # Build step
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s

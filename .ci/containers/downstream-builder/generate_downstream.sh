@@ -28,6 +28,11 @@ function clone_repo() {
         UPSTREAM_BRANCH=main
         GH_REPO=terraform-validator
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
+    elif [ "$REPO" == "terraform-google-conversion" ]; then
+        UPSTREAM_OWNER=GoogleCloudPlatform
+        UPSTREAM_BRANCH=main
+        GH_REPO=terraform-google-conversion
+        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
         UPSTREAM_BRANCH=master
         UPSTREAM_OWNER=terraform-google-modules
@@ -97,7 +102,7 @@ if [ "$REPO" == "terraform" ]; then
     popd
 fi
 
-if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
+if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "terraform-google-conversion" ]; then
     # use terraform generator with validator overrides.
     # Check for tf-conversion is legacy and can be removed after Nov 15 2021
     if [ "$REPO" == "terraform-validator" ] && [ "$COMMAND" == "base" ] && [ ! -d "../.ci/containers/terraform-validator-tester" ]; then
@@ -114,11 +119,21 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     rm -rf ./testdata/templates/
     rm -rf ./testdata/generatedconvert/
     rm -rf ./converters/google/provider
-    find ./test/** -type f -exec git rm {} \;
-
     popd
-    rm -rf third_party/validator/tests/source
-    cp -rf third_party/validator/tests/tfv-source third_party/validator/tests/source
+
+    if [ "$REPO" == "terraform-validator" ]; then
+      pushd $LOCAL_PATH
+      find ./test/** -type f -exec git rm {} \;
+      popd
+      rm -rf third_party/validator/tests/source
+      cp -rf third_party/validator/tests/tfv-source third_party/validator/tests/source
+    elif [ "$REPO" == "terraform-google-conversion" ]; then
+      pushd $LOCAL_PATH
+      find ./tfplan2cai/test/** -type f -exec git rm {} \;
+      popd
+      rm -rf third_party/validator/tests/source
+      cp -rf third_party/validator/tests/tgc-source third_party/validator/tests/source
+    fi
     bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     pushd $LOCAL_PATH
 
