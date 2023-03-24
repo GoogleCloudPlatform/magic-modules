@@ -95,6 +95,9 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		if err == iterator.Done {
 			break
 		}
+		if err != nil {
+			return fmt.Errorf("Failed to fetch the list of available locations.")
+		}
 		locationDetails := make(map[string]interface{})
 		if loc.Name != "" {
 			locationDetails["name"] = loc.Name
