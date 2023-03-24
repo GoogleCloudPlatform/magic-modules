@@ -54,6 +54,12 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-mesh'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_services_mesh_no_port'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-mesh-noport'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
