@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
+// Ensure the implementation satisfies the expected interfaces
 var _ datasource.DataSource = &GoogleDnsRecordSetDataSource{}
 
 func NewGoogleDnsRecordSetDataSource() datasource.DataSource {
