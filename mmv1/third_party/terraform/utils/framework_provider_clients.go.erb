@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	"google.golang.org/api/dns/v1"
+<% unless version == 'ga' -%>
 	firebase "google.golang.org/api/firebase/v1beta1"
+<% end -%>
 	"google.golang.org/api/option"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
