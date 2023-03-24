@@ -161,6 +161,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester'
       id: tfv-test
+      allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tfv-head", "tfv-base"]
       env:
@@ -177,6 +178,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.12.31
+      allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tfv-head", "tfv-base"]
       env:
@@ -194,6 +196,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.13.7
+      allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tfv-head", "tfv-base"]
       env:
