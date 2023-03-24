@@ -199,6 +199,25 @@ func schemaNodeConfig() *schema.Schema {
 				},
 	<% end -%>
 
+        "ephemeral_storage_local_ssd_config": {
+          Type:     schema.TypeList,
+          Optional: true,
+          MaxItems: 1,
+          Description: `Parameters for the ephemeral storage filesystem.`,
+          ForceNew: true,
+          Elem: &schema.Resource{
+            Schema: map[string]*schema.Schema{
+              "local_ssd_count": {
+                Type:         schema.TypeInt,
+                Required:     true,
+                ForceNew:     true,
+                ValidateFunc: validation.IntAtLeast(0),
+                Description:  `Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD must be 375 or 3000 GB in size, and all local SSDs must share the same size.`,
+              },
+            },
+          },
+        },
+
 				"local_nvme_ssd_block_config": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -217,25 +236,6 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
-
-        "ephemeral_storage_local_ssd_config": {
-          Type:     schema.TypeList,
-          Optional: true,
-          MaxItems: 1,
-          Description: `Parameters for the ephemeral storage filesystem.`,
-          ForceNew: true,
-          Elem: &schema.Resource{
-            Schema: map[string]*schema.Schema{
-              "local_ssd_count": {
-                Type:         schema.TypeInt,
-                Required:     true,
-                ForceNew:     true,
-                ValidateFunc: validation.IntAtLeast(0),
-                Description:  `Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size.`,
-              },
-            },
-          },
-        },
 
 				"gcfs_config": schemaGcfsConfig(true),
 
