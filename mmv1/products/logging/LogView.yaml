@@ -31,6 +31,7 @@ examples:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/logging_log_view.go.erb
+  post_create: templates/terraform/post_create/logging_log_view.go.erb
   pre_read: templates/terraform/pre_read/logging_log_view.go.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -53,13 +54,13 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    description: 'The resource name of the view. For example: `projects/my-project/locations/global/buckets/my-bucket/views/my-view`'
+    description: 'The resource name of the view. For example: \`projects/my-project/locations/global/buckets/my-bucket/views/my-view\`'
     required: true
     immutable: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: description
     description: Describes this view.
