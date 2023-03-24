@@ -198,7 +198,7 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 }
 
 
-func testAccStorageTransferJob_objectConditions(t *testing.T) {
+func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 	t.Parallel()
 
 	testDataSourceBucketName := randString(t, 10)
