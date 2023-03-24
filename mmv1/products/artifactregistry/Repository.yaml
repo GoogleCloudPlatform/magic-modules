@@ -76,7 +76,7 @@
       name: name
       description: |-
         The name of the repository, for example:
-        "projects/p1/locations/us-central1/repositories/repo1"
+        "repo1"
       output: true
       custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
       custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'

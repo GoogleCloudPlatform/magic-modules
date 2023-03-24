@@ -55,11 +55,11 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t) },
 	{{ if $s.HasGAEquivalent -}}
-		Providers: TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 	{{- else }}
-		Providers: TestAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 	{{- end }}
 	{{ if true -}}
 		CheckDestroy: testAccCheck{{$.PathType}}DestroyProducer(t),

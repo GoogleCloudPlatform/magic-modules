@@ -55,7 +55,7 @@ OptionParser.new do |opt|
   opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
     all_products = true
   end
-  opt.on('-y', '--yaml-dump', 'Dump the final api.yaml output to a file.') do
+  opt.on('-y', '--yaml-dump', 'Dump the final yaml output to a file.') do
     yaml_dump = true
   end
   opt.on('-o', '--output OUTPUT', 'Folder for module output') do |o|
@@ -73,7 +73,7 @@ OptionParser.new do |opt|
   opt.on('-v', '--version VERSION', 'API version to generate') do |v|
     version = v
   end
-  opt.on('-r', '--override OVERRIDE', 'Directory containing api.yaml overrides') do |r|
+  opt.on('-r', '--override OVERRIDE', 'Directory containing yaml overrides') do |r|
     override_dir = r
   end
   opt.on('-h', '--help', 'Show this message') do
