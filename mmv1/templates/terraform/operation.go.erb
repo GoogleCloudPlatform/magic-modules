@@ -1,7 +1,9 @@
 <%
   product_name = object.__product.name
   has_project = object.base_url.include?("{{project}}")
+  has_project = has_project || (object.async.is_a? Api::OpAsync and object.async.include_project)
 -%>
+
 <%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
