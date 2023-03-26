@@ -234,6 +234,8 @@ module Provider
                         'third_party/validator/project_organization_policy.go'],
                        ['converters/google/resources/folder_organization_policy.go',
                         'third_party/validator/folder_organization_policy.go'],
+                       ['converters/google/resources/org_policy_custom_constraint.go',
+                        'third_party/validator/org_policy_custom_constraint.go'],
                        ['converters/google/resources/folder_iam.go',
                         'third_party/validator/folder_iam.go'],
                        ['converters/google/resources/container.go',

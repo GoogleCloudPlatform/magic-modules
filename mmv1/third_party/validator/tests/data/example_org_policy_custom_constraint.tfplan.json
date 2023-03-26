@@ -1,0 +1,263 @@
+{
+    "format_version": "1.1",
+    "terraform_version": "1.3.9",
+    "planned_values": {
+        "root_module": {
+            "resources": [
+                {
+                    "address": "google_org_policy_custom_constraint.dataprocAmPrimaryOnlyEnforced",
+                    "mode": "managed",
+                    "type": "google_org_policy_custom_constraint",
+                    "name": "dataprocAmPrimaryOnlyEnforced",
+                    "provider_name": "registry.terraform.io/hashicorp/google-beta",
+                    "schema_version": 0,
+                    "values": {
+                        "action_type": "ALLOW",
+                        "condition": "(\"dataproc:am.primary_only\" in resource.config.softwareConfig.properties) \u0026\u0026 (resource.config.softwareConfig.properties[\"dataproc:am.primary_only\"]==\"true\")",
+                        "description": "Property \"dataproc:am.primary_only\" must be \"true\".",
+                        "display_name": "Application master cannot run on preemptible workers",
+                        "method_types": [
+                            "CREATE"
+                        ],
+                        "name": "custom.dataprocAmPrimaryOnlyEnforced",
+                        "parent "   : "organizations/{{.OrgID}}",
+                        "resource_types": [
+                            "dataproc.googleapis.com/Cluster"
+                        ],
+                        "timeouts": null
+                    },
+                    "sensitive_values": {
+                        "method_types": [
+                            false
+                        ],
+                        "resource_types": [
+                            false
+                        ]
+                    }
+                },
+                {
+                    "address": "google_org_policy_custom_constraint.gke_auto_upgrade_constraint",
+                    "mode": "managed",
+                    "type": "google_org_policy_custom_constraint",
+                    "name": "gke_auto_upgrade_constraint",
+                    "provider_name": "registry.terraform.io/hashicorp/google-beta",
+                    "schema_version": 0,
+                    "values": {
+                        "action_type": "ALLOW",
+                        "condition": "resource.management.autoUpgrade == false",
+                        "description": "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced.",
+                        "display_name": "Disable GKE auto upgrade",
+                        "method_types": [
+                            "CREATE",
+                            "UPDATE"
+                        ],
+                        "name": "custom.disableGkeAutoUpgrade",
+                        "parent "   : "organizations/{{.OrgID}}",
+                        "resource_types": [
+                            "container.googleapis.com/NodePool"
+                        ],
+                        "timeouts": null
+                    },
+                    "sensitive_values": {
+                        "method_types": [
+                            false,
+                            false
+                        ],
+                        "resource_types": [
+                            false
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "resource_changes": [
+        {
+            "address": "google_org_policy_custom_constraint.dataprocAmPrimaryOnlyEnforced",
+            "mode": "managed",
+            "type": "google_org_policy_custom_constraint",
+            "name": "dataprocAmPrimaryOnlyEnforced",
+            "provider_name": "registry.terraform.io/hashicorp/google-beta",
+            "change": {
+                "actions": [
+                    "create"
+                ],
+                "before": null,
+                "after": {
+                    "action_type": "ALLOW",
+                    "condition": "(\"dataproc:am.primary_only\" in resource.config.softwareConfig.properties) \u0026\u0026 (resource.config.softwareConfig.properties[\"dataproc:am.primary_only\"]==\"true\")",
+                    "description": "Property \"dataproc:am.primary_only\" must be \"true\".",
+                    "display_name": "Application master cannot run on preemptible workers",
+                    "method_types": [
+                        "CREATE"
+                    ],
+                    "name": "custom.dataprocAmPrimaryOnlyEnforced",
+                    "parent "   : "organizations/{{.OrgID}}",
+                    "resource_types": [
+                        "dataproc.googleapis.com/Cluster"
+                    ],
+                    "timeouts": null
+                },
+                "after_unknown": {
+                    "id": true,
+                    "method_types": [
+                        false
+                    ],
+                    "resource_types": [
+                        false
+                    ],
+                    "update_time": true
+                },
+                "before_sensitive": false,
+                "after_sensitive": {
+                    "method_types": [
+                        false
+                    ],
+                    "resource_types": [
+                        false
+                    ]
+                }
+            }
+        },
+        {
+            "address": "google_org_policy_custom_constraint.gke_auto_upgrade_constraint",
+            "mode": "managed",
+            "type": "google_org_policy_custom_constraint",
+            "name": "gke_auto_upgrade_constraint",
+            "provider_name": "registry.terraform.io/hashicorp/google-beta",
+            "change": {
+                "actions": [
+                    "create"
+                ],
+                "before": null,
+                "after": {
+                    "action_type": "ALLOW",
+                    "condition": "resource.management.autoUpgrade == false",
+                    "description": "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced.",
+                    "display_name": "Disable GKE auto upgrade",
+                    "method_types": [
+                        "CREATE",
+                        "UPDATE"
+                    ],
+                    "name": "custom.disableGkeAutoUpgrade",
+                    "parent "   : "organizations/{{.OrgID}}",
+                    "resource_types": [
+                        "container.googleapis.com/NodePool"
+                    ],
+                    "timeouts": null
+                },
+                "after_unknown": {
+                    "id": true,
+                    "method_types": [
+                        false,
+                        false
+                    ],
+                    "resource_types": [
+                        false
+                    ],
+                    "update_time": true
+                },
+                "before_sensitive": false,
+                "after_sensitive": {
+                    "method_types": [
+                        false,
+                        false
+                    ],
+                    "resource_types": [
+                        false
+                    ]
+                }
+            }
+        }
+    ],
+    "configuration": {
+        "provider_config": {
+            "google-beta": {
+                "name": "google-beta",
+                "full_name": "registry.terraform.io/hashicorp/google-beta",
+                "version_constraint": "{{.Provider.version}}" 
+            }
+        },
+        "root_module": {
+            "resources": [
+                {
+                    "address": "google_org_policy_custom_constraint.dataprocAmPrimaryOnlyEnforced",
+                    "mode": "managed",
+                    "type": "google_org_policy_custom_constraint",
+                    "name": "dataprocAmPrimaryOnlyEnforced",
+                    "provider_config_key": "google-beta",
+                    "expressions": {
+                        "action_type": {
+                            "constant_value": "ALLOW"
+                        },
+                        "condition": {
+                            "constant_value": "(\"dataproc:am.primary_only\" in resource.config.softwareConfig.properties) \u0026\u0026 (resource.config.softwareConfig.properties[\"dataproc:am.primary_only\"]==\"true\")"
+                        },
+                        "description": {
+                            "constant_value": "Property \"dataproc:am.primary_only\" must be \"true\"."
+                        },
+                        "display_name": {
+                            "constant_value": "Application master cannot run on preemptible workers"
+                        },
+                        "method_types": {
+                            "constant_value": [
+                                "CREATE"
+                            ]
+                        },
+                        "name": {
+                            "constant_value": "custom.dataprocAmPrimaryOnlyEnforced"
+                        },
+                        "parent": {
+                            "constant_value": "organizations/{{.OrgID}}"
+                        },
+                        "resource_types": {
+                            "constant_value": [
+                                "dataproc.googleapis.com/Cluster"
+                            ]
+                        }
+                    },
+                    "schema_version": 0
+                },
+                {
+                    "address": "google_org_policy_custom_constraint.gke_auto_upgrade_constraint",
+                    "mode": "managed",
+                    "type": "google_org_policy_custom_constraint",
+                    "name": "gke_auto_upgrade_constraint",
+                    "provider_config_key": "google-beta",
+                    "expressions": {
+                        "action_type": {
+                            "constant_value": "ALLOW"
+                        },
+                        "condition": {
+                            "constant_value": "resource.management.autoUpgrade == false"
+                        },
+                        "description": {
+                            "constant_value": "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced."
+                        },
+                        "display_name": {
+                            "constant_value": "Disable GKE auto upgrade"
+                        },
+                        "method_types": {
+                            "constant_value": [
+                                "CREATE",
+                                "UPDATE"
+                            ]
+                        },
+                        "name": {
+                            "constant_value": "custom.disableGkeAutoUpgrade"
+                        },
+                        "parent": {
+                            "constant_value": "organizations/{{.OrgID}}"
+                        },
+                        "resource_types": {
+                            "constant_value": [
+                                "container.googleapis.com/NodePool"
+                            ]
+                        }
+                    },
+                    "schema_version": 0
+                }
+            ]
+        }
+    }
+}
