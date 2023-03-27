@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -16,10 +16,10 @@ name: 'Instance'
 kind: 'compute#instance'
 base_url: projects/{{project}}/zones/{{zone}}/instances
 collection_url_key: 'items'
-input: true
+immutable: true
 has_self_link: true
 description: |
-   An instance is a virtual machine (VM) hosted on Google's infrastructure.
+  An instance is a virtual machine (VM) hosted on Google's infrastructure.
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -38,6 +38,19 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  allowed_iam_role: 'roles/compute.osLogin'
+  parent_resource_attribute: 'instance_name'
+  iam_conditions_request_type: :QUERY_PARAM
+exclude_resource: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "instance_basic"
+    primary_resource_id: "default"
+    vars:
+      instance_name: "my-instance"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"\
+      ])"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -72,7 +85,7 @@ properties:
     description: |
       An array of disks that are associated with the instances that are
       created from this template.
-    input: true
+    immutable: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Boolean
@@ -138,7 +151,7 @@ properties:
             created alongside the new instance. Use initialization
             parameters to create boot disks or local SSDs attached to
             the new instance.
-          input: true
+          immutable: true
           properties:
             - !ruby/object:Api::Type::String
               name: 'diskName'
@@ -244,7 +257,7 @@ properties:
       List of the type and count of accelerator cards attached to the
       instance
     item_type: !ruby/object:Api::Type::NestedObject
-       properties:
+      properties:
         - !ruby/object:Api::Type::Integer
           name: 'acceleratorCount'
           description: |
@@ -344,68 +357,68 @@ properties:
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Array
-         name: 'accessConfigs'
-         description: |
-           An array of configurations for this interface. Currently, only
-           one access config, ONE_TO_ONE_NAT, is supported. If there are no
-           accessConfigs specified, then this instance will have no
-           external internet access.
-         item_type: !ruby/object:Api::Type::NestedObject
-           properties:
+          name: 'accessConfigs'
+          description: |
+            An array of configurations for this interface. Currently, only
+            one access config, ONE_TO_ONE_NAT, is supported. If there are no
+            accessConfigs specified, then this instance will have no
+            external internet access.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
              # 'kind' is not needed for object convergence
-             - !ruby/object:Api::Type::String
-               name: 'name'
-               description: |
-                 The name of this access configuration. The
-                 default and recommended name is External NAT but you can
-                 use any arbitrary string you would like. For example, My
-                 external IP or Network Access.
-               required: true
-             - !ruby/object:Api::Type::ResourceRef
-               name: 'natIP'
-               resource: 'Address'
-               imports: 'address'
-               description: |
-                 Reference to an address.
-                 An external IP address associated with this instance.
-                 Specify an unused static external IP address available to
-                 the project or leave this field undefined to use an IP
-                 from a shared ephemeral IP address pool. If you specify a
-                 static external IP address, it must live in the same
-                 region as the zone of the instance.
-             - !ruby/object:Api::Type::Enum
-               name: 'type'
-               description: |
-                 The type of configuration. The default and only option is
-                 ONE_TO_ONE_NAT.
-               values:
-                 - :ONE_TO_ONE_NAT
-               required: true
-             - !ruby/object:Api::Type::Boolean
-               name: 'setPublicPtr'
-               description: |
-                 Specifies whether a public DNS PTR record should be
-                 created to map the external IP address of the instance
-                 to a DNS domain name.
-             - !ruby/object:Api::Type::String
-               name: 'publicPtrDomainName'
-               description: |
-                 The DNS domain name for the public PTR record. You can
-                 set this field only if the setPublicPtr field is
-                 enabled.
-             - !ruby/object:Api::Type::Enum
-               name: 'networkTier'
-               description: |
-                 This signifies the networking tier used for configuring
-                 this access configuration. If an AccessConfig is
-                 specified without a valid external IP address, an
-                 ephemeral IP will be created with this networkTier. If an
-                 AccessConfig with a valid external IP address is
-                 specified, it must match that of the networkTier
-                 associated with the Address resource owning that IP.
-               values:
-                 - :PREMIUM
-                 - :STANDARD
+              - !ruby/object:Api::Type::String
+                name: 'name'
+                description: |
+                  The name of this access configuration. The
+                  default and recommended name is External NAT but you can
+                  use any arbitrary string you would like. For example, My
+                  external IP or Network Access.
+                required: true
+              - !ruby/object:Api::Type::ResourceRef
+                name: 'natIP'
+                resource: 'Address'
+                imports: 'address'
+                description: |
+                  Reference to an address.
+                  An external IP address associated with this instance.
+                  Specify an unused static external IP address available to
+                  the project or leave this field undefined to use an IP
+                  from a shared ephemeral IP address pool. If you specify a
+                  static external IP address, it must live in the same
+                  region as the zone of the instance.
+              - !ruby/object:Api::Type::Enum
+                name: 'type'
+                description: |
+                  The type of configuration. The default and only option is
+                  ONE_TO_ONE_NAT.
+                values:
+                  - :ONE_TO_ONE_NAT
+                required: true
+              - !ruby/object:Api::Type::Boolean
+                name: 'setPublicPtr'
+                description: |
+                  Specifies whether a public DNS PTR record should be
+                  created to map the external IP address of the instance
+                  to a DNS domain name.
+              - !ruby/object:Api::Type::String
+                name: 'publicPtrDomainName'
+                description: |
+                  The DNS domain name for the public PTR record. You can
+                  set this field only if the setPublicPtr field is
+                  enabled.
+              - !ruby/object:Api::Type::Enum
+                name: 'networkTier'
+                description: |
+                  This signifies the networking tier used for configuring
+                  this access configuration. If an AccessConfig is
+                  specified without a valid external IP address, an
+                  ephemeral IP will be created with this networkTier. If an
+                  AccessConfig with a valid external IP address is
+                  specified, it must match that of the networkTier
+                  associated with the Address resource owning that IP.
+                values:
+                  - :PREMIUM
+                  - :STANDARD
         - !ruby/object:Api::Type::Array
           name: 'aliasIpRanges'
           description: |
@@ -533,7 +546,8 @@ properties:
         update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
   - !ruby/object:Api::Type::NestedObject
     name: 'confidentialInstanceConfig'
-    description: 'Configuration for confidential computing (requires setting the machine type to any of the n2d-* types and a boot disk of type pd-ssd).'
+    description: 'Configuration for confidential computing (requires setting the machine
+      type to any of the n2d-* types and a boot disk of type pd-ssd).'
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enableConfidentialCompute'

@@ -135,7 +135,8 @@
             "bar",
             "foo"
           ]
-        }
+        },
+        "zone": "us-central1-a"
       }
     }
   },
@@ -157,7 +158,7 @@
             "boot": true,
             "diskEncryptionKey": {
               "kmsKeyName": "test-kms_key_self_link"
-      	    },
+            },
             "mode": "READ_WRITE"
           }
         ],
@@ -172,7 +173,8 @@
         "scheduling": {
           "automaticRestart": true
         },
-        "tags": {}
+        "tags": {},
+        "zone": "us-central1-a"
       }
     }
   }

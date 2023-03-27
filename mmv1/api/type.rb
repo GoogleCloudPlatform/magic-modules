@@ -37,7 +37,7 @@ module Api
       attr_reader :removed_message
 
       attr_reader :output # If set value will not be sent to server on sync
-      attr_reader :input # If set to true value is used only on creation
+      attr_reader :immutable # If set to true value is used only on creation
 
       # url_param_only will not send the field in the resource body and will
       # not attempt to read the field from the API response.
@@ -128,9 +128,6 @@ module Api
       # This should be avoided for new fields, and only used with old ones.
       attr_reader :schema_config_mode_attr
 
-      # Names of attributes that can't be set alongside this one
-      attr_reader :conflicts_with
-
       # Names of fields that should be included in the updateMask.
       attr_reader :update_mask_fields
 
@@ -214,7 +211,7 @@ module Api
       check :allow_empty_object, type: :boolean
       check :url_param_only, type: :boolean
       check :read_query_params, type: ::String
-      check :input, type: :boolean
+      check :immutable, type: :boolean
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
@@ -599,6 +596,24 @@ module Api
         super
         check :values, type: ::Array, item_type: [Symbol, ::String, ::Integer], required: true
         check :skip_docs_values, type: :boolean
+      end
+
+      def merge(other)
+        result = self.class.new
+        instance_variables.each do |v|
+          result.instance_variable_set(v, instance_variable_get(v))
+        end
+
+        other.instance_variables.each do |v|
+          if other.instance_variable_get(v).instance_of?(Array)
+            result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
+                                                       other.instance_variable_get(v)))
+          else
+            result.instance_variable_set(v, other.instance_variable_get(v))
+          end
+        end
+
+        result
       end
     end
 

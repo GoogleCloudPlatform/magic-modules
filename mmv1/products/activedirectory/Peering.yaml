@@ -24,7 +24,7 @@
   description: Creates a Peering for Managed AD instance.
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
-        'Active Directory Domain Peering': 'https://cloud.google.com/managed-microsoft-ad/docs/domain-peering'
+      'Active Directory Domain Peering': 'https://cloud.google.com/managed-microsoft-ad/docs/domain-peering'
     api: 'https://cloud.google.com/managed-microsoft-ad/reference/rest/v1beta1/projects.locations.global.peerings'
   async: !ruby/object:Api::OpAsync
     operation: !ruby/object:Api::OpAsync::Operation
@@ -43,12 +43,25 @@
     error: !ruby/object:Api::OpAsync::Error
       path: 'error'
       message: 'message'
+  id_format: "projects/{{project}}/locations/global/domains/{{peering_id}}"
+  exclude_import: true
+  autogen_async: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "active_directory_peering_basic"
+      primary_resource_id: "ad-domain-peering"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_import_test: true
+          # skip the test until Active Directory setup issue got resolved
+      skip_test: true
   parameters:
     - !ruby/object:Api::Type::String
       name: peeringId
       required: true
       url_param_only: true
-      input: true
+      immutable: true
       description: ""
   properties:
     - !ruby/object:Api::Type::String
@@ -62,13 +75,13 @@
     - !ruby/object:Api::Type::String
       name: authorizedNetwork
       required: true
-      input: true
+      immutable: true
       description: |
         The full names of the Google Compute Engine networks to which the instance is connected. Caller needs to make sure that CIDR subnets do not overlap between networks, else peering creation will fail.
     - !ruby/object:Api::Type::String
       name: domainResource
       required: true
-      input: true
+      immutable: true
       description: |
         Full domain resource path for the Managed AD Domain involved in peering. The resource path should be in the form projects/{projectId}/locations/global/domains/{domainName}
     - !ruby/object:Api::Type::String
@@ -76,8 +89,10 @@
       url_param_only: true
       description: |
         The current state of this Peering.
+      ignore_read: true
     - !ruby/object:Api::Type::String
       name: statusMessage
       description: |
         Additional information about the current status of this peering, if available.
-
+  
+      ignore_read: true

@@ -2,9 +2,9 @@ module github.com/trodge/magic-modules/tools/missing-test-detector
 
 go 1.18
 
-replace google/provider/old => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20230228191546-cd4e339e0ce6
+replace google/provider/old => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20230302220542-203a52c6e3e1
 
-replace google/provider/new => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20230301204602-e72330247c9a
+replace google/provider/new => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20230303123138-8194a951d003
 
 require (
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b

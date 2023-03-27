@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -19,10 +19,46 @@ description: |
   A Membership defines a relationship between a Group and an entity belonging to that Group, referred to as a "member".
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/identity/docs/how-to/memberships-google-groups'
+    'Official Documentation': 'https://cloud.google.com/identity/docs/how-to/memberships-google-groups'
   api: 'https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships'
-input: true
+immutable: true
+read_error_transform: "transformCloudIdentityGroupMembershipReadError"
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    If you are using User ADCs (Application Default Credentials) with this resource,
+    you must specify a `billing_project` and set `user_project_override` to true 
+    in the provider configuration. Otherwise the Cloud Identity API will return a 403 error. 
+    Your account must have the `serviceusage.services.use` permission on the 
+    `billing_project` you defined.
+import_format: ["{{%name}}"]
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloud_identity_group_membership"
+        # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    skip_test: true
+    primary_resource_id: "cloud_identity_group_membership_basic"
+    vars:
+      id_group: "my-identity-group"
+    test_env_vars:
+      org_domain: :ORG_DOMAIN
+      cust_id: :CUST_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloud_identity_group_membership_user"
+        # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    skip_test: true
+    primary_resource_id: "cloud_identity_group_membership_basic"
+    vars:
+      id_group: "my-identity-group"
+    test_env_vars:
+      org_domain: :ORG_DOMAIN
+      cust_id: :CUST_ID
+      identity_user: :IDENTITY_USER
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/set_computed_name.erb
+  post_import: templates/terraform/post_import/cloud_identity_group_membership.go.erb
+  update_encoder: templates/terraform/update_encoder/cloud_identity_group_membership.go.erb
+
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'group'
@@ -31,7 +67,7 @@ parameters:
     description: |
       The name of the Group to create this membership in.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -41,18 +77,19 @@ properties:
       The resource name of the Membership, of the form groups/{group_id}/memberships/{membership_id}.
   - !ruby/object:Api::Type::NestedObject
     name: 'memberKey'
-    input: true
+    immutable: true
     description: |
       EntityKey of the member.
     min_version: beta
     exactly_one_of:
       - member_key
       - preferred_member_key
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'id'
         required: true
-        input: true
+        immutable: true
         description: |
           The ID of the entity.
 
@@ -65,7 +102,7 @@ properties:
           Must be unique within a namespace.
       - !ruby/object:Api::Type::String
         name: 'namespace'
-        input: true
+        immutable: true
         description: |
           The namespace in which the entity exists.
 
@@ -77,17 +114,18 @@ properties:
           and must be in the form of `identitysources/{identity_source_id}`.
   - !ruby/object:Api::Type::NestedObject
     name: 'preferredMemberKey'
-    input: true
+    immutable: true
     description: |
       EntityKey of the member.
     exactly_one_of:
       - member_key
       - preferred_member_key
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'id'
         required: true
-        input: true
+        immutable: true
         description: |
           The ID of the entity.
 
@@ -100,7 +138,7 @@ properties:
           Must be unique within a namespace.
       - !ruby/object:Api::Type::String
         name: 'namespace'
-        input: true
+        immutable: true
         description: |
           The namespace in which the entity exists.
 
@@ -126,6 +164,9 @@ properties:
     description: |
       The MembershipRoles that apply to the Membership.
       Must not contain duplicate MembershipRoles with the same name.
+    update_verb: :POST
+    update_url: '{{name}}:modifyMembershipRoles'
+    is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Enum
@@ -137,8 +178,6 @@ properties:
             - :OWNER
             - :MANAGER
             - :MEMBER
-    update_verb: :POST
-    update_url: '{{name}}:modifyMembershipRoles'
   - !ruby/object:Api::Type::String
     name: 'type'
     output: true

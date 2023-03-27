@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,6 +21,38 @@ update_mask: true
 description: |
   A Hl7V2Store is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/hl7V2/STU3/)
   standard for Healthcare information exchange
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Creating a HL7v2 Store': 'https://cloud.google.com/healthcare/docs/how-tos/hl7v2'
+  api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.hl7V2Stores'
+id_format: "{{dataset}}/hl7V2Stores/{{name}}"
+import_format: ["{{dataset}}/hl7V2Stores/{{name}}"]
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "healthcare_hl7_v2_store_basic"
+    primary_resource_id: "store"
+    vars:
+      dataset_name: "example-dataset"
+      hl7_v2_store_name: "example-hl7-v2-store"
+      pubsub_topic: "hl7-v2-notifications"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "healthcare_hl7_v2_store_parser_config"
+    min_version: "beta"
+    primary_resource_id: "store"
+    vars:
+      dataset_name: "example-dataset"
+      hl7_v2_store_name: "example-hl7-v2-store"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "healthcare_hl7_v2_store_unschematized"
+    min_version: "beta"
+    primary_resource_id: "store"
+    vars:
+      dataset_name: "example-dataset"
+      hl7_v2_store_name: "example-hl7-v2-store"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+  custom_import: templates/terraform/custom_import/healthcare_hl7_v2_store.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'dataset'
@@ -28,7 +60,7 @@ parameters:
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
     required: true
-    input: true
+    immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
     url_param_only: true
@@ -40,10 +72,15 @@ properties:
 
       ** Changing this property may recreate the Hl7v2 store (removing all data) **
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: parserConfig
     required: false
+    update_mask_fields:
+      - "parser_config.allow_null_header"
+      - "parser_config.segment_terminator"
+      - "parser_config.schema"
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: allowNullHeader
@@ -63,6 +100,8 @@ properties:
           Byte(s) to be used as the segment terminator. If this is unset, '\r' will be used as segment terminator.
 
           A base64-encoded string.
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateBase64String'
       - !ruby/object:Api::Type::String
         name: schema
         at_least_one_of:
@@ -73,11 +112,17 @@ properties:
         description: |
           JSON encoded string for schemas used to parse messages in this
           store if schematized parsing is desired.
+        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
+          return s }'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringIsJSON'
       - !ruby/object:Api::Type::Enum
         name: version
         description: |
           The version of the unschematized parser to be used when a custom `schema` is not set.
-        input: true
+        immutable: true
         default_value: :V1
         values:
           - :V1
@@ -172,13 +217,10 @@ properties:
       The time that this resource was created on the server.
       This is in RFC3339 text format.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |
       The fully qualified name of this dataset
     output: true
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Creating a HL7v2 Store':
-      'https://cloud.google.com/healthcare/docs/how-tos/hl7v2'
-  api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.hl7V2Stores'
+    ignore_read: true

@@ -13,8 +13,8 @@ func TestAccDataFusionInstance_update(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstance_basic(instanceName),
@@ -48,6 +48,10 @@ resource "google_data_fusion_instance" "foobar" {
   options = {
   	prober_test_run = "true"
   }
+  accelerators {
+    accelerator_type = "CDC"
+    state = "DISABLED"
+  }
 }
 `, instanceName)
 }
@@ -66,6 +70,11 @@ resource "google_data_fusion_instance" "foobar" {
     label2 = "value2"
   }
   version = "6.8.0"
+
+  accelerators {
+    accelerator_type = "CCAI_INSIGHTS"
+    state = "ENABLED"
+  }
   # Mark for testing to avoid service networking connection usage that is not cleaned up
   options = {
   	prober_test_run = "true"
@@ -80,8 +89,8 @@ func TestAccDataFusionInstanceEnterprise_update(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: TestAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstanceEnterprise_basic(instanceName),
@@ -153,9 +162,9 @@ func TestAccDataFusionInstanceVersion_dataFusionInstanceUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckDataFusionInstanceDestroyProducer(t),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataFusionInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstanceVersion_dataFusionInstanceUpdate(context),

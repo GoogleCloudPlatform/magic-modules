@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -44,17 +44,32 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
+import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}"]
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "workstation_cluster_basic"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      workstation_cluster_name: "workstation-cluster"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "workstation_cluster_private"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      workstation_cluster_name: "workstation-cluster-private"
 parameters:
   - !ruby/object:Api::Type::String
     name: "workstationClusterId"
     required: true
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The ID of the workstation cluster.
   - !ruby/object:Api::Type::String
     name: "location"
-    input: true
+    immutable: true
     url_param_only: true
     description: |
       The location where the workstation cluster should reside.
@@ -71,18 +86,19 @@ properties:
       The system-generated UID of the resource.
   - !ruby/object:Api::Type::KeyValuePairs
     name: "labels"
-    description: "Client-specified labels that are applied to the resource and that are also propagated to the underlying Compute Engine resources."
+    description: "Client-specified labels that are applied to the resource and that\
+      \ are also propagated to the underlying Compute Engine resources."
   - !ruby/object:Api::Type::String
     name: "network"
     required: true
-    input: true
+    immutable: true
     description: |
       The relative resource name of the VPC network on which the instance can be accessed. 
       It is specified in the following form: "projects/{projectNumber}/global/networks/{network_id}".
   - !ruby/object:Api::Type::String
     name: "subnetwork"
     required: true
-    input: true
+    immutable: true
     description: |
       Name of the Compute Engine subnetwork in which instances associated with this cluster will be created. 
       Must be part of the subnetwork specified for this cluster.
@@ -116,7 +132,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: "enablePrivateEndpoint"
-        input: true
+        immutable: true
         required: true
         description: |
           Whether Workstations endpoint is private.

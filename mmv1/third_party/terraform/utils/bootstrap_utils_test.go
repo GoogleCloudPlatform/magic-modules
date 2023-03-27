@@ -427,11 +427,20 @@ func removeContainerServiceAgentRoleFromContainerEngineRobot(t *testing.T, proje
 	}
 }
 
-func BootstrapProject(t *testing.T, projectID, billingAccount string, services []string) *cloudresourcemanager.Project {
+// BootstrapProject will create or get a project named
+// "<projectIDPrefix><projectIDSuffix>" that will persist across test runs,
+// where projectIDSuffix is based off of getTestProjectFromEnv(). The reason
+// for the naming is to isolate bootstrapped projects by test environment.
+// Given the existing projects being used by our team, the prefix provided to
+// this function can be no longer than 18 characters.
+func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, services []string) *cloudresourcemanager.Project {
 	config := BootstrapConfig(t)
 	if config == nil {
 		return nil
 	}
+
+	projectIDSuffix := strings.Replace(GetTestProjectFromEnv(), "ci-test-project-", "", 1)
+	projectID := projectIDPrefix + projectIDSuffix
 
 	crmClient := config.NewResourceManagerClient(config.UserAgent)
 
@@ -525,86 +534,7 @@ func BootstrapProject(t *testing.T, projectID, billingAccount string, services [
 	return project
 }
 
-// BootstrapAllPSARoles ensures that the given project's IAM
-// policy grants the given service agents the given roles.
-// This is important to bootstrap because using iam policy resources means that
-// deleting them removes permissions for concurrent tests.
-// Return whether the policy changed.
-func BootstrapAllPSARoles(t *testing.T, agentNames, roles []string) bool {
-	config := BootstrapConfig(t)
-	if config == nil {
-		t.Fatal("Could not bootstrap a config for BootstrapAllPSARoles.")
-		return false
-	}
-	client := config.NewResourceManagerClient(config.UserAgent)
-
-	// Get the project since we need its number, id, and policy.
-	project, err := client.Projects.Get(GetTestProjectFromEnv()).Do()
-	if err != nil {
-		t.Fatalf("Error getting project with id %q: %s", project.ProjectId, err)
-		return false
-	}
-
-	getPolicyRequest := &cloudresourcemanager.GetIamPolicyRequest{}
-	policy, err := client.Projects.GetIamPolicy(project.ProjectId, getPolicyRequest).Do()
-	if err != nil {
-		t.Fatalf("Error getting project iam policy: %v", err)
-		return false
-	}
-
-	var members []string
-	for _, agentName := range agentNames {
-		member := fmt.Sprintf("serviceAccount:service-%d@%s.iam.gserviceaccount.com", project.ProjectNumber, agentName)
-		members = append(members, member)
-	}
-
-	// Create the bindings we need to add to the policy.
-	var newBindings []*cloudresourcemanager.Binding
-	for _, role := range roles {
-		newBindings = append(newBindings, &cloudresourcemanager.Binding{
-			Role:    role,
-			Members: members,
-		})
-	}
-
-	mergedBindings := MergeBindings(append(policy.Bindings, newBindings...))
-
-	if !compareBindings(policy.Bindings, mergedBindings) {
-		for _, missingBinding := range missingBindings(policy.Bindings, mergedBindings) {
-			log.Printf("[DEBUG] Missing binding: %v", missingBinding)
-		}
-		// The policy must change.
-		policy.Bindings = mergedBindings
-		setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
-		policy, err = client.Projects.SetIamPolicy(project.ProjectId, setPolicyRequest).Do()
-		if err != nil {
-			t.Fatalf("Error setting project iam policy: %v", err)
-			return false
-		}
-		return true
-	}
-
-	return false
-}
-
-// BootstrapAllPSARole is a version of BootstrapAllPSARoles for granting a
-// single role to multiple service agents.
-func BootstrapAllPSARole(t *testing.T, agentNames []string, role string) bool {
-	return BootstrapAllPSARoles(t, agentNames, []string{role})
-}
-
-// BootstrapPSARoles is a version of BootstrapAllPSARoles for granting roles to
-// a single service agent.
-func BootstrapPSARoles(t *testing.T, agentName string, roles []string) bool {
-	return BootstrapAllPSARoles(t, []string{agentName}, roles)
-}
-
-// BootstrapPSARole is a simplified version of BootstrapPSARoles for granting a
-// single role to a single service agent.
-func BootstrapPSARole(t *testing.T, agentName, role string) bool {
-	return BootstrapPSARoles(t, agentName, []string{role})
-}
-
+// BootstrapConfig returns a Config pulled from the environment.
 func BootstrapConfig(t *testing.T) *Config {
 	if v := os.Getenv("TF_ACC"); v == "" {
 		t.Skip("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")

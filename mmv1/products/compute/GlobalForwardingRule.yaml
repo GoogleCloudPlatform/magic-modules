@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -15,7 +15,7 @@
 name: 'GlobalForwardingRule'
 kind: 'compute#forwardingRule'
 base_url: projects/{{project}}/global/forwardingRules
-input: true
+immutable: true
 has_self_link: true
 collection_url_key: 'items'
 description: |
@@ -44,11 +44,138 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "external_ssl_proxy_lb_mig_backend"
+    primary_resource_id: "default"
+    skip_test: true
+    vars:
+      ssl_proxy_xlb_network: "ssl-proxy-xlb-network"
+      ssl_proxy_xlb_subnet: "ssl-proxy-xlb-subnet"
+      ssl_proxy_xlb_ip: "ssl-proxy-xlb-ip"
+      default_cert: "default-cert"
+      test_proxy: "test-proxy"
+      ssl_proxy_xlb_forwarding_rule: "ssl-proxy-xlb-forwarding-rule"
+      ssl_proxy_xlb_backend_service: "ssl-proxy-xlb-backend-service"
+      ssl_proxy_health_check: "ssl-proxy-health-check"
+      ssl_proxy_xlb_mig_template: "ssl-proxy-xlb-mig-template"
+      ssl_proxy_xlb_mig1: "ssl-proxy-xlb-mig1"
+      ssl_proxy_xlb_fw_allow_hc: "ssl-proxy-xlb-fw-allow-hc"
+    ignore_read_extra:
+      - "port_range"
+      - "target"
+      - "ip_address"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "external_tcp_proxy_lb_mig_backend"
+    primary_resource_id: "default"
+    vars:
+      tcp_proxy_xlb_network: "tcp-proxy-xlb-network"
+      tcp_proxy_xlb_subnet: "tcp-proxy-xlb-subnet"
+      tcp_proxy_xlb_ip: "tcp-proxy-xlb-ip"
+      tcp_proxy_xlb_forwarding_rule: "tcp-proxy-xlb-forwarding-rule"
+      test_proxy_health_check: "test-proxy-health-check"
+      tcp_proxy_xlb_backend_service: "tcp-proxy-xlb-backend-service"
+      tcp_proxy_health_check: "tcp-proxy-health-check"
+      tcp_proxy_xlb_mig_template: "tcp-proxy-xlb-mig-template"
+      tcp_proxy_xlb_mig1: "tcp-proxy-xlb-mig1"
+      tcp_proxy_xlb_fw_allow_hc: "tcp-proxy-xlb-fw-allow-hc"
+    min_version: beta
+    ignore_read_extra:
+      - "port_range"
+      - "target"
+      - "ip_address"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "external_http_lb_mig_backend_custom_header"
+    primary_resource_id: "default"
+    vars:
+      xlb_network_name: "l7-xlb-network"
+      backend_subnet_name: "l7-xlb-subnet"
+      address_name: "l7-xlb-static-ip"
+      forwarding_rule_name: "l7-xlb-forwarding-rule"
+      target_http_proxy_name: "l7-xlb-target-http-proxy"
+      url_map_name: "l7-xlb-url-map"
+      backend_service_name: "l7-xlb-backend-service"
+      mig_template_name: "l7-xlb-mig-template"
+      hc_name: "l7-xlb-hc"
+      mig_name: "l7-xlb-mig1"
+      fw_allow_hc_name: "l7-xlb-fw-allow-hc"
+    min_version: beta
+    ignore_read_extra:
+      - "port_range"
+      - "target"
+      - "ip_address"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "global_forwarding_rule_http"
+    primary_resource_id: "default"
+    vars:
+      forwarding_rule_name: "global-rule"
+      http_proxy_name: "target-proxy"
+      backend_service_name: "backend"
+    ignore_read_extra:
+      - "port_range"
+      - "target"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "global_forwarding_rule_internal"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      forwarding_rule_name: "global-rule"
+      http_proxy_name: "target-proxy"
+      backend_service_name: "backend"
+      igm_name: "igm-internal"
+    ignore_read_extra:
+      - "port_range"
+      - "target"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "global_forwarding_rule_external_managed"
+    primary_resource_id: "default"
+    vars:
+      forwarding_rule_name: "global-rule"
+      http_proxy_name: "target-proxy"
+      backend_service_name: "backend"
+    ignore_read_extra:
+      - "port_range"
+      - "target"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "global_forwarding_rule_hybrid"
+    primary_resource_id: "default"
+    vars:
+      forwarding_rule_name: "global-rule"
+      http_proxy_name: "target-proxy"
+      network_name: "my-network"
+      internal_network_name: "my-internal-network"
+      subnetwork_name: "my-subnetwork"
+      default_backend_service_name: "backend-default"
+      hybrid_backend_service_name: "backend-hybrid"
+      internal_backend_service_name": "backend-internal"
+      default_neg_name: "default-neg"
+      hybrid_neg_name: "hybrid-neg"
+      internal_neg_name: "internal-neg"
+      health_check_name: "health-check"
+    ignore_read_extra:
+      - "port_range"
+      - "target"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "private_service_connect_google_apis"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      network_name: "my-network"
+      subnetwork_name: "my-subnetwork"
+      global_address_name: "global-psconnect-ip"
+      forwarding_rule_name: "globalrule"
+    test_env_vars:
+      project: :PROJECT_NAME
+    ignore_read_extra:
+      - "ip_address"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/labels.erb
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -59,6 +186,7 @@ properties:
     description: 'The unique identifier for the resource.'
     output: true
   # This is a multi-resource resource reference (Address, GlobalAddress)
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'IPAddress'
     description: |
@@ -78,6 +206,8 @@ properties:
 
       For Private Service Connect forwarding rules that forward traffic to
       Google APIs, IP address must be provided.
+    default_from_api: true
+    diff_suppress_func: 'internalIpDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -92,6 +222,8 @@ properties:
       - :AH
       - :SCTP
       - :ICMP
+    diff_suppress_func: 'caseDiffSuppress'
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
     description: |
@@ -153,44 +285,44 @@ properties:
       loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'filterMatchCriteria'
-        description: |
-          Specifies how individual filterLabel matches within the list of
-          filterLabels contribute towards the overall metadataFilter match.
+        - !ruby/object:Api::Type::Enum
+          name: 'filterMatchCriteria'
+          description: |
+            Specifies how individual filterLabel matches within the list of
+            filterLabels contribute towards the overall metadataFilter match.
 
-          MATCH_ANY - At least one of the filterLabels must have a matching
-          label in the provided metadata.
-          MATCH_ALL - All filterLabels must have matching labels in the
-          provided metadata.
-        required: true
-        values:
-          - :MATCH_ANY
-          - :MATCH_ALL
-      - !ruby/object:Api::Type::Array
-        name: 'filterLabels'
-        description: |
-          The list of label value pairs that must match labels in the
-          provided metadata based on filterMatchCriteria
+            MATCH_ANY - At least one of the filterLabels must have a matching
+            label in the provided metadata.
+            MATCH_ALL - All filterLabels must have matching labels in the
+            provided metadata.
+          required: true
+          values:
+            - :MATCH_ANY
+            - :MATCH_ALL
+        - !ruby/object:Api::Type::Array
+          name: 'filterLabels'
+          description: |
+            The list of label value pairs that must match labels in the
+            provided metadata based on filterMatchCriteria
 
-          This list must not be empty and can have at the most 64 entries.
-        min_size: 1
-        max_size: 64
-        required: true
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-          - !ruby/object:Api::Type::String
-            name: 'name'
-            description: |
-              Name of the metadata label. The length must be between
-              1 and 1024 characters, inclusive.
-            required: true
-          - !ruby/object:Api::Type::String
-            name: 'value'
-            description: |
-              The value that the label must match. The value has a maximum
-              length of 1024 characters.
-            required: true
+            This list must not be empty and can have at the most 64 entries.
+          min_size: 1
+          max_size: 64
+          required: true
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'name'
+                description: |
+                  Name of the metadata label. The length must be between
+                  1 and 1024 characters, inclusive.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: 'value'
+                description: |
+                  The value that the label must match. The value has a maximum
+                  length of 1024 characters.
+                required: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -216,6 +348,8 @@ properties:
   # manifest input from a single value to a range of form NN-NN. The API
   # accepts a single value, e.g. '80', but the API stores and returns
   # '80-80'. This causes idempotency false positive.
+    default_from_api: true
+    min_version: beta
   - !ruby/object:Api::Type::String
     name: 'portRange'
     description: |
@@ -241,6 +375,7 @@ properties:
   # This is a multi-resource resource reference (TargetHttp(s)Proxy,
   # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
   # TargetInstance)
+    diff_suppress_func: 'portRangeDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'target'
     required: true
@@ -254,3 +389,4 @@ properties:
       addressType of INTERNAL, only "all-apis" and "vpc-sc" are valid.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
+    diff_suppress_func: 'compareSelfLinkRelativePaths'

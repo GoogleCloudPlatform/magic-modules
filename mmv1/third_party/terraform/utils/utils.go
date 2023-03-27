@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
+	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -595,4 +597,37 @@ func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f fu
 		}
 		return nil
 	})
+}
+
+// MultiEnvDefault is a helper function that returns the value of the first
+// environment variable in the given list that returns a non-empty value. If
+// none of the environment variables return a value, the default value is
+// returned.
+func MultiEnvDefault(ks []string, dv interface{}) interface{} {
+	for _, k := range ks {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return dv
+}
+
+func frameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
+	var diags diag.Diagnostics
+	for _, e := range fwD.Errors() {
+		diags = append(diags, diag.Diagnostic{
+			Detail:   e.Detail(),
+			Severity: diag.Error,
+			Summary:  e.Summary(),
+		})
+	}
+	for _, w := range fwD.Warnings() {
+		diags = append(diags, diag.Diagnostic{
+			Detail:   w.Detail(),
+			Severity: diag.Warning,
+			Summary:  w.Summary(),
+		})
+	}
+
+	return &diags
 }
