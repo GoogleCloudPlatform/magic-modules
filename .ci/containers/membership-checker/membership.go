@@ -9,10 +9,6 @@ import (
 )
 
 var (
-	// TODO: add unit tests to ensure that
-	// 1. people in vacationList are also  in reviewers
-	// 2. people in trustedContributors are not in reviewers
-
 	// This is for the random-assignee rotation.
 	reviewerRotation = []string{"megan07", "slevenick", "c2thorn", "rileykarson", "melinath", "ScottSuarez", "shuyama1", "SarahFrench", "roaks3", "zli82016", "trodge", "hao-nan-li"}
 
