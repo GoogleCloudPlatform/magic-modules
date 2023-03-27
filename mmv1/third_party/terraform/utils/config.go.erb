@@ -575,6 +575,16 @@ func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
 	return clientSqlAdmin
 }
 
+func (c *Config) NewAlloydbClient() *alloydb.AlloyDBAdminClient {
+	log.Printf("[INFO] Instantiating Alloydb client")
+	clientAlloydb, err := alloydb.NewAlloyDBAdminRESTClient(c.context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client storage: %s", err)
+		return nil
+	}
+	return clientAlloydb
+}
+
 func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
 	pubsubClientBasePath := RemoveBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)

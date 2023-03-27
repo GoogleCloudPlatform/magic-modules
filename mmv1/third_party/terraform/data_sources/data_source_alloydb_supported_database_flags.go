@@ -3,7 +3,11 @@ package google
 import (
 	"fmt"
 
+	alloydb "cloud.google.com/go/alloydb/apiv1"
+	alloydbpb "cloud.google.com/go/alloydb/apiv1/alloydbpb"
+	gax "github.com/googleapis/gax-go/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/iterator"
 )
 
 func DataSourceAlloydbSupportedDatabaseFlags() *schema.Resource {
@@ -114,6 +118,36 @@ func DataSourceAlloydbSupportedDatabaseFlags() *schema.Resource {
 
 func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project: %s", err)
+	}
+	billingProject := project
+	if bp, err := getBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+	location := ""
+	if v, ok := d.GetOk("location"); ok {
+		location = v.(string)
+	}
+	if location == "" {
+		return fmt.Errorf("Location cannot be empty")
+	}
+	var supportedDatabaseFlagIterator *alloydb.SupportedDatabaseFlagIterator
+	locsReq := new(alloydbpb.ListSupportedDatabaseFlagsRequest)
+	err = nil
+	err = retryTime(func() error {
+		locationsClient := config.NewAlloydbClient()
+		//set call options on locationsClient
+		supportedDatabaseFlagIterator = locationsClient.ListSupportedDatabaseFlags(config.context, locsReq, gax.WithPath(fmt.Sprintf("v1/projects/%s/locations/%s/supportedDatabaseFlags", billingProject, location)))
+		return nil
+	}, 5)
+	if err != nil {
+		return handleNotFoundError(err, d, fmt.Sprintf("Locations %q", d.Id()))
+	}
+
+	/*config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
@@ -141,74 +175,58 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("SupportedDatabaseFlags %q", d.Id()))
 	}
+	*/
 	var supportedDatabaseFlags []map[string]interface{}
 	for {
-		result := res["supportedDatabaseFlags"].([]interface{})
-		for _, dbFlag := range result {
-			supportedDatabaseFlag := make(map[string]interface{})
-			flag := dbFlag.(map[string]interface{})
-			if flag["name"] != nil {
-				supportedDatabaseFlag["name"] = flag["name"].(string)
-			}
-			if flag["flagName"] != nil {
-				supportedDatabaseFlag["flag_name"] = flag["flagName"].(string)
-			}
-			if flag["valueType"] != nil {
-				supportedDatabaseFlag["value_type"] = flag["valueType"].(string)
-			}
-			if flag["acceptsMultipleValues"] != nil {
-				supportedDatabaseFlag["accepts_multiple_values"] = flag["acceptsMultipleValues"].(bool)
-			}
-			if flag["requiresDbRestart"] != nil {
-				supportedDatabaseFlag["requires_db_restart"] = flag["requiresDbRestart"].(bool)
-			}
-			if flag["supportedDbVersions"] != nil {
-				dbVersions := make([]string, 0, len(flag["supportedDbVersions"].([]interface{})))
-				for _, supDbVer := range flag["supportedDbVersions"].([]interface{}) {
-					dbVersions = append(dbVersions, supDbVer.(string))
-				}
-				supportedDatabaseFlag["supported_db_versions"] = dbVersions
-			}
-
-			if flag["stringRestrictions"] != nil {
-				restrictions := make([]map[string][]string, 0, 1)
-				fetchedAllowedValues := flag["stringRestrictions"].(map[string]interface{})["allowedValues"]
-				if fetchedAllowedValues != nil {
-					allowedValues := make([]string, 0, len(fetchedAllowedValues.([]interface{})))
-					for _, val := range fetchedAllowedValues.([]interface{}) {
-						allowedValues = append(allowedValues, val.(string))
-					}
-					stringRestrictions := map[string][]string{
-						"allowed_values": allowedValues,
-					}
-					restrictions = append(restrictions, stringRestrictions)
-					supportedDatabaseFlag["string_restrictions"] = restrictions
-				}
-			}
-			if flag["integerRestrictions"] != nil {
-				restrictions := make([]map[string]string, 0, 1)
-				minValue := flag["integerRestrictions"].(map[string]interface{})["minValue"].(string)
-				maxValue := flag["integerRestrictions"].(map[string]interface{})["maxValue"].(string)
-				integerRestrictions := map[string]string{
-					"min_value": minValue,
-					"max_value": maxValue,
-				}
-				restrictions = append(restrictions, integerRestrictions)
-				supportedDatabaseFlag["integer_restrictions"] = restrictions
-			}
-			supportedDatabaseFlags = append(supportedDatabaseFlags, supportedDatabaseFlag)
-		}
-		if res["nextPageToken"] == nil || res["nextPageToken"].(string) == "" {
+		supportedDatabaseFlag := make(map[string]interface{})
+		flag, err := supportedDatabaseFlagIterator.Next()
+		if err == iterator.Done {
 			break
 		}
-		url, err = replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{location}}/supportedDatabaseFlags?pageToken="+res["nextPageToken"])
-		if err != nil {
-			return fmt.Errorf("Error setting api endpoint")
+		if flag.Name != "" {
+			supportedDatabaseFlag["name"] = flag.Name
 		}
-		res, err = sendRequest(config, "GET", billingProject, url, userAgent, nil)
-		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("SupportedDatabaseFlags %q", d.Id()))
+		if flag.FlagName != "" {
+			supportedDatabaseFlag["flag_name"] = flag.FlagName
 		}
+		supportedDatabaseFlag["value_type"] = flag.ValueType
+		supportedDatabaseFlag["accepts_multiple_values"] = flag.AcceptsMultipleValues
+		supportedDatabaseFlag["requires_db_restart"] = flag.RequiresDbRestart
+		if flag.SupportedDbVersions != nil {
+			dbVersions := make([]string, 0, len(flag.SupportedDbVersions))
+			for _, supDbVer := range flag.SupportedDbVersions {
+				dbVersions = append(dbVersions, supDbVer.String())
+			}
+			supportedDatabaseFlag["supported_db_versions"] = dbVersions
+		}
+
+		if flag.Restrictions.StringRestrictions != nil {
+			restrictions := make([]map[string][]string, 0, 1)
+			fetchedAllowedValues := flag.Restrictions.StringRestrictions.AllowedValues
+			if fetchedAllowedValues != nil {
+				allowedValues := make([]string, 0, len(fetchedAllowedValues))
+				for _, val := range fetchedAllowedValues {
+					allowedValues = append(allowedValues, val)
+				}
+				stringRestrictions := map[string][]string{
+					"allowed_values": allowedValues,
+				}
+				restrictions = append(restrictions, stringRestrictions)
+				supportedDatabaseFlag["string_restrictions"] = restrictions
+			}
+		}
+		if flag.Restrictions.IntegerRestrictions != nil {
+			restrictions := make([]map[string]string, 0, 1)
+			minValue := flag.Restrictions.IntegerRestrictions.MinValue
+			maxValue := flag.Restrictions.IntegerRestrictions.MaxValue
+			integerRestrictions := map[string]string{
+				"min_value": minValue,
+				"max_value": maxValue,
+			}
+			restrictions = append(restrictions, integerRestrictions)
+			supportedDatabaseFlag["integer_restrictions"] = restrictions
+		}
+		supportedDatabaseFlags = append(supportedDatabaseFlags, supportedDatabaseFlag)
 	}
 	if err := d.Set("supported_database_flags", supportedDatabaseFlags); err != nil {
 		return fmt.Errorf("Error setting supported_database_flags: %s", err)
