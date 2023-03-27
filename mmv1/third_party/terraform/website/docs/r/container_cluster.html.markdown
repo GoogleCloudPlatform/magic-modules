@@ -691,6 +691,10 @@ to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.
 from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
 pick a specific range to use.
 
+* `stack_type` - (Optional) The IP Stack Type of the cluster. 
+Default value is `IPV4`.
+Possible values are `IPV4` and `PV4_IPV6`.
+
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
 * `client_certificate_config` - (Required) Whether client certificate authorization is enabled for this cluster.  For example:
@@ -741,6 +745,8 @@ ephemeral_storage_config {
   local_ssd_count = 2
 }
 ```
+
+* `local_nvme_ssd_block_config` - (Optional) Parameters for the local NVMe SSDs. Structure is [documented below](#nested_local_nvme_ssd_block_config).
 
 * `logging_variant` (Optional) Parameter for specifying the type of logging agent used in a node pool. This will override any [cluster-wide default value](#nested_node_pool_defaults). Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
 
@@ -874,9 +880,21 @@ linux_node_config {
 
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
 
+* `advanced_machine_features` - (Optional) Specifies options for controlling
+  advanced machine features. Structure is documented below.
+
+<a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
+
+* `threads_per_core` - (Required) The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.
+
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nested_local_nvme_ssd_block_config"></a>The `local_nvme_ssd_block_config` block supports:
+
+* `local_ssd_count` (Required) - Number of raw-block local NVMe SSD disks to be attached to the node. Each local SSD is 375 GB in size. If zero, it means no raw-block local NVMe SSD disks to be attached to the node.
+-> Note: Local NVMe SSD storage available in GKE versions v1.25.3-gke.1800 and later.
 
 <a name="nested_gcfs_config"></a>The `gcfs_config` block supports:
 

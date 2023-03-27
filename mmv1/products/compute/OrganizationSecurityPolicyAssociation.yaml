@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,19 +14,33 @@
 --- !ruby/object:Api::Resource
 name: 'OrganizationSecurityPolicyAssociation'
 min_version: beta
-base_url: 'locations/global/securityPolicies/{{policy_id}}'
-self_link: 'locations/global/securityPolicies/{{policy_id}}/getAssociation?name={{name}}'
-create_url: 'locations/global/securityPolicies/{{policy_id}}/addAssociation'
+base_url: '{{policy_id}}'
+self_link: '{{policy_id}}/getAssociation?name={{name}}'
+create_url: '{{policy_id}}/addAssociation'
 delete_verb: :POST
-delete_url: 'locations/global/securityPolicies/{{policy_id}}/removeAssociation?name={{name}}'
+delete_url: '{{policy_id}}/removeAssociation?name={{name}}'
 description: |
   An association for the OrganizationSecurityPolicy.
 immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Associating a policy with the organization or folder':
-      'https://cloud.google.com/vpc/docs/using-firewall-policies#associate'
+    'Associating a policy with the organization or folder': 'https://cloud.google.com/vpc/docs/using-firewall-policies#associate'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addAssociation'
+id_format: "{{policy_id}}/association/{{name}}"
+import_format: ["{{%policy_id}}/association/{{name}}"]
+read_error_transform: "transformSecurityPolicyAssociationReadError"
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "organization_security_policy_association_basic"
+    primary_resource_id: "policy"
+    min_version: 'beta'
+    test_env_vars:
+      org_id: :ORG_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/org_security_policy_association.go.erb
+  post_delete: templates/terraform/post_create/org_security_policy_association.go.erb
+      # TODO: Remove once b/154369201 is closed.
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'policyId'

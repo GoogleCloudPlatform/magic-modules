@@ -11,6 +11,8 @@ weight: 30
 
 ## Setup
 
+Authentication is described in more detail [here](https://github.com/hashicorp/terraform-provider-google/wiki/Developer-Best-Practices#authentication).
+
 Tests generally assume the following environment variables must be set in order to run tests:
 
 ```
