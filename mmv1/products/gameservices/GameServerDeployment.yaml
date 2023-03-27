@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -40,36 +40,44 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+autogen_async: true
+import_format: ["projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "game_service_deployment_basic"
+    primary_resource_id: "default"
+    vars:
+      deployment_id: "tf-test-deployment"
 properties:
-- !ruby/object:Api::Type::String
-  name: name
-  output: true
-  description: |-
-    The resource id of the game server deployment, eg:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |-
+      The resource id of the game server deployment, eg:
 
-    `projects/{project_id}/locations/{location}/gameServerDeployments/{deployment_id}`.
-    For example,
+      `projects/{project_id}/locations/{location}/gameServerDeployments/{deployment_id}`.
+      For example,
 
-    `projects/my-project/locations/{location}/gameServerDeployments/my-deployment`.
-- !ruby/object:Api::Type::String
-  name: description
-  description: Human readable description of the game server deployment.
-- !ruby/object:Api::Type::String
-  name: deploymentId
-  immutable: true
-  required: true
-  url_param_only: true
-  description: |
-    A unique id for the deployment.
-- !ruby/object:Api::Type::String
-  name: location
+      `projects/my-project/locations/{location}/gameServerDeployments/my-deployment`.
+  - !ruby/object:Api::Type::String
+    name: description
+    description: Human readable description of the game server deployment.
+  - !ruby/object:Api::Type::String
+    name: deploymentId
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      A unique id for the deployment.
+  - !ruby/object:Api::Type::String
+    name: location
   # The only acceptable location currently is 'global'
   # TODO - either hard code or set as computed
-  url_param_only: true
-  default_value: global
-  description: Location of the Deployment.
-- !ruby/object:Api::Type::KeyValuePairs
-  name: labels
-  description: |-
-    The labels associated with this game server deployment. Each label is a
-    key-value pair.
+    url_param_only: true
+    default_value: global
+    description: Location of the Deployment.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: labels
+    description: |-
+      The labels associated with this game server deployment. Each label is a
+      key-value pair.

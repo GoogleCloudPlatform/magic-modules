@@ -19,7 +19,7 @@ import (
 <%
 
 resource_name = product_ns + object.name
-tf_product = (@config.legacy_name || product_ns).underscore
+tf_product = (object.__product.legacy_name || product_ns).underscore
 tf_resource = object.name.underscore
 terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
 -%>
@@ -65,11 +65,11 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t) },
 		<% unless versioned_provider -%>
-		Providers: TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		<% else -%>
-		Providers: TestAccProvidersOiCS,
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		<% end -%>
 		<% if example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{

@@ -21,9 +21,9 @@
   self_link: 'apps/{{project}}/services/{{id}}'
   references: !ruby/object:Api::Resource::ReferenceLinks
     guides:
-      'Official Documentation':
-        'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
+      'Official Documentation': 'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
     api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
+  exclude: true
   properties:
     - !ruby/object:Api::Type::String
       name: 'name'
@@ -35,5 +35,5 @@
       name: 'id'
       output: true
       description: |
-         Relative name of the service within the application. Example default.
-
+        Relative name of the service within the application. Example default.
+  

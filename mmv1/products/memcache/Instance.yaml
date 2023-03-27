@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,18 +13,34 @@
 
 --- !ruby/object:Api::Resource
 name: 'Instance'
-create_url:  projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
+create_url: projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
 self_link: projects/{{project}}/locations/{{region}}/instances/{{name}}
-base_url:  projects/{{project}}/locations/{{region}}/instances
+base_url: projects/{{project}}/locations/{{region}}/instances
 update_verb: :PATCH
 update_mask: true
 description: |
   A Google Cloud Memcache instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/memcache/docs/creating-instances'
+    'Official Documentation': 'https://cloud.google.com/memcache/docs/creating-instances'
   api: 'https://cloud.google.com/memorystore/docs/memcached/reference/rest/v1/projects.locations.instances'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+examples:
+        # Temporary as CI has used up servicenetworking quota
+  - !ruby/object:Provider::Terraform::Examples
+    skip_vcr: true
+    name: "memcache_instance_basic"
+    primary_resource_id: "instance"
+    vars:
+      instance_name: "test-instance"
+      network_name: "test-network"
+      address_name: "address"
+    test_vars_overrides:
+      network_name: 'BootstrapSharedTestNetwork(t, "memcache-private")'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -32,6 +48,7 @@ parameters:
       The region of the Memcache instance. If it is not provided, the provider region is used.
     immutable: true
     url_param_only: true
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -41,10 +58,12 @@ properties:
     immutable: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{region}}/instances/{{name}}
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
       A user-visible name for the instance.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'state'
     description: |
@@ -74,8 +93,8 @@ properties:
       properties:
         - !ruby/object:Api::Type::String
           name: 'nodeId'
-          description: Identifier of the Memcached node.
-            The node id does not include project or location like the Memcached instance name.
+          description: Identifier of the Memcached node. The node id does not include
+            project or location like the Memcached instance name.
           output: true
         - !ruby/object:Api::Type::String
           name: 'zone'
@@ -87,7 +106,8 @@ properties:
           output: true
         - !ruby/object:Api::Type::String
           name: 'host'
-          description: Hostname or IP address of the Memcached node used by the clients to connect to the Memcached server on this node.
+          description: Hostname or IP address of the Memcached node used by the clients
+            to connect to the Memcached server on this node.
           output: true
         - !ruby/object:Api::Type::String
           name: state
@@ -99,7 +119,7 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'discoveryEndpoint'
-    description:  Endpoint for Discovery API
+    description: Endpoint for Discovery API
     output: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
@@ -116,6 +136,8 @@ properties:
     description: |
       Zones where memcache nodes should be provisioned.  If not
       provided, all zones will be used.
+    default_from_api: true
+    is_set: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'authorizedNetwork'
@@ -123,6 +145,7 @@ properties:
     description: |
       The full name of the GCE network to connect the instance to.  If not provided,
       'default' will be used.
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: nodeCount
     description: |
@@ -155,7 +178,8 @@ properties:
           Memory size in Mebibytes for each memcache node.
         required: true
   - !ruby/object:Api::Type::NestedObject
-    name: parameters
+    name: memcacheParameters
+    api_name: parameters
     description: |
       User-specified parameters for this memcache instance.
     immutable: true
@@ -194,6 +218,8 @@ properties:
           Optional. Description of what this policy is for.
           Create/Update methods return INVALID_ARGUMENT if the
           length is greater than 512.
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringLenBetween(0, 512)'
       - !ruby/object:Api::Type::Array
         name: 'weeklyMaintenanceWindow'
         description: |
@@ -245,19 +271,29 @@ properties:
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23.
                     An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,23)'
                 - !ruby/object:Api::Type::Integer
                   name: 'minutes'
                   description: |
                     Minutes of hour of day. Must be from 0 to 59.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,59)'
                 - !ruby/object:Api::Type::Integer
                   name: 'seconds'
                   description: |
                     Seconds of minutes of the time. Must normally be from 0 to 59.
                     An API may allow the value 60 if it allows leap-seconds.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,60)'
                 - !ruby/object:Api::Type::Integer
                   name: 'nanos'
                   description: |
                     Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                  validation: !ruby/object:Provider::Terraform::Validation
+                    function: 'validation.IntBetween(0,999999999)'
+
+
   - !ruby/object:Api::Type::NestedObject
     name: maintenanceSchedule
     description: Output only. Published maintenance schedule.

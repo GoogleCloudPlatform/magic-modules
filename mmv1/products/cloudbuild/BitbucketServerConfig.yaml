@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,8 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'BitbucketServerConfig'
 base_url: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs
-self_link: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{bitbucketServerConfigId}}
-create_url: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs?bitbucketServerConfigId={{bitbucketServerConfigId}}
+self_link: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}
+create_url: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs?bitbucketServerConfigId={{config_id}}
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -41,9 +41,33 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+autogen_async: true
+import_format:
+  - "projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}"
+id_format: 'projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudbuild_bitbucket_server_config"
+    primary_resource_id: "bbs-config"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudbuild_bitbucket_server_config_repositories"
+    primary_resource_id: "bbs-config-with-repos"
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudbuild_bitbucket_server_config_peered_network"
+    primary_resource_id: "bbs-config-with-peered-network"
+    vars:
+      network_name: "vpc-network"
+    test_vars_overrides:
+      network_name: 'BootstrapSharedTestNetwork(t, "peered-network")'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/cloudbuild_bitbucketserver_config.go.erb
+  post_create: templates/terraform/post_create/cloudbuild_bitbucketserver_config.go.erb
+  pre_update: templates/terraform/pre_update/cloudbuild_bitbucketserver_config.go.erb
+  post_update: templates/terraform/post_update/cloudbuild_bitbucketserver_config.go.erb
 parameters:
   - !ruby/object:Api::Type::String
-    name: 'bitbucketServerConfigId'
+    name: 'config_id'
     required: true
     url_param_only: true
     immutable: true
@@ -112,6 +136,7 @@ properties:
     name: 'connectedRepositories'
     description: |
       Connected Bitbucket Server repositories for this config.
+    is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
