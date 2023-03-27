@@ -881,7 +881,7 @@ linux_node_config {
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
 
 * `advanced_machine_features` - (Optional) Specifies options for controlling
-  advanced machine features.
+  advanced machine features. Structure is documented below.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 
