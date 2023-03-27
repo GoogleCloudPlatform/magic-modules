@@ -201,20 +201,18 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 	t.Parallel()
 
-	testDataSourceBucketName := randString(t, 10)
-	testDataSinkName := randString(t, 10)
-	testTransferJobDescription := randString(t, 10)
-	testModifiedSince := time.Now().Format(time.RFC3339)
-	testModifiedBefore := time.Now().Format(time.RFC3339)
-	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
+	testDataSourceBucketName := RandString(t, 10)
+	testDataSinkName := RandString(t, 10)
+	testTransferJobDescription := RandString(t, 10)
+	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_basic(getTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
+				Config: testAccStorageTransferJob_basic(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -222,7 +220,7 @@ func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_objectConditions(getTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testModifiedSince, testModifiedBefore, testPubSubTopicName),
+				Config: testAccStorageTransferJob_objectConditions(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -336,6 +334,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -349,6 +348,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -391,6 +391,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -404,6 +405,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -466,6 +468,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -479,6 +482,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -561,6 +565,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -574,6 +579,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -628,6 +634,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -704,6 +711,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -779,6 +787,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -792,6 +801,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -869,7 +879,7 @@ resource "google_storage_transfer_job" "transfer_job" {
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, pubSubTopicName, transferJobDescription, project, overwriteObjectsAlreadyExistingInSink, deleteObjectsUniqueInSink, deleteObjectsFromSourceAfterTransfer, overwriteWhenVal)
 }
 
-func testAccStorageTransferJob_objectConditions(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, testModifiedSince string, testModifiedBefore string, pubSubTopicName string) string {
+func testAccStorageTransferJob_objectConditions(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, pubSubTopicName string) string {
 	return fmt.Sprintf(`
 data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
@@ -880,6 +890,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -893,6 +904,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -925,8 +937,8 @@ resource "google_storage_transfer_job" "transfer_job" {
       path  = "foo/bar/"
     }
     object_conditions {
-      last_modified_since = %s
-      last_modified_before = %s
+      last_modified_since = "2020-01-01T00:00:00Z"
+      last_modified_before = "2020-01-01T00:00:00Z"
     }
   }
 
@@ -965,7 +977,7 @@ resource "google_storage_transfer_job" "transfer_job" {
     google_pubsub_topic_iam_member.notification_config,
   ]
 }
-`, project, dataSourceBucketName, project, dataSinkBucketName, project, pubSubTopicName, transferJobDescription, project, testModifiedSince, testModifiedBefore,  overwriteWhenVal)
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, pubSubTopicName, transferJobDescription, project)
 }
 
 func testAccStorageTransferJob_notificationPayloadFormat(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, pubsubTopicName string, notificationPayloadFormat string) string {
@@ -979,6 +991,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -992,6 +1005,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -1074,6 +1088,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -1087,6 +1102,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
@@ -1168,6 +1184,7 @@ resource "google_storage_bucket" "data_source" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_source" {
@@ -1181,6 +1198,7 @@ resource "google_storage_bucket" "data_sink" {
   project       = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_iam_member" "data_sink" {
