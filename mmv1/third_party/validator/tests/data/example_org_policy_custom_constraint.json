@@ -22,7 +22,7 @@
                 ]
             }
         },
-        "ancestors": [
+        "ancestry_path": [
             "organizations/{{.OrgID}}"
         ]
     },
@@ -48,7 +48,7 @@
                 ]
             }
         },
-        "ancestors": [
+        "ancestry_path": [
             "organizations/{{.OrgID}}"
         ]
     }
