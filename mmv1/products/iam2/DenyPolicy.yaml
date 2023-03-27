@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -20,32 +20,45 @@ description: |
   Represents a collection of denial policies to apply to a given resource.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Permissions supported in deny policies':
-      'https://cloud.google.com/iam/docs/deny-permissions-support'
+    'Permissions supported in deny policies': 'https://cloud.google.com/iam/docs/deny-permissions-support'
   api: 'https://cloud.google.com/iam/docs/reference/rest/v2beta/policies'
+autogen_async: true
+import_format: ["{{parent}}/{{name}}"]
+id_format: "{{parent}}/{{name}}"
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "iam_deny_policy_basic"
+    primary_resource_id: "example"
+    vars:
+      policy_name: "my-deny-policy"
+      account_id: "svc-acc"
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    min_version: beta
 properties:
   - !ruby/object:Api::Type::String
-     name: 'name'
-     description: |
-       The name of the policy.
-     required: true
-     immutable: true
-     url_param_only: true
+    name: 'name'
+    description: |
+      The name of the policy.
+    required: true
+    immutable: true
+    url_param_only: true
   - !ruby/object:Api::Type::String
-     name: 'parent'
-     description: |
-       The attachment point is identified by its URL-encoded full resource name.
-     required: true
-     immutable: true
-     url_param_only: true
+    name: 'parent'
+    description: |
+      The attachment point is identified by its URL-encoded full resource name.
+    required: true
+    immutable: true
+    url_param_only: true
   - !ruby/object:Api::Type::String
-     name: 'displayName'
-     description: |
-       The display name of the rule.
+    name: 'displayName'
+    description: |
+      The display name of the rule.
   - !ruby/object:Api::Type::Fingerprint
-     name: 'etag'
-     description: |
-       The hash of the resource. Used internally during updates.
+    name: 'etag'
+    description: |
+      The hash of the resource. Used internally during updates.
   - !ruby/object:Api::Type::Array
     name: 'rules'
     required: true
@@ -54,9 +67,9 @@ properties:
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
-           name: 'description'
-           description: |
-             The description of the rule.
+          name: 'description'
+          description: |
+            The description of the rule.
         - !ruby/object:Api::Type::NestedObject
           name: 'denyRule'
           description: |
@@ -64,7 +77,8 @@ properties:
           properties:
             - !ruby/object:Api::Type::Array
               name: 'deniedPrincipals'
-              description: The identities that are prevented from using one or more permissions on Google Cloud resources.
+              description: The identities that are prevented from using one or more
+                permissions on Google Cloud resources.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: 'exceptionPrincipals'
@@ -87,9 +101,9 @@ properties:
               item_type: Api::Type::String
             - !ruby/object:Api::Type::NestedObject
               name: 'denialCondition'
-              description:
-                User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip,
-                source.region_code and contents in the request header.
+              description: User defined CEVAL expression. A CEVAL expression is used
+                to specify match criteria such as origin.ip, source.region_code and
+                contents in the request header.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'expression'

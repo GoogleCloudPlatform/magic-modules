@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -17,6 +17,7 @@ base_url: "projects/{{project}}/regions/{{region}}/clusters"
 self_link: "projects/{{project}}/regions/{{region}}/clusters/{{clusterName}}"
 description: |
   Describes an autoscaling policy for Dataproc cluster autoscaler.
+exclude: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -141,9 +142,9 @@ properties:
               The default value for master and worker groups is NON_PREEMPTIBLE. This default cannot be changed.
               The default value for secondary instances is PREEMPTIBLE.
             values:
-            - :PREEMPTIBILITY_UNSPECIFIED
-            - :NON_PREEMPTIBLE
-            - :PREEMPTIBLE
+              - :PREEMPTIBILITY_UNSPECIFIED
+              - :NON_PREEMPTIBLE
+              - :PREEMPTIBLE
           - !ruby/object:Api::Type::NestedObject
             name: 'managedGroupConfig'
             output: true
@@ -213,9 +214,9 @@ properties:
               The default value for master and worker groups is NON_PREEMPTIBLE. This default cannot be changed.
               The default value for secondary instances is PREEMPTIBLE.
             values:
-            - :PREEMPTIBILITY_UNSPECIFIED
-            - :NON_PREEMPTIBLE
-            - :PREEMPTIBLE
+              - :PREEMPTIBILITY_UNSPECIFIED
+              - :NON_PREEMPTIBLE
+              - :PREEMPTIBLE
           - !ruby/object:Api::Type::NestedObject
             name: 'managedGroupConfig'
             output: true
@@ -285,9 +286,9 @@ properties:
               The default value for master and worker groups is NON_PREEMPTIBLE. This default cannot be changed.
               The default value for secondary instances is PREEMPTIBLE.
             values:
-            - :PREEMPTIBILITY_UNSPECIFIED
-            - :NON_PREEMPTIBLE
-            - :PREEMPTIBLE
+              - :PREEMPTIBILITY_UNSPECIFIED
+              - :NON_PREEMPTIBLE
+              - :PREEMPTIBLE
           - !ruby/object:Api::Type::NestedObject
             name: 'managedGroupConfig'
             output: true
@@ -326,14 +327,14 @@ properties:
 
               Possible values include: COMPONENT_UNSPECIFIED, ANACONDA, HIVE_WEBHCAT, JUPYTER, ZEPPELIN, HBASE, SOLR, and RANGER
             values:
-            - :COMPONENT_UNSPECIFIED
-            - :ANACONDA
-            - :HBASE
-            - :RANGER
-            - :SOLR
-            - :HIVE_WEBHCAT
-            - :JUPYTER
-            - :ZEPPELIN
+              - :COMPONENT_UNSPECIFIED
+              - :ANACONDA
+              - :HBASE
+              - :RANGER
+              - :SOLR
+              - :HIVE_WEBHCAT
+              - :JUPYTER
+              - :ZEPPELIN
       - !ruby/object:Api::Type::Array
         name: 'initializationActions'
         description: |

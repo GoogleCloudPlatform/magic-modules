@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -36,6 +36,26 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+docs: !ruby/object:Provider::Terraform::Docs
+autogen_async: true
+import_format: ["projects/{{project}}/locations/global/certificates/{{name}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "certificate_manager_google_managed_certificate"
+    primary_resource_id: "default"
+    vars:
+      dns_auth_name: "dns-auth"
+      dns_auth_subdomain: "subdomain"
+      dns_auth_name2: "dns-auth2"
+      dns_auth_subdomain2: "subdomain2"
+      cert_name: "dns-cert"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "certificate_manager_self_managed_certificate"
+    primary_resource_id: "default"
+    vars:
+      cert_name: "self-managed-cert"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/cert_manager.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -62,11 +82,12 @@ properties:
 
       DEFAULT: Certificates with default scope are served from core Google data centers.
       If unsure, choose this option.
-      
+
       EDGE_CACHE: Certificates with scope EDGE_CACHE are special-purposed certificates,
       served from non-core Google data centers.
       Currently allowed only for managed certificates.
     default_value: DEFAULT
+    diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
   - !ruby/object:Api::Type::NestedObject
     name: selfManaged
     immutable: true
@@ -77,6 +98,7 @@ properties:
       Certificate data for a SelfManaged Certificate.
       SelfManaged Certificates are uploaded by the user. Updating such
       certificates before they expire remains the user's responsibility.
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::String
         name: certificatePem
@@ -88,6 +110,7 @@ properties:
           **Deprecated** The certificate chain in PEM-encoded form.
 
           Leaf certificate comes first, followed by intermediate ones if any.
+        sensitive: true
       - !ruby/object:Api::Type::String
         name: privateKeyPem
         exactly_one_of:
@@ -96,6 +119,7 @@ properties:
         deprecation_message: "Deprecated in favor of `pem_private_key`"
         description: |
           **Deprecated** The private key of the leaf certificate in PEM-encoded form.
+        sensitive: true
       - !ruby/object:Api::Type::String
         name: pemCertificate
         exactly_one_of:
@@ -112,6 +136,7 @@ properties:
           - self_managed.0.pem_private_key
         description: |
           The private key of the leaf certificate in PEM-encoded form.
+        sensitive: true
   - !ruby/object:Api::Type::NestedObject
     name: managed
     immutable: true
@@ -135,6 +160,7 @@ properties:
         immutable: true
         description: |
           Authorizations that will be used for performing domain authorization
+        diff_suppress_func: 'projectNumberDiffSuppress'
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'state'

@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Product
 name: CloudFunctions
 display_name: Cloud Functions
+legacy_name: 'cloudfunctions'
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

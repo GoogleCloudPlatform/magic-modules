@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -59,6 +59,53 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Private Google Access': 'https://cloud.google.com/vpc/docs/configure-private-google-access'
+    'Cloud Networking': 'https://cloud.google.com/vpc/docs/using-vpc'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  allowed_iam_role: 'roles/compute.networkUser'
+  parent_resource_attribute: 'subnetwork'
+  iam_conditions_request_type: :QUERY_PARAM
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/subnetwork.erb
+  resource_definition: templates/terraform/resource_definition/subnetwork.erb
+  extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "subnetwork_basic"
+    primary_resource_id: "network-with-private-secondary-ip-ranges"
+    vars:
+      subnetwork_name: "test-subnetwork"
+      network_name: "test-network"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"\
+      random_suffix\"])"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "subnetwork_logging_config"
+    primary_resource_id: "subnet-with-logging"
+    vars:
+      subnetwork_name: "log-test-subnetwork"
+      network_name: "log-test-network"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "subnetwork_internal_l7lb"
+    min_version: beta
+    primary_resource_id: "network-for-l7lb"
+    vars:
+      subnetwork_name: "l7lb-test-subnetwork"
+      network_name: "l7lb-test-network"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "subnetwork_ipv6"
+    primary_resource_id: "subnetwork-ipv6"
+    vars:
+      subnetwork_name: "ipv6-test-subnetwork"
+      network_name: "ipv6-test-network"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "subnetwork_internal_ipv6"
+    primary_resource_id: "subnetwork-internal-ipv6"
+    vars:
+      subnetwork_name: "internal-ipv6-test-subnetwork"
+      network_name: "internal-ipv6-test-network"
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -80,6 +127,7 @@ properties:
     name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description: |
@@ -90,6 +138,8 @@ properties:
     required: true
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validateIpCidrRange'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -101,6 +151,8 @@ properties:
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
     required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validateGCEName'
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'
@@ -114,11 +166,12 @@ properties:
     name: 'purpose'
     immutable: true
     description: |
-      The purpose of the resource. A subnetwork with purpose set to
-      INTERNAL_HTTPS_LOAD_BALANCER is a user-created subnetwork that is
-      reserved for Internal HTTP(S) Load Balancing.
-
-      If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the `role` field.
+      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `INTERNAL_HTTPS_LOAD_BALANCER` or `REGIONAL_MANAGED_PROXY`.
+      A subnetwork with purpose set to `INTERNAL_HTTPS_LOAD_BALANCER` is a user-created subnetwork that is reserved for Internal HTTP(S) Load Balancing.
+      A subnetwork in a given region with purpose set to `REGIONAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the regional Envoy-based load balancers.
+      If unspecified, the purpose defaults to `PRIVATE_RFC_1918`.
+      The enableFlowLogs field isn't supported with the purpose field set to `INTERNAL_HTTPS_LOAD_BALANCER`.
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'role'
     update_verb: :PATCH
@@ -129,20 +182,32 @@ properties:
       - :ACTIVE
       - :BACKUP
     description: |
-      The role of subnetwork. Currently, this field is only used when
-      purpose = INTERNAL_HTTPS_LOAD_BALANCER. The value can be set to ACTIVE
-      or BACKUP. An ACTIVE subnetwork is one that is currently being used
-      for Internal HTTP(S) Load Balancing. A BACKUP subnetwork is one that
-      is ready to be promoted to ACTIVE or is currently draining.
+      The role of subnetwork.
+      The value can be set to `ACTIVE` or `BACKUP`.
+      An `ACTIVE` subnetwork is one that is currently being used.
+      A `BACKUP` subnetwork is one that is ready to be promoted to `ACTIVE` or is currently draining.
+
+      Subnetwork role must be specified when purpose is set to `INTERNAL_HTTPS_LOAD_BALANCER` or `REGIONAL_MANAGED_PROXY`.
   - !ruby/object:Api::Type::Array
-    name: 'secondaryIpRanges'
+    name: 'secondaryIpRange'
+    api_name: secondaryIpRanges
+    unordered_list: true
+    default_from_api: true
+    schema_config_mode_attr: true
+    send_empty_value: true
     description: |
       An array of configurations for secondary IP ranges for VM instances
       contained in this subnetwork. The primary IP of such VM must belong
       to the primary ipCidrRange of the subnetwork. The alias IPs may belong
       to either primary or secondary ranges.
+
+      **Note**: This field uses [attr-as-block mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html) to avoid
+      breaking users during the 0.12 upgrade. To explicitly send a list
+      of zero objects you must use the following syntax:
+      `example=[]`
+      For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
     update_verb: :PATCH
-    update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     update_id: 'secondaryIpRanges'
     fingerprint_name: 'fingerprint'
     item_type: !ruby/object:Api::Type::NestedObject
@@ -150,6 +215,8 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'rangeName'
           required: true
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validateGCEName'
           description: |
             The name associated with this subnetwork secondary range, used
             when adding an alias IP range to a VM instance. The name must
@@ -158,6 +225,8 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'ipCidrRange'
           required: true
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validateIpCidrRange'
           description: |
             The range of IP addresses belonging to this subnetwork secondary
             range. Provide this property when you create the subnetwork.
@@ -170,34 +239,42 @@ properties:
       access Google APIs and services by using Private Google Access.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'privateIpv6GoogleAccess'
     update_verb: :PATCH
-    update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     description: The private IPv6 google access type for the VMs in this subnet.
     fingerprint_name: 'fingerprint'
+    default_from_api: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
     description: |
       The GCP region for this subnetwork.
-    required: true
+    required: false
     immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::NestedObject
     name: 'logConfig'
     update_verb: :PATCH
-    update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     fingerprint_name: 'fingerprint'
     update_id: 'logConfig'
     description: |
       Denotes the logging options for the subnetwork flow logs. If logging is enabled
       logs will be exported to Stackdriver. This field cannot be set if the `purpose` of this
       subnetwork is `INTERNAL_HTTPS_LOAD_BALANCER`
+    send_empty_value: true
+    custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enable'
         description: If logging is enabled for this subnetwork
+        exclude: true
       - !ruby/object:Api::Type::Enum
         name: 'aggregationInterval'
         at_least_one_of:
@@ -253,6 +330,7 @@ properties:
         description: |
           List of metadata fields that should be added to reported logs.
           Can only be specified if VPC flow logs for this subnetwork is enabled and "metadata" is set to CUSTOM_METADATA.
+        is_set: true
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'filterExpr'
@@ -277,10 +355,11 @@ properties:
     description: |
       The stack type for this subnet to identify whether the IPv6 feature is enabled or not.
       If not specified IPV4_ONLY will be used.
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'ipv6AccessType'
     update_verb: :PATCH
-    update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     fingerprint_name: 'fingerprint'
     values:
       - :EXTERNAL
@@ -299,10 +378,3 @@ properties:
     output: true
     description: |
       The range of external IPv6 addresses that are owned by this subnetwork.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Private Google Access':
-      'https://cloud.google.com/vpc/docs/configure-private-google-access'
-    'Cloud Networking':
-      'https://cloud.google.com/vpc/docs/using-vpc'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks'

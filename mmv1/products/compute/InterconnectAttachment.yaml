@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -39,14 +39,35 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "interconnect_attachment_basic"
+    primary_resource_id: "on_prem"
+    vars:
+      interconnect_attachment_name: "on-prem-attachment"
+      router_name: "router-1"
+      network_name: "network-1"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "compute_interconnect_attachment_ipsec_encryption"
+    primary_resource_id: "ipsec-encrypted-interconnect-attachment"
+    vars:
+      interconnect_attachment_name: "test-interconnect-attachment"
+      address_name: "test-address"
+      router_name: "test-router"
+      network_name: "test-network"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/interconnect_attachment.go.erb
+  post_create: templates/terraform/post_create/interconnect_attachment.go.erb
+  pre_delete: templates/terraform/pre_delete/interconnect_attachment.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'selfLink'
-    required: true
+    required: false
     description: |
       Region where the regional interconnect attachment resides.
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::Boolean
     name: 'adminEnabled'
@@ -74,6 +95,7 @@ properties:
       URL of the underlying Interconnect object that this attachment's
       traffic will traverse through. Required if type is DEDICATED, must not
       be set if type is PARTNER.
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -83,6 +105,8 @@ properties:
     description: |
       Maximum Transmission Unit (MTU), in bytes, of packets passing through
       this interconnect attachment. Currently, only 1440 and 1500 are allowed. If not specified, the value will default to 1440.
+    custom_flatten: templates/terraform/custom_flatten/float64_to_int_to_string.go.erb
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'bandwidth'
     description: |
@@ -104,6 +128,7 @@ properties:
       - :BPS_10G
       - :BPS_20G
       - :BPS_50G
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'edgeAvailabilityDomain'
     immutable: true
@@ -114,6 +139,7 @@ properties:
       selected availability domain will be provided to the Partner via the
       pairing key so that the provisioned circuit will lie in the specified
       domain. If not specified, the value will default to AVAILABILITY_DOMAIN_ANY.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'pairingKey'
     description: |
@@ -151,6 +177,7 @@ properties:
       - :DEDICATED
       - :PARTNER
       - :PARTNER_PROVIDER
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
@@ -187,6 +214,7 @@ properties:
       Cloud Router is configured.
     required: true
     immutable: true
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: |
@@ -198,6 +226,7 @@ properties:
       The unique identifier for the resource. This identifier is
       defined by the server.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -209,6 +238,8 @@ properties:
       letter, or digit, except the last character, which cannot be a dash.
     required: true
     immutable: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
   - !ruby/object:Api::Type::Array
     name: candidateSubnets
     immutable: true
@@ -220,6 +251,7 @@ properties:
       an unused /29 from the supplied candidate prefix(es). The request will
       fail if all possible /29s are in use on Google's edge. If not supplied,
       Google will randomly select an unused /29 from all of link-local space.
+    ignore_read: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Integer
     name: vlanTag8021q
@@ -227,6 +259,7 @@ properties:
     description: |
       The IEEE 802.1Q VLAN tag for this attachment, in the range 2-4094. When
       using PARTNER type this will be managed upstream.
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ipsecInternalAddresses'
     description: |
@@ -277,3 +310,4 @@ properties:
       - :NONE
       - :IPSEC
     default_value: :NONE
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
