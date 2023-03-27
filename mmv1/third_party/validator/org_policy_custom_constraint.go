@@ -1,8 +1,6 @@
 package google
 
 import (
-	"fmt"
-
 	"google.golang.org/api/orgpolicy/v2"
 )
 
@@ -60,7 +58,7 @@ func GetOrgPolicyV2CustomConstraintApiObject(d TerraformResourceData, config *Co
 	}
 
 	if v, ok := d.GetOk("resource_types"); ok {
-		cc.RetentionPolicy = expandResourceTypes(v.([]interface{}))
+		cc.ResourceTypes = expandResourceTypes(v.([]interface{}))
 	}
 
 	if v, ok := d.GetOk("action_type"); ok {
