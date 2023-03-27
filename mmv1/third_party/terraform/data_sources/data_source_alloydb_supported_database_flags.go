@@ -95,13 +95,13 @@ func DataSourceAlloydbSupportedDatabaseFlags() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"min_value": {
-										Type:        schema.TypeString,
+										Type:        schema.TypeInt,
 										Computed:    true,
 										Optional:    true,
 										Description: `The minimum value that can be specified, if applicable.`,
 									},
 									"max_value": {
-										Type:        schema.TypeString,
+										Type:        schema.TypeInt,
 										Computed:    true,
 										Optional:    true,
 										Description: `The maximum value that can be specified, if applicable.`,
@@ -136,46 +136,20 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 	}
 	var supportedDatabaseFlagIterator *alloydb.SupportedDatabaseFlagIterator
 	locsReq := new(alloydbpb.ListSupportedDatabaseFlagsRequest)
+	locationsClient := config.NewAlloydbClient()
+	if locationsClient == nil {
+		return fmt.Errorf("Failed to call the API to fetch the supported database flags")
+	}
 	err = nil
 	err = retryTime(func() error {
-		locationsClient := config.NewAlloydbClient()
 		//set call options on locationsClient
 		supportedDatabaseFlagIterator = locationsClient.ListSupportedDatabaseFlags(config.context, locsReq, gax.WithPath(fmt.Sprintf("v1/projects/%s/locations/%s/supportedDatabaseFlags", billingProject, location)))
 		return nil
 	}, 5)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Locations %q", d.Id()))
+		return handleNotFoundError(err, d, fmt.Sprintf("Supported Database flags %q", d.Id()))
 	}
 
-	/*config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-	if err != nil {
-		return err
-	}
-	location := d.Get("location").(string)
-
-	billingProject := ""
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return fmt.Errorf("Error fetching project: %s", err)
-	}
-	billingProject = project
-
-	// err == nil indicates that the billing_project value was found
-	if bp, err := getBillingProject(d, config); err == nil {
-		billingProject = bp
-	}
-
-	url, err := replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{location}}/supportedDatabaseFlags")
-	if err != nil {
-		return fmt.Errorf("Error setting api endpoint")
-	}
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
-	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("SupportedDatabaseFlags %q", d.Id()))
-	}
-	*/
 	var supportedDatabaseFlags []map[string]interface{}
 	for {
 		supportedDatabaseFlag := make(map[string]interface{})
@@ -183,13 +157,16 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 		if err == iterator.Done {
 			break
 		}
+		if err != nil {
+			return fmt.Errorf(fmt.Sprintf("Failed to fetch the supported database flags for the provided location: %s", location))
+		}
 		if flag.Name != "" {
 			supportedDatabaseFlag["name"] = flag.Name
 		}
 		if flag.FlagName != "" {
 			supportedDatabaseFlag["flag_name"] = flag.FlagName
 		}
-		supportedDatabaseFlag["value_type"] = flag.ValueType
+		supportedDatabaseFlag["value_type"] = flattenValueType(flag.ValueType)
 		supportedDatabaseFlag["accepts_multiple_values"] = flag.AcceptsMultipleValues
 		supportedDatabaseFlag["requires_db_restart"] = flag.RequiresDbRestart
 		if flag.SupportedDbVersions != nil {
@@ -200,31 +177,33 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 			supportedDatabaseFlag["supported_db_versions"] = dbVersions
 		}
 
-		if flag.Restrictions.StringRestrictions != nil {
-			restrictions := make([]map[string][]string, 0, 1)
-			fetchedAllowedValues := flag.Restrictions.StringRestrictions.AllowedValues
-			if fetchedAllowedValues != nil {
-				allowedValues := make([]string, 0, len(fetchedAllowedValues))
-				for _, val := range fetchedAllowedValues {
-					allowedValues = append(allowedValues, val)
+		if flag.Restrictions != nil {
+			if stringRes, ok := flag.Restrictions.(*alloydbpb.SupportedDatabaseFlag_StringRestrictions_); ok {
+				restrictions := make([]map[string][]string, 0, 1)
+				fetchedAllowedValues := stringRes.StringRestrictions.AllowedValues
+				if fetchedAllowedValues != nil {
+					allowedValues := make([]string, 0, len(fetchedAllowedValues))
+					for _, val := range fetchedAllowedValues {
+						allowedValues = append(allowedValues, val)
+					}
+					stringRestrictions := map[string][]string{
+						"allowed_values": allowedValues,
+					}
+					restrictions = append(restrictions, stringRestrictions)
+					supportedDatabaseFlag["string_restrictions"] = restrictions
 				}
-				stringRestrictions := map[string][]string{
-					"allowed_values": allowedValues,
+			}
+			if integerRes, ok := flag.Restrictions.(*alloydbpb.SupportedDatabaseFlag_IntegerRestrictions_); ok {
+				restrictions := make([]map[string]int64, 0, 1)
+				minValue := integerRes.IntegerRestrictions.MinValue
+				maxValue := integerRes.IntegerRestrictions.MaxValue
+				integerRestrictions := map[string]int64{
+					"min_value": minValue.GetValue(),
+					"max_value": maxValue.GetValue(),
 				}
-				restrictions = append(restrictions, stringRestrictions)
-				supportedDatabaseFlag["string_restrictions"] = restrictions
+				restrictions = append(restrictions, integerRestrictions)
+				supportedDatabaseFlag["integer_restrictions"] = restrictions
 			}
-		}
-		if flag.Restrictions.IntegerRestrictions != nil {
-			restrictions := make([]map[string]string, 0, 1)
-			minValue := flag.Restrictions.IntegerRestrictions.MinValue
-			maxValue := flag.Restrictions.IntegerRestrictions.MaxValue
-			integerRestrictions := map[string]string{
-				"min_value": minValue,
-				"max_value": maxValue,
-			}
-			restrictions = append(restrictions, integerRestrictions)
-			supportedDatabaseFlag["integer_restrictions"] = restrictions
 		}
 		supportedDatabaseFlags = append(supportedDatabaseFlags, supportedDatabaseFlag)
 	}
@@ -233,4 +212,19 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 	}
 	d.SetId(fmt.Sprintf("projects/%s/locations/%s/supportedDbFlags", project, location))
 	return nil
+}
+
+func flattenValueType(value alloydbpb.SupportedDatabaseFlag_ValueType) string {
+	switch value {
+	case 1:
+		return "SupportedDatabaseFlag_STRING"
+	case 2:
+		return "SupportedDatabaseFlag_INTEGER"
+	case 3:
+		return "SupportedDatabaseFlag_FLOAT"
+	case 4:
+		return "SupportedDatabaseFlag_NONE"
+	default:
+		return "SupportedDatabaseFlag_VALUE_TYPE_UNSPECIFIED"
+	}
 }

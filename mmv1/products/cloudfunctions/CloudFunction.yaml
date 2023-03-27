@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'CloudFunction'
-base_url: projects/{{project}}/locations/{{location}}/functions
+base_url: projects/{{project}}/locations/{{region}}/functions
 create_verb: :POST
 description: |
   A Cloud Function that contains user computation executed in response to an event.
@@ -29,16 +29,37 @@ async: !ruby/object:Api::OpAsync
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'cloud_function'
+  method_name_separator: ':'
+  exclude: false
+
+legacy_name: 'google_cloudfunctions_function'
+id_format: 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
+import_format: ["projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}"]
+exclude_resource: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudfunctions_cloud_function"
+    primary_resource_id: "function"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-function%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      function_name: "my-function"
+      bucket_name: "cloudfunctions-function-example-bucket"
+      zip_path: "path/to/index.zip"
+    test_vars_overrides:
+      zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
 parameters:
   - !ruby/object:Api::Type::String
-    name: 'location'
+    name: 'region'
     required: true
     description: The location of this cloud function.
     # This is not a real API field.
@@ -48,8 +69,6 @@ parameters:
   - !ruby/object:Api::Type::Boolean
     name: 'trigger_http'
     description: 'Use HTTP to trigger this function'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  exclude: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

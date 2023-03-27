@@ -117,7 +117,9 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     find ./test/** -type f -exec git rm {} \;
 
     popd
-    bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
+    rm -rf third_party/validator/tests/source
+    cp -rf third_party/validator/tests/tfv-source third_party/validator/tests/source
+    bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     pushd $LOCAL_PATH
 
     if [ "$COMMAND" == "downstream" ]; then
@@ -146,14 +148,14 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     popd
 elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
-    bundle exec compiler -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
+    bundle exec compiler.rb -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
 else
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
-            bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION --no-docs
-            bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v beta --no-code
+            bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v $VERSION --no-docs
+            bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v beta --no-code
         else
-            bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION
+            bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v $VERSION
         fi
         pushd ../
         make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION

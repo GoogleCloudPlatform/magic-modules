@@ -53,6 +53,14 @@ type AssetResource struct {
 	Data map[string]interface{} `json:"data,omitempty"`
 }
 
+type Folder struct {
+	Name        string `json:"name,omitempty"`
+	Parent      string `json:"parent,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
+	State string `json:"state,omitempty"`
+	CreateTime *Timestamp `json:"create_time,omitempty"`
+}
+
 type IAMPolicy struct {
 	Bindings []IAMBinding `json:"bindings"`
 }
