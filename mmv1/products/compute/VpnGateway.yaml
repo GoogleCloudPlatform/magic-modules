@@ -133,7 +133,7 @@ properties:
     required: true
     immutable: true
   - !ruby/object:Api::Type::Enum
-    name: 'stack_type'
+    name: 'stackType'
     description: |
       The stack type for this VPN gateway to identify the IP protocols that are enbaled.
       If not specified, IPV4_ONLY will be used.
@@ -141,8 +141,7 @@ properties:
     values:
       - :IPV4_ONLY
       - :IPV4_IPV6
-    immutable: true
-    ignore_read: true    
+    immutable: true  
   - !ruby/object:Api::Type::Array
     name: 'vpnInterfaces'
     description: |
