@@ -38,7 +38,7 @@ func New(version string) provider.ProviderWithMetaSchema {
 }
 
 // frameworkProvider is the provider implementation.
-type frameworkProvider struct{
+type frameworkProvider struct {
     billingProject types.String
     client *http.Client
     context context.Context
@@ -268,6 +268,7 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
 func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {
     return []func() datasource.DataSource{
         NewGoogleClientConfigDataSource,
+        NewGoogleClientOpenIDUserinfoDataSource,
         NewGoogleDnsManagedZoneDataSource,
         NewGoogleDnsRecordSetDataSource,
         NewGoogleDnsKeysDataSource,
