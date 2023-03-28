@@ -42,6 +42,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "cloudbuild_trigger_service_account"
     primary_resource_id: "service-account-trigger"
+    vars:
+      sa_name: "my-service-account"
   - !ruby/object:Provider::Terraform::Examples
     name: "cloudbuild_trigger_include_build_logs"
     primary_resource_id: "include-build-logs-trigger"
