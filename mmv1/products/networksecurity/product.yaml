@@ -15,7 +15,6 @@
 name: NetworkSecurity
 versions:
   - !ruby/object:Api::Product::Version
-    # TODO(gfelipe) change to beta once this is released
     name: beta
     base_url: https://networksecurity.googleapis.com/v1beta1/
 scopes:
