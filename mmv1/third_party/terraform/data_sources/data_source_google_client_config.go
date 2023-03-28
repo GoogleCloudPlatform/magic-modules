@@ -19,6 +19,8 @@ type GoogleClientConfigDataSource struct {
 }
 
 type GoogleClientConfigModel struct {
+	// Id could/should be removed in future as it's not necessary in the plugin framework
+	// https://github.com/hashicorp/terraform-plugin-testing/issues/84
 	Id          types.String `tfsdk:"id"`
 	Project     types.String `tfsdk:"project"`
 	Region      types.String `tfsdk:"region"`
