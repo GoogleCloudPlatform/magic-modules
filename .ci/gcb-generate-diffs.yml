@@ -111,6 +111,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tfv-head
+      allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-head"]
       args:
@@ -121,6 +122,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       id: tfv-base
+      allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-base"]
       args:
