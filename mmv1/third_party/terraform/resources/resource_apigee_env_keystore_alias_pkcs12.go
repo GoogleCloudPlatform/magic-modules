@@ -13,14 +13,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func ResourceApigeeKeystoreAliasesPkcs() *schema.Resource {
+func ResourceApigeeEnvKeystoreAliasPkcs12() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceApigeeKeystoreAliasesPkcsCreate,
-		Read:   resourceApigeeKeystoreAliasesPkcsRead,
-		Delete: resourceApigeeKeystoreAliasesPkcsDelete,
+		Create: resourceApigeeEnvKeystoreAliasPkcs12Create,
+		Read:   resourceApigeeEnvKeystoreAliasPkcs12Read,
+		Delete: resourceApigeeEnvKeystoreAliasPkcs12Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: resourceApigeeKeystoreAliasesPkcsImport,
+			State: resourceApigeeEnvKeystoreAliasPkcs12Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -172,7 +172,7 @@ Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not
 	}
 }
 
-func resourceApigeeKeystoreAliasesPkcsCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceApigeeEnvKeystoreAliasPkcs12Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -221,10 +221,10 @@ func resourceApigeeKeystoreAliasesPkcsCreate(d *schema.ResourceData, meta interf
 
 	log.Printf("[DEBUG] Finished creating KeystoreAliasesPkcs %q: %#v", d.Id(), res)
 
-	return resourceApigeeKeystoreAliasesPkcsRead(d, meta)
+	return resourceApigeeEnvKeystoreAliasPkcs12Read(d, meta)
 }
 
-func resourceApigeeKeystoreAliasesPkcsRead(d *schema.ResourceData, meta interface{}) error {
+func resourceApigeeEnvKeystoreAliasPkcs12Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -263,7 +263,7 @@ func resourceApigeeKeystoreAliasesPkcsRead(d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func resourceApigeeKeystoreAliasesPkcsDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceApigeeEnvKeystoreAliasPkcs12Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -294,7 +294,7 @@ func resourceApigeeKeystoreAliasesPkcsDelete(d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceApigeeKeystoreAliasesPkcsImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceApigeeEnvKeystoreAliasPkcs12Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 	if err := parseImportId([]string{
 		"organizations/(?P<org_id>[^/]+)/environments/(?P<environment>[^/]+)/keystores/(?P<keystore>[^/]+)/aliases/(?P<alias>[^/]+)",
