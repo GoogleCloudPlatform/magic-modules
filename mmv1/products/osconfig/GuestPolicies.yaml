@@ -361,7 +361,7 @@ properties:
                 name: 'remote'
                 description: |
                   A generic remote artifact.
-                # TODO (mbang): add conflicts_with when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'uri'
@@ -377,7 +377,7 @@ properties:
                 name: 'gcs'
                 description: |
                   A Google Cloud Storage artifact.
-                # TODO (mbang): add conflicts_with when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'bucket'

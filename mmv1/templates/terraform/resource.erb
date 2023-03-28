@@ -746,11 +746,11 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             This is unfortunate, but it's because of the way that GCP works, so there's
             no easy way out.  Some APIs require you to send `enable_foo: false`, while
             others will crash if you send `attribute: ''`.  We require this nuance to
-            be annotated in api.yaml, since it is not discoverable automatically.
+            be annotated in ResourceName.yaml, since it is not discoverable automatically.
 
             The behavior here, which we believe to be correct, is to send a value if
             * It is non-empty OR
-            * It is marked send_empty_value in api.yaml.
+            * It is marked send_empty_value in ResourceName.yaml.
             AND
             * It has been set by the user OR
             * It has been modified by the expander in any way
