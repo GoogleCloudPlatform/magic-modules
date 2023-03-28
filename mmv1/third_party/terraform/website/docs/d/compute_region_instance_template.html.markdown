@@ -300,6 +300,3 @@ The `disk_encryption_key` block supports:
 * `self_link` - The URI of the created resource.
 
 * `tags_fingerprint` - The unique fingerprint of the tags.
-
-[1]: /docs/providers/google/r/compute_instance_group_manager.html
-[2]: /docs/configuration/resources.html#lifecycle
