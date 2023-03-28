@@ -86,12 +86,11 @@ parameters:
       The name of the gatewat security policy this rule belongs to.
     url_param_only: true
 properties:
-  # TODO(felipegc) the current alpha api does not support it. Validate if there will be for beta.
-  # - !ruby/object:Api::Type::String
-  #   name: 'selfLink'
-  #   description: |
-  #     Server-defined URL of this resource.
-  #   output: true
+  - !ruby/object:Api::Type::String
+    name: 'selfLink'
+    description: |
+      Server-defined URL of this resource.
+    output: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
