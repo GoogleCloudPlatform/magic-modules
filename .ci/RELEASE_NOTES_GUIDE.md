@@ -6,8 +6,6 @@ The Magician bot has the ability to copy specifically formatted release notes
 from upstream Magic-Modules PRs to downstream PRs that have CHANGELOGS, namely
 PRs generated in the Terraform providers (GA, beta).
 
-Code lives in magic-modules/downstream_changelog_metadata.py
-
 This guide discusses the style and format of release notes to add
 in PR descriptions so they will be copied downstream and used
 in CHANGELOGs.
