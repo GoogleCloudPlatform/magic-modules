@@ -29,7 +29,7 @@ func ResourceApigeeFlowhook() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: `Description of the flow hook.`,
+				Description: `Description of the flow hook.changed`,
 			},
 			"environment": {
 				Type:        schema.TypeString,
