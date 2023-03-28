@@ -10,6 +10,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// Ensure the data source satisfies the expected interfaces.
+var (
+	_ datasource.DataSource              = &GoogleClientConfigDataSource{}
+	_ datasource.DataSourceWithConfigure = &GoogleClientConfigDataSource{}
+)
+
 func NewGoogleClientConfigDataSource() datasource.DataSource {
 	return &GoogleClientConfigDataSource{}
 }
