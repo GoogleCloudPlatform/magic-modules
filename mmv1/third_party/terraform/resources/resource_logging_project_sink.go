@@ -62,32 +62,15 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 	id, sink := expandResourceLoggingSink(d, "projects", project)
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
 
-	create := true
 	name := d.Get("name").(string)
-	for _, reserved := range ReservedLoggingProjectSinks {
-		if name == reserved {
-			if err := resourceLoggingProjectSinkRead(d, meta); err != nil {
-				if isGoogleApiErrorWithCode(err, 404) {
-					log.Printf("[WARN] %q not found and attempting to create it", name)
-					// attempt to create the resource if the _Default sink is disabled
-					// https://cloud.google.com/logging/docs/default-settings#disable-default-sink
-					create = true
-					break
+	if _, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do(); err != nil {
+		if isGoogleApiErrorWithCode(err, 409) {
+			for _, reserved := range ReservedLoggingProjectSinks {
+				if name == reserved {
+					log.Printf("[WARN] %q is a reserved log sink and will be imported into the state", name)
 				}
-
-				// if reading the project logging sink returns a non 404 error,
-				// return it to be handled by the callee
-				return err
 			}
-
-			log.Printf("[WARN] %q is an auto-created log sink and will be imported into the state", name)
-			create = false
-			break
-		}
-	}
-
-	if create {
-		if _, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do(); err != nil {
+		} else {
 			return err
 		}
 	}
