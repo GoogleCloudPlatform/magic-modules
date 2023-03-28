@@ -31,11 +31,11 @@ type Asset struct {
 	// The name, in a peculiar format: `\\<api>.googleapis.com/<self_link>`
 	Name string `json:"name"`
 	// The type name in `google.<api>.<resourcename>` format.
-	Type      string         `json:"asset_type"`
-	Resource  *AssetResource `json:"resource,omitempty"`
-	IAMPolicy *IAMPolicy     `json:"iam_policy,omitempty"`
-	OrgPolicy []*OrgPolicy   `json:"org_policy,omitempty"`
-	CustomOrgPolicy []*CustomOrgPolicy `json:"v2_org_policies,omitempty"`
+	Type            string             `json:"asset_type"`
+	Resource        *AssetResource     `json:"resource,omitempty"`
+	IAMPolicy       *IAMPolicy         `json:"iam_policy,omitempty"`
+	OrgPolicy       []*OrgPolicy       `json:"org_policy,omitempty"`
+	OrgPolicyPolicy []*OrgPolicyPolicy `json:"v2_org_policies,omitempty"`
 }
 
 // AssetResource is the Asset's Resource field.
@@ -52,6 +52,14 @@ type AssetResource struct {
 	// as there are occasional deviations between CAI and API responses.
 	// This returns the API response values instead.
 	Data map[string]interface{} `json:"data,omitempty"`
+}
+
+type Folder struct {
+	Name        string `json:"name,omitempty"`
+	Parent      string `json:"parent,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
+	State string `json:"state,omitempty"`
+	CreateTime *Timestamp `json:"create_time,omitempty"`
 }
 
 type IAMPolicy struct {
@@ -71,17 +79,17 @@ type OrgPolicy struct {
 	UpdateTime     *Timestamp      `json:"update_time,omitempty"`
 }
 
-// CustomOrgPolicy is the represtation of V2OrgPolicies
-type CustomOrgPolicy struct {
-	Name string `json:"name"`
-	Spec *Spec  `json:"spec,omitempty"`
+// OrgPolicyPolicy is the represtation of V2OrgPolicies
+type OrgPolicyPolicy struct {
+	Name       string      `json:"name"`
+	PolicySpec *PolicySpec `json:"spec,omitempty"`
 }
 
-// Spec is the representation of Spec for Custom Org Policy
-type Spec struct {
+// Spec is the representation of Spec for V2OrgPolicy
+type PolicySpec struct {
 	Etag              string        `json:"etag,omitempty"`
 	UpdateTime        *Timestamp    `json:"update_time,omitempty"`
-	Rules             []*PolicyRule `json:"rules,omitempty"`
+	PolicyRules       []*PolicyRule `json:"rules,omitempty"`
 	InheritFromParent bool          `json:"inherit_from_parent,omitempty"`
 	Reset             bool          `json:"reset,omitempty"`
 }
@@ -91,7 +99,7 @@ type PolicyRule struct {
 	AllowAll  bool          `json:"allow_all,omitempty"`
 	DenyAll   bool          `json:"deny_all,omitempty"`
 	Enforce   bool          `json:"enforce,omitempty"`
-	Condition *Expr         `json:"expression,omitempty"`
+	Condition *Expr         `json:"condition,omitempty"`
 }
 
 type StringValues struct {
@@ -105,7 +113,6 @@ type Expr struct {
 	Description string `json:"description,omitempty"`
 	Location    string `json:"location,omitempty"`
 }
-
 
 type Timestamp struct {
 	Seconds int64 `json:"seconds,omitempty"`
@@ -139,7 +146,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	// workaround for empty project
 	placeholderSet := false
 	if config.Project == "" {
-		config.Project = fmt.Sprintf("placeholder-%s", randString(8))
+		config.Project = fmt.Sprintf("placeholder-%s", RandString(8))
 		placeholderSet = true
 	}
 
@@ -154,7 +161,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	fWithPlaceholder := func(key string) string {
 		val := f(key)
 		if val == "" {
-			val = fmt.Sprintf("placeholder-%s", randString(8))
+			val = fmt.Sprintf("placeholder-%s", RandString(8))
 		}
 		return val
 	}
@@ -162,7 +169,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	return re.ReplaceAllStringFunc(linkTmpl, fWithPlaceholder), nil
 }
 
-func randString(n int) string {
+func RandString(n int) string {
 	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, n)
 	for i := range b {
