@@ -47,7 +47,7 @@ func TestDetectMissingTests(t *testing.T) {
 					},
 				},
 			},
-			expectedUntestedFields: []string{"`field_four.field_five.field_six`", "`field_one`"},
+			expectedUntestedFields: []string{"field_four.field_five.field_six", "field_one"},
 		},
 		{
 			name: "config-variable-resource",
@@ -64,7 +64,7 @@ func TestDetectMissingTests(t *testing.T) {
 					"field_one": &Field{Added: true},
 				},
 			},
-			expectedUntestedFields: []string{"`field_one`"},
+			expectedUntestedFields: []string{"field_one"},
 		},
 	} {
 		missingTests, err := detectMissingTests(test.changedFields, allTests)

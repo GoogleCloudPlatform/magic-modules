@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strings"
+	"text/template"
 
 	"github.com/golang/glog"
 )
@@ -25,14 +27,25 @@ func main() {
 		glog.Errorf("error detecting missing tests: %v", err)
 	}
 	if len(missingTests) > 0 {
-		fmt.Println("## Missing test report\nYour PR includes resource fields which are not covered by any test.")
-		for resourceName, missingTestInfo := range missingTests {
-			fmt.Printf("\nResource: `%s` (%d total tests)\n", resourceName, len(missingTestInfo.Tests))
-			glog.Infof("%s tests parsed: %v", resourceName, missingTestInfo.Tests)
-			if len(missingTestInfo.UntestedFields) > 0 {
-				fmt.Printf("Untested fields: %s\n", strings.Join(missingTestInfo.UntestedFields, ", "))
-			}
+		funcs := template.FuncMap{
+			"join": strings.Join,
+			"backTickAll": func(ss []string) []string {
+				rs := make([]string, len(ss))
+				for i, s := range ss {
+					rs[i] = fmt.Sprintf("`%s`", s)
+				}
+				return rs
+			},
 		}
-		fmt.Println("\nPlease add acceptance tests which include these fields.")
+		outputTemplate, err := template.New("output.tmpl").Funcs(funcs).ParseFiles("output.tmpl")
+		if err != nil {
+			glog.Exitf("Error parsing missing test template file: %s", err)
+		}
+		if err := outputTemplate.Execute(os.Stdout, missingTests); err != nil {
+			glog.Exitf("Error executing missing test output template: %s", err)
+		}
+		for resourceName, missingTestInfo := range missingTests {
+			glog.Infof("%s tests parsed: %v", resourceName, missingTestInfo.Tests)
+		}
 	}
 }
