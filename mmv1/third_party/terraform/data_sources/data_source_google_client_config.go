@@ -46,7 +46,9 @@ func (d *GoogleClientConfigDataSource) Schema(ctx context.Context, req datasourc
 		MarkdownDescription: "Use this data source to access the configuration of the Google Cloud provider.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed: true,
+				Computed:            true,
+				Description:         "The ID of this data source in Terraform state. It is created in a projects/{{project}}/regions/{{region}}/zones/{{zone}} format and is NOT used by the data source in requests to Google APIs.",
+				MarkdownDescription: "The ID of this data source in Terraform state. It is created in a projects/{{project}}/regions/{{region}}/zones/{{zone}} format and is NOT used by the data source in requests to Google APIs.",
 			},
 			"project": schema.StringAttribute{
 				Description:         "The ID of the project to apply any resources to.",
