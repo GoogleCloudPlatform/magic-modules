@@ -166,11 +166,13 @@ Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Optional:    true,
+				Sensitive:   true,
 				Description: `Private Key content, omit if uploading to truststore`,
 			},
 			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				Description: `Password for the Private Key if it's encrypted`,
 			},
 			"type": {
