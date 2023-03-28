@@ -5,15 +5,14 @@ import (
 	"strings"
 )
 
-func resourceConverterCustomOrgPolicy() ResourceConverter {
+func resourceConverterOrgPolicyPolicy() ResourceConverter {
 	return ResourceConverter{
-		Convert:           GetCustomOrgPolicyCaiObject,
-		MergeCreateUpdate: MergeCustomOrgPolicy,
+		Convert:           GetOrgPolicyPolicyCaiObject,
+		MergeCreateUpdate: MergeOrgPolicyPolicy,
 	}
 }
 
-func GetCustomOrgPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
-
+func GetOrgPolicyPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	assetNamePattern, assetType, err := getAssetNameAndTypeFromParent(d.Get("parent").(string))
 	if err != nil {
 		return []Asset{}, err
@@ -24,11 +23,11 @@ func GetCustomOrgPolicyCaiObject(d TerraformResourceData, config *Config) ([]Ass
 		return []Asset{}, err
 	}
 
-	if obj, err := GetCustomOrgPolicyApiObject(d, config); err == nil {
+	if obj, err := GetOrgPolicyPolicyApiObject(d, config); err == nil {
 		return []Asset{{
 			Name:            name,
 			Type:            assetType,
-			CustomOrgPolicy: []*CustomOrgPolicy{&obj},
+			OrgPolicyPolicy: []*OrgPolicyPolicy{&obj},
 		}}, nil
 	} else {
 		return []Asset{}, err
@@ -36,19 +35,19 @@ func GetCustomOrgPolicyCaiObject(d TerraformResourceData, config *Config) ([]Ass
 
 }
 
-func GetCustomOrgPolicyApiObject(d TerraformResourceData, config *Config) (CustomOrgPolicy, error) {
-	spec, err := expandSpecCustomOrgPolicy(d.Get("spec").([]interface{}))
+func GetOrgPolicyPolicyApiObject(d TerraformResourceData, config *Config) (OrgPolicyPolicy, error) {
+	spec, err := expandSpecOrgPolicyPolicy(d.Get("spec").([]interface{}))
 	if err != nil {
-		return CustomOrgPolicy{}, err
+		return OrgPolicyPolicy{}, err
 	}
 
-	return CustomOrgPolicy{
+	return OrgPolicyPolicy{
 		Name: d.Get("name").(string),
-		Spec: spec,
+		PolicySpec: spec,
 	}, nil
 }
 
-func MergeCustomOrgPolicy(existing, incoming Asset) Asset {
+func MergeOrgPolicyPolicy(existing, incoming Asset) Asset {
 	existing.Resource = incoming.Resource
 	return existing
 }
@@ -56,17 +55,17 @@ func MergeCustomOrgPolicy(existing, incoming Asset) Asset {
 func getAssetNameAndTypeFromParent(parent string) (assetName string, assetType string, err error) {
 	const prefix = "cloudresourcemanager.googleapis.com/"
 	if strings.Contains(parent, "projects") {
-		return prefix + "projects/{{project_id}}", prefix + "Project", nil
+		return "//" + prefix + parent, prefix + "Project", nil
 	} else if strings.Contains(parent, "folders") {
-		return prefix + "folders/{{folder_id}}", prefix + "Folder", nil
+		return "//" + prefix + parent, prefix + "Folder", nil
 	} else if strings.Contains(parent, "organizations") {
-		return prefix + "organizations/{{organization_id}}", prefix + "Organization", nil
+		return "//" + prefix + parent, prefix + "Organization", nil
 	} else {
 		return "", "", fmt.Errorf("Invalid parent address(%s) for an asset", parent)
 	}
 }
 
-func expandSpecCustomOrgPolicy(configured []interface{}) (*Spec, error) {
+func expandSpecOrgPolicyPolicy(configured []interface{}) (*PolicySpec, error) {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil, nil
 	}
@@ -75,12 +74,12 @@ func expandSpecCustomOrgPolicy(configured []interface{}) (*Spec, error) {
 
 	policyRules, err := expandPolicyRulesSpec(specMap["rules"].([]interface{}))
 	if err != nil {
-		return &Spec{}, err
+		return &PolicySpec{}, err
 	}
 
-	return &Spec{
+	return &PolicySpec{
 		Etag:              specMap["etag"].(string),
-		Rules:             policyRules,
+		PolicyRules:       policyRules,
 		InheritFromParent: specMap["inherit_from_parent"].(bool),
 		Reset:             specMap["reset"].(bool),
 	}, nil
@@ -88,7 +87,7 @@ func expandSpecCustomOrgPolicy(configured []interface{}) (*Spec, error) {
 }
 
 func expandPolicyRulesSpec(configured []interface{}) ([]*PolicyRule, error) {
-	if configured[0] == nil {
+	if len(configured) == 0 || configured[0] == nil {
 		return nil, nil
 	}
 
