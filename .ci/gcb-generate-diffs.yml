@@ -199,6 +199,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - "20"  # Build step
+          - terraform-validator
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.12.31
@@ -217,6 +218,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - "21"  # Build step
+          - terraform-validator
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
       id: tfv-test-integration-0.13.7
