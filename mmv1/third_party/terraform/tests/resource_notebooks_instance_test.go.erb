@@ -16,7 +16,6 @@ func TestAccNotebooksInstance_create_vm_image(t *testing.T) {
 	prefix := fmt.Sprintf("%d", RandInt(t))
 	name := fmt.Sprintf("tf-%s", prefix)
 
-	
   VcrTest(t, resource.TestCase{
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
