@@ -27,7 +27,7 @@ func TestAccApigeeEnvKeystoreAliasPkcs12_apigeeEnvKeystoreAliasPkcs12Example(t *
 				Config: testAccApigeeEnvKeystoreAliasPkcs12_apigeeEnvKeystoreAliasPkcs12Example(context),
 			},
 			{
-				ResourceName:            "google_apigee_keystore_aliases_pkcs.apigee_environment_keystore_aliases_pkcs",
+				ResourceName:            "google_apigee_env_keystore_alias_pkcs12.apigee_environment_keystore_aliases_pkcs",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"file", "filehash", "password", "org_id", "environment"},
