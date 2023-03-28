@@ -1,9 +1,13 @@
+<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
-
+<% if version == "ga" -%>
 	alloydb "cloud.google.com/go/alloydb/apiv1"
+<% else -%>
+	alloydb "cloud.google.com/go/alloydb/apiv1beta"
+<% end -%>
 	gax "github.com/googleapis/gax-go/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/iterator"
@@ -81,8 +85,12 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 	err = nil
 	err = retryTime(func() error {
 		locationsClient := config.NewAlloydbClient()
-		//set call options on locationsClient
-		listLocationsIterator = locationsClient.ListLocations(config.context, locsReq, gax.WithPath(fmt.Sprintf("v1/projects/%s/locations", billingProject)))
+<% if version == "ga" -%>
+		url := fmt.Sprintf("v1/projects/%s/locations", billingProject)
+<% else -%>
+		url := fmt.Sprintf("v1beta/projects/%s/locations", billingProject)
+<% end -%>
+		listLocationsIterator = locationsClient.ListLocations(config.context, locsReq, gax.WithPath(url))
 		return nil
 	}, 5)
 	if err != nil {
