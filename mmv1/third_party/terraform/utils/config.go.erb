@@ -73,7 +73,11 @@ import (
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
+<% if version == "ga" -%>
 	alloydb "cloud.google.com/go/alloydb/apiv1"
+<% else -%>
+	alloydb "cloud.google.com/go/alloydb/apiv1beta"
+<% end -%>
 )
 
 type providerMeta struct {

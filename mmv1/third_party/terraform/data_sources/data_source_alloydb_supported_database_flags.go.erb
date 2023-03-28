@@ -1,10 +1,15 @@
+<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
-
+<% if version == "ga" -%>
 	alloydb "cloud.google.com/go/alloydb/apiv1"
 	alloydbpb "cloud.google.com/go/alloydb/apiv1/alloydbpb"
+<% else -%>
+	alloydb "cloud.google.com/go/alloydb/apiv1beta"
+	alloydbpb "cloud.google.com/go/alloydb/apiv1beta/alloydbpb"
+<% end -%>
 	gax "github.com/googleapis/gax-go/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/iterator"
@@ -142,8 +147,12 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 	}
 	err = nil
 	err = retryTime(func() error {
-		//set call options on locationsClient
-		supportedDatabaseFlagIterator = locationsClient.ListSupportedDatabaseFlags(config.context, locsReq, gax.WithPath(fmt.Sprintf("v1/projects/%s/locations/%s/supportedDatabaseFlags", billingProject, location)))
+<% if version == "ga" -%>
+		url := fmt.Sprintf("v1/projects/%s/locations/%s/supportedDatabaseFlags", billingProject, location)
+<% else -%>
+		url := fmt.Sprintf("v1/projects/%s/locations/%s/supportedDatabaseFlags", billingProject, location)
+<% end -%>
+		supportedDatabaseFlagIterator = locationsClient.ListSupportedDatabaseFlags(config.context, locsReq, gax.WithPath(url))
 		return nil
 	}, 5)
 	if err != nil {
