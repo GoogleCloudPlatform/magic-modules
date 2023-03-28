@@ -8,7 +8,7 @@ resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
     image_family = "tf-latest-cpu"
   }
 
-  instance_owners = ["admin@hashicorptest.com"]
+  instance_owners = [ "<%= ctx[:test_env_vars]["service_account"] %>"]
   service_account = "<%= ctx[:test_env_vars]["service_account"] %>"
 
   install_gpu_driver = true
