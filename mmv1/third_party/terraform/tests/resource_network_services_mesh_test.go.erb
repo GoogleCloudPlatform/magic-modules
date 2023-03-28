@@ -16,8 +16,8 @@ func TestAccNetworkServicesMesh_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckNetworkServicesMeshDestroyProducer(t),
+                ProtoV5ProviderFactories: ProtoV5ProviderFactories(t), 
+                CheckDestroy: testAccCheckNetworkServicesMeshDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkServicesMesh_basic(meshName),
