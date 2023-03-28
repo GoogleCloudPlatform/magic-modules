@@ -17,7 +17,7 @@ versions:
   - !ruby/object:Api::Product::Version
     # TODO(gfelipe) change to beta once this is released
     name: beta
-    base_url: https://networksecurity.googleapis.com/v1alpha1/
+    base_url: https://networksecurity.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
