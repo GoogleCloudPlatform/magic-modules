@@ -13,6 +13,7 @@ func resourceConverterBigQueryTable() ResourceConverter {
 	}
 }
 
+// this is a change
 func GetBigQueryTableCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 
