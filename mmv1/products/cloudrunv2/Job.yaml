@@ -562,6 +562,7 @@ properties:
               Number of retries allowed per Task, before marking this Task failed.
             default_from_api: true
             send_empty_value: true
+            default_value: 3
   - !ruby/object:Api::Type::String
     name: "observedGeneration"
     output: true
