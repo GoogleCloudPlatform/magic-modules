@@ -40,6 +40,9 @@ examples:
       instance_name: "memory-cache"
     test_env_vars:
       org_id: :ORG_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/firebase_project.go.erb
+  pre_create: templates/terraform/pre_create/firebase_project.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: projectNumber
