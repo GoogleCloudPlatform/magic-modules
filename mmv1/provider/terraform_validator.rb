@@ -198,6 +198,8 @@ module Provider
                         'third_party/validator/cai_test.go'],
                        ['converters/google/resources/getconfig.go',
                         'third_party/validator/getconfig.go'],
+                       ['converters/google/resources/folder.go',
+                        'third_party/validator/folder.go'],
                        ['converters/google/resources/getconfig_test.go',
                         'third_party/validator/getconfig_test.go'],
                        ['converters/google/resources/json_map.go',
