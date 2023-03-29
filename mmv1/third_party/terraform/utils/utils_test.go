@@ -144,6 +144,65 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 	}
 }
 
+func TestGetProject(t *testing.T) {
+	cases := map[string]struct {
+		ResourceProject string
+		ProviderProject string
+		ExpectedProject string
+		ExpectedError   bool
+	}{
+		"project is pulled from resource config instead of provider config": {
+			ResourceProject: "foo",
+			ProviderProject: "bar",
+			ExpectedProject: "foo",
+		},
+		"project is pulled from provider config when not set on resource": {
+			ProviderProject: "bar",
+			ExpectedProject: "bar",
+		},
+		"error returned when project not set on either provider or resource": {
+			ExpectedError: true,
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+
+			// Create provider config
+			var config Config
+			if tc.ProviderProject != "" {
+				config.Project = tc.ProviderProject
+			}
+
+			// Create resource config
+			// Here use ResourceComputeDisk schema as example
+			d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
+				"project": tc.ResourceProject,
+			})
+			if tc.ResourceProject != "" {
+				if err := d.Set("project", tc.ResourceProject); err != nil {
+					t.Fatalf("Cannot set project: %s", err)
+				}
+			}
+
+			// Act
+			project, err := getProject(d, &config)
+
+			// Assert
+			if err != nil {
+				if tc.ExpectedError {
+					return
+				}
+				t.Fatalf("Unexpected error using test: %s", err)
+			}
+
+			if project != tc.ExpectedProject {
+				t.Fatalf("Incorrect project: got %s, want %s", project, tc.ExpectedProject)
+			}
+		})
+	}
+}
+
 func TestGetZone(t *testing.T) {
 	d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
 		"zone": "foo",
