@@ -31,11 +31,11 @@ type Asset struct {
 	// The name, in a peculiar format: `\\<api>.googleapis.com/<self_link>`
 	Name string `json:"name"`
 	// The type name in `google.<api>.<resourcename>` format.
-	Type            string             `json:"asset_type"`
-	Resource        *AssetResource     `json:"resource,omitempty"`
-	IAMPolicy       *IAMPolicy         `json:"iam_policy,omitempty"`
-	OrgPolicy       []*OrgPolicy       `json:"org_policy,omitempty"`
-	OrgPolicyPolicy []*OrgPolicyPolicy `json:"v2_org_policies,omitempty"`
+	Type          string           `json:"asset_type"`
+	Resource      *AssetResource   `json:"resource,omitempty"`
+	IAMPolicy     *IAMPolicy       `json:"iam_policy,omitempty"`
+	OrgPolicy     []*OrgPolicy     `json:"org_policy,omitempty"`
+	V2OrgPolicies []*V2OrgPolicies `json:"v2_org_policies,omitempty"`
 }
 
 // AssetResource is the Asset's Resource field.
@@ -55,11 +55,11 @@ type AssetResource struct {
 }
 
 type Folder struct {
-	Name        string `json:"name,omitempty"`
-	Parent      string `json:"parent,omitempty"`
-	DisplayName string `json:"display_name,omitempty"`
-	State string `json:"state,omitempty"`
-	CreateTime *Timestamp `json:"create_time,omitempty"`
+	Name        string     `json:"name,omitempty"`
+	Parent      string     `json:"parent,omitempty"`
+	DisplayName string     `json:"display_name,omitempty"`
+	State       string     `json:"state,omitempty"`
+	CreateTime  *Timestamp `json:"create_time,omitempty"`
 }
 
 type IAMPolicy struct {
@@ -79,8 +79,8 @@ type OrgPolicy struct {
 	UpdateTime     *Timestamp      `json:"update_time,omitempty"`
 }
 
-// OrgPolicyPolicy is the represtation of V2OrgPolicies
-type OrgPolicyPolicy struct {
+// V2OrgPolicies is the represtation of V2OrgPolicies
+type V2OrgPolicies struct {
 	Name       string      `json:"name"`
 	PolicySpec *PolicySpec `json:"spec,omitempty"`
 }
