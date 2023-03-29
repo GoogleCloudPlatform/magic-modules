@@ -9,9 +9,9 @@ import (
 )
 
 func triggerMMPresubmitRuns(projectId, repoName, commitSha string, substitutions map[string]string) error {
-	presubmitTriggerId, ok := os.LookupEnv("PRESUBMIT_TRIGGER")
+	presubmitTriggerId, ok := os.LookupEnv("GENERATE_DIFFS_TRIGGER")
 	if !ok {
-		return fmt.Errorf("Did not provide PRESUBMIT_TRIGGER environment variable")
+		return fmt.Errorf("Did not provide GENERATE_DIFFS_TRIGGER environment variable")
 	}
 
 	rakeTestTriggerId, ok := os.LookupEnv("RAKE_TESTS_TRIGGER")
