@@ -4,53 +4,47 @@ description: |-
   Get a VM instance template within GCE.
 ---
 
-# google\_compute\_instance\_template
+# google\_compute\_region\_instance\_template
 
 Get information about a VM instance template resource within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/instance-templates)
 and
-[API](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates).
+[API](https://cloud.google.com/compute/docs/reference/rest/v1/regionInstanceTemplates).
 
 ## Example Usage
 
 ```hcl
 # by name
-data "google_compute_instance_template" "generic" {
+data "google_compute_region_instance_template" "generic" {
   name    = "generic-tpl-20200107"
 }
 
 # using a filter
-data "google_compute_instance_template" "generic-regex" {
+data "google_compute_region_instance_template" "generic-regex" {
   filter      = "name != generic-tpl-20200107"
   most_recent = true
 }
-
-# by unique ID
-data "google_compute_instance_template" "generic" {
-  self_link_unique    = "https://www.googleapis.com/compute/v1/projects/your-project-name/global/instanceTemplates/example-template-custom?uniqueId=1234"
-}
-
 ```
 
 ## Argument Reference
 
 The following arguments are supported:
 
-- `name` - (Optional) The name of the instance template. One of `name`, `filter` or `self_link_unique` must be provided.
+- `name` - (Optional) The name of the instance template. One of `name` or `filter` must be provided.
 
 - `filter` - (Optional) A filter to retrieve the instance templates.
     See [gcloud topic filters](https://cloud.google.com/sdk/gcloud/reference/topic/filters) for reference.
-    If multiple instance templates match, either adjust the filter or specify `most_recent`.
-	One of `name`, `filter` or `self_link_unique` must be provided.
+    If multiple instance templates match, either adjust the filter or specify `most_recent`. One of `name` or `filter` must be provided.
 
-- `self_link_unique` - (Optional) The self_link_unique URI of the instance template. One of `name`, `filter` or `self_link_unique` must be provided.
-
-- `most_recent` - (Optional) If `filter` is provided, ensures the most recent template is returned when multiple instance templates match. One of `name`, `filter` or `self_link_unique` must be provided.
+- `most_recent` - (Optional) If `filter` is provided, ensures the most recent template is returned when multiple instance templates match. One of `name` or `filter` must be provided.
 
 ---
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If `project` is not provided, the provider project is used.
+
+* `region` - (Optional) The Region in which the resource belongs.
+    If `region` is not provided, the provider region is used.
 
 ## Attributes Reference
 
@@ -96,13 +90,6 @@ The following arguments are supported:
 
 * `project` - The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
-
-* `region` - An instance template is a global resource that is not
-    bound to a zone or a region. However, you can still specify some regional
-    resources in an instance template, which restricts the template to the
-    region where that resource resides. For example, a custom `subnetwork`
-    resource is tied to a specific region. Defaults to the region of the
-    Provider if no value is given.
 
 * `scheduling` - The scheduling strategy to use. More details about
     this configuration option are detailed below.
@@ -306,16 +293,10 @@ The `disk_encryption_key` block supports:
 
 ---
 
-* `id` - an identifier for the resource with format `projects/{{project}}/global/instanceTemplates/{{name}}`
+* `id` - an identifier for the resource with format `projects/{{project}}/regions/{{region}}/instanceTemplates/{{name}}`
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
 
 * `self_link` - The URI of the created resource.
 
-* `self_link_unique` - A special URI of the created resource that uniquely identifies this instance template with the following format: `projects/{{project}}/global/instanceTemplates/{{name}}?uniqueId={{uniqueId}}`
-Referencing an instance template via this attribute prevents Time of Check to Time of Use attacks when the instance template resides in a shared/untrusted environment.
-
 * `tags_fingerprint` - The unique fingerprint of the tags.
-
-[1]: /docs/providers/google/r/compute_instance_group_manager.html
-[2]: /docs/configuration/resources.html#lifecycle
