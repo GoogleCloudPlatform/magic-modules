@@ -292,6 +292,14 @@ func TestGetRegion(t *testing.T) {
 	}
 }
 
+func TestProvider_getRegionFromZone(t *testing.T) {
+	expected := "us-central1"
+	actual := getRegionFromZone("us-central1-f")
+	if expected != actual {
+		t.Fatalf("Region (%s) did not match expected value: %s", actual, expected)
+	}
+}
+
 func TestDatasourceSchemaFromResourceSchema(t *testing.T) {
 	type args struct {
 		rs map[string]*schema.Schema
