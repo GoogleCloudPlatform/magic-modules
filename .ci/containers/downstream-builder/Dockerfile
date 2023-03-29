@@ -40,6 +40,9 @@ RUN apt-get install -y git build-essential libbz2-dev libssl-dev libreadline-dev
                         libreadline-dev libsqlite3-dev curl llvm libncurses5-dev libncursesw5-dev \
                         xz-utils tk-dev libffi-dev liblzma-dev jq
 
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
 ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile" Gemfile
 ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile.lock" Gemfile.lock
 RUN bundle install
