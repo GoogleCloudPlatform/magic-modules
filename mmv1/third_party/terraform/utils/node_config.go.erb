@@ -183,7 +183,7 @@ func schemaNodeConfig() *schema.Schema {
 					Type:     schema.TypeList,
 					Optional: true,
 					MaxItems: 1,
-					Description: `Parameters for the ephemeral storage filesystem.`,
+					Description: `Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk.`,
 					ForceNew: true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -203,7 +203,7 @@ func schemaNodeConfig() *schema.Schema {
           Type:     schema.TypeList,
           Optional: true,
           MaxItems: 1,
-          Description: `Parameters for the ephemeral storage filesystem.`,
+          Description: `Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk.`,
           ForceNew: true,
           Elem: &schema.Resource{
             Schema: map[string]*schema.Schema{
