@@ -292,7 +292,7 @@ func TestGetRegion(t *testing.T) {
 	}
 }
 
-func TestProvider_getRegionFromZone(t *testing.T) {
+func TestGetRegionFromZone(t *testing.T) {
 	expected := "us-central1"
 	actual := getRegionFromZone("us-central1-f")
 	if expected != actual {
