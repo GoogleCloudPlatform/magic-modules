@@ -175,10 +175,9 @@ func TestGetProject(t *testing.T) {
 			}
 
 			// Create resource config
-			// Here use ResourceComputeDisk schema as example
-			d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
-				"project": tc.ResourceProject,
-			})
+			// Here use ResourceComputeDisk schema as example  - because it has a zone field in schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, emptyConfigMap)
 			if tc.ResourceProject != "" {
 				if err := d.Set("project", tc.ResourceProject); err != nil {
 					t.Fatalf("Cannot set project: %s", err)
@@ -239,10 +238,9 @@ func TestGetZone(t *testing.T) {
 			}
 
 			// Create resource config
-			// Here use ResourceComputeDisk schema as example
-			d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
-				"zone": tc.ResourceZone,
-			})
+			// Here use ResourceComputeDisk schema as example - because it has a zone field in schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, emptyConfigMap)
 			if tc.ResourceZone != "" {
 				if err := d.Set("zone", tc.ResourceZone); err != nil {
 					t.Fatalf("Cannot set zone: %s", err)
