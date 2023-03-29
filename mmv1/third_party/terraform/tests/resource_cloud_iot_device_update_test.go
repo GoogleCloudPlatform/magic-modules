@@ -10,14 +10,14 @@ import (
 func TestAccCloudIoTDevice_update(t *testing.T) {
 	t.Parallel()
 
-	registryName := fmt.Sprintf("psregistry-test-%s", randString(t, 10))
-	deviceName := fmt.Sprintf("psdevice-test-%s", randString(t, 10))
+	registryName := fmt.Sprintf("psregistry-test-%s", RandString(t, 10))
+	deviceName := fmt.Sprintf("psdevice-test-%s", RandString(t, 10))
 	resourceName := fmt.Sprintf("google_cloudiot_device.%s", deviceName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudIotDeviceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudIotDeviceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudIoTDeviceBasic(deviceName, registryName),

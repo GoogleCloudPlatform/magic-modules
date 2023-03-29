@@ -10,13 +10,13 @@ import (
 func TestAccStorageBucketIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	serviceAcct := getTestServiceAccountFromEnv(t)
-	bucket := fmt.Sprintf("tf-test-%d", randInt(t))
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	serviceAcct := GetTestServiceAccountFromEnv(t)
+	bucket := fmt.Sprintf("tf-test-%d", RandInt(t))
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Policy creation

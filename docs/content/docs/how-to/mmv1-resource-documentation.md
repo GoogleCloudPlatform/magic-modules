@@ -6,7 +6,7 @@ weight: 13
 
 # MMv1 resource documentation
 
-A majority of the provider's documentation is generated using the same information that's used for generating the provider's Go code. For example, when adding a new field to a resource in the relevant `api.yaml` file we include a `description` field. This is used to set a field description in the resource's schema and is also used to document the field in generated markdown files.
+A majority of the provider's documentation is generated using the same information that's used for generating the provider's Go code. For example, when adding a new field to a resource in the relevant `ResourceName.yaml` file we include a `description` field. This is used to set a field description in the resource's schema and is also used to document the field in generated markdown files.
 
 ## Updating an existing MMv1 resource's documentation
 
@@ -33,7 +33,7 @@ Below are descriptions of fields that are directly referenced in the documentati
 
 ### Top level fields for a product
 
-These fields are found at the top of `api.yaml` files, and describe an overall product (ruby/object:Api::Product).
+These fields are found in the `product.yaml` files, and describe an overall product (ruby/object:Api::Product).
 
 | Field | Type | Relation to documentation | Example value |
 | ----- | ---- |------------------------- | ------------- |
@@ -41,22 +41,22 @@ These fields are found at the top of `api.yaml` files, and describe an overall p
 
 ### Top level fields within resources
 
-These can be top-level properties of a resource (ruby/object:Api::Resource) or overrides for the resource (ruby/object:Overrides::Terraform::ResourceOverride), i.e. in `api.yaml` or `terraform.yaml`.
+These are top-level properties of a resource (ruby/object:Api::Resource) in `ResourceName.yaml`.
 
 | Field | Type | Relation to documentation | Example value |
 | ----- | ---- |------------------------- | ------------- |
-| `has_self_link` | boolean | Boolean to indicate if a resource has a `self_link` attribute. If true, the attribute is included in the templated markdown | [See example](https://github.com/hashicorp/magic-modules/blob/44d348dc92c279992febd7132a88656417a2a86f/mmv1/products/bigquery/api.yaml#L32-L33) and the resulting [self_link attribute in docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_dataset#self_link) |
-| `import_format`| array of strings | Sets the identifiers that can be used to import a resource into Terraform state. Used to add multiple entries in the 'Import' section of documentation. | [See example](https://github.com/hashicorp/magic-modules/blob/44d348dc92c279992febd7132a88656417a2a86f/mmv1/products/apigateway/terraform.yaml#L23) that results in [an import section listing multiple options](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/api_gateway_api#import) |
-| `description`| string | Sets the description of the resource at the top of the page | [See example](https://github.com/hashicorp/magic-modules/blob/44d348dc92c279992febd7132a88656417a2a86f/mmv1/products/bigquery/api.yaml#L34-L35) |
-| `docs.note` | string | Text is templated into a callout block at the top of the page which is titled "Note" | [See example](https://github.com/hashicorp/magic-modules/blob/dc463cb5b459044bf6bb37a1d502ae8bb14e2127/mmv1/products/iamworkforcepool/terraform.yaml#L19-L21) and the resulting [callout in the docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iam_workforce_pool)| 
-| `docs.warning` | string | Text is templated into a callout block at the top of the page which is titled "Warning" | [See example](https://github.com/hashicorp/magic-modules/blob/dc463cb5b459044bf6bb37a1d502ae8bb14e2127/mmv1/products/bigquery/terraform.yaml#L94-L98) and the resulting [callout in the docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_dataset)|
-| * `docs.optional_properties` | string | Used to append extra content to the bulleted list describing optional properties for a resource. | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/1589b882611cceafdf2615ca74cc215c327ef141/mmv1/products/cloudiot/terraform.yaml#L28-L61) |
+| `has_self_link` | boolean | Boolean to indicate if a resource has a `self_link` attribute. If true, the attribute is included in the templated markdown | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/bigquery/Dataset.yaml#L19) and the resulting [self_link attribute in docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_dataset#self_link) |
+| `import_format`| array of strings | Sets the identifiers that can be used to import a resource into Terraform state. Used to add multiple entries in the 'Import' section of documentation. | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/apigateway/Gateway.yaml#L37) that results in [an import section listing multiple options](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/api_gateway_api#import) |
+| `description`| string | Sets the description of the resource at the top of the page | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/bigquery/Dataset.yaml#L20) |
+| `docs.note` | string | Text is templated into a callout block at the top of the page which is titled "Note" | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/iamworkforcepool/WorkforcePool.yaml#L29) and the resulting [callout in the docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iam_workforce_pool)| 
+| `docs.warning` | string | Text is templated into a callout block at the top of the page which is titled "Warning" | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/bigquery/Dataset.yaml#L78-L81) and the resulting [callout in the docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_dataset)|
+| * `docs.optional_properties` | string | Used to append extra content to the bulleted list describing optional properties for a resource. | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/cloudiot/DeviceRegistry.yaml#L43-L76) |
 | * `docs.required_properties` | string | Used to append extra content to the bulleted list describing required properties for a resource. | There are no examples of this currently in use. |
-| * `docs.attributes` | string | Used to append extra content to the bulleted list describing attributes for a resource. | There is currently only one example of this field in use, [here](https://github.com/hashicorp/magic-modules/blob/dacfb793fec55a9a2929be00b0cfa8f6cc5f1f88/mmv1/products/iap/terraform.yaml#L224-L226). |
+| * `docs.attributes` | string | Used to append extra content to the bulleted list describing attributes for a resource. | There is currently only one example of this field in use, [here](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/iap/Client.yaml#L43-L44). |
 | `min_version`| string | If set to `beta`, the template includes a beta warning at the start of the documentation | [See example in the official docs](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/alloydb_backup) |
-| `references.api`| string | Sets the URL used in generated links to documentation | [See example](https://github.com/hashicorp/magic-modules/blob/44d348dc92c279992febd7132a88656417a2a86f/mmv1/products/bigquery/api.yaml#L39) |
-| `references.guides`| hash | A set of key-value pairs where the key is text to be rendered and the value is the URL the text links to | [See example](https://github.com/hashicorp/magic-modules/blob/44d348dc92c279992febd7132a88656417a2a86f/mmv1/products/bigquery/api.yaml#L38)  |
-| `supports_indirect_user_project_override`| boolean | This is the explicit way to make sure the 'User Project Overrides' section is shown in the resource's documentation | [See example](https://github.com/hashicorp/magic-modules/blob/44d348dc92c279992febd7132a88656417a2a86f/mmv1/products/datacatalog/terraform.yaml#L43) and the [resulting section in the docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/data_catalog_entry#user-project-overrides)  |
+| `references.api`| string | Sets the URL used in generated links to documentation | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/datacatalog/Entry.yaml#L31) |
+| `references.guides`| hash | A set of key-value pairs where the key is text to be rendered and the value is the URL the text links to | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/datacatalog/Entry.yaml#L29-L30)  |
+| `supports_indirect_user_project_override`| boolean | This is the explicit way to make sure the 'User Project Overrides' section is shown in the resource's documentation | [See example](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/datacatalog/Entry.yaml#L33) and the [resulting section in the docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/data_catalog_entry#user-project-overrides)  |
 
 \* = Avoid unless absolutely necessary.
 

@@ -200,6 +200,8 @@ module Provider
                         'third_party/validator/org_policy_policy.go'], 
                        ['converters/google/resources/getconfig.go',
                         'third_party/validator/getconfig.go'],
+                       ['converters/google/resources/folder.go',
+                        'third_party/validator/folder.go'],
                        ['converters/google/resources/getconfig_test.go',
                         'third_party/validator/getconfig_test.go'],
                        ['converters/google/resources/json_map.go',
@@ -338,9 +340,7 @@ module Provider
     end
 
     def generate_resource_tests(pwd, data)
-      product_whitelist = [
-        'cloudrun'
-      ]
+      product_whitelist = []
 
       return unless product_whitelist.include?(data.product.name.downcase)
       return if data.object.examples

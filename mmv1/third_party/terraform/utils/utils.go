@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
+	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -96,7 +98,7 @@ func getRouterLockName(region string, router string) string {
 }
 
 func handleNotFoundError(err error, d *schema.ResourceData, resource string) error {
-	if isGoogleApiErrorWithCode(err, 404) {
+	if IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[WARN] Removing %s because it's gone", resource)
 		// The resource doesn't exist anymore
 		d.SetId("")
@@ -108,7 +110,7 @@ func handleNotFoundError(err error, d *schema.ResourceData, resource string) err
 		fmt.Sprintf("Error when reading or editing %s: {{err}}", resource), err)
 }
 
-func isGoogleApiErrorWithCode(err error, errCode int) bool {
+func IsGoogleApiErrorWithCode(err error, errCode int) bool {
 	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
 	return ok && gerr != nil && gerr.Code == errCode
 }
@@ -324,7 +326,7 @@ func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Re
 	return merged, err
 }
 
-func stringToFixed64(v string) (int64, error) {
+func StringToFixed64(v string) (int64, error) {
 	return strconv.ParseInt(v, 10, 64)
 }
 
@@ -381,7 +383,7 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *C
 }
 
 func paginatedListRequest(project, baseUrl, userAgent string, config *Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
-	res, err := sendRequest(config, "GET", project, baseUrl, userAgent, nil)
+	res, err := SendRequest(config, "GET", project, baseUrl, userAgent, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +395,7 @@ func paginatedListRequest(project, baseUrl, userAgent string, config *Config, fl
 			break
 		}
 		url := fmt.Sprintf("%s?pageToken=%s", baseUrl, pageToken.(string))
-		res, err = sendRequest(config, "GET", project, url, userAgent, nil)
+		res, err = SendRequest(config, "GET", project, url, userAgent, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -521,7 +523,7 @@ func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
 
 	// See https://github.com/golang/oauth2/issues/306 for a recommendation to do this from a Go maintainer
 	// URL retrieved from https://accounts.google.com/.well-known/openid-configuration
-	res, err := sendRequest(config, "GET", "NO_BILLING_PROJECT_OVERRIDE", "https://openidconnect.googleapis.com/v1/userinfo", userAgent, nil)
+	res, err := SendRequest(config, "GET", "NO_BILLING_PROJECT_OVERRIDE", "https://openidconnect.googleapis.com/v1/userinfo", userAgent, nil)
 
 	if err != nil {
 		return "", fmt.Errorf("error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
@@ -595,4 +597,37 @@ func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f fu
 		}
 		return nil
 	})
+}
+
+// MultiEnvDefault is a helper function that returns the value of the first
+// environment variable in the given list that returns a non-empty value. If
+// none of the environment variables return a value, the default value is
+// returned.
+func MultiEnvDefault(ks []string, dv interface{}) interface{} {
+	for _, k := range ks {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return dv
+}
+
+func frameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
+	var diags diag.Diagnostics
+	for _, e := range fwD.Errors() {
+		diags = append(diags, diag.Diagnostic{
+			Detail:   e.Detail(),
+			Severity: diag.Error,
+			Summary:  e.Summary(),
+		})
+	}
+	for _, w := range fwD.Warnings() {
+		diags = append(diags, diag.Diagnostic{
+			Detail:   w.Detail(),
+			Severity: diag.Warning,
+			Summary:  w.Summary(),
+		})
+	}
+
+	return &diags
 }

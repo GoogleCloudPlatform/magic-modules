@@ -11,13 +11,13 @@ func TestAccComputeFirewallPolicyAssociation_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-		"org_name":      fmt.Sprintf("organizations/%s", getTestOrgFromEnv(t)),
+		"random_suffix": RandString(t, 10),
+		"org_name":      fmt.Sprintf("organizations/%s", GetTestOrgFromEnv(t)),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeFirewallPolicyAssociation_basic(context),

@@ -103,12 +103,16 @@ module Api
       attr_reader :self_link
 
       # [Optional] Version number in the request payload.
-      # if set, it overrides the default iamPolicyVersion
+      # if set, it overrides the default IamPolicyVersion
       attr_reader :iam_policy_version
 
       # [Optional] Min version to make IAM resources available at
       # If unset, defaults to 'ga'
       attr_reader :min_version
+
+      # [Optional] Check to see if zone value should be replaced with GOOGLE_ZONE in iam tests
+      # Defaults to true
+      attr_reader :substitute_zone_value
 
       def validate
         super
@@ -138,6 +142,7 @@ module Api
         )
         check :iam_policy_version, type: String
         check :min_version, type: String
+        check :substitute_zone_value, type: :boolean, default: true
       end
     end
   end

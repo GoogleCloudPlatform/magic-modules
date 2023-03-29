@@ -73,15 +73,15 @@ func TestAccHealthcareHl7V2StoreIdParsing(t *testing.T) {
 func TestAccHealthcareHl7V2Store_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetName := fmt.Sprintf("tf-test-dataset-%s", randString(t, 10))
-	hl7_v2StoreName := fmt.Sprintf("tf-test-hl7_v2-store-%s", randString(t, 10))
-	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", RandString(t, 10))
+	hl7_v2StoreName := fmt.Sprintf("tf-test-hl7_v2-store-%s", RandString(t, 10))
+	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 	resourceName := "google_healthcare_hl7_v2_store.default"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckHealthcareHl7V2StoreDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckHealthcareHl7V2StoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleHealthcareHl7V2Store_basic(hl7_v2StoreName, datasetName),
@@ -119,14 +119,14 @@ func TestAccHealthcareHl7V2Store_basic(t *testing.T) {
 func TestAccHealthcareHl7V2Store_updateSchema(t *testing.T) {
 	t.Parallel()
 
-	datasetName := fmt.Sprintf("tf-test-dataset-%s", randString(t, 10))
-	hl7_v2StoreName := fmt.Sprintf("tf-test-hl7_v2-store-%s", randString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", RandString(t, 10))
+	hl7_v2StoreName := fmt.Sprintf("tf-test-hl7_v2-store-%s", RandString(t, 10))
 	resourceName := "google_healthcare_hl7_v2_store.default"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckHealthcareHl7V2StoreDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckHealthcareHl7V2StoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleHealthcareHl7V2Store_basicSchema(hl7_v2StoreName, datasetName),
@@ -258,14 +258,14 @@ func testAccCheckGoogleHealthcareHl7V2StoreUpdate(t *testing.T, pubsubTopic stri
 			}
 			foundResource = true
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/hl7V2Stores/{{name}}")
 			if err != nil {
 				return err
 			}
 
-			response, err := config.NewHealthcareClient(config.userAgent).Projects.Locations.Datasets.Hl7V2Stores.Get(gcpResourceUri).Do()
+			response, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.Hl7V2Stores.Get(gcpResourceUri).Do()
 			if err != nil {
 				return fmt.Errorf("Unexpected failure while verifying 'updated' dataset: %s", err)
 			}

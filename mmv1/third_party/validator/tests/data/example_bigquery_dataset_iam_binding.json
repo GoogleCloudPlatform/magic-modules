@@ -16,7 +16,8 @@
         "labels": {
           "env": "dev"
         },
-        "location": "EU"
+        "location": "EU",
+        "friendlyName": ""
       }
     },
     "iam_policy": {

@@ -37,14 +37,13 @@ resource "google_kms_key_ring" "default" {
 resource "google_kms_crypto_key" "default" {
   name            = "<%= ctx[:vars]['workstation_cluster_name'] %>"
   key_ring        = google_kms_key_ring.default.id
-  rotation_period = "100000s"
   provider        = google-beta
 }
 
 resource "google_service_account" "default" {
-  account_id   = "cloud-workstations-kms"
-  display_name = "Service Account for Cloud Workstations"
-  provider     = google-beta
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  display_name = "Service Account"
+  provider = google-beta
 }
 
 resource "google_workstations_workstation_config" "<%= ctx[:primary_resource_id] %>" {

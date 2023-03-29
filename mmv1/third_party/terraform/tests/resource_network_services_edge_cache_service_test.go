@@ -9,13 +9,13 @@ import (
 
 func TestAccNetworkServicesEdgeCacheService_updateAndImport(t *testing.T) {
 	t.Parallel()
-	namebkt := "tf-test-bucket-" + randString(t, 10)
-	nameorigin := "tf-test-origin-" + randString(t, 10)
-	nameservice := "tf-test-service-" + randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkServicesEdgeCacheServiceDestroyProducer(t),
+	namebkt := "tf-test-bucket-" + RandString(t, 10)
+	nameorigin := "tf-test-origin-" + RandString(t, 10)
+	nameservice := "tf-test-service-" + RandString(t, 10)
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesEdgeCacheServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkServicesEdgeCacheService_update_0(namebkt, nameorigin, nameservice),

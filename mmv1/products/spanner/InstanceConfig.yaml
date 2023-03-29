@@ -1,0 +1,32 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'InstanceConfig'
+base_url: 'projects/{{project}}/instanceConfigs'
+description: |
+  A possible configuration for a Cloud Spanner instance. Configurations
+  define the geographic placement of nodes and their replication.
+readonly: true
+exclude: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      A unique identifier for the instance configuration. Values are of the
+      form projects/<project>/instanceConfigs/[a-z][-a-z0-9]*
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description: |
+      The name of this instance configuration as it appears in UIs.
+    output: true
