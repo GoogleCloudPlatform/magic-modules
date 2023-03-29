@@ -268,27 +268,71 @@ func TestGetZone(t *testing.T) {
 }
 
 func TestGetRegion(t *testing.T) {
-	d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
-		"zone": "foo",
-	})
-	var config Config
-	barRegionName := getRegionFromZone("bar")
-	fooRegionName := getRegionFromZone("foo")
+	cases := map[string]struct {
+		ResourceRegion string
+		ProviderRegion string
+		ProviderZone   string
+		ExpectedRegion string
+		ExpectedZone   string
+		ExpectedError  bool
+	}{
+		"region is pulled from resource config instead of provider config": {
+			ResourceRegion: "foo",
+			ProviderRegion: "bar",
+			ProviderZone:   "lol-a",
+			ExpectedRegion: "foo",
+		},
+		"region is pulled from region on provider config when region unset in resource config": {
+			ProviderRegion: "bar",
+			ProviderZone:   "lol-a",
+			ExpectedRegion: "bar",
+		},
+		"region is pulled from zone on provider config when region unset in both resource and provider config": {
+			ProviderZone:   "lol-a",
+			ExpectedRegion: "lol",
+		},
+		"error returned when region not set on resource and neither region or zone set on provider": {
+			ExpectedError: true,
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
 
-	if region, err := getRegion(d, &config); err != nil || region != fooRegionName {
-		t.Fatalf("Zone '%s' != '%s', %s", region, fooRegionName, err)
-	}
+			// Create provider config
+			var config Config
+			if tc.ProviderRegion != "" {
+				config.Region = tc.ProviderRegion
+			}
+			if tc.ProviderZone != "" {
+				config.Zone = tc.ProviderZone
+			}
 
-	config.Zone = "bar"
-	if err := d.Set("zone", ""); err != nil {
-		t.Fatalf("Error setting zone: %s", err)
-	}
-	if region, err := getRegion(d, &config); err != nil || region != barRegionName {
-		t.Fatalf("Zone '%s' != '%s', %s", region, barRegionName, err)
-	}
-	config.Region = "something-else"
-	if region, err := getRegion(d, &config); err != nil || region != config.Region {
-		t.Fatalf("Zone '%s' != '%s', %s", region, config.Region, err)
+			// Create resource config
+			// Here use ComputeRegionInstanceTemplate schema as example - because it has a region field in schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, ResourceComputeRegionInstanceTemplate().Schema, emptyConfigMap)
+			if tc.ResourceRegion != "" {
+				if err := d.Set("region", tc.ResourceRegion); err != nil {
+					t.Fatalf("Cannot set region: %s", err)
+				}
+			}
+
+			// Act
+			region, err := getRegion(d, &config)
+
+			// Assert
+			if err != nil {
+				if tc.ExpectedError {
+					return
+				}
+				t.Fatalf("Unexpected error using test: %s", err)
+			}
+
+			if region != tc.ExpectedRegion {
+				t.Fatalf("Incorrect region: got %s, want %s", region, tc.ExpectedRegion)
+			}
+		})
 	}
 }
 
