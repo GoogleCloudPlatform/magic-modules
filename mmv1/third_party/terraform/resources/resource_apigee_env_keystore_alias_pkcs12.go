@@ -3,12 +3,12 @@ package google
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"mime/multipart"
+	"os"
 	"reflect"
 	"time"
-	"io"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -32,37 +32,37 @@ func ResourceApigeeEnvKeystoreAliasPkcs12() *schema.Resource {
 			"alias": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:	 true,
+				ForceNew:    true,
 				Description: `Alias Name`,
 			},
 			"file": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:	 true,
+				ForceNew:    true,
 				Description: `Cert content`,
 			},
 			"environment": {
 				Type:        schema.TypeString,
-				ForceNew:	 true,
+				ForceNew:    true,
 				Required:    true,
 				Description: `Environment associated with the alias`,
 			},
 			"keystore": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:	 true,
+				ForceNew:    true,
 				Description: `Keystore Name`,
 			},
 			"org_id": {
 				Type:        schema.TypeString,
-				ForceNew:	 true,
+				ForceNew:    true,
 				Required:    true,
 				Description: `Organization ID associated with the alias`,
 			},
 			"filehash": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:	 true,
+				ForceNew:    true,
 				Description: "Hash of the pkcs file",
 			},
 			"certs_info": {
@@ -95,7 +95,7 @@ func ResourceApigeeEnvKeystoreAliasPkcs12() *schema.Resource {
 									"is_valid": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed:    true,
+										Computed: true,
 										Description: `Flag that specifies whether the certificate is valid. 
 Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not yet valid.`,
 									},
@@ -159,7 +159,7 @@ Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not
 			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed: 	 true,
+				Computed:    true,
 				Description: `Password for the Private Key if it's encrypted`,
 			},
 			"type": {
@@ -198,15 +198,15 @@ func resourceApigeeEnvKeystoreAliasPkcs12Create(d *schema.ResourceData, meta int
 	if err != nil {
 		return err
 	}
-	
+
 	log.Printf("[DEBUG] Creating new KeystoresAliasesPkcs12")
 	billingProject := ""
-	
+
 	// err == nil indicates that the billing_project value was found
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	
+
 	res, err := sendRequestRawBodyWithTimeout(config, "POST", billingProject, url, userAgent, buf, "multipart/form-data; boundary="+bw.Boundary(), d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating KeystoresAliasesPkcs12: %s", err)
