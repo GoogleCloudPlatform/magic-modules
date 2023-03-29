@@ -72,7 +72,7 @@ properties:
       If set to true, this reservation is placed in the organization's secondary region which is designated for disaster recovery purposes. If false, this reservation is placed in the organization's default region.
   - !ruby/object:Api::Type::String
     name: 'edition'
-    input: true
+    immutable: true
     description: |
       The edition type. Valid values are STANDARD, ENTERPRISE, ENTERPRISE_PLUS
   - !ruby/object:Api::Type::NestedObject

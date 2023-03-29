@@ -101,6 +101,6 @@ properties:
       The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable some commitment plans.
   - !ruby/object:Api::Type::String
     name: 'edition'
-    input: true
+    immutable: true
     description: |
       The edition type. Valid values are STANDARD, ENTERPRISE, ENTERPRISE_PLUS
