@@ -541,10 +541,11 @@ func TestAccBillingBudget_budgetFilterProjectsOrdering(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org":             GetTestOrgFromEnv(t),
-		"billing_acct":    GetTestMasterBillingAccountFromEnv(t),
-		"random_suffix_1": RandString(t, 10),
-		"random_suffix_2": RandString(t, 10),
+		"org":                  GetTestOrgFromEnv(t),
+		"billing_acct":         GetTestMasterBillingAccountFromEnv(t),
+		"project_billing_acct": GetTestBillingAccountFromEnv(t),
+		"random_suffix_1":      RandString(t, 10),
+		"random_suffix_2":      RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -578,6 +579,10 @@ func TestAccBillingBudget_budgetFilterProjectsOrdering(t *testing.T) {
 func testAccBillingBudget_budgetFilterProjectsOrdering1(context map[string]interface{}) string {
 	return Nprintf(`
 
+data "google_billing_account" "project_account" {
+	billing_account = "%{project_billing_acct}"
+}
+
 data "google_billing_account" "account" {
 	billing_account = "%{billing_acct}"
 }
@@ -586,14 +591,14 @@ resource "google_project" "project1" {
 	project_id      = "tf-test-%{random_suffix_1}"
 	name            = "tf-test-%{random_suffix_1}"
 	org_id          = "%{org}"
-	billing_account = data.google_billing_account.account.id
+	billing_account = data.google_billing_account.project_account.id
 }
 
 resource "google_project" "project2" {
 	project_id      = "tf-test-%{random_suffix_2}"
 	name            = "tf-test-%{random_suffix_2}"
 	org_id          = "%{org}"
-	billing_account = data.google_billing_account.account.id
+	billing_account = data.google_billing_account.project_account.id
 }
 
 resource "google_billing_budget" "budget" {
@@ -622,6 +627,10 @@ resource "google_billing_budget" "budget" {
 func testAccBillingBudget_budgetFilterProjectsOrdering2(context map[string]interface{}) string {
 	return Nprintf(`
 
+data "google_billing_account" "project_account" {
+	billing_account = "%{project_billing_acct}"
+}
+
 data "google_billing_account" "account" {
 	billing_account = "%{billing_acct}"
 }
@@ -630,14 +639,14 @@ resource "google_project" "project1" {
 	project_id      = "tf-test-%{random_suffix_1}"
 	name            = "tf-test-%{random_suffix_1}"
 	org_id          = "%{org}"
-	billing_account = data.google_billing_account.account.id
+	billing_account = data.google_billing_account.project_account.id
 }
 
 resource "google_project" "project2" {
 	project_id      = "tf-test-%{random_suffix_2}"
 	name            = "tf-test-%{random_suffix_2}"
 	org_id          = "%{org}"
-	billing_account = data.google_billing_account.account.id
+	billing_account = data.google_billing_account.project_account.id
 }
 
 resource "google_billing_budget" "budget" {
