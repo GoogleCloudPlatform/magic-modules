@@ -38,21 +38,7 @@ RUN apt-get install -y git build-essential libbz2-dev libssl-dev libreadline-dev
                         libffi-dev libsqlite3-dev tk-dev libpng-dev libfreetype6-dev \
                         make build-essential libssl-dev zlib1g-dev libbz2-dev \
                         libreadline-dev libsqlite3-dev curl llvm libncurses5-dev libncursesw5-dev \
-                        xz-utils tk-dev libffi-dev liblzma-dev python-openssl jq
-
-RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
-ENV PATH="/root/.pyenv/bin:${PATH}"
-RUN eval "$(pyenv init -)"
-RUN eval "$(pyenv virtualenv-init -)"
-RUN pyenv install 3.6.8
-RUN pyenv install 2.7.13
-RUN pyenv rehash
-ENV PATH="/root/.pyenv/shims:${PATH}"
-RUN pyenv global 2.7.13 3.6.8
-RUN pip install beautifulsoup4 mistune
-RUN pip3 install black
-ENV LC_ALL=C.UTF-8
-ENV LANG=C.UTF-8
+                        xz-utils tk-dev libffi-dev liblzma-dev jq
 
 ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile" Gemfile
 ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/Gemfile.lock" Gemfile.lock
