@@ -204,29 +204,66 @@ func TestGetProject(t *testing.T) {
 }
 
 func TestGetZone(t *testing.T) {
-	d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
-		"zone": "foo",
-	})
-	var config Config
-	if err := d.Set("zone", "foo"); err != nil {
-		t.Fatalf("Cannot set zone: %s", err)
+	cases := map[string]struct {
+		ResourceZone  string
+		ProviderZone  string
+		ExpectedZone  string
+		ExpectedError bool
+	}{
+		"zone is pulled from resource config instead of provider config": {
+			ResourceZone: "foo",
+			ProviderZone: "bar",
+			ExpectedZone: "foo",
+		},
+		"zone is pulled from provider config when not set on resource": {
+			ProviderZone: "bar",
+			ExpectedZone: "bar",
+		},
+		"zone value from resource is retrieved by splitting on slashes and selecting last element": {
+			// Unclear why this is the case - documenting this behaviour in a test case
+			ResourceZone: "this/is/foo/bar",
+			ExpectedZone: "bar",
+		},
+		"error returned when zone not set on either provider or resource": {
+			ExpectedError: true,
+		},
 	}
-	if zone, err := getZone(d, &config); err != nil || zone != "foo" {
-		t.Fatalf("Zone '%s' != 'foo', %s", zone, err)
-	}
-	config.Zone = "bar"
-	if zone, err := getZone(d, &config); err != nil || zone != "foo" {
-		t.Fatalf("Zone '%s' != 'foo', %s", zone, err)
-	}
-	if err := d.Set("zone", ""); err != nil {
-		t.Fatalf("Error setting zone: %s", err)
-	}
-	if zone, err := getZone(d, &config); err != nil || zone != "bar" {
-		t.Fatalf("Zone '%s' != 'bar', %s", zone, err)
-	}
-	config.Zone = ""
-	if zone, err := getZone(d, &config); err == nil || zone != "" {
-		t.Fatalf("Zone '%s' != '', err=%s", zone, err)
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+
+			// Create provider config
+			var config Config
+			if tc.ProviderZone != "" {
+				config.Zone = tc.ProviderZone
+			}
+
+			// Create resource config
+			// Here use ResourceComputeDisk schema as example
+			d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, map[string]interface{}{
+				"zone": tc.ResourceZone,
+			})
+			if tc.ResourceZone != "" {
+				if err := d.Set("zone", tc.ResourceZone); err != nil {
+					t.Fatalf("Cannot set zone: %s", err)
+				}
+			}
+
+			// Act
+			zone, err := getZone(d, &config)
+
+			// Assert
+			if err != nil {
+				if tc.ExpectedError {
+					return
+				}
+				t.Fatalf("Unexpected error using test: %s", err)
+			}
+
+			if zone != tc.ExpectedZone {
+				t.Fatalf("Incorrect zone: got %s, want %s", zone, tc.ExpectedZone)
+			}
+		})
 	}
 }
 
