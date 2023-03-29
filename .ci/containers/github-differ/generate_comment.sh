@@ -144,19 +144,6 @@ if git clone -b $NEW_BRANCH $TFV_SCRATCH_PATH $TFV_LOCAL_PATH; then
     popd
 fi
 
-# TGC
-mkdir -p $TGC_LOCAL_PATH
-# allow this to fail for compatibility during tfv/tgc transition phase
-if git clone -b $NEW_BRANCH $TGC_SCRATCH_PATH $TGC_LOCAL_PATH; then
-    pushd $TGC_LOCAL_PATH
-    git fetch origin $OLD_BRANCH
-    if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
-        SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
-        DIFFS="${DIFFS}${NEWLINE}TF Validator: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
-    fi
-    popd
-fi
-
 # TF OICS
 mkdir -p $TFOICS_LOCAL_PATH
 git clone -b $NEW_BRANCH $TFOICS_SCRATCH_PATH $TFOICS_LOCAL_PATH
