@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -20,14 +20,31 @@ description: |
   A Dialogflow CX conversation (session) can be described and visualized as a state machine. The states of a CX session are represented by pages.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/dialogflow/cx/docs'
+    'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.flows.pages'
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 40
+  update_minutes: 40
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/dialogflowcx_page.go.erb
+  pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dialogflowcx_page_full"
+    primary_resource_id: "basic_page"
+    vars:
+      agent_name: "dialogflowcx-agent"
+skip_sweeper: true
+id_format: "{{parent}}/pages/{{name}}"
+import_format: ["{{parent}}/pages/{{name}}"]
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
     url_param_only: true
-    input: true
+    immutable: true
     description: |
       The flow to create a page for.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
@@ -47,7 +64,7 @@ parameters:
       Page.transition_routes.trigger_fulfillment.messages
       Page.transition_routes.trigger_fulfillment.conditional_cases
       If not specified, the agent's default language is used. Many languages are supported. Note: languages must be enabled in the agent before they can be used.
-    input: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -55,11 +72,14 @@ properties:
     description: |
       The unique identifier of the page.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'displayName'
     required: true
     description: |
       The human-readable name of the page, unique within the agent.
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.StringLenBetween(0, 64)'
   - !ruby/object:Api::Type::NestedObject
     name: 'entryFulfillment'
     description: |

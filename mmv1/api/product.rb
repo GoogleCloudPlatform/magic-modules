@@ -58,6 +58,10 @@ module Api
 
     attr_reader :async
 
+    attr_reader :legacy_name
+
+    attr_reader :client_name
+
     def validate
       super
       set_variables @objects, :__product
@@ -68,6 +72,8 @@ module Api
       check :operation_retry, type: String
 
       check :async, type: Api::Async
+      check :legacy_name, type: String
+      check :client_name, type: String
 
       check :versions, type: Array, item_type: Api::Product::Version, required: true
     end

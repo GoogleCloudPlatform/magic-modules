@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -25,6 +25,18 @@ update_verb: :PATCH
 min_version: beta
 identity:
   - ruleName
+id_format: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'
+import_format: ["projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dns_response_policy_rule_basic"
+    primary_resource_id: "example-response-policy-rule"
+    vars:
+      response_policy_name: "example-response-policy"
+      network_1_name: "network-1"
+      network_2_name: "network-2"
+      cluster_1_name: "cluster-1"
+      response_policy_rule_name: "example-rule"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'response_policy'
@@ -38,11 +50,12 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'ruleName'
     description: An identifier for this rule. Must be unique with the ResponsePolicy.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'dnsName'
-    description: The DNS name (wildcard or exact) to apply this rule to. Must be unique within the Response Policy Rule.
+    description: The DNS name (wildcard or exact) to apply this rule to. Must be unique
+      within the Response Policy Rule.
     required: true
     update_verb: :PATCH
   - !ruby/object:Api::Type::NestedObject
@@ -56,54 +69,56 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'localDatas'
-        description: All resource record sets for this selector, one per resource record type. The name must match the dns_name.
+        description: All resource record sets for this selector, one per resource
+          record type. The name must match the dns_name.
         update_verb: :PATCH
         required: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-          - !ruby/object:Api::Type::String
-            name: 'name'
-            description: For example, www.example.com.
-            required: true
-          - !ruby/object:Api::Type::Enum
-            name: 'type'
-            values:
-              - :A
-              - :AAAA
-              - :CAA
-              - :CNAME
-              - :DNSKEY
-              - :DS
-              - :HTTPS
-              - :IPSECVPNKEY
-              - :MX
-              - :NAPTR
-              - :NS
-              - :PTR
-              - :SOA
-              - :SPF
-              - :SRV
-              - :SSHFP
-              - :SVCB
-              - :TLSA
-              - :TXT
-            description: One of valid DNS resource types.
-            required: true
-          - !ruby/object:Api::Type::Integer
-            name: 'ttl'
-            description: |
-              Number of seconds that this ResourceRecordSet can be cached by
-              resolvers.
-          - !ruby/object:Api::Type::Array
-            item_type: Api::Type::String
-            name: 'rrdatas'
-            description: |
-              As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1)
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: For example, www.example.com.
+              required: true
+            - !ruby/object:Api::Type::Enum
+              name: 'type'
+              values:
+                - :A
+                - :AAAA
+                - :CAA
+                - :CNAME
+                - :DNSKEY
+                - :DS
+                - :HTTPS
+                - :IPSECVPNKEY
+                - :MX
+                - :NAPTR
+                - :NS
+                - :PTR
+                - :SOA
+                - :SPF
+                - :SRV
+                - :SSHFP
+                - :SVCB
+                - :TLSA
+                - :TXT
+              description: One of valid DNS resource types.
+              required: true
+            - !ruby/object:Api::Type::Integer
+              name: 'ttl'
+              description: |
+                Number of seconds that this ResourceRecordSet can be cached by
+                resolvers.
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'rrdatas'
+              description: |
+                As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1)
   - !ruby/object:Api::Type::String
     name: 'behavior'
     conflicts:
       - local_data
     min_version: beta
-    description: Answer this query with a behavior rather than DNS data. Acceptable values are 'behaviorUnspecified', and 'bypassResponsePolicy'
+    description: Answer this query with a behavior rather than DNS data. Acceptable
+      values are 'behaviorUnspecified', and 'bypassResponsePolicy'
     update_verb: :PATCH
 

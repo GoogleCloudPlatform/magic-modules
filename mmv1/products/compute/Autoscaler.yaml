@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -46,6 +46,34 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "autoscaler_single_instance"
+    primary_resource_id: "default"
+    min_version: 'beta'
+    vars:
+      autoscaler_name: "my-autoscaler"
+      instance_template_name: "my-instance-template"
+      target_pool_name: "my-target-pool"
+      igm_name: "my-igm"
+          # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+          # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
+      provider_name: "google-beta"
+      provider_alias: ""
+    test_vars_overrides:
+      provider_name: '"google-beta.us-central1"'
+      provider_alias: '"alias  = \"us-central1\""'
+    oics_vars_overrides:
+      provider_name: "google-beta"
+      provider_alias: ""
+  - !ruby/object:Provider::Terraform::Examples
+    name: "autoscaler_basic"
+    primary_resource_id: "foobar"
+    vars:
+      autoscaler_name: "my-autoscaler"
+      instance_template_name: "my-instance-template"
+      target_pool_name: "my-target-pool"
+      igm_name: "my-igm"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -53,13 +81,15 @@ parameters:
     imports: 'name'
     description: |
       URL of the zone where the instance group resides.
-    required: true
-    input: true
+    required: false
+    immutable: true
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'id'
     description: 'Unique identifier for the resource.'
     output: true
+    exclude: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -73,7 +103,9 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-    input: true
+    immutable: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validateGCEName'
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -90,15 +122,18 @@ properties:
     required: true
     properties:
       - !ruby/object:Api::Type::Integer
-        name: 'minNumReplicas'
+        name: 'minReplicas'
+        api_name: minNumReplicas
         description: |
           The minimum number of replicas that the autoscaler can scale down
           to. This cannot be less than 0. If not provided, autoscaler will
           choose a default value depending on maximum number of instances
           allowed.
         send_empty_value: true
+        required: true
       - !ruby/object:Api::Type::Integer
-        name: 'maxNumReplicas'
+        name: 'maxReplicas'
+        api_name: maxNumReplicas
         description: |
           The maximum number of instances that the autoscaler can scale up
           to. This is required when creating or updating an autoscaler. The
@@ -106,7 +141,8 @@ properties:
           of replicas.
         required: true
       - !ruby/object:Api::Type::Integer
-        name: 'coolDownPeriodSec'
+        name: 'cooldownPeriod'
+        api_name: 'coolDownPeriodSec'
         description: |
           The number of seconds that the autoscaler should wait before it
           starts collecting information from a new instance. This prevents
@@ -134,207 +170,219 @@ properties:
         description: |
           Defines scale down controls to reduce the risk of response latency
           and outages due to abrupt scale-in events
+        required: false
+        default_from_api: true
         properties:
-        - !ruby/object:Api::Type::NestedObject
-          name: 'maxScaledDownReplicas'
-          at_least_one_of:
-            - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
-            - autoscaling_policy.0.scale_down_control.0.time_window_sec
-          properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'fixed'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'maxScaledDownReplicas'
             at_least_one_of:
-              - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
-              - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
-            description: |
-              Specifies a fixed number of VM instances. This must be a positive
-              integer.
+              - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+              - autoscaling_policy.0.scale_down_control.0.time_window_sec
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
+                  - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
           - !ruby/object:Api::Type::Integer
-            name: 'percent'
+            name: 'timeWindowSec'
             at_least_one_of:
-              - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.fixed
-              - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas.0.percent
+              - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
+              - autoscaling_policy.0.scale_down_control.0.time_window_sec
             description: |
-              Specifies a percentage of instances between 0 to 100%, inclusive.
-              For example, specify 80 for 80%.
-        - !ruby/object:Api::Type::Integer
-          name: 'timeWindowSec'
-          at_least_one_of:
-            - autoscaling_policy.0.scale_down_control.0.max_scaled_down_replicas
-            - autoscaling_policy.0.scale_down_control.0.time_window_sec
-          description: |
-            How long back autoscaling should look when computing recommendations
-            to include directives regarding slower scale down, as described above.
+              How long back autoscaling should look when computing recommendations
+              to include directives regarding slower scale down, as described above.
       - !ruby/object:Api::Type::NestedObject
         name: 'scaleInControl'
         description: |
           Defines scale in controls to reduce the risk of response latency
           and outages due to abrupt scale-in events
         properties:
-        - !ruby/object:Api::Type::NestedObject
-          name: 'maxScaledInReplicas'
-          at_least_one_of:
-            - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
-            - autoscaling_policy.0.scale_in_control.0.time_window_sec
-          properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'fixed'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'maxScaledInReplicas'
             at_least_one_of:
-              - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
-              - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
-            description: |
-              Specifies a fixed number of VM instances. This must be a positive
-              integer.
+              - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+              - autoscaling_policy.0.scale_in_control.0.time_window_sec
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                at_least_one_of:
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
+                  - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
           - !ruby/object:Api::Type::Integer
-            name: 'percent'
+            name: 'timeWindowSec'
             at_least_one_of:
-              - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.fixed
-              - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas.0.percent
+              - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
+              - autoscaling_policy.0.scale_in_control.0.time_window_sec
             description: |
-              Specifies a percentage of instances between 0 to 100%, inclusive.
-              For example, specify 80 for 80%.
-        - !ruby/object:Api::Type::Integer
-          name: 'timeWindowSec'
-          at_least_one_of:
-            - autoscaling_policy.0.scale_in_control.0.max_scaled_in_replicas
-            - autoscaling_policy.0.scale_in_control.0.time_window_sec
-          description: |
-            How long back autoscaling should look when computing recommendations
-            to include directives regarding slower scale down, as described above.
+              How long back autoscaling should look when computing recommendations
+              to include directives regarding slower scale down, as described above.
       - !ruby/object:Api::Type::NestedObject
         name: 'cpuUtilization'
         description: |
           Defines the CPU utilization policy that allows the autoscaler to
           scale based on the average CPU utilization of a managed instance
           group.
+        default_from_api: true
         properties:
-        - !ruby/object:Api::Type::Double
-          name: 'utilizationTarget'
-          description: |
-            The target CPU utilization that the autoscaler should maintain.
-            Must be a float value in the range (0, 1]. If not specified, the
-            default is 0.6.
+          - !ruby/object:Api::Type::Double
+            name: 'target'
+            api_name: 'utilizationTarget'
+            required: true
+            description: |
+              The target CPU utilization that the autoscaler should maintain.
+              Must be a float value in the range (0, 1]. If not specified, the
+              default is 0.6.
 
-            If the CPU level is below the target utilization, the autoscaler
-            scales down the number of instances until it reaches the minimum
-            number of instances you specified or until the average CPU of
-            your instances reaches the target utilization.
+              If the CPU level is below the target utilization, the autoscaler
+              scales down the number of instances until it reaches the minimum
+              number of instances you specified or until the average CPU of
+              your instances reaches the target utilization.
 
-            If the average CPU is above the target utilization, the autoscaler
-            scales up until it reaches the maximum number of instances you
-            specified or until the average utilization reaches the target
-            utilization.
-        - !ruby/object:Api::Type::String
-          name: 'predictiveMethod'
-          default_value: NONE
-          description: |
-            Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
+              If the average CPU is above the target utilization, the autoscaler
+              scales up until it reaches the maximum number of instances you
+              specified or until the average utilization reaches the target
+              utilization.
+          - !ruby/object:Api::Type::String
+            name: 'predictiveMethod'
+            default_value: NONE
+            description: |
+              Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
 
-            - NONE (default). No predictive method is used. The autoscaler scales the group to meet current demand based on real-time metrics.
+              - NONE (default). No predictive method is used. The autoscaler scales the group to meet current demand based on real-time metrics.
 
-            - OPTIMIZE_AVAILABILITY. Predictive autoscaling improves availability by monitoring daily and weekly load patterns and scaling out ahead of anticipated demand.
+              - OPTIMIZE_AVAILABILITY. Predictive autoscaling improves availability by monitoring daily and weekly load patterns and scaling out ahead of anticipated demand.
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       - !ruby/object:Api::Type::Array
-        name: 'customMetricUtilizations'
+        name: 'metric'
+        api_name: 'customMetricUtilizations'
         description: |
           Configuration parameters of autoscaling based on a custom metric.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-          - !ruby/object:Api::Type::String
-            name: 'metric'
-            description: |
-              The identifier (type) of the Stackdriver Monitoring metric.
-              The metric cannot have negative values.
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              api_name: 'metric'
+              description: |
+                The identifier (type) of the Stackdriver Monitoring metric.
+                The metric cannot have negative values.
 
-              The metric must have a value type of INT64 or DOUBLE.
-            required: true
-          - !ruby/object:Api::Type::Double
-            name: 'singleInstanceAssignment'
-            min_version: beta
-            description: |
-              If scaling is based on a per-group metric value that represents the
-              total amount of work to be done or resource usage, set this value to
-              an amount assigned for a single instance of the scaled group.
-              The autoscaler will keep the number of instances proportional to the
-              value of this metric, the metric itself should not change value due
-              to group resizing.
+                The metric must have a value type of INT64 or DOUBLE.
+              required: true
+            - !ruby/object:Api::Type::Double
+              name: 'singleInstanceAssignment'
+              min_version: beta
+              description: |
+                If scaling is based on a per-group metric value that represents the
+                total amount of work to be done or resource usage, set this value to
+                an amount assigned for a single instance of the scaled group.
+                The autoscaler will keep the number of instances proportional to the
+                value of this metric, the metric itself should not change value due
+                to group resizing.
 
-              For example, a good metric to use with the target is
-              `pubsub.googleapis.com/subscription/num_undelivered_messages`
-              or a custom metric exporting the total number of requests coming to
-              your instances.
+                For example, a good metric to use with the target is
+                `pubsub.googleapis.com/subscription/num_undelivered_messages`
+                or a custom metric exporting the total number of requests coming to
+                your instances.
 
-              A bad example would be a metric exporting an average or median
-              latency, since this value can't include a chunk assignable to a
-              single instance, it could be better used with utilization_target
-              instead.
-          - !ruby/object:Api::Type::Double
-            name: 'utilizationTarget'
-            description: |
-              The target value of the metric that autoscaler should
-              maintain. This must be a positive value. A utilization
-              metric scales number of virtual machines handling requests
-              to increase or decrease proportionally to the metric.
+                A bad example would be a metric exporting an average or median
+                latency, since this value can't include a chunk assignable to a
+                single instance, it could be better used with utilization_target
+                instead.
+            - !ruby/object:Api::Type::Double
+              name: 'target'
+              api_name: utilizationTarget
+              description: |
+                The target value of the metric that autoscaler should
+                maintain. This must be a positive value. A utilization
+                metric scales number of virtual machines handling requests
+                to increase or decrease proportionally to the metric.
 
-              For example, a good metric to use as a utilizationTarget is
-              www.googleapis.com/compute/instance/network/received_bytes_count.
-              The autoscaler will work to keep this value constant for each
-              of the instances.
-          - !ruby/object:Api::Type::Enum
-            name: 'utilizationTargetType'
-            description: |
-              Defines how target utilization value is expressed for a
-              Stackdriver Monitoring metric.
-            values:
-              - :GAUGE
-              - :DELTA_PER_SECOND
-              - :DELTA_PER_MINUTE
-          - !ruby/object:Api::Type::String
-            name: 'filter'
-            description: |
-              A filter string to be used as the filter string for
-              a Stackdriver Monitoring TimeSeries.list API call.
-              This filter is used to select a specific TimeSeries for
-              the purpose of autoscaling and to determine whether the metric
-              is exporting per-instance or per-group data.
+                For example, a good metric to use as a utilizationTarget is
+                www.googleapis.com/compute/instance/network/received_bytes_count.
+                The autoscaler will work to keep this value constant for each
+                of the instances.
+            - !ruby/object:Api::Type::Enum
+              name: 'type'
+              api_name: 'utilizationTargetType'
+              description: |
+                Defines how target utilization value is expressed for a
+                Stackdriver Monitoring metric.
+              values:
+                - :GAUGE
+                - :DELTA_PER_SECOND
+                - :DELTA_PER_MINUTE
+            - !ruby/object:Api::Type::String
+              name: 'filter'
+              description: |
+                A filter string to be used as the filter string for
+                a Stackdriver Monitoring TimeSeries.list API call.
+                This filter is used to select a specific TimeSeries for
+                the purpose of autoscaling and to determine whether the metric
+                is exporting per-instance or per-group data.
 
-              You can only use the AND operator for joining selectors.
-              You can only use direct equality comparison operator (=) without
-              any functions for each selector.
-              You can specify the metric in both the filter string and in the
-              metric field. However, if specified in both places, the metric must
-              be identical.
+                You can only use the AND operator for joining selectors.
+                You can only use direct equality comparison operator (=) without
+                any functions for each selector.
+                You can specify the metric in both the filter string and in the
+                metric field. However, if specified in both places, the metric must
+                be identical.
 
-              The monitored resource type determines what kind of values are
-              expected for the metric. If it is a gce_instance, the autoscaler
-              expects the metric to include a separate TimeSeries for each
-              instance in a group. In such a case, you cannot filter on resource
-              labels.
+                The monitored resource type determines what kind of values are
+                expected for the metric. If it is a gce_instance, the autoscaler
+                expects the metric to include a separate TimeSeries for each
+                instance in a group. In such a case, you cannot filter on resource
+                labels.
 
-              If the resource type is any other value, the autoscaler expects
-              this metric to contain values that apply to the entire autoscaled
-              instance group and resource label filtering can be performed to
-              point autoscaler at the correct TimeSeries to scale upon.
-              This is called a per-group metric for the purpose of autoscaling.
+                If the resource type is any other value, the autoscaler expects
+                this metric to contain values that apply to the entire autoscaled
+                instance group and resource label filtering can be performed to
+                point autoscaler at the correct TimeSeries to scale upon.
+                This is called a per-group metric for the purpose of autoscaling.
 
-              If not specified, the type defaults to gce_instance.
+                If not specified, the type defaults to gce_instance.
 
-              You should provide a filter that is selective enough to pick just
-              one TimeSeries for the autoscaled group or for each of the instances
-              (if you are using gce_instance resource type). If multiple
-              TimeSeries are returned upon the query execution, the autoscaler
-              will sum their respective values to obtain its scaling value.
-            min_version: beta
+                You should provide a filter that is selective enough to pick just
+                one TimeSeries for the autoscaled group or for each of the instances
+                (if you are using gce_instance resource type). If multiple
+                TimeSeries are returned upon the query execution, the autoscaler
+                will sum their respective values to obtain its scaling value.
+              min_version: beta
       - !ruby/object:Api::Type::NestedObject
         name: 'loadBalancingUtilization'
         description: |
           Configuration parameters of autoscaling based on a load balancer.
         properties:
-        - !ruby/object:Api::Type::Double
-          name: 'utilizationTarget'
-          description: |
-            Fraction of backend capacity utilization (set in HTTP(s) load
-            balancing configuration) that autoscaler should maintain. Must
-            be a positive float value. If not defined, the default is 0.8.
+          - !ruby/object:Api::Type::Double
+            name: 'target'
+            api_name: utilizationTarget
+            required: true
+            description: |
+              Fraction of backend capacity utilization (set in HTTP(s) load
+              balancing configuration) that autoscaler should maintain. Must
+              be a positive float value. If not defined, the default is 0.8.
       - !ruby/object:Api::Type::Map
         name: 'scalingSchedules'
         description: |
@@ -382,3 +430,4 @@ properties:
     description: |
       URL of the managed instance group that this autoscaler will scale.
     required: true
+    custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'

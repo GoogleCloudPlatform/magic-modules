@@ -17,9 +17,15 @@ func main() {
 		glog.Errorf("error reading all test files: %v", err)
 	}
 
-	missingTests := detectMissingTests(changedResourceFields(), allTests)
+	changedFields := changedResourceFields()
+
+	missingTests, err := detectMissingTests(changedFields, allTests)
+	if err != nil {
+		glog.Errorf("error detecting missing tests: %v", err)
+	}
 	for resourceName, missingTestInfo := range missingTests {
-		fmt.Printf("Resource %s changed, found the following tests: %v\n", resourceName, missingTestInfo.Tests)
+		fmt.Printf("Resource %s changed\n", resourceName)
+		glog.Infof("Tests parsed: %v", missingTestInfo.Tests)
 		if len(missingTestInfo.UntestedFields) > 0 {
 			fmt.Printf("Untested fields: %v\n", missingTestInfo.UntestedFields)
 		}

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -24,9 +24,9 @@ description: |
   rules reference a target gRPC proxy. The Target gRPC Proxy references
   a URL map which specifies how traffic routes to gRPC backend services.
 references: !ruby/object:Api::Resource::ReferenceLinks
-      guides:
-        'Using Target gRPC Proxies': 'https://cloud.google.com/traffic-director/docs/proxyless-overview'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetGrpcProxies'
+  guides:
+    'Using Target gRPC Proxies': 'https://cloud.google.com/traffic-director/docs/proxyless-overview'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetGrpcProxies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -45,6 +45,15 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "target_grpc_proxy_basic"
+    primary_resource_id: "default"
+    vars:
+      proxy_name: "proxy"
+      urlmap_name: "urlmap"
+      backend_name: "backend"
+      healthcheck_name: "healthcheck"
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -60,7 +69,7 @@ properties:
       means the first character must be a lowercase letter, and all
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -75,12 +84,13 @@ properties:
       URL to the UrlMap resource that defines the mapping from URL to
       the BackendService. The protocol field in the BackendService
       must be set to GRPC.
-    input: true
+    immutable: true
     update_id: 'urlMap'
     fingerprint_name: 'fingerprint'
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Boolean
     name: 'validateForProxyless'
-    input: true
+    immutable: true
     description: |
       If true, indicates that the BackendServices referenced by
       the urlMap may be accessed by gRPC applications without using

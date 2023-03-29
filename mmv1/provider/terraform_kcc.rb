@@ -87,8 +87,10 @@ module Provider
     def guess_metadata_mapping_name(object)
       # Split the last import format by '/' and take the last part. Then use
       # the regex to verify if it is a value field in the format of {{value}}.
-      last_import_part =
-        import_id_formats_from_resource(object)[-1].split('/')[-1].scan(/{{[[:word:]]+}}/)
+      last_import_part = import_id_formats_from_resource(object)[-1]
+                         .gsub('%', '')
+                         .split('/')[-1]
+                         .scan(/{{[[:word:]]+}}/)
       # If it is a value field, the length of last_import_part will be 1;
       # otherwise it'll be 0.
       # Remove '{{' and '}}' and only return the field name.

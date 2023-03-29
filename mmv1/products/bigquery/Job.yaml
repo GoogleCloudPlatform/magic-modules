@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -16,7 +16,7 @@ name: 'Job'
 kind: 'bigquery#job'
 base_url: projects/{{project}}/jobs
 self_link: projects/{{project}}/jobs/{{job_id}}?location={{location}}
-input: true
+immutable: true
 description: |
   Jobs are actions that BigQuery runs on your behalf to load data, export data, query data, or copy data.
   Once a BigQuery job is created, it cannot be changed or deleted.
@@ -24,12 +24,123 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'BigQuery Jobs Intro': 'https://cloud.google.com/bigquery/docs/jobs-overview'
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs'
+import_format: ["projects/{{project}}/jobs/{{job_id}}/location/{{location}}", "projects/{{project}}/jobs/{{job_id}}",
+  "{{project}}/{{job_id}}", "{{job_id}}"]
+skip_delete: true
+id_format: projects/{{project}}/jobs/{{job_id}}
+async: !ruby/object:Provider::Terraform::PollAsync
+  check_response_func_existence: PollCheckForExistence
+  actions: ['create']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_job_query"
+    primary_resource_id: "job"
+    vars:
+      job_id: "job_query"
+      account_name: "bqowner"
+    ignore_read_extra:
+      - "etag"
+      - "status.0.state"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_job_query_table_reference"
+    primary_resource_id: "job"
+    vars:
+      job_id: "job_query"
+      account_name: "bqowner"
+    ignore_read_extra:
+      - "etag"
+      - "query.0.default_dataset.0.dataset_id"
+      - "query.0.destination_table.0.table_id"
+      - "status.0.state"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_job_load"
+    primary_resource_id: "job"
+    vars:
+      job_id: "job_load"
+    ignore_read_extra:
+      - "etag"
+      - "status.0.state"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_job_load_geojson"
+    primary_resource_id: "job"
+    vars:
+      job_id: "job_load"
+      bucket_name: "bq-geojson-sample"
+    test_env_vars:
+      project: :PROJECT_NAME
+    ignore_read_extra:
+      - "etag"
+      - "status.0.state"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_job_load_table_reference"
+    primary_resource_id: "job"
+    vars:
+      job_id: "job_load"
+    ignore_read_extra:
+      - "etag"
+      - "load.0.destination_table.0.table_id"
+      - "status.0.state"
+    skip_docs: true      # there are a lot of examples for this resource, so omitting some that are similar to others
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_job_copy"
+    primary_resource_id: "job"
+    vars:
+      job_id: "job_copy"
+      account_name: "bqowner"
+      key_name: "example-key"
+      keyring_name: "example-keyring"
+    test_env_vars:
+      project: :PROJECT_NAME
+    ignore_read_extra:
+      - "etag"
+      - "status.0.state"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_job_copy_table_reference"
+    primary_resource_id: "job"
+    vars:
+      job_id: "job_copy"
+      account_name: "bqowner"
+      key_name: "example-key"
+      keyring_name: "example-keyring"
+    test_env_vars:
+      project: :PROJECT_NAME
+    ignore_read_extra:
+      - "etag"
+      - "copy.0.destination_table.0.table_id"
+      - "copy.0.source_tables.0.table_id"
+      - "copy.0.source_tables.1.table_id"
+      - "status.0.state"
+    skip_docs: true      # there are a lot of examples for this resource, so omitting some that are similar to others
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_job_extract"
+    primary_resource_id: "job"
+    vars:
+      job_id: "job_extract"
+      account_name: "bqowner"
+    ignore_read_extra:
+      - "etag"
+      - "status.0.state"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_job_extract_table_reference"
+    primary_resource_id: "job"
+    vars:
+      job_id: "job_extract"
+      account_name: "bqowner"
+    ignore_read_extra:
+      - "etag"
+      - "extract.0.source_table.0.table_id"
+      - "status.0.state"
+    skip_docs: true      # there are a lot of examples for this resource, so omitting some that are similar to others
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/bigquery_job.go
+  encoder: templates/terraform/encoders/bigquery_job.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'id'
     output: true
     description: |
       Opaque ID field of the job.
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'user_email'
     output: true
@@ -39,6 +150,7 @@ properties:
     name: 'configuration'
     description: 'Describes the job configuration.'
     required: true
+    flatten_object: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'jobType'
@@ -75,19 +187,27 @@ properties:
               Describes the table where the query results should be stored.
               This property must be set for large results that exceed the maximum response size.
               For queries that produce anonymous (cached) results, this field will be populated by BigQuery.
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_query_destinationtable.go.erb'
+            default_from_api: true
             properties:
               - !ruby/object:Api::Type::String
                 name: 'projectId'
                 description: 'The ID of the project containing this table.'
-                required: true
+                required: false
+                default_from_api: true
               - !ruby/object:Api::Type::String
                 name: 'datasetId'
                 description: 'The ID of the dataset containing this table.'
-                required: true
+                required: false
+                default_from_api: true
               - !ruby/object:Api::Type::String
                 name: 'tableId'
-                description: 'The ID of the table.'
+                description: |
+                  The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+                  or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
+                diff_suppress_func: 'compareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Array
             name: 'userDefinedFunctionResources'
             description: |
@@ -96,7 +216,8 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'resourceUri'
-                  description: 'A code resource to load from a Google Cloud Storage URI (gs://bucket/path).'
+                  description: 'A code resource to load from a Google Cloud Storage
+                    URI (gs://bucket/path).'
                   # TODO (mbang): exactly_one_of: resourceUri, inlineCode
                 - !ruby/object:Api::Type::String
                   name: 'inlineCode'
@@ -133,14 +254,21 @@ properties:
             name: 'defaultDataset'
             description: |
               Specifies the default dataset to use for unqualified table names in the query. Note that this does not alter behavior of unqualified dataset names.
+            custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_ref.go.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_ref.go.erb'
             properties:
               - !ruby/object:Api::Type::String
                 name: 'datasetId'
-                description: 'A unique ID for this dataset, without the project name.'
+                description: |
+                  The dataset. Can be specified `{{dataset_id}}` if `project_id` is also set,
+                  or of the form `projects/{{project}}/datasets/{{dataset_id}}` if not.
                 required: true
+                diff_suppress_func: 'compareSelfLinkRelativePaths'
               - !ruby/object:Api::Type::String
                 name: 'projectId'
                 description: 'The ID of the project containing this table.'
+                required: false
+                default_from_api: true
           - !ruby/object:Api::Type::Enum
             name: 'priority'
             description: |
@@ -202,6 +330,7 @@ properties:
             name: 'destinationEncryptionConfiguration'
             description: |
               Custom encryption configuration (e.g., Cloud KMS keys)
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.erb'
             properties:
               - !ruby/object:Api::Type::String
                 name: 'kmsKeyName'
@@ -228,7 +357,8 @@ properties:
                   - configuration.0.query.0.script_options.0.key_result_statement
               - !ruby/object:Api::Type::String
                 name: 'statementByteBudget'
-                description: 'Limit on the number of bytes billed per statement. Exceeding this budget results in an error.'
+                description: 'Limit on the number of bytes billed per statement. Exceeding
+                  this budget results in an error.'
                 at_least_one_of:
                   - configuration.0.query.0.script_options.0.statement_timeout_ms
                   - configuration.0.query.0.script_options.0.statement_byte_budget
@@ -270,19 +400,26 @@ properties:
             description: |
               The destination table to load the data into.
             required: true
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_load_destinationtable.go.erb'
             properties:
               - !ruby/object:Api::Type::String
                 name: 'projectId'
                 description: 'The ID of the project containing this table.'
-                required: true
+                required: false
+                default_from_api: true
               - !ruby/object:Api::Type::String
                 name: 'datasetId'
                 description: 'The ID of the dataset containing this table.'
-                required: true
+                required: false
+                default_from_api: true
               - !ruby/object:Api::Type::String
                 name: 'tableId'
-                description: 'The ID of the table.'
+                description: |
+                  The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+                  or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
+                diff_suppress_func: 'compareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -324,6 +461,7 @@ properties:
               the string to ISO-8859-1 encoding, and then uses the first byte of the encoded string to split the
               data in its raw, binary state. BigQuery also supports the escape sequence "\t" to specify a tab separator.
               The default value is a comma (',').
+            default_from_api: true
           - !ruby/object:Api::Type::Integer
             name: 'skipLeadingRows'
             description: |
@@ -336,6 +474,8 @@ properties:
               skipLeadingRows = N > 0 - Autodetect skips N-1 rows and tries to detect headers in row N. If headers are not detected,
               row N is just skipped. Otherwise row N is used to extract column names for the detected schema.
             default_value: 0
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntAtLeast(0)'
           - !ruby/object:Api::Type::String
             name: 'encoding'
             description: |
@@ -350,6 +490,7 @@ properties:
               and then uses the first byte of the encoded string to split the data in its raw, binary state.
               The default value is a double-quote ('"'). If your data does not contain quoted sections, set the property value to an empty string.
               If your data contains quoted newline characters, you must also set the allowQuotedNewlines property to true.
+            default_from_api: true
           - !ruby/object:Api::Type::Integer
             name: 'maxBadRecords'
             description: |
@@ -439,6 +580,7 @@ properties:
             name: 'destinationEncryptionConfiguration'
             description: |
               Custom encryption configuration (e.g., Cloud KMS keys)
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.erb'
             properties:
               - !ruby/object:Api::Type::String
                 name: 'kmsKeyName'
@@ -465,36 +607,50 @@ properties:
             description: |
               Source tables to copy.
             required: true
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref_array.go.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_sourcetables.go.erb'
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'projectId'
                   description: 'The ID of the project containing this table.'
-                  required: true
+                  required: false
+                  default_from_api: true
                 - !ruby/object:Api::Type::String
                   name: 'datasetId'
                   description: 'The ID of the dataset containing this table.'
-                  required: true
+                  required: false
+                  default_from_api: true
                 - !ruby/object:Api::Type::String
                   name: 'tableId'
-                  description: 'The ID of the table.'
+                  description: |
+                    The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+                    or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                   required: true
+                  diff_suppress_func: 'compareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::NestedObject
             name: 'destinationTable'
             description: 'The destination table.'
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_destinationtable.go.erb'
             properties:
               - !ruby/object:Api::Type::String
                 name: 'projectId'
                 description: 'The ID of the project containing this table.'
-                required: true
+                required: false
+                default_from_api: true
               - !ruby/object:Api::Type::String
                 name: 'datasetId'
                 description: 'The ID of the dataset containing this table.'
-                required: true
+                required: false
+                default_from_api: true
               - !ruby/object:Api::Type::String
                 name: 'tableId'
-                description: 'The ID of the table.'
+                description: |
+                  The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+                  or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
+                diff_suppress_func: 'compareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -524,6 +680,7 @@ properties:
             name: 'destinationEncryptionConfiguration'
             description: |
               Custom encryption configuration (e.g., Cloud KMS keys)
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_kms_version.go.erb'
             properties:
               - !ruby/object:Api::Type::String
                 name: 'kmsKeyName'
@@ -561,12 +718,14 @@ properties:
             description: |
               When extracting data in CSV format, this defines the delimiter to use between fields in the exported data.
               Default is ','
+            default_from_api: true
           - !ruby/object:Api::Type::String
             name: 'destinationFormat'
             description: |
               The exported file format. Possible values include CSV, NEWLINE_DELIMITED_JSON and AVRO for tables and SAVED_MODEL for models.
               The default value for tables is CSV. Tables with nested or repeated fields cannot be exported as CSV.
               The default value for models is SAVED_MODEL.
+            default_from_api: true
           - !ruby/object:Api::Type::String
             name: 'compression'
             description: |
@@ -584,19 +743,26 @@ properties:
             exactly_one_of:
               - configuration.0.extract.0.source_table
               - configuration.0.extract.0.source_model
+            custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_extract_sourcetable.go.erb'
             properties:
               - !ruby/object:Api::Type::String
                 name: 'projectId'
                 description: 'The ID of the project containing this table.'
-                required: true
+                required: false
+                default_from_api: true
               - !ruby/object:Api::Type::String
                 name: 'datasetId'
                 description: 'The ID of the dataset containing this table.'
-                required: true
+                required: false
+                default_from_api: true
               - !ruby/object:Api::Type::String
                 name: 'tableId'
-                description: 'The ID of the table.'
+                description: |
+                  The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+                  or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
+                diff_suppress_func: 'compareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::NestedObject
             name: 'sourceModel'
             description: |
@@ -621,12 +787,14 @@ properties:
     name: 'jobReference'
     description: |
       Reference describing the unique-per-user name of the job.
+    flatten_object: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'projectId'
         description: |
           The project ID of the project containing this job.
         required: true
+        exclude: true
       - !ruby/object:Api::Type::String
         name: 'jobId'
         description: |

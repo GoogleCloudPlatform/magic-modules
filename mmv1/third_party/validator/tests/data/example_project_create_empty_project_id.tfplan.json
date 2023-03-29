@@ -13,7 +13,7 @@
           "schema_version": 0,
           "values": {
             "display_name": "Department 1",
-            "parent": "organizations/1234567",
+            "parent": "organizations/{{.OrgID}}",
             "timeouts": null
           },
           "sensitive_values": {}
@@ -78,7 +78,7 @@
         "before": null,
         "after": {
           "display_name": "Department 1",
-          "parent": "organizations/1234567",
+          "parent": "organizations/{{.OrgID}}",
           "timeouts": null
         },
         "after_unknown": {
@@ -174,7 +174,7 @@
               "constant_value": "Department 1"
             },
             "parent": {
-              "constant_value": "organizations/1234567"
+              "constant_value": "organizations/{{.OrgID}}"
             }
           },
           "schema_version": 0

@@ -53,9 +53,9 @@ func TestAccSpannerInstance_basic(t *testing.T) {
 
 	idName := fmt.Sprintf("spanner-test-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerInstance_basic(idName),
@@ -77,9 +77,9 @@ func TestAccSpannerInstance_noNodeCountSpecified(t *testing.T) {
 
 	idName := fmt.Sprintf("spanner-test-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccSpannerInstance_noNodeCountSpecified(idName),
@@ -96,9 +96,9 @@ func TestAccSpannerInstance_basicWithAutogenName(t *testing.T) {
 
 	displayName := fmt.Sprintf("spanner-test-%s-dname", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerInstance_basicWithAutogenName(displayName),
@@ -123,9 +123,9 @@ func TestAccSpannerInstance_update(t *testing.T) {
 	dName1 := fmt.Sprintf("spanner-dname1-%s", RandString(t, 10))
 	dName2 := fmt.Sprintf("spanner-dname2-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSpannerInstance_update(dName1, 1, false),
@@ -142,6 +142,35 @@ func TestAccSpannerInstance_update(t *testing.T) {
 				ResourceName:      "google_spanner_instance.updater",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccSpannerInstance_virtualUpdate(t *testing.T) {
+	// Randomness
+	SkipIfVcr(t)
+	t.Parallel()
+
+	dName := fmt.Sprintf("spanner-dname1-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_virtualUpdate(dName, "true"),
+			},
+			{
+				ResourceName: "google_spanner_instance.basic",
+				ImportState:  true,
+			},
+			{
+				Config: testAccSpannerInstance_virtualUpdate(dName, "false"),
+			},
+			{
+				ResourceName: "google_spanner_instance.basic",
+				ImportState:  true,
 			},
 		},
 	})
@@ -195,4 +224,16 @@ resource "google_spanner_instance" "updater" {
   }
 }
 `, name, nodes, extraLabel)
+}
+
+func testAccSpannerInstance_virtualUpdate(name, virtual string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s"
+  processing_units = 100
+  force_destroy    = "%s"
+}
+`, name, name, virtual)
 }

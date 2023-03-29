@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -33,6 +33,17 @@ min_version: beta
 description: |
   A container for `services`. Namespaces allow administrators to group services
   together and define permissions for a collection of services.
+import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}"]
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "service_directory_namespace_basic"
+    primary_resource_id: "example"
+    vars:
+      namespace_id: "example-namespace"
+    min_version: beta
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/service_directory_namespace.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -42,14 +53,17 @@ parameters:
       `gcloud beta service-directory locations list`.
     required: true
     url_param_only: true
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: namespaceId
     description: |
       The Resource ID must be 1-63 characters long, including digits,
       lowercase letters or the hyphen character.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validateRFC1035Name(2, 63)'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

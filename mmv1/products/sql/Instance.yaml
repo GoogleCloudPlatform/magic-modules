@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -20,6 +20,7 @@ description: |
   hosted in Google's cloud. The Instances resource provides methods for
   common configuration and management tasks.
 collection_url_key: 'items'
+exclude: true
 properties:
   - !ruby/object:Api::Type::Enum
     name: 'backendType'
@@ -135,8 +136,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-        Name of the Cloud SQL instance. This does not include the project
-        ID.
+      Name of the Cloud SQL instance. This does not include the project
+      ID.
     required: true
   # TODO(alexstephen): Investigate if worth to make this depend on compute's
   # region as a resource reference. (low priority, non launch blocker)
@@ -291,9 +292,6 @@ properties:
               'slash' notation (e.g. 192.168.100.0/24).
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
-                #- !ruby/object:Api::Type::Constant
-                #  name: 'kind'
-                #  value: 'sql#aclEntry'
                 - !ruby/object:Api::Type::Time
                   name: 'expirationTime'
                   description: |
@@ -312,8 +310,8 @@ properties:
           - !ruby/object:Api::Type::Boolean
             name: 'requireSsl'
             description: |
-                Whether the mysqld should default to 'REQUIRE X509' for
-                users connecting over IP.
+              Whether the mysqld should default to 'REQUIRE X509' for
+              users connecting over IP.
       - !ruby/object:Api::Type::String
         name: 'tier'
         description: |
@@ -327,16 +325,13 @@ properties:
           The availabilityType define if your postgres instance is run zonal
           or regional.
         values:
-        - :ZONAL
-        - :REGIONAL
+          - :ZONAL
+          - :REGIONAL
       - !ruby/object:Api::Type::NestedObject
         name: 'backupConfiguration'
         description: |
           The daily backup configuration for the instance.
         properties:
-          #- !ruby/object:Api::Type::Constant
-          #  name: 'kind'
-          #  value: 'sql#backupConfiguration'
           - !ruby/object:Api::Type::Boolean
             name: 'enabled'
             description: |

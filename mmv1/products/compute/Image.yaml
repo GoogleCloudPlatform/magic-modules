@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -15,7 +15,7 @@
 name: 'Image'
 kind: 'compute#image'
 base_url: projects/{{project}}/global/images
-input: true
+immutable: true
 has_self_link: true
 collection_url_key: 'items'
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -57,6 +57,23 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  allowed_iam_role: 'roles/compute.imageUser'
+  parent_resource_attribute: 'image'
+  iam_conditions_request_type: :QUERY_PARAM
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "image_basic"
+    primary_resource_id: "example"
+    vars:
+      image_name: "example-image"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-image%s\", context[\"random_suffix\"\
+      ])"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "image_guest_os"
+    primary_resource_id: "example"
+    vars:
+      image_name: "example-image"
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'archiveSizeBytes'
@@ -72,6 +89,7 @@ properties:
     name: 'deprecated'
     description: The deprecation status associated with this image.
     output: true
+    exclude: true
     properties:
       - !ruby/object:Api::Type::Time
         name: 'deleted'
@@ -124,6 +142,7 @@ properties:
       Size of the image when restored onto a persistent disk (in GB).
   # TODO(alexstephen): Build family support.
   # Families use a different API
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'family'
     description: |
@@ -135,8 +154,10 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'guestOsFeatures'
     description: |
-        A list of features to enable on the guest operating system.
-        Applicable only for bootable images.
+      A list of features to enable on the guest operating system.
+      Applicable only for bootable images.
+    default_from_api: true
+    is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Enum
@@ -158,6 +179,7 @@ properties:
       The unique identifier for the resource. This identifier
       is defined by the server.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'imageEncryptionKey'
     description: |
@@ -172,17 +194,23 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        exclude: true
       - !ruby/object:Api::Type::String
         name: 'sha256'
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the
           customer-supplied encryption key that protects this resource.
         output: true
-      - !ruby/object:Api::Type::String
+        exclude: true
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
-        name: 'kmsKeyName'
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeySelfLink'
+        api_name: 'kmsKeyName'
         description: |
-          The name of the encryption key that is stored in Google Cloud KMS.
+          The self link of the encryption key that is stored in Google Cloud
+          KMS.
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.erb'
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
         description: |
@@ -204,6 +232,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'licenses'
     description: Any applicable license URI.
+    default_from_api: true
     item_type: !ruby/object:Api::Type::ResourceRef
       name: 'license'
       description: 'An applicable license URI'
@@ -223,6 +252,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'rawDisk'
     description: The parameters of the raw disk image.
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'containerType'
@@ -233,8 +263,10 @@ properties:
           image is created.
         values:
           - :TAR
+        default_value: :TAR
       - !ruby/object:Api::Type::String
-        name: 'sha1Checksum'
+        name: 'sha1'
+        api_name: 'sha1Checksum'
         description: |
           An optional SHA1 checksum of the disk image before unpackaging.
           This is provided by the client when the disk image is created.
@@ -259,6 +291,7 @@ properties:
     description: |
       The customer-supplied encryption key of the source disk. Required if
       the source disk is protected by a customer-supplied encryption key.
+    exclude: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'rawKey'
@@ -271,8 +304,8 @@ properties:
           The RFC 4648 base64 encoded SHA-256 hash of the
           customer-supplied encryption key that protects this resource.
         output: true
-      - !ruby/object:Api::Type::String
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+      - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
         min_version: beta
         description: |
@@ -283,6 +316,7 @@ properties:
       The ID value of the disk used to create this image. This value may
       be used to determine whether the image was taken from the current
       or a previous instance of a given disk name.
+    exclude: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceImage'
     description: |
@@ -316,6 +350,7 @@ properties:
       only value is RAW
     values:
       - :RAW
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     exclude: true
