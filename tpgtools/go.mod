@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/magic-modules/tpgtools
 
-go 1.19
+go 1.18
 
 require (
 	bitbucket.org/creachadair/stringset v0.0.9
