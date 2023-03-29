@@ -78,7 +78,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'autoscale'
     description: |
-      Block that will tune the autoscale functionality of the reservation.
+      The configuration parameters for the auto scaling feature.
     properties:
       - !ruby/object:Api::Type::Integer
         name: currentSlots
