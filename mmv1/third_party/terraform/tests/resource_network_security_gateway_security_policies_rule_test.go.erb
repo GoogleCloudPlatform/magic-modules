@@ -17,7 +17,7 @@ func TestAccNetworkSecurityGatewaySecurityPoliciesRule_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkSecurityGatewaySecurityPoliciesRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
