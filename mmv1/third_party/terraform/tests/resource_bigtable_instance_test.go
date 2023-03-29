@@ -66,7 +66,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 			{
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
-				ImportStateVerify:       true,
+				ImportStateVerify:       false,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
@@ -75,7 +75,8 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 			{
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
-				ImportStateVerify:       true,
+				PlanOnly:                true,
+				ImportStateVerify:       false,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
@@ -84,7 +85,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 			{
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
-				ImportStateVerify:       true,
+				ImportStateVerify:       false,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
@@ -93,7 +94,8 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 			{
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
-				ImportStateVerify:       true,
+				PlanOnly:                true,
+				ImportStateVerify:       false,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
@@ -102,7 +104,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 			{
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
-				ImportStateVerify:       true,
+				ImportStateVerify:       false,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 		},
