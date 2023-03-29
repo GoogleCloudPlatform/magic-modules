@@ -7,12 +7,12 @@ import (
 
 func resourceConverterOrgPolicyPolicy() ResourceConverter {
 	return ResourceConverter{
-		Convert:           GetOrgPolicyPolicyCaiObject,
-		MergeCreateUpdate: MergeOrgPolicyPolicy,
+		Convert:           GetV2OrgPoliciesCaiObject,
+		MergeCreateUpdate: MergeV2OrgPolicies,
 	}
 }
 
-func GetOrgPolicyPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetV2OrgPoliciesCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	assetNamePattern, assetType, err := getAssetNameAndTypeFromParent(d.Get("parent").(string))
 	if err != nil {
 		return []Asset{}, err
@@ -23,11 +23,11 @@ func GetOrgPolicyPolicyCaiObject(d TerraformResourceData, config *Config) ([]Ass
 		return []Asset{}, err
 	}
 
-	if obj, err := GetOrgPolicyPolicyApiObject(d, config); err == nil {
+	if obj, err := GetV2OrgPoliciesApiObject(d, config); err == nil {
 		return []Asset{{
-			Name:            name,
-			Type:            assetType,
-			OrgPolicyPolicy: []*OrgPolicyPolicy{&obj},
+			Name:          name,
+			Type:          assetType,
+			V2OrgPolicies: []*V2OrgPolicies{&obj},
 		}}, nil
 	} else {
 		return []Asset{}, err
@@ -35,19 +35,19 @@ func GetOrgPolicyPolicyCaiObject(d TerraformResourceData, config *Config) ([]Ass
 
 }
 
-func GetOrgPolicyPolicyApiObject(d TerraformResourceData, config *Config) (OrgPolicyPolicy, error) {
-	spec, err := expandSpecOrgPolicyPolicy(d.Get("spec").([]interface{}))
+func GetV2OrgPoliciesApiObject(d TerraformResourceData, config *Config) (V2OrgPolicies, error) {
+	spec, err := expandSpecV2OrgPolicies(d.Get("spec").([]interface{}))
 	if err != nil {
-		return OrgPolicyPolicy{}, err
+		return V2OrgPolicies{}, err
 	}
 
-	return OrgPolicyPolicy{
-		Name: d.Get("name").(string),
+	return V2OrgPolicies{
+		Name:       d.Get("name").(string),
 		PolicySpec: spec,
 	}, nil
 }
 
-func MergeOrgPolicyPolicy(existing, incoming Asset) Asset {
+func MergeV2OrgPolicies(existing, incoming Asset) Asset {
 	existing.Resource = incoming.Resource
 	return existing
 }
@@ -65,7 +65,7 @@ func getAssetNameAndTypeFromParent(parent string) (assetName string, assetType s
 	}
 }
 
-func expandSpecOrgPolicyPolicy(configured []interface{}) (*PolicySpec, error) {
+func expandSpecV2OrgPolicies(configured []interface{}) (*PolicySpec, error) {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil, nil
 	}
