@@ -197,7 +197,6 @@ func TestAccStorageTransferJob_transferOptions(t *testing.T) {
 	})
 }
 
-
 func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 	t.Parallel()
 
@@ -207,9 +206,9 @@ func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 	testPubSubTopicName := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
+		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageTransferJob_basic(GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription, testPubSubTopicName),
