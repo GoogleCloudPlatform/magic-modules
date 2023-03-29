@@ -12,5 +12,6 @@
         # See the License for the specific language governing permissions and
         # limitations under the License.
 -%>
-// Set bucket back to its long form name (if it had one).
-d.Set("bucket", longBucket)
+// Set bucket and name back to their original values.
+d.Set("bucket", oldBucket)
+d.Set("name", oldName)

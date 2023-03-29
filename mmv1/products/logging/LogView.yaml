@@ -67,7 +67,7 @@ properties:
     description: 'The resource name of the view. For example: \`projects/my-project/locations/global/buckets/my-bucket/views/my-view\`'
     required: true
     immutable: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: description
     description: Describes this view.

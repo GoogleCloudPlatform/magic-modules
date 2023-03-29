@@ -14,22 +14,23 @@
 -%>
 // Extract any empty fields from the bucket field.
 parent := d.Get("parent").(string)
-longBucket := d.Get("bucket").(string)
-parent, err = ExtractFieldByPattern("parent", parent, longBucket, "((projects|folders|organizations|billingAccounts)/[a-z0-9A-Z-]*)/locations/.*")
+oldBucket := d.Get("bucket").(string)
+parent, err = ExtractFieldByPattern("parent", parent, oldBucket, "((projects|folders|organizations|billingAccounts)/[a-z0-9A-Z-]*)/locations/.*")
 if err != nil {
 	return err
 }
 d.Set("parent", parent)
 location := d.Get("location").(string)
-location, err = ExtractFieldByPattern("location", location, longBucket, "[a-zA-Z]*/[a-z0-9A-Z-]*/locations/([a-z0-9-]*)/buckets/.*")
+location, err = ExtractFieldByPattern("location", location, oldBucket, "[a-zA-Z]*/[a-z0-9A-Z-]*/locations/([a-z0-9-]*)/buckets/.*")
 if err != nil {
 	return err
 }
-shortBucket := GetResourceNameFromSelfLink(longBucket)
-name := GetResourceNameFromSelfLink(d.Get("name").(string))
+newBucket := GetResourceNameFromSelfLink(oldBucket)
+oldName := d.Get("name").(string)
+newName := GetResourceNameFromSelfLink(oldName)
 // Set all the other fields to their short forms before forming url and setting ID.
 d.Set("location", location)
-d.Set("bucket", shortBucket)
-d.Set("name", name)
+d.Set("bucket", newBucket)
+d.Set("name", newName)
 // Set URL using custom formatting (allowing forward slash in parent).
-url = fmt.Sprintf("%s%s/locations/%s/buckets/%s/views?viewId=%s", config.LoggingBasePath, parent, location, shortBucket, name)
+url = fmt.Sprintf("%s%s/locations/%s/buckets/%s/views?viewId=%s", config.LoggingBasePath, parent, location, newBucket, newName)
