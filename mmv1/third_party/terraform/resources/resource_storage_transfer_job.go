@@ -1049,8 +1049,8 @@ func expandObjectConditions(conditions []interface{}) *storagetransfer.ObjectCon
 		IncludePrefixes:                     convertStringArr(condition["include_prefixes"].([]interface{})),
 		MaxTimeElapsedSinceLastModification: condition["max_time_elapsed_since_last_modification"].(string),
 		MinTimeElapsedSinceLastModification: condition["min_time_elapsed_since_last_modification"].(string),
-		LastModifiedSince: condition["last_modified_since"].(string),
-		LastModifiedBefore: condition["last_modified_before"].(string),
+		LastModifiedSince: 					 condition["last_modified_since"].(string),
+		LastModifiedBefore: 				 condition["last_modified_before"].(string),
 	}
 }
 
@@ -1060,8 +1060,8 @@ func flattenObjectCondition(condition *storagetransfer.ObjectConditions) []map[s
 		"include_prefixes":                         condition.IncludePrefixes,
 		"max_time_elapsed_since_last_modification": condition.MaxTimeElapsedSinceLastModification,
 		"min_time_elapsed_since_last_modification": condition.MinTimeElapsedSinceLastModification,
-		"last_modified_since": condition.LastModifiedSince,
-		"last_modified_before": condition.LastModifiedBefore,
+		"last_modified_since": 						condition.LastModifiedSince,
+		"last_modified_before": 					condition.LastModifiedBefore,
 	}
 	return []map[string]interface{}{data}
 }
