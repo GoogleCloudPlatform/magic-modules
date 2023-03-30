@@ -175,7 +175,7 @@ func TestGetProject(t *testing.T) {
 			}
 
 			// Create resource config
-			// Here use ResourceComputeDisk schema as example  - because it has a zone field in schema
+			// Here use ResourceComputeDisk schema as example
 			emptyConfigMap := map[string]interface{}{}
 			d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, emptyConfigMap)
 			if tc.ResourceProject != "" {
