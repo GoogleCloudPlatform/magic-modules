@@ -274,6 +274,7 @@ func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.D
         NewGoogleDnsKeysDataSource,
         <% unless version == 'ga' -%>
         NewGoogleFirebaseAppleAppConfigDataSource,
+        NewGoogleFirebaseWebAppConfigDataSource,
         <% end -%>
     }
 }
