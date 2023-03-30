@@ -197,7 +197,7 @@ module Provider
                        ['converters/google/resources/cai_test.go',
                         'third_party/validator/cai_test.go'],
                        ['converters/google/resources/org_policy_policy.go',
-                        'third_party/validator/org_policy_policy.go'], 
+                        'third_party/validator/org_policy_policy.go'],
                        ['converters/google/resources/getconfig.go',
                         'third_party/validator/getconfig.go'],
                        ['converters/google/resources/folder.go',
