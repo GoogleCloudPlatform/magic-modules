@@ -79,6 +79,23 @@ func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal types.S
 	return types.String{}
 }
 
+func getRegionFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
+	return getRegionFromFrameworkSchema("region", rVal, pVal, diags)
+}
+
+func getRegionFromFrameworkSchema(regionSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
+	if !rVal.IsNull() && rVal.ValueString() != "" {
+		return rVal
+	}
+
+	if !pVal.IsNull() && pVal.ValueString() != "" {
+		return pVal
+	}
+
+	diags.AddError("required field is not set", fmt.Sprintf("%s is not set", regionSchemaField))
+	return types.String{}
+}
+
 func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
 	if IsGoogleApiErrorWithCode(err, 404) {
 		tflog.Warn(ctx, fmt.Sprintf("Removing %s because it's gone", resource))
