@@ -19,9 +19,9 @@ func TestAccApigeeEnvKeystoreAliasPkcs12_apigeeEnvKeystoreAliasPkcs12Example(t *
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
-		CheckDestroy: testAccCheckApigeeEnvKeystoreAliasPkcs12DestroyProducer(t),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApigeeEnvKeystoreAliasPkcs12DestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeEnvKeystoreAliasPkcs12_apigeeEnvKeystoreAliasPkcs12Example(context),
