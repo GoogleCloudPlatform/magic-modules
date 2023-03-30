@@ -19,7 +19,7 @@ collection_url_key: 'items'
 has_self_link: true
 immutable: true
 description: |
-  Represents an Address resource.
+  An Address resource.
 
   Each virtual machine instance has an ephemeral internal IP address and,
   optionally, an external IP address. To communicate between instances on
