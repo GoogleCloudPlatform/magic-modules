@@ -42,7 +42,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_read: templates/terraform/pre_read/logging_log_view.go.erb
   pre_update: templates/terraform/pre_update/logging_log_view.go.erb
   pre_delete: templates/terraform/pre_delete/logging_log_view.go.erb
-    #custom_import: templates/terraform/custom_import/logging_log_view.go.erb
+  test_check_destroy: templates/terraform/custom_check_destroy/logging_log_view.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
