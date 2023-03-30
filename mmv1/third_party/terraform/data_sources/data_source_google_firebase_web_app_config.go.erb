@@ -15,7 +15,10 @@ import (
 )
 
 // Ensure the implementation satisfies the expected interfaces
-var _ datasource.DataSource = &GoogleFirebaseWebAppConfigDataSource{}
+var (
+	_ datasource.DataSource              = &GoogleFirebaseWebAppConfigDataSource{}
+	_ datasource.DataSourceWithConfigure = &GoogleFirebaseWebAppConfigDataSource{}
+)
 
 func NewGoogleFirebaseWebAppConfigDataSource() datasource.DataSource {
 	return &GoogleFirebaseWebAppConfigDataSource{}
@@ -54,6 +57,12 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Schema(ctx context.Context, req d
 				Description:         "The id of the Firebase web App.",
 				MarkdownDescription: "The id of the Firebase web App.",
 				Required:            true,
+			},
+
+			"project": schema.StringAttribute{
+				Description:         "The project id of the Firebase web App.",
+				MarkdownDescription: "The project id of the Firebase web App.",
+				Optional:            true,
 			},
 
 			"api_key": schema.StringAttribute{
@@ -108,12 +117,6 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Schema(ctx context.Context, req d
 				Description:         "The default Cloud Storage for Firebase storage bucket name.",
 				MarkdownDescription: "The default Cloud Storage for Firebase storage bucket name.",
 				Computed:            true,
-			},
-
-			"project": schema.StringAttribute{
-				Description:         "The project id of the Firebase web App.",
-				MarkdownDescription: "The project id of the Firebase web App.",
-				Optional:            true,
 			},
 
 			"id": schema.StringAttribute{
