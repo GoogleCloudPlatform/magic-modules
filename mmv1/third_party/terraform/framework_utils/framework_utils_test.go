@@ -20,7 +20,7 @@ func TestGetProjectFramework(t *testing.T) {
 			ExpectedProject: types.StringValue("foo"),
 		},
 		"project is pulled from the provider config value when unset on the resource": {
-			// Note - ResourceProject is not set to non-zero value here
+			ResourceProject: types.StringNull(),
 			ProviderProject: types.StringValue("bar"),
 			ExpectedProject: types.StringValue("bar"),
 		},
