@@ -79,21 +79,45 @@ func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal types.S
 	return types.String{}
 }
 
-func getRegionFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
-	return getRegionFromFrameworkSchema("region", rVal, pVal, diags)
+func getRegionFramework(rRegion, rZone, pRegion, pZone types.String, diags *diag.Diagnostics) types.String {
+	return getRegionFromFrameworkSchema("region", rRegion, rZone, pRegion, pZone, diags)
 }
 
-func getRegionFromFrameworkSchema(regionSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
-	if !rVal.IsNull() && rVal.ValueString() != "" {
-		return rVal
+// Infers the region based on the following (in order of priority):
+// - `regionSchemaField` in resource schema
+// - region extracted from the `zoneSchemaField` in resource schema
+// - provider-level region
+// - region extracted from the provider-level zone
+func getRegionFromFrameworkSchema(regionSchemaField string, rRegion, rZone, pRegion, pZone types.String, diags *diag.Diagnostics) types.String {
+
+	// Value search #1: use region value from resource/data source config
+	if !rRegion.IsNull() && rRegion.ValueString() != "" {
+		return rRegion
 	}
 
-	if !pVal.IsNull() && pVal.ValueString() != "" {
-		return pVal
+	// Value search #2: extract rergion from zone value from resource/data source config
+	if !rZone.IsNull() && rZone.ValueString() != "" {
+		v := getRegionFromZone(rZone.ValueString())
+		if v != "" {
+			return types.StringValue(v)
+		}
+	}
+
+	// Value search #3: use region from provider config
+	if !pRegion.IsNull() && pRegion.ValueString() != "" {
+		return pRegion
+	}
+
+	// Value search #4: extract region from zone value in provider config
+	if !pZone.IsNull() && pZone.ValueString() != "" {
+		v := getRegionFromZone(pZone.ValueString())
+		if v != "" {
+			return types.StringValue(v)
+		}
 	}
 
 	diags.AddError("required field is not set", fmt.Sprintf("%s is not set", regionSchemaField))
-	return types.String{}
+	return types.StringNull()
 }
 
 func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
