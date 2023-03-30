@@ -57,7 +57,11 @@ ifeq ($(FORCE_DCL),)
 endif
 terraform build provider:
 	@make validate_environment;
-	make mmv1
+	@make providernocheck
+
+# "make provider" with no validation. don't use this interactively.
+providernocheck:
+	make mmv1;
 	make tpgtools
 
 mmv1:
