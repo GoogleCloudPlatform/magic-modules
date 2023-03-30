@@ -37,6 +37,11 @@ func New(version string) provider.ProviderWithMetaSchema {
     }
 }
 
+// Custom types important, often-reused values
+type ProjectType = types.String
+type RegionType = types.String
+type ZoneType = types.String
+
 // frameworkProvider is the provider implementation.
 type frameworkProvider struct {
     billingProject types.String
@@ -44,9 +49,9 @@ type frameworkProvider struct {
     context context.Context
     gRPCLoggingOptions []option.ClientOption
     pollInterval time.Duration
-    project types.String
-    region types.String
-    zone types.String
+    project ProjectType
+    region RegionType
+    zone ZoneType
     requestBatcherIam *RequestBatcher
     requestBatcherServiceUsage *RequestBatcher
     scopes []string

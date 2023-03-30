@@ -28,9 +28,9 @@ type GoogleClientConfigModel struct {
 	// Id could/should be removed in future as it's not necessary in the plugin framework
 	// https://github.com/hashicorp/terraform-plugin-testing/issues/84
 	Id          types.String `tfsdk:"id"`
-	Project     types.String `tfsdk:"project"`
-	Region      types.String `tfsdk:"region"`
-	Zone        types.String `tfsdk:"zone"`
+	Project     ProjectType  `tfsdk:"project"`
+	Region      RegionType   `tfsdk:"region"`
+	Zone        ZoneType     `tfsdk:"zone"`
 	AccessToken types.String `tfsdk:"access_token"`
 }
 
@@ -111,7 +111,7 @@ func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	data.Id = types.StringValue(fmt.Sprintf("projects/%s/regions/%s/zones/%s", d.providerConfig.project.String(), d.providerConfig.region.String(), d.providerConfig.zone.String()))
+	data.Id = types.StringValue(fmt.Sprintf("projects/%s/regions/%s/zones/%s", d.providerConfig.project.ValueString(), d.providerConfig.region.ValueString(), d.providerConfig.zone.ValueString()))
 	data.Project = d.providerConfig.project
 	data.Region = d.providerConfig.region
 	data.Zone = d.providerConfig.zone

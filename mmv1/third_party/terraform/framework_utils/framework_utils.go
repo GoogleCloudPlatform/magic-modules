@@ -62,11 +62,11 @@ func generateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent
 // getProject reads the "project" field from the given resource and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
-func getProjectFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
+func getProjectFramework(rVal, pVal ProjectType, diags *diag.Diagnostics) ProjectType {
 	return getProjectFromFrameworkSchema("project", rVal, pVal, diags)
 }
 
-func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
+func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal ProjectType, diags *diag.Diagnostics) ProjectType {
 	if !rVal.IsNull() && rVal.ValueString() != "" {
 		return rVal
 	}
@@ -79,7 +79,7 @@ func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal types.S
 	return types.String{}
 }
 
-func getRegionFramework(rRegion, rZone, pRegion, pZone types.String, diags *diag.Diagnostics) types.String {
+func getRegionFramework(rRegion, pRegion RegionType, rZone, pZone ZoneType, diags *diag.Diagnostics) RegionType {
 	return getRegionFromFrameworkSchema("region", rRegion, rZone, pRegion, pZone, diags)
 }
 
@@ -88,7 +88,7 @@ func getRegionFramework(rRegion, rZone, pRegion, pZone types.String, diags *diag
 // - region extracted from the `zoneSchemaField` in resource schema
 // - provider-level region
 // - region extracted from the provider-level zone
-func getRegionFromFrameworkSchema(regionSchemaField string, rRegion, rZone, pRegion, pZone types.String, diags *diag.Diagnostics) types.String {
+func getRegionFromFrameworkSchema(regionSchemaField string, rRegion, pRegion RegionType, rZone, pZone ZoneType, diags *diag.Diagnostics) RegionType {
 
 	// Value search #1: use region value from resource/data source config
 	if !rRegion.IsNull() && rRegion.ValueString() != "" {
@@ -134,7 +134,7 @@ func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.
 
 // Parses a project field with the following formats:
 // - projects/{my_projects}/{resource_type}/{resource_name}
-func parseProjectFieldValueFramework(resourceType, fieldValue, projectSchemaField string, rVal, pVal types.String, isEmptyValid bool, diags *diag.Diagnostics) *ProjectFieldValue {
+func parseProjectFieldValueFramework(resourceType, fieldValue, projectSchemaField string, rVal, pVal ProjectType, isEmptyValid bool, diags *diag.Diagnostics) *ProjectFieldValue {
 	if len(fieldValue) == 0 {
 		if isEmptyValid {
 			return &ProjectFieldValue{resourceType: resourceType}

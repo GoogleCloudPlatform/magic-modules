@@ -11,10 +11,10 @@ type ProviderModel struct {
 	AccessToken                        types.String `tfsdk:"access_token"`
 	ImpersonateServiceAccount          types.String `tfsdk:"impersonate_service_account"`
 	ImpersonateServiceAccountDelegates types.List   `tfsdk:"impersonate_service_account_delegates"`
-	Project                            types.String `tfsdk:"project"`
+	Project                            ProjectType  `tfsdk:"project"`
 	BillingProject                     types.String `tfsdk:"billing_project"`
-	Region                             types.String `tfsdk:"region"`
-	Zone                               types.String `tfsdk:"zone"`
+	Region                             RegionType   `tfsdk:"region"`
+	Zone                               ZoneType     `tfsdk:"zone"`
 	Scopes                             types.List   `tfsdk:"scopes"`
 	Batching                           types.List   `tfsdk:"batching"`
 	UserProjectOverride                types.Bool   `tfsdk:"user_project_override"`

@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	"fmt"
+
 	"google.golang.org/api/dns/v1"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -26,13 +27,13 @@ func NewGoogleDnsKeysDataSource() datasource.DataSource {
 // GoogleDnsKeysDataSource defines the data source implementation
 type GoogleDnsKeysDataSource struct {
 	client  *dns.Service
-	project types.String
+	project ProjectType
 }
 
 type GoogleDnsKeysModel struct {
 	Id              types.String `tfsdk:"id"`
 	ManagedZone     types.String `tfsdk:"managed_zone"`
-	Project         types.String `tfsdk:"project"`
+	Project         ProjectType  `tfsdk:"project"`
 	KeySigningKeys  types.List   `tfsdk:"key_signing_keys"`
 	ZoneSigningKeys types.List   `tfsdk:"zone_signing_keys"`
 }
