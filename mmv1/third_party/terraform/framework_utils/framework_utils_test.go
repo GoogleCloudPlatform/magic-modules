@@ -9,11 +9,11 @@ import (
 
 func TestGetRegionFramework(t *testing.T) {
 	cases := map[string]struct {
-		ResourceRegion types.String
-		ResourceZone   types.String
-		ProviderRegion types.String
-		ProviderZone   types.String
-		ExpectedRegion types.String
+		ResourceRegion RegionType
+		ResourceZone   ZoneType
+		ProviderRegion RegionType
+		ProviderZone   ZoneType
+		ExpectedRegion RegionType
 		ExpectedError  bool
 	}{
 		"region is pulled from the resource config's region value if available": {
