@@ -37,12 +37,7 @@ examples:
       project: :PROJECT_NAME
     skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/logging_log_view.go.erb
-  post_create: templates/terraform/post_create/logging_log_view.go.erb
-  pre_read: templates/terraform/pre_read/logging_log_view.go.erb
-  pre_update: templates/terraform/pre_update/logging_log_view.go.erb
-  pre_delete: templates/terraform/pre_delete/logging_log_view.go.erb
-  test_check_destroy: templates/terraform/custom_check_destroy/logging_log_view.go.erb
+  encoder: templates/terraform/encoders/logging_log_view.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
@@ -64,6 +59,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    diff_suppress_func: 'compareResourceNames'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -71,6 +67,7 @@ properties:
     required: true
     immutable: true
     ignore_read: true
+    diff_suppress_func: 'compareResourceNames'
   - !ruby/object:Api::Type::String
     name: description
     description: Describes this view.
