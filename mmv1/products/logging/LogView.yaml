@@ -16,6 +16,7 @@ name: LogView
 base_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views'
 create_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views?viewId={{name}}'
 self_link: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
+import_format: ['{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}']
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -40,7 +41,8 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/logging_log_view.go.erb
   pre_read: templates/terraform/pre_read/logging_log_view.go.erb
   pre_update: templates/terraform/pre_update/logging_log_view.go.erb
-  custom_import: templates/terraform/custom_import/logging_log_view.go.erb
+  pre_delete: templates/terraform/pre_delete/logging_log_view.go.erb
+    #custom_import: templates/terraform/custom_import/logging_log_view.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
