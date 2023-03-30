@@ -10,21 +10,35 @@ import (
 func TestGetRegionFramework(t *testing.T) {
 	cases := map[string]struct {
 		ResourceRegion types.String
+		ResourceZone   types.String
 		ProviderRegion types.String
+		ProviderZone   types.String
 		ExpectedRegion types.String
 		ExpectedError  bool
 	}{
-		"region is pulled from the resource config value instead of the provider config value, even if both set": {
+		"region is pulled from the resource config's region value if available": {
 			ResourceRegion: types.StringValue("foo"),
-			ProviderRegion: types.StringValue("bar"),
 			ExpectedRegion: types.StringValue("foo"),
 		},
-		"region is pulled from the provider config value when unset on the resource": {
+		"region is pulled from the resource config's zone value if region is unset": {
 			ResourceRegion: types.StringNull(),
+			ResourceZone:   types.StringValue("foo-a"),
+			ExpectedRegion: types.StringValue("foo"),
+		},
+		"region is pulled from the provider config's region value when region and zone are unset on the resource": {
+			ResourceRegion: types.StringNull(),
+			ResourceZone:   types.StringNull(),
 			ProviderRegion: types.StringValue("bar"),
 			ExpectedRegion: types.StringValue("bar"),
 		},
-		"error when region is not set on the provider or the resource": {
+		"region is pulled from the provider config's zone value when region is unset on the provider (and resource config lacks region/zone)": {
+			ResourceRegion: types.StringNull(),
+			ResourceZone:   types.StringNull(),
+			ProviderRegion: types.StringNull(),
+			ProviderZone:   types.StringValue("bar-a"),
+			ExpectedRegion: types.StringValue("bar"),
+		},
+		"error when region and zone are not set on the provider nor the resource": {
 			ExpectedError: true,
 		},
 	}
@@ -34,7 +48,7 @@ func TestGetRegionFramework(t *testing.T) {
 			var diags diag.Diagnostics
 
 			// Act
-			region := getRegionFramework(tc.ResourceRegion, tc.ProviderRegion, &diags)
+			region := getRegionFramework(tc.ResourceRegion, tc.ResourceZone, tc.ProviderRegion, tc.ProviderZone, &diags)
 
 			// Assert
 			if diags.HasError() {
