@@ -9,33 +9,43 @@ import (
 
 func TestGetRegionFramework(t *testing.T) {
 	cases := map[string]struct {
-		ResourceRegion RegionType
-		ResourceZone   ZoneType
-		ProviderRegion RegionType
-		ProviderZone   ZoneType
-		ExpectedRegion RegionType
+		Resource       ResourceFoobar
+		Provider       ProviderFoobar
+		ExpectedRegion types.String
 		ExpectedError  bool
 	}{
 		"region is pulled from the resource config's region value if available": {
-			ResourceRegion: types.StringValue("foo"),
+			Resource: ResourceFoobar{
+				Region: types.StringValue("foo"),
+			},
 			ExpectedRegion: types.StringValue("foo"),
 		},
 		"region is pulled from the resource config's zone value if region is unset": {
-			ResourceRegion: types.StringNull(),
-			ResourceZone:   types.StringValue("foo-a"),
+			Resource: ResourceFoobar{
+				Region: types.StringNull(),
+				Zone:   types.StringValue("foo-a"),
+			},
 			ExpectedRegion: types.StringValue("foo"),
 		},
 		"region is pulled from the provider config's region value when region and zone are unset on the resource": {
-			ResourceRegion: types.StringNull(),
-			ResourceZone:   types.StringNull(),
-			ProviderRegion: types.StringValue("bar"),
+			Resource: ResourceFoobar{
+				Region: types.StringNull(),
+				Zone:   types.StringNull(),
+			},
+			Provider: ProviderFoobar{
+				Region: types.StringValue("bar"),
+			},
 			ExpectedRegion: types.StringValue("bar"),
 		},
 		"region is pulled from the provider config's zone value when region is unset on the provider (and resource config lacks region/zone)": {
-			ResourceRegion: types.StringNull(),
-			ResourceZone:   types.StringNull(),
-			ProviderRegion: types.StringNull(),
-			ProviderZone:   types.StringValue("bar-a"),
+			Resource: ResourceFoobar{
+				Region: types.StringNull(),
+				Zone:   types.StringNull(),
+			},
+			Provider: ProviderFoobar{
+				Region: types.StringValue("bar"),
+				Zone:   types.StringValue("bar-a"),
+			},
 			ExpectedRegion: types.StringValue("bar"),
 		},
 		"error when region and zone are not set on the provider nor the resource": {
@@ -48,7 +58,7 @@ func TestGetRegionFramework(t *testing.T) {
 			var diags diag.Diagnostics
 
 			// Act
-			region := getRegionFramework(tc.ResourceRegion, tc.ResourceZone, tc.ProviderRegion, tc.ProviderZone, &diags)
+			region := getRegionFramework(tc.Resource, tc.Provider, &diags)
 
 			// Assert
 			if diags.HasError() {

@@ -26,7 +26,7 @@ func NewGoogleDnsRecordSetDataSource() datasource.DataSource {
 // GoogleDnsRecordSetDataSource defines the data source implementation
 type GoogleDnsRecordSetDataSource struct {
 	client  *dns.Service
-	project ProjectType
+	project types.String
 }
 
 type GoogleDnsRecordSetModel struct {
@@ -36,7 +36,7 @@ type GoogleDnsRecordSetModel struct {
 	Rrdatas     types.List   `tfsdk:"rrdatas"`
 	Ttl         types.Int64  `tfsdk:"ttl"`
 	Type        types.String `tfsdk:"type"`
-	Project     ProjectType  `tfsdk:"project"`
+	Project     types.String `tfsdk:"project"`
 }
 
 func (d *GoogleDnsRecordSetDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {

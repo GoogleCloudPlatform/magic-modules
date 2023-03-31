@@ -37,11 +37,6 @@ func New(version string) provider.ProviderWithMetaSchema {
     }
 }
 
-// Custom types important, often-reused values
-type ProjectType = types.String
-type RegionType = types.String
-type ZoneType = types.String
-
 // frameworkProvider is the provider implementation.
 type frameworkProvider struct {
     billingProject types.String
@@ -49,9 +44,9 @@ type frameworkProvider struct {
     context context.Context
     gRPCLoggingOptions []option.ClientOption
     pollInterval time.Duration
-    project ProjectType
-    region RegionType
-    zone ZoneType
+	project types.String
+	region types.String
+	zone types.String
     requestBatcherIam *RequestBatcher
     requestBatcherServiceUsage *RequestBatcher
     scopes []string
@@ -64,6 +59,15 @@ type frameworkProvider struct {
     <% products.each do |product| -%>
     <%= product[:definitions].name -%>BasePath string
     <% end -%>
+}
+
+// FallbackConfig returns config values from the framework provider that could be used as fallback values for resources/data sources
+func (p *frameworkProvider) FallbackConfig() ProviderFoobar {
+	return ProviderFoobar{
+		Project: p.project,
+		Region:  p.region,
+		Zone:    p.zone,
+	}
 }
 
 // Metadata returns the provider type name.

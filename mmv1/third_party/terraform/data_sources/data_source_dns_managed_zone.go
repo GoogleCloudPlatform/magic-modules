@@ -26,7 +26,7 @@ func NewGoogleDnsManagedZoneDataSource() datasource.DataSource {
 // GoogleDnsManagedZoneDataSource defines the data source implementation
 type GoogleDnsManagedZoneDataSource struct {
 	client  *dns.Service
-	project ProjectType
+	project types.String
 }
 
 type GoogleDnsManagedZoneModel struct {
@@ -37,7 +37,7 @@ type GoogleDnsManagedZoneModel struct {
 	ManagedZoneId types.Int64  `tfsdk:"managed_zone_id"`
 	NameServers   types.List   `tfsdk:"name_servers"`
 	Visibility    types.String `tfsdk:"visibility"`
-	Project       ProjectType  `tfsdk:"project"`
+	Project       types.String `tfsdk:"project"`
 }
 
 func (d *GoogleDnsManagedZoneDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {

@@ -62,11 +62,11 @@ func generateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent
 // getProject reads the "project" field from the given resource and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
-func getProjectFramework(rVal, pVal ProjectType, diags *diag.Diagnostics) ProjectType {
+func getProjectFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
 	return getProjectFromFrameworkSchema("project", rVal, pVal, diags)
 }
 
-func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal ProjectType, diags *diag.Diagnostics) ProjectType {
+func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
 	if !rVal.IsNull() && rVal.ValueString() != "" {
 		return rVal
 	}
@@ -79,8 +79,8 @@ func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal Project
 	return types.String{}
 }
 
-func getRegionFramework(rRegion, pRegion RegionType, rZone, pZone ZoneType, diags *diag.Diagnostics) RegionType {
-	return getRegionFromFrameworkSchema("region", rRegion, rZone, pRegion, pZone, diags)
+func getRegionFramework(r ResourceFoobar, p ProviderFoobar, diags *diag.Diagnostics) types.String {
+	return getRegionFromFrameworkSchema("region", r, p, diags)
 }
 
 // Infers the region based on the following (in order of priority):
@@ -88,29 +88,29 @@ func getRegionFramework(rRegion, pRegion RegionType, rZone, pZone ZoneType, diag
 // - region extracted from the `zoneSchemaField` in resource schema
 // - provider-level region
 // - region extracted from the provider-level zone
-func getRegionFromFrameworkSchema(regionSchemaField string, rRegion, pRegion RegionType, rZone, pZone ZoneType, diags *diag.Diagnostics) RegionType {
+func getRegionFromFrameworkSchema(regionSchemaField string, r ResourceFoobar, p ProviderFoobar, diags *diag.Diagnostics) types.String {
 
 	// Value search #1: use region value from resource/data source config
-	if !rRegion.IsNull() && rRegion.ValueString() != "" {
-		return rRegion
+	if !r.Region.IsNull() && r.Region.ValueString() != "" {
+		return r.Region
 	}
 
 	// Value search #2: extract rergion from zone value from resource/data source config
-	if !rZone.IsNull() && rZone.ValueString() != "" {
-		v := getRegionFromZone(rZone.ValueString())
+	if !r.Zone.IsNull() && r.Zone.ValueString() != "" {
+		v := getRegionFromZone(r.Zone.ValueString())
 		if v != "" {
 			return types.StringValue(v)
 		}
 	}
 
 	// Value search #3: use region from provider config
-	if !pRegion.IsNull() && pRegion.ValueString() != "" {
-		return pRegion
+	if !p.Region.IsNull() && p.Region.ValueString() != "" {
+		return p.Region
 	}
 
 	// Value search #4: extract region from zone value in provider config
-	if !pZone.IsNull() && pZone.ValueString() != "" {
-		v := getRegionFromZone(pZone.ValueString())
+	if !p.Zone.IsNull() && p.Zone.ValueString() != "" {
+		v := getRegionFromZone(p.Zone.ValueString())
 		if v != "" {
 			return types.StringValue(v)
 		}
@@ -134,7 +134,7 @@ func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.
 
 // Parses a project field with the following formats:
 // - projects/{my_projects}/{resource_type}/{resource_name}
-func parseProjectFieldValueFramework(resourceType, fieldValue, projectSchemaField string, rVal, pVal ProjectType, isEmptyValid bool, diags *diag.Diagnostics) *ProjectFieldValue {
+func parseProjectFieldValueFramework(resourceType, fieldValue, projectSchemaField string, rVal, pVal types.String, isEmptyValid bool, diags *diag.Diagnostics) *ProjectFieldValue {
 	if len(fieldValue) == 0 {
 		if isEmptyValid {
 			return &ProjectFieldValue{resourceType: resourceType}

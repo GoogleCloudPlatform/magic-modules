@@ -25,13 +25,31 @@ type GoogleClientConfigDataSource struct {
 }
 
 type GoogleClientConfigModel struct {
-	// Id could/should be removed in future as it's not necessary in the plugin framework
-	// https://github.com/hashicorp/terraform-plugin-testing/issues/84
 	Id          types.String `tfsdk:"id"`
-	Project     ProjectType  `tfsdk:"project"`
-	Region      RegionType   `tfsdk:"region"`
-	Zone        ZoneType     `tfsdk:"zone"`
+	Project     types.String `tfsdk:"project"`
+	Region      types.String `tfsdk:"region"`
+	Zone        types.String `tfsdk:"zone"`
 	AccessToken types.String `tfsdk:"access_token"`
+}
+
+type ProviderFoobar struct {
+	Project types.String
+	Region  types.String
+	Zone    types.String
+}
+
+type ResourceFoobar struct {
+	Project types.String
+	Region  types.String
+	Zone    types.String
+}
+
+func (m *GoogleClientConfigModel) Config() ResourceFoobar {
+	return ResourceFoobar{
+		Project: m.Project,
+		Region:  m.Region,
+		Zone:    m.Zone,
+	}
 }
 
 func (d *GoogleClientConfigDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {

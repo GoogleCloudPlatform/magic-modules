@@ -27,13 +27,13 @@ func NewGoogleDnsKeysDataSource() datasource.DataSource {
 // GoogleDnsKeysDataSource defines the data source implementation
 type GoogleDnsKeysDataSource struct {
 	client  *dns.Service
-	project ProjectType
+	project types.String
 }
 
 type GoogleDnsKeysModel struct {
 	Id              types.String `tfsdk:"id"`
 	ManagedZone     types.String `tfsdk:"managed_zone"`
-	Project         ProjectType  `tfsdk:"project"`
+	Project         types.String `tfsdk:"project"`
 	KeySigningKeys  types.List   `tfsdk:"key_signing_keys"`
 	ZoneSigningKeys types.List   `tfsdk:"zone_signing_keys"`
 }
