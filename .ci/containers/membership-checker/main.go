@@ -54,7 +54,7 @@ func main() {
 		return
 	}
 
-	if target == "auto_run_and_gcbrun" {
+	if target == "auto_run" {
 		err = requestReviewer(author, prNumber, GITHUB_TOKEN)
 		if err != nil {
 			fmt.Println(err)
