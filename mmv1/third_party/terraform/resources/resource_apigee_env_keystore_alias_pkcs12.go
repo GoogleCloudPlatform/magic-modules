@@ -67,71 +67,59 @@ func ResourceApigeeEnvKeystoreAliasPkcs12() *schema.Resource {
 			},
 			"certs_info": {
 				Type:        schema.TypeList,
-				Optional:    true,
 				Computed:    true,
 				Description: `Chain of certificates under this alias.`,
-				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cert_info": {
 							Type:        schema.TypeList,
-							Optional:    true,
 							Computed:    true,
 							Description: `List of all properties in the object.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"basic_constraints": {
 										Type:        schema.TypeString,
-										Optional:    true,
 										Computed:    true,
 										Description: `X.509 basic constraints extension.`,
 									},
 									"expiry_date": {
 										Type:        schema.TypeString,
-										Optional:    true,
 										Computed:    true,
 										Description: `X.509 notAfter validity period in milliseconds since epoch.`,
 									},
 									"is_valid": {
 										Type:     schema.TypeString,
-										Optional: true,
 										Computed: true,
 										Description: `Flag that specifies whether the certificate is valid. 
 Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not yet valid.`,
 									},
 									"issuer": {
 										Type:        schema.TypeString,
-										Optional:    true,
 										Computed:    true,
 										Description: `X.509 issuer.`,
 									},
 									"public_key": {
 										Type:        schema.TypeString,
-										Optional:    true,
 										Computed:    true,
 										Description: `Public key component of the X.509 subject public key info.`,
 									},
 									"serial_number": {
 										Type:        schema.TypeString,
-										Optional:    true,
 										Computed:    true,
 										Description: `X.509 serial number.`,
 									},
 									"sig_alg_name": {
 										Type:        schema.TypeString,
-										Optional:    true,
 										Computed:    true,
 										Description: `X.509 signatureAlgorithm.`,
 									},
 									"subject": {
 										Type:        schema.TypeString,
-										Optional:    true,
 										Computed:    true,
 										Description: `X.509 subject.`,
 									},
 									"subject_alternative_names": {
 										Type:        schema.TypeList,
-										Optional:    true,
 										Computed:    true,
 										Description: `X.509 subject alternative names (SANs) extension.`,
 										Elem: &schema.Schema{
@@ -140,13 +128,11 @@ Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not
 									},
 									"valid_from": {
 										Type:        schema.TypeString,
-										Optional:    true,
 										Computed:    true,
 										Description: `X.509 notBefore validity period in milliseconds since epoch.`,
 									},
 									"version": {
 										Type:        schema.TypeInt,
-										Optional:    true,
 										Computed:    true,
 										Description: `X.509 version.`,
 									},
@@ -158,7 +144,7 @@ Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not
 			},
 			"password": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				ForceNew:	 true,
 				Computed:    true,
 				Description: `Password for the Private Key if it's encrypted`,
 			},
