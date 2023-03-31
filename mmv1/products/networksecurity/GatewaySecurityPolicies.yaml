@@ -59,7 +59,7 @@ parameters:
     required: true
     url_param_only: true
     description: |
-      Required. Name of the resource. Name is of the form projects/{project}/locations/{location}/gatewaySecurityPolicies/{gatewaySecurityPolicy}
+      Name of the resource. Name is of the form projects/{project}/locations/{location}/gatewaySecurityPolicies/{gatewaySecurityPolicy}
       gatewaySecurityPolicy should match the pattern:(^a-z?$).
   - !ruby/object:Api::Type::String
     name: 'location'
