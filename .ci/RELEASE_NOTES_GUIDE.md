@@ -6,7 +6,7 @@ an original MM PR. These are then collected as part of the release cut
 and shared direcltly with end users in the provider changelog & GitHub release
 details.
 
-Whomever merges a PR is responsible for the release note. For most contributors
+Whoever merges a PR is responsible for the release note. For most contributors
 that means their reviewer, and for maintainers, that means they are responsible
 themselves.
 
