@@ -33,18 +33,18 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 
 func TestAccLoggingProjectSink_default(t *testing.T) {
 	t.Parallel()
-	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
+	sinkName := "_Default"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingProjectSink_basic("_Default", getTestProjectFromEnv(), bucketName),
+				Config: testAccLoggingProjectSink_loggingbucket(sinkName, GetTestProjectFromEnv()),
 			},
 			{
-				ResourceName:      "google_logging_project_sink.basic",
+				ResourceName:      "google_logging_project_sink.loggingbucket",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
