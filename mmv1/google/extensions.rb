@@ -33,4 +33,8 @@ class String
   def plural
     Google::StringUtils.plural(self)
   end
+
+  def title
+    Google::StringUtils.title(self)
+  end
 end
