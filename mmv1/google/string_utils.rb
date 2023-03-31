@@ -74,5 +74,49 @@ module Google
 
       "#{source}s"
     end
+
+    # ActiveSupport::Inflector code
+    # Converts strings to UpperCamelCase.
+    # If the +uppercase_first_letter+ parameter is set to false, then produces
+    # lowerCamelCase.
+    #
+    # Also converts '/' to '::' which is useful for converting
+    # paths to namespaces.
+    #
+    #   camelize('active_model')                # => "ActiveModel"
+    #   camelize('active_model', false)         # => "activeModel"
+    #   camelize('active_model/errors')         # => "ActiveModel::Errors"
+    #   camelize('active_model/errors', false)  # => "activeModel::Errors"
+    #
+    # As a rule of thumb you can think of +camelize+ as the inverse of
+    # #underscore, though there are cases where that does not hold:
+    #
+    #   camelize(underscore('SSLError'))        # => "SslError"
+    def self.camelize(term, uppercase_first_letter = true)
+      # patched in to this fn
+      define_acronym_regex_patterns
+      inflections = {"tpu": "TPU", "vpc": "VPC"}
+
+      string = term.to_s
+      # String#camelize takes a symbol (:upper or :lower), so here we also support :lower to keep the methods consistent.
+      if !uppercase_first_letter || uppercase_first_letter == :lower
+        string = string.sub(@acronyms_camelize_regex) { |match| match.downcase! || match }
+      else
+        string = string.sub(/^[a-z\d]*/) { |match| inflections[match] || match.capitalize! || match }
+      end
+      string.gsub!(/(?:_|(\/))([a-z\d]*)/i) do
+        word = $2
+        substituted = inflections[word] || word.capitalize! || word
+        $1 ? "::#{substituted}" : substituted
+      end
+      string
+    end
+
+    def self.define_acronym_regex_patterns
+      @acronyms = {}
+      @acronym_regex             = @acronyms.empty? ? /(?=a)b/ : /#{@acronyms.values.join("|")}/
+      @acronyms_camelize_regex   = /^(?:#{@acronym_regex}(?=\b|[A-Z_])|\w)/
+      @acronyms_underscore_regex = /(?:(?<=([A-Za-z\d]))|\b)(#{@acronym_regex})(?=\b|[^a-z])/
+    end
   end
 end
