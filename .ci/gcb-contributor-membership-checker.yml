@@ -2,7 +2,7 @@
 steps:
     - name: 'gcr.io/graphite-docker-images/membership-checker'
       id: contributor-membership-checker
-      secretEnv: ["GITHUB_TOKEN", "GENERATE_DIFFS_TRIGGER", "RAKE_TESTS_TRIGGER"]
+      secretEnv: ["GITHUB_TOKEN", "GENERATE_DIFFS_TRIGGER", "RAKE_TESTS_TRIGGER", "COMMUNITY_CHECKER_TRIGGER"]
       timeout: 8000s
       args:
           - "auto_run_and_gcbrun"
@@ -21,3 +21,5 @@ availableSecrets:
       env: GENERATE_DIFFS_TRIGGER
     - versionName: projects/673497134629/secrets/ci-trigger-rake-test/versions/latest
       env: RAKE_TESTS_TRIGGER
+    - versionName: projects/673497134629/secrets/ci-trigger-community-checker/versions/latest
+      env: COMMUNITY_CHECKER_TRIGGER

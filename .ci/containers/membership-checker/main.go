@@ -16,6 +16,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	projectId := "graphite-docker-images"
+	repoName := "magic-modules"
+
 	target := os.Args[1]
 	fmt.Println("Trigger Target: ", target)
 
@@ -63,11 +66,29 @@ func main() {
 
 	// auto_run_and_gcbrun will be run on every commit or /gcbrun: only trigger builds for trusted users
 	// gcbrun_only will be run on every /gcbrun: only trigger builds for untrusted users (because trusted users will be handled by auto_run_and_gcbrun)
+
 	if (target == "auto_run_and_gcbrun" && trusted) || (target == "gcbrun_only" && !trusted) {
-		err = triggerMMPresubmitRuns("graphite-docker-images", "magic-modules", commitSha, substitutions)
+		err = triggerMMPresubmitRuns(projectId, repoName, commitSha, substitutions)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
+	}
+
+	// in contributor-membership-checker job:
+	// auto approve community-checker run for trusted users
+	// add Awaiting Approval label to external contributor PRs
+	if target == "auto_run_and_gcbrun" {
+		if trusted {
+			approveCommunityChecker(prNumber, projectId, commitSha)
+		} else {
+			addAwaitingApprovalLabel(prNumber, GITHUB_TOKEN)
+		}
+	}
+
+	// in contributor-membership-checker job:
+	// remove Awaiting Approval label from external contributor PRs
+	if target == "gcbrun_only" && !trusted {
+		err = removeAwaitingApprovalLabel(prNumber, GITHUB_TOKEN)
 	}
 }
