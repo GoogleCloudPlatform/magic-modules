@@ -25,4 +25,8 @@ class String
   def first_sentence
     Google::StringUtils.first_sentence(self)
   end
+
+  def space_separated
+    Google::StringUtils.space_separated(self)
+  end
 end
