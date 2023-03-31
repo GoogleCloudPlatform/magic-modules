@@ -84,7 +84,11 @@ func main() {
 	// 2. add awaiting-approval label to external contributor PRs
 	if target == "auto_run" {
 		if trusted {
-			approveCommunityChecker(prNumber, projectId, commitSha)
+			err = approveCommunityChecker(prNumber, projectId, commitSha)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 		} else {
 			addAwaitingApprovalLabel(prNumber, GITHUB_TOKEN)
 		}
@@ -93,6 +97,6 @@ func main() {
 	// in community-checker job:
 	// remove awaiting-approval label from external contributor PRs
 	if target == "needs_approval" && !trusted {
-		err = removeAwaitingApprovalLabel(prNumber, GITHUB_TOKEN)
+		removeAwaitingApprovalLabel(prNumber, GITHUB_TOKEN)
 	}
 }

@@ -10,13 +10,30 @@ import (
 
 var (
 	// This is for the random-assignee rotation.
-	reviewerRotation = []string{"megan07", "slevenick", "c2thorn", "rileykarson", "melinath", "ScottSuarez", "shuyama1", "SarahFrench", "roaks3", "zli82016", "trodge", "hao-nan-li"}
+	reviewerRotation = []string{
+		"megan07",
+		"slevenick",
+		"c2thorn",
+		"rileykarson",
+		"melinath",
+		"ScottSuarez",
+		"shuyama1",
+		"SarahFrench",
+		"roaks3",
+		"zli82016",
+		"trodge",
+		"hao-nan-li",
+	}
 
 	// This is for new team members who are onboarding
-	trustedContributors = []string{"NickElliot"}
+	trustedContributors = []string{
+		"NickElliot",
+	}
 
 	// This is for reviewers who are "on vacation" will not receive new review assignments but will still receive re-requests for assigned PRs.
-	onVacationReviewers = []string{"zli82016"}
+	onVacationReviewers = []string{
+		"zli82016",
+	}
 )
 
 // Check if a user is team member to not request a random reviewer
