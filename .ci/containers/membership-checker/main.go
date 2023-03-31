@@ -64,10 +64,14 @@ func main() {
 
 	trusted := isTrustedUser(author, GITHUB_TOKEN)
 
-	// auto_run_and_gcbrun will be run on every commit or /gcbrun: only trigger builds for trusted users
-	// gcbrun_only will be run on every /gcbrun: only trigger builds for untrusted users (because trusted users will be handled by auto_run_and_gcbrun)
+	// auto_run(contributor-membership-checker) will be run on every commit or /gcbrun:
+	// only triggers builds for trusted users
 
-	if (target == "auto_run_and_gcbrun" && trusted) || (target == "gcbrun_only" && !trusted) {
+	// needs_approval(community-checker) will be run after approval:
+	// 1. will be auto approved (by contributor-membership-checker) for trusted users
+	// 2. needs approval from team reviewer via cloud build for untrusted users
+	// 3. only triggers build for untrusted users (because trusted users will be handled by auto_run)
+	if (target == "auto_run" && trusted) || (target == "needs_approval" && !trusted) {
 		err = triggerMMPresubmitRuns(projectId, repoName, commitSha, substitutions)
 		if err != nil {
 			fmt.Println(err)
@@ -76,9 +80,9 @@ func main() {
 	}
 
 	// in contributor-membership-checker job:
-	// auto approve community-checker run for trusted users
-	// add Awaiting Approval label to external contributor PRs
-	if target == "auto_run_and_gcbrun" {
+	// 1. auto approve community-checker run for trusted users
+	// 2. add awaiting-approval label to external contributor PRs
+	if target == "auto_run" {
 		if trusted {
 			approveCommunityChecker(prNumber, projectId, commitSha)
 		} else {
@@ -86,9 +90,9 @@ func main() {
 		}
 	}
 
-	// in contributor-membership-checker job:
-	// remove Awaiting Approval label from external contributor PRs
-	if target == "gcbrun_only" && !trusted {
+	// in community-checker job:
+	// remove awaiting-approval label from external contributor PRs
+	if target == "needs_approval" && !trusted {
 		err = removeAwaitingApprovalLabel(prNumber, GITHUB_TOKEN)
 	}
 }

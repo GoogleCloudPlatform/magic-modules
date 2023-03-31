@@ -5,7 +5,7 @@ steps:
       secretEnv: ["GITHUB_TOKEN", "GENERATE_DIFFS_TRIGGER", "RAKE_TESTS_TRIGGER", "COMMUNITY_CHECKER_TRIGGER"]
       timeout: 8000s
       args:
-          - "auto_run_and_gcbrun"
+          - "auto_run"
           - $_PR_NUMBER
           - $COMMIT_SHA
           - $BRANCH_NAME
