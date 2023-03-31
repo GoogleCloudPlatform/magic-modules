@@ -64,7 +64,7 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 
 	name := d.Get("name").(string)
 	if _, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do(); err != nil {
-		if isGoogleApiErrorWithCode(err, 409) {
+		if IsGoogleApiErrorWithCode(err, 409) {
 			for _, reserved := range ReservedLoggingProjectSinks {
 				if name == reserved {
 					log.Printf("[WARN] %q is a reserved log sink and will be imported into the state", name)
