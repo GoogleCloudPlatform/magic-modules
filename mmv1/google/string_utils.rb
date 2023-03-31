@@ -46,5 +46,37 @@ module Google
 
       text[0, period_pos + 1]
     end
+
+    # Returns the plural form of a word
+    def self.plural(source)
+      # policies -> policies
+      # indices -> indices
+      if source.end_with?("ies") || source.end_with?("es")
+        return source
+      end
+
+      # index -> indices
+      if source.end_with?("ex")
+        return source.gsub(/ex$/, '') + "ices"
+      end
+
+      # mesh -> meshes
+      if source.end_with?("esh")
+        return source + "es"
+      end
+
+      # key -> keys
+      # gateway -> gateways
+      if source.end_with?("ey") || source.end_with?("ay")
+        return source + "s"
+      end
+
+      # policy -> policies
+      if source.end_with?("y")
+        return source.gsub(/y$/, '') + "ies"
+      end
+
+      source + "s"
+    end
   end
 end

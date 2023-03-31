@@ -29,4 +29,8 @@ class String
   def space_separated
     Google::StringUtils.space_separated(self)
   end
+
+  def plural
+    Google::StringUtils.plural(self)
+  end
 end
