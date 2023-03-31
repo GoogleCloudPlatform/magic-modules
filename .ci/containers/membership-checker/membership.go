@@ -33,6 +33,7 @@ var (
 	// This is for reviewers who are "on vacation" will not receive new review assignments but will still receive re-requests for assigned PRs.
 	onVacationReviewers = []string{
 		"zli82016",
+		"shuyama1",
 	}
 )
 
