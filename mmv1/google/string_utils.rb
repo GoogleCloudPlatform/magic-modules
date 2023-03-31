@@ -27,9 +27,9 @@ module Google
     # Converts from PascalCase to Space Separated
     def self.space_separated(source)
       tmp = source.gsub(/([A-Z]+)([A-Z][a-z])/, '\1 \2')
-            .gsub(/([a-z\d])([A-Z])/, '\1 \2')
-            .downcase
-      tmp[0].upcase.concat(tmp[1..-1])
+                  .gsub(/([a-z\d])([A-Z])/, '\1 \2')
+                  .downcase
+      tmp[0].upcase.concat(tmp[1..])
     end
 
     # rubocop:disable Style/SafeNavigation # support Ruby < 2.3.0
