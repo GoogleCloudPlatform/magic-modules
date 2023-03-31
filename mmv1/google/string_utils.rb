@@ -32,6 +32,12 @@ module Google
       tmp[0].upcase.concat(tmp[1..])
     end
 
+    # Converts a string to space-separated capitalized words
+    def self.title(source)
+      ss = space_separated(source)
+      ss.gsub(/\b(?<!\w['’`()])[a-z]/, &:capitalize)
+    end
+
     # rubocop:disable Style/SafeNavigation # support Ruby < 2.3.0
     def self.symbolize(key)
       key.to_sym unless key.nil?
