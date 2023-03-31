@@ -144,7 +144,7 @@ Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not
 			},
 			"password": {
 				Type:        schema.TypeString,
-				ForceNew:	 true,
+				Optional:	 true,
 				Computed:    true,
 				Description: `Password for the Private Key if it's encrypted`,
 			},
