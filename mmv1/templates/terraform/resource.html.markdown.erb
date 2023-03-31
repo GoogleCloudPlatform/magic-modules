@@ -86,11 +86,12 @@ To get more information about <%= object.name -%>, see:
 <%- end -%>
 <%- if !sensitive_props.empty? -%>
 <%-
-  sense_props = sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.to_sentence
+  sense_props = sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.join(', ')
 -%>
 
-~> **Warning:** All arguments including <%= sense_props -%> will be stored in the raw
-state as plain-text. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
+~> **Warning:** All arguments including the following potentially sensitive
+values will be stored in the raw state as plain text: <%=sense_props%>.
+[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
 <%- end -%>
 
 <%#- We over-generate examples/oics buttons here; they'll all be _valid_ just not necessarily intended for this provider version.
