@@ -46,7 +46,7 @@ resource "google_bigquery_table" "foo" {
 
 resource "google_bigquery_dataset" "bar" {
   dataset_id                  = "tf_test_job_query%{random_suffix}_dataset"
-  friendly_name               = "test"
+  friendly_name               = "test-update"
   description                 = "This is a test description"
   location                    = "%{location}"
 }
