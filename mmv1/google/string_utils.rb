@@ -51,32 +51,22 @@ module Google
     def self.plural(source)
       # policies -> policies
       # indices -> indices
-      if source.end_with?("ies") || source.end_with?("es")
-        return source
-      end
+      return source if source.end_with?('ies') || source.end_with?('es')
 
       # index -> indices
-      if source.end_with?("ex")
-        return source.gsub(/ex$/, '') + "ices"
-      end
+      return "#{source.gsub(/ex$/, '')}ices" if source.end_with?('ex')
 
       # mesh -> meshes
-      if source.end_with?("esh")
-        return source + "es"
-      end
+      return "#{source}es" if source.end_with?('esh')
 
       # key -> keys
       # gateway -> gateways
-      if source.end_with?("ey") || source.end_with?("ay")
-        return source + "s"
-      end
+      return "#{source}s" if source.end_with?('ey') || source.end_with?('ay')
 
       # policy -> policies
-      if source.end_with?("y")
-        return source.gsub(/y$/, '') + "ies"
-      end
+      return "#{source.gsub(/y$/, '')}ies" if source.end_with?('y')
 
-      source + "s"
+      "#{source}s"
     end
   end
 end
