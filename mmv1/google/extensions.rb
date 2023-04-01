@@ -45,9 +45,7 @@ class String
     when :lower
       Google::StringUtils.camelize(self, false)
     else
-      raise ArgumentError, "Invalid option, use either :upper or :lower."
+      raise ArgumentError, 'Invalid option, use either :upper or :lower.'
     end
   end
-  alias_method :camelcase, :camelize
-
 end

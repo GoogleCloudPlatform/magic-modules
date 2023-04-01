@@ -76,19 +76,18 @@ module Google
     end
 
     # Slimmed down version of ActiveSupport::Inflector code
-    def self.camelize(term, uppercase_first_letter = true)
-      acronyms_camelize_regex   = /^(?:(?=a)b(?=\b|[A-Z_])|\w)/
+    def self.camelize(term, uppercase_first_letter)
+      acronyms_camelize_regex = /^(?:(?=a)b(?=\b|[A-Z_])|\w)/
 
       string = term.to_s
-      # String#camelize takes a symbol (:upper or :lower), so here we also support :lower to keep the methods consistent.
-      if !uppercase_first_letter || uppercase_first_letter == :lower
-        string = string.sub(acronyms_camelize_regex) { |match| match.downcase! || match }
-      else
-        string = string.sub(/^[a-z\d]*/) { |match| match.capitalize! || match }
-      end
+      string = if uppercase_first_letter
+                 string.sub(/^[a-z\d]*/) { |match| match.capitalize! || match }
+               else
+                 string.sub(acronyms_camelize_regex) { |match| match.downcase! || match }
+               end
       # handle snake case
       string.gsub!(/(?:_)([a-z\d]*)/i) do
-        word = $1
+        word = ::Regexp.last_match(1)
         word.capitalize! || word
       end
       string
