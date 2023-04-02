@@ -99,7 +99,7 @@ func forceNewIfNetworkIPNotUpdatableFunc(d TerraformResourceDiff) error {
 }
 
 // check if stopping_with_local_ssd_discard is the only updated field
-func ResourceComputeInstanceLocalSsdlUpdate(d *schema.ResourceData, resourceSchema map[string]*schema.Schema) bool {
+func onlyStoppingWithLocalSsdDiscardChanged(d *schema.ResourceData, resourceSchema map[string]*schema.Schema) bool {
 	if d.HasChange("stopping_with_local_ssd_discard") {
 		for field := range resourceSchema {
 			if field == "stopping_with_local_ssd_discard" {
@@ -1547,7 +1547,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	if ResourceComputeInstanceLocalSsdlUpdate(d, ResourceComputeInstance().Schema) {
+	if onlyStoppingWithLocalSsdDiscardChanged(d, ResourceComputeInstance().Schema) {
 		if d.Get("stopping_with_local_ssd_discard") != nil {
 			if err := d.Set("stopping_with_local_ssd_discard", d.Get("stopping_with_local_ssd_discard")); err != nil {
 				return fmt.Errorf("Error reading/setting stopping_with_local_ssd_discard: %s", err)
@@ -2018,7 +2018,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 						return err
 					}
 				} else {
-					// DiscardLocalSsd could happen only when stopping_with_local_ssd_discard = false
+					// DiscardLocalSsd could happen only when stopping_with_local_ssd_discard = true
 					op, err = config.NewComputeClient(userAgent).Instances.Stop(project, zone, instance.Name).Do()
 					if err != nil {
 						return err
