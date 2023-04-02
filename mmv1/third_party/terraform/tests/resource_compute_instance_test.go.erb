@@ -800,7 +800,7 @@ func TestAccComputeInstance_scratchDiskUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME", "SCSI"}),
+					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME"}),
 				),
 			},
 			{
@@ -812,7 +812,7 @@ func TestAccComputeInstance_scratchDiskUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME", "SCSI"}),
+					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME"}),
 				),
 			},
 			{
@@ -824,7 +824,7 @@ func TestAccComputeInstance_scratchDiskUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME", "SCSI"}),
+					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME"}),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
@@ -833,7 +833,7 @@ func TestAccComputeInstance_scratchDiskUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME", "SCSI"}),
+					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME"}),
 				),
 			},
 			{
@@ -4646,11 +4646,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-<<<<<<< HEAD
 func testAccComputeInstance_with18TbScratchDisk(instance string) string {
-=======
-func testAccComputeInstance_scratchDiskUpdate(instance, machinetype string) string {
->>>>>>> bb884a1ea (fix local-ssd update issue)
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -4659,14 +4655,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-<<<<<<< HEAD
   machine_type = "n2-standard-64"   // must be a large n2 to be paired with 18Tb local-ssd
   zone         = "us-central1-a"
-=======
-  machine_type = "%s"
-  zone         = "us-central1-a"
-  allow_stopping_for_update = true
->>>>>>> bb884a1ea (fix local-ssd update issue)
 
   boot_disk {
     initialize_params {
@@ -4676,7 +4666,6 @@ resource "google_compute_instance" "foobar" {
 
   scratch_disk {
     interface = "NVME"
-<<<<<<< HEAD
     size      = 3000
   }
 
@@ -4703,25 +4692,45 @@ resource "google_compute_instance" "foobar" {
   scratch_disk {
     interface = "NVME"
     size      = 3000
-=======
-  }
-
-  scratch_disk {
-    interface = "SCSI"
->>>>>>> bb884a1ea (fix local-ssd update issue)
   }
 
   network_interface {
     network = "default"
   }
-<<<<<<< HEAD
 }`, instance)
-=======
+}
+
+func testAccComputeInstance_scratchDiskUpdate(instance, machinetype string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "%s"
+  zone         = "us-central1-a"
+  allow_stopping_for_update = true
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  scratch_disk {
+    interface = "NVME"
+  }
+
+  network_interface {
+    network = "default"
+  }
 
 }
 `, instance, machinetype)
->>>>>>> bb884a1ea (fix local-ssd update issue)
 }
+
 
 func testAccComputeInstance_scratchDiskUpdate2(instance, machinetype, discard string) string {
 	return fmt.Sprintf(`
@@ -4746,10 +4755,6 @@ resource "google_compute_instance" "foobar" {
     interface = "NVME"
   }
 
-  scratch_disk {
-    interface = "SCSI"
-  }
-
   network_interface {
     network = "default"
   }
@@ -4759,8 +4764,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance, machinetype, discard)
 }
-
-
 
 func testAccComputeInstance_serviceAccount(instance string) string {
 	return fmt.Sprintf(`

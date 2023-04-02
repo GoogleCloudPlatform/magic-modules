@@ -126,7 +126,7 @@ func hasLocalSsd(d *schema.ResourceData, config *Config) bool {
 		}
 	}
 
-	return count == 2
+	return count > 0
 }
 
 func ResourceComputeInstance() *schema.Resource {
