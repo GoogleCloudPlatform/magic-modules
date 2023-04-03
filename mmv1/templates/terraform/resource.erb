@@ -48,9 +48,9 @@ import (
     resource_name = product_ns + object.name
     properties = object.all_user_properties
     update_body_properties = properties_without_custom_update(object.settable_properties)
-    update_body_properties = update_body_properties.reject(&:input) if object.update_verb == :PATCH
+    update_body_properties = update_body_properties.reject(&:immutable) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
-    client_name = @config.client_name || product_ns
+    client_name = object.__product.client_name || product_ns
     client_name_camel = client_name.camelize(:lower)
     client_name_pascal = client_name.camelize(:upper)
     client_name_lower = client_name.downcase
@@ -598,7 +598,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  end -%>
 
 
-<%  if !object.input -%>
+<%  if !object.immutable -%>
     obj := make(map[string]interface{})
 <%  update_body_properties.each do |prop| -%>
     <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
@@ -700,7 +700,7 @@ if len(updateMask) > 0 {
 <% if object.update_mask && field_specific_update_methods(object.root_properties) -%>
   }
 <% end -%>
-<%  end # if !object.input -%>
+<%  end # if !object.immutable -%>
 <%    if field_specific_update_methods(object.root_properties) -%>
     d.Partial(true)
 
@@ -746,11 +746,11 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             This is unfortunate, but it's because of the way that GCP works, so there's
             no easy way out.  Some APIs require you to send `enable_foo: false`, while
             others will crash if you send `attribute: ''`.  We require this nuance to
-            be annotated in api.yaml, since it is not discoverable automatically.
+            be annotated in ResourceName.yaml, since it is not discoverable automatically.
 
             The behavior here, which we believe to be correct, is to send a value if
             * It is non-empty OR
-            * It is marked send_empty_value in api.yaml.
+            * It is marked send_empty_value in ResourceName.yaml.
             AND
             * It has been set by the user OR
             * It has been modified by the expander in any way

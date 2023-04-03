@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -17,7 +17,7 @@ kind: 'compute#targetInstance'
 base_url: projects/{{project}}/zones/{{zone}}/targetInstances
 collection_url_key: 'items'
 has_self_link: true
-input: true
+immutable: true
 description: |
   Represents a TargetInstance resource which defines an endpoint instance
   that terminates traffic of certain protocols. In particular, they are used
@@ -47,6 +47,20 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "target_instance_basic"
+    primary_resource_id: "default"
+    vars:
+      target_name: "target"
+      instance_name: "target-vm"
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: "target_instance_custom_network"
+    primary_resource_id: "custom_network"
+    vars:
+      target_name: "custom-network"
+      instance_name: "custom-network-target-vm"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -54,8 +68,9 @@ parameters:
     imports: 'name'
     description: |
       URL of the zone where the target instance resides.
-    required: true
-    input: true
+    required: false
+    immutable: true
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -74,8 +89,10 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'network'
-    description: 'The URL of the network this target instance uses to forward traffic. If not specified, the traffic will be forwarded to the network that the default network interface belongs to.'
-    input: true
+    description: 'The URL of the network this target instance uses to forward traffic.
+      If not specified, the traffic will be forwarded to the network that the default
+      network interface belongs to.'
+    immutable: true
     min_version: beta
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -85,18 +102,22 @@ properties:
     resource: 'Instance'
     imports: 'selfLink'
     description: |
-      A URL to the virtual machine instance that handles traffic for this
-      target instance. Accepts self-links or the partial paths with format
-      `projects/project/zones/zone/instances/instance' or
-      `zones/zone/instances/instance`
+      The Compute instance VM handling traffic for this target instance.
+      Accepts the instance self-link, relative path
+      (e.g. `projects/project/zones/zone/instances/instance`) or name. If
+      name is given, the zone will default to the given zone or
+      the provider-default zone and the project will default to the
+      provider-level project.
     required: true
-    input: true
+    immutable: true
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
   - !ruby/object:Api::Type::Enum
     name: 'natPolicy'
     description: |
       NAT option controlling how IPs are NAT'ed to the instance.
       Currently only NO_NAT (default value) is supported.
-    input: true
+    immutable: true
     default_value: :NO_NAT
     values:
       - :NO_NAT

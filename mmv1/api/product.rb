@@ -58,6 +58,10 @@ module Api
 
     attr_reader :async
 
+    attr_reader :legacy_name
+
+    attr_reader :client_name
+
     def validate
       super
       set_variables @objects, :__product
@@ -68,6 +72,8 @@ module Api
       check :operation_retry, type: String
 
       check :async, type: Api::Async
+      check :legacy_name, type: String
+      check :client_name, type: String
 
       check :versions, type: Array, item_type: Api::Product::Version, required: true
     end
@@ -85,7 +91,7 @@ module Api
     # users to read in documentation; "Google Compute Engine", "Cloud Bigtable"
     def display_name
       if @display_name.nil?
-        name.underscore.humanize
+        name.space_separated
       else
         @display_name
       end

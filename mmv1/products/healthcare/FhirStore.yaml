@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,6 +21,50 @@ update_mask: true
 description: |
   A FhirStore is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/fhir/STU3/)
   standard for Healthcare information exchange
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Creating a FHIR store': 'https://cloud.google.com/healthcare/docs/how-tos/fhir'
+  api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.fhirStores'
+id_format: "{{dataset}}/fhirStores/{{name}}"
+import_format: ["{{dataset}}/fhirStores/{{name}}"]
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "healthcare_fhir_store_basic"
+    primary_resource_id: "default"
+    vars:
+      dataset_name: "example-dataset"
+      fhir_store_name: "example-fhir-store"
+      pubsub_topic: "fhir-notifications"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "healthcare_fhir_store_streaming_config"
+    primary_resource_id: "default"
+    vars:
+      dataset_name: "example-dataset"
+      fhir_store_name: "example-fhir-store"
+      pubsub_topic: "fhir-notifications"
+      bq_dataset_name: "bq_example_dataset"
+    test_vars_overrides:
+      policyChanged: ' BootstrapPSARoles(t, "service-", "gcp-sa-healthcare", []string{"roles/bigquery.dataEditor",
+        "roles/bigquery.jobUser"})'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "healthcare_fhir_store_notification_config"
+    primary_resource_id: "default"
+    vars:
+      dataset_name: "example-dataset"
+      fhir_store_name: "example-fhir-store"
+      pubsub_topic: "fhir-notifications"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "healthcare_fhir_store_notification_configs"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      dataset_name: "example-dataset"
+      fhir_store_name: "example-fhir-store"
+      pubsub_topic: "fhir-notifications"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+  custom_import: templates/terraform/custom_import/healthcare_fhir_store.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'dataset'
@@ -28,7 +72,7 @@ parameters:
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
     required: true
-    input: true
+    immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
     url_param_only: true
@@ -40,7 +84,7 @@ properties:
 
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: true
-    input: true
+    immutable: true
   # Version is duplicated because it is optional in beta but required in GA.
   - !ruby/object:Api::Type::Enum
     name: version
@@ -48,7 +92,7 @@ properties:
       The FHIR specification version.
     exact_version: beta
     required: false
-    input: true
+    immutable: true
     default_value: :STU3
     values:
       - :DSTU2
@@ -60,7 +104,7 @@ properties:
       The FHIR specification version.
     exact_version: ga
     required: true
-    input: true
+    immutable: true
     values:
       - :DSTU2
       - :STU3
@@ -86,7 +130,7 @@ properties:
 
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: false
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Boolean
     name: 'disableResourceVersioning'
     description: |
@@ -98,7 +142,7 @@ properties:
 
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: false
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::Boolean
     name: 'enableHistoryImport'
     description: |
@@ -111,7 +155,7 @@ properties:
 
       ** This property can be changed manually in the Google Cloud Healthcare admin console without recreating the FHIR store **
     required: false
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
     required: false
@@ -150,11 +194,13 @@ properties:
       The time that this resource was created on the server.
       This is in RFC3339 text format.
     output: true
+    exclude: true
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |
       The fully qualified name of this dataset
     output: true
+    ignore_read: true
   - !ruby/object:Api::Type::Array
     name: streamConfigs
     description: |-
@@ -222,9 +268,9 @@ properties:
     min_version: beta
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - !ruby/object:Api::Type::String 
+        - !ruby/object:Api::Type::String
           name: pubsubTopic
-          required: true 
+          required: true
           description: |
             The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
             PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
@@ -240,8 +286,3 @@ properties:
             full FHIR resource. When a resource change is too large or during heavy traffic, only the resource name will be
             sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether 
             it needs to fetch the full resource as a separate operation.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Creating a FHIR store':
-      'https://cloud.google.com/healthcare/docs/how-tos/fhir'
-  api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.fhirStores'

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -25,12 +25,27 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
     - liens
 identity:
   - name
-description: A Lien represents an encumbrance on the actions that can be performed on a resource.
-input: true
+description: A Lien represents an encumbrance on the actions that can be performed
+  on a resource.
+immutable: true
+id_format: "{{name}}"
+import_format: ["{{parent}}/{{name}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "resource_manager_lien"
+    skip_test: true
+    primary_resource_id: "lien"
+    vars:
+      project_id: "staging-project"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/lien.erb
+  post_import: templates/terraform/post_import/lien_import.erb
+  pre_delete: templates/terraform/pre_delete/modify_delete_url.erb
+  decoder: templates/terraform/decoders/avoid_meaningless_project_update.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
-    input: true
+    immutable: true
     required: true
     description: |
       A reference to the resource this Lien is attached to.
@@ -46,19 +61,20 @@ parameters:
       list is meaningless and will be rejected.
       e.g. ['resourcemanager.projects.delete']
     item_type: 'Api::Type::String'
-    input: true
+    immutable: true
     required: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: A system-generated unique identifier for this Lien.
     output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
-    name: reason 
+    name: reason
     description: |
       Concise user-visible strings indicating why an action cannot be performed
       on a resource. Maximum length of 200 characters.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: origin
@@ -66,7 +82,7 @@ properties:
       A stable, user-visible/meaningful string identifying the origin
       of the Lien, intended to be inspected programmatically. Maximum length of
       200 characters.
-    input: true
+    immutable: true
     required: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'

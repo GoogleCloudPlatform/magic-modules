@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,27 +14,41 @@
 --- !ruby/object:Api::Resource
 name: 'OrganizationSecurityPolicyRule'
 min_version: beta
-base_url: 'locations/global/securityPolicies/{{policy_id}}'
-self_link: 'locations/global/securityPolicies/{{policy_id}}/getRule?priority={{priority}}'
-create_url: 'locations/global/securityPolicies/{{policy_id}}/addRule?priority={{priority}}'
+base_url: '{{policy_id}}'
+self_link: '{{policy_id}}/getRule?priority={{priority}}'
+create_url: '{{policy_id}}/addRule?priority={{priority}}'
 update_verb: :POST
-update_url: 'locations/global/securityPolicies/{{policy_id}}/patchRule?priority={{priority}}'
+update_url: '{{policy_id}}/patchRule?priority={{priority}}'
 delete_verb: :POST
-delete_url: 'locations/global/securityPolicies/{{policy_id}}/removeRule?priority={{priority}}'
+delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
 description: |
   A rule for the OrganizationSecurityPolicy.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Creating firewall rules':
-      'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'
+    'Creating firewall rules': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
+id_format: "{{policy_id}}/priority/{{priority}}"
+import_format: ["{{%policy_id}}/priority/{{priority}}"]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "organization_security_policy_rule_basic"
+    primary_resource_id: "policy"
+    min_version: 'beta'
+    test_env_vars:
+      org_id: :ORG_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
+  post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
+  post_update: templates/terraform/post_create/org_security_policy_rule.go.erb
+      # TODO: Remove once b/154369201 is closed.
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: policyId
     description: |
       The ID of the OrganizationSecurityPolicy this rule applies to.
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -48,12 +62,11 @@ properties:
       between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
       highest priority and 2147483647 is the lowest prority.
     required: true
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'match'
-    description:
-      A match condition that incoming traffic is evaluated against. If it evaluates to true,
-      the corresponding 'action' is enforced.
+    description: A match condition that incoming traffic is evaluated against. If
+      it evaluates to true, the corresponding 'action' is enforced.
     required: true
     properties:
       - !ruby/object:Api::Type::String
@@ -70,56 +83,55 @@ properties:
         default_value: :FIREWALL
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
-        description:
-          The configuration options for matching the rule.
+        description: The configuration options for matching the rule.
         required: true
         properties:
-        - !ruby/object:Api::Type::Array
-          name: 'srcIpRanges'
-          description: |
-            Source IP address range in CIDR format. Required for
-            INGRESS rules.
-          item_type: Api::Type::String
-          exactly_one_of:
-            - match.0.config.0.src_ip_ranges
-            - match.0.config.0.dest_ip_ranges
-        - !ruby/object:Api::Type::Array
-          name: 'destIpRanges'
-          description: |
-            Destination IP address range in CIDR format. Required for
-            EGRESS rules.
-          item_type: Api::Type::String
-          exactly_one_of:
-            - match.0.config.0.src_ip_ranges
-            - match.0.config.0.dest_ip_ranges
-        - !ruby/object:Api::Type::Array
-          name: 'layer4Config'
-          api_name: 'layer4Configs'
-          description: |
-            Pairs of IP protocols and ports that the rule should match.
-          required: true
-          item_type: !ruby/object:Api::Type::NestedObject
-            properties:
-              - !ruby/object:Api::Type::String
-                name: 'ipProtocol'
-                description: |
-                  The IP protocol to which this rule applies. The protocol
-                  type is required when creating a firewall rule.
-                  This value can either be one of the following well
-                  known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
-                  or the IP protocol number.
-                required: true
-              - !ruby/object:Api::Type::Array
-                item_type: Api::Type::String
-                name: 'ports'
-                description: |
-                  An optional list of ports to which this rule applies. This field
-                  is only applicable for UDP or TCP protocol. Each entry must be
-                  either an integer or a range. If not specified, this rule
-                  applies to connections through any port.
+          - !ruby/object:Api::Type::Array
+            name: 'srcIpRanges'
+            description: |
+              Source IP address range in CIDR format. Required for
+              INGRESS rules.
+            item_type: Api::Type::String
+            exactly_one_of:
+              - match.0.config.0.src_ip_ranges
+              - match.0.config.0.dest_ip_ranges
+          - !ruby/object:Api::Type::Array
+            name: 'destIpRanges'
+            description: |
+              Destination IP address range in CIDR format. Required for
+              EGRESS rules.
+            item_type: Api::Type::String
+            exactly_one_of:
+              - match.0.config.0.src_ip_ranges
+              - match.0.config.0.dest_ip_ranges
+          - !ruby/object:Api::Type::Array
+            name: 'layer4Config'
+            api_name: 'layer4Configs'
+            description: |
+              Pairs of IP protocols and ports that the rule should match.
+            required: true
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'ipProtocol'
+                  description: |
+                    The IP protocol to which this rule applies. The protocol
+                    type is required when creating a firewall rule.
+                    This value can either be one of the following well
+                    known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
+                    or the IP protocol number.
+                  required: true
+                - !ruby/object:Api::Type::Array
+                  item_type: Api::Type::String
+                  name: 'ports'
+                  description: |
+                    An optional list of ports to which this rule applies. This field
+                    is only applicable for UDP or TCP protocol. Each entry must be
+                    either an integer or a range. If not specified, this rule
+                    applies to connections through any port.
 
-                  Example inputs include: ["22"], ["80","443"], and
-                  ["12345-12349"].
+                    Example inputs include: ["22"], ["80","443"], and
+                    ["12345-12349"].
   - !ruby/object:Api::Type::String
     name: 'action'
     description: |
@@ -135,8 +147,8 @@ properties:
     description: |
       The direction in which this rule applies. If unspecified an INGRESS rule is created.
     values:
-    - :INGRESS
-    - :EGRESS
+      - :INGRESS
+      - :EGRESS
   - !ruby/object:Api::Type::Array
     name: 'targetResources'
     description: |

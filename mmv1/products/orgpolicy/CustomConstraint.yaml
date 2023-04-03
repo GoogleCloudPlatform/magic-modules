@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -19,28 +19,45 @@ update_verb: :PATCH
 min_version: beta
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints'
-    'Supported Services':
-      'https://cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services'
+    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints'
+    'Supported Services': 'https://cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services'
   api: 'https://cloud.google.com/resource-manager/docs/reference/orgpolicy/rest/v2/organizations.constraints'
 description: |
   Custom constraints are created by administrators to provide more granular and customizable control over the specific fields that are restricted by your organization policies.
+id_format: '{{parent}}/customConstraints/{{name}}'
+import_format: ["{{%parent}}/customConstraints/{{name}}"]
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  update_encoder: 'templates/terraform/update_encoder/org_policy_custom_constraint.go.erb'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: "org_policy_custom_constraint_basic"
+    primary_resource_id: "constraint"
+    test_env_vars:
+      org_id: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: "org_policy_custom_constraint_full"
+    primary_resource_id: "constraint"
+    test_env_vars:
+      org_id: :ORG_TARGET
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
     description: |
       The parent of the resource, an organization. Format should be `organizations/{organization_id}`.
-    input: true
+    immutable: true
     url_param_only: true
     required: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       Immutable. The name of the custom constraint. This is unique within the organization.
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
@@ -71,7 +88,7 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
     name: 'resourceTypes'
-    input: true
+    immutable: true
     min_size: 1
     required: true
     description: |

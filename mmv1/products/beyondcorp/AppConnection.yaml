@@ -1,4 +1,4 @@
-# Copyright 2020 Google Inc.
+# Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-!ruby/object:Api::Resource
+--- !ruby/object:Api::Resource
 name: 'AppConnection'
-description: "A BeyondCorp AppConnection resource represents a BeyondCorp protected
-  AppConnection to a remote application.\nIt creates all the necessary GCP components
-  needed for creating a BeyondCorp protected AppConnection. \nMultiple connectors
-  can be authorised for a single AppConnection.\n"
+description: "A BeyondCorp AppConnection resource represents a BeyondCorp protected\
+  \ AppConnection to a remote application.\nIt creates all the necessary GCP components\
+  \ needed for creating a BeyondCorp protected AppConnection. \nMultiple connectors\
+  \ can be authorised for a single AppConnection.\n"
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/beyondcorp-enterprise/docs/enable-app-connector'
@@ -47,11 +47,32 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "beyondcorp_app_connection_basic"
+    primary_resource_id: "app_connection"
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_connection%s\", context[\"\
+      random_suffix\"])"
+    vars:
+      account_id: "my-account"
+      app_connector_name: "my-app-connector"
+      app_connection_name: "my-app-connection"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "beyondcorp_app_connection_full"
+    primary_resource_id: "app_connection"
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_app_connection%s\", context[\"\
+      random_suffix\"])"
+    vars:
+      account_id: "my-account"
+      app_connector_name: "my-app-connector"
+      app_connection_name: "my-app-connection"
+      display_name: "some display name"
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       ID of the AppConnection.
     url_param_only: true
@@ -59,7 +80,7 @@ properties:
     name: 'region'
     description: |
       The region of the AppConnection.
-    input: true
+    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
@@ -75,7 +96,7 @@ properties:
       The type of network connectivity used by the AppConnection. Refer to
       https://cloud.google.com/beyondcorp/docs/reference/rest/v1/projects.locations.appConnections#type
       for a list of possible values.
-    input: true
+    immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'applicationEndpoint'
     description: |
@@ -101,6 +122,7 @@ properties:
     name: gateway
     description: |
       Gateway used by the AppConnection.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'appGateway'

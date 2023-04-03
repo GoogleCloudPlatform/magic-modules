@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,18 +13,59 @@
 
 --- !ruby/object:Api::Resource
 name: 'JobTrigger'
-create_url:  "{{parent}}/jobTriggers"
+create_url: "{{parent}}/jobTriggers"
 self_link: "{{parent}}/jobTriggers/{{name}}"
-base_url:  "{{parent}}/jobTriggers"
+base_url: "{{parent}}/jobTriggers"
 update_verb: :PATCH
 update_mask: true
 description: |
   A job trigger configuration.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/dlp/docs/creating-job-triggers'
+    'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-job-triggers'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.jobTriggers'
+id_format: "{{parent}}/jobTriggers/{{name}}"
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dlp_job_trigger_basic"
+    primary_resource_id: "basic"
+    vars:
+      trigger: "trigger"
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dlp_job_trigger_bigquery_row_limit"
+    primary_resource_id: "bigquery_row_limit"
+    vars:
+      trigger: "trigger"
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dlp_job_trigger_bigquery_row_limit_percentage"
+    primary_resource_id: "bigquery_row_limit_percentage"
+    vars:
+      trigger: "trigger"
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dlp_job_trigger_data_catalog_output"
+    primary_resource_id: "data_catalog_output"
+    vars:
+      trigger: "trigger"
+    test_env_vars:
+      project: :PROJECT_NAME
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dlp_job_trigger_scc_output"
+    primary_resource_id: "scc_output"
+    vars:
+      trigger: "trigger"
+    test_env_vars:
+      project: :PROJECT_NAME
+    skip_docs: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/wrap_object.go.erb
+  custom_import: templates/terraform/custom_import/dlp_import.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'
@@ -32,7 +73,7 @@ parameters:
       The parent of the trigger, either in the format `projects/{{project}}`
       or `projects/{{project}}/locations/{{location}}`
     required: true
-    input: true
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -40,6 +81,7 @@ properties:
     description: |
       The resource name of the job trigger. Set by the server.
     output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -111,7 +153,8 @@ properties:
                 at_least_one_of:
                   - inspect_job.0.storage_config.0.timespan_config.0.start_time
                   - inspect_job.0.storage_config.0.timespan_config.0.end_time
-                description: Exclude files or rows newer than this value. If set to zero, no upper time limit is applied.
+                description: Exclude files or rows newer than this value. If set to
+                  zero, no upper time limit is applied.
               - !ruby/object:Api::Type::Boolean
                 name: 'enableAutoPopulationOfTimespanConfig'
                 description: |
@@ -152,7 +195,8 @@ properties:
                     description: The ID of the project to which the entities belong.
                   - !ruby/object:Api::Type::String
                     name: 'namespaceId'
-                    description: If not empty, the ID of the namespace to which the entities belong.
+                    description: If not empty, the ID of the namespace to which the
+                      entities belong.
               - !ruby/object:Api::Type::NestedObject
                 name: 'kind'
                 required: true
@@ -165,7 +209,8 @@ properties:
                     description: The name of the Datastore kind.
           - !ruby/object:Api::Type::NestedObject
             name: 'cloudStorageOptions'
-            description: Options defining a file or a set of files within a Google Cloud Storage bucket.
+            description: Options defining a file or a set of files within a Google
+              Cloud Storage bucket.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'fileSet'
@@ -296,7 +341,7 @@ properties:
                 description: |
                   How to sample rows if not all rows are scanned. Meaningful only when used in conjunction with either 
                   rowsLimit or rowsLimitPercent. If not specified, rows are scanned in the order BigQuery reads them.
-                values: 
+                values:
                   - :TOP
                   - :RANDOM_START
                 default_value: :TOP
@@ -397,7 +442,7 @@ properties:
                 - publish_summary_to_cscc
               allow_empty_object: true
               send_empty_value: true
-              properties: [ ]
+              properties: []
               description: |
                 Publish the result summary of a DlpJob to the Cloud Security Command Center.
             - !ruby/object:Api::Type::NestedObject
@@ -409,6 +454,6 @@ properties:
                 - publish_summary_to_cscc
               allow_empty_object: true
               send_empty_value: true
-              properties: [ ]
+              properties: []
               description: |
                 Publish findings of a DlpJob to Data Catalog.

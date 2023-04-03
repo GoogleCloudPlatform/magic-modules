@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,42 +21,119 @@ description: |
   A Google Cloud IoT Core device registry.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation':
-      'https://cloud.google.com/iot/docs/'
+    'Official Documentation': 'https://cloud.google.com/iot/docs/'
   api: 'https://cloud.google.com/iot/docs/reference/cloudiot/rest/'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   exclude: false
   method_name_separator: ':'
-  fetch_iam_policy_verb: :POST      
+  fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'name'
-  import_format: ["projects/{{project}}/locations/{{location}}/registries/{{name}}", "{{name}}"]           
+  import_format: ["projects/{{project}}/locations/{{location}}/registries/{{name}}",
+    "{{name}}"]
+legacy_name: "google_cloudiot_registry"
+import_format: ["{{project}}/locations/{{region}}/registries/{{name}}"]
+id_format: "projects/{{project}}/locations/{{region}}/registries/{{name}}"
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/cloudiot.go.erb
+  decoder: templates/terraform/decoders/cloudiot_device_registry.go.erb
+  encoder: templates/terraform/encoders/cloudiot_device_registry.go.erb
+  extra_schema_entry: templates/terraform/extra_schema_entry/cloudiot_device_registry.go.erb
+  pre_update: templates/terraform/pre_update/cloudiot_device_registry.go.erb
+docs: !ruby/object:Provider::Terraform::Docs
+  optional_properties: |
+    * `state_notification_config` - A PubSub topic to publish device state updates.
+      The structure is documented below.
+
+    * `mqtt_config` - Activate or deactivate MQTT.
+      The structure is documented below.
+
+    * `http_config` - Activate or deactivate HTTP.
+      The structure is documented below.
+
+    * `credentials` - List of public key certificates to authenticate devices.
+      The structure is documented below.
+
+    The `state_notification_config` block supports:
+
+    * `pubsub_topic_name` - PubSub topic name to publish device state updates.
+
+    The `mqtt_config` block supports:
+
+    * `mqtt_enabled_state` - The field allows `MQTT_ENABLED` or `MQTT_DISABLED`.
+
+    The `http_config` block supports:
+
+    * `http_enabled_state` - The field allows `HTTP_ENABLED` or `HTTP_DISABLED`.
+
+    The `credentials` block supports:
+
+    * `public_key_certificate` - A public key certificate format and data.
+
+    The `public_key_certificate` block supports:
+
+    * `format` - The field allows only `X509_CERTIFICATE_PEM`.
+
+    * `certificate` - The certificate data.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudiot_device_registry_basic"
+    primary_resource_id: "test-registry"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudiot-registry%s\", context[\"\
+      random_suffix\"])"
+    vars:
+      cloudiot_registry_name: "cloudiot-registry"
+    test_env_vars:
+      project: :PROJECT_NAME
+      region: :REGION
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudiot_device_registry_single_event_notification_configs"
+    primary_resource_id: "test-registry"
+    vars:
+      cloudiot_registry_name: "cloudiot-registry"
+      cloudiot_device_telemetry_topic_name: "default-telemetry"
+    test_env_vars:
+      project: :PROJECT_NAME
+      region: :REGION
+  - !ruby/object:Provider::Terraform::Examples
+    name: "cloudiot_device_registry_full"
+    primary_resource_id: "test-registry"
+    vars:
+      cloudiot_registry_name: "cloudiot-registry"
+      cloudiot_device_status_topic_name: "default-devicestatus"
+      cloudiot_device_telemetry_topic_name: "default-telemetry"
+      cloudiot_additional_device_telemetry_topic_name: "additional-telemetry"
+      cloudiot_subfolder_matches_additional_device_telemetry_topic: "test/path"
+    test_env_vars:
+      project: :PROJECT_NAME
+      region: :REGION
 parameters:
   - !ruby/object:Api::Type::String
     name: region
-    input: true
+    immutable: true
     url_param_only: true
-    required: true
+    required: false
     description: |
-      The region of this Device Registry.
+      The region in which the created registry should reside.
+      If it is not provided, the provider region is used.
+    ignore_read: true
+    default_from_api: true
 properties:
   - !ruby/object:Api::Type::String
-    name: 'id'
-    input: true
+    name: 'name'
+    immutable: true
     required: true
     description: |
-      The unique identifier for the device registry. For example,
-      `myRegistry`.
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    description: |
-      The resource path name. For example,
-      `projects/example-proj/locations/us-central1/registries/my-registry`.
+      A unique name for the resource, required by device registry.
+    api_name: 'id'
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validateCloudIotDeviceRegistryID'
   - !ruby/object:Api::Type::Array
     name: 'eventNotificationConfigs'
     description: |
       List of configurations for event notifications, such as PubSub topics
       to publish device events to.
     max_size: 10
+    default_from_api: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -67,25 +144,31 @@ properties:
             leading '/' character. If empty, all strings are matched. Empty
             value can only be used for the last `event_notification_configs`
             item.
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validateCloudIotDeviceRegistrySubfolderMatch'
         - !ruby/object:Api::Type::String
           name: 'pubsubTopicName'
           required: true
           description: |
             PubSub topic name to publish device events.
+          diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'stateNotificationConfig'
     description: |
       A PubSub topic to publish device state updates.
+    exclude: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'pubsubTopicName'
         required: true
         description: |
           PubSub topic name to publish device state updates.
+        exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'mqttConfig'
     description: |
       Activate or deactivate MQTT.
+    exclude: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'mqttEnabledState'
@@ -95,10 +178,12 @@ properties:
         values:
           - :MQTT_ENABLED
           - :MQTT_DISABLED
+        exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: 'httpConfig'
     description: |
       Activate or deactivate HTTP.
+    exclude: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'httpEnabledState'
@@ -108,6 +193,7 @@ properties:
         values:
           - :HTTP_ENABLED
           - :HTTP_DISABLED
+        exclude: true
   - !ruby/object:Api::Type::Enum
     name: 'logLevel'
     default_value: :NONE
@@ -122,11 +208,13 @@ properties:
       - :ERROR
       - :INFO
       - :DEBUG
+    diff_suppress_func: 'emptyOrDefaultStringSuppress("NONE")'
   - !ruby/object:Api::Type::Array
     name: 'credentials'
     description: |
       List of public key certificates to authenticate devices.
     max_size: 10
+    exclude: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::NestedObject
@@ -134,6 +222,7 @@ properties:
           required: true
           description: |
             A public key certificate format and data.
+          exclude: true
           properties:
             - !ruby/object:Api::Type::Enum
               name: 'format'

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,8 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'Index'
 base_url: "projects/{{project}}/indexes"
-self_link: "projects/{{project}}/indexes/{{indexId}}"
-input: true
+self_link: "projects/{{project}}/indexes/{{index_id}}"
+immutable: true
 collection_url_key: indexes
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -25,6 +25,27 @@ identity:
   - indexId
 description: |
   Describes a composite index for Cloud Datastore.
+id_format: "projects/{{project}}/indexes/{{index_id}}"
+error_retry_predicates: ["datastoreIndex409Contention"]
+autogen_async: true
+skip_sweeper: true
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 20
+  delete_minutes: 20
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    This resource creates a Datastore Index on a project that has already
+    enabled a Datastore-compatible database. If you haven't already enabled
+    one, you can create a `google_app_engine_application` resource with
+    `database_type` set to `"CLOUD_DATASTORE_COMPATIBILITY"` to do so. Your
+    Datastore location will be the same as the App Engine location specified.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "datastore_index"
+    primary_resource_id: "default"
+    vars:
+      property_name_1: "property_a"
+      property_name_2: "property_b"
 properties:
   - !ruby/object:Api::Type::String
     name: 'indexId'
@@ -43,11 +64,11 @@ properties:
       - :NONE
       - :ALL_ANCESTORS
     description: |
-        Policy for including ancestors in the index.
+      Policy for including ancestors in the index.
   - !ruby/object:Api::Type::Array
     name: 'properties'
     description: |
-        An ordered list of properties to index on.
+      An ordered list of properties to index on.
     min_size: 1
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -55,7 +76,7 @@ properties:
           name: 'name'
           required: true
           description: |
-              The property name to index.
+            The property name to index.
         - !ruby/object:Api::Type::Enum
           name: 'direction'
           required: true
@@ -63,5 +84,5 @@ properties:
             - :ASCENDING
             - :DESCENDING
           description: |
-             The direction the index should optimize for sorting.
+            The direction the index should optimize for sorting.
 

@@ -22,7 +22,6 @@ Dir.chdir(File.dirname(__FILE__))
 ENV['TZ'] = 'UTC'
 
 require 'active_support/inflector'
-require 'active_support/core_ext/array/conversions'
 require 'api/compiler'
 require 'google/logger'
 require 'optparse'
@@ -55,7 +54,7 @@ OptionParser.new do |opt|
   opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
     all_products = true
   end
-  opt.on('-y', '--yaml-dump', 'Dump the final api.yaml output to a file.') do
+  opt.on('-y', '--yaml-dump', 'Dump the final yaml output to a file.') do
     yaml_dump = true
   end
   opt.on('-o', '--output OUTPUT', 'Folder for module output') do |o|
@@ -73,7 +72,7 @@ OptionParser.new do |opt|
   opt.on('-v', '--version VERSION', 'API version to generate') do |v|
     version = v
   end
-  opt.on('-r', '--override OVERRIDE', 'Directory containing api.yaml overrides') do |r|
+  opt.on('-r', '--override OVERRIDE', 'Directory containing yaml overrides') do |r|
     override_dir = r
   end
   opt.on('-h', '--help', 'Show this message') do
@@ -91,17 +90,6 @@ OptionParser.new do |opt|
   end
 end.parse!
 # rubocop:enable Metrics/BlockLength
-
-# We use ActiveSupport Inflections to perform common string operations like
-# going from camelCase/PascalCase -> snake_case -> Title Case.
-# In order to not break the world, they've frozen the list of inflections the
-# library uses by default.
-# Particularly for initialisms, it may need a little help to generate great
-# code.
-ActiveSupport::Inflector.inflections(:en) do |inflect|
-  inflect.acronym 'TPU'
-  inflect.acronym 'VPC'
-end
 
 raise 'Cannot use -p/--products and -a/--all simultaneously' \
   if products_to_generate && all_products
@@ -240,6 +228,11 @@ all_product_files.each do |product_name|
                    else
                      File.read(override_path)
                    end
+        unless override_dir.nil?
+          # Replace overrides directory if we are running with a provider override
+          # This allows providers to reference files in their override path
+          res_yaml = res_yaml.gsub('{{override_path}}', override_dir)
+        end
         resource = Api::Compiler.new(res_yaml).run
         resource.validate
         resources.push(resource)

@@ -1,5 +1,5 @@
 # Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -38,13 +38,109 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_url_map_basic"
+    primary_resource_id: "regionurlmap"
+    vars:
+      region_url_map_name: "regionurlmap"
+      login_region_backend_service_name: "login"
+      home_region_backend_service_name: "home"
+      region_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_url_map_default_route_action"
+    primary_resource_id: "regionurlmap"
+    vars:
+      region_url_map_name: "regionurlmap"
+      login_region_backend_service_name: "login"
+      home_region_backend_service_name: "home"
+      region_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_url_map_l7_ilb_path"
+    primary_resource_id: "regionurlmap"
+    vars:
+      region_url_map_name: "regionurlmap"
+      home_region_backend_service_name: "home"
+      region_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_url_map_l7_ilb_path_partial"
+    primary_resource_id: "regionurlmap"
+    vars:
+      region_url_map_name: "regionurlmap"
+      home_region_backend_service_name: "home"
+      region_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_url_map_l7_ilb_route"
+    primary_resource_id: "regionurlmap"
+    vars:
+      region_url_map_name: "regionurlmap"
+      home_region_backend_service_name: "home"
+      region_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_url_map_l7_ilb_route_partial"
+    primary_resource_id: "regionurlmap"
+    vars:
+      region_url_map_name: "regionurlmap"
+      home_region_backend_service_name: "home"
+      region_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "int_https_lb_https_redirect"
+    primary_resource_id: "redirect"
+    skip_test: true
+    vars:
+      l7_ilb_network: "l7-ilb-network"
+      l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
+      l7_ilb_subnet: "l7-ilb-subnet"
+      l7_ilb_ip: "l7-ilb-ip"
+      l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
+      l7_ilb_target_https_proxy: "l7-ilb-target-https-proxy"
+      l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
+      l7_ilb_backend_service: "l7-ilb-backend-service"
+      l7_ilb_mig_template: "l7-ilb-mig-template"
+      l7_ilb_hc: "l7-ilb-hc"
+      l7_ilb_mig1: "l7-ilb-mig1"
+      l7_ilb_fw_allow_hc: "l7-ilb-fw-allow-hc"
+      l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
+      l7_ilb_test_vm: "l7-ilb-test-vm"
+      l7_ilb_redirect: "l7-ilb-redirect"
+      l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
+      l7_ilb_redirect_url_map: "l7-ilb-redirect-url-map"
+    min_version: beta
+    ignore_read_extra:
+      - "target"
+      - "ip_address"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "regional_external_http_load_balancer"
+    primary_resource_type: "google_compute_region_url_map"
+    primary_resource_id: "default"
+    vars:
+      lb_network: "lb-network"
+      backend_subnet: "backend-subnet"
+      proxy_only_subnet: "proxy-only-subnet"
+      fw_allow_health_check: "fw-allow-health-check"
+      fw_allow_proxies: "fw-allow-proxies"
+      l7_xlb_backend_template: "l7-xlb-backend-template"
+      l7_xlb_backend_example: "l7-xlb-backend-example"
+      address_name: "address-name"
+      l7_xlb_basic_check: "l7-xlb-basic-check"
+      l7_xlb_backend_service: "l7-xlb-backend-service"
+      regional_l7_xlb_map: "regional-l7-xlb-map"
+      l7_xlb_proxy: "l7-xlb-proxy"
+      l7_xlb_forwarding_rule: "l7-xlb-forwarding-rule"
+    skip_docs: true
+    skip_test: true     # Similar to other samples
+    min_version: beta
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
-    description: 'A reference to the region where the url map resides.'
-    required: true
+    description: |
+      The Region in which the url map should reside.
+      If it is not provided, the provider region is used.
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -73,7 +169,9 @@ properties:
       you create the resource.
   # 'fingerprint' used internally for object consistency.
   - !ruby/object:Api::Type::Array
-    name: 'hostRules'
+    name: "host_rule"
+    api_name: 'hostRules'
+    is_set: true
     description: 'The list of HostRules to use against the URL.'
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -84,6 +182,7 @@ properties:
             when you create the resource.
         - !ruby/object:Api::Type::Array
           name: 'hosts'
+          is_set: true
           required: true
           item_type: Api::Type::String
           description: |
@@ -98,8 +197,9 @@ properties:
             The name of the PathMatcher to use to match the path portion of
             the URL if the hostRule matches the URL's host portion.
   - !ruby/object:Api::Type::Integer
-    name: 'id'
+    name: 'map_id'
     description: 'The unique identifier for the resource.'
+    api_name: 'id'
     output: true
   - !ruby/object:Api::Type::Fingerprint
     name: 'fingerprint'
@@ -109,7 +209,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
-    input: true
+    immutable: true
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -119,7 +219,8 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
   - !ruby/object:Api::Type::Array
-    name: 'pathMatchers'
+    name: "path_matcher"
+    api_name: 'pathMatchers'
     description: 'The list of named PathMatchers to use against the URL.'
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -846,7 +947,8 @@ properties:
                       removed prior to redirecting the request. If set to false, the query
                       portion of the original URL is retained. The default value is false.
         - !ruby/object:Api::Type::Array
-          name: 'pathRules'
+          name: 'pathRule'
+          api_name: 'pathRules'
           description: |
             The list of path rules. Use this list instead of routeRules when routing based
             on simple path matching is all that's required. The order by which path rules
@@ -871,6 +973,7 @@ properties:
               - !ruby/object:Api::Type::Array
                 name: 'paths'
                 required: true
+                is_set: true
                 item_type: Api::Type::String
                 description: |
                   The list of path patterns to match. Each must start with / and the only place a
@@ -1266,10 +1369,12 @@ properties:
                       - :TEMPORARY_REDIRECT
                   - !ruby/object:Api::Type::Boolean
                     name: 'stripQuery'
+                    required: true
                     description: |
                       If set to true, any accompanying query portion of the original URL is removed
                       prior to redirecting the request. If set to false, the query portion of the
                       original URL is retained.
+                       This field is required to ensure an empty block is not set. The normal default value is false.
         - !ruby/object:Api::Type::NestedObject
           name: 'defaultUrlRedirect'
           # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
@@ -1337,12 +1442,15 @@ properties:
                 - :TEMPORARY_REDIRECT
             - !ruby/object:Api::Type::Boolean
               name: 'stripQuery'
+              required: true
               description: |
                 If set to true, any accompanying query portion of the original URL is removed prior
                 to redirecting the request. If set to false, the query portion of the original URL is
                 retained.
+                 This field is required to ensure an empty block is not set. The normal default value is false.
   - !ruby/object:Api::Type::Array
-    name: 'tests'
+    name: "test"
+    api_name: tests
     description: |
       The list of expected URL mappings. Requests to update this UrlMap will
       succeed only if all of the test cases pass.
@@ -1364,9 +1472,8 @@ properties:
           required: true
           resource: 'RegionBackendService'
           imports: 'selfLink'
-          description:
-            A reference to expected RegionBackendService resource the given URL
-            should be mapped to.
+          description: A reference to expected RegionBackendService resource the given
+            URL should be mapped to.
   - !ruby/object:Api::Type::NestedObject
     name: 'defaultUrlRedirect'
     exactly_one_of:
@@ -1434,10 +1541,12 @@ properties:
           - :TEMPORARY_REDIRECT
       - !ruby/object:Api::Type::Boolean
         name: 'stripQuery'
-        description: |
+        description:  |
           If set to true, any accompanying query portion of the original URL is removed prior
           to redirecting the request. If set to false, the query portion of the original URL is
           retained.
+           This field is required to ensure an empty block is not set. The normal default value is false.
+        required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'defaultRouteAction'
     conflicts:
@@ -1450,7 +1559,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'weightedBackendServices'
-        description : |
+        description: |
           A list of weighted backend services to send traffic to when a route match occurs. The weights determine the fraction of traffic that flows to their corresponding backend service. If all traffic needs to go to a single backend service, there must be one weightedBackendService with weight set to a non-zero number.
           After a backend service is identified and before forwarding the request to the backend service, advanced routing actions such as URL rewrites and header transformations are applied depending on additional settings specified in this HttpRouteAction.
         exactly_one_of:
@@ -1479,6 +1588,8 @@ properties:
                 Specifies the fraction of traffic sent to a backend service, computed as weight / (sum of all weightedBackendService weights in routeAction) .
                 The selection of a backend service is determined only for new traffic. Once a user's request has been directed to a backend service, subsequent requests are sent to the same backend service as determined by the backend service's session affinity policy.
                 The value must be from 0 to 1000.
+              validation: !ruby/object:Provider::Terraform::Validation
+                function: 'validation.IntBetween(0, 1000)'
             - !ruby/object:Api::Type::NestedObject
               name: 'headerAction'
               description: |
@@ -1535,7 +1646,7 @@ properties:
                         default_value: false
       - !ruby/object:Api::Type::NestedObject
         name: 'urlRewrite'
-        description : |
+        description: |
           The spec to modify the URL of the request, before forwarding the request to the matched service.
           urlRewrite is the only action supported in UrlMaps for external HTTP(S) load balancers.
           Not supported when the URL map is bound to a target gRPC proxy that has the validateForProxyless field set to true.
@@ -1556,6 +1667,8 @@ properties:
             at_least_one_of:
               - default_route_action.0.url_rewrite.0.path_prefix_rewrite
               - default_route_action.0.url_rewrite.0.host_rewrite
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.StringLenBetween(1, 1024)'
           - !ruby/object:Api::Type::String
             name: 'hostRewrite'
             description: |
@@ -1564,6 +1677,8 @@ properties:
             at_least_one_of:
               - default_route_action.0.url_rewrite.0.path_prefix_rewrite
               - default_route_action.0.url_rewrite.0.host_rewrite
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.StringLenBetween(1, 255)'
       - !ruby/object:Api::Type::NestedObject
         name: 'timeout'
         description: |
@@ -1593,9 +1708,11 @@ properties:
             at_least_one_of:
               - default_route_action.0.timeout.0.seconds
               - default_route_action.0.timeout.0.nanos
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntBetween(0, 999999999)'
       - !ruby/object:Api::Type::NestedObject
         name: 'retryPolicy'
-        description : |
+        description: |
           Specifies the retry policy associated with this route.
         at_least_one_of:
           - default_route_action.0.weighted_backend_services
@@ -1635,6 +1752,8 @@ properties:
               - default_route_action.0.retry_policy.0.retry_conditions
               - default_route_action.0.retry_policy.0.num_retries
               - default_route_action.0.retry_policy.0.per_try_timeout
+            validation: !ruby/object:Provider::Terraform::Validation
+              function: 'validation.IntAtLeast(1)'
           - !ruby/object:Api::Type::NestedObject
             name: 'perTryTimeout'
             description: |
@@ -1663,6 +1782,8 @@ properties:
                 at_least_one_of:
                   - default_route_action.0.retry_policy.0.per_try_timeout.0.seconds
                   - default_route_action.0.retry_policy.0.per_try_timeout.0.nanos
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.IntBetween(0, 999999999)'
       - !ruby/object:Api::Type::NestedObject
         name: 'requestMirrorPolicy'
         description: |
@@ -1865,6 +1986,8 @@ properties:
                     at_least_one_of:
                       - default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay.0.seconds
                       - default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay.0.nanos
+                    validation: !ruby/object:Provider::Terraform::Validation
+                      function: 'validation.IntBetween(0, 999999999)'
               - !ruby/object:Api::Type::Double
                 name: 'percentage'
                 description: |
@@ -1873,6 +1996,8 @@ properties:
                 at_least_one_of:
                   - default_route_action.0.fault_injection_policy.0.delay.0.fixed_delay
                   - default_route_action.0.fault_injection_policy.0.delay.0.percentage
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.FloatBetween(0, 100)'
           - !ruby/object:Api::Type::NestedObject
             name: 'abort'
             description: |
@@ -1889,6 +2014,8 @@ properties:
                 at_least_one_of:
                   - default_route_action.0.fault_injection_policy.0.abort.0.http_status
                   - default_route_action.0.fault_injection_policy.0.abort.0.percentage
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.IntBetween(200, 599)'
               - !ruby/object:Api::Type::Double
                 name: 'percentage'
                 description: |
@@ -1897,3 +2024,5 @@ properties:
                 at_least_one_of:
                   - default_route_action.0.fault_injection_policy.0.abort.0.http_status
                   - default_route_action.0.fault_injection_policy.0.abort.0.percentage
+                validation: !ruby/object:Provider::Terraform::Validation
+                  function: 'validation.FloatBetween(0, 100)'
