@@ -401,7 +401,7 @@ module Api
     end
 
     def exact_version
-      return nil if @exact_version.nil? || @exact_version.empty?
+      return nil if @exact_version.nil? || @exact_version.blank?
 
       @__resource.__product.version_obj(@exact_version)
     end
