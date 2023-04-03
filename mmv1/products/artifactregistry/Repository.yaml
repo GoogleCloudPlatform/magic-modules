@@ -47,6 +47,12 @@
         repository_id: "my-repository"
         description: "example docker repository"
     - !ruby/object:Provider::Terraform::Examples
+      name: "artifact_registry_repository_docker"
+      primary_resource_id: "my-repo"
+      vars:
+        repository_id: "my-repository"
+        description: "example docker repository"           
+    - !ruby/object:Provider::Terraform::Examples
       name: "artifact_registry_repository_cmek"
       primary_resource_id: "my-repo"
       vars:
@@ -135,6 +141,15 @@
       name: updateTime
       description: The time when the repository was last updated.
       output: true
+    - !ruby/object:Api::Type::NestedObject
+      name: 'dockerConfig'
+      description: |-
+        Docker repository config contains repository level configuration for the repositories of docker type.
+      properties:
+        - !ruby/object:Api::Type::Boolean
+          name: 'immutableTags'
+          description: |-
+            The repository which enabled this flag prevents all tags from being modified, moved or deleted. This does not prevent tags from being created.            
     - !ruby/object:Api::Type::NestedObject
       name: 'mavenConfig'
       description: |-
