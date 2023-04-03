@@ -104,7 +104,6 @@
         The database engine major version. This is an output-only field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
     - !ruby/object:Api::Type::NestedObject
       name: "initialUser"
-      immutable: true
       description: |
         Initial user to setup during cluster creation.
       custom_flatten: "templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.erb"
@@ -145,7 +144,6 @@
           description: "Labels to apply to backups created using this configuration."
         - !ruby/object:Api::Type::NestedObject
           name: "weeklySchedule"
-          immutable: true
           required: true
           description: "Weekly schedule for the Backup."
           default_from_api: true
