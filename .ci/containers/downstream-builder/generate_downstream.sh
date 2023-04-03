@@ -32,7 +32,7 @@ function clone_repo() {
         UPSTREAM_OWNER=GoogleCloudPlatform
         UPSTREAM_BRANCH=main
         GH_REPO=terraform-google-conversion
-        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
+        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion/tfplan2cai
     elif [ "$REPO" == "tf-oics" ]; then
         UPSTREAM_BRANCH=master
         UPSTREAM_OWNER=terraform-google-modules
