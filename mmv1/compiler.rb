@@ -21,6 +21,7 @@ Dir.chdir(File.dirname(__FILE__))
 # generation.
 ENV['TZ'] = 'UTC'
 
+require 'active_support/inflector'
 require 'api/compiler'
 require 'google/logger'
 require 'optparse'
