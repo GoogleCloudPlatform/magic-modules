@@ -268,6 +268,8 @@ module Provider
                         'third_party/terraform/utils/common_operation.go'],
                        ['converters/google/resources/convert.go',
                         'third_party/terraform/utils/convert.go'],
+                       ['converters/google/resources/extract.go',
+                        'third_party/terraform/utils/extract.go'],
                        ['converters/google/resources/service_scope.go',
                         'third_party/terraform/utils/service_scope.go'],
                        ['converters/google/resources/kms_utils.go',
