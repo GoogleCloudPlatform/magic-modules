@@ -79,7 +79,7 @@ properties:
     name: 'plan'
     required: true
     description: |
-      Capacity commitment plan. Valid values are FLEX, TRIAL, MONTHLY, ANNUAL
+      Capacity commitment plan. Valid values are at https://cloud.google.com/bigquery/docs/reference/reservations/rpc/google.cloud.bigquery.reservation.v1#commitmentplan
   - !ruby/object:Api::Type::String
     name: 'state'
     output: true
@@ -98,4 +98,9 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'renewalPlan'
     description: |
-      The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable for ANNUAL and TRIAL commitments.
+      The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable some commitment plans.
+  - !ruby/object:Api::Type::String
+    name: 'edition'
+    immutable: true
+    description: |
+      The edition type. Valid values are STANDARD, ENTERPRISE, ENTERPRISE_PLUS

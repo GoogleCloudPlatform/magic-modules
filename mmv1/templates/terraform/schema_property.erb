@@ -23,7 +23,7 @@
   <% else -%>
   Type: <%= tf_type(property) %>,
   <% end -%>
-<%	if property.default_from_api -%>
+<% if property.default_from_api -%>
 	Computed: true,
 	Optional: true,
 	<% if property.schema_config_mode_attr -%>

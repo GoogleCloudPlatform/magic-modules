@@ -146,7 +146,7 @@ properties:
         description: |
           The list of hostRules to match against. These rules define which hostnames the EdgeCacheService will match against, and which route configurations apply.
         min_size: 1
-        max_size: 5
+        max_size: 10
         required: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
