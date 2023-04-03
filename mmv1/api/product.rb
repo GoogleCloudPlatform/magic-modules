@@ -91,7 +91,7 @@ module Api
     # users to read in documentation; "Google Compute Engine", "Cloud Bigtable"
     def display_name
       if @display_name.nil?
-        name.underscore.humanize
+        name.space_separated
       else
         @display_name
       end
