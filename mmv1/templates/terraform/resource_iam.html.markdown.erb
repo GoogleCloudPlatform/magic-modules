@@ -223,7 +223,7 @@ The following arguments are supported:
 * `<%= param.name.underscore -%>` - (Required) <%= param.description -%> Used to find the parent resource to bind the IAM policy to
 <% end -%>
 <% end -%>
-<% if object.iam_policy.base_url.present? -%>
+<% if !object.iam_policy.base_url.nil? -%>
 <% if object.iam_policy.base_url.include?("{{project}}") -%>
 <%# The following new line allow for project to be bullet-formatted properly. -%>
 
