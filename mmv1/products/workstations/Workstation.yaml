@@ -27,7 +27,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: "https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs.workstations"
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ":"
-  fetch_iam_policy_verb: :POST
+  fetch_iam_policy_verb: :GET
   parent_resource_attribute: workstation_id
   import_format:
     [
