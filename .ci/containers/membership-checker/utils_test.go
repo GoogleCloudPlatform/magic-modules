@@ -24,6 +24,11 @@ func TestRemovesList(t *testing.T) {
 			Removal:  []string{"a", "A", "d"},
 			Expected: []string{"b", "c", "B"},
 		},
+		"Remove none": {
+			Original: []string{"a", "b", "c", "A", "B"},
+			Removal:  []string{},
+			Expected: []string{"a", "b", "c", "A", "B"},
+		},
 		"Remove all": {
 			Original: []string{"a", "b", "c", "A", "B"},
 			Removal:  []string{"a", "b", "c", "A", "B"},
