@@ -70,7 +70,7 @@ resource "google_compute_network" "default" {
 
 // Test if adding automatedBackupPolicy AND initialUser re-creates the cluster.
 // Ideally, cluster shouldn't be re-created. This test will only pass if the cluster
-//  isn't re-created but updated in-place.
+// isn't re-created but updated in-place.
 func TestAccAlloydbCluster_addAutomatedBackupPolicyAndInitialUser(t *testing.T) {
 	t.Parallel()
 
@@ -96,9 +96,9 @@ func TestAccAlloydbCluster_addAutomatedBackupPolicyAndInitialUser(t *testing.T) 
 				Config: testAccAlloydbCluster_withInitialUserAndAutomatedBackupPolicy(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
 			},
 			{
@@ -110,7 +110,7 @@ func TestAccAlloydbCluster_addAutomatedBackupPolicyAndInitialUser(t *testing.T) 
 
 // Test if deleting automatedBackupPolicy AND initialUser re-creates the cluster.
 // Ideally, cluster shouldn't be re-created. This test will only pass if the cluster
-//  isn't re-created but updated in-place.
+// isn't re-created but updated in-place.
 func TestAccAlloydbCluster_deleteAutomatedBackupPolicyAndInitialUser(t *testing.T) {
 	t.Parallel()
 
@@ -136,9 +136,9 @@ func TestAccAlloydbCluster_deleteAutomatedBackupPolicyAndInitialUser(t *testing.
 				Config: testAccAlloydbCluster_withoutInitialUserAndAutomatedBackupPolicy(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
 			},
 			{
