@@ -424,7 +424,6 @@ properties:
       Labels to apply to this forwarding rule.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
-    min_version: beta
   - !ruby/object:Api::Type::Fingerprint
     name: 'labelFingerprint'
     description: |
@@ -432,7 +431,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
     update_verb: :POST
-    min_version: beta
     # While this field doesn't appear in the resource definition in the docs,
     # it's present in Get and Insert, and the resource has no Update/Patch call.
     exclude: false
@@ -464,6 +462,7 @@ properties:
     min_size: 0
     max_size: 1
     immutable: true
+    default_from_api: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -471,6 +470,7 @@ properties:
           description: |
             Service Directory namespace to register the forwarding rule under.
           immutable: true
+          default_from_api: true
         - !ruby/object:Api::Type::String
           name: 'service'
           description: |
