@@ -32,6 +32,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   import_format:
     [
       "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}",
+      "{{workstation_config_id}}",
     ]
   min_version: beta
 async: !ruby/object:Api::OpAsync
