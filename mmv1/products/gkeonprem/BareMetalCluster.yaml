@@ -22,7 +22,7 @@ self_link: "projects/{{project}}/locations/{{location}}/bareMetalClusters/{{name
 update_verb: :PATCH
 update_mask: true
 description: "A Google Bare Metal User Cluster."
-autogen_async: true
+autogen_async: false
 id_format: "projects/{{project}}/locations/{{location}}/bareMetalClusters/{{name}}"
 import_format: ["projects/{{project}}/locations/{{location}}/bareMetalClusters/{{name}}"]
 taint_resource_on_failed_create: true

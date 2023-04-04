@@ -21,7 +21,7 @@ self_link: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_
 update_verb: :PATCH
 update_mask: true
 description: "A Google Vmware Node Pool."
-autogen_async: true
+autogen_async: false
 id_format: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}"
 import_format: ["projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}"]
 taint_resource_on_failed_create: true
