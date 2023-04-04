@@ -15,10 +15,7 @@
 name: 'ServiceBinding'
 base_url: 'projects/{{project}}/locations/global/serviceBindings'
 create_url: 'projects/{{project}}/locations/global/serviceBindings?serviceBindingId={{name}}'
-self_link: 'projects/{{project}}/locations/global/serviceBindings/{{name}}'
 min_version: beta
-update_verb: :PATCH
-update_mask: true
 description: |
   ServiceBinding is the resource that defines a Service Directory Service to be used in a 
   BackendService resource.
@@ -28,7 +25,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
-    wait_ms: 1000
+    wait_ms: 300
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 30
       update_minutes: 30
