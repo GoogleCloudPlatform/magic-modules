@@ -307,9 +307,9 @@ func TestGetRegion(t *testing.T) {
 			}
 
 			// Create resource config
-			// Here use ComputeRegionInstanceTemplate schema as example - because it has a region field in schema
+			// Here use ResourceComputeSubnetwork schema as example - because it has a region field in schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, ResourceComputeRegionInstanceTemplate().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, ResourceComputeSubnetwork().Schema, emptyConfigMap)
 			if tc.ResourceRegion != "" {
 				if err := d.Set("region", tc.ResourceRegion); err != nil {
 					t.Fatalf("Cannot set region: %s", err)
