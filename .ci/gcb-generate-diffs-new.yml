@@ -196,7 +196,7 @@ steps:
           - "19"  # Build step
           - terraform-validator
 
-    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester:stephenrlewis-integration'
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration:stephenrlewis'
       id: tfv-test-integration-0.12.31
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
@@ -215,7 +215,7 @@ steps:
           - "20"  # Build step
           - terraform-validator
 
-    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester:stephenrlewis-integration'
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration:stephenrlewis'
       id: tfv-test-integration-0.13.7
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
@@ -252,7 +252,7 @@ steps:
           - "22"  # Build step
           - terraform-google-conversion
 
-    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester:stephenrlewis-integration'
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration:stephenrlewis'
       id: tgc-test-integration-0.12.31
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
@@ -271,7 +271,7 @@ steps:
           - "23"  # Build step
           - terraform-google-conversion
 
-    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester:stephenrlewis-integration'
+    - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration:stephenrlewis'
       id: tgc-test-integration-0.13.7
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
