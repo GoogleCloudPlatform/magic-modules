@@ -277,7 +277,7 @@ func TestAccDataLossPreventionStoredInfoType_dlpStoredInfoTypeGroupIndexUpdate(t
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       GetTestProjectFromEnv(),
+		"project": GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
