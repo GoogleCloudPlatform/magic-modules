@@ -19,7 +19,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/workstationClusters?wor
 update_verb: :PATCH
 update_mask: true
 min_version: beta
-description: 'A managed workstation cluster.'
+description: 'A grouping of workstation configurations and the associated workstations in that region.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Workstations': 'https://cloud.google.com/workstations/docs/'
@@ -69,7 +69,7 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      The ID of the workstation cluster.
+      ID to use for the workstation cluster.
   - !ruby/object:Api::Type::String
     name: 'location'
     immutable: true
@@ -127,7 +127,7 @@ properties:
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
-      Time the Instance was created in UTC.
+      Time when this resource was created.
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'privateClusterConfig'
@@ -151,7 +151,7 @@ properties:
         name: 'serviceAttachmentUri'
         description: |
           Service attachment URI for the workstation cluster.
-          The service attachemnt is created when private endpoint is enabled.
+          The service attachment is created when private endpoint is enabled.
           To access workstations in the cluster, configure access to the managed service using (Private Service Connect)[https://cloud.google.com/vpc/docs/configure-private-service-connect-services].
         output: true
   - !ruby/object:Api::Type::Array
