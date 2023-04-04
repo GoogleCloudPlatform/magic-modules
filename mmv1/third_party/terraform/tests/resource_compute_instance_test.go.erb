@@ -439,6 +439,10 @@ func TestAccComputeInstance_kmsDiskEncryption(t *testing.T) {
 		},
 	}
 
+	if BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
+
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -3917,24 +3921,12 @@ func testAccComputeInstance_disks_kms(pid string, bootEncryptionKey string, disk
 	}
 	sort.Strings(diskNames)
 	return fmt.Sprintf(`
-data "google_project" "project" {
-  project_id = "%s"
-}
-
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
 }
 
-resource "google_project_iam_member" "kms-project-binding" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
-}
-
 resource "google_compute_disk" "foobar" {
-  depends_on = [google_project_iam_member.kms-project-binding]
-
   name = "%s"
   size = 10
   type = "pd-ssd"
@@ -3946,8 +3938,6 @@ resource "google_compute_disk" "foobar" {
 }
 
 resource "google_compute_disk" "foobar2" {
-  depends_on = [google_project_iam_member.kms-project-binding]
-
   name = "%s"
   size = 10
   type = "pd-ssd"
@@ -3959,8 +3949,6 @@ resource "google_compute_disk" "foobar2" {
 }
 
 resource "google_compute_disk" "foobar3" {
-  depends_on = [google_project_iam_member.kms-project-binding]
-
   name = "%s"
   size = 10
   type = "pd-ssd"
@@ -3979,8 +3967,6 @@ resource "google_compute_disk" "foobar4" {
 }
 
 resource "google_compute_instance" "foobar" {
-  depends_on = [google_project_iam_member.kms-project-binding]
-
   name         = "%s"
   machine_type = "e2-medium"
   zone         = "us-central1-a"

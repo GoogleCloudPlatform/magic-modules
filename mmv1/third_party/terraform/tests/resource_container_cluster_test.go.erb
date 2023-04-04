@@ -1421,6 +1421,10 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
 
+	if BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
+
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -3079,6 +3083,10 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsBootDiskKmsKey(t *testi
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
+
+	if BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
@@ -5190,16 +5198,6 @@ resource "google_container_cluster" "with_sandbox_config" {
 
 func testAccContainerCluster_withBootDiskKmsKey(project, clusterName, kmsKeyName string) string {
 	return fmt.Sprintf(`
-data "google_project" "project" {
-  project_id = "%s"
-}
-
-resource "google_project_iam_member" "kms-project-binding" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
-}
-
 resource "google_container_cluster" "with_boot_disk_kms_key" {
   name               = "%s"
   location           = "us-central1-a"
@@ -5738,16 +5736,6 @@ resource "google_container_cluster" "with_autoprovisioning" {
 
 func testAccContainerCluster_autoprovisioningDefaultsBootDiskKmsKey(project, clusterName, kmsKeyName string) string {
 	return fmt.Sprintf(`
-data "google_project" "project" {
-  project_id = "%s"
-}
-
-resource "google_project_iam_member" "kms-project-binding" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
-}
-
 resource "google_container_cluster" "nap_boot_disk_kms_key" {
   name               = "%s"
   location           = "us-central1-a"
