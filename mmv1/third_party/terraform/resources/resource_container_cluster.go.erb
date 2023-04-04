@@ -3982,7 +3982,6 @@ func expandIPAllocationPolicy(configured interface{}, networkingMode string) (*c
 		return &container.IPAllocationPolicy{
 			UseIpAliases:    false,
 			UseRoutes:       true,
-			StackType:       "IPV4",
 			ForceSendFields: []string{"UseIpAliases"},
 		}, nil
 	}
