@@ -52,6 +52,11 @@ examples:
       logging_metric_name: "my-(custom)/metric"
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: "logging_metric_disabled"
+    primary_resource_id: "logging_metric"
+    vars:
+      logging_metric_name: "my-(custom)/metric"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
