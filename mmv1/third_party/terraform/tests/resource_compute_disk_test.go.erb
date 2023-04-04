@@ -429,7 +429,7 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeDisk_encryptionKMS(pid, diskName, kms.CryptoKey.Name),
+				Config: testAccComputeDisk_encryptionKMS(diskName, kms.CryptoKey.Name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeDiskExists(
 						t, "google_compute_disk.foobar", pid, &disk),
@@ -775,7 +775,7 @@ resource "google_compute_disk" "foobar" {
 `, diskName)
 }
 
-func testAccComputeDisk_encryptionKMS(pid, diskName, kmsKey string) string {
+func testAccComputeDisk_encryptionKMS(diskName, kmsKey string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -793,7 +793,7 @@ resource "google_compute_disk" "foobar" {
     kms_key_self_link = "%s"
   }
 }
-`, pid, diskName, kmsKey)
+`, diskName, kmsKey)
 }
 
 func testAccComputeDisk_deleteDetach(instanceName, diskName string) string {

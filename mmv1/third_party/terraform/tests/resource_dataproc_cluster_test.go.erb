@@ -862,7 +862,6 @@ func TestAccDataprocCluster_KMS(t *testing.T) {
 
 	rnd := RandString(t, 10)
 	kms := BootstrapKMSKey(t)
-	pid := GetTestProjectFromEnv()
 
 	if BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
 		t.Fatal("Stopping the test because a role was added to the policy.")
@@ -875,7 +874,7 @@ func TestAccDataprocCluster_KMS(t *testing.T) {
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_KMS(pid, rnd, kms.CryptoKey.Name),
+				Config: testAccDataprocCluster_KMS(rnd, kms.CryptoKey.Name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.kms", &cluster),
 				),
@@ -2054,7 +2053,7 @@ resource "google_dataproc_cluster" "with_net_ref_by_url" {
 `, netName, rnd, rnd, rnd)
 }
 
-func testAccDataprocCluster_KMS(pid, rnd, kmsKey string) string {
+func testAccDataprocCluster_KMS(rnd, kmsKey string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "kms" {
   name   = "tf-test-dproc-%s"
@@ -2066,7 +2065,7 @@ resource "google_dataproc_cluster" "kms" {
     }
   }
 }
-`, pid, rnd, kmsKey)
+`, rnd, kmsKey)
 }
 
 func testAccDataprocCluster_withKerberos(rnd, kmsKey string) string {

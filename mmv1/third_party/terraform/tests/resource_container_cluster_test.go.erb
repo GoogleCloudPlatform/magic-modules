@@ -1431,7 +1431,7 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withBootDiskKmsKey(GetTestProjectFromEnv(), clusterName, kms.CryptoKey.Name),
+				Config: testAccContainerCluster_withBootDiskKmsKey(clusterName, kms.CryptoKey.Name),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_boot_disk_kms_key",
@@ -3094,7 +3094,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsBootDiskKmsKey(t *testi
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_autoprovisioningDefaultsBootDiskKmsKey(GetTestProjectFromEnv(), clusterName, kms.CryptoKey.Name),
+				Config: testAccContainerCluster_autoprovisioningDefaultsBootDiskKmsKey(clusterName, kms.CryptoKey.Name),
 			},
 			{
 				ResourceName:            "google_container_cluster.nap_boot_disk_kms_key",
@@ -5196,7 +5196,7 @@ resource "google_container_cluster" "with_sandbox_config" {
 }
 <% end -%>
 
-func testAccContainerCluster_withBootDiskKmsKey(project, clusterName, kmsKeyName string) string {
+func testAccContainerCluster_withBootDiskKmsKey(clusterName, kmsKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_boot_disk_kms_key" {
   name               = "%s"
@@ -5215,7 +5215,7 @@ resource "google_container_cluster" "with_boot_disk_kms_key" {
     boot_disk_kms_key = "%s"
   }
 }
-`, project, clusterName, kmsKeyName)
+`, clusterName, kmsKeyName)
 }
 
 func testAccContainerCluster_networkRef(cluster, network string) string {
@@ -5734,7 +5734,7 @@ resource "google_container_cluster" "with_autoprovisioning" {
 }`, cluster, imageTypeCfg)
 }
 
-func testAccContainerCluster_autoprovisioningDefaultsBootDiskKmsKey(project, clusterName, kmsKeyName string) string {
+func testAccContainerCluster_autoprovisioningDefaultsBootDiskKmsKey(clusterName, kmsKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "nap_boot_disk_kms_key" {
   name               = "%s"
@@ -5758,7 +5758,7 @@ resource "google_container_cluster" "nap_boot_disk_kms_key" {
     }
   }
 }
-`, project, clusterName, kmsKeyName)
+`, clusterName, kmsKeyName)
 }
 
 func testAccContainerCluster_autoprovisioningDefaultsShieldedInstance(cluster string) string {
