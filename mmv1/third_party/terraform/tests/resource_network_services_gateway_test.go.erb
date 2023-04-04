@@ -16,7 +16,7 @@ func TestAccNetworkServicesGateway_update(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    TestAccProviders,
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
