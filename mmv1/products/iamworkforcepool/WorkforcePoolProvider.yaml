@@ -244,4 +244,25 @@ properties:
         description: The client ID. Must match the audience claim of the JWT issued
           by the identity provider.
         required: true
-
+      - !ruby/object:Api::Type::NestedObject
+        name: 'webSsoConfig'
+        description: |
+          Configuration for web single sign-on for the OIDC provider. Here, web sign-in refers to console sign-in and gcloud sign-in through the browser.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'responseType'
+            description: |
+              The Response Type to request for in the OIDC Authorization Request for web sign-in.
+              * ID_TOKEN: The `response_type=id_token` selection uses the Implicit Flow for web sign-in.
+            required: true
+            values:
+              - :ID_TOKEN
+          - !ruby/object:Api::Type::Enum
+            name: assertionClaimsBehavior
+            description: |
+              The behavior for how OIDC Claims are included in the `assertion` object used for attribute mapping and attribute condition.
+              * ONLY_ID_TOKEN_CLAIMS: Only include ID Token Claims.
+            required: true
+            values:
+              - :ONLY_ID_TOKEN_CLAIMS
