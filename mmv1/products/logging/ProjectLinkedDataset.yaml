@@ -17,13 +17,28 @@ base_url: '{{bucket}}/links'
 create_url: '{{bucket}}/links?linkId={{link_id}}'
 delete_url: '{{bucket}}/links/{{link_id}}'
 self_link: '{{bucket}}/links/{{link_id}}'
+import_format: ['{{%bucket}}/links/{{link_id}}']
 collection_url_key: 'links'
 description: |
   Describes a BigQuery linked dataset
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/linked_dataset.go.erb
-  post_create: templates/terraform/post_create/linked_dataset.go.erb
-  post_delete: templates/terraform/post_delete/linked_dataset.go.erb
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: "name"
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: "response"
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: "done"
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: "error"
+    message: "message"
+autogen_async: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'linkId'
@@ -75,6 +90,7 @@ properties:
       The information of a BigQuery Dataset. When a link is created, a BigQuery dataset is created along
       with it, in the same project as the LogBucket it's linked to. This dataset will also have BigQuery
       Views corresponding to the LogViews in the bucket.
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::String
         name: datasetId 
@@ -89,5 +105,4 @@ examples:
     name: "logging_project_linked_dataset"
     primary_resource_id: "logging_project_linked_dataset"
     test_env_vars:
-      project_name: :PROJECT_NAME
-#      org_id: :ORG_ID
+      project: :PROJECT_NAME
