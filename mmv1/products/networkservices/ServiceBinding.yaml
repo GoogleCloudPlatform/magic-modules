@@ -81,6 +81,6 @@ properties:
     name: 'service'
     required: true
     description: |
-      Required. The full Service Directory Service name of the format 
+      The full Service Directory Service name of the format 
       projects/*/locations/*/namespaces/*/services/*
 
