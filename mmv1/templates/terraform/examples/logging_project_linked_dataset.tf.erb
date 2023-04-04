@@ -1,28 +1,11 @@
-#resource "google_project" "basic" {
-#  project_id = "tf-test%{random_suffix}"
-#  name       = "tf-test%{random_suffix}"
-#  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
-#}
-
-resource "google_logging_project_bucket_config" "basic" {
+resource "google_logging_project_bucket_config" "<%= ctx[:primary_resource_id] %>" {
   location         = "global"
-#  project          = google_project.basic.project_id
-  project          = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project          = "<%= ctx[:test_env_vars]['project'] %>"
   enable_analytics = true
   bucket_id        = "tftest%{random_suffix}"
 }
 
-#resource "google_project_service" "logging" {
-##  project = google_project.basic.project_id
-#  project = "<%= ctx[:test_env_vars]['project_name'] %>"
-#  service = "logging.googleapis.com"
-#}
-
-resource "google_logging_project_linked_dataset" "basic" {
+resource "google_logging_project_linked_dataset" "<%= ctx[:primary_resource_id] %>" {
   link_id = "tftest%{random_suffix}"
-  bucket  = google_logging_project_bucket_config.basic.id
-#
-#  depends_on = [
-#    google_project_service.logging
-#  ]
+  bucket  = google_logging_project_bucket_config.<%= ctx[:primary_resource_id] %>.id
 }

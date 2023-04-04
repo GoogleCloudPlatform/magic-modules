@@ -1,3 +1,0 @@
-if err := waitForLinkedDatasetReady(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
-  return fmt.Errorf("Error waiting for LinkedDataset %q to be ACTIVE. Current state is %q. %q", d.Get("name").(string), d.Get("lifecycle_state").(string), err)
-}
