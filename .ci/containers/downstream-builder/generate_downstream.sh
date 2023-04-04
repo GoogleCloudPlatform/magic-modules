@@ -32,7 +32,7 @@ function clone_repo() {
         UPSTREAM_OWNER=GoogleCloudPlatform
         UPSTREAM_BRANCH=main
         GH_REPO=terraform-google-conversion
-        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion/tfplan2cai
+        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
         UPSTREAM_BRANCH=master
         UPSTREAM_OWNER=terraform-google-modules
@@ -119,17 +119,24 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "terraform-google-conver
     rm -rf ./testdata/templates/
     rm -rf ./testdata/generatedconvert/
     rm -rf ./converters/google/provider
-    find ./test/** -type f -exec git rm {} \;
     popd
 
     if [ "$REPO" == "terraform-validator" ]; then
+      pushd $LOCAL_PATH
+      find ./test/** -type f -exec git rm {} \;
+      popd
       rm -rf third_party/validator/tests/source
       cp -rf third_party/validator/tests/tfv-source third_party/validator/tests/source
+      bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
     elif [ "$REPO" == "terraform-google-conversion" ]; then
+      pushd $LOCAL_PATH
+      find ./tfplan2cai/test/** -type f -exec git rm {} \;
+      popd
       rm -rf third_party/validator/tests/source
       cp -rf third_party/validator/tests/tgc-source third_party/validator/tests/source
+      bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v $VERSION
     fi
-    bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
+
     pushd $LOCAL_PATH
 
     if [ "$COMMAND" == "downstream" ]; then
