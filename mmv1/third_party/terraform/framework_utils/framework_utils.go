@@ -120,6 +120,19 @@ func getRegionFromFrameworkSchema(regionSchemaField string, rRegion, rZone, pReg
 	return types.StringNull()
 }
 
+func getZoneFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
+	if !rVal.IsNull() && rVal.ValueString() != "" {
+		return rVal
+	}
+
+	if !pVal.IsNull() && pVal.ValueString() != "" {
+		return pVal
+	}
+
+	diags.AddError("required field is not set", "cannot determine zone: set in this resource, or set provider-level zone.")
+	return types.StringNull()
+}
+
 func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
 	if IsGoogleApiErrorWithCode(err, 404) {
 		tflog.Warn(ctx, fmt.Sprintf("Removing %s because it's gone", resource))

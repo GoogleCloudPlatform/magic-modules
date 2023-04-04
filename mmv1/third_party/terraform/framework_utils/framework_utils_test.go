@@ -158,3 +158,48 @@ func TestGetRegionFramework(t *testing.T) {
 		})
 	}
 }
+
+func TestGetZoneFramework(t *testing.T) {
+	cases := map[string]struct {
+		ResourceRegion types.String
+		ResourceZone   types.String
+		ProviderRegion types.String
+		ProviderZone   types.String
+		ExpectedZone   types.String
+		ExpectedError  bool
+	}{
+		"zone is pulled from the resource config": {
+			ResourceZone: types.StringValue("foo"),
+			ExpectedZone: types.StringValue("foo"),
+		},
+		"zone is pulled from the resource config's region value if available": {
+			ResourceZone: types.StringNull(),
+			ProviderZone: types.StringValue("bar"),
+			ExpectedZone: types.StringValue("bar"),
+		},
+		"error when zone is not set on the provider nor the resource": {
+			ExpectedError: true,
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+			var diags diag.Diagnostics
+
+			// Act
+			region := getZoneFramework(tc.ResourceZone, tc.ProviderZone, &diags)
+
+			// Assert
+			if diags.HasError() {
+				if tc.ExpectedError {
+					return
+				}
+				t.Fatalf("Got %d unexpected error(s) during test: %s", diags.ErrorsCount(), diags.Errors())
+			}
+
+			if region != tc.ExpectedZone {
+				t.Fatalf("Incorrect zone: got %s, want %s", region, tc.ExpectedZone)
+			}
+		})
+	}
+}
