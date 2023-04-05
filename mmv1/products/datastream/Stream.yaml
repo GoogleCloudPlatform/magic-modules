@@ -30,7 +30,7 @@ virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'desired_state'
     description: |
-      Desired state of the Stream. Set this field to `RUNNING` to start the stream, and `PAUSED` to pause the stream.
+      Desired state of the Stream. Set this field to `RUNNING` to start the stream, `NOT_STARTED` to not start the stream and `PAUSED` to pause the stream from a `RUNNING` state.
     values:
       - :NOT_STARTED
       - :RUNNING
