@@ -33,14 +33,14 @@ count_in_path() {
 }
 
 
-count_in_path "rbenv"
+count_in_path "ruby"
 if [ $found -eq 0 ]; then
     exitcode=1
-    warn "yel" "   rbenv not found. See https://github.com/rbenv/rbenv for information on installing it."
+    warn "yel" "   ruby not found. See https://github.com/rbenv/rbenv for information on installing it."
 else
     warn "grn" "   found!"
     echo "Checking ruby version..."
-    rbenv version
+    ruby -v
 
     count_in_path "bundler"
     if [ $found -eq 0 ]; then
