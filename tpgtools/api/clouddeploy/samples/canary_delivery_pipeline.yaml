@@ -15,10 +15,10 @@ name: delivery_pipeline
 description: Creates a basic Cloud Deploy delivery pipeline
 type: delivery_pipeline
 versions:
-- ga
+- beta
 resource: samples/basic.delivery_pipeline.json
 updates:
-- resource: samples/update.delivery_pipeline.json
+- resource: samples/updatecanary.delivery_pipeline.json
 variables:
 - name: project
   type: project
