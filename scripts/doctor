@@ -32,15 +32,12 @@ count_in_path() {
     found=$(which -a "${1}" | uniq | wc -l)
 }
 
-
-count_in_path "ruby"
-if [ $found -eq 0 ]; then
+echo "Check for ruby in path..."
+if ! command -v ruby >/dev/null 2>&1 || ! ruby -e "exit Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.1.0')"; then
     exitcode=1
-    warn "yel" "   ruby not found. See https://github.com/rbenv/rbenv for information on installing it."
+    warn "yel" "   ruby version needs to be at least 3.1.0. See https://github.com/rbenv/rbenv for information on installing it."
 else
     warn "grn" "   found!"
-    echo "Checking ruby version..."
-    ruby -v
 
     count_in_path "bundler"
     if [ $found -eq 0 ]; then
