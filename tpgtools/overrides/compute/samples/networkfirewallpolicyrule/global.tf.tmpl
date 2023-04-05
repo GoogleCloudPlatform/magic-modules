@@ -25,6 +25,10 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
     layer4_configs {
       ip_protocol = "all"
     }
+
+    destAddressGroups = [""]
+    
+    srcAddressGroups = [""]
   }
 }
 

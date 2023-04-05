@@ -27,6 +27,10 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
     src_secure_tags {
       name = "tagValues/${google_tags_tag_value.basic_value.name}"
     }
+
+    destAddressGroups = [""]
+    
+    srcAddressGroups = [""]
   }
 }
 
