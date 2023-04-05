@@ -173,6 +173,7 @@ properties:
             - :VIRTIO_SCSI_MULTIQUEUE
             - :WINDOWS
             - :GVNIC
+            - :SEV_LIVE_MIGRATABLE
   - !ruby/object:Api::Type::Integer
     name: 'id'
     description: |
