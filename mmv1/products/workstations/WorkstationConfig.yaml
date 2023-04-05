@@ -247,10 +247,11 @@ properties:
             default_from_api: true
             properties:
               - !ruby/object:Api::Type::Boolean
-                name: 'enableConfidentialCompute'
-                immutable: true
+                name: "enableConfidentialCompute"
+                # TODO(esu): Change this to required in next breaking release.
                 description: |
                   Whether the instance has confidential compute enabled.
+                default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'persistentDirectories'
     description: |
