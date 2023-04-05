@@ -41,7 +41,7 @@ Each file must include specific [YAML frontmatter](https://developer.hashicorp.c
 
 - `subcategory` - for resource/data source pages -  determines where the link to the page is located in the left-side navigation.
 - `page_title` - for guide pages -  sets the page title (as there isn't a resource to name it after). Here's [an example](https://github.com/hashicorp/terraform-provider-google/blob/46b96dcaec4e1563a5a0aff412e47896a3b72ea7/website/docs/guides/getting_started.html.markdown?plain=1#L2).
-## What information documentation needs to inlude
+## What information documentation needs to be included
 
 [HashiCorp advice](https://developer.hashicorp.com/terraform/registry/providers/docs#headers) is to include these sections:
 
