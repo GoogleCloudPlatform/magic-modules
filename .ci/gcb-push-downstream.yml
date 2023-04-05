@@ -108,6 +108,34 @@ steps:
           - -c
           - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-validator-sync
 
+    # TGC
+    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+      id: tgc-sync
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["checkout"]
+      args:
+          - 'tgc-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      id: tgc-push
+      waitFor: ["tgc-sync", "tpg-push"]
+      args:
+          - 'downstream'
+          - 'terraform-google-conversion'
+          - 'ga'
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/cloud-builders/git'
+      waitFor: ["tgc-push"]
+      secretEnv: ["GITHUB_TOKEN"]
+      entrypoint: 'bash'
+      args:
+          - -c
+          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync
+
     # TF-OICS
     - name: 'gcr.io/graphite-docker-images/downstream-waiter'
       id: tf-oics-sync
