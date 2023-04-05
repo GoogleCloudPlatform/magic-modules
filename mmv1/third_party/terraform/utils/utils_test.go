@@ -202,6 +202,105 @@ func TestGetProject(t *testing.T) {
 	}
 }
 
+func TestGetLocation(t *testing.T) {
+	cases := map[string]struct {
+		ResourceLocation string
+		ResourceRegion   string
+		ResourceZone     string
+		ProviderZone     string
+		ExpectedLocation string
+		ExpectedError    bool
+	}{
+		"location is pulled from the resource config": {
+			ResourceLocation: "resource-location",
+			ExpectedLocation: "resource-location",
+		},
+		"region is pulled from the resource config when location is not set": {
+			ResourceRegion:   "resource-region",
+			ExpectedLocation: "resource-region",
+		},
+		"zone is pulled from the resource config when both location and region are not set": {
+			ResourceZone:     "resource-zone",
+			ExpectedLocation: "resource-zone",
+		},
+		"zone pulled from the resource config can be retrieved by splitting on slashes and selecting last element": {
+			// Results from getLocation using getZone internally - documenting this behaviour in a test case
+			ResourceZone:     "foo/bar/resource-zone",
+			ExpectedLocation: "resource-zone",
+		},
+		"zone is pulled from the provider config when location and region are not set in the resource config": {
+			ProviderZone:     "provider-zone",
+			ExpectedLocation: "provider-zone",
+		},
+		"error when neither location or region set on resource, and zone is not set on the provider": {
+			ExpectedError: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+
+			// Create provider config
+			var config Config
+			if tc.ProviderZone != "" {
+				config.Zone = tc.ProviderZone
+			}
+
+			// Create resource config
+			// Here use a fictional schema as example because we need to have all of
+			// location, region, and zone fields present in the schema for the test,
+			// and no real resources would contain all of these
+			fictionalSchema := map[string]*schema.Schema{
+				"location": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"region": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"zone": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			}
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, fictionalSchema, emptyConfigMap)
+			if tc.ResourceLocation != "" {
+				if err := d.Set("location", tc.ResourceLocation); err != nil {
+					t.Fatalf("Cannot set location: %s", err)
+				}
+			}
+			if tc.ResourceRegion != "" {
+				if err := d.Set("region", tc.ResourceRegion); err != nil {
+					t.Fatalf("Cannot set region: %s", err)
+				}
+			}
+			if tc.ResourceZone != "" {
+				if err := d.Set("zone", tc.ResourceZone); err != nil {
+					t.Fatalf("Cannot set zone: %s", err)
+				}
+			}
+
+			// Act
+			location, err := getLocation(d, &config)
+
+			// Assert
+			if err != nil {
+				if tc.ExpectedError {
+					return
+				}
+				t.Fatalf("Unexpected error using test: %s", err)
+			}
+
+			if location != tc.ExpectedLocation {
+				t.Fatalf("Incorrect location: got %s, want %s", location, tc.ExpectedLocation)
+			}
+		})
+	}
+}
+
 func TestGetZone(t *testing.T) {
 	cases := map[string]struct {
 		ResourceZone  string
@@ -218,7 +317,7 @@ func TestGetZone(t *testing.T) {
 			ProviderZone: "bar",
 			ExpectedZone: "bar",
 		},
-		"zone value from resource is retrieved by splitting on slashes and selecting last element": {
+		"zone value from resource can be retrieved by splitting on slashes and selecting last element": {
 			// Unclear why this is the case - documenting this behaviour in a test case
 			ResourceZone: "this/is/foo/bar",
 			ExpectedZone: "bar",
