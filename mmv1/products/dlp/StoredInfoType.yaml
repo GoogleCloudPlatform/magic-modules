@@ -48,6 +48,8 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: templates/terraform/resource_definition/dlp_stored_info_type.go.erb
+  constants: templates/terraform/constants/dlp_stored_info_type.go.erb
   decoder: templates/terraform/decoders/dlp_stored_info_type.go.erb
   encoder: templates/terraform/encoders/dlp_stored_info_type.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
@@ -82,7 +84,6 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'regex'
     description: Regular expression which defines the rule.
-    immutable: true
     exactly_one_of:
       - dictionary
       - regex
@@ -96,14 +97,12 @@ properties:
           Its syntax (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
       - !ruby/object:Api::Type::Array
         name: 'groupIndexes'
-        immutable: true
         description: |
           The index of the submatch to extract as findings. When not specified, the entire match is returned. No more than 3 may be included.
         item_type: Api::Type::Integer
   - !ruby/object:Api::Type::NestedObject
     name: 'dictionary'
     description: Dictionary which defines the rule.
-    immutable: true
     exactly_one_of:
       - dictionary
       - regex
@@ -139,7 +138,6 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'largeCustomDictionary'
     description: Dictionary which defines the rule.
-    immutable: true
     exactly_one_of:
       - dictionary
       - regex
