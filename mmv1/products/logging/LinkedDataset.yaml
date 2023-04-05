@@ -12,13 +12,12 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "ProjectLinkedDataset"
-base_url: '{{bucket}}/links'
-create_url: '{{bucket}}/links?linkId={{link_id}}'
-delete_url: '{{bucket}}/links/{{link_id}}'
-self_link: '{{bucket}}/links/{{link_id}}'
-import_format: ['{{%bucket}}/links/{{link_id}}']
-collection_url_key: 'links'
+name: "LinkedDataset"
+base_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links'
+create_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links?linkId={{link_id}}'
+delete_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links/{{link_id}}'
+self_link: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links/{{link_id}}'
+import_format: ['{{%parent}}/locations/{{location}}/buckets/{{bucket}}/links/{{link_id}}']
 description: |
   Describes a BigQuery linked dataset
 async: !ruby/object:Api::OpAsync
@@ -39,6 +38,8 @@ async: !ruby/object:Api::OpAsync
     path: "error"
     message: "message"
 autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/logging_linked_dataset.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'linkId'
@@ -48,12 +49,26 @@ parameters:
     description: |-
       The id of the linked dataset.
   - !ruby/object:Api::Type::String
-    name: 'bucket'
+    name: parent
+    description: The parent of the resource.
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+    diff_suppress_func: 'compareSelfLinkOrResourceName'
+  - !ruby/object:Api::Type::String
+    name: location
+    description: 'The location of the resource. The supported locations are: global, us-central1, us-east1, us-west1, asia-east1, europe-west1.'
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+  - !ruby/object:Api::Type::String
+    # Make this a String for now since we don't have a good way to reference multiple resources.
+    name: bucket
+    description: The bucket of the resource
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-    description: |-
-      The bucket for which the linked dataset will be created
+    diff_suppress_func: 'compareResourceNames'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -102,7 +117,7 @@ properties:
           "bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET_ID]"
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "logging_project_linked_dataset"
-    primary_resource_id: "logging_project_linked_dataset"
+    name: "logging_linked_dataset"
+    primary_resource_id: "logging_linked_dataset"
     test_env_vars:
       project: :PROJECT_NAME
