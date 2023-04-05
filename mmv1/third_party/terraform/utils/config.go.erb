@@ -304,13 +304,17 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 	}
 
 	if _, ok := d.GetOk("user_project_override"); !ok {
-		b, err := strconv.ParseBool(MultiEnvDefault([]string{
+		override := MultiEnvDefault([]string{
 			"USER_PROJECT_OVERRIDE",
-		}, nil).(string))
-		if err != nil {
-			return err
+		}, nil)
+
+		if override != nil {
+			b, err := strconv.ParseBool(override.(string))
+			if err != nil {
+				return err
+			}
+			d.Set("user_project_override", b)
 		}
-		d.Set("user_project_override", b)
 	}
 
 	if d.Get("request_reason") == "" {
