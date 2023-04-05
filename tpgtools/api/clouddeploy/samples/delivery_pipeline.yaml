@@ -18,7 +18,7 @@ versions:
 - ga
 resource: samples/basic.delivery_pipeline.json
 updates:
-- resource: samples/update.delivery_pipeline.json
+- resource: samples/updatecanary.delivery_pipeline.json
 variables:
 - name: project
   type: project
