@@ -255,7 +255,7 @@ func TestGetLocationFramework(t *testing.T) {
 			var diags diag.Diagnostics
 
 			// Act
-			location := getLocationFramework(tc.ResourceLocation, tc.ResourceRegion, tc.ProviderZone, &diags)
+			location := getLocationFramework(tc.ResourceLocation, tc.ResourceRegion, tc.ResourceZone, tc.ProviderZone, &diags)
 
 			// Assert
 			if diags.HasError() {

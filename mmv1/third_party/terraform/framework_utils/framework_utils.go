@@ -148,7 +148,7 @@ func getLocationFramework(rLocation, rRegion, rZone, pZone types.String, diags *
 	}
 
 	if !rZone.IsNull() && rZone.ValueString() != "" {
-		return pZone
+		return rZone
 	}
 
 	if !pZone.IsNull() && pZone.ValueString() != "" {
