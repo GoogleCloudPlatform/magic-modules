@@ -21,8 +21,6 @@ TPGB_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magi
 TPGB_LOCAL_PATH=$PWD/../tpgb
 TFV_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-validator
 TFV_LOCAL_PATH=$PWD/../tfv
-TGC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-google-conversion
-TGC_LOCAL_PATH=$PWD/../tgc
 TFOICS_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/docs-examples
 TFOICS_LOCAL_PATH=$PWD/../tfoics
 
