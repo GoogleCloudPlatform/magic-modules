@@ -255,6 +255,7 @@ properties:
     name: 'persistentDirectories'
     description: |
       Directories to persist across workstation sessions.
+    default_from_api: true
     immutable: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -262,32 +263,38 @@ properties:
           name: 'mountPath'
           description: |
             Location of this directory in the running workstation.
+          default_from_api: true
           immutable: true
         - !ruby/object:Api::Type::NestedObject
           name: 'gcePd'
           description: |
             PersistentDirectory backed by a Compute Engine regional persistent disk.
+          default_from_api: true
           immutable: true
           properties:
             - !ruby/object:Api::Type::String
               name: 'fsType'
               description: |
                 Type of file system that the disk should be formatted with. The workstation image must support this file system type. Must be empty if sourceSnapshot is set.
+              default_from_api: true
               immutable: true
             - !ruby/object:Api::Type::String
               name: 'diskType'
               description: |
                 Type of the disk to use.
+              default_from_api: true
               immutable: true
             - !ruby/object:Api::Type::Integer
               name: 'sizeGb'
               description: |-
                 Size of the disk in GB. Must be empty if sourceSnapshot is set.
+              default_from_api: true
               immutable: true
             - !ruby/object:Api::Type::Enum
               name: 'reclaimPolicy'
               description: |
                 What should happen to the disk after the workstation is deleted. Defaults to DELETE.
+              default_from_api: true
               immutable: true
               values:
                 - :DELETE
