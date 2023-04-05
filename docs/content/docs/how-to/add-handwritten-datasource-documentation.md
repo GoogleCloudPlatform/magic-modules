@@ -49,7 +49,7 @@ The top of the file needs to contain frontmatter, which is used to create the ne
 You need to make sure your file's frontmatter includes:
 - `subcategory` - This sets which section in the left-side navigation menu the new page is categorised into.
 - `page_title` - This frontmatter is specific to files in the Guides section (`/website/docs/guides`) but we set it for all markdown files.
-- `description` - A decription of the page.
+- `description` - A description of the page.
 
 For example, here is the frontmatter from `/website/docs/d/container_cluster.html.markdown` ([link to generated page](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/container_cluster)):
 
@@ -88,7 +88,7 @@ To get more information about Cloud Run, see:
 
 ### Example usage
 
-The next section includes one or more examples showing how a user may use the data source in their Terrform configuration. The examples can be basic and show what the minimum number of arguments are required, or they can be used to demonstrate more complex usage of the data source if necessary.
+The next section includes one or more examples showing how a user may use the data source in their Terraform configuration. The examples can be basic and show what the minimum number of arguments are required, or they can be used to demonstrate more complex usage of the data source if necessary.
 
 For example, here's the example usage section from `/website/docs/d/kms_crypto_key.html.markdown` ([link to generated page](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key)):
 
