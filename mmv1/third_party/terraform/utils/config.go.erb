@@ -303,7 +303,7 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 		}, nil))
 	}
 
-	if _, ok := d.GetOk("user_project_override"); !ok {
+	if _, ok := d.GetOkExists("user_project_override"); !ok {
 		override := MultiEnvDefault([]string{
 			"USER_PROJECT_OVERRIDE",
 		}, nil)
