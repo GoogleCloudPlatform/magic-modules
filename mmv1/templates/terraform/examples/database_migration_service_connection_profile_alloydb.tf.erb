@@ -1,5 +1,9 @@
+data "google_project" "project" {
+}
+
 resource "google_compute_network" "default" {
-  name = "default"
+  provider                = google-beta
+  name = "tf-test-workstation-cluster%{random_suffix}"
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
@@ -34,7 +38,7 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 				user = "alloyuser"
 				password = "alloypass"
 			}
-			vpc_network = "projects/${data.google_project.project.number}/global/networks/default"
+			vpc_network = "projects/${data.google_project.project.project_id}/global/networks/default"
 			labels	= { 
 					testalloylabela = "testalloylabelb" 
 				}

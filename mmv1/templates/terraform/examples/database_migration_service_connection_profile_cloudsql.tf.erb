@@ -1,9 +1,14 @@
+data "google_project" "project" {
+}
+
 resource "google_sql_database_instance" "cloudsqldb" {
   name             = "<%= ctx[:vars]["sqldb"] %>"
   database_version = "MYSQL_5_7"
   settings {
     tier = "db-n1-standard-1"
+    deletion_protection_enabled = false
   }
+  deletion_protection = false
 }
 
 resource "google_sql_ssl_cert" "sql_client_cert" {
@@ -31,7 +36,7 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 					testanno = "testanno" 
 				}
 	mysql {
-	  host = google_sql_database_instance.main.ip_address.0.ip_address
+	  host = google_sql_database_instance.cloudsqldb.ip_address.0.ip_address
 	  port = 3306
 	  username = google_sql_user.sqldb_user.name
 	  password = google_sql_user.sqldb_user.password
@@ -44,11 +49,11 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 	}
 	dbprovider            = "CLOUDSQL"
 
-	depends_on = [google_sql_user.sql_user]
+	depends_on = [google_sql_user.sqldb_user]
 }
 
 
-resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>_destination" {
 	location = "us-central1"		
 	connection_profile_id = "<%= ctx[:vars]["to_profile"] %>"
 	display_name = "<%= ctx[:vars]["to_profile"] %>_displayname"
@@ -68,20 +73,16 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 		ip_config {
 			enable_ipv4 = true
 			require_ssl = "true"
-			authorized_networks {
-				value = google_sql_database_instance.cloudsqldb.ip_address.0.ip_address
-				label = "testlabel"
-			}
 		}
 		auto_storage_increase = true
 		data_disk_type = "PD_HDD"
 		data_disk_size_gb = "11"
 		zone = "us-central1-b"
-		source_id = "projects/${data.google_project.project.number}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["sqldb_from_profile"] %>"
+		source_id = "projects/${data.google_project.project.project_id}/locations/us-central1/connectionProfiles/<%= ctx[:vars]["from_profile"] %>"
 		root_password = "testpasscloudsql"
 	  }
 
 
-	depends_on = [google_database_migration_service_connection_profile.<%= ctx[:primary_resource_id] %>]
 	}
+	depends_on = [google_database_migration_service_connection_profile.<%= ctx[:primary_resource_id] %>]
 }
