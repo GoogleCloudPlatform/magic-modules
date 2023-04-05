@@ -90,12 +90,16 @@ func getRegionFramework(rRegion, rZone, pRegion, pZone types.String, diags *diag
 // - region extracted from the provider-level zone
 func getRegionFromFrameworkSchema(regionSchemaField string, rRegion, rZone, pRegion, pZone types.String, diags *diag.Diagnostics) types.String {
 
-	// Value search #1: use region value from resource/data source config
+	// This function lacks the if regionSchemaField == zoneSchemaField logic in getRegionFromSchema
+	// This is because we don't use the schema field arguments as arguments to getter functions like in the SDK
+	// https://github.com/hashicorp/terraform-provider-google/blob/b495ed16a91076e5288d9b0348e66a4423493348/google/field_helpers.go#L370-L378
+
 	if !rRegion.IsNull() && rRegion.ValueString() != "" {
-		return rRegion
+		// Match use of GetResourceNameFromSelfLink in getRegionFromSchema
+		region := GetResourceNameFromSelfLink(rRegion.ValueString())
+		return types.StringValue(region)
 	}
 
-	// Value search #2: extract rergion from zone value from resource/data source config
 	if !rZone.IsNull() && rZone.ValueString() != "" {
 		v := getRegionFromZone(rZone.ValueString())
 		if v != "" {
@@ -103,12 +107,10 @@ func getRegionFromFrameworkSchema(regionSchemaField string, rRegion, rZone, pReg
 		}
 	}
 
-	// Value search #3: use region from provider config
 	if !pRegion.IsNull() && pRegion.ValueString() != "" {
 		return pRegion
 	}
 
-	// Value search #4: extract region from zone value in provider config
 	if !pZone.IsNull() && pZone.ValueString() != "" {
 		v := getRegionFromZone(pZone.ValueString())
 		if v != "" {
@@ -122,7 +124,9 @@ func getRegionFromFrameworkSchema(regionSchemaField string, rRegion, rZone, pReg
 
 func getZoneFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
 	if !rVal.IsNull() && rVal.ValueString() != "" {
-		return rVal
+		// Match use of GetResourceNameFromSelfLink in getZone
+		zone := GetResourceNameFromSelfLink(rVal.ValueString())
+		return types.StringValue(zone)
 	}
 
 	if !pVal.IsNull() && pVal.ValueString() != "" {
@@ -148,7 +152,9 @@ func getLocationFramework(rLocation, rRegion, rZone, pZone types.String, diags *
 	}
 
 	if !rZone.IsNull() && rZone.ValueString() != "" {
-		return rZone
+		// Match use of GetResourceNameFromSelfLink in getZone, which is used by getLocation
+		zone := GetResourceNameFromSelfLink(rZone.ValueString())
+		return types.StringValue(zone)
 	}
 
 	if !pZone.IsNull() && pZone.ValueString() != "" {
