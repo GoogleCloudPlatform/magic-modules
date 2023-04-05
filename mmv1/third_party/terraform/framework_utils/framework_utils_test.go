@@ -111,26 +111,30 @@ func TestGetRegionFramework(t *testing.T) {
 		ExpectedError  bool
 	}{
 		"region is pulled from the resource config's region value if available": {
-			ResourceRegion: types.StringValue("foo"),
-			ExpectedRegion: types.StringValue("foo"),
+			ResourceRegion: types.StringValue("resource-region"),
+			ExpectedRegion: types.StringValue("resource-region"),
+		},
+		"region pulled from the resource config can be a self link": {
+			ResourceRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/resource-region"),
+			ExpectedRegion: types.StringValue("resource-region"),
 		},
 		"region is pulled from the resource config's zone value if region is unset": {
 			ResourceRegion: types.StringNull(),
-			ResourceZone:   types.StringValue("foo-a"),
-			ExpectedRegion: types.StringValue("foo"),
+			ResourceZone:   types.StringValue("resource-zone"),
+			ExpectedRegion: types.StringValue("resource-zone"),
 		},
 		"region is pulled from the provider config's region value when region and zone are unset on the resource": {
 			ResourceRegion: types.StringNull(),
 			ResourceZone:   types.StringNull(),
-			ProviderRegion: types.StringValue("bar"),
-			ExpectedRegion: types.StringValue("bar"),
+			ProviderRegion: types.StringValue("provider-region"),
+			ExpectedRegion: types.StringValue("provider-region"),
 		},
 		"region is pulled from the provider config's zone value when region is unset on the provider (and resource config lacks region/zone)": {
 			ResourceRegion: types.StringNull(),
 			ResourceZone:   types.StringNull(),
 			ProviderRegion: types.StringNull(),
-			ProviderZone:   types.StringValue("bar-a"),
-			ExpectedRegion: types.StringValue("bar"),
+			ProviderZone:   types.StringValue("provider-zone"),
+			ExpectedRegion: types.StringValue("provider-zone"),
 		},
 		"error when region and zone are not set on the provider nor the resource": {
 			ExpectedError: true,
@@ -171,6 +175,10 @@ func TestGetZoneFramework(t *testing.T) {
 		"zone is pulled from the resource config": {
 			ResourceZone: types.StringValue("foo"),
 			ExpectedZone: types.StringValue("foo"),
+		},
+		"zone pulled from the resource config can be a self link": {
+			ResourceZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a"),
+			ExpectedZone: types.StringValue("us-central1-a"),
 		},
 		"zone is pulled from the resource config's region value if available": {
 			ResourceZone: types.StringNull(),
@@ -220,6 +228,10 @@ func TestGetLocationFramework(t *testing.T) {
 			ProviderZone:     types.StringNull(),
 			ExpectedLocation: types.StringValue("resource-location"),
 		},
+		"location pulled from the resource config cannot be a self link": {
+			ResourceLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location"),
+			ExpectedLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location"), // No shortening takes place
+		},
 		"region is pulled from the resource config when location is not set": {
 			ResourceLocation: types.StringNull(),
 			ResourceRegion:   types.StringValue("resource-region"),
@@ -234,10 +246,13 @@ func TestGetLocationFramework(t *testing.T) {
 			ProviderZone:     types.StringNull(),
 			ExpectedLocation: types.StringValue("resource-zone"),
 		},
-		//"zone pulled from the resource config can be retrieved by splitting on slashes and selecting last element": {
-		// This behaviour isn't implemented but is present in the SDK version of getLocation.
-		// Do we reproduce it? Or leave it behind?
-		//},
+		"zone pulled from the resource config can be a self link": {
+			ResourceLocation: types.StringNull(),
+			ResourceRegion:   types.StringNull(),
+			ResourceZone:     types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/resource-zone"),
+			ProviderZone:     types.StringNull(),
+			ExpectedLocation: types.StringValue("resource-zone"),
+		},
 		"zone is pulled from the provider config when location/region/zone are not set in the resource config": {
 			ResourceLocation: types.StringNull(),
 			ResourceRegion:   types.StringNull(),

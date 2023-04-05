@@ -215,17 +215,25 @@ func TestGetLocation(t *testing.T) {
 			ResourceLocation: "resource-location",
 			ExpectedLocation: "resource-location",
 		},
+		"location pulled from the resource config cannot be a self link": {
+			ResourceLocation: "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location",
+			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location", // No shortening takes place
+		},
 		"region is pulled from the resource config when location is not set": {
 			ResourceRegion:   "resource-region",
 			ExpectedLocation: "resource-region",
+		},
+		"region pulled from the resource config cannot be a self link": {
+			ResourceRegion:   "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region",
+			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region", // No shortening takes place
 		},
 		"zone is pulled from the resource config when both location and region are not set": {
 			ResourceZone:     "resource-zone",
 			ExpectedLocation: "resource-zone",
 		},
-		"zone pulled from the resource config can be retrieved by splitting on slashes and selecting last element": {
-			// Results from getLocation using getZone internally - documenting this behaviour in a test case
-			ResourceZone:     "foo/bar/resource-zone",
+		"zone pulled from the resource config can be a self link": {
+			// Results from getLocation using getZone internally
+			ResourceZone:     "https://www.googleapis.com/compute/v1/projects/my-project/zones/resource-zone",
 			ExpectedLocation: "resource-zone",
 		},
 		"zone is pulled from the provider config when location and region are not set in the resource config": {
@@ -313,13 +321,12 @@ func TestGetZone(t *testing.T) {
 			ProviderZone: "bar",
 			ExpectedZone: "foo",
 		},
+		"zone value from resource can be a self link": {
+			ResourceZone: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
+			ExpectedZone: "us-central1-a",
+		},
 		"zone is pulled from provider config when not set on resource": {
 			ProviderZone: "bar",
-			ExpectedZone: "bar",
-		},
-		"zone value from resource can be retrieved by splitting on slashes and selecting last element": {
-			// Unclear why this is the case - documenting this behaviour in a test case
-			ResourceZone: "this/is/foo/bar",
 			ExpectedZone: "bar",
 		},
 		"error returned when zone not set on either provider or resource": {
@@ -378,6 +385,10 @@ func TestGetRegion(t *testing.T) {
 			ProviderRegion: "bar",
 			ProviderZone:   "lol-a",
 			ExpectedRegion: "foo",
+		},
+		"region pulled from resource config can be a self link": {
+			ResourceRegion: "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1",
+			ExpectedRegion: "us-central1",
 		},
 		"region is pulled from region on provider config when region unset in resource config": {
 			ProviderRegion: "bar",
