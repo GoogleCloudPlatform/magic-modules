@@ -133,6 +133,32 @@ func getZoneFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.St
 	return types.StringNull()
 }
 
+// getLocationFramework (mimicking getLocation) attempts to get values in this order (if they exist):
+// - location argument in the resource config
+// - region argument in the resource config
+// - zone argument in the resource config
+// - zone argument set in the provider config
+func getLocationFramework(rLocation, rRegion, rZone, pZone types.String, diags *diag.Diagnostics) types.String {
+	if !rLocation.IsNull() && rLocation.ValueString() != "" {
+		return rLocation
+	}
+
+	if !rRegion.IsNull() && rRegion.ValueString() != "" {
+		return rRegion
+	}
+
+	if !rZone.IsNull() && rZone.ValueString() != "" {
+		return pZone
+	}
+
+	if !pZone.IsNull() && pZone.ValueString() != "" {
+		return pZone
+	}
+
+	diags.AddError("required field is not set", "cannot determine location: set location or region in this resource, or set provider-level zone.")
+	return types.StringNull()
+}
+
 func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
 	if IsGoogleApiErrorWithCode(err, 404) {
 		tflog.Warn(ctx, fmt.Sprintf("Removing %s because it's gone", resource))

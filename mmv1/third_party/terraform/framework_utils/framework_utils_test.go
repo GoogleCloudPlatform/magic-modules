@@ -203,3 +203,71 @@ func TestGetZoneFramework(t *testing.T) {
 		})
 	}
 }
+
+func TestGetLocationFramework(t *testing.T) {
+	cases := map[string]struct {
+		ResourceLocation types.String
+		ResourceRegion   types.String
+		ResourceZone     types.String
+		ProviderZone     types.String
+		ExpectedLocation types.String
+		ExpectedError    bool
+	}{
+		"location is pulled from the resource config": {
+			ResourceLocation: types.StringValue("resource-location"),
+			ResourceRegion:   types.StringNull(),
+			ResourceZone:     types.StringNull(),
+			ProviderZone:     types.StringNull(),
+			ExpectedLocation: types.StringValue("resource-location"),
+		},
+		"region is pulled from the resource config when location is not set": {
+			ResourceLocation: types.StringNull(),
+			ResourceRegion:   types.StringValue("resource-region"),
+			ResourceZone:     types.StringNull(),
+			ProviderZone:     types.StringNull(),
+			ExpectedLocation: types.StringValue("resource-region"),
+		},
+		"zone is pulled from the resource config when location and region is not set": {
+			ResourceLocation: types.StringNull(),
+			ResourceRegion:   types.StringNull(),
+			ResourceZone:     types.StringValue("resource-zone"),
+			ProviderZone:     types.StringNull(),
+			ExpectedLocation: types.StringValue("resource-zone"),
+		},
+		//"zone pulled from the resource config can be retrieved by splitting on slashes and selecting last element": {
+		// This behaviour isn't implemented but is present in the SDK version of getLocation.
+		// Do we reproduce it? Or leave it behind?
+		//},
+		"zone is pulled from the provider config when location/region/zone are not set in the resource config": {
+			ResourceLocation: types.StringNull(),
+			ResourceRegion:   types.StringNull(),
+			ResourceZone:     types.StringNull(),
+			ProviderZone:     types.StringValue("provider-zone"),
+			ExpectedLocation: types.StringValue("provider-zone"),
+		},
+		"error when neither location or region set on resource, and zone is not set on the provider": {
+			ExpectedError: true,
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+			var diags diag.Diagnostics
+
+			// Act
+			location := getLocationFramework(tc.ResourceLocation, tc.ResourceRegion, tc.ProviderZone, &diags)
+
+			// Assert
+			if diags.HasError() {
+				if tc.ExpectedError {
+					return
+				}
+				t.Fatalf("Got %d unexpected error(s) during test: %s", diags.ErrorsCount(), diags.Errors())
+			}
+
+			if location != tc.ExpectedLocation {
+				t.Fatalf("Incorrect location: got %s, want %s", location, tc.ExpectedLocation)
+			}
+		})
+	}
+}
