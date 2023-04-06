@@ -15,7 +15,7 @@ func TestAccNetworkServicesMesh_update(t *testing.T) {
 	meshName := fmt.Sprintf("tf-test-mesh-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { AccTestPreCheck(t) },
                 ProtoV5ProviderFactories: ProtoV5ProviderFactories(t), 
                 CheckDestroy: testAccCheckNetworkServicesMeshDestroyProducer(t),
 		Steps: []resource.TestStep{

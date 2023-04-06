@@ -15,7 +15,7 @@ func TestAccNetworkSecurityGatewaySecurityPolicies_update(t *testing.T) {
 	gatewaySecurityPolicyName := fmt.Sprintf("tf-test-gateway-sp-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkSecurityGatewaySecurityPoliciesDestroyProducer(t),
 		Steps: []resource.TestStep{
