@@ -484,16 +484,16 @@ func TestAccBigQueryExternalDataTable_objectTable(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("tf_test_%s.csv", randString(t, 10))
+	objectName := fmt.Sprintf("tf_test_%s.csv", RandString(t, 10))
 
-	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
-	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
-	connectionID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	datasetID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
+	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableFromGCSObjectTable(connectionID, datasetID, tableID, bucketName, objectName),
