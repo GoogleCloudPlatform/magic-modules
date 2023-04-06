@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/magic-modules/.ci/breaking-change-detector
 
-go 1.19
+go 1.18
 
 replace google/provider/old => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20220901180512-245a877821d3
 
