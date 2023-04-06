@@ -1,12 +1,12 @@
 func getExistingFirebaseProjectId(config *Config, d *schema.ResourceData, billingProject string, userAgent string) (string, error) {
-	url, err := replaceVars(d, config, "{{FirebaseBasePath}}projects/{{project}}")
+	url, err := ReplaceVars(d, config, "{{FirebaseBasePath}}projects/{{project}}")
 	if err != nil {
 		return "", err
 	}
 
 	_, err = SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err == nil {
-		id, err := replaceVars(d, config, "projects/{{project}}")
+		id, err := ReplaceVars(d, config, "projects/{{project}}")
 		if err != nil {
 			return "", fmt.Errorf("Error constructing id: %s", err)
 		}

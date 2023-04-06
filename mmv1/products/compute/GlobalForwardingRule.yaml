@@ -207,7 +207,7 @@ properties:
       For Private Service Connect forwarding rules that forward traffic to
       Google APIs, IP address must be provided.
     default_from_api: true
-    diff_suppress_func: 'internalIpDiffSuppress'
+    diff_suppress_func: 'InternalIpDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -222,7 +222,7 @@ properties:
       - :AH
       - :SCTP
       - :ICMP
-    diff_suppress_func: 'caseDiffSuppress'
+    diff_suppress_func: 'CaseDiffSuppress'
     default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
@@ -375,7 +375,7 @@ properties:
   # This is a multi-resource resource reference (TargetHttp(s)Proxy,
   # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
   # TargetInstance)
-    diff_suppress_func: 'portRangeDiffSuppress'
+    diff_suppress_func: 'PortRangeDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'target'
     required: true

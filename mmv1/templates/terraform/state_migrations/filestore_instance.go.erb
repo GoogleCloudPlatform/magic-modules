@@ -179,7 +179,7 @@ simultaneous updates from overwriting each other.`,
   }
 }
 
-func resourceFilestoreInstanceUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+func ResourceFilestoreInstanceUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
   log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
   rawState["location"] = rawState["zone"]
