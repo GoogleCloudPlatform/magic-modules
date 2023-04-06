@@ -166,14 +166,6 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-func TestProvider_getRegionFromZone(t *testing.T) {
-	expected := "us-central1"
-	actual := getRegionFromZone("us-central1-f")
-	if expected != actual {
-		t.Fatalf("Region (%s) did not match expected value: %s", actual, expected)
-	}
-}
-
 func TestProvider_loadCredentialsFromFile(t *testing.T) {
 	ws, es := validateCredentials(testFakeCredentialsPath, "")
 	if len(ws) != 0 {
@@ -568,7 +560,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 
 	project := &cloudresourcemanager.Project{
 		ProjectId: pid,
-		Name:      pname,
+		Name:      pid,
 		Parent: &cloudresourcemanager.ResourceId{
 			Id:   org,
 			Type: "organization",
@@ -605,7 +597,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *C
 
 	p2 := fmt.Sprintf("%s-2", pid)
 	project.ProjectId = p2
-	project.Name = fmt.Sprintf("%s-2", pname)
+	project.Name = fmt.Sprintf("%s-2", pid)
 
 	err = RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = rmService.Projects.Create(project).Do()

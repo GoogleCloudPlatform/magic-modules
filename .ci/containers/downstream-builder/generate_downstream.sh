@@ -28,6 +28,11 @@ function clone_repo() {
         UPSTREAM_BRANCH=main
         GH_REPO=terraform-validator
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-validator
+    elif [ "$REPO" == "terraform-google-conversion" ]; then
+        UPSTREAM_OWNER=GoogleCloudPlatform
+        UPSTREAM_BRANCH=main
+        GH_REPO=terraform-google-conversion
+        LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
     elif [ "$REPO" == "tf-oics" ]; then
         UPSTREAM_BRANCH=master
         UPSTREAM_OWNER=terraform-google-modules
@@ -97,7 +102,7 @@ if [ "$REPO" == "terraform" ]; then
     popd
 fi
 
-if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
+if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "terraform-google-conversion" ]; then
     # use terraform generator with validator overrides.
     # Check for tf-conversion is legacy and can be removed after Nov 15 2021
     if [ "$REPO" == "terraform-validator" ] && [ "$COMMAND" == "base" ] && [ ! -d "../.ci/containers/terraform-validator-tester" ]; then
@@ -114,12 +119,24 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     rm -rf ./testdata/templates/
     rm -rf ./testdata/generatedconvert/
     rm -rf ./converters/google/provider
-    find ./test/** -type f -exec git rm {} \;
-
     popd
-    rm -rf third_party/validator/tests/source
-    cp -rf third_party/validator/tests/tfv-source third_party/validator/tests/source
-    bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
+
+    if [ "$REPO" == "terraform-validator" ]; then
+      pushd $LOCAL_PATH
+      find ./test/** -type f -exec git rm {} \;
+      popd
+      rm -rf third_party/validator/tests/source
+      cp -rf third_party/validator/tests/tfv-source third_party/validator/tests/source
+      bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
+    elif [ "$REPO" == "terraform-google-conversion" ]; then
+      pushd $LOCAL_PATH
+      find ./tfplan2cai/test/** -type f -exec git rm {} \;
+      popd
+      rm -rf third_party/validator/tests/source
+      cp -rf third_party/validator/tests/tgc-source third_party/validator/tests/source
+      bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v $VERSION
+    fi
+
     pushd $LOCAL_PATH
 
     if [ "$COMMAND" == "downstream" ]; then
@@ -133,16 +150,18 @@ if [ "$REPO" == "terraform-validator" ] || [ "$REPO" == "tf-conversion" ]; then
     # the following build can fail which results in a subsequent failure to push to tfv repository.
     # due to the uncertainty of tpg being able to build we will ignore errors here
     # as these files are not critical to operation of tfv and not worth blocking the GA pipeline
-    if [ "$COMMAND" == "downstream" ]; then
-      set +e
-    fi
+    if [ "$REPO" == "terraform-validator" ]; then
+      if [ "$COMMAND" == "downstream" ]; then
+        set +e
+      fi
 
-    make build
-    export TFV_CREATE_GENERATED_FILES=true
-    go test ./test -run "TestAcc.*_generated_offline"
+      make build
+      export TFV_CREATE_GENERATED_FILES=true
+      go test ./test -run "TestAcc.*_generated_offline"
 
-    if [ "$COMMAND" == "downstream" ]; then
-      set -e
+      if [ "$COMMAND" == "downstream" ]; then
+        set -e
+      fi
     fi
 
     popd
