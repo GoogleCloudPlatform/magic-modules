@@ -1,5 +1,5 @@
 {
-    "name": "{{resource_name}}",
+    "name": "{{pipeline}}",
     "location": "{{region}}",
     "project": "{{project}}",
   
