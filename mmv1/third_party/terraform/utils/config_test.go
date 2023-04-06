@@ -14,6 +14,79 @@ import (
 const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
 const testOauthScope = "https://www.googleapis.com/auth/compute"
 
+func TestHandleSDKDefaults_ImpersonateServiceAccount(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValue      string
+		EnvVariables     map[string]string
+		ExpectedValue    string
+		ValueNotProvided bool
+		ExpectError      bool
+	}{
+		"impersonate_service_account value set in the provider schema is not overridden by ENVs": {
+			ConfigValue: "value-from-config@example.com",
+			EnvVariables: map[string]string{
+				"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT": "value-from-env@example.com",
+			},
+			ExpectedValue: "value-from-config@example.com",
+		},
+		"impersonate_service_account value can be set by environment variable": {
+			EnvVariables: map[string]string{
+				"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT": "value-from-env@example.com",
+			},
+			ExpectedValue: "value-from-env@example.com",
+		},
+		"when no values are provided via config or environment variables, the field remains unset": {
+			ValueNotProvided: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			// Create empty schema.ResourceData using the SDK Provider schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
+
+			// Set config value(s)
+			if tc.ConfigValue != "" {
+				d.Set("impersonate_service_account", tc.ConfigValue)
+			}
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			err := HandleSDKDefaults(d)
+
+			// Assert
+			if err != nil {
+				if !tc.ExpectError {
+					t.Fatalf("error: %v", err)
+				}
+				return
+			}
+
+			// Assert
+			v, ok := d.GetOk("impersonate_service_account")
+			if !ok && !tc.ValueNotProvided {
+				t.Fatal("expected impersonate_service_account to be set in the provider data")
+			}
+			if ok && tc.ValueNotProvided {
+				t.Fatal("expected impersonate_service_account to not be set in the provider data")
+			}
+
+			if v != tc.ExpectedValue {
+				t.Fatalf("unexpected value: wanted %v, got, %v", tc.ExpectedValue, v)
+			}
+		})
+	}
+}
+
 // The `user_project_override` field is an odd one out, as other provider schema fields tend to be strings
 // and `user_project_override` is a boolean
 func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
