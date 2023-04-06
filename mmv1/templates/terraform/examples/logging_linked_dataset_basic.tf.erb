@@ -6,6 +6,7 @@ resource "google_logging_project_bucket_config" "<%= ctx[:primary_resource_id] %
 }
 
 resource "google_logging_linked_dataset" "<%= ctx[:primary_resource_id] %>" {
-  link_id = "tftest%{random_suffix}"
-  bucket  = google_logging_project_bucket_config.<%= ctx[:primary_resource_id] %>.id
+  link_id     = "tftest%{random_suffix}"
+  bucket      = google_logging_project_bucket_config.<%= ctx[:primary_resource_id] %>.id
+  description = "Linked dataset test"
 }
