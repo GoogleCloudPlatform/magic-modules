@@ -4,11 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-const nonUniqueWriterAccount = "serviceAccount:cloud-logs@system.gserviceaccount.com"
+const (
+	nonUniqueWriterAccount = "serviceAccount:cloud-logs@system.gserviceaccount.com"
+)
+
+var (
+	ReservedLoggingProjectSinks = []string{"_Default", "_Required"}
+)
 
 func ResourceLoggingProjectSink() *schema.Resource {
 	schm := &schema.Resource{
@@ -55,13 +62,36 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 	id, sink := expandResourceLoggingSink(d, "projects", project)
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
 
-	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do()
-	if err != nil {
-		return err
+	create := true
+	name := d.Get("name").(string)
+	for _, reserved := range ReservedLoggingProjectSinks {
+		if name == reserved {
+			if err := resourceLoggingProjectSinkRead(d, meta); err != nil {
+				if isGoogleApiErrorWithCode(err, 404) {
+					log.Printf("[WARN] %q not found and attempting to create it", name)
+					// attempt to create the resource if the _Default sink is disabled
+					// https://cloud.google.com/logging/docs/default-settings#disable-default-sink
+					create = true
+					break
+				}
+
+				// if reading the project logging sink returns a non 404 error,
+				// return it to be handled by the callee
+				return err
+			}
+
+			log.Printf("[WARN] %q is an auto-created log sink and will be imported into the state", name)
+			create = false
+			break
+		}
 	}
 
+	if create {
+		if _, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do(); err != nil {
+			return err
+		}
+	}
 	d.SetId(id.canonicalId())
-
 	return resourceLoggingProjectSinkRead(d, meta)
 }
 
@@ -149,11 +179,19 @@ func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
+	name := d.Get("name")
+	for _, reserved := range ReservedLoggingProjectSinks {
+		if reserved == name {
+			log.Printf("[WARN] Auto created log sinks cannot be removed. Removing logging sink from state: %#v", d.Id())
+			d.SetId("")
+			return nil
+		}
+	}
+
 	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {
 		return err
 	}
-
 	d.SetId("")
 	return nil
 }

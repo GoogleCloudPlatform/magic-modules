@@ -31,6 +31,27 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 	})
 }
 
+func TestAccLoggingProjectSink_default(t *testing.T) {
+	t.Parallel()
+	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingProjectSink_basic("_Default", getTestProjectFromEnv(), bucketName),
+			},
+			{
+				ResourceName:      "google_logging_project_sink.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccLoggingProjectSink_described(t *testing.T) {
 	t.Parallel()
 
@@ -331,8 +352,19 @@ func testAccCheckLoggingProjectSinkDestroyProducer(t *testing.T) func(s *terrafo
 
 			attributes := rs.Primary.Attributes
 
-			_, err := config.NewLoggingClient(config.UserAgent).Projects.Sinks.Get(attributes["id"]).Do()
-			if err == nil {
+			reserved := false
+			for _, reserved := range ReservedLoggingProjectSinks {
+				if name == reserved {
+					reserved = true
+					break
+				}
+			}
+
+			_, err := config.NewLoggingClient(config.userAgent).Projects.Sinks.Get(attributes["id"]).Do()
+			if reserved && isGoogleApiErrorWithCode(err, 404) {
+				return fmt.Errorf("reserved log sinks should not be deleted")
+			}
+			if !reserved && err == nil {
 				return fmt.Errorf("project sink still exists")
 			}
 		}
