@@ -7,11 +7,101 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"golang.org/x/oauth2/google"
 )
 
 const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
 const testOauthScope = "https://www.googleapis.com/auth/compute"
+
+func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
+	cases := map[string]struct {
+		SetViaConfig  bool // Awkward, but necessary as zero value of ConfigValue could be intended
+		ConfigValue   bool
+		EnvVariables  map[string]string
+		ExpectedValue bool
+		ExpectError   bool
+	}{
+		"user_project_override value set in the provider schema is not overridden by ENVs": {
+			SetViaConfig: true,
+			ConfigValue:  false,
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "true",
+			},
+			ExpectedValue: false,
+		},
+		"user_project_override can be set by environment variable: true": {
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "true",
+			},
+			ExpectedValue: true,
+		},
+		"user_project_override can be set by environment variable: false": {
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "false",
+			},
+			ExpectedValue: false,
+		},
+		"user_project_override can be set by environment variable: 1": {
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "1",
+			},
+			ExpectedValue: true,
+		},
+		"user_project_override can be set by environment variable: 0": {
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "0",
+			},
+			ExpectedValue: false,
+		},
+		"error returned due to non-boolean environment variables": {
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "I'm not a boolean",
+			},
+			ExpectError: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+			// Create empty schema.ResourceData using the SDK Provider schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
+
+			// Set config value(s)
+			if tc.SetViaConfig {
+				d.Set("user_project_override", tc.ConfigValue)
+			}
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			err := HandleSDKDefaults(d)
+
+			// Assert
+			if err != nil {
+				if !tc.ExpectError {
+					t.Fatalf("error: %v", err)
+				}
+				return
+			}
+
+			v, ok := d.GetOkExists("user_project_override")
+			if !ok {
+				t.Fatal("expected user_project_override to be set in the provider data")
+			}
+			if v != tc.ExpectedValue {
+				t.Fatalf("unexpected value: wanted %v, got, %v", tc.ExpectedValue, v)
+			}
+		})
+	}
+}
 
 func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
 	config := &Config{
