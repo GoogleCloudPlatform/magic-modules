@@ -125,7 +125,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	return re.ReplaceAllStringFunc(linkTmpl, fWithPlaceholder), nil
 }
 
-func acctest.RandString(n int) string {
+func RandString(n int) string {
 	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, n)
 	for i := range b {
