@@ -618,13 +618,17 @@ func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
 
+	if BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
+
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withBootDiskKmsKey(GetTestProjectFromEnv(), cluster, np),
+				Config: testAccContainerNodePool_withBootDiskKmsKey(cluster, np),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_boot_disk_kms_key",
@@ -2557,20 +2561,10 @@ resource "google_container_node_pool" "with_auto_pod_cidr" {
 
 
 <% unless version.nil? || version == 'ga' -%>
-func testAccContainerNodePool_withBootDiskKmsKey(project, cluster, np string) string {
+func testAccContainerNodePool_withBootDiskKmsKey(cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
-}
-
-data "google_project" "project" {
-  project_id = "%s"
-}
-
-resource "google_project_iam_member" "kms-project-binding" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
 }
 
 resource "google_kms_key_ring" "keyring" {
@@ -2606,7 +2600,7 @@ resource "google_container_node_pool" "with_boot_disk_kms_key" {
     ]
   }
 }
-`, project, cluster, cluster, cluster, np)
+`, cluster, cluster, cluster, np)
 }
 <% end -%>
 
