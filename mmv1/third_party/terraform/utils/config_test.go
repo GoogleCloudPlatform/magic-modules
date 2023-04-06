@@ -14,13 +14,16 @@ import (
 const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
 const testOauthScope = "https://www.googleapis.com/auth/compute"
 
+// The `user_project_override` field is an odd one out, as other provider schema fields tend to be strings
+// and `user_project_override` is a boolean
 func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 	cases := map[string]struct {
-		SetViaConfig  bool // Awkward, but necessary as zero value of ConfigValue could be intended
-		ConfigValue   bool
-		EnvVariables  map[string]string
-		ExpectedValue bool
-		ExpectError   bool
+		SetViaConfig     bool // Awkward, but necessary as zero value of ConfigValue could be intended
+		ConfigValue      bool
+		EnvVariables     map[string]string
+		ExpectedValue    bool
+		ValueNotProvided bool
+		ExpectError      bool
 	}{
 		"user_project_override value set in the provider schema is not overridden by ENVs": {
 			SetViaConfig: true,
@@ -60,6 +63,9 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 			},
 			ExpectError: true,
 		},
+		"when no values are provided via config or environment variables, the field remains unset": {
+			ValueNotProvided: true,
+		},
 	}
 
 	for tn, tc := range cases {
@@ -93,9 +99,13 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 			}
 
 			v, ok := d.GetOkExists("user_project_override")
-			if !ok {
+			if !ok && !tc.ValueNotProvided {
 				t.Fatal("expected user_project_override to be set in the provider data")
 			}
+			if ok && tc.ValueNotProvided {
+				t.Fatal("expected user_project_override to not be set in the provider data")
+			}
+
 			if v != tc.ExpectedValue {
 				t.Fatalf("unexpected value: wanted %v, got, %v", tc.ExpectedValue, v)
 			}
