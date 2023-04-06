@@ -2,7 +2,6 @@ package google
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -44,7 +43,7 @@ func TestCompileUserAgentString(t *testing.T) {
 			// Arrange
 			ctx := context.Background()
 
-			os.Setenv(uaEnvVar, tc.EnvValue) // Use same global const as the CompileUserAgentString function
+			t.Setenv(uaEnvVar, tc.EnvValue) // Use same global const as the CompileUserAgentString function
 
 			// Act
 
