@@ -351,23 +351,3 @@ func generateDSRecord(signingKey *dns.DnsKey) (string, error) {
 		digestType,
 		signingKey.Digests[0].Digest), nil
 }
-
-func getDnsKeyAttrs(keyType string) map[string]attr.Type {
-	dnsKeyAttrs := map[string]attr.Type{
-		"algorithm":     types.StringType,
-		"creation_time": types.StringType,
-		"description":   types.StringType,
-		"id":            types.StringType,
-		"is_active":     types.BoolType,
-		"key_length":    types.Int64Type,
-		"key_tag":       types.Int64Type,
-		"public_key":    types.StringType,
-		"digests":       types.ListType{}.WithElementType(types.ObjectType{}.WithAttributeTypes(digestAttrTypes)),
-	}
-
-	if keyType == "keySigning" {
-		dnsKeyAttrs["ds_record"] = types.StringType
-	}
-
-	return dnsKeyAttrs
-}
