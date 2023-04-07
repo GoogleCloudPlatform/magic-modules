@@ -1,7 +1,7 @@
 FROM ruby:3.1-bullseye
 
 # golang
-COPY --from=golang:1.18-stretch /usr/local/go /usr/local/go
+COPY --from=golang:1.19-bullseye /usr/local/go /usr/local/go
 ENV GOPATH /go
 ENV PATH /usr/local/go/bin:$PATH
 ENV PATH $GOPATH/bin:$PATH
