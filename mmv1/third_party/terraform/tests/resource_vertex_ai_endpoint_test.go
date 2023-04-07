@@ -86,12 +86,6 @@ data "google_compute_network" "vertex_network" {
   name       = "%{network_name}"
 }
 
-resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = "%{kms_key_name}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-}
-
 data "google_project" "project" {}
 `, context)
 }
@@ -132,12 +126,6 @@ resource "google_compute_global_address" "vertex_range" {
 
 data "google_compute_network" "vertex_network" {
   name       = "%{network_name}"
-}
-
-resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = "%{kms_key_name}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 }
 
 data "google_project" "project" {}

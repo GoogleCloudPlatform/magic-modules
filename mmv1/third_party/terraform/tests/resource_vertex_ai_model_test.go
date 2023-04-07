@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccVertexAIModel_advancedUpdate(t *testing.T) {
+func TestAccVertexAIModel_vertexAiModelAdvancedExampleUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -15,7 +15,7 @@ func TestAccVertexAIModel_advancedUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVertexAIModelDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -71,17 +71,6 @@ resource "google_vertex_ai_model" "model" {
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
   }
-  depends_on   = [
-    google_kms_crypto_key_iam_member.crypto_key
-  ]
 }
-
-resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = "%{kms_key_name}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-}
-
-data "google_project" "project" {}
 `, context)
 }

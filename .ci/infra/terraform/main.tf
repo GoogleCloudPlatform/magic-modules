@@ -365,6 +365,9 @@ resource "google_project_iam_member" "compute_agent_secret_accessor" {
 # TestAccVertexAIFeaturestore_vertexAiFeaturestoreScalingExample
 # TestAccVertexAIFeaturestore_vertexAiFeaturestoreWithBetaFieldsExample
 # TestAccVertexAIMetadataStore_vertexAiMetadataStoreExample
+# TestAccVertexAIModel_vertexAiModelBasicExample
+# TestAccVertexAIModel_vertexAiModelAdvancedExample
+# TestAccVertexAIModel_vertexAiModelAdvancedExampleUpdate
 # TestAccVertexAITensorboard_vertexAiTensorboardFullExample
 resource "google_project_iam_member" "aiplatform_agent_encrypter_decrypter" {
   project = google_project.proj.project_id
