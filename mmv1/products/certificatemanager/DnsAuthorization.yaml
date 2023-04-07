@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'DnsAuthorization'
-base_url: 'projects/{{project}}/locations/global/dnsAuthorizations'
-create_url: 'projects/{{project}}/locations/global/dnsAuthorizations?dnsAuthorizationId={{name}}'
-self_link: 'projects/{{project}}/locations/global/dnsAuthorizations/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations'
+create_url: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations?dnsAuthorizationId={{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -38,7 +38,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/dnsAuthorizations/{{name}}"]
+import_format: ["projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "certificate_manager_dns_authorization_basic"
@@ -72,6 +72,12 @@ properties:
       A domain which is being authorized. A DnsAuthorization resource covers a
       single domain and its wildcard, e.g. authorization for "example.com" can
       be used to issue certificates for "example.com" and "*.example.com".
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: |
+      The Certificate Manager location. If not specified, "global" is used.
+    default_value: global
+    url_param_only: true
   - !ruby/object:Api::Type::NestedObject
     name: 'dnsResourceRecord'
     output: true

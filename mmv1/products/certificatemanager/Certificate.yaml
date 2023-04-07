@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'Certificate'
-base_url: 'projects/{{project}}/locations/global/certificates'
-create_url: 'projects/{{project}}/locations/global/certificates?certificateId={{name}}'
-self_link: 'projects/{{project}}/locations/global/certificates/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/certificates'
+create_url: 'projects/{{project}}/locations/{{location}}/certificates?certificateId={{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/certificates/{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -38,7 +38,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/certificates/{{name}}"]
+import_format: ["projects/{{project}}/locations/{{location}}/certificates/{{name}}"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "certificate_manager_google_managed_certificate"
@@ -50,7 +50,12 @@ examples:
       dns_auth_subdomain2: "subdomain2"
       cert_name: "dns-cert"
   - !ruby/object:Provider::Terraform::Examples
-    name: "certificate_manager_self_managed_certificate"
+    name: "certificate_manager_self_managed_certificate_global"
+    primary_resource_id: "default"
+    vars:
+      cert_name: "self-managed-cert"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "certificate_manager_self_managed_certificate_regional"
     primary_resource_id: "default"
     vars:
       cert_name: "self-managed-cert"
@@ -88,6 +93,12 @@ properties:
       Currently allowed only for managed certificates.
     default_value: DEFAULT
     diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: |
+      The Certificate Manager location. If not specified, "global" is used.
+    default_value: global
+    url_param_only: true
   - !ruby/object:Api::Type::NestedObject
     name: selfManaged
     immutable: true
