@@ -1,4 +1,4 @@
-func resourceCloudBuildTriggerUpgradeV1(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+func ResourceCloudBuildTriggerUpgradeV1(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 	// Versions 0 and 1 didn't support location. Default them to global.
 	rawState["location"] = "global"
@@ -11,7 +11,7 @@ func resourceCloudBuildTriggerResourceV1() *schema.Resource {
 	return resourceCloudBuildTriggerResourceV0()
 }
 
-func resourceCloudBuildTriggerUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+func ResourceCloudBuildTriggerUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	// Do nothing as V0 and V1 are exactly the same.
 	return rawState, nil
 }
