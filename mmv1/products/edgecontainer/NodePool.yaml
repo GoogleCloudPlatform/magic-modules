@@ -1,0 +1,135 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+  name: "NodePool"
+  base_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools"
+  create_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools?nodePoolId={{name}}"
+  update_verb: :PATCH
+  update_mask: true
+  description: "A set of Kubernetes nodes in a cluster with common configuration and specification."
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      "Google Distributed Cloud Edge": "https://cloud.google.com/distributed-cloud/edge/latest/docs"
+    api: "https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.clusters.nodePools"
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: "name"
+      base_url: "{{op_id}}"
+      wait_ms: 1000
+      timeouts: !ruby/object:Api::Timeouts
+        insert_minutes: 30
+        update_minutes: 30
+        delete_minutes: 30
+    result: !ruby/object:Api::OpAsync::Result
+      path: "response"
+    status: !ruby/object:Api::OpAsync::Status
+      path: "done"
+      complete: true
+      allowed:
+        - true
+        - false
+    error: !ruby/object:Api::OpAsync::Error
+      path: "error"
+      message: "message"
+  import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}",
+    "{{name}}"]
+  autogen_async: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "edgecontainer_node_pool"
+      primary_resource_id: "default"
+      skip_test: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "edgecontainer_node_pool_with_cmek"
+      primary_resource_id: "default"
+      skip_test: true
+  properties:
+    - !ruby/object:Api::Type::String
+      name: "name"
+      required: true
+      immutable: true
+      url_param_only: true
+      description: |
+        The resource name of the node pool.
+    - !ruby/object:Api::Type::String
+      name: "location"
+      required: true
+      immutable: true
+      url_param_only: true
+      description: |
+        The Google Cloud region which hosts the Kubernetes control plane for the Cluster.
+    - !ruby/object:Api::Type::String
+      name: "cluster"
+      required: true
+      immutable: true
+      url_param_only: true
+      description: |
+        The name of the target Distributed Cloud Edge Cluster.
+    - !ruby/object:Api::Type::Time
+      name: createTime
+      description: |
+        The time when the node pool was created.
+      output: true
+    - !ruby/object:Api::Type::Time
+      name: updateTime
+      description: |
+        The time when the node pool was last updated.
+      output: true
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: "labels"
+      default_from_api: true
+      description: "Labels associated with this resource."
+    - !ruby/object:Api::Type::String
+      name: "nodeLocation"
+      description: |
+        Name of the Google Distributed Cloud Edge zone where this node pool will be created.
+    - !ruby/object:Api::Type::Integer
+      name: "nodeCount"
+      url_param_only: false
+      description: |
+        The number of nodes in the pool.
+    - !ruby/object:Api::Type::String
+      name: "machineFilter"
+      description: |
+        Only machines matching this filter will be allowed to join the node pool.
+    - !ruby/object:Api::Type::NestedObject
+      name: localDiskEncryption
+      description: Local disk encryption options. This field is only used when enabling CMEK support.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: "kmsKey"
+          immutable: true
+          description: |
+            The Cloud KMS CryptoKey e.g. projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey} to use for protecting node local disks. 
+            If not specified, a Google-managed key will be used instead.
+        - !ruby/object:Api::Type::String
+          name: "kmsKeyActiveVersion"
+          default_from_api: true
+          description: |
+            The Cloud KMS CryptoKeyVersion currently in use for protecting node local disks. Only applicable if kmsKey is set.
+        - !ruby/object:Api::Type::Enum
+          name: kmsKeyState
+          description: |
+            Availability of the Cloud KMS CryptoKey. If not KEY_AVAILABLE, then nodes may go offline as they cannot access their local data.
+            This can be caused by a lack of permissions to use the key, or if the key is disabled or deleted.
+          output: true
+          values:
+            - :KMS_KEY_STATE_UNSPECIFIED
+            - :KMS_KEY_STATE_KEY_AVAILABLE
+            - :KMS_KEY_STATE_KEY_UNAVAILABLE
+    - !ruby/object:Api::Type::String
+      name: "nodeVersion"
+      output: true
+      description: |
+        The lowest release version among all worker nodes.

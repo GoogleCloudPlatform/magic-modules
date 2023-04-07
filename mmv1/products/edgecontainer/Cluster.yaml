@@ -1,0 +1,201 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+  name: "Cluster"
+  base_url: "projects/{{project}}/locations/{{location}}/clusters"
+  create_url: "projects/{{project}}/locations/{{location}}/clusters?clusterId={{name}}"
+  update_verb: :PATCH
+  update_mask: true
+  description: "A managed Kubernetes Edge cluster."
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      "Google Distributed Cloud Edge": "https://cloud.google.com/distributed-cloud/edge/latest/docs"
+    api: "https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.clusters"
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: "name"
+      base_url: "{{op_id}}"
+      wait_ms: 1000
+      timeouts: !ruby/object:Api::Timeouts
+        insert_minutes: 30
+        update_minutes: 30
+        delete_minutes: 30
+    result: !ruby/object:Api::OpAsync::Result
+      path: "response"
+    status: !ruby/object:Api::OpAsync::Status
+      path: "done"
+      complete: true
+      allowed:
+        - true
+        - false
+    error: !ruby/object:Api::OpAsync::Error
+      path: "error"
+      message: "message"
+  import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{name}}",
+    "{{name}}"]
+  autogen_async: true
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "edgecontainer_cluster"
+      primary_resource_id: "default"
+      vars:
+        edgecontainer_cluster_name: "basic-cluster"
+    - !ruby/object:Provider::Terraform::Examples
+      name: "edgecontainer_cluster_with_maintenance_window"
+      primary_resource_id: "default"
+      vars:
+        edgecontainer_cluster_name: "cluster-with-maintenance"
+  properties:
+    - !ruby/object:Api::Type::String
+      name: "name"
+      required: true
+      immutable: true
+      url_param_only: true
+      description: |
+        A client-specified unique identifier for the cluster.
+    - !ruby/object:Api::Type::String
+      name: "location"
+      required: true
+      immutable: true
+      url_param_only: true
+      description: |
+        The Google Cloud region in which the Cluster will be created and in which the Kubernetes control plane for the Cluster will be provisioned.
+    - !ruby/object:Api::Type::Time
+      name: createTime
+      description: |
+        The time when the cluster was created in RFC3339 UTC "Zulu" format,
+        accurate to nanoseconds.
+      output: true
+    - !ruby/object:Api::Type::Time
+      name: updateTime
+      description: |
+        The time when the cluster was created in RFC3339 UTC "Zulu" format,
+        accurate to nanoseconds.
+      output: true
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: "labels"
+      default_from_api: true
+      description: "User-defined labels for the edgecloud cluster."
+    - !ruby/object:Api::Type::NestedObject
+      name: fleet
+      description: Fleet configuration.
+      default_from_api: true
+      properties:
+        - !ruby/object:Api::Type::String
+          name: "project"
+          immutable: true
+          description: |
+            The name of the Fleet host project where this cluster will be registered.
+    - !ruby/object:Api::Type::NestedObject
+      name: networking
+      description: Cluster-wide networking configuration.
+      required: true
+      properties:
+        - !ruby/object:Api::Type::Array
+          name: "clusterIpv4CidrBlocks"
+          immutable: true
+          required: true
+          url_param_only: false
+          item_type: Api::Type::String
+          description: |
+            All pods in the cluster are assigned an RFC1918 IPv4 address from these blocks. Only a single block is supported.
+        - !ruby/object:Api::Type::Array
+          name: "servicesIpv4CidrBlocks"
+          immutable: true
+          required: true
+          url_param_only: false
+          item_type: Api::Type::String
+          description: |
+            All services in the cluster are assigned an RFC1918 IPv4 address from these blocks. Only a single block is supported.
+    - !ruby/object:Api::Type::NestedObject
+      name: authorization
+      description: RBAC policy that will be applied and managed by GEC.
+      required: true
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: "adminUsers"
+          immutable: true
+          required: true
+          url_param_only: false
+          description: |
+            RBAC policy that will be applied and managed by GEC.
+          properties:
+          - !ruby/object:Api::Type::String
+            name: "username"
+            immutable: true
+            required: true
+            url_param_only: false
+            description: |
+              An active Google username.
+    - !ruby/object:Api::Type::Integer
+      name: "defaultMaxPodsPerNode"
+      default_from_api: true
+      description: |
+        the desired maximum number of Kubernetes Pods to execute on each Node in this Cluster.
+    - !ruby/object:Api::Type::String
+      name: "clusterCaCertificate"
+      output: true
+      description: |
+        The PEM-encoded public certificate of the cluster's CA.
+    - !ruby/object:Api::Type::String
+      name: "endpoint"
+      output: true
+      description: |
+        The IP address of the Kubernetes API server.
+    - !ruby/object:Api::Type::String
+      name: "controlPlaneVersion"
+      output: true
+      description: |
+        The control plane release version.
+    - !ruby/object:Api::Type::NestedObject
+      name: maintenancePolicy
+      description: Cluster-wide maintenance policy configuration.
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: "window"
+          url_param_only: false
+          description: |
+            Specifies the maintenance window in which maintenance may be performed.
+          properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: "recurringWindow"
+            url_param_only: false
+            description: |
+              Configuration of a recurring maintenance window.
+            properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: "window"
+              url_param_only: false
+              description: |
+                Configuration of a recurring maintenance window.
+              properties:
+              - !ruby/object:Api::Type::Time
+                name: "startTime"
+                description: |
+                  The time that the window first starts.
+              - !ruby/object:Api::Type::Time
+                name: "endTime"
+                description: |
+                  The time that the window ends. The end time must take place after the start time.
+            - !ruby/object:Api::Type::String
+              name: "recurrence"
+              url_param_only: false
+              description: |
+                An RRULE (https://tools.ietf.org/html/rfc5545#section-3.8.5.3) for how this window recurs. They go on for the span of time between the start and end time.
+    - !ruby/object:Api::Type::String
+      name: "nodeVersion"
+      output: true
+      description: |
+        The lowest release version among all worker nodes. This field can be empty if the cluster does not have any worker nodes.
+    
