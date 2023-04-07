@@ -145,7 +145,6 @@ func (d *GoogleDnsKeysDataSource) Configure(ctx context.Context, req datasource.
 func (d *GoogleDnsKeysDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleDnsKeysModel
 	var metaData *ProviderMetaModel
-	var diags diag.Diagnostics
 
 	// Read Provider meta into the meta model
 	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
@@ -185,21 +184,7 @@ func (d *GoogleDnsKeysDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	tflog.Trace(ctx, "read dns keys data source")
 
-	zoneSigningKeys, keySigningKeys := flattenSigningKeys(ctx, clientResp.DnsKeys, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	zskObjType := types.ObjectType{}.WithAttributeTypes(getDnsKeyAttrs("zoneSigning"))
-	data.ZoneSigningKeys, diags = types.ListValueFrom(ctx, zskObjType, zoneSigningKeys)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	kskObjType := types.ObjectType{}.WithAttributeTypes(getDnsKeyAttrs("keySigning"))
-	data.KeySigningKeys, diags = types.ListValueFrom(ctx, kskObjType, keySigningKeys)
-	resp.Diagnostics.Append(diags...)
+	flattenSigningKeys(ctx, &data, clientResp.DnsKeys, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -244,11 +229,11 @@ func kskObject() types.ObjectType {
 	return nbo
 }
 
-func flattenSigningKeys(ctx context.Context, signingKeys []*dns.DnsKey, diags *diag.Diagnostics) ([]types.Object, []types.Object) {
-	var zoneSigningKeys []types.Object
-	var keySigningKeys []types.Object
+func flattenSigningKeys(ctx context.Context, dnsKey *GoogleDnsKeysModel, signingKeys []*dns.DnsKey, diags *diag.Diagnostics) {
 	var d diag.Diagnostics
 
+	ksks := []*GoogleKeySigningKey{}
+	zsks := []*GoogleZoneSigningKey{}
 	for _, signingKey := range signingKeys {
 		if signingKey != nil {
 			var digests []types.Object
@@ -260,7 +245,7 @@ func flattenSigningKeys(ctx context.Context, signingKeys []*dns.DnsKey, diags *d
 				obj, d := types.ObjectValueFrom(ctx, digestAttrTypes, digest)
 				diags.Append(d...)
 				if diags.HasError() {
-					return zoneSigningKeys, keySigningKeys
+					return
 				}
 
 				digests = append(digests, obj)
@@ -278,27 +263,20 @@ func flattenSigningKeys(ctx context.Context, signingKeys []*dns.DnsKey, diags *d
 					PublicKey:    types.StringValue(signingKey.PublicKey),
 				}
 
-				objType := types.ObjectType{}.WithAttributeTypes(digestAttrTypes)
-				ksk.Digests, d = types.ListValueFrom(ctx, objType, digests)
+				ksk.Digests, d = types.ListValueFrom(ctx, types.ObjectType{}.WithAttributeTypes(digestAttrTypes), digests)
 				diags.Append(d...)
 				if diags.HasError() {
-					return zoneSigningKeys, keySigningKeys
+					return
 				}
 
 				dsRecord, err := generateDSRecord(signingKey)
 				if err != nil {
 					diags.AddError("error generating ds record", err.Error())
-					return zoneSigningKeys, keySigningKeys
+					return
 				}
 
 				ksk.DSRecord = types.StringValue(dsRecord)
-
-				obj, d := types.ObjectValueFrom(ctx, getDnsKeyAttrs(signingKey.Type), ksk)
-				diags.Append(d...)
-				if diags.HasError() {
-					return zoneSigningKeys, keySigningKeys
-				}
-				keySigningKeys = append(keySigningKeys, obj)
+				ksks = append(ksks, &ksk)
 			} else {
 				zsk := GoogleZoneSigningKey{
 					Algorithm:    types.StringValue(signingKey.Algorithm),
@@ -311,25 +289,30 @@ func flattenSigningKeys(ctx context.Context, signingKeys []*dns.DnsKey, diags *d
 					PublicKey:    types.StringValue(signingKey.PublicKey),
 				}
 
-				objType := types.ObjectType{}.WithAttributeTypes(digestAttrTypes)
-				zsk.Digests, d = types.ListValueFrom(ctx, objType, digests)
+				zsk.Digests, d = types.ListValueFrom(ctx, types.ObjectType{}.WithAttributeTypes(digestAttrTypes), digests)
 				diags.Append(d...)
 				if diags.HasError() {
-					return zoneSigningKeys, keySigningKeys
+					return
 				}
 
-				obj, d := types.ObjectValueFrom(ctx, getDnsKeyAttrs("zoneSigning"), zsk)
-				diags.Append(d...)
-				if diags.HasError() {
-					return zoneSigningKeys, keySigningKeys
-				}
-				zoneSigningKeys = append(zoneSigningKeys, obj)
+				zsks = append(zsks, &zsk)
 			}
 
+			dnsKey.ZoneSigningKeys, d = types.ListValueFrom(ctx, dnsKey.ZoneSigningKeys.ElementType(ctx), zsks)
+			diags.Append(d...)
+			if diags.HasError() {
+				return
+			}
+
+			dnsKey.KeySigningKeys, d = types.ListValueFrom(ctx, dnsKey.KeySigningKeys.ElementType(ctx), ksks)
+			diags.Append(d...)
+			if diags.HasError() {
+				return
+			}
 		}
 	}
 
-	return zoneSigningKeys, keySigningKeys
+	return
 }
 
 // DNSSEC Algorithm Numbers: https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml

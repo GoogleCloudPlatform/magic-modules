@@ -10,11 +10,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 const uaEnvVar = "TF_APPEND_USER_AGENT"
+
+var (
+	unhandledAsEmpty = basetypes.ObjectAsOptions {
+		UnhandledNullAsEmpty: true,
+		UnhandledUnknownAsEmpty: true,
+	}
+)
 
 func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion string) string {
 	ua := fmt.Sprintf("Terraform/%s (+https://www.terraform.io) Terraform-Plugin-SDK/%s %s/%s", tfVersion, "terraform-plugin-framework", name, provVersion)

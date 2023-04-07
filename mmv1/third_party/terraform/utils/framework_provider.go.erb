@@ -222,18 +222,16 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
         },
         Blocks: map[string]schema.Block{
-            "batching": schema.ListNestedBlock{
-                NestedObject: schema.NestedBlockObject{
-                    Attributes: map[string]schema.Attribute{
-                        "send_after": schema.StringAttribute{
-                            Optional: true,
-                            Validators: []validator.String{
-                                NonNegativeDurationValidator(),
-                            },
+            "batching": schema.SingleNestedBlock{
+                Attributes: map[string]schema.Attribute{
+                    "send_after": schema.StringAttribute{
+                        Optional: true,
+                        Validators: []validator.String{
+                            NonNegativeDurationValidator(),
                         },
-                        "enable_batching": schema.BoolAttribute{
-                            Optional: true,
-                        },
+                    },
+                    "enable_batching": schema.BoolAttribute{
+                        Optional: true,
                     },
                 },
             },

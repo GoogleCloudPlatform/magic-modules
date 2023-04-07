@@ -2,7 +2,6 @@
 package google
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -17,7 +16,7 @@ type ProviderModel struct {
 	Region                             types.String `tfsdk:"region"`
 	Zone                               types.String `tfsdk:"zone"`
 	Scopes                             types.List   `tfsdk:"scopes"`
-	Batching                           types.List   `tfsdk:"batching"`
+	Batching                           types.Object `tfsdk:"batching"`
 	UserProjectOverride                types.Bool   `tfsdk:"user_project_override"`
 	RequestTimeout                     types.String `tfsdk:"request_timeout"`
 	RequestReason                      types.String `tfsdk:"request_reason"`
@@ -67,11 +66,6 @@ type ProviderModel struct {
 	// internal definition is removed.
 	RunCustomEndpoint                  types.String `tfsdk:"run_custom_endpoint"`
 <% end -%>
-}
-
-var ProviderBatchingAttributes = map[string]attr.Type{
-	"send_after":      types.StringType,
-	"enable_batching": types.BoolType,
 }
 
 // ProviderMetaModel describes the provider meta model
