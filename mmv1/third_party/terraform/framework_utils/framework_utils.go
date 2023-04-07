@@ -18,8 +18,8 @@ import (
 const uaEnvVar = "TF_APPEND_USER_AGENT"
 
 var (
-	unhandledAsEmpty = basetypes.ObjectAsOptions {
-		UnhandledNullAsEmpty: true,
+	unhandledAsEmpty = basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	}
 )

@@ -153,25 +153,27 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 		}
 	}
 
-	var pbConfig transport_tpg.ProviderBatching
-	d := data.Batching.As(ctx, &pbConfig, unhandledAsEmpty)
-	diags.Append(d...)
-	if diags.HasError() {
-		return
-	}
+	if !data.Batching.IsNull() {
+		var pbConfig transport_tpg.ProviderBatching
+		d := data.Batching.As(ctx, &pbConfig, unhandledAsEmpty)
+		diags.Append(d...)
+		if diags.HasError() {
+			return
+		}
 
-	if pbConfig.SendAfter.IsNull() {
-		pbConfig.SendAfter = types.StringValue("10s")
-	}
+		if pbConfig.SendAfter.IsNull() {
+			pbConfig.SendAfter = types.StringValue("10s")
+		}
 
-	if pbConfig.EnableBatching.IsNull() {
-		pbConfig.EnableBatching = types.BoolValue(true)
-	}
+		if pbConfig.EnableBatching.IsNull() {
+			pbConfig.EnableBatching = types.BoolValue(true)
+		}
 
-	data.Batching, d = types.ObjectValueFrom(ctx, data.Batching.AttributeTypes(ctx), pbConfig)
-	diags.Append(d...)
-	if diags.HasError() {
-		return
+		data.Batching, d = types.ObjectValueFrom(ctx, data.Batching.AttributeTypes(ctx), pbConfig)
+		diags.Append(d...)
+		if diags.HasError() {
+			return
+		}
 	}
 
 	if data.UserProjectOverride.IsNull() && os.Getenv("USER_PROJECT_OVERRIDE") != "" {
