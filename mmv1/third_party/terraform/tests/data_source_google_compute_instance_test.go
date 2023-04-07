@@ -11,12 +11,12 @@ import (
 func TestAccDataSourceComputeInstance_basic(t *testing.T) {
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeInstanceConfig(instanceName),

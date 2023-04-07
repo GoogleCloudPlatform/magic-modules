@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -93,7 +94,7 @@ var (
   }
 )
 
-func resourceSqlDatabaseInstance() *schema.Resource {
+func ResourceSqlDatabaseInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlDatabaseInstanceCreate,
 		Read:   resourceSqlDatabaseInstanceRead,
@@ -111,6 +112,8 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
+			customdiff.ForceNewIfChange("master_instance_name", isMasterInstanceNameSet),
+			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
 		),
@@ -671,7 +674,6 @@ is set to true. Defaults to ZONAL.`,
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
 				Description: `The name of the instance that will act as the master in the replication setup. Note, this requires the master to have binary_log_enabled set, as well as existing backups.`,
 			},
 
@@ -686,6 +688,7 @@ is set to true. Defaults to ZONAL.`,
 			"instance_type": {
 				Type:		schema.TypeString,
 				Computed: 	true,
+				Optional: 	true,
 				Description: `The type of the instance. The valid values are:- 'SQL_INSTANCE_TYPE_UNSPECIFIED', 'CLOUD_SQL_INSTANCE', 'ON_PREMISES_INSTANCE' and 'READ_REPLICA_INSTANCE'.`,
 			},
 
@@ -866,6 +869,14 @@ is set to true. Defaults to ZONAL.`,
 							DiffSuppressFunc: timestampDiffSuppress(time.RFC3339Nano),
 							Description:      `The timestamp of the point in time that should be restored.`,
 						},
+						"database_names": {
+							Type:             schema.TypeList,
+							Optional:         true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: `(SQL Server only, use with point_in_time) clone only the specified databases from the source instance. Clone all databases if empty.`,
+						},
 						"allocated_ip_range": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -919,7 +930,7 @@ func pitrSupportDbCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v 
 
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1007,7 +1018,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	var op *sqladmin.Operation
-	err = retryTimeDuration(func() (operr error) {
+	err = RetryTimeDuration(func() (operr error) {
 		if cloneContext != nil {
 			cloneContext.DestinationInstanceName = name
 			clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
@@ -1016,7 +1027,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 			op, operr = config.NewSqlAdminClient(userAgent).Instances.Insert(project, instance).Do()
 		}
 		return operr
-	}, d.Timeout(schema.TimeoutCreate), isSqlOperationInProgressError)
+	}, d.Timeout(schema.TimeoutCreate), IsSqlOperationInProgressError)
 	if err != nil {
 		return fmt.Errorf("Error, failed to create instance %s: %s", instance.Name, err)
 	}
@@ -1027,7 +1038,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 	d.SetId(id)
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = SqlAdminOperationWaitTime(config, op, project, "Create Instance", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		d.SetId("")
 		return err
@@ -1040,10 +1051,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	// risk of it being left on the instance, which would present a security concern.
 	if sqlDatabaseIsMaster(d) {
 		var users *sqladmin.UsersListResponse
-		err = retryTimeDuration(func() error {
+		err = RetryTimeDuration(func() error {
 			users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance.Name).Do()
 			return err
-		}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
+		}, d.Timeout(schema.TimeoutRead), IsSqlOperationInProgressError)
 		if err != nil {
 			return fmt.Errorf("Error, attempting to list users associated with instance %s: %s", instance.Name, err)
 		}
@@ -1052,7 +1063,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 				err = retry(func() error {
 					op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
 					if err == nil {
-						err = sqlAdminOperationWaitTime(config, op, project, "Delete default root User", userAgent, d.Timeout(schema.TimeoutCreate))
+						err = SqlAdminOperationWaitTime(config, op, project, "Delete default root User", userAgent, d.Timeout(schema.TimeoutCreate))
 					}
 					return err
 				})
@@ -1065,14 +1076,14 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	// patch any fields that need to be sent postcreation
 	if patchData != nil {
-		err = retryTimeDuration(func() (rerr error) {
+		err = RetryTimeDuration(func() (rerr error) {
 			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, instance.Name, patchData).Do()
 			return rerr
-		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
+		}, d.Timeout(schema.TimeoutUpdate), IsSqlOperationInProgressError)
 		if err != nil {
 			return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -1093,15 +1104,15 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		_settings := s.([]interface{})[0].(map[string]interface{})
 		instanceUpdate.Settings.SettingsVersion = int64(_settings["version"].(int))
 		var op *sqladmin.Operation
-		err = retryTimeDuration(func() (rerr error) {
+		err = RetryTimeDuration(func() (rerr error) {
 			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, name, instanceUpdate).Do()
 			return rerr
-		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
+		}, d.Timeout(schema.TimeoutUpdate), IsSqlOperationInProgressError)
 		if err != nil {
 			return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
 		}
 
-		err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = SqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -1197,8 +1208,15 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 
 	_cloneConfiguration := configured[0].(map[string]interface{})
 
+	databaseNames := []string{}
+	rawDatabaseNames := _cloneConfiguration["database_names"].([]interface{})
+	for _, db := range rawDatabaseNames {
+		databaseNames = append(databaseNames, db.(string))
+	}
+
 	return &sqladmin.CloneContext{
 		PointInTime: _cloneConfiguration["point_in_time"].(string),
+		DatabaseNames: databaseNames,
 		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
 }
@@ -1386,7 +1404,7 @@ func expandPasswordValidationPolicy(configured []interface{}) *sqladmin.Password
 
 func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1397,10 +1415,10 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	var instance *sqladmin.DatabaseInstance
-	err = retryTimeDuration(func() (rerr error) {
+	err = RetryTimeDuration(func() (rerr error) {
 		instance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, d.Get("name").(string)).Do()
 		return rerr
-	}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
+	}, d.Timeout(schema.TimeoutRead), IsSqlOperationInProgressError)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("name").(string)))
 	}
@@ -1492,7 +1510,7 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1506,22 +1524,37 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		maintenance_version = v.(string)
 	}
 
+	promoteReadReplicaRequired := false
+	if d.HasChange("instance_type") {
+		oldInstanceType, newInstanceType := d.GetChange("instance_type")
+
+		if isReplicaPromoteRequested(nil, oldInstanceType, newInstanceType, nil) {
+			err = checkPromoteConfigurations(d)
+			if err != nil {
+				return err
+			}
+
+			promoteReadReplicaRequired = true
+		}
+	}
+
 	desiredSetting := d.Get("settings")
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
 
-	// Check if the database version is being updated, because patching database version is an atomic operation and can not be
-	// performed with other fields, we first patch database version before updating the rest of the fields.
-	if v, ok := d.GetOk("database_version"); ok {
-		instance = &sqladmin.DatabaseInstance{DatabaseVersion: v.(string)}
-		err = retryTimeDuration(func() (rerr error) {
+	desiredDatabaseVersion := d.Get("database_version")
+
+	// Check if the activation policy is being updated. If it is being changed to ALWAYS this should be done first.
+	if d.HasChange("settings.0.activation_policy") && d.Get("settings.0.activation_policy").(string) == "ALWAYS" {
+		instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{ActivationPolicy: "ALWAYS"}}
+		err = RetryTimeDuration(func() (rerr error) {
 			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 			return rerr
-		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
+		}, d.Timeout(schema.TimeoutUpdate), IsSqlOperationInProgressError)
 		if err != nil {
 			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -1531,7 +1564,28 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-    // Check if the root_password is being updated, because updating root_password is an atomic operation and can not be
+	// Check if the database version is being updated, because patching database version is an atomic operation and can not be
+	// performed with other fields, we first patch database version before updating the rest of the fields.
+	if d.HasChange("database_version") {
+		instance = &sqladmin.DatabaseInstance{DatabaseVersion: desiredDatabaseVersion.(string)}
+		err = RetryTimeDuration(func() (rerr error) {
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+			return rerr
+		}, d.Timeout(schema.TimeoutUpdate), IsSqlOperationInProgressError)
+		if err != nil {
+			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
+		}
+		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+		err = resourceSqlDatabaseInstanceRead(d, meta)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Check if the root_password is being updated, because updating root_password is an atomic operation and can not be
 	// performed with other fields, we first update root password before updating the rest of the fields.
 	if d.HasChange("root_password") {
 		oldPwd, newPwd := d.GetChange("root_password")
@@ -1573,7 +1627,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
-		err = retryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
+		err = RetryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			if err := d.Set("root_password", oldPwd.(string)); err != nil {
@@ -1582,7 +1636,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 			return fmt.Errorf("Error, failed to update root_password : %s", err)
 		}
 
-		err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = SqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			if err := d.Set("root_password", oldPwd.(string)); err != nil {
@@ -1596,14 +1650,14 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	// performed with other fields, we first patch maintenance version before updating the rest of the fields.
 	if d.HasChange("maintenance_version") {
 		instance = &sqladmin.DatabaseInstance{MaintenanceVersion: maintenance_version}
-		err = retryTimeDuration(func() (rerr error) {
+		err = RetryTimeDuration(func() (rerr error) {
 			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
 			return rerr
-		}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
+		}, d.Timeout(schema.TimeoutUpdate), IsSqlOperationInProgressError)
 		if err != nil {
 			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", instance.Name, err)
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -1612,6 +1666,24 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 			return err
                 }
         }
+
+	if promoteReadReplicaRequired {
+		err = RetryTimeDuration(func() (rerr error) {
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.PromoteReplica(project, d.Get("name").(string)).Do()
+			return rerr
+		}, d.Timeout(schema.TimeoutUpdate), IsSqlOperationInProgressError)
+		if err != nil {
+			return fmt.Errorf("Error, failed to promote read replica instance as primary stand-alone %s: %s", instance.Name, err)
+		}
+		err = SqlAdminOperationWaitTime(config, op, project, "Promote Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+		err = resourceSqlDatabaseInstanceRead(d, meta)
+		if err != nil {
+			return err
+		}
+	}
 
 	s := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
@@ -1636,15 +1708,15 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance.InstanceType = d.Get("instance_type").(string)
 	}
 
-	err = retryTimeDuration(func() (rerr error) {
+	err = RetryTimeDuration(func() (rerr error) {
 		op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
 		return rerr
-	}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
+	}, d.Timeout(schema.TimeoutUpdate), IsSqlOperationInProgressError)
 	if err != nil {
 		return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+	err = SqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -1674,7 +1746,7 @@ func maintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) 
 
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1698,17 +1770,17 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	var op *sqladmin.Operation
-	err = retryTimeDuration(func() (rerr error) {
+	err = RetryTimeDuration(func() (rerr error) {
 		op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).Do()
 		if rerr != nil {
 		  return rerr
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Delete Instance", userAgent, d.Timeout(schema.TimeoutDelete))
+		err = SqlAdminOperationWaitTime(config, op, project, "Delete Instance", userAgent, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
 			return err
 		}
 		return nil
-	}, d.Timeout(schema.TimeoutDelete), isSqlOperationInProgressError, isSqlInternalError)
+	}, d.Timeout(schema.TimeoutDelete), IsSqlOperationInProgressError, isSqlInternalError)
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete instance %s: %s", d.Get("name").(string), err)
 	}
@@ -2090,15 +2162,15 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *Config
 	}
 
 	var op *sqladmin.Operation
-	err := retryTimeDuration(func() (operr error) {
+	err := RetryTimeDuration(func() (operr error) {
 		op, operr = config.NewSqlAdminClient(userAgent).Instances.RestoreBackup(project, instanceId, backupRequest).Do()
 		return operr
-	}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
+	}, d.Timeout(schema.TimeoutUpdate), IsSqlOperationInProgressError)
 	if err != nil {
 		return fmt.Errorf("Error, failed to restore instance from backup %s: %s", instanceId, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Restore Backup", userAgent, d.Timeout(schema.TimeoutUpdate))
+	err = SqlAdminOperationWaitTime(config, op, project, "Restore Backup", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -2109,4 +2181,63 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *Config
 func caseDiffDashSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	postReplaceNew := strings.Replace(new, "-", "_", -1)
 	return strings.ToUpper(postReplaceNew) == strings.ToUpper(old)
+}
+
+func isMasterInstanceNameSet(_ context.Context, oldMasterInstanceName interface{}, newMasterInstanceName interface{}, _ interface{}) bool {
+	new := newMasterInstanceName.(string)
+	if new == "" {
+		return false
+	}
+
+	return true
+}
+
+func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, newInstanceType interface{}, _ interface{}) bool {
+	oldInstanceType = oldInstanceType.(string)
+	newInstanceType = newInstanceType.(string)
+
+	if newInstanceType == "CLOUD_SQL_INSTANCE" && oldInstanceType == "READ_REPLICA_INSTANCE" {
+		return true
+	}
+
+	return false
+}
+
+func checkPromoteConfigurations(d *schema.ResourceData) error {
+	masterInstanceName := d.GetRawConfig().GetAttr("master_instance_name")
+	replicaConfiguration := d.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
+
+	return validatePromoteConfigurations(masterInstanceName, replicaConfiguration)
+}
+
+func checkPromoteConfigurationsAndUpdateDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	masterInstanceName := diff.GetRawConfig().GetAttr("master_instance_name")
+	replicaConfiguration := diff.GetRawConfig().GetAttr("replica_configuration").AsValueSlice()
+
+	err := validatePromoteConfigurations(masterInstanceName, replicaConfiguration)
+	if (err != nil) {
+		return err
+	}
+
+	err = diff.SetNew("master_instance_name", nil)
+	if err != nil {
+		return err
+	}
+
+	err = diff.SetNew("replica_configuration", nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func validatePromoteConfigurations(masterInstanceName cty.Value, replicaConfigurations []cty.Value) error {
+	if !masterInstanceName.IsNull() {
+		return fmt.Errorf("Replica promote configuration check failed. Please remove master_instance_name and try again.")
+	}
+
+	if len(replicaConfigurations) != 0 {
+		return fmt.Errorf("Replica promote configuration check failed. Please remove replica_configuration and try again.")
+	}
+	return nil
 }

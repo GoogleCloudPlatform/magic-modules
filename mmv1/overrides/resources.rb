@@ -28,6 +28,8 @@ module Overrides
 
     # Used for testing.
     def initialize(hash = {})
+      super()
+
       hash.each { |k, v| instance_variable_set("@#{k}", v) }
     end
 
@@ -80,14 +82,14 @@ module Overrides
   class ResourceOverrides < OverrideResource
   end
 
-  # Override to an Api::Resource in api.yaml
+  # Override to an Api::Resource in ResourceName.yaml
   class ResourceOverride < OverrideResource
     def apply(_resource)
       self
     end
   end
 
-  # Override to a Api::Type in api.yaml
+  # Override to a Api::Type in ResourceName.yaml
   class PropertyOverride < OverrideResource
     def apply(_resource)
       self

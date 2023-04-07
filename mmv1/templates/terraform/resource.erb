@@ -48,9 +48,9 @@ import (
     resource_name = product_ns + object.name
     properties = object.all_user_properties
     update_body_properties = properties_without_custom_update(object.settable_properties)
-    update_body_properties = update_body_properties.reject(&:input) if object.update_verb == :PATCH
+    update_body_properties = update_body_properties.reject(&:immutable) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
-    client_name = @config.client_name || product_ns
+    client_name = object.__product.client_name || product_ns
     client_name_camel = client_name.camelize(:lower)
     client_name_pascal = client_name.camelize(:upper)
     client_name_lower = client_name.downcase
@@ -63,7 +63,7 @@ import (
     timeouts ||= Api::Timeouts.new
 -%>
 
-func resource<%= resource_name -%>() *schema.Resource {
+func Resource<%= resource_name -%>() *schema.Resource {
     return &schema.Resource{
         Create: resource<%= resource_name -%>Create,
         Read: resource<%= resource_name -%>Read,
@@ -168,7 +168,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  if object.custom_code.custom_create -%>
     <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
 <%  else  -%>
-    userAgent, err := generateUserAgentString(d, config.userAgent)
+    userAgent, err := generateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
     }
@@ -247,7 +247,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
 <%= lines(compile(pwd + '/' + object.custom_code.pre_create)) if object.custom_code.pre_create -%>
-    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := SendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.custom_code.post_create_failure && object.async.nil? # Only add if not handled by async error handling -%>
         resource<%= resource_name -%>PostCreateFailure(d, meta)
@@ -278,7 +278,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
-    err = <%= client_name_camel -%>OperationWaitTimeWithResponse(
+    err = <%= client_name_pascal -%>OperationWaitTimeWithResponse(
     config, res, &opRes, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
@@ -330,7 +330,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
     <% else -%>
-    err = <%= client_name_camel -%>OperationWaitTime(
+    err = <%= client_name_pascal -%>OperationWaitTime(
     config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
@@ -408,12 +408,12 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
         billingProject = bp
         }
 
-        userAgent, err := generateUserAgentString(d, config.userAgent)
+        userAgent, err := generateUserAgentString(d, config.UserAgent)
         if err != nil {
             return nil, err
         }
 
-        res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        res, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return res, err
         }
@@ -446,7 +446,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
-    userAgent, err := generateUserAgentString(d, config.userAgent)
+    userAgent, err := generateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
     }
@@ -478,7 +478,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 
     <%= lines(compile(pwd + '/' + object.custom_code.pre_read)) if object.custom_code.pre_read -%>
-    res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.read_error_transform -%>
         return handleNotFoundError(<%= object.read_error_transform %>(err), d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
@@ -582,7 +582,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     var project string
 <% end -%>
     config := meta.(*Config)
-    userAgent, err := generateUserAgentString(d, config.userAgent)
+    userAgent, err := generateUserAgentString(d, config.UserAgent)
     if err != nil {
     	return err
     }
@@ -598,7 +598,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  end -%>
 
 
-<%  if !object.input -%>
+<%  if !object.immutable -%>
     obj := make(map[string]interface{})
 <%  update_body_properties.each do |prop| -%>
     <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
@@ -669,7 +669,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 <% end -%>
-    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := SendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 
     if err != nil {
         return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
@@ -679,7 +679,7 @@ if len(updateMask) > 0 {
 
 <%  if object.async&.allow?('update') -%>
 <%    if object.async.is_a? Api::OpAsync -%>
-    err = <%= client_name_camel -%>OperationWaitTime(
+    err = <%= client_name_pascal -%>OperationWaitTime(
         config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
@@ -700,7 +700,7 @@ if len(updateMask) > 0 {
 <% if object.update_mask && field_specific_update_methods(object.root_properties) -%>
   }
 <% end -%>
-<%  end # if !object.input -%>
+<%  end # if !object.immutable -%>
 <%    if field_specific_update_methods(object.root_properties) -%>
     d.Partial(true)
 
@@ -727,7 +727,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         billingProject = bp
         }
 
-        getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        getRes, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
         }
@@ -746,11 +746,11 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             This is unfortunate, but it's because of the way that GCP works, so there's
             no easy way out.  Some APIs require you to send `enable_foo: false`, while
             others will crash if you send `attribute: ''`.  We require this nuance to
-            be annotated in api.yaml, since it is not discoverable automatically.
+            be annotated in ResourceName.yaml, since it is not discoverable automatically.
 
             The behavior here, which we believe to be correct, is to send a value if
             * It is non-empty OR
-            * It is marked send_empty_value in api.yaml.
+            * It is marked send_empty_value in ResourceName.yaml.
             AND
             * It has been set by the user OR
             * It has been modified by the expander in any way
@@ -804,7 +804,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         billingProject = bp
         }
 
-        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        res, err := SendRequestWithTimeout(config, "<%= key[:update_verb] -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         } else {
@@ -813,7 +813,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 
 <%      if object.async&.allow?('update') -%>
 <%          if object.async.is_a? Api::OpAsync-%>
-        err = <%= client_name_camel -%>OperationWaitTime(
+        err = <%= client_name_pascal -%>OperationWaitTime(
             config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
             d.Timeout(schema.TimeoutUpdate))
         if err != nil {
@@ -854,7 +854,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     return nil
 <% else -%>
     config := meta.(*Config)
-    userAgent, err := generateUserAgentString(d, config.userAgent)
+    userAgent, err := generateUserAgentString(d, config.UserAgent)
     if err != nil {
     	return err
     }
@@ -917,7 +917,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
       billingProject = bp
     }
 
-    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := SendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
@@ -933,7 +933,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%      end -%>
     }
 <%    else -%>
-    err = <%= client_name_camel -%>OperationWaitTime(
+    err = <%= client_name_pascal -%>OperationWaitTime(
         config, res, <% if has_project || object.async.include_project-%> project, <% end -%> "Deleting <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutDelete))
 

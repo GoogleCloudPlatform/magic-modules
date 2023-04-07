@@ -12,17 +12,17 @@ import (
 func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := randString(t, 10)
+	randomSuffix := RandString(t, 10)
 
 	rsName := "foo_" + randomSuffix
 	rsFullName := fmt.Sprintf("google_compute_resource_policy.%s", rsName)
 	dsName := "my_policy_" + randomSuffix
 	dsFullName := fmt.Sprintf("data.google_compute_resource_policy.%s", dsName)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataSourceComputeResourcePolicyDestroy(t, rsFullName),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataSourceComputeResourcePolicyDestroy(t, rsFullName),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix),
@@ -43,11 +43,11 @@ func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name strin
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			policyAttrs := rs.Primary.Attributes
 
-			_, err := config.NewComputeClient(config.userAgent).ResourcePolicies.Get(
+			_, err := config.NewComputeClient(config.UserAgent).ResourcePolicies.Get(
 				config.Project, policyAttrs["region"], policyAttrs["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("Resource Policy still exists")

@@ -12,13 +12,13 @@ func TestAccDataCatalogTagTemplate_dataCatalogTagTemplate_updateFields(t *testin
 
 	context := map[string]interface{}{
 		"force_delete":  true,
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataCatalogTagTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataCatalogTagTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataCatalogTagTemplate_dataCatalogTagTemplateBasicExample(context),

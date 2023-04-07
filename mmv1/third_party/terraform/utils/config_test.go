@@ -65,10 +65,10 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	AccTestPreCheck(t)
 
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	config := &Config{
 		Credentials: creds,
@@ -83,7 +83,7 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = config.NewComputeClient(config.userAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = config.NewComputeClient(config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected call with loaded config client to work, got error: %s", err)
 	}
@@ -93,11 +93,11 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	AccTestPreCheck(t)
 
-	serviceaccount := multiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	config := &Config{
 		Credentials:               creds,
@@ -113,7 +113,7 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = config.NewComputeClient(config.userAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = config.NewComputeClient(config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -123,11 +123,11 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	AccTestPreCheck(t)
 
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
-	serviceaccount := multiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
+	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), DefaultClientScopes...)
 	if err != nil {
@@ -153,7 +153,7 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = config.NewComputeClient(config.userAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = config.NewComputeClient(config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -163,10 +163,10 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	testAccPreCheck(t)
+	AccTestPreCheck(t)
 
-	creds := getTestCredsFromEnv()
-	proj := getTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
 	if err != nil {
@@ -191,7 +191,7 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = config.NewComputeClient(config.userAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = config.NewComputeClient(config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -222,7 +222,7 @@ func TestConfigLoadAndValidate_customScopes(t *testing.T) {
 
 func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 	// Use default batching config
-	batchCfg, err := expandProviderBatchingConfig(nil)
+	batchCfg, err := ExpandProviderBatchingConfig(nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -238,16 +238,16 @@ func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expectedDur := time.Second * defaultBatchSendIntervalSec
-	if config.requestBatcherServiceUsage.sendAfter != expectedDur {
-		t.Fatalf("expected sendAfter to be %d seconds, got %v",
-			defaultBatchSendIntervalSec,
-			config.requestBatcherServiceUsage.sendAfter)
+	expectedDur := time.Second * DefaultBatchSendIntervalSec
+	if config.RequestBatcherServiceUsage.SendAfter != expectedDur {
+		t.Fatalf("expected SendAfter to be %d seconds, got %v",
+			DefaultBatchSendIntervalSec,
+			config.RequestBatcherServiceUsage.SendAfter)
 	}
 }
 
 func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
-	batchCfg, err := expandProviderBatchingConfig([]interface{}{
+	batchCfg, err := ExpandProviderBatchingConfig([]interface{}{
 		map[string]interface{}{
 			"send_after":      "1s",
 			"enable_batching": false,
@@ -256,11 +256,11 @@ func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if batchCfg.sendAfter != time.Second {
-		t.Fatalf("expected batchCfg sendAfter to be 1 second, got %v", batchCfg.sendAfter)
+	if batchCfg.SendAfter != time.Second {
+		t.Fatalf("expected batchCfg SendAfter to be 1 second, got %v", batchCfg.SendAfter)
 	}
-	if batchCfg.enableBatching {
-		t.Fatalf("expected enableBatching to be false")
+	if batchCfg.EnableBatching {
+		t.Fatalf("expected EnableBatching to be false")
 	}
 
 	config := &Config{
@@ -276,14 +276,14 @@ func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 	}
 
 	expectedDur := time.Second * 1
-	if config.requestBatcherServiceUsage.sendAfter != expectedDur {
-		t.Fatalf("expected sendAfter to be %d seconds, got %v",
+	if config.RequestBatcherServiceUsage.SendAfter != expectedDur {
+		t.Fatalf("expected SendAfter to be %d seconds, got %v",
 			1,
-			config.requestBatcherServiceUsage.sendAfter)
+			config.RequestBatcherServiceUsage.SendAfter)
 	}
 
-	if config.requestBatcherServiceUsage.enableBatching {
-		t.Fatalf("expected enableBatching to be false")
+	if config.RequestBatcherServiceUsage.EnableBatching {
+		t.Fatalf("expected EnableBatching to be false")
 	}
 }
 
@@ -301,8 +301,8 @@ func TestRemoveBasePathVersion(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		if c.Expected != removeBasePathVersion(c.BaseURL) {
-			t.Errorf("replace url failed: got %s wanted %s", removeBasePathVersion(c.BaseURL), c.Expected)
+		if c.Expected != RemoveBasePathVersion(c.BaseURL) {
+			t.Errorf("replace url failed: got %s wanted %s", RemoveBasePathVersion(c.BaseURL), c.Expected)
 		}
 	}
 }

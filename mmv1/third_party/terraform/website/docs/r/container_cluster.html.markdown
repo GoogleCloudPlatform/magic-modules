@@ -357,6 +357,9 @@ subnetwork in which the cluster's instances are launched.
 * `gateway_api_config` - (Optional)
   Configuration for [GKE Gateway API controller](https://cloud.google.com/kubernetes-engine/docs/concepts/gateway-api). Structure is [documented below](#nested_gateway_api_config).
 
+* `protect_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  Enable/Disable Protect API features for the cluster. Structure is [documented below](#nested_protect_config).
+
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -688,6 +691,10 @@ to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.
 from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
 pick a specific range to use.
 
+* `stack_type` - (Optional) The IP Stack Type of the cluster. 
+Default value is `IPV4`.
+Possible values are `IPV4` and `PV4_IPV6`.
+
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
 * `client_certificate_config` - (Required) Whether client certificate authorization is enabled for this cluster.  For example:
@@ -738,6 +745,15 @@ ephemeral_storage_config {
   local_ssd_count = 2
 }
 ```
+* `ephemeral_storage_local_ssd_config` - (Optional) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_local_ssd_config).
+
+```hcl
+ephemeral_storage_local_ssd_config {
+  local_ssd_count = 2
+}
+```
+
+* `local_nvme_ssd_block_config` - (Optional) Parameters for the local NVMe SSDs. Structure is [documented below](#nested_local_nvme_ssd_block_config).
 
 * `logging_variant` (Optional) Parameter for specifying the type of logging agent used in a node pool. This will override any [cluster-wide default value](#nested_node_pool_defaults). Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
 
@@ -851,6 +867,7 @@ kubelet_config {
   cpu_manager_policy   = "static"
   cpu_cfs_quota        = true
   cpu_cfs_quota_period = "100us"
+  pod_pids_limit       = 1024
 }
 ```
 
@@ -870,9 +887,25 @@ linux_node_config {
 
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
 
+* `advanced_machine_features` - (Optional) Specifies options for controlling
+  advanced machine features. Structure is documented below.
+
+<a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
+
+* `threads_per_core` - (Required) The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.
+
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nested_ephemeral_storage_local_ssd_config"></a>The `ephemeral_storage_local_ssd_config` block supports:
+
+* `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nested_local_nvme_ssd_block_config"></a>The `local_nvme_ssd_block_config` block supports:
+
+* `local_ssd_count` (Required) - Number of raw-block local NVMe SSD disks to be attached to the node. Each local SSD is 375 GB in size. If zero, it means no raw-block local NVMe SSD disks to be attached to the node.
+-> Note: Local NVMe SSD storage available in GKE versions v1.25.3-gke.1800 and later.
 
 <a name="nested_gcfs_config"></a>The `gcfs_config` block supports:
 
@@ -1116,6 +1149,8 @@ value and accepts an invalid `default` value instead. While this remains true,
 not specifying the `kubelet_config` block should be the equivalent of specifying
 `none`.
 
+* `pod_pids_limit` - (Optional) Controls the maximum number of processes allowed to run in a pod. The value must be greater than or equal to 1024 and less than 4194304.
+
 <a name="nested_linux_node_config"></a>The `linux_node_config` block supports:
 
 * `sysctls` - (Required)  The Linux kernel parameters to be applied to the nodes
@@ -1137,6 +1172,16 @@ and all pods running on the nodes. Specified as a map from the key, such as
 <a name="nested_gateway_api_config"></a>The `gateway_api_config` block supports:
 
 * `channel` - (Required) Which Gateway Api channel should be used. `CHANNEL_DISABLED` or `CHANNEL_STANDARD`.
+
+<a name="nested_protect_config"></a>The `protect_config` block supports:
+
+* `workload_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) WorkloadConfig defines which actions are enabled for a cluster's workload configurations. Structure is [documented below](#nested_workload_config)
+
+* `workload_vulnerability_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode to use for Protect workload vulnerability scanning feature. Accepted values are DISABLED, BASIC.
+
+<a name="nested_workload_config"></a>The `protect_config.workload_config` block supports:
+
+* `audit_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode of auditing should be used for the cluster's workloads. Accepted values are DISABLED, BASIC.
 
 ## Attributes Reference
 

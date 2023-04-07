@@ -12,16 +12,16 @@ import (
 
 func TestAccBigtableTable_basic(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableTable(instanceName, tableName),
@@ -37,16 +37,16 @@ func TestAccBigtableTable_basic(t *testing.T) {
 
 func TestAccBigtableTable_splitKeys(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableTable_splitKeys(instanceName, tableName),
@@ -63,17 +63,17 @@ func TestAccBigtableTable_splitKeys(t *testing.T) {
 
 func TestAccBigtableTable_family(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableTable_family(instanceName, tableName, family),
@@ -89,17 +89,17 @@ func TestAccBigtableTable_family(t *testing.T) {
 
 func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			// creating a table with a column family and deletion protection equals to protected
 			{
@@ -149,17 +149,17 @@ func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 
 func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			// creating a table with a column family and deletion protection equals to unprotected
 			{
@@ -208,17 +208,17 @@ func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 
 func TestAccBigtableTable_familyMany(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableTable_familyMany(instanceName, tableName, family),
@@ -234,17 +234,17 @@ func TestAccBigtableTable_familyMany(t *testing.T) {
 
 func TestAccBigtableTable_familyUpdate(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	family := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableTable_familyMany(instanceName, tableName, family),
@@ -274,8 +274,8 @@ func testAccCheckBigtableTableDestroyProducer(t *testing.T) func(s *terraform.St
 				continue
 			}
 
-			config := googleProviderConfig(t)
-			c, err := config.BigTableClientFactory(config.userAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+			config := GoogleProviderConfig(t)
+			c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 			if err != nil {
 				// The instance is already gone
 				return nil
@@ -301,8 +301,8 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family st
 			return fmt.Errorf("Table not found: %s", table_name_space)
 		}
 
-		config := googleProviderConfig(t)
-		c, err := config.BigTableClientFactory(config.userAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		config := GoogleProviderConfig(t)
+		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting admin client. %s", err)
 		}

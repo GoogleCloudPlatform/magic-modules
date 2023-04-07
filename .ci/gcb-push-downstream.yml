@@ -108,6 +108,34 @@ steps:
           - -c
           - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-validator-sync
 
+    # TGC
+    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+      id: tgc-sync
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["checkout"]
+      args:
+          - 'tgc-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      id: tgc-push
+      waitFor: ["tgc-sync", "tpg-push"]
+      args:
+          - 'downstream'
+          - 'terraform-google-conversion'
+          - 'ga'
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/cloud-builders/git'
+      waitFor: ["tgc-push"]
+      secretEnv: ["GITHUB_TOKEN"]
+      entrypoint: 'bash'
+      args:
+          - -c
+          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync
+
     # TF-OICS
     - name: 'gcr.io/graphite-docker-images/downstream-waiter'
       id: tf-oics-sync
@@ -147,11 +175,10 @@ timeout: 86400s
 options:
     machineType: 'N1_HIGHCPU_32'
 
-# This is the ciphertext of the token, encrypted using the above KMS key.
-secrets:
-    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
-      secretEnv:
-          GITHUB_TOKEN: CiQADkR4Nt6nHLI52Kc1W55OwpLdc4vjBfVR0SGQNzm6VSVj9lUSUQBfF82vVhn43A1jNYOv8ScoWgrZONwNrUabHfGjkvl+IZxcii0JlOVUawbscs4OJga0eitNNlagAOruLs6C926X20ZZPqWtH97ui6CKNvxgkQ==
-    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/environment-keyring/cryptoKeys/ci-project-key
-      secretEnv:
-          GOOGLE_PROJECT: CiQAis6xrDDU4Wcxn5s8Y790IMxTUEe2d3SaYEXUGScHfaLjOw8SPwDOc1nLe6Yz0zzA0mcYTsXaeGSFYu7uQ5+QCtTProJWRv2ITrNwCS3AF/kvMCrHvltx7O1CZnJveutlVpZH3w==
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
+      env: GITHUB_TOKEN
+    - versionName: projects/673497134629/secrets/ci-test-project/versions/latest
+      env: GOOGLE_PROJECT

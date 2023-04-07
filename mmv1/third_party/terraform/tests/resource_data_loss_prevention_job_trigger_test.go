@@ -10,14 +10,14 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample(t *testing.T
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project":       GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerBasic(context),
@@ -45,14 +45,14 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample2(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project":       GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerIdentifyingFields(context),
@@ -80,13 +80,13 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerPubsub(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": getTestProjectFromEnv(),
+		"project": GetTestProjectFromEnv(),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataLossPreventionJobTrigger_publishToPubSub(context),

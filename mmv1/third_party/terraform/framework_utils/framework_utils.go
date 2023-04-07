@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -28,7 +29,7 @@ func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion st
 	return ua
 }
 
-func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
+func GetCurrentUserEmailFramework(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
 	// When environment variables UserProjectOverride and BillingProject are set for the provider,
 	// the header X-Goog-User-Project is set for the API requests.
 	// But it causes an error when calling GetCurrUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".
@@ -62,10 +63,10 @@ func generateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
 func getProjectFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
-	return getProjectFromSchemaFramework("project", rVal, pVal, diags)
+	return getProjectFromFrameworkSchema("project", rVal, pVal, diags)
 }
 
-func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
+func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
 	if !rVal.IsNull() && rVal.ValueString() != "" {
 		return rVal
 	}
@@ -79,11 +80,47 @@ func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.S
 }
 
 func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
-	if isGoogleApiErrorWithCode(err, 404) {
+	if IsGoogleApiErrorWithCode(err, 404) {
 		tflog.Warn(ctx, fmt.Sprintf("Removing %s because it's gone", resource))
 		// The resource doesn't exist anymore
 		state.RemoveResource(ctx)
 	}
 
 	diags.AddError(fmt.Sprintf("Error when reading or editing %s", resource), err.Error())
+}
+
+// field helpers
+
+// Parses a project field with the following formats:
+// - projects/{my_projects}/{resource_type}/{resource_name}
+func parseProjectFieldValueFramework(resourceType, fieldValue, projectSchemaField string, rVal, pVal types.String, isEmptyValid bool, diags *diag.Diagnostics) *ProjectFieldValue {
+	if len(fieldValue) == 0 {
+		if isEmptyValid {
+			return &ProjectFieldValue{resourceType: resourceType}
+		}
+		diags.AddError("field can not be empty", fmt.Sprintf("The project field for resource %s cannot be empty", resourceType))
+		return nil
+	}
+
+	r := regexp.MustCompile(fmt.Sprintf(projectBasePattern, resourceType))
+	if parts := r.FindStringSubmatch(fieldValue); parts != nil {
+		return &ProjectFieldValue{
+			Project: parts[1],
+			Name:    parts[2],
+
+			resourceType: resourceType,
+		}
+	}
+
+	project := getProjectFromFrameworkSchema(projectSchemaField, rVal, pVal, diags)
+	if diags.HasError() {
+		return nil
+	}
+
+	return &ProjectFieldValue{
+		Project: project.ValueString(),
+		Name:    GetResourceNameFromSelfLink(fieldValue),
+
+		resourceType: resourceType,
+	}
 }

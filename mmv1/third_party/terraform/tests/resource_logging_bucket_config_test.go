@@ -11,14 +11,14 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-		"folder_name":   "tf-test-" + randString(t, 10),
-		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
+		"folder_name":   "tf-test-" + RandString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigFolder_basic(context, 30),
@@ -46,14 +46,14 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-		"project_name":  "tf-test-" + randString(t, 10),
-		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
+		"project_name":  "tf-test-" + RandString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigProject_basic(context, 30),
@@ -86,23 +86,58 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	})
 }
 
+func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": RandString(t, 10),
+		"project_name":  "tf-test-" + RandString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, true),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+			{
+				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, false),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+		},
+	})
+}
+
 func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":    "tf-test-" + randString(t, 10),
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
+		"project_name":    "tf-test-" + RandString(t, 10),
+		"org_id":          GetTestOrgFromEnv(t),
+		"billing_account": GetTestBillingAccountFromEnv(t),
 	}
 
-	bucketId := fmt.Sprintf("tf-test-bucket-%s", randString(t, 10))
-	keyRingName := fmt.Sprintf("tf-test-key-ring-%s", randString(t, 10))
-	cryptoKeyName := fmt.Sprintf("tf-test-crypto-key-%s", randString(t, 10))
-	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", randString(t, 10))
+	bucketId := fmt.Sprintf("tf-test-bucket-%s", RandString(t, 10))
+	keyRingName := fmt.Sprintf("tf-test-key-ring-%s", RandString(t, 10))
+	cryptoKeyName := fmt.Sprintf("tf-test-crypto-key-%s", RandString(t, 10))
+	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigProject_cmekSettings(context, bucketId, keyRingName, cryptoKeyName, cryptoKeyNameUpdate),
@@ -130,14 +165,14 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":        randString(t, 10),
-		"billing_account_name": "billingAccounts/" + getTestBillingAccountFromEnv(t),
-		"org_id":               getTestOrgFromEnv(t),
+		"random_suffix":        RandString(t, 10),
+		"billing_account_name": "billingAccounts/" + GetTestMasterBillingAccountFromEnv(t),
+		"org_id":               GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigBillingAccount_basic(context, 30),
@@ -165,13 +200,13 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-		"org_id":        getTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigOrganization_basic(context, 30),
@@ -228,6 +263,23 @@ resource "google_logging_project_bucket_config" "basic" {
 	bucket_id = "_Default"
 }
 `, context), retention, retention)
+}
+
+func testAccLoggingBucketConfigProject_analyticsEnabled(context map[string]interface{}, analytics bool) string {
+	return fmt.Sprintf(Nprintf(`
+resource "google_project" "default" {
+	project_id = "%{project_name}"
+	name       = "%{project_name}"
+	org_id     = "%{org_id}"
+}
+
+resource "google_logging_project_bucket_config" "basic" {
+	project    = google_project.default.name
+	location  = "global"
+	enable_analytics = %t
+	bucket_id = "_Default"
+}
+`, context), analytics)
 }
 
 func testAccLoggingBucketConfigProject_preCmekSettings(context map[string]interface{}, keyRingName, cryptoKeyName, cryptoKeyNameUpdate string) string {
@@ -322,19 +374,19 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":        randString(t, 10),
-		"billing_account_name": getTestBillingAccountFromEnv(t),
-		"org_id":               getTestOrgFromEnv(t),
-		"project_name":         "tf-test-" + randString(t, 10),
-		"bucket_id":            "tf-test-bucket-" + randString(t, 10),
+		"random_suffix":        RandString(t, 10),
+		"billing_account_name": GetTestBillingAccountFromEnv(t),
+		"org_id":               GetTestOrgFromEnv(t),
+		"project_name":         "tf-test-" + RandString(t, 10),
+		"bucket_id":            "tf-test-bucket-" + RandString(t, 10),
 	}
 
 	configList := getLoggingBucketConfigs(context)
 
 	for res, config := range configList {
-		vcrTest(t, resource.TestCase{
-			PreCheck:  func() { testAccPreCheck(t) },
-			Providers: testAccProviders,
+		VcrTest(t, resource.TestCase{
+			PreCheck:                 func() { AccTestPreCheck(t) },
+			ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 			Steps: []resource.TestStep{
 				{
 					Config: config,

@@ -7,7 +7,7 @@ import (
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 )
 
-func dataSourceGoogleActiveFolder() *schema.Resource {
+func DataSourceGoogleActiveFolder() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleActiveFolderRead,
 
@@ -30,7 +30,7 @@ func dataSourceGoogleActiveFolder() *schema.Resource {
 
 func dataSourceGoogleActiveFolderRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

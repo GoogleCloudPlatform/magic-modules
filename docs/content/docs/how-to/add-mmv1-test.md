@@ -67,12 +67,12 @@ two ways:
     appending suffixes to them, and are typically only used for names- most
     values should be constant within the configuration.
 
-## `terraform.yaml` metadata
+## `Topic.yaml` metadata
 
-Once your configuration is written, go in `terraform.yaml` and find the
+Once your configuration is written, go in `Topic.yaml` and find the
 `examples` block for the resource. Generally it'll be above the `properties`
 block. In there, append an entry such as the
-[following](https://github.com/GoogleCloudPlatform/magic-modules/blob/e7ef590f6007796f446b2d41875b3d26f4469ff4/mmv1/products/pubsub/terraform.yaml#L108-L113):
+[following](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/pubsub/Topic.yaml#L45-L73):
 
 ```yaml
       - !ruby/object:Provider::Terraform::Examples
@@ -104,13 +104,13 @@ func TestAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(t *testing.T)
     t.Parallel()
 
     context := map[string]interface{}{
-        "random_suffix": randString(t, 10),
+        "random_suffix": RandString(t, 10),
     }
 
-    vcrTest(t, resource.TestCase{
-        PreCheck:     func() { testAccPreCheck(t) },
-        Providers:    testAccProviders,
-        CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
+    VcrTest(t, resource.TestCase{
+        PreCheck:                 func() { AccTestPreCheck(t) },
+        ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+        CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
         Steps: []resource.TestStep{
             {
                 Config: testAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(context),

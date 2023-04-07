@@ -10,12 +10,12 @@ import (
 func TestAccDataSourceGoogleForwardingRule(t *testing.T) {
 	t.Parallel()
 
-	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
+	poolName := fmt.Sprintf("tf-%s", RandString(t, 10))
+	ruleName := fmt.Sprintf("tf-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleForwardingRuleConfig(poolName, ruleName),

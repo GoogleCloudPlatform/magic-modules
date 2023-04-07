@@ -10,14 +10,14 @@ func TestAccAlloydbBackup_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  BootstrapSharedTestNetwork(t, "alloydb"),
-		"random_suffix": randString(t, 10),
+		"network_name":  BootstrapSharedTestNetwork(t, "alloydb-update"),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAlloydbBackupDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAlloydbBackup_alloydbBackupFullExample(context),

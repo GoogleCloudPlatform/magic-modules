@@ -12,15 +12,15 @@ import (
 func TestAccComputeSubnetworkIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	project := GetTestProjectFromEnv()
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	role := "roles/compute.networkUser"
-	region := getTestRegionFromEnv()
-	subnetwork := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	region := GetTestRegionFromEnv()
+	subnetwork := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSubnetworkIamPolicy_basic(account, region, subnetwork, role),

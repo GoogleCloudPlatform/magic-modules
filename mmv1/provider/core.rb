@@ -59,7 +59,7 @@ module Provider
         true
       else
         Google::LOGGER.warn 'Either gofmt or goimports is not installed; go ' \
-          'code will be poorly formatted and will likely not compile.'
+                            'code will be poorly formatted and will likely not compile.'
         false
       end
     end
@@ -77,7 +77,7 @@ module Provider
       compile_product_files(output_folder) \
         unless @config.files.nil? || @config.files.compile.nil?
 
-      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      FileUtils.mkpath output_folder
       pwd = Dir.pwd
       if generate_code
         Dir.chdir output_folder
@@ -126,7 +126,7 @@ module Provider
           target_file = File.join(output_folder, target)
           target_dir = File.dirname(target_file)
           Google::LOGGER.debug "Copying #{source} => #{target}"
-          FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
+          FileUtils.mkpath target_dir
 
           # If we've modified a file since starting an MM run, it's a reasonable
           # assumption that it was this run that modified it.
@@ -174,7 +174,7 @@ module Provider
     end
 
     def compile_file_list(output_folder, files, file_template, pwd = Dir.pwd)
-      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      FileUtils.mkpath output_folder
       Dir.chdir output_folder
       files.map do |target, source|
         Thread.new do
@@ -212,7 +212,7 @@ module Provider
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
       unless object.exclude_resource
-        FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+        FileUtils.mkpath output_folder
         Dir.chdir output_folder
         Google::LOGGER.debug "Generating #{object.name} resource"
         generate_resource(pwd, data.clone, generate_code, generate_docs)
@@ -228,7 +228,7 @@ module Provider
       # if iam_policy is not defined or excluded, don't generate it
       return if object.iam_policy.nil? || object.iam_policy.exclude
 
-      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      FileUtils.mkpath output_folder
       Dir.chdir output_folder
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
       generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
@@ -257,36 +257,27 @@ module Provider
 
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
-    def properties_by_custom_update(properties, behavior = :new)
+    def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
 
-      # TODO(rambleraptor): Add support to Ansible for one-at-a-time updates.
-      if behavior == :old
-        update_props.group_by do |p|
-          { update_url: p.update_url, update_verb: p.update_verb, fingerprint: p.fingerprint_name }
-        end
-      else
-        update_props.group_by do |p|
-          {
-            update_url: p.update_url,
-            update_verb: p.update_verb,
-            update_id: p.update_id,
-            fingerprint_name: p.fingerprint_name
-          }
-        end
+      update_props.group_by do |p|
+        {
+          update_url: p.update_url,
+          update_verb: p.update_verb,
+          update_id: p.update_id,
+          fingerprint_name: p.fingerprint_name
+        }
       end
     end
 
     # Filter the properties to keep only the ones don't have custom update
     # method and group them by update url & verb.
     def properties_without_custom_update(properties)
-      update_props = properties.select do |p|
+      properties.select do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
-
-      update_props
     end
 
     # Takes a update_url and returns the list of custom updatable properties

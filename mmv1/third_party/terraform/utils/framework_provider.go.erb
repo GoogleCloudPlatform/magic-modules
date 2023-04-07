@@ -6,6 +6,7 @@ import (
     "net/http"
     "time"
 
+    "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/path"
     "github.com/hashicorp/terraform-plugin-framework/provider"
@@ -14,7 +15,7 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/resource"
     "github.com/hashicorp/terraform-plugin-framework/schema/validator"
     "github.com/hashicorp/terraform-plugin-framework/types"
-    "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+    "golang.org/x/oauth2"
 
     "google.golang.org/api/option"
 )
@@ -37,17 +38,19 @@ func New(version string) provider.ProviderWithMetaSchema {
 }
 
 // frameworkProvider is the provider implementation.
-type frameworkProvider struct{
+type frameworkProvider struct {
     billingProject types.String
     client *http.Client
     context context.Context
     gRPCLoggingOptions []option.ClientOption
     pollInterval time.Duration
     project types.String
-    region string
+    region types.String
+    zone types.String
     requestBatcherIam *RequestBatcher
     requestBatcherServiceUsage *RequestBatcher
     scopes []string
+    tokenSource oauth2.TokenSource
     userAgent string
     userProjectOverride bool
     version string
@@ -236,7 +239,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
         },
     }
 
-    configureDCLFrameworkProvider(&resp.Schema)
+    configureDCLCustomEndpointAttributesFramework(&resp.Schema)
 }
 
 // Configure prepares an API client for data sources and resources.
@@ -250,7 +253,7 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
     }
 
     // Configuration values are now available.
-    p.ConfigureWithData(ctx, data, req.TerraformVersion, &resp.Diagnostics)
+    p.LoadAndValidateFramework(ctx, data, req.TerraformVersion, &resp.Diagnostics)
     if resp.Diagnostics.HasError() {
         return
     }
@@ -264,8 +267,16 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
 // DataSources defines the data sources implemented in the provider.
 func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {
     return []func() datasource.DataSource{
+        NewGoogleClientConfigDataSource,
+        NewGoogleClientOpenIDUserinfoDataSource,
         NewGoogleDnsManagedZoneDataSource,
         NewGoogleDnsRecordSetDataSource,
+        NewGoogleDnsKeysDataSource,
+        <% unless version == 'ga' -%>
+        NewGoogleFirebaseAndroidAppConfigDataSource,
+        NewGoogleFirebaseAppleAppConfigDataSource,
+        NewGoogleFirebaseWebAppConfigDataSource,
+        <% end -%>
     }
 }
 

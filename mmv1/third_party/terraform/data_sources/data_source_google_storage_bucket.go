@@ -1,13 +1,14 @@
 package google
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleStorageBucket() *schema.Resource {
+func DataSourceGoogleStorageBucket() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceStorageBucket().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceStorageBucket().Schema)
 
 	addRequiredFieldsToSchema(dsSchema, "name")
 
@@ -19,7 +20,7 @@ func dataSourceGoogleStorageBucket() *schema.Resource {
 
 func dataSourceGoogleStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

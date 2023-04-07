@@ -13,7 +13,7 @@ import (
 
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
-    "google.golang.org/grpc"
+	"google.golang.org/grpc"
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -21,20 +21,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 
-    grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
-    "github.com/sirupsen/logrus"
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Provider methods
 
-// ConfigureWithData handles the bulk of configuring the provider
+// LoadAndValidateFramework handles the bulk of configuring the provider
 // it is pulled out so that we can manually call this from our testing provider as well
-func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data ProviderModel, tfVersion string, diags *diag.Diagnostics) {
+func (p *frameworkProvider) LoadAndValidateFramework(ctx context.Context, data ProviderModel, tfVersion string, diags *diag.Diagnostics) {
 	// Set defaults if needed
 	p.HandleDefaults(ctx, &data, diags)
 	if diags.HasError() {
 		return
 	}
+
+	p.context = ctx
 
 	// Handle User Agent string
 	p.userAgent = CompileUserAgentString(ctx, "terraform-provider-google<%= "-" + version unless version == 'ga'  -%>", tfVersion, p.version)
@@ -61,92 +63,13 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 
 	// Setup Base Paths for clients
 	// Generated products
-	p.AccessApprovalBasePath = data.AccessApprovalCustomEndpoint.ValueString()
-	p.AccessContextManagerBasePath = data.AccessContextManagerCustomEndpoint.ValueString()
-	p.ActiveDirectoryBasePath = data.ActiveDirectoryCustomEndpoint.ValueString()
-	p.ApigeeBasePath = data.ApigeeCustomEndpoint.ValueString()
-	p.AppEngineBasePath = data.AppEngineCustomEndpoint.ValueString()
-	p.ArtifactRegistryBasePath = data.ArtifactRegistryCustomEndpoint.ValueString()
-	p.BeyondcorpBasePath = data.BeyondcorpCustomEndpoint.ValueString()
-	p.BigQueryBasePath = data.BigQueryCustomEndpoint.ValueString()
-	p.BigqueryAnalyticsHubBasePath = data.BigqueryAnalyticsHubCustomEndpoint.ValueString()
-	p.BigqueryConnectionBasePath = data.BigqueryConnectionCustomEndpoint.ValueString()
-	p.BigqueryDataTransferBasePath = data.BigqueryDataTransferCustomEndpoint.ValueString()
-	p.BigqueryReservationBasePath = data.BigqueryReservationCustomEndpoint.ValueString()
-	p.BigtableBasePath = data.BigtableCustomEndpoint.ValueString()
-	p.BillingBasePath = data.BillingCustomEndpoint.ValueString()
-	p.BinaryAuthorizationBasePath = data.BinaryAuthorizationCustomEndpoint.ValueString()
-	p.CertificateManagerBasePath = data.CertificateManagerCustomEndpoint.ValueString()
-	p.CloudAssetBasePath = data.CloudAssetCustomEndpoint.ValueString()
-	p.CloudBuildBasePath = data.CloudBuildCustomEndpoint.ValueString()
-	p.CloudFunctionsBasePath = data.CloudFunctionsCustomEndpoint.ValueString()
-	p.Cloudfunctions2BasePath = data.Cloudfunctions2CustomEndpoint.ValueString()
-	p.CloudIdentityBasePath = data.CloudIdentityCustomEndpoint.ValueString()
-	p.CloudIdsBasePath = data.CloudIdsCustomEndpoint.ValueString()
-	p.CloudIotBasePath = data.CloudIotCustomEndpoint.ValueString()
-	p.CloudRunBasePath = data.CloudRunCustomEndpoint.ValueString()
-	p.CloudRunV2BasePath = data.CloudRunV2CustomEndpoint.ValueString()
-	p.CloudSchedulerBasePath = data.CloudSchedulerCustomEndpoint.ValueString()
-	p.CloudTasksBasePath = data.CloudTasksCustomEndpoint.ValueString()
-	p.ComputeBasePath = data.ComputeCustomEndpoint.ValueString()
-	p.ContainerAnalysisBasePath = data.ContainerAnalysisCustomEndpoint.ValueString()
-	p.ContainerAttachedBasePath = data.ContainerAttachedCustomEndpoint.ValueString()
-	p.DataCatalogBasePath = data.DataCatalogCustomEndpoint.ValueString()
-	p.DataFusionBasePath = data.DataFusionCustomEndpoint.ValueString()
-	p.DataLossPreventionBasePath = data.DataLossPreventionCustomEndpoint.ValueString()
-	p.DataprocBasePath = data.DataprocCustomEndpoint.ValueString()
-	p.DataprocMetastoreBasePath = data.DataprocMetastoreCustomEndpoint.ValueString()
-	p.DatastoreBasePath = data.DatastoreCustomEndpoint.ValueString()
-	p.DatastreamBasePath = data.DatastreamCustomEndpoint.ValueString()
-	p.DeploymentManagerBasePath = data.DeploymentManagerCustomEndpoint.ValueString()
-	p.DialogflowBasePath = data.DialogflowCustomEndpoint.ValueString()
-	p.DialogflowCXBasePath = data.DialogflowCXCustomEndpoint.ValueString()
-	p.DNSBasePath = data.DNSCustomEndpoint.ValueString()
-	p.DocumentAIBasePath = data.DocumentAICustomEndpoint.ValueString()
-	p.EssentialContactsBasePath = data.EssentialContactsCustomEndpoint.ValueString()
-	p.FilestoreBasePath = data.FilestoreCustomEndpoint.ValueString()
-	p.FirestoreBasePath = data.FirestoreCustomEndpoint.ValueString()
-	p.GameServicesBasePath = data.GameServicesCustomEndpoint.ValueString()
-	p.GKEBackupBasePath = data.GKEBackupCustomEndpoint.ValueString()
-	p.GKEHubBasePath = data.GKEHubCustomEndpoint.ValueString()
-	p.HealthcareBasePath = data.HealthcareCustomEndpoint.ValueString()
-	p.IAM2BasePath = data.IAM2CustomEndpoint.ValueString()
-	p.IAMBetaBasePath = data.IAMBetaCustomEndpoint.ValueString()
-	p.IAMWorkforcePoolBasePath = data.IAMWorkforcePoolCustomEndpoint.ValueString()
-	p.IapBasePath = data.IapCustomEndpoint.ValueString()
-	p.IdentityPlatformBasePath = data.IdentityPlatformCustomEndpoint.ValueString()
-	p.KMSBasePath = data.KMSCustomEndpoint.ValueString()
-	p.LoggingBasePath = data.LoggingCustomEndpoint.ValueString()
-	p.MemcacheBasePath = data.MemcacheCustomEndpoint.ValueString()
-	p.MLEngineBasePath = data.MLEngineCustomEndpoint.ValueString()
-	p.MonitoringBasePath = data.MonitoringCustomEndpoint.ValueString()
-	p.NetworkManagementBasePath = data.NetworkManagementCustomEndpoint.ValueString()
-	p.NetworkServicesBasePath = data.NetworkServicesCustomEndpoint.ValueString()
-	p.NotebooksBasePath = data.NotebooksCustomEndpoint.ValueString()
-	p.OSConfigBasePath = data.OSConfigCustomEndpoint.ValueString()
-	p.OSLoginBasePath = data.OSLoginCustomEndpoint.ValueString()
-	p.PrivatecaBasePath = data.PrivatecaCustomEndpoint.ValueString()
-	p.PubsubBasePath = data.PubsubCustomEndpoint.ValueString()
-	p.PubsubLiteBasePath = data.PubsubLiteCustomEndpoint.ValueString()
-	p.RedisBasePath = data.RedisCustomEndpoint.ValueString()
-	p.ResourceManagerBasePath = data.ResourceManagerCustomEndpoint.ValueString()
-	p.SecretManagerBasePath = data.SecretManagerCustomEndpoint.ValueString()
-	p.SecurityCenterBasePath = data.SecurityCenterCustomEndpoint.ValueString()
-	p.ServiceManagementBasePath = data.ServiceManagementCustomEndpoint.ValueString()
-	p.ServiceUsageBasePath = data.ServiceUsageCustomEndpoint.ValueString()
-	p.SourceRepoBasePath = data.SourceRepoCustomEndpoint.ValueString()
-	p.SpannerBasePath = data.SpannerCustomEndpoint.ValueString()
-	p.SQLBasePath = data.SQLCustomEndpoint.ValueString()
-	p.StorageBasePath = data.StorageCustomEndpoint.ValueString()
-	p.StorageTransferBasePath = data.StorageTransferCustomEndpoint.ValueString()
-	p.TagsBasePath = data.TagsCustomEndpoint.ValueString()
-	p.TPUBasePath = data.TPUCustomEndpoint.ValueString()
-	p.VertexAIBasePath = data.VertexAICustomEndpoint.ValueString()
-	p.VPCAccessBasePath = data.VPCAccessCustomEndpoint.ValueString()
-	p.WorkflowsBasePath = data.WorkflowsCustomEndpoint.ValueString()
+	<% products.map.each do |product| -%>
+	p.<%= product[:definitions].name -%>BasePath = data.<%= product[:definitions].name -%>CustomEndpoint.ValueString()
+	<% end -%>
 
 	p.context = ctx
-	p.region = data.Region.String()
+	p.region = data.Region
+	p.zone = data.Zone
 	p.pollInterval = 10 * time.Second
 	p.project = data.Project
 	p.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, batchingConfig)
@@ -244,7 +167,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			pbConfigs[0].EnableBatching = types.BoolValue(true)
 		}
 
-		data.Batching, d = types.ListValueFrom(ctx, types.ObjectType{}, pbConfigs)
+		data.Batching, d = types.ListValueFrom(ctx, types.ObjectType{}.WithAttributeTypes(ProviderBatchingAttributes), pbConfigs)
 	}
 
 	if data.UserProjectOverride.IsNull() && os.Getenv("USER_PROJECT_OVERRIDE") != "" {
@@ -533,30 +456,35 @@ func (p *frameworkProvider) SetupClient(ctx context.Context, data ProviderModel,
 	}
 	client.Timeout = timeout
 
+	p.tokenSource = tokenSource
 	p.client = client
 }
 
 func (p *frameworkProvider) SetupGrpcLogging() {
 	logger := logrus.StandardLogger()
 
-    logrus.SetLevel(logrus.DebugLevel)
-    logrus.SetFormatter(&Formatter{
-        TimestampFormat: "2006/01/02 15:04:05",
-        LogFormat:       "%time% [%lvl%] %msg% \n",
-    })
+	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetFormatter(&Formatter{
+		TimestampFormat: "2006/01/02 15:04:05",
+		LogFormat:       "%time% [%lvl%] %msg% \n",
+	})
 
-    alwaysLoggingDeciderClient := func(ctx context.Context, fullMethodName string) bool { return true }
-    grpc_logrus.ReplaceGrpcLogger(logrus.NewEntry(logger))
+	alwaysLoggingDeciderClient := func(ctx context.Context, fullMethodName string) bool { return true }
+	grpc_logrus.ReplaceGrpcLogger(logrus.NewEntry(logger))
 
-    p.gRPCLoggingOptions = append(
-        p.gRPCLoggingOptions, option.WithGRPCDialOption(grpc.WithUnaryInterceptor(
-            grpc_logrus.PayloadUnaryClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
-        option.WithGRPCDialOption(grpc.WithStreamInterceptor(
-            grpc_logrus.PayloadStreamClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
-    )
+	p.gRPCLoggingOptions = append(
+		p.gRPCLoggingOptions, option.WithGRPCDialOption(grpc.WithUnaryInterceptor(
+			grpc_logrus.PayloadUnaryClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
+		option.WithGRPCDialOption(grpc.WithStreamInterceptor(
+			grpc_logrus.PayloadStreamClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
+	)
 }
 
 func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data ProviderModel, diags *diag.Diagnostics) {
+	// GetCurrentUserEmailFramework doesn't pass an error back from logGoogleIdentities, so we want
+	// a separate diagnostics here
+	var d diag.Diagnostics
+
 	if data.ImpersonateServiceAccount.IsNull() {
 
 		tokenSource := GetTokenSource(ctx, data, true, diags)
@@ -566,10 +494,9 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 
 		p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
 
-		email := getCurrUserEmail(p, p.userAgent, diags)
-		if diags.HasError() {
+		email := GetCurrentUserEmailFramework(p, p.userAgent, &d)
+		if d.HasError() {
 			tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
-			return
 		}
 
 		tflog.Info(ctx, fmt.Sprintf("Terraform is using this identity: %s", email))
@@ -583,10 +510,9 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 	}
 
 	p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
-	email := getCurrUserEmail(p, p.userAgent, diags)
-	if diags.HasError() {
+	email := GetCurrentUserEmailFramework(p, p.userAgent, &d)
+	if d.HasError() {
 		tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
-		return
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Terraform is configured with service account impersonation, original identity: %s, impersonated identity: %s", email, data.ImpersonateServiceAccount.ValueString()))
@@ -713,8 +639,8 @@ func GetCredentials(ctx context.Context, data ProviderModel, initialCredentialsO
 // provider configuration set for batching
 func GetBatchingConfig(ctx context.Context, data types.List, diags *diag.Diagnostics) *batchingConfig {
 	bc := &batchingConfig{
-		sendAfter:      time.Second * defaultBatchSendIntervalSec,
-		enableBatching: true,
+		SendAfter:      time.Second * DefaultBatchSendIntervalSec,
+		EnableBatching: true,
 	}
 
 	if data.IsNull() {
@@ -734,10 +660,10 @@ func GetBatchingConfig(ctx context.Context, data types.List, diags *diag.Diagnos
 		return bc
 	}
 
-	bc.sendAfter = sendAfter
+	bc.SendAfter = sendAfter
 
 	if !pbConfigs[0].EnableBatching.IsNull() {
-		bc.enableBatching = pbConfigs[0].EnableBatching.ValueBool()
+		bc.EnableBatching = pbConfigs[0].EnableBatching.ValueBool()
 	}
 
 	return bc

@@ -13,7 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ datasource.DataSource = &GoogleDnsManagedZoneDataSource{}
+// Ensure the implementation satisfies the expected interfaces
+var (
+	_ datasource.DataSource              = &GoogleDnsManagedZoneDataSource{}
+	_ datasource.DataSourceWithConfigure = &GoogleDnsManagedZoneDataSource{}
+)
 
 func NewGoogleDnsManagedZoneDataSource() datasource.DataSource {
 	return &GoogleDnsManagedZoneDataSource{}
@@ -46,16 +50,23 @@ func (d *GoogleDnsManagedZoneDataSource) Schema(ctx context.Context, req datasou
 		MarkdownDescription: "Provides access to a zone's attributes within Google Cloud DNS",
 
 		Attributes: map[string]schema.Attribute{
-			"dns_name": schema.StringAttribute{
-				Description:         "The fully qualified DNS name of this zone.",
-				MarkdownDescription: "The fully qualified DNS name of this zone.",
-				Computed:            true,
-			},
-
 			"name": schema.StringAttribute{
 				Description:         "A unique name for the resource.",
 				MarkdownDescription: "A unique name for the resource.",
 				Required:            true,
+			},
+
+			// Google Cloud DNS ManagedZone resources do not have a SelfLink attribute.
+			"project": schema.StringAttribute{
+				Description:         "The ID of the project for the Google Cloud.",
+				MarkdownDescription: "The ID of the project for the Google Cloud.",
+				Optional:            true,
+			},
+
+			"dns_name": schema.StringAttribute{
+				Description:         "The fully qualified DNS name of this zone.",
+				MarkdownDescription: "The fully qualified DNS name of this zone.",
+				Computed:            true,
 			},
 
 			"description": schema.StringAttribute{
@@ -89,12 +100,6 @@ func (d *GoogleDnsManagedZoneDataSource) Schema(ctx context.Context, req datasou
 				Computed: true,
 			},
 
-			// Google Cloud DNS ManagedZone resources do not have a SelfLink attribute.
-			"project": schema.StringAttribute{
-				Description:         "The ID of the project for the Google Cloud.",
-				MarkdownDescription: "The ID of the project for the Google Cloud.",
-				Optional:            true,
-			},
 			"id": schema.StringAttribute{
 				Description:         "DNS managed zone identifier",
 				MarkdownDescription: "DNS managed zone identifier",
@@ -151,6 +156,9 @@ func (d *GoogleDnsManagedZoneDataSource) Read(ctx context.Context, req datasourc
 	clientResp, err := d.client.ManagedZones.Get(data.Project.ValueString(), data.Name.ValueString()).Do()
 	if err != nil {
 		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceDnsManagedZone %q", data.Name.ValueString()), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	tflog.Trace(ctx, "read dns record set data source")

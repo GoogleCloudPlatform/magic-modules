@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
+func DataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleBigqueryDefaultServiceAccountRead,
 		Schema: map[string]*schema.Schema{
@@ -29,7 +29,7 @@ func dataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
 
 func dataSourceGoogleBigqueryDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

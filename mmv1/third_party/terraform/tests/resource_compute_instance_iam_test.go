@@ -12,14 +12,14 @@ import (
 func TestAccComputeInstanceIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 	role := "roles/compute.osLogin"
-	zone := getTestZoneFromEnv()
-	instanceName := fmt.Sprintf("tf-test-instance-%s", randString(t, 10))
+	zone := GetTestZoneFromEnv()
+	instanceName := fmt.Sprintf("tf-test-instance-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceIamPolicy_basic(zone, instanceName, role),

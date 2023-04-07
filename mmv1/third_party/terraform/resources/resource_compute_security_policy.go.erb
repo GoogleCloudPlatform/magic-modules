@@ -18,7 +18,7 @@ import (
 <% end -%>
 )
 
-func resourceComputeSecurityPolicy() *schema.Resource {
+func ResourceComputeSecurityPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeSecurityPolicyCreate,
 		Read:   resourceComputeSecurityPolicyRead,
@@ -173,7 +173,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 												"request_uri": resourceComputeSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParamsSchema(
 													`Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation. When specifying this field, the query or fragment part should be excluded.`,
 												),
-												
+
 												"request_query_param": resourceComputeSecurityPolicyRulePreconfiguredWafConfigExclusionFieldParamsSchema(
 													`Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation.  Note that the parameter can be in the query string or in the POST body.`,
 												),
@@ -262,7 +262,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Optional:     true,
 										Default:      "ALL",
 										Description:  `Determines the key to enforce the rateLimitThreshold on`,
-										ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE", "HTTP_PATH", "SNI", "REGION_CODE", ""}, false),
 									},
 
 									"enforce_on_key_name": {
@@ -270,6 +270,30 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Optional:    true,
 										Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
 									},
+
+									<% unless version == 'ga' -%>
+									"enforce_on_key_configs": {
+										Type:        schema.TypeList,
+										Description: `Enforce On Key Config of this security policy`,
+										ForceNew:    true,
+										Optional:    true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enforce_on_key_type": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													Description:  `Determines the key to enforce the rate_limit_threshold on`,
+													ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE", "HTTP_PATH", "SNI", "REGION_CODE"}, false),
+												},
+												"enforce_on_key_name": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
+												},
+											},
+										},
+									},
+									<% end -%>
 
 									"ban_threshold": {
 										Type:        schema.TypeList,
@@ -564,7 +588,7 @@ func rulesCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interfac
 
 func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -616,7 +640,7 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 	}
 	d.SetId(id)
 
-	err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Creating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Creating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -626,7 +650,7 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 
 func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -683,7 +707,7 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 
 func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -737,7 +761,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 		}
 
-		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -772,7 +796,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -790,7 +814,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -813,7 +837,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
+				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -826,7 +850,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 
 func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -844,7 +868,7 @@ func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{
 		return errwrap.Wrapf("Error deleting SecurityPolicy: {{err}}", err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Deleting SecurityPolicy", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, op, project, "Deleting SecurityPolicy", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}
@@ -1135,7 +1159,7 @@ func expandSecurityPolicyAdaptiveProtectionConfig(configured []interface{}) *com
 		<% unless version == 'ga' -%>
 		AutoDeployConfig: expandAutoDeployConfig(data["auto_deploy_config"].([]interface{})),
 		<% end -%>
-		
+
 	}
 }
 
@@ -1226,8 +1250,16 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute
 		ConformAction:         data["conform_action"].(string),
 		EnforceOnKey:          data["enforce_on_key"].(string),
 		EnforceOnKeyName:      data["enforce_on_key_name"].(string),
+		<% unless version == 'ga' -%>
+		EnforceOnKeyConfigs:   expandSecurityPolicyEnforceOnKeyConfigs(data["enforce_on_key_configs"].([]interface{})),
+		<% end -%>
 		BanDurationSec:        int64(data["ban_duration_sec"].(int)),
 		ExceedRedirectOptions: expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})),
+		<% if version == 'ga' -%>
+		ForceSendFields:       []string{"EnforceOnKey", "EnforceOnKeyName"},
+		<% else -%>
+		ForceSendFields:       []string{"EnforceOnKey", "EnforceOnKeyName", "EnforceOnKeyConfigs"},
+		<% end -%>
 	}
 }
 
@@ -1243,6 +1275,27 @@ func expandThreshold(configured []interface{}) *compute.SecurityPolicyRuleRateLi
 	}
 }
 
+<% unless version == 'ga' -%>
+func expandSecurityPolicyEnforceOnKeyConfigs(configured []interface{}) []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig {
+	params := make([]*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig, 0, len(configured))
+
+	for _, raw := range configured {
+		params = append(params, expandSecurityPolicyEnforceOnKeyConfigsFields(raw))
+	}
+
+	return params
+}
+
+func expandSecurityPolicyEnforceOnKeyConfigsFields(raw interface{}) *compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig {
+	data := raw.(map[string]interface{})
+
+	return &compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig{
+		EnforceOnKeyType: data["enforce_on_key_type"].(string),
+		EnforceOnKeyName: data["enforce_on_key_name"].(string),
+	}
+}
+<% end -%>
+
 func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleRateLimitOptions) []map[string]interface{} {
 	if conf == nil {
 		return nil
@@ -1255,6 +1308,9 @@ func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleR
 		"conform_action":          conf.ConformAction,
 		"enforce_on_key":          conf.EnforceOnKey,
 		"enforce_on_key_name":     conf.EnforceOnKeyName,
+		<% unless version == 'ga' -%>
+		"enforce_on_key_configs": flattenSecurityPolicyEnforceOnKeyConfigs(conf.EnforceOnKeyConfigs),
+		<% end -%>
 		"ban_duration_sec":        conf.BanDurationSec,
 		"exceed_redirect_options": flattenSecurityPolicyRedirectOptions(conf.ExceedRedirectOptions),
 	}
@@ -1286,6 +1342,31 @@ func expandSecurityPolicyRuleRedirectOptions(configured []interface{}) *compute.
 		Target: data["target"].(string),
 	}
 }
+
+<% unless version == 'ga' -%>
+func flattenSecurityPolicyEnforceOnKeyConfigs(conf []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig) []map[string]interface{} {
+	if conf == nil || len(conf) == 0 {
+		return nil
+	}
+
+	transformed := make([]map[string]interface{}, 0, len(conf))
+	for _, raw := range conf {
+		transformed = append(transformed, flattenSecurityPolicyEnforceOnKeyConfigsFields(raw))
+	}
+	return transformed
+}
+
+func flattenSecurityPolicyEnforceOnKeyConfigsFields(conf *compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig) map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"enforce_on_key_name":  conf.EnforceOnKeyName,
+		"enforce_on_key_type": conf.EnforceOnKeyType,
+	}
+}
+<% end -%>
 
 func flattenSecurityPolicyRedirectOptions(conf *compute.SecurityPolicyRuleRedirectOptions) []map[string]interface{} {
 	if conf == nil {

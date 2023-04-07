@@ -11,11 +11,11 @@ import (
 func TestAccDataprocMetastoreServiceDatasource_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-test-" + randString(t, 10)
+	name := "tf-test-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataprocMetastoreServiceDatasource_basic(name, "DEVELOPER"),

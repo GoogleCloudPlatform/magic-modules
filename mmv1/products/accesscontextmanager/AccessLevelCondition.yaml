@@ -22,7 +22,7 @@
   self_link: "{{access_level}}"
   create_verb: :PATCH
   delete_verb: :PATCH
-  input: true
+  immutable: true
   update_mask: true
   identity:
     - ipSubnetworks
@@ -82,7 +82,7 @@
       description: |
         The name of the Access Level to add this condition to.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::Array

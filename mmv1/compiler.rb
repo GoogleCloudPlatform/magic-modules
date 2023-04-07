@@ -14,9 +14,7 @@
 
 $LOAD_PATH.unshift File.dirname(__FILE__)
 
-# Run from compiler dir so all references are relative to the compiler
-# executable. This allows the following command line:
-#   ruby compiler.rb -p products/compute -e ansible -o build/ansible
+# Run from compiler dir so all references are relative to compiler.rb
 Dir.chdir(File.dirname(__FILE__))
 
 # Our default timezone is UTC, to avoid local time compromise test code seed
@@ -24,17 +22,14 @@ Dir.chdir(File.dirname(__FILE__))
 ENV['TZ'] = 'UTC'
 
 require 'active_support/inflector'
-require 'active_support/core_ext/array/conversions'
 require 'api/compiler'
 require 'google/logger'
 require 'optparse'
 require 'pathname'
-require 'provider/inspec'
 require 'provider/terraform'
 require 'provider/terraform_kcc'
 require 'provider/terraform_oics'
 require 'provider/terraform_validator'
-require 'pp' if ENV['COMPILER_DEBUG']
 
 products_to_generate = nil
 all_products = false
@@ -59,7 +54,7 @@ OptionParser.new do |opt|
   opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
     all_products = true
   end
-  opt.on('-y', '--yaml-dump', 'Dump the final api.yaml output to a file.') do
+  opt.on('-y', '--yaml-dump', 'Dump the final yaml output to a file.') do
     yaml_dump = true
   end
   opt.on('-o', '--output OUTPUT', 'Folder for module output') do |o|
@@ -77,7 +72,7 @@ OptionParser.new do |opt|
   opt.on('-v', '--version VERSION', 'API version to generate') do |v|
     version = v
   end
-  opt.on('-r', '--override OVERRIDE', 'Directory containing api.yaml overrides') do |r|
+  opt.on('-r', '--override OVERRIDE', 'Directory containing yaml overrides') do |r|
     override_dir = r
   end
   opt.on('-h', '--help', 'Show this message') do
@@ -95,17 +90,6 @@ OptionParser.new do |opt|
   end
 end.parse!
 # rubocop:enable Metrics/BlockLength
-
-# We use ActiveSupport Inflections to perform common string operations like
-# going from camelCase/PascalCase -> snake_case -> Title Case.
-# In order to not break the world, they've frozen the list of inflections the
-# library uses by default.
-# Particularly for initialisms, it may need a little help to generate great
-# code.
-ActiveSupport::Inflector.inflections(:en) do |inflect|
-  inflect.acronym 'TPU'
-  inflect.acronym 'VPC'
-end
 
 raise 'Cannot use -p/--products and -a/--all simultaneously' \
   if products_to_generate && all_products
@@ -141,6 +125,8 @@ start_time = Time.now
 Google::LOGGER.info "Generating MM output to '#{output_path}'"
 Google::LOGGER.info "Using #{version} version"
 
+allowed_classes = Google::YamlValidator.allowed_classes
+
 # products_for_version entries are a hash of product definitions (:definitions)
 # and provider config (:overrides) for the product
 products_for_version = []
@@ -167,18 +153,20 @@ all_product_files.each do |product_name|
 
   if File.exist?(api_override_path)
     result = if File.exist?(api_yaml_path)
-               YAML.load_file(api_yaml_path).merge(YAML.load_file(api_override_path))
+               YAML.load_file(api_yaml_path, permitted_classes: allowed_classes) \
+                   .merge(YAML.load_file(api_override_path, permitted_classes: allowed_classes))
              else
-               YAML.load_file(api_override_path)
+               YAML.load_file(api_override_path, permitted_classes: allowed_classes)
              end
     product_yaml = result.to_yaml
   elsif File.exist?(api_yaml_path)
     product_yaml = File.read(api_yaml_path)
   elsif File.exist?(product_override_path)
     result = if File.exist?(product_yaml_path)
-               YAML.load_file(product_yaml_path).merge(YAML.load_file(product_override_path))
+               YAML.load_file(product_yaml_path, permitted_classes: allowed_classes) \
+                   .merge(YAML.load_file(product_override_path, permitted_classes: allowed_classes))
              else
-               YAML.load_file(product_override_path)
+               YAML.load_file(product_override_path, permitted_classes: allowed_classes)
              end
     product_yaml = result.to_yaml
   elsif File.exist?(product_yaml_path)
@@ -208,14 +196,47 @@ all_product_files.each do |product_name|
 
   if File.exist?(product_yaml_path) || File.exist?(product_override_path)
     resources = []
-    Dir[product_name + '/*'].each do |file_path|
+    Dir["#{product_name}/*"].each do |file_path|
       next if File.basename(file_path) == 'product.yaml' \
-       || File.basename(file_path) == 'terraform.yaml'
+       || File.basename(file_path) == 'terraform.yaml' \
+       || File.extname(file_path) != '.yaml'
 
-      resource_yaml = File.read(file_path)
-      resource = Api::Compiler.new(resource_yaml).run
+      if override_dir
+        # Skip if resource will be merged in the override loop
+        resource_override_path = File.join(override_dir, file_path)
+        next if File.exist?(resource_override_path)
+      end
+      res_yaml = File.read(file_path)
+      resource = Api::Compiler.new(res_yaml).run
       resource.validate
       resources.push(resource)
+    end
+
+    if override_dir
+      ovr_prod_dir = File.join(override_dir, product_name)
+      Dir["#{ovr_prod_dir}/*"].each do |override_path|
+        next if File.basename(override_path) == 'product.yaml' \
+        || File.basename(override_path) == 'terraform.yaml' \
+        || File.extname(override_path) != '.yaml'
+
+        file_path = File.join(product_name, File.basename(override_path))
+        res_yaml = if File.exist?(file_path)
+                     YAML.load_file(file_path, permitted_classes: allowed_classes) \
+                         .merge(YAML \
+                           .load_file(override_path, permitted_classes: allowed_classes)) \
+                         .to_yaml
+                   else
+                     File.read(override_path)
+                   end
+        unless override_dir.nil?
+          # Replace overrides directory if we are running with a provider override
+          # This allows providers to reference files in their override path
+          res_yaml = res_yaml.gsub('{{override_path}}', override_dir)
+        end
+        resource = Api::Compiler.new(res_yaml).run
+        resource.validate
+        resources.push(resource)
+      end
     end
     product_api.set_variable(resources, 'objects')
   end

@@ -428,6 +428,8 @@ The optional `clone` block supports:
 
     A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
+* `database_names` - (Optional) (SQL Server only, use with `point_in_time`) Clone only the specified databases from the source instance. Clone all databases if empty.
+
 * `allocated_ip_range` -  (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
 
 The optional `restore_backup_context` block supports:
@@ -484,6 +486,8 @@ but also provides a convenient way to access an IP of a specific type without
 performing filtering in a Terraform config.
 
 * `instance_type` - The type of the instance. The supported values are `SQL_INSTANCE_TYPE_UNSPECIFIED`, `CLOUD_SQL_INSTANCE`, `ON_PREMISES_INSTANCE` and `READ_REPLICA_INSTANCE`.
+
+~> **NOTE:** Users can upgrade a read replica instance to a stand-alone Cloud SQL instance with the help of `instance_type`. To promote, users have to set the `instance_type` property as `CLOUD_SQL_INSTANCE` and remove/unset `master_instance_name` and `replica_configuration` from instance configuration. This operation might cause your instance to restart.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.

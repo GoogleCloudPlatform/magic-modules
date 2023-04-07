@@ -13,7 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ datasource.DataSource = &GoogleDnsRecordSetDataSource{}
+// Ensure the implementation satisfies the expected interfaces
+var (
+	_ datasource.DataSource              = &GoogleDnsRecordSetDataSource{}
+	_ datasource.DataSourceWithConfigure = &GoogleDnsRecordSetDataSource{}
+)
 
 func NewGoogleDnsRecordSetDataSource() datasource.DataSource {
 	return &GoogleDnsRecordSetDataSource{}
@@ -53,6 +57,14 @@ func (d *GoogleDnsRecordSetDataSource) Schema(ctx context.Context, req datasourc
 				MarkdownDescription: "The DNS name for the resource.",
 				Required:            true,
 			},
+			"type": schema.StringAttribute{
+				MarkdownDescription: "The identifier of a supported record type. See the list of Supported DNS record types.",
+				Required:            true,
+			},
+			"project": schema.StringAttribute{
+				MarkdownDescription: "The ID of the project for the Google Cloud.",
+				Optional:            true,
+			},
 			"rrdatas": schema.ListAttribute{
 				MarkdownDescription: "The string data for the records in this record set.",
 				Computed:            true,
@@ -61,14 +73,6 @@ func (d *GoogleDnsRecordSetDataSource) Schema(ctx context.Context, req datasourc
 			"ttl": schema.Int64Attribute{
 				MarkdownDescription: "The time-to-live of this record set (seconds).",
 				Computed:            true,
-			},
-			"type": schema.StringAttribute{
-				MarkdownDescription: "The identifier of a supported record type. See the list of Supported DNS record types.",
-				Required:            true,
-			},
-			"project": schema.StringAttribute{
-				MarkdownDescription: "The ID of the project for the Google Cloud.",
-				Optional:            true,
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "DNS record set identifier",
@@ -125,6 +129,9 @@ func (d *GoogleDnsRecordSetDataSource) Read(ctx context.Context, req datasource.
 	clientResp, err := d.client.ResourceRecordSets.List(data.Project.ValueString(), data.ManagedZone.ValueString()).Name(data.Name.ValueString()).Type(data.Type.ValueString()).Do()
 	if err != nil {
 		handleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceDnsRecordSet %q", data.Name.ValueString()), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 	if len(clientResp.Rrsets) != 1 {
 		resp.Diagnostics.AddError("only expected 1 record set", fmt.Sprintf("%d record sets were returned", len(clientResp.Rrsets)))

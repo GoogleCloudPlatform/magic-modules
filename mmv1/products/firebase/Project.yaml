@@ -1,0 +1,56 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Project'
+min_version: beta
+base_url: projects/{{project}}
+self_link: projects/{{project}}
+create_url: projects/{{project}}:addFirebase
+immutable: true
+description: |
+  A Google Cloud Firebase instance. This enables Firebase resources on a given google project.
+  Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
+  identifiers (most importantly, the projectId) as its own for easy interop with GCP APIs.
+  Once Firebase has been added to a Google Project it cannot be removed.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://firebase.google.com/'
+  api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects'
+import_format: ["projects/{{project}}", "{{project}}"]
+autogen_async: true
+skip_delete: true
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "firebase_project_basic"
+    min_version: 'beta'
+    primary_resource_id: "default"
+    vars:
+      instance_name: "memory-cache"
+    test_env_vars:
+      org_id: :ORG_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/firebase_project.go.erb
+  pre_create: templates/terraform/pre_create/firebase_project.go.erb
+properties:
+  - !ruby/object:Api::Type::String
+    name: projectNumber
+    output: true
+    description: |
+      The number of the google project that firebase is enabled on.
+  - !ruby/object:Api::Type::String
+    name: displayName
+    output: true
+    description: |
+      The GCP project display name

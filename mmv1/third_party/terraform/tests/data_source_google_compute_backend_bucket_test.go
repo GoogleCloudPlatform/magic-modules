@@ -10,13 +10,13 @@ import (
 func TestAccDataSourceComputeBackendBucket_basic(t *testing.T) {
 	t.Parallel()
 
-	backendBucketName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	bucketName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	backendBucketName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	bucketName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeBackendBucketDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeBackendBucket_basic(backendBucketName, bucketName),

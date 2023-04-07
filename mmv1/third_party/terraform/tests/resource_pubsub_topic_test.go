@@ -10,12 +10,12 @@ import (
 func TestAccPubsubTopic_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPubsubTopicDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubTopic_update(topic, "foo", "bar"),
@@ -43,16 +43,19 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 	t.Parallel()
 
 	kms := BootstrapKMSKey(t)
-	pid := getTestProjectFromEnv()
-	topicName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	topicName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPubsubTopicDestroyProducer(t),
+	if BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubTopic_cmek(pid, topicName, kms.CryptoKey.Name),
+				Config: testAccPubsubTopic_cmek(topicName, kms.CryptoKey.Name),
 			},
 			{
 				ResourceName:      "google_pubsub_topic.topic",
@@ -91,22 +94,11 @@ resource "google_pubsub_topic" "foo" {
 `, topic, key, value, region)
 }
 
-func testAccPubsubTopic_cmek(pid, topicName, kmsKey string) string {
+func testAccPubsubTopic_cmek(topicName, kmsKey string) string {
 	return fmt.Sprintf(`
-data "google_project" "project" {
-  project_id = "%s"
-}
-
-resource "google_project_iam_member" "kms-project-binding" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
-
 resource "google_pubsub_topic" "topic" {
   name         = "%s"
-  project      = google_project_iam_member.kms-project-binding.project
   kms_key_name = "%s"
 }
-`, pid, topicName, kmsKey)
+`, topicName, kmsKey)
 }
