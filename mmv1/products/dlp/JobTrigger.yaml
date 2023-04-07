@@ -307,7 +307,6 @@ properties:
                 values:
                   - :TOP
                   - :RANDOM_START
-                  - :SAMPLE_METHOD_UNSPECIFIED
           - !ruby/object:Api::Type::NestedObject
             name: 'bigQueryOptions'
             description: Options defining BigQuery table and row identifiers.
@@ -353,6 +352,7 @@ properties:
                 values:
                   - :TOP
                   - :RANDOM_START
+                  - :SAMPLE_METHOD_UNSPECIFIED
                 default_value: :TOP
               - !ruby/object:Api::Type::Array
                 name: 'identifyingFields'
