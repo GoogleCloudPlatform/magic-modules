@@ -1,6 +1,6 @@
 module github.com/trodge/magic-modules/tools/missing-test-detector
 
-go 1.18
+go 1.19
 
 replace google/provider/old => github.com/hashicorp/terraform-provider-google-beta v1.20.1-0.20230302220542-203a52c6e3e1
 
