@@ -178,6 +178,10 @@ module Provider
         # Remove region tags
         body = body.gsub(/# \[[a-zA-Z_ ]+\]\n/, '')
         body = body.gsub(/\n# \[[a-zA-Z_ ]+\]/, '')
+
+        # Remove %{random_suffix}
+        body.gsub!("-%{random_suffix}", "")
+        body.gsub!("%{random_suffix}", "")
         lines(compile_file(
                 { content: body },
                 "#{pwd}/templates/terraform/examples/base_configs/documentation.tf.erb"
