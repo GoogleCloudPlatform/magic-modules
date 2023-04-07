@@ -105,7 +105,7 @@ properties:
       A set of Certificates defines for the given hostname.
       There can be defined up to fifteen certificates in each Certificate Map Entry.
       Each certificate must match pattern projects/*/locations/*/certificates/*.
-    diff_suppress_func: projectNumberDiffSuppress
+    diff_suppress_func: ProjectNumberDiffSuppress
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'state'

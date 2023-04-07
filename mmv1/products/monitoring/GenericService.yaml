@@ -31,7 +31,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 legacy_name: 'google_monitoring_service'
 id_format: "projects/{{project}}/services/{{service_id}}"
 import_format: ["projects/{{project}}/services/{{service_id}}"]
-error_retry_predicates: ["isMonitoringConcurrentEditError"]
+error_retry_predicates: ["IsMonitoringConcurrentEditError"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "monitoring_service_example"
