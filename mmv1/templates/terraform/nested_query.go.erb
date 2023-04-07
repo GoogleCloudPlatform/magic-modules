@@ -226,7 +226,7 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
 -%>
 func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
   config := meta.(*Config)
-  url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+  url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
   if err != nil {
       return nil, err
   }

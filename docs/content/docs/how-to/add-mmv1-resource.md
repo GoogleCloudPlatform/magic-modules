@@ -274,20 +274,20 @@ your resource:
   properties:
     - !ruby/object:Api::Type::String
       name: "myField"
-      diff_suppress_func: 'caseDiffSuppress'
+      diff_suppress_func: 'CaseDiffSuppress'
 ```
 
 The value of diff_suppress_func can be any valid DiffSuppressFunc, including the
 result of a function call. For example:
 
 ```yaml
-diff_suppress_func: 'optionalPrefixSuppress("folders/")'
+diff_suppress_func: 'OptionalPrefixSuppress("folders/")'
 ```
 
 Please make sure to add thorough unit tests (in addition to basic integration
 tests) for your diff suppress func.
 
-Example: DomainMapping (domainMappingLabelDiffSuppress)
+Example: DomainMapping (DomainMappingLabelDiffSuppress)
 
 -   [DomainMapping.yaml resource file](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/cloudrun/DomainMapping.yaml)
     -   [`custom_code`](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/cloudrun/DomainMapping.yaml#L40)

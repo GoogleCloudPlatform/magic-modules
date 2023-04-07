@@ -34,7 +34,7 @@ docs: !ruby/object:Provider::Terraform::Docs
     developer experience and broader support of Cloud Run features.
 id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
 import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
-error_retry_predicates: ["isCloudRunCreationConflict"]
+error_retry_predicates: ["IsCloudRunCreationConflict"]
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckKnativeStatusFunc(res)
   actions: ['create', 'update']

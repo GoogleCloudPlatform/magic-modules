@@ -60,7 +60,7 @@ func GetBigtableInstanceApiObject(d TerraformResourceData, config *Config) (map[
 }
 
 func expandBigtableInstanceName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return replaceVars(d, config, "projects/{{project}}/instances/{{name}}")
+	return ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 }
 
 func expandBigtableDisplayName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {

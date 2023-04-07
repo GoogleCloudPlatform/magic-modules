@@ -422,7 +422,7 @@ var translationMap = map[string]translationIndex{
 	"project_number": {
 		docsValue:    "my-project-number",
 		contextKey:   "project_number",
-		contextValue: "getTestProjectNumberFromEnv()",
+		contextValue: "GetTestProjectNumberFromEnv()",
 	},
 	"customer_id": {
 		docsValue:    "A01b123xz",
