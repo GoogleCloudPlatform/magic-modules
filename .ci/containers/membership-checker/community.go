@@ -26,6 +26,46 @@ func approveCommunityChecker(prNumber, projectId, commitSha string) error {
 	return nil
 }
 
+func postAwaitingApprovalBuildLink(prNumber, GITHUB_TOKEN, projectId, commitSha string) error {
+	buildId, err := getPendingBuildId(projectId, commitSha)
+	if err != nil {
+		return err
+	}
+
+	if buildId == "" {
+		return fmt.Errorf("Failed to find pending build for PR %s", prNumber)
+	}
+
+	targetUrl := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s?project=%s", buildId, projectId)
+
+	postBody := map[string]string{
+		"context":    "Approve Build",
+		"state":      "success",
+		"target_url": targetUrl,
+	}
+
+	err = postBuildStatus(prNumber, GITHUB_TOKEN, commitSha, postBody)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func postBuildStatus(prNumber, GITHUB_TOKEN, commitSha string, body map[string]string) error {
+
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/%s", commitSha)
+
+	_, err := requestCall(url, "POST", GITHUB_TOKEN, nil, body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Successfully posted community-checker build link to pull request %s", prNumber)
+
+	return nil
+}
+
 func getPendingBuildId(projectId, commitSha string) (string, error) {
 	COMMUNITY_CHECKER_TRIGGER, ok := os.LookupEnv("COMMUNITY_CHECKER_TRIGGER")
 	if !ok {
