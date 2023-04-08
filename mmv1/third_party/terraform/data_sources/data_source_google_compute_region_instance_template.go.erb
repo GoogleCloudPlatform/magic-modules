@@ -68,12 +68,12 @@ func datasourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta in
 			"filter": v.(string),
 		}
 
-		url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates")
+		url, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates")
 		if err != nil {
 			return err
 		}
 
-		url, err = addQueryParams(url, params)
+		url, err = AddQueryParams(url, params)
 		if err != nil {
 			return err
 		}
