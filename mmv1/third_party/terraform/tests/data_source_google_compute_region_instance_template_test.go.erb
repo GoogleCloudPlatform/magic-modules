@@ -20,7 +20,7 @@ func TestAccRegionInstanceTemplateDatasource_name(t *testing.T) {
 			{
 				Config: testAccRegionInstanceTemplate_name(GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_region_instance_template.default",
 						"google_compute_region_instance_template.default",
 						map[string]struct{}{},
@@ -41,7 +41,7 @@ func TestAccRegionInstanceTemplateDatasource_filter(t *testing.T) {
 			{
 				Config: testAccRegionInstanceTemplate_filter(GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_region_instance_template.default",
 						"google_compute_region_instance_template.c",
 						map[string]struct{}{},
@@ -62,7 +62,7 @@ func TestAccRegionInstanceTemplateDatasource_filter_mostRecent(t *testing.T) {
 			{
 				Config: testAccRegionInstanceTemplate_filter_mostRecent(GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_region_instance_template.default",
 						"google_compute_region_instance_template.c",
 						map[string]struct{}{},
