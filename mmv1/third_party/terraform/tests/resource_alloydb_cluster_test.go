@@ -219,6 +219,8 @@ resource "google_compute_network" "default" {
 `, context)
 }
 
+// We expect an error when creating a cluster without location.
+// Location is a `required` field.
 func TestAccAlloydbCluster_missingLocation(t *testing.T) {
 	t.Parallel()
 
