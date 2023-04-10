@@ -1,5 +1,5 @@
 CustomizeDiff: customdiff.All(
-        customdiff.ForceNewIfChange("ip_cidr_range", isShrinkageIpCidr),
+        customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr),
         <% object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
         resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff,
         <% end -%>

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'GatewaySecurityPoliciesRule'
+name: 'GatewaySecurityPolicyRule'
 base_url: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules'
 create_url: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules?gatewaySecurityPolicyRuleId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules/{{name}}'
@@ -50,14 +50,14 @@ import_format: ['projects/{{project}}/locations/{{location}}/gatewaySecurityPoli
 examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
-    name: 'network_security_gateway_security_policies_rules_basic'
+    name: 'network_security_gateway_security_policy_rules_basic'
     primary_resource_id: 'default'
     vars:
       gateway_security_policy_id: 'my-gateway-security-policy'
       resource_name: 'my-gateway-security-policy-rule'
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
-    name: 'network_security_gateway_security_policies_rules_advanced'
+    name: 'network_security_gateway_security_policy_rules_advanced'
     primary_resource_id: 'default'
     vars:
       gateway_security_policy_id: 'my-gateway-security-policy'

@@ -1,5 +1,5 @@
 func enableRTDB(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	url, err := replaceVars(d, config, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}:reenable")
+	url, err := ReplaceVars(d, config, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}:reenable")
 	if err != nil {
 		return err
 	}
@@ -14,7 +14,7 @@ func enableRTDB(config *Config, d *schema.ResourceData, project string, billingP
 }
 
 func disableRTDB(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	url, err := replaceVars(d, config, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}:disable")
+	url, err := ReplaceVars(d, config, "{{FirebaseDatabaseBasePath}}projects/{{project}}/locations/{{region}}/instances/{{instance_id}}:disable")
 	if err != nil {
 		return err
 	}

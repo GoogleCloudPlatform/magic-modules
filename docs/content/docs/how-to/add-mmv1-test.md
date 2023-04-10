@@ -87,11 +87,13 @@ The `name` should match the base name of your example file,
 `primary_resource_id` is an arbitrary snake_cased string that describes the
 resource, and the `vars` map should contain each key you defined previously.
 
+{{< hint danger >}}
 **Important**: Any vars that are part of the resource's id should include at
 least one hyphen or underscore; this
 [triggers addition of a `tf-test` or `tf_test` prefix](https://github.com/GoogleCloudPlatform/magic-modules/blob/6858338f013f5dc57729ec037883a3594441ea62/mmv1/provider/terraform/examples.rb#L244),
 which is what we use to detect and delete stray resources that are sometimes
 left over during test runs.
+{{< /hint >}}
 
 ## Results
 
@@ -108,7 +110,7 @@ func TestAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(t *testing.T)
     }
 
     VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { testAccPreCheck(t) },
+        PreCheck:                 func() { AccTestPreCheck(t) },
         ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
         CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
         Steps: []resource.TestStep{
