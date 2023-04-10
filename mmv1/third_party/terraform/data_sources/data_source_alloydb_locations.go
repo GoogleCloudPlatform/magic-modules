@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -63,7 +64,7 @@ func DataSourceAlloydbLocations() *schema.Resource {
 
 func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -80,11 +81,12 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		billingProject = bp
 	}
 
-	url, err := replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations")
+	url, err := ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations")
+	log.Printf("[ERROR] kanthara url : %s", url)
 	if err != nil {
 		return fmt.Errorf("Error setting api endpoint")
 	}
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Locations %q", d.Id()))
 	}
@@ -122,11 +124,11 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		if res["nextPageToken"] == nil || res["nextPageToken"].(string) == "" {
 			break
 		}
-		url, err = replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations?pageToken="+res["nextPageToken"].(string))
+		url, err = ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations?pageToken="+res["nextPageToken"].(string))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
-		res, err = sendRequest(config, "GET", billingProject, url, userAgent, nil)
+		res, err = SendRequest(config, "GET", billingProject, url, userAgent, nil)
 		if err != nil {
 			return handleNotFoundError(err, d, fmt.Sprintf("Locations %q", d.Id()))
 		}
