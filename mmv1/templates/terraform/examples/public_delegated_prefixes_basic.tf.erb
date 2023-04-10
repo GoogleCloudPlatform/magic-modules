@@ -7,6 +7,7 @@ resource "google_compute_public_advertised_prefix" "advertised" {
 
 resource "google_compute_public_delegated_prefix" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['prefixes_name'] %>"
+  region = "us-central1"
   description = "my description"
   ip_cidr_range = "127.127.0.0/24"
   parent_prefix = google_compute_public_advertised_prefix.advertised.id
