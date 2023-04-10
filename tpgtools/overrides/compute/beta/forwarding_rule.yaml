@@ -79,7 +79,7 @@
   field: location
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: portRangeDiffSuppress
+    diffsuppressfunc: PortRangeDiffSuppress
   field: port_range
 - type: DIFF_SUPPRESS_FUNC
   details:
@@ -99,11 +99,11 @@
   field: network
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: caseDiffSuppress
+    diffsuppressfunc: CaseDiffSuppress
   field: ip_protocol
 - type: DIFF_SUPPRESS_FUNC
   details:
-    diffsuppressfunc: internalIpDiffSuppress
+    diffsuppressfunc: InternalIpDiffSuppress
   field: ip_address
 - type: CUSTOM_VALIDATION
   details:

@@ -30,7 +30,7 @@ func Nprintf(format string, params map[string]interface{}) string {
 	return google.Nprintf(format, params)
 }
 
-// testAccPreCheck ensures at least one of the project env variables is set.
+// AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectFromEnv() string {
 	project := MultiEnvSearch([]string{"TEST_PROJECT", "GOOGLE_PROJECT"})
 	if project == "" {
@@ -41,7 +41,7 @@ func GetTestProjectFromEnv() string {
 	return project
 }
 
-// testAccPreCheck ensures at least one of the credentials env variables is set.
+// AccTestPreCheck ensures at least one of the credentials env variables is set.
 func GetTestCredsFromEnv() string {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -62,7 +62,7 @@ func GetTestCredsFromEnv() string {
 	return credentials
 }
 
-// testAccPreCheck ensures at least one of the region env variables is set.
+// AccTestPreCheck ensures at least one of the region env variables is set.
 func GetTestRegionFromEnv() string {
 	return defaultRegion
 }

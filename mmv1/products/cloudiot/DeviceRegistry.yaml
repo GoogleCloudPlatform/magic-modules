@@ -126,7 +126,7 @@ properties:
       A unique name for the resource, required by device registry.
     api_name: 'id'
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateCloudIotDeviceRegistryID'
+      function: 'ValidateCloudIotDeviceRegistryID'
   - !ruby/object:Api::Type::Array
     name: 'eventNotificationConfigs'
     description: |
@@ -208,7 +208,7 @@ properties:
       - :ERROR
       - :INFO
       - :DEBUG
-    diff_suppress_func: 'emptyOrDefaultStringSuppress("NONE")'
+    diff_suppress_func: 'EmptyOrDefaultStringSuppress("NONE")'
   - !ruby/object:Api::Type::Array
     name: 'credentials'
     description: |
