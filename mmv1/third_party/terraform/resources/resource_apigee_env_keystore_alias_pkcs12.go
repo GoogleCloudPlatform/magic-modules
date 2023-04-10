@@ -13,14 +13,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func ResourceApigeeEnvKeystoreAliasPkcs12() *schema.Resource {
+func ResourceApigeeKeystoresAliasesPkcs12() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceApigeeEnvKeystoreAliasPkcs12Create,
-		Read:   resourceApigeeEnvKeystoreAliasPkcs12Read,
-		Delete: resourceApigeeEnvKeystoreAliasPkcs12Delete,
+		Create: ResourceApigeeKeystoresAliasesPkcs12Create,
+		Read:   ResourceApigeeKeystoresAliasesPkcs12Read,
+		Delete: ResourceApigeeKeystoresAliasesPkcs12Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: resourceApigeeEnvKeystoreAliasPkcs12Import,
+			State: ResourceApigeeKeystoresAliasesPkcs12Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -158,7 +158,7 @@ Flag is set to Yes if the certificate is valid, No if expired, or Not yet if not
 	}
 }
 
-func resourceApigeeEnvKeystoreAliasPkcs12Create(d *schema.ResourceData, meta interface{}) error {
+func ResourceApigeeKeystoresAliasesPkcs12Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -180,7 +180,7 @@ func resourceApigeeEnvKeystoreAliasPkcs12Create(d *schema.ResourceData, meta int
 	_, err = io.Copy(certFilePartWriter, file)
 	bw.Close()
 	file.Close()
-	url, err := replaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases?format=pkcs12&alias={{alias}}&ignoreExpiryValidation=true")
+	url, err := ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases?format=pkcs12&alias={{alias}}&ignoreExpiryValidation=true")
 	if err != nil {
 		return err
 	}
@@ -199,7 +199,7 @@ func resourceApigeeEnvKeystoreAliasPkcs12Create(d *schema.ResourceData, meta int
 	}
 
 	// Store the ID now
-	id, err := replaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
+	id, err := ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -207,17 +207,17 @@ func resourceApigeeEnvKeystoreAliasPkcs12Create(d *schema.ResourceData, meta int
 
 	log.Printf("[DEBUG] Finished creating KeystoreAliasesPkcs %q: %#v", d.Id(), res)
 
-	return resourceApigeeEnvKeystoreAliasPkcs12Read(d, meta)
+	return ResourceApigeeKeystoresAliasesPkcs12Read(d, meta)
 }
 
-func resourceApigeeEnvKeystoreAliasPkcs12Read(d *schema.ResourceData, meta interface{}) error {
+func ResourceApigeeKeystoresAliasesPkcs12Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
+	url, err := ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
 	if err != nil {
 		return err
 	}
@@ -249,7 +249,7 @@ func resourceApigeeEnvKeystoreAliasPkcs12Read(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceApigeeEnvKeystoreAliasPkcs12Delete(d *schema.ResourceData, meta interface{}) error {
+func ResourceApigeeKeystoresAliasesPkcs12Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -258,7 +258,7 @@ func resourceApigeeEnvKeystoreAliasPkcs12Delete(d *schema.ResourceData, meta int
 
 	billingProject := ""
 
-	url, err := replaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
+	url, err := ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
 	if err != nil {
 		return err
 	}
@@ -280,9 +280,9 @@ func resourceApigeeEnvKeystoreAliasPkcs12Delete(d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceApigeeEnvKeystoreAliasPkcs12Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func ResourceApigeeKeystoresAliasesPkcs12Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"organizations/(?P<org_id>[^/]+)/environments/(?P<environment>[^/]+)/keystores/(?P<keystore>[^/]+)/aliases/(?P<alias>[^/]+)",
 		"(?P<org_id>[^/]+)/(?P<environment>[^/]+)/(?P<keystore>[^/]+)/(?P<alias>[^/]+)",
 	}, d, config); err != nil {
@@ -290,7 +290,7 @@ func resourceApigeeEnvKeystoreAliasPkcs12Import(d *schema.ResourceData, meta int
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
+	id, err := ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

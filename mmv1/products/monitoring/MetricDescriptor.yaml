@@ -31,7 +31,7 @@ async: !ruby/object:Provider::Terraform::PollAsync
   actions: ['create', 'update', 'delete']
 id_format: "{{name}}"
 import_format: ["{{name}}"]
-error_retry_predicates: ["isMonitoringConcurrentEditError"]
+error_retry_predicates: ["IsMonitoringConcurrentEditError"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "monitoring_metric_descriptor_basic"

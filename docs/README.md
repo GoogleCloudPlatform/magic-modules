@@ -1,4 +1,4 @@
-The docsite is generated using [Hugo](https://gohugo.io/) and hosted using Github Pages. Magic Modules documentation should adhere to the [Google developer documentation style guide](https://developers.google.com/style/).
+The docsite is generated using [Hugo](https://gohugo.io/) and hosted using Github Pages. The theme is [Hugo Book](https://themes.gohugo.io/themes/hugo-book/) by [Alex Shpak](https://github.com/alex-shpak/). Magic Modules documentation should adhere to the [Google developer documentation style guide](https://developers.google.com/style/).
 
 To view locally:
 
