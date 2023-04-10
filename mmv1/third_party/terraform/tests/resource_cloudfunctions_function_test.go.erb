@@ -1362,12 +1362,6 @@ resource "google_artifact_registry_repository_iam_binding" "binding" {
   ]
 }
 
-resource "google_project_iam_member" "cloud_build_sa_builder_permission" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudbuild.builds.builder"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-}
-
 resource "google_kms_crypto_key_iam_binding" "gcf_cmek_keyuser" {
   crypto_key_id = "%s"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
