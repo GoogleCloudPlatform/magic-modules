@@ -65,6 +65,7 @@ examples:
       random_suffix\"])"
     vars:
       account_id: "my-account"
+      app_gateway_name: "my-app-gateway"
       app_connector_name: "my-app-connector"
       app_connection_name: "my-app-connection"
       display_name: "some display name"
