@@ -73,38 +73,3 @@ properties:
     name: 'ipCidrRange'
     description: The IPv4 address range, in CIDR format, represented by this public advertised prefix.
     required: true
-  - !ruby/object:Api::Type::Array
-    name: 'publicDelegatedPrefixs'
-    output: true
-    description: |
-      Opaque filter criteria used by Loadbalancer to restrict routing
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
-          description: |
-            Specifies how individual filterLabel matches within the list of
-            filterLabels contribute towards the overall metadataFilter match.
-
-            MATCH_ANY - At least one of the filterLabels must have a matching
-            label in the provided metadata.
-            MATCH_ALL - All filterLabels must have matching labels in the
-            provided metadata.
-          required: true
-        - !ruby/object:Api::Type::String
-          name: 'project'
-          description: |
-            Specifies how individual filterLabel matches within the list of
-            filterLabels contribute towards the overall metadataFilter match.
-
-            MATCH_ANY - At least one of the filterLabels must have a matching
-            label in the provided metadata.
-            MATCH_ALL - All filterLabels must have matching labels in the
-            provided metadata.
-          required: true
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'fingerprint'
-    output: true
-    description: |
-      Fingerprint of this resource. A hash of the contents stored in this
-      object. This field is used in optimistic locking.

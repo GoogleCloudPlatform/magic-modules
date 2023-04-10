@@ -57,6 +57,7 @@ properties:
     description: 'A region where the prefix will reside.'
     url_param_only: true
     immutable: true
+    required: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: An optional description of this resource.
@@ -83,10 +84,4 @@ properties:
     name: 'ipCidrRange'
     description: The IPv4 address range, in CIDR format, represented by this public advertised prefix.
     required: true
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'fingerprint'
-    output: true
-    description: |
-      Fingerprint of this resource. A hash of the contents stored in this
-      object. This field is used in optimistic locking.
 

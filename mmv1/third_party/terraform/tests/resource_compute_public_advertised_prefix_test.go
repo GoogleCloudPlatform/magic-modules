@@ -59,7 +59,7 @@ func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest(t *t
 				Config: testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicExample(context),
 			},
 			{
-				ResourceName:      "google_compute_public_advertised_prefix.prefixes",
+				ResourceName:      "google_compute_public_advertised_prefix.prefix",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -69,7 +69,7 @@ func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest(t *t
 
 func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicExample(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_public_advertised_prefix" "prefixes" {
+resource "google_compute_public_advertised_prefix" "prefix" {
   name = "tf-test-my-prefix%{random_suffix}"
   description = "%{description}"
   dns_verification_ip = "127.127.0.0"
@@ -93,16 +93,7 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest(t *tes
 				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExample(context),
 			},
 			{
-				ResourceName:            "google_compute_public_delegated_prefix.prefixes",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region"},
-			},
-			{
-				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesUpdate(context),
-			},
-			{
-				ResourceName:            "google_compute_public_delegated_prefix.prefixes",
+				ResourceName:            "google_compute_public_delegated_prefix.prefix",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"region"},
@@ -123,39 +114,16 @@ resource "google_compute_public_advertised_prefix" "advertised" {
 resource "google_compute_public_delegated_prefix" "prefix" {
   name = "tf-test-my-prefix%{random_suffix}"
   description = "my description"
+  region = "us-central1"
   ip_cidr_range = "127.127.0.0/24"
   parent_prefix = google_compute_public_advertised_prefix.advertised.id
 }
 
 resource "google_compute_public_delegated_prefix" "subprefix" {
-  name = "tf-test-my-prefix%{random_suffix}"
+  name = "tf-test-my-subprefix%{random_suffix}"
   description = "my description"
+  region = "us-central1"
   ip_cidr_range = "127.127.0.0/26"
-  parent_prefix = google_compute_public_delegated_prefix.prefix.id
-}
-`, context)
-}
-
-func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesUpdate(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_compute_public_advertised_prefix" "advertised" {
-  name = "tf-test-my-prefix%{random_suffix}"
-  description = "%{description}"
-  dns_verification_ip = "127.127.0.0"
-  ip_cidr_range = "127.127.0.0/16"
-}
-
-resource "google_compute_public_delegated_prefix" "prefix" {
-  name = "tf-test-my-prefix%{random_suffix}"
-  description = "my description"
-  ip_cidr_range = "127.127.0.0/24"
-  parent_prefix = google_compute_public_advertised_prefix.advertised.id
-}
-
-resource "google_compute_public_delegated_prefix" "subprefix" {
-  name = "tf-test-my-prefix%{random_suffix}"
-  description = "my description updated"
-  ip_cidr_range = "127.127.0.0/27"
   parent_prefix = google_compute_public_delegated_prefix.prefix.id
 }
 `, context)
