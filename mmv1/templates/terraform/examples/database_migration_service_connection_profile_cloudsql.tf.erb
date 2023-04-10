@@ -47,7 +47,6 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 	  }
 	  cloud_sql_id = "<%= ctx[:vars]["sqldb"] %>"
 	}
-	dbprovider            = "CLOUDSQL"
 
 	depends_on = [google_sql_user.sqldb_user]
 }
@@ -57,7 +56,6 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 	location = "us-central1"		
 	connection_profile_id = "<%= ctx[:vars]["to_profile"] %>"
 	display_name = "<%= ctx[:vars]["to_profile"] %>_displayname"
-	dbprovider            = "CLOUDSQL"
 	labels	= { 
 					testlabela = "testlabelb" 
 				}

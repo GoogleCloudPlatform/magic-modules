@@ -23,6 +23,27 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Database Migration': 'https://cloud.google.com/database-migration/docs/'
   api: 'https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.connectionProfiles/create'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: "name"
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+  result: !ruby/object:Api::OpAsync::Result
+    path: "response"
+  status: !ruby/object:Api::OpAsync::Status
+    path: "done"
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: "error"
+    message: "message"
+autogen_async: true
 examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "database_migration_service_connection_profile_cloudsql"
@@ -114,6 +135,7 @@ properties:
         output: true
   - !ruby/object:Api::Type::Enum
     name: 'dbprovider'
+    output: true
     description: |
       The database provider.
     api_name: provider
