@@ -233,4 +233,4 @@ properties:
     values:
       - :BEFORE_CLASSIC_FIREWALL
       - :AFTER_CLASSIC_FIREWALL
-    default_from_api: true
+    default_value: :AFTER_CLASSIC_FIREWALL
