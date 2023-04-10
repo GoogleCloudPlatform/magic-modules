@@ -12,7 +12,7 @@ Use this data source to get information about the available locations.
 
 
 ```hcl
-data "google_alloydb_locations" "qa"{
+data "google_alloydb_locations" "qa" {
 }
 ```
 
