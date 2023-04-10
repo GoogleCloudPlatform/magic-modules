@@ -81,8 +81,8 @@ func getPendingBuildId(projectId, commitSha string) (string, error) {
 
 	filter := fmt.Sprintf("trigger_id=%s AND status=PENDING", COMMUNITY_CHECKER_TRIGGER)
 	// Builds will be sorted by createTime, descending order.
-	// 10 should be enough to include the one needs auto approval
-	pageSize := int64(10)
+	// 50 should be enough to include the one needs auto approval
+	pageSize := int64(50)
 
 	builds, err := c.Projects.Builds.List(projectId).Filter(filter).PageSize(pageSize).Do()
 	if err != nil {
