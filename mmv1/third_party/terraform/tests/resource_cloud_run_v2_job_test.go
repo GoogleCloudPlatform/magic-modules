@@ -14,7 +14,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -89,6 +89,12 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
         max_retries = 5
       }
     }
+
+    lifecycle {
+      ignore_changes = [
+        launch_stage,
+      ]
+    }
   }
   resource "google_service_account" "service_account" {
     account_id   = "tf-test-my-account%{random_suffix}"
@@ -151,8 +157,14 @@ resource "google_cloud_run_v2_job" "default" {
         connector = google_vpc_access_connector.connector.id
         egress = "ALL_TRAFFIC"
       }
-      max_retries = 2
+      max_retries = 0
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
   }
 }
 resource "google_service_account" "service_account" {

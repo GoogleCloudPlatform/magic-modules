@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func isShrinkageIpCidr(old, new, _ interface{}) bool {
+func IsShrinkageIpCidr(old, new, _ interface{}) bool {
 	_, oldCidr, oldErr := net.ParseCIDR(old.(string))
 	_, newCidr, newErr := net.ParseCIDR(new.(string))
 

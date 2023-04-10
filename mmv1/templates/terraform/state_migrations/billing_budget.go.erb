@@ -241,7 +241,7 @@ billingAccounts/{billingAccountId}/budgets/{budgetId}.`,
 	}
 }
 
-func resourceBillingBudgetUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+func ResourceBillingBudgetUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
 	rawState["name"] = GetResourceNameFromSelfLink(rawState["name"].(string))

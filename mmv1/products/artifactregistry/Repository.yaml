@@ -47,6 +47,12 @@
         repository_id: "my-repository"
         description: "example docker repository"
     - !ruby/object:Provider::Terraform::Examples
+      name: "artifact_registry_repository_docker"
+      primary_resource_id: "my-repo"
+      vars:
+        repository_id: "my-repository"
+        description: "example docker repository"           
+    - !ruby/object:Provider::Terraform::Examples
       name: "artifact_registry_repository_cmek"
       primary_resource_id: "my-repo"
       vars:
@@ -56,7 +62,6 @@
         kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     - !ruby/object:Provider::Terraform::Examples
       name: "artifact_registry_repository_virtual"
-      min_version: beta
       primary_resource_id: "my-repo"
       vars:
         repository_id: "my-repository"
@@ -66,7 +71,6 @@
         upstream_policy_id: "my-repository-upstream"
     - !ruby/object:Provider::Terraform::Examples
       name: "artifact_registry_repository_remote"
-      min_version: beta
       primary_resource_id: "my-repo"
       vars:
         repository_id: "my-repository"
@@ -136,6 +140,15 @@
       description: The time when the repository was last updated.
       output: true
     - !ruby/object:Api::Type::NestedObject
+      name: 'dockerConfig'
+      description: |-
+        Docker repository config contains repository level configuration for the repositories of docker type.
+      properties:
+        - !ruby/object:Api::Type::Boolean
+          name: 'immutableTags'
+          description: |-
+            The repository which enabled this flag prevents all tags from being modified, moved or deleted. This does not prevent tags from being created.            
+    - !ruby/object:Api::Type::NestedObject
       name: 'mavenConfig'
       description: |-
         MavenRepositoryConfig is maven related repository details.
@@ -161,7 +174,6 @@
           default_value: :VERSION_POLICY_UNSPECIFIED
     - !ruby/object:Api::Type::Enum
       name: 'mode'
-      min_version: beta
       description: |-
         The mode configures the repository to serve artifacts from different sources.
       immutable: true
@@ -172,7 +184,6 @@
       default_value: :STANDARD_REPOSITORY
     - !ruby/object:Api::Type::NestedObject
       name: 'virtualRepositoryConfig'
-      min_version: beta
       conflicts:
         - remote_repository_config
       description: |-
@@ -200,7 +211,6 @@
                   Entries with a greater priority value take precedence in the pull order.
     - !ruby/object:Api::Type::NestedObject
       name: 'remoteRepositoryConfig'
-      min_version: beta
       conflicts:
         - virtual_repository_config
       description: |-

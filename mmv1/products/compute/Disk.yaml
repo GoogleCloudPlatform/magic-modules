@@ -346,7 +346,7 @@ properties:
       config.
     description: |
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-    diff_suppress_func: 'alwaysDiffSuppress'
+    diff_suppress_func: 'AlwaysDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'sourceDisk'
     description: |
@@ -379,7 +379,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'image'
     api_name: 'sourceImage'
-    diff_suppress_func: 'diskImageDiffSuppress'
+    diff_suppress_func: 'DiskImageDiffSuppress'
     description: |
       The image from which to initialize this disk. This can be
       one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
