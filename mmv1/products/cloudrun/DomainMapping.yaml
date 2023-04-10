@@ -25,7 +25,7 @@ description: |-
 immutable: true
 id_format: "locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"
 import_format: ["locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"]
-error_retry_predicates: ["isCloudRunCreationConflict"]
+error_retry_predicates: ["IsCloudRunCreationConflict"]
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckKnativeStatusFunc(res)
   actions: ['create', 'update']
@@ -174,7 +174,7 @@ properties:
           and routes.
           More info: http://kubernetes.io/docs/user-guide/labels
         default_from_api: true
-        diff_suppress_func: 'domainMappingLabelDiffSuppress'
+        diff_suppress_func: 'DomainMappingLabelDiffSuppress'
       - !ruby/object:Api::Type::Integer
         name: generation
         description: |-

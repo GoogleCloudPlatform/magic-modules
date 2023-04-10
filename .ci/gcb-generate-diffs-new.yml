@@ -105,24 +105,24 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      id: tfv-head
+      id: tgc-head
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-head"]
       args:
           - 'head'
-          - 'terraform-validator'
+          - 'terraform-google-conversion'
           - 'ga'
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
-      id: tfv-base
+      id: tgc-base
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["merged", "tpg-base"]
       args:
           - 'base'
-          - 'terraform-validator'
+          - 'terraform-google-conversion'
           - 'ga'
           - $_PR_NUMBER
 
@@ -157,10 +157,10 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester'
-      id: tfv-test
+      id: tgc-test
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tfv-head", "tfv-base"]
+      waitFor: ["tgc-head", "tgc-base"]
       env:
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
         - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
@@ -172,12 +172,13 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - "17"  # Build step
+          - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
-      id: tfv-test-integration-0.12.31
+      id: tgc-test-integration-0.12.31
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tfv-head", "tfv-base"]
+      waitFor: ["tgc-head", "tgc-base"]
       env:
         - TERRAFORM_VERSION=0.12.31
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
@@ -190,12 +191,13 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - "18"  # Build step
+          - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/terraform-validator-tester-integration'
-      id: tfv-test-integration-0.13.7
+      id: tgc-test-integration-0.13.7
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tfv-head", "tfv-base"]
+      waitFor: ["tgc-head", "tgc-base"]
       env:
         - TERRAFORM_VERSION=0.13.7
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
@@ -208,6 +210,7 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - "19"  # Build step
+          - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test

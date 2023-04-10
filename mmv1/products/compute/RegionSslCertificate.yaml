@@ -138,4 +138,4 @@ properties:
     sensitive: true
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
-    diff_suppress_func: 'sha256DiffSuppress'
+    diff_suppress_func: 'Sha256DiffSuppress'

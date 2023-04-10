@@ -15,7 +15,7 @@
 	}
 	billingProject = project
 
-	url, err := replaceVars(d, config, "{{FirebaseBasePath}}{{name}}:remove")
+	url, err := ReplaceVars(d, config, "{{FirebaseBasePath}}{{name}}:remove")
 	if err != nil {
 		return err
 	}

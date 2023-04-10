@@ -43,7 +43,7 @@ Don't panic - this is all quite safe and we have fixed it before.  We store the 
 It's possible for a job to be cancelled or fail in the middle of pushing downstreams in a transient way.  The sorts of failures that happen at scale - lightning strikes a datacenter (ours or GitHub's!) or some other unlikely misfortune happens.  This has a chance to cause a hiccup in the downstream history, but isn't dangerous.  If that happens, the sync tags may need to be manually updated to sit at the same commit, just before the commit which needs to be generated, or some failed tasks might need to be run by hand.
 
 Updating the sync tags is done like this:
-First, check their state: `git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tf-validator-sync` will list the commits for each of the sync tags.
+First, check their state: `git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tf-validator-sync origin/tgc-sync` will list the commits for each of the sync tags.
 (If you have changed the name of the `googlecloudplatform/magic-modules` remote from `origin`, substitute that name instead)
 In normal, steady-state operation, these tags will all be identical.  When a failure occurs, some of them may be one commit ahead of the others.  It is rare for any of them to be 2 or more commits ahead of any other.  If some of them are one commit ahead of the others, and there is no pusher task currently running, this means you need to reset them by hand and rerun the failed jobs.  If they diverge by more than one commit, or a pusher task is currently running, you will need to manually run missing tasks.
 
@@ -73,7 +73,7 @@ VERSION=beta
 git clone https://github.com/GoogleCloudPlatform/magic-modules fix-gcb-run
 pushd fix-gcb-run
 docker pull gcr.io/graphite-docker-images/downstream-builder;
-for commit in $(git log $SYNC_TAG..main --pretty=%H | tac); do 
+for commit in $(git log $SYNC_TAG..main --pretty=%H | tac); do
   git checkout $commit && \
   docker run -v `pwd`:/workspace -w /workspace -e GITHUB_TOKEN=$MAGICIAN_GITHUB_TOKEN -it gcr.io/graphite-docker-images/downstream-builder downstream $REPO $VERSION $commit || \
   break;

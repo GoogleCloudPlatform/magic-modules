@@ -66,9 +66,9 @@ func HandleDCLCustomEndpointDefaults(d *schema.ResourceData) {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
 	if d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey) == "" {
-		d.Set({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey, MultiEnvSearch([]string{
+		d.Set({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_{{$pkg.BasePathIdentifier.ToUpper}}_CUSTOM_ENDPOINT",
-		}))
+		}, ""))
 	}
 {{- end}}
 {{- end}}

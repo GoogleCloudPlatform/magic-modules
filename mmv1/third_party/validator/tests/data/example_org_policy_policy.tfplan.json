@@ -52,8 +52,8 @@
           "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 0,
           "values": {
-            "name": "organizations/{{{.OrgD}}/policies/gcp.detailedAuditLoggingMode",
-            "parent": "organizations/{{{.OrgD}}",
+            "name": "organizations/{{.OrgID}}/policies/gcp.detailedAuditLoggingMode",
+            "parent": "organizations/{{.OrgID}}",
             "spec": [
               {
                 "inherit_from_parent": null,
@@ -228,8 +228,8 @@
         ],
         "before": null,
         "after": {
-          "name": "organizations/{{{.OrgD}}/policies/gcp.detailedAuditLoggingMode",
-          "parent": "organizations/{{{.OrgD}}",
+          "name": "organizations/{{.OrgID}}/policies/gcp.detailedAuditLoggingMode",
+          "parent": "organizations/{{.OrgID}}",
           "spec": [
             {
               "inherit_from_parent": null,
@@ -424,10 +424,10 @@
           "provider_config_key": "google",
           "expressions": {
             "name": {
-              "constant_value": "organizations/{{{.OrgD}}/policies/gcp.detailedAuditLoggingMode"
+              "constant_value": "organizations/{{.OrgID}}/policies/gcp.detailedAuditLoggingMode"
             },
             "parent": {
-              "constant_value": "organizations/{{{.OrgD}}"
+              "constant_value": "organizations/{{.OrgID}}"
             },
             "spec": [
               {

@@ -3,14 +3,14 @@
 		return err
 	}
 
-	lockName, err := replaceVars(d, config, "instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}")
+	lockName, err := ReplaceVars(d, config, "instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}")
 	if err != nil {
 		return err
 	}
 	mutexKV.Lock(lockName)
 	defer mutexKV.Unlock(lockName)
 
-	url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/deletePerInstanceConfigs")
+	url, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/deletePerInstanceConfigs")
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@
 		obj["instances"] = []string{instanceName}
 
 		// Updates must be applied to the instance after deleting the PerInstanceConfig
-		url, err = replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/applyUpdatesToInstances")
+		url, err = ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/applyUpdatesToInstances")
 		if err != nil {
 			return err
 		}
