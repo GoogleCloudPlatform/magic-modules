@@ -12,11 +12,12 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'PublicAdvertisedPrefixes'
+name: 'PublicAdvertisedPrefix'
 base_url: projects/{{project}}/global/publicAdvertisedPrefixes
 has_self_link: true
+immutable: true
 description: |
-  Represents a set of Public Advertised Prefixes for use with bring your own IP addresses (BYOIP).
+  Represents a PublicAdvertisedPrefix for use with bring your own IP addresses (BYOIP).
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Using bring your own IP': 'https://cloud.google.com/vpc/docs/using-bring-your-own-ip'
@@ -43,6 +44,9 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "public_advertised_prefixes_basic"
     primary_resource_id: "prefixes"
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    skip_test: true
     vars:
       prefixes_name: "my-prefix"
     test_env_vars:
@@ -71,6 +75,7 @@ properties:
     required: true
   - !ruby/object:Api::Type::Array
     name: 'publicDelegatedPrefixs'
+    output: true
     description: |
       Opaque filter criteria used by Loadbalancer to restrict routing
     item_type: !ruby/object:Api::Type::NestedObject
@@ -97,3 +102,9 @@ properties:
             MATCH_ALL - All filterLabels must have matching labels in the
             provided metadata.
           required: true
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'fingerprint'
+    output: true
+    description: |
+      Fingerprint of this resource. A hash of the contents stored in this
+      object. This field is used in optimistic locking.
