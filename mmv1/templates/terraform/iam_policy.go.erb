@@ -71,7 +71,7 @@ func <%= resource_name -%>IamUpdaterProducer(d TerraformResourceData, config *Co
 
 <% resource_params.each do |param| -%>
 <% if provider_default_values.include?(param) -%>
-	<%= param -%>, _ := get<%= param.capitalize -%>(d, config)
+	<%= param -%>, _ := Get<%= param.capitalize -%>(d, config)
 	if <%= param -%> != "" {
 		if err := d.Set("<%= param -%>", <%= param -%>); err != nil {
 			return nil, fmt.Errorf("Error setting <%= param -%>: %s", err)
@@ -134,7 +134,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 
 <% resource_params.each do |param| -%>
 <% if provider_default_values.include?(param) -%>
-	<%= param -%>, _ := get<%= param.capitalize -%>(d, config)
+	<%= param -%>, _ := Get<%= param.capitalize -%>(d, config)
 	if <%= param -%> != "" {
 		values["<%= param -%>"] = <%= param -%>
 	}
