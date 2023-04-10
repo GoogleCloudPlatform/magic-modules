@@ -68,7 +68,7 @@ func DataSourceAlloydbSupportedDatabaseFlags() *schema.Resource {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Optional:    true,
-							Description: ``,
+							Description: `Restriction on STRING type value.`,
 							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -86,7 +86,7 @@ func DataSourceAlloydbSupportedDatabaseFlags() *schema.Resource {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Optional:    true,
-							Description: ``,
+							Description: `Restriction on INTEGER type value.`,
 							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
