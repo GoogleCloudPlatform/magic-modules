@@ -145,6 +145,7 @@
           description: "Labels to apply to backups created using this configuration."
         - !ruby/object:Api::Type::NestedObject
           name: "weeklySchedule"
+          required: true
           description: "Weekly schedule for the Backup."
           default_from_api: true
           properties:
