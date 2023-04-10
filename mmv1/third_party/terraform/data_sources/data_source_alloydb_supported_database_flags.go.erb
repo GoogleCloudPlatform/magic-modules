@@ -1,18 +1,9 @@
-<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
-<% if version == "ga" -%>
-	alloydb "cloud.google.com/go/alloydb/apiv1"
-	alloydbpb "cloud.google.com/go/alloydb/apiv1/alloydbpb"
-<% else -%>
-	alloydb "cloud.google.com/go/alloydb/apiv1beta"
-	alloydbpb "cloud.google.com/go/alloydb/apiv1beta/alloydbpb"
-<% end -%>
-	gax "github.com/googleapis/gax-go/v2"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"google.golang.org/api/iterator"
 )
 
 func DataSourceAlloydbSupportedDatabaseFlags() *schema.Resource {
@@ -77,7 +68,7 @@ func DataSourceAlloydbSupportedDatabaseFlags() *schema.Resource {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Optional:    true,
-							Description: `Restriction on STRING type value.`,
+							Description: ``,
 							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -95,18 +86,18 @@ func DataSourceAlloydbSupportedDatabaseFlags() *schema.Resource {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Optional:    true,
-							Description: `Restriction on INTEGER type value.`,
+							Description: ``,
 							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"min_value": {
-										Type:        schema.TypeInt,
+										Type:        schema.TypeString,
 										Computed:    true,
 										Optional:    true,
 										Description: `The minimum value that can be specified, if applicable.`,
 									},
 									"max_value": {
-										Type:        schema.TypeInt,
+										Type:        schema.TypeString,
 										Computed:    true,
 										Optional:    true,
 										Description: `The maximum value that can be specified, if applicable.`,
@@ -123,80 +114,69 @@ func DataSourceAlloydbSupportedDatabaseFlags() *schema.Resource {
 
 func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
+	location := d.Get("location").(string)
+
+	billingProject := ""
+
 	project, err := getProject(d, config)
 	if err != nil {
-		return fmt.Errorf("Error fetching project: %s", err)
+		return fmt.Errorf("Error fetching project for Cluster: %s", err)
 	}
-	billingProject := project
+	billingProject = project
+
+	// err == nil indicates that the billing_project value was found
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	location := ""
-	if v, ok := d.GetOk("location"); ok {
-		location = v.(string)
-	}
-	if location == "" {
-		return fmt.Errorf("Location cannot be empty")
-	}
-	var supportedDatabaseFlagIterator *alloydb.SupportedDatabaseFlagIterator
-	dbFlagsReq := new(alloydbpb.ListSupportedDatabaseFlagsRequest)
-	alloydbClient := config.NewAlloydbClient(userAgent)
-	if alloydbClient == nil {
-		return fmt.Errorf("Failed to call the API to fetch the supported database flags")
-	}
-	err = nil
-	err = retryTime(func() error {
-<% if version == "ga" -%>
-		url := fmt.Sprintf("v1/projects/%s/locations/%s/supportedDatabaseFlags", billingProject, location)
-<% else -%>
-		url := fmt.Sprintf("v1beta/projects/%s/locations/%s/supportedDatabaseFlags", billingProject, location)
-<% end -%>
-		supportedDatabaseFlagIterator = alloydbClient.ListSupportedDatabaseFlags(config.context, dbFlagsReq, gax.WithPath(url))
-		return nil
-	}, 5)
-	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Supported Database flags %q", d.Id()))
-	}
 
+	url, err := replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{location}}/supportedDatabaseFlags")
+	if err != nil {
+		return fmt.Errorf("Error setting api endpoint")
+	}
+	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	if err != nil {
+		return handleNotFoundError(err, d, fmt.Sprintf("SupportedDatabaseFlags %q", d.Id()))
+	}
 	var supportedDatabaseFlags []map[string]interface{}
 	for {
-		supportedDatabaseFlag := make(map[string]interface{})
-		flag, err := supportedDatabaseFlagIterator.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf(fmt.Sprintf("Failed to fetch the supported database flags for the provided location: %s", location))
-		}
-		if flag.Name != "" {
-			supportedDatabaseFlag["name"] = flag.Name
-		}
-		if flag.FlagName != "" {
-			supportedDatabaseFlag["flag_name"] = flag.FlagName
-		}
-		supportedDatabaseFlag["value_type"] = flag.ValueType.String()
-		supportedDatabaseFlag["accepts_multiple_values"] = flag.AcceptsMultipleValues
-		supportedDatabaseFlag["requires_db_restart"] = flag.RequiresDbRestart
-		if flag.SupportedDbVersions != nil {
-			dbVersions := make([]string, 0, len(flag.SupportedDbVersions))
-			for _, supDbVer := range flag.SupportedDbVersions {
-				dbVersions = append(dbVersions, supDbVer.String())
+		result := res["supportedDatabaseFlags"].([]interface{})
+		for _, dbFlag := range result {
+			supportedDatabaseFlag := make(map[string]interface{})
+			flag := dbFlag.(map[string]interface{})
+			if flag["name"] != nil {
+				supportedDatabaseFlag["name"] = flag["name"].(string)
 			}
-			supportedDatabaseFlag["supported_db_versions"] = dbVersions
-		}
+			if flag["flagName"] != nil {
+				supportedDatabaseFlag["flag_name"] = flag["flagName"].(string)
+			}
+			if flag["valueType"] != nil {
+				supportedDatabaseFlag["value_type"] = flag["valueType"].(string)
+			}
+			if flag["acceptsMultipleValues"] != nil {
+				supportedDatabaseFlag["accepts_multiple_values"] = flag["acceptsMultipleValues"].(bool)
+			}
+			if flag["requiresDbRestart"] != nil {
+				supportedDatabaseFlag["requires_db_restart"] = flag["requiresDbRestart"].(bool)
+			}
+			if flag["supportedDbVersions"] != nil {
+				dbVersions := make([]string, 0, len(flag["supportedDbVersions"].([]interface{})))
+				for _, supDbVer := range flag["supportedDbVersions"].([]interface{}) {
+					dbVersions = append(dbVersions, supDbVer.(string))
+				}
+				supportedDatabaseFlag["supported_db_versions"] = dbVersions
+			}
 
-		if flag.Restrictions != nil {
-			if stringRes, ok := flag.Restrictions.(*alloydbpb.SupportedDatabaseFlag_StringRestrictions_); ok {
+			if flag["stringRestrictions"] != nil {
 				restrictions := make([]map[string][]string, 0, 1)
-				fetchedAllowedValues := stringRes.StringRestrictions.AllowedValues
+				fetchedAllowedValues := flag["stringRestrictions"].(map[string]interface{})["allowedValues"]
 				if fetchedAllowedValues != nil {
-					allowedValues := make([]string, 0, len(fetchedAllowedValues))
-					for _, val := range fetchedAllowedValues {
-						allowedValues = append(allowedValues, val)
+					allowedValues := make([]string, 0, len(fetchedAllowedValues.([]interface{})))
+					for _, val := range fetchedAllowedValues.([]interface{}) {
+						allowedValues = append(allowedValues, val.(string))
 					}
 					stringRestrictions := map[string][]string{
 						"allowed_values": allowedValues,
@@ -205,24 +185,34 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 					supportedDatabaseFlag["string_restrictions"] = restrictions
 				}
 			}
-			if integerRes, ok := flag.Restrictions.(*alloydbpb.SupportedDatabaseFlag_IntegerRestrictions_); ok {
-				restrictions := make([]map[string]int64, 0, 1)
-				minValue := integerRes.IntegerRestrictions.MinValue
-				maxValue := integerRes.IntegerRestrictions.MaxValue
-				integerRestrictions := map[string]int64{
-					"min_value": minValue.GetValue(),
-					"max_value": maxValue.GetValue(),
+			if flag["integerRestrictions"] != nil {
+				restrictions := make([]map[string]string, 0, 1)
+				minValue := flag["integerRestrictions"].(map[string]interface{})["minValue"].(string)
+				maxValue := flag["integerRestrictions"].(map[string]interface{})["maxValue"].(string)
+				integerRestrictions := map[string]string{
+					"min_value": minValue,
+					"max_value": maxValue,
 				}
 				restrictions = append(restrictions, integerRestrictions)
 				supportedDatabaseFlag["integer_restrictions"] = restrictions
 			}
+			supportedDatabaseFlags = append(supportedDatabaseFlags, supportedDatabaseFlag)
 		}
-		supportedDatabaseFlags = append(supportedDatabaseFlags, supportedDatabaseFlag)
+		if res["pageToken"] == nil || res["pageToken"].(string) == "" {
+			break
+		}
+		url, err = replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{location}}/supportedDatabaseFlags?pageToken={{res[\"pageToken\"]}}")
+		if err != nil {
+			return fmt.Errorf("Error setting api endpoint")
+		}
+		res, err = sendRequest(config, "GET", billingProject, url, userAgent, nil)
+		if err != nil {
+			return handleNotFoundError(err, d, fmt.Sprintf("SupportedDatabaseFlags %q", d.Id()))
+		}
 	}
 	if err := d.Set("supported_database_flags", supportedDatabaseFlags); err != nil {
 		return fmt.Errorf("Error setting supported_database_flags: %s", err)
 	}
-	d.SetId(fmt.Sprintf("projects/%s/locations/%s/supportedDbFlags", project, location))
+	d.SetId(fmt.Sprintf("project/%s/location/%s/supportedDbFlags", project, location))
 	return nil
 }
-
