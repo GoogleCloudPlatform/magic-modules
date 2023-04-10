@@ -66,6 +66,8 @@ examples:
       image_name: "my-image"
       key_name: "key"
       keyring_name: "keyring"
+    test_vars_overrides:
+      policyChanged: "BootstrapPSARole(t, \"service-\", \"compute-system\", \"roles/cloudkms.cryptoKeyEncrypterDecrypter\")"
 
 properties:
   - !ruby/object:Api::Type::String

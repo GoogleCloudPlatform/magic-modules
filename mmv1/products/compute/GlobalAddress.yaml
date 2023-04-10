@@ -115,7 +115,7 @@ properties:
     values:
       - :IPV4
       - :IPV6
-    diff_suppress_func: 'emptyOrDefaultStringSuppress("IPV4")'
+    diff_suppress_func: 'EmptyOrDefaultStringSuppress("IPV4")'
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
@@ -143,7 +143,7 @@ properties:
       - :EXTERNAL
       - :INTERNAL
     default_value: :EXTERNAL
-    diff_suppress_func: 'emptyOrDefaultStringSuppress("EXTERNAL")'
+    diff_suppress_func: 'EmptyOrDefaultStringSuppress("EXTERNAL")'
   - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |

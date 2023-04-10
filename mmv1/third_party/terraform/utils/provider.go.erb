@@ -160,7 +160,6 @@ func Provider() *schema.Provider {
 			"google_access_approval_organization_service_account": DataSourceAccessApprovalOrganizationServiceAccount(),
 			"google_access_approval_project_service_account":   DataSourceAccessApprovalProjectServiceAccount(),
 			"google_active_folder":                             DataSourceGoogleActiveFolder(),
-			"google_alloydb_supported_database_flags":          DataSourceAlloydbSupportedDatabaseFlags(),
 			"google_artifact_registry_repository":              DataSourceArtifactRegistryRepository(),
 			"google_app_engine_default_service_account":        DataSourceGoogleAppEngineDefaultServiceAccount(),
 			"google_beyondcorp_app_connection":                 DataSourceGoogleBeyondcorpAppConnection(),
@@ -371,7 +370,7 @@ end     # products.each do
 				"google_apigee_sharedflow":                     ResourceApigeeSharedFlow(),
 				"google_apigee_sharedflow_deployment":          ResourceApigeeSharedFlowDeployment(),
 				"google_apigee_flowhook":                       ResourceApigeeFlowhook(),
-				"google_apigee_env_keystore_alias_pkcs12":	    ResourceApigeeEnvKeystoreAliasPkcs12(),
+				"google_apigee_keystores_aliases_pkcs12":       ResourceApigeeKeystoresAliasesPkcs12(),
 				"google_apigee_keystores_aliases_key_cert_file": ResourceApigeeKeystoresAliasesKeyCertFile(),
 				"google_bigquery_table":                        ResourceBigQueryTable(),
 				"google_bigtable_gc_policy":                    ResourceBigtableGCPolicy(),
@@ -528,7 +527,10 @@ end     # products.each do
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
-	HandleSDKDefaults(d)
+	err := HandleSDKDefaults(d)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
 	HandleDCLCustomEndpointDefaults(d)
 
 	config := Config{

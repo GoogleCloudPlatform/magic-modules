@@ -6,10 +6,12 @@ import (
 	"testing"
 )
 
-// This test only ensures there isn't a panic reading tests in the provider.
+// This test only ensures there isn't a panic or an error reading tests in the provider.
 func TestReadAllTests(t *testing.T) {
 	if providerDir := os.Getenv("PROVIDER_DIR"); providerDir != "" {
-		readAllTests(providerDir)
+		if _, err := readAllTests(providerDir); err != nil {
+			t.Error(err)
+		}
 	}
 }
 

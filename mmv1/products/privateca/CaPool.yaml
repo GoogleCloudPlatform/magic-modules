@@ -452,7 +452,7 @@ properties:
     name: 'publishingOptions'
     description: |
       The PublishingOptions to follow when issuing Certificates from any CertificateAuthority in this CaPool.
-    diff_suppress_func: 'emptyOrUnsetBlockDiffSuppress'
+    diff_suppress_func: 'EmptyOrUnsetBlockDiffSuppress'
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'publishCaCert'

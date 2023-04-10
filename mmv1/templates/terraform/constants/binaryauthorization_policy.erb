@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func defaultBinaryAuthorizationPolicy(project string) map[string]interface{} {
+func DefaultBinaryAuthorizationPolicy(project string) map[string]interface{} {
 	return map[string]interface{}{
 		"name": fmt.Sprintf("projects/%s/policy", project),
 		"admissionWhitelistPatterns": []interface{}{

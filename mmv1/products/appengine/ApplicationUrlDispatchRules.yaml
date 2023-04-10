@@ -44,7 +44,7 @@
   id_format: "{{project}}"
   import_format: ["{{project}}"]
   mutex: "apps/{{project}}"
-  error_retry_predicates: ["isAppEngineRetryableError"]
+  error_retry_predicates: ["IsAppEngineRetryableError"]
   skip_sweeper: true
   custom_code: !ruby/object:Provider::Terraform::CustomCode
     test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb

@@ -1,4 +1,4 @@
-parent, err := replaceVars(d, config, "projects/{{parent}}")
+parent, err := ReplaceVars(d, config, "projects/{{parent}}")
 if err != nil {
 		return nil, err
 }
