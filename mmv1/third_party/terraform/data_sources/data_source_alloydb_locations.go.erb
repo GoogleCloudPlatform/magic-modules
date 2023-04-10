@@ -1,17 +1,9 @@
-<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
-<% if version == "ga" -%>
-	alloydb "cloud.google.com/go/alloydb/apiv1"
-<% else -%>
-	alloydb "cloud.google.com/go/alloydb/apiv1beta"
-<% end -%>
-	gax "github.com/googleapis/gax-go/v2"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"google.golang.org/api/iterator"
-	locationpb "google.golang.org/genproto/googleapis/cloud/location"
 )
 
 func DataSourceAlloydbLocations() *schema.Resource {
@@ -56,10 +48,11 @@ func DataSourceAlloydbLocations() *schema.Resource {
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 						"metadata": {
-							Type:        schema.TypeString,
+							Type:        schema.TypeMap,
 							Computed:    true,
 							Optional:    true,
 							Description: `Service-specific metadata. For example the available capacity at the given location.`,
+							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -70,66 +63,73 @@ func DataSourceAlloydbLocations() *schema.Resource {
 
 func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
+	billingProject := ""
+
 	project, err := getProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project: %s", err)
 	}
-	billingProject := project
+	billingProject = project
+
+	// err == nil indicates that the billing_project value was found
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
-	var listLocationsIterator *alloydb.LocationIterator
-	locsReq := new(locationpb.ListLocationsRequest)
-	err = nil
-	err = retryTime(func() error {
-		locationsClient := config.NewAlloydbClient(userAgent)
-<% if version == "ga" -%>
-		url := fmt.Sprintf("v1/projects/%s/locations", billingProject)
-<% else -%>
-		url := fmt.Sprintf("v1beta/projects/%s/locations", billingProject)
-<% end -%>
-		listLocationsIterator = locationsClient.ListLocations(config.context, locsReq, gax.WithPath(url))
-		return nil
-	}, 5)
+	url, err := replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations")
+	if err != nil {
+		return fmt.Errorf("Error setting api endpoint")
+	}
+	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Locations %q", d.Id()))
 	}
-
 	var locations []map[string]interface{}
 	for {
-		loc, err := listLocationsIterator.Next()
-		if err == iterator.Done {
+		fetchedLocations := res["locations"].([]interface{})
+		for _, loc := range fetchedLocations {
+			locationDetails := make(map[string]interface{})
+			l := loc.(map[string]interface{})
+			if l["name"] != nil {
+				locationDetails["name"] = l["name"].(string)
+			}
+			if l["locationId"] != nil {
+				locationDetails["location_id"] = l["locationId"].(string)
+			}
+			if l["displayName"] != nil {
+				locationDetails["display_id"] = l["displayName"].(string)
+			}
+			if l["labels"] != nil {
+				labels := make(map[string]string)
+				for k, v := range l["labels"].(map[string]interface{}) {
+					labels[k] = v.(string)
+				}
+				locationDetails["labels"] = labels
+			}
+			if l["metadata"] != nil {
+				metadata := make(map[string]string)
+				for k, v := range l["metadata"].(map[interface{}]interface{}) {
+					metadata[k.(string)] = v.(string)
+				}
+				locationDetails["metadata"] = metadata
+			}
+			locations = append(locations, locationDetails)
+		}
+		if res["nextPageToken"] == nil || res["nextPageToken"].(string) == "" {
 			break
 		}
+		url, err = replaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations?pageToken="+res["nextPageToken"].(string))
 		if err != nil {
-			return fmt.Errorf("Failed to fetch the list of available locations.")
+			return fmt.Errorf("Error setting api endpoint")
 		}
-		locationDetails := make(map[string]interface{})
-		if loc.Name != "" {
-			locationDetails["name"] = loc.Name
+		res, err = sendRequest(config, "GET", billingProject, url, userAgent, nil)
+		if err != nil {
+			return handleNotFoundError(err, d, fmt.Sprintf("Locations %q", d.Id()))
 		}
-		if loc.LocationId != "" {
-			locationDetails["location_id"] = loc.LocationId
-		}
-		if loc.DisplayName != "" {
-			locationDetails["display_id"] = loc.DisplayName
-		}
-		if loc.Labels != nil {
-			labels := make(map[string]string)
-			for k, v := range loc.Labels {
-				labels[k] = v
-			}
-			locationDetails["labels"] = labels
-		}
-		if loc.Metadata != nil {
-			locationDetails["metadata"] = fmt.Sprintf("%v", loc.Metadata)
-		}
-		locations = append(locations, locationDetails)
 	}
 
 	if err := d.Set("locations", locations); err != nil {
