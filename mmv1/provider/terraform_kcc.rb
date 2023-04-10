@@ -17,17 +17,56 @@ require 'provider/terraform/import'
 module Provider
   # Magic Modules Provider for KCC ServiceMappings and TF samples.
   class TerraformKCC < Provider::Terraform
+    PRODUCT_NAME_MAP = { Alloydb: 'AlloyDB',
+                         ApiGateway: 'APIGateway',
+                         Beyondcorp: 'BeyondCorp',
+                         BigqueryAnalyticsHub: 'BigQueryAnalyticsHub',
+                         BigqueryConnection: 'BigQueryConnection',
+                         BigqueryDatapolicy: 'BigQueryDataPolicy',
+                         BigqueryDataTransfer: 'BigQueryDataTransfer',
+                         BigqueryReservation: 'BigQueryReservation',
+                         CloudIds: 'CloudIDS',
+                         CloudIot: 'CloudIOT',
+                         Pubsub: 'PubSub' }.freeze
+    OBJECT_NAME_MAP = { Api: 'API',
+                        Dns: 'DNS',
+                        Dicom: 'DICOM',
+                        Entitytype: 'EntityType',
+                        Fhir: 'FHIR',
+                        Gcp: 'GCP',
+                        Hl7: 'HL7',
+                        Hmac: 'HMAC',
+                        Idp: 'IDP',
+                        Nat: 'NAT',
+                        Saml: 'SAML',
+                        Ssl: 'SSL',
+                        Url: 'URL' }.freeze
+
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
       generate_objects(output_folder, types, generate_code, generate_docs)
       compile_product_files(output_folder)
     end
 
+    def generate_product_name(product_name)
+      PRODUCT_NAME_MAP.inject(product_name.dup) do |name, (old_value, new_value)|
+        name.gsub(old_value.to_s, new_value)
+      end
+    end
+
+    def generate_object_name(object_name)
+      OBJECT_NAME_MAP.inject(object_name.dup) do |name, (old_value, new_value)|
+        name.gsub(old_value.to_s, new_value)
+      end
+    end
+
     # Create a directory of sample per test case.
     # Filter out samples that have no test and that don't match the current
     # product version.
     def generate_resource(pwd, data, _generate_code, _generate_docs)
-      kind = data.product.name + data.name
+      product_name = generate_product_name(data.product.name)
+      object_name = generate_object_name(data.name)
+      kind = product_name + object_name
       # skip_test examples and examples with test_env_vars should also be
       # included. Whether and how to convert them into KCC examples will be
       # handled separately.
@@ -35,7 +74,7 @@ module Provider
                      .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 
       examples.each do |example|
-        folder_name = "#{data.product.name}-#{kind}-#{example.name}"
+        folder_name = "#{product_name}-#{kind}-#{example.name}"
         folder_name += '-skipped' if example.skip_test
         target_folder = File.join('samples', folder_name)
 

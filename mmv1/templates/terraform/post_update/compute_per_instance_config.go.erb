@@ -1,5 +1,5 @@
 // Instance name in applyUpdatesToInstances request must include zone
-instanceName, err := replaceVars(d, config, "zones/{{zone}}/instances/{{name}}")
+instanceName, err := ReplaceVars(d, config, "zones/{{zone}}/instances/{{name}}")
 if err != nil {
 	return err
 }
@@ -19,7 +19,7 @@ if isEmptyValue(reflect.ValueOf(mostDisruptiveAction)) {
 }
 obj["mostDisruptiveAllowedAction"] = mostDisruptiveAction
 
-url, err = replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/applyUpdatesToInstances")
+url, err = ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/applyUpdatesToInstances")
 if err != nil {
 	return err
 }

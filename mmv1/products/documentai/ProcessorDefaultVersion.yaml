@@ -54,4 +54,4 @@ properties:
     required: true
     immutable: true
 
-    diff_suppress_func: projectNumberDiffSuppress
+    diff_suppress_func: ProjectNumberDiffSuppress

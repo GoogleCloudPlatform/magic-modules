@@ -137,7 +137,7 @@ properties:
     imports: 'selfLink'
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
-    diff_suppress_func: 'compareOptionalSubnet'
+    diff_suppress_func: 'CompareOptionalSubnet'
   - !ruby/object:Api::Type::Integer
     name: 'defaultPort'
     description: |

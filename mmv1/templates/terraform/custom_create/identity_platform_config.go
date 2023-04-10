@@ -3,7 +3,7 @@ if err != nil {
 	return err
 }
 
-url, err := replaceVars(d, config, "{{IdentityPlatformBasePath}}projects/{{project}}/identityPlatform:initializeAuth")
+url, err := ReplaceVars(d, config, "{{IdentityPlatformBasePath}}projects/{{project}}/identityPlatform:initializeAuth")
 if err != nil {
 	return err
 }
@@ -30,7 +30,7 @@ if err := d.Set("name", flattenIdentityPlatformConfigName(res["name"], d, config
 }
 
 // Store the ID now
-id, err := replaceVars(d, config, "projects/{{project}}/config")
+id, err := ReplaceVars(d, config, "projects/{{project}}/config")
 if err != nil {
 	return fmt.Errorf("Error constructing id: %s", err)
 }
