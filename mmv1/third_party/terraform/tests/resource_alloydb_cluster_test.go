@@ -219,22 +219,21 @@ resource "google_compute_network" "default" {
 `, context)
 }
 
-
 func TestAccAlloydbCluster_missingLocation(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{} {
+	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:					func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories:	ProtoV5ProviderFactories(t),
-		CheckDestroy:				testAccCheckAlloydbClusterDestroyProducer(t),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: 		testAccAlloydbCluster_missingLocation(context),
-				ExpectError:	regexp.MustCompile("Missing required argument"),
+				Config:      testAccAlloydbCluster_missingLocation(context),
+				ExpectError: regexp.MustCompile("Missing required argument"),
 			},
 		},
 	})
