@@ -115,18 +115,8 @@ func onlyStoppingWithLocalSsdDiscardChanged(d *schema.ResourceData, resourceSche
 }
 
 func hasLocalSsd(d *schema.ResourceData, config *Config) bool {
-	n := d.Get("scratch_disk.#").(int)
-	interfaces := []string{"NVME", "SCSI"}
-	count := 0
-	for i := 0; i < n; i++ {
-		for j := 0; j < len(interfaces); j++ {
-			if strings.EqualFold(d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string), interfaces[j]) {
-				count++
-			}
-		}
-	}
-
-	return count > 0
+	n := d.Get("scratch_disk.#")
+	return n != nil && n.(int) > 0
 }
 
 func ResourceComputeInstance() *schema.Resource {
@@ -2046,7 +2036,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				"You can also stop it by setting desired_status = \"TERMINATED\", but the instance will not be restarted after the update.")
 		}
 
-		if statusBeforeUpdate != "TERMINATED" {
+		if statusBeforeUpdate != "TERMINATED" && d.Get("stopping_with_local_ssd_discard").(bool) {
 			op, err := config.NewComputeClient(userAgent).Instances.Stop(project, zone, instance.Name).DiscardLocalSsd(true).Do()
 			if err != nil {
 				return errwrap.Wrapf("Error stopping instance: {{err}}", err)
