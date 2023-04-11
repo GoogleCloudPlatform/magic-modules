@@ -2217,7 +2217,7 @@ func TestAccContainerCluster_with_PodCIDROverprovisionDisabled(t *testing.T) {
 	resourceName := "google_container_cluster.with_pco_disabled"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
