@@ -102,4 +102,5 @@ properties:
     name: 'cryptoKeyName'
     description: |
       The KMS key used to encrypt workflow and execution data.
+      
       Format: projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}
