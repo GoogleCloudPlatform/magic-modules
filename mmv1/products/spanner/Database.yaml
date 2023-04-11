@@ -113,7 +113,7 @@ properties:
       If this property is used, you must avoid adding new DDL statements to `ddl` that
       update the database's version_retention_period. 
     validation: !ruby/object:Provider::Terraform::Validation
-      function: validateDatabaseRetentionPeriod
+      function: ValidateDatabaseRetentionPeriod
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ddl'

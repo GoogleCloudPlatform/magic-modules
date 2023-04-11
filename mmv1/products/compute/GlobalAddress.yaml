@@ -55,6 +55,7 @@ examples:
     primary_resource_id: "default"
     vars:
       global_address_name: "global-psconnect-ip"
+      network_name: "my-network-name"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 properties:
@@ -115,7 +116,7 @@ properties:
     values:
       - :IPV4
       - :IPV6
-    diff_suppress_func: 'emptyOrDefaultStringSuppress("IPV4")'
+    diff_suppress_func: 'EmptyOrDefaultStringSuppress("IPV4")'
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
@@ -143,7 +144,7 @@ properties:
       - :EXTERNAL
       - :INTERNAL
     default_value: :EXTERNAL
-    diff_suppress_func: 'emptyOrDefaultStringSuppress("EXTERNAL")'
+    diff_suppress_func: 'EmptyOrDefaultStringSuppress("EXTERNAL")'
   - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |

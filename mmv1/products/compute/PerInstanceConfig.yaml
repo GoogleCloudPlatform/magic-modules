@@ -67,6 +67,7 @@ examples:
     vars:
       template_name: "my-template"
       igm_name: "my-igm"
+      disk_name: "my-disk-name"
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'minimal_action'

@@ -104,7 +104,7 @@
       description: "The full resource name of the backup source cluster (e.g., projects/{project}/locations/{location}/clusters/{clusterId})."
       required: true
       immutable: true
-      diff_suppress_func: "projectNumberDiffSuppress"
+      diff_suppress_func: "ProjectNumberDiffSuppress"
     - !ruby/object:Api::Type::KeyValuePairs
       name: "labels"
       description: "User-defined labels for the alloydb backup."

@@ -65,7 +65,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
-error_retry_predicates: ["isPeeringOperationInProgress"]
+error_retry_predicates: ["IsPeeringOperationInProgress"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "route_basic"
@@ -250,4 +250,4 @@ properties:
       - next_hop_ip
       - next_hop_vpn_tunnel
       - next_hop_ilb
-    diff_suppress_func: 'compareIpAddressOrSelfLinkOrResourceName'
+    diff_suppress_func: 'CompareIpAddressOrSelfLinkOrResourceName'

@@ -48,6 +48,10 @@
   examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_attachment_basic"
+      vars:
+        project_id: "my-project"
+        instance_name: "my-instance-name"
+        environment_name: "my-environment-name"
       skip_test: true
         # This is a more verbose version of the above that creates all
         # the resources needed for the acceptance test.

@@ -44,10 +44,12 @@
   autogen_async: true
   import_format: ["{{org_id}}/instances/{{name}}", "{{org_id}}/{{name}}"]
   mutex: "{{org_id}}/apigeeInstances"
-  error_retry_predicates: ["isApigeeRetryableError"]
+  error_retry_predicates: ["IsApigeeRetryableError"]
   examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_basic"
+      vars:
+        instance_name: "my-instance-name"
       skip_test: true
         # This is a more verbose version of the above that creates all
         # the resources needed for the acceptance test.
@@ -62,6 +64,8 @@
       skip_vcr: true
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_cidr_range"
+      vars:
+        instance_name: "my-instance-name"
       skip_test: true
         # This is a more verbose version of the above that creates all
         # the resources needed for the acceptance test.
@@ -76,6 +80,8 @@
       skip_vcr: true
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_ip_range"
+      vars:
+        instance_name: "my-instance-name"
       skip_test: true
         # This is a more verbose version of the above that creates all
         # the resources needed for the acceptance test.
@@ -90,6 +96,8 @@
       skip_vcr: true
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_instance_full"
+      vars:
+        instance_name: "my-instance-name"
       skip_test: true
         # This is a more verbose version of the above that creates all
         # the resources needed for the acceptance test.
