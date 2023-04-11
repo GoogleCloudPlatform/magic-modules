@@ -4,6 +4,7 @@ import (
 	"context"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -630,6 +631,52 @@ func TestHandleSDKDefaults_RequestReason(t *testing.T) {
 
 			if v != tc.ExpectedValue {
 				t.Fatalf("unexpected value: wanted %v, got, %v", tc.ExpectedValue, v)
+			}
+		})
+	}
+}
+
+func TestConfigGetCredentials(t *testing.T) {
+	cases := map[string]struct {
+		EnvVariables        map[string]string
+		ExpectError         bool
+		ErrorContainsString string
+	}{
+		"error returned if neither credentials nor access_token set in the provider config, and Application Default Credentials are not found": {
+			ExpectError:         true,
+			ErrorContainsString: "could not find default credentials",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+
+			// Neither `credentials` nor `access_token` set
+			config := &Config{
+				Scopes: DefaultClientScopes,
+			}
+			ConfigureBasePaths(config)
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			_, err := config.GetCredentials(config.Scopes, false)
+
+			// Assert
+			if err != nil && !tc.ExpectError {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if err != nil && tc.ExpectError {
+				if !strings.Contains(err.Error(), tc.ErrorContainsString) {
+					t.Fatalf("expected error to contain \"%s\", not found in: \"%s\"", tc.ErrorContainsString, err.Error())
+				}
 			}
 		})
 	}
