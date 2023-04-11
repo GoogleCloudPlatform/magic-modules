@@ -12,7 +12,7 @@ Use this data source to get information about the supported alloydb database fla
 
 
 ```hcl
-data "google_alloydb_supported_database_flags" "qa"{
+data "google_alloydb_supported_database_flags" "qa" {
     location = "us-central1"
 }
 ```

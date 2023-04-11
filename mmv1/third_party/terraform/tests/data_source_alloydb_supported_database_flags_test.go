@@ -36,7 +36,7 @@ func TestAccDataSourceAlloydbSupportedDatabaseFlags_basic(t *testing.T) {
 
 func testAccDataSourceAlloydbSupportedDatabaseFlags_basic(context map[string]interface{}) string {
 	return Nprintf(`
-data "google_alloydb_supported_database_flags" "qa"{
+data "google_alloydb_supported_database_flags" "qa" {
 	location = "us-central1"
 }
 `, context)
