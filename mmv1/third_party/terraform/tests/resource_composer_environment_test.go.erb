@@ -2021,7 +2021,7 @@ resource "google_composer_environment" "test" {
       }
 	  tags = toset(["t1", "t2"])
 	  machine_type = "n2-highcpu-2"
-	  disk_size_gb = 2
+	  disk_size_gb = 20
 	  oauth_scopes = toset(["https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/bigquery"])
     }
     software_config {
