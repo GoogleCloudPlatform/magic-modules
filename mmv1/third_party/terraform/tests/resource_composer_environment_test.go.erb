@@ -775,7 +775,7 @@ func TestAccComposer1Environment_withNodeConfig_withTags(t *testing.T) {
 	serviceAccount := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:		          func() { testAccPreCheck(t) },
+		PreCheck:		          func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -809,7 +809,7 @@ func TestAccComposer2Environment_withNodeConfig_withTags(t *testing.T) {
 	serviceAccount := fmt.Sprintf("tf-test-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:		          func() { testAccPreCheck(t) },
+		PreCheck:		          func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
