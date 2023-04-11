@@ -93,9 +93,9 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 	cases := map[string]struct {
 		SetViaConfig     bool // Awkward, but necessary as zero value of ConfigValue could be intended
 		ConfigValue      bool
+		ValueNotProvided bool
 		EnvVariables     map[string]string
 		ExpectedValue    bool
-		ValueNotProvided bool
 		ExpectError      bool
 	}{
 		"user_project_override value set in the provider schema is not overridden by ENVs": {
@@ -136,7 +136,7 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 			},
 			ExpectError: true,
 		},
-		"when no values are provided via config or environment variables, the field remains unset": {
+		"when no values are provided via config or environment variables, the field remains unset without error": {
 			ValueNotProvided: true,
 		},
 	}
