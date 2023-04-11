@@ -639,10 +639,30 @@ func TestHandleSDKDefaults_RequestReason(t *testing.T) {
 func TestConfigGetCredentials(t *testing.T) {
 	cases := map[string]struct {
 		EnvVariables        map[string]string
+		SetCredentials      bool
+		Credentials         string
 		ExpectError         bool
 		ErrorContainsString string
 	}{
-		"error returned if neither credentials nor access_token set in the provider config, and Application Default Credentials are not found": {
+		"no error is returned if neither credentials nor access_token set in the provider config but GOOGLE_APPLICATION_CREDENTIALS is set": {
+			EnvVariables: map[string]string{
+				"GOOGLE_APPLICATION_CREDENTIALS": testFakeCredentialsPath,
+			},
+		},
+		"no error is returned if credentials is set as an empty string and GOOGLE_APPLICATION_CREDENTIALS is set": {
+			SetCredentials: true,
+			Credentials:    "",
+			EnvVariables: map[string]string{
+				"GOOGLE_APPLICATION_CREDENTIALS": testFakeCredentialsPath,
+			},
+		},
+		"error returned if credentials is set as an empty string and GOOGLE_APPLICATION_CREDENTIALS is unset": {
+			SetCredentials:      true,
+			Credentials:         "",
+			ExpectError:         true,
+			ErrorContainsString: "could not find default credentials",
+		},
+		"error returned if neither credentials nor access_token set in the provider config, and GOOGLE_APPLICATION_CREDENTIALS is unset": {
 			ExpectError:         true,
 			ErrorContainsString: "could not find default credentials",
 		},
@@ -653,9 +673,11 @@ func TestConfigGetCredentials(t *testing.T) {
 
 			// Arrange
 
-			// Neither `credentials` nor `access_token` set
 			config := &Config{
 				Scopes: DefaultClientScopes,
+			}
+			if tc.SetCredentials {
+				config.Credentials = tc.Credentials
 			}
 			ConfigureBasePaths(config)
 
