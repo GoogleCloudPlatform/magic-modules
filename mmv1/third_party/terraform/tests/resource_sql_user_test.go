@@ -390,6 +390,7 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 
+# TODO: Remove with resolution of https://github.com/hashicorp/terraform-provider-google/issues/14233
 resource "time_sleep" "wait_30_seconds" {
   depends_on = [google_sql_database_instance.instance]
 
