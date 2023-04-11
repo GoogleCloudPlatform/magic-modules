@@ -35,7 +35,7 @@ func TestHandleSDKDefaults_ImpersonateServiceAccount(t *testing.T) {
 			},
 			ExpectedValue: "value-from-env@example.com",
 		},
-		"when no values are provided via config or environment variables, the field remains unset": {
+		"when no values are provided via config or environment variables, the field remains unset without error": {
 			ValueNotProvided: true,
 		},
 	}
@@ -144,7 +144,7 @@ func TestHandleSDKDefaults_Project(t *testing.T) {
 			},
 			ExpectedValue: "project-from-CLOUDSDK_CORE_PROJECT",
 		},
-		"when no values are provided via config or environment variables, the field remains unset": {
+		"when no values are provided via config or environment variables, the field remains unset without error": {
 			ValueNotProvided: true,
 		},
 	}
@@ -217,7 +217,7 @@ func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 			},
 			ExpectedValue: "my-billing-project-from-env",
 		},
-		"when no values are provided via config or environment variables, the field remains unset": {
+		"when no values are provided via config or environment variables, the field remains unset without error": {
 			ValueNotProvided: true,
 		},
 	}
@@ -260,6 +260,103 @@ func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 			}
 			if ok && tc.ValueNotProvided {
 				t.Fatal("expected billing_project to not be set in the provider data")
+			}
+
+			if v != tc.ExpectedValue {
+				t.Fatalf("unexpected value: wanted %v, got, %v", tc.ExpectedValue, v)
+			}
+		})
+	}
+}
+
+func TestHandleSDKDefaults_Region(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValue      string
+		EnvVariables     map[string]string
+		ExpectedValue    string
+		ValueNotProvided bool
+		ExpectError      bool
+	}{
+		"region value set in the provider config is not overridden by ENVs": {
+			ConfigValue: "region-from-config",
+			EnvVariables: map[string]string{
+				"GOOGLE_REGION": "region-from-env",
+			},
+			ExpectedValue: "region-from-config",
+		},
+		"region can be set by environment variable, when no value supplied via the config": {
+			EnvVariables: map[string]string{
+				"GOOGLE_REGION": "region-from-env",
+			},
+			ExpectedValue: "region-from-env",
+		},
+		"when multiple region environment variables are provided, `GOOGLE_REGION` is used first": {
+			EnvVariables: map[string]string{
+				"GOOGLE_REGION":           "project-from-GOOGLE_REGION",
+				"GCLOUD_REGION":           "project-from-GCLOUD_REGION",
+				"CLOUDSDK_COMPUTE_REGION": "project-from-CLOUDSDK_COMPUTE_REGION",
+			},
+			ExpectedValue: "project-from-GOOGLE_REGION",
+		},
+		"when multiple region environment variables are provided, `GCLOUD_REGION` is used second": {
+			EnvVariables: map[string]string{
+				// GOOGLE_REGION unset
+				"GCLOUD_REGION":           "project-from-GCLOUD_REGION",
+				"CLOUDSDK_COMPUTE_REGION": "project-from-CLOUDSDK_COMPUTE_REGION",
+			},
+			ExpectedValue: "project-from-GCLOUD_REGION",
+		},
+		"when multiple region environment variables are provided, `CLOUDSDK_COMPUTE_REGION` is the last-used ENV": {
+			EnvVariables: map[string]string{
+				// GOOGLE_REGION unset
+				// GCLOUD_REGION unset
+				"CLOUDSDK_COMPUTE_REGION": "project-from-CLOUDSDK_COMPUTE_REGION",
+			},
+			ExpectedValue: "project-from-CLOUDSDK_COMPUTE_REGION",
+		},
+		"when no values are provided via config or environment variables, the field remains unset without error": {
+			ValueNotProvided: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			// Create empty schema.ResourceData using the SDK Provider schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
+
+			// Set config value(s)
+			if tc.ConfigValue != "" {
+				d.Set("region", tc.ConfigValue)
+			}
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			err := HandleSDKDefaults(d)
+
+			// Assert
+			if err != nil {
+				if !tc.ExpectError {
+					t.Fatalf("error: %v", err)
+				}
+				return
+			}
+
+			// Assert
+			v, ok := d.GetOk("region")
+			if !ok && !tc.ValueNotProvided {
+				t.Fatal("expected region to be set in the provider data")
+			}
+			if ok && tc.ValueNotProvided {
+				t.Fatal("expected region to not be set in the provider data")
 			}
 
 			if v != tc.ExpectedValue {
