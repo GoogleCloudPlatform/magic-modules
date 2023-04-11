@@ -1230,6 +1230,75 @@ func TestAccComputeRegionInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 }
 <% end -%>
 
+func TestAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	kmsKey := BootstrapKMSKeyInLocation(t, "us-central1")
+
+	context := map[string]interface{}{
+		"kms_ring_name": GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
+		"kms_key_name":  GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
+		"random_suffix": RandString(t, 10),
+	}
+
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.template", &instanceTemplate),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_template.template",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"disk.0.source_snapshot", "disk.0.source_snapshot_encryption_key"},
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	kmsKey := BootstrapKMSKeyInLocation(t, "us-central1")
+
+	context := map[string]interface{}{
+		"kms_ring_name": GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
+		"kms_key_name":  GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_sourceImageEncryptionKey(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.template", &instanceTemplate),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_template.template",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"disk.0.source_image_encryption_key"},
+			},
+		},
+	})
+}
+
 func testAccCheckComputeRegionInstanceTemplateDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := GoogleProviderConfig(t)
@@ -3203,6 +3272,134 @@ resource "google_compute_region_instance_template" "foobar" {
   }
 }
 `, suffix)
+}
+
+func testAccComputeRegionInstanceTemplate_sourceSnapshotEncryptionKey(context map[string]interface{}) string {
+	return Nprintf(`
+data "google_kms_key_ring" "ring" {
+  name     = "%{kms_ring_name}"
+  location = "us-central1"
+}
+
+data "google_kms_crypto_key" "key" {
+  name     = "%{kms_key_name}"
+  key_ring = data.google_kms_key_ring.ring.id
+}
+
+resource "google_service_account" "test" {
+  account_id   = "tf-test-sa-%{random_suffix}"
+  display_name = "KMS Ops Account"
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = data.google_kms_crypto_key.key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_service_account.test.email}"
+}
+
+data "google_compute_image" "debian" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "persistent" {
+  name  = "tf-test-debian-disk-%{random_suffix}"
+  image = data.google_compute_image.debian.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "snapshot" {
+  name        = "tf-test-my-snapshot-%{random_suffix}"
+  source_disk = google_compute_disk.persistent.id
+  zone        = "us-central1-a"
+  snapshot_encryption_key {
+    kms_key_self_link       = data.google_kms_crypto_key.key.id
+    kms_key_service_account = google_service_account.test.email
+  }
+}
+
+resource "google_compute_region_instance_template" "template" {
+  name           = "tf-test-instance-template-%{random_suffix}"
+  machine_type   = "e2-medium"
+  region      = "us-central1"
+
+  disk {
+    source_snapshot = google_compute_snapshot.snapshot.self_link
+    source_snapshot_encryption_key {
+      kms_key_self_link       = data.google_kms_crypto_key.key.id
+      kms_key_service_account = google_service_account.test.email
+    }
+    auto_delete = true
+    boot        = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionInstanceTemplate_sourceImageEncryptionKey(context map[string]interface{}) string {
+	return Nprintf(`
+data "google_kms_key_ring" "ring" {
+  name     = "%{kms_ring_name}"
+  location = "us-central1"
+}
+
+data "google_kms_crypto_key" "key" {
+  name     = "%{kms_key_name}"
+  key_ring = data.google_kms_key_ring.ring.id
+}
+
+resource "google_service_account" "test" {
+  account_id   = "tf-test-sa-%{random_suffix}"
+  display_name = "KMS Ops Account"
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = data.google_kms_crypto_key.key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_service_account.test.email}"
+}
+
+data "google_compute_image" "debian" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_image" "image" {
+  name         = "debian-image"
+  source_image = data.google_compute_image.debian.self_link
+  image_encryption_key {
+    kms_key_self_link       = data.google_kms_crypto_key.key.id
+    kms_key_service_account = google_service_account.test.email
+  }
+}
+
+
+resource "google_compute_region_instance_template" "template" {
+  name           = "tf-test-instance-template-%{random_suffix}"
+  machine_type   = "e2-medium"
+  region      = "us-central1"
+
+  disk {
+    source_image = google_compute_image.image.self_link
+    source_image_encryption_key {
+      kms_key_self_link       = data.google_kms_crypto_key.key.id
+      kms_key_service_account = google_service_account.test.email
+    }
+    auto_delete = true
+    boot        = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, context)
 }
 
 <% end -%>
