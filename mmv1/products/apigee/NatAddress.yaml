@@ -49,6 +49,8 @@
   examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "apigee_nat_address_basic"
+      vars:
+        nat_address_name: "my-nat-address"
       skip_test: true
         # This is a more verbose version of the above that creates all
         # the resources needed for the acceptance test.
