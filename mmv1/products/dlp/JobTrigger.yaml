@@ -77,6 +77,10 @@ examples:
       project: :PROJECT_NAME
     test_vars_overrides:
       name: '"tf_test_" + RandString(t, 10)'
+    name: "dlp_job_trigger_hybrid"
+    primary_resource_id: "hybrid_trigger"
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/wrap_object.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
@@ -139,6 +143,13 @@ properties:
                 This value must be set to a time duration greater than or equal to 1 day and can be no longer than 60 days.
 
                 A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+        - !ruby/object:Api::Type::NestedObject
+          name: 'manual'
+          allow_empty_object: true
+          send_empty_value: true
+          properties: []
+          description: |
+            For use with hybrid jobs. Jobs must be manually created and finished.
   - !ruby/object:Api::Type::NestedObject
     name: 'inspectJob'
     description: Controls what and how to inspect for findings.
@@ -371,6 +382,59 @@ properties:
                       required: true
                       description: |
                         Name of a BigQuery field to be returned with the findings.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'hybridOptions'
+            allow_empty_object: true
+            send_empty_value: true
+            description: |
+              Configuration to control jobs where the content being inspected is outside of Google Cloud Platform.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'description'
+                description: |
+                  A short description of where the data is coming from. Will be stored once in the job. 256 max length.
+              - !ruby/object:Api::Type::Array
+                name: 'requiredFindingLabelKeys'
+                item_type: Api::Type::String
+                description: |
+                  These are labels that each inspection request must include within their 'finding_labels' map. Request
+                  may contain others, but any missing one of these will be rejected.
+
+                  Label keys must be between 1 and 63 characters long and must conform to the following regular expression: `[a-z]([-a-z0-9]*[a-z0-9])?`.
+
+                  No more than 10 keys can be required.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'tableOptions'
+                description: |
+                  If the container is a table, additional information to make findings meaningful such as the columns that are primary keys.
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'identifyingFields'
+                    description: |
+                      The columns that are the primary keys for table objects included in ContentItem. A copy of this
+                      cell's value will stored alongside alongside each finding so that the finding can be traced to
+                      the specific row it came from. No more than 3 may be provided.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          required: true
+                          description: |
+                            Name describing the field.
+              - !ruby/object:Api::Type::KeyValuePairs
+                name: 'labels'
+                description: |
+                  To organize findings, these labels will be added to each finding.
+
+                  Label keys must be between 1 and 63 characters long and must conform to the following regular expression: `[a-z]([-a-z0-9]*[a-z0-9])?`.
+
+                  Label values must be between 0 and 63 characters long and must conform to the regular expression `([a-z]([-a-z0-9]*[a-z0-9])?)?`.
+
+                  No more than 10 labels can be associated with a given finding.
+
+                  Examples:
+                  * `"environment" : "production"`
+                  * `"pipeline" : "etl"`
       - !ruby/object:Api::Type::Array
         name: 'actions'
         required: true
