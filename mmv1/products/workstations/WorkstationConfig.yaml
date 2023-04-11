@@ -221,7 +221,6 @@ properties:
             name: 'disablePublicIpAddresses'
             description: |
               Whether instances have no public IP address.
-            default_from_api: true
           - !ruby/object:Api::Type::NestedObject
             name: 'shieldedInstanceConfig'
             description: |
@@ -251,7 +250,6 @@ properties:
                 # TODO(esu): Change this to required in next breaking release.
                 description: |
                   Whether the instance has confidential compute enabled.
-                default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'persistentDirectories'
     description: |
@@ -295,7 +293,6 @@ properties:
               name: 'reclaimPolicy'
               description: |
                 What should happen to the disk after the workstation is deleted. Defaults to DELETE.
-              default_from_api: true
               immutable: true
               values:
                 - :DELETE
