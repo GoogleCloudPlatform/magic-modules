@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+	google "terraform-provider-google/internal"
 )
 
 func DataSourceGoogleRuntimeconfigConfig() *schema.Resource {

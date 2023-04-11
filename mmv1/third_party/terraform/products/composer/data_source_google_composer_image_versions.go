@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	google "terraform-provider-google/internal"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta"
 )
 
 func DataSourceGoogleComposerImageVersions() *schema.Resource {

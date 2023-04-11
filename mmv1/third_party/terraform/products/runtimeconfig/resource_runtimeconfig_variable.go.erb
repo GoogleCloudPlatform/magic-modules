@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"regexp"
 
+	google "terraform-provider-google/internal"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/runtimeconfig/v1beta1"
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
 )
 
 func ResourceRuntimeconfigVariable() *schema.Resource {
