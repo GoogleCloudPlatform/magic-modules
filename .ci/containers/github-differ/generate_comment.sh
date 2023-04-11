@@ -19,8 +19,6 @@ TPG_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magic
 TPG_LOCAL_PATH=$PWD/../tpg
 TPGB_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-provider-google-beta
 TPGB_LOCAL_PATH=$PWD/../tpgb
-TFV_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-validator
-TFV_LOCAL_PATH=$PWD/../tfv
 TFOICS_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/docs-examples
 TFOICS_LOCAL_PATH=$PWD/../tfoics
 
@@ -127,19 +125,6 @@ if git clone -b $NEW_BRANCH $TFC_SCRATCH_PATH $TFC_LOCAL_PATH; then
     if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
         SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
         DIFFS="${DIFFS}${NEWLINE}TF Conversion: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
-    fi
-    popd
-fi
-
-# TF Validator
-mkdir -p $TFV_LOCAL_PATH
-# allow this to fail for compatibility during tfv/tgc transition phase
-if git clone -b $NEW_BRANCH $TFV_SCRATCH_PATH $TFV_LOCAL_PATH; then
-    pushd $TFV_LOCAL_PATH
-    git fetch origin $OLD_BRANCH
-    if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
-        SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
-        DIFFS="${DIFFS}${NEWLINE}TF Validator: [Diff](https://github.com/modular-magician/terraform-validator/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
     fi
     popd
 fi
