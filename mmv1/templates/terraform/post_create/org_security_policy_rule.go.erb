@@ -1,7 +1,7 @@
 // `parent` is needed to poll the asynchronous operations but its available only on the policy.
 
 policyUrl := fmt.Sprintf("{{ComputeBasePath}}%s", d.Get("policy_id"))
-url, err = replaceVars(d, config, policyUrl)
+url, err = ReplaceVars(d, config, policyUrl)
 if err != nil {
 	return err
 }

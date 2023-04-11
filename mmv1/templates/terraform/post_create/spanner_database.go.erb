@@ -42,7 +42,7 @@ if retentionPeriodOk || ddlOk {
 
 		obj["statements"] = updateDdls
 
-		url, err = replaceVars(d, config, "{{SpannerBasePath}}projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl")
+		url, err = ReplaceVars(d, config, "{{SpannerBasePath}}projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl")
 		if err != nil {
 			return err
 		}

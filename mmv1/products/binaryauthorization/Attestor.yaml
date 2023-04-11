@@ -144,7 +144,7 @@ properties:
                     match the structure and any object identifiers encoded in
                     publicKeyPem (i.e. this algorithm must match that of the
                     public key).
-                  diff_suppress_func: 'compareSignatureAlgorithm'
+                  diff_suppress_func: 'CompareSignatureAlgorithm'
       - !ruby/object:Api::Type::String
         name: delegationServiceAccountEmail
         description: |

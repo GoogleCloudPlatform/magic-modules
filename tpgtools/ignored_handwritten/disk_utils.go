@@ -18,7 +18,7 @@ func isDiskShrinkage(old, new, _ interface{}) bool {
 
 // We cannot suppress the diff for the case when family name is not part of the image name since we can't
 // make a network call in a DiffSuppressFunc.
-func diskImageDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+func DiskImageDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	// Understand that this function solves a messy problem ("how do we tell if the diff between two images
 	// is 'ForceNew-worthy', without making a network call?") in the best way we can: through a series of special
 	// cases and regexes.  If you find yourself here because you are trying to add a new special case,
@@ -200,7 +200,7 @@ func suppressWindowsFamilyDiff(imageName, familyName string) bool {
 
 func expandComputeDiskType(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
-		return nil 
+		return nil
 	}
 
 	f, err := parseZonalFieldValue("diskTypes", v.(string), "project", "zone", d, config, true)
@@ -214,7 +214,7 @@ func expandComputeDiskType(v interface{}, d TerraformResourceData, config *Confi
 
 func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
-		return nil 
+		return nil
 	}
 
 	if v == nil {
@@ -236,7 +236,7 @@ func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config
 
 func expandComputeDiskSnapshot(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
-		return nil 
+		return nil
 	}
 
 	f, err := parseGlobalFieldValue("snapshots", v.(string), "project", d, config, true)
@@ -257,7 +257,7 @@ func ConvertSelfLinkToV1UnlessNil(v interface{}) *string {
 	if vptr == nil {
 		return nil
 	}
-	
+
 	val := ConvertSelfLinkToV1(*vptr)
 	return &val
 }

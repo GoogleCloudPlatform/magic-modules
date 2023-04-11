@@ -9,29 +9,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccNetworkSecurityGatewaySecurityPolicies_update(t *testing.T) {
+func TestAccNetworkSecurityGatewaySecurityPolicy_update(t *testing.T) {
 	t.Parallel()
 
 	gatewaySecurityPolicyName := fmt.Sprintf("tf-test-gateway-sp-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckNetworkSecurityGatewaySecurityPoliciesDestroyProducer(t),
+		CheckDestroy: testAccCheckNetworkSecurityGatewaySecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityGatewaySecurityPolicies_basic(gatewaySecurityPolicyName),
+				Config: testAccNetworkSecurityGatewaySecurityPolicy_basic(gatewaySecurityPolicyName),
 			},
 			{
-				ResourceName:      "google_network_security_gateway_security_policies.foobar",
+				ResourceName:      "google_network_security_gateway_security_policy.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNetworkSecurityGatewaySecurityPolicies_update(gatewaySecurityPolicyName),
+				Config: testAccNetworkSecurityGatewaySecurityPolicy_update(gatewaySecurityPolicyName),
 			},
 			{
-				ResourceName:      "google_network_security_gateway_security_policies.foobar",
+				ResourceName:      "google_network_security_gateway_security_policy.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -39,9 +39,9 @@ func TestAccNetworkSecurityGatewaySecurityPolicies_update(t *testing.T) {
 	})
 }
 
-func testAccNetworkSecurityGatewaySecurityPolicies_basic(gatewaySecurityPolicyName string) string {
+func testAccNetworkSecurityGatewaySecurityPolicy_basic(gatewaySecurityPolicyName string) string {
 	return fmt.Sprintf(`
-resource "google_network_security_gateway_security_policies" "foobar" {
+resource "google_network_security_gateway_security_policy" "foobar" {
   name        = "%s"
   location    = "us-central1"
   description = "my description"
@@ -49,9 +49,9 @@ resource "google_network_security_gateway_security_policies" "foobar" {
 `, gatewaySecurityPolicyName)
 }
 
-func testAccNetworkSecurityGatewaySecurityPolicies_update(gatewaySecurityPolicyName string) string {
+func testAccNetworkSecurityGatewaySecurityPolicy_update(gatewaySecurityPolicyName string) string {
 	return fmt.Sprintf(`
-resource "google_network_security_gateway_security_policies" "foobar" {
+resource "google_network_security_gateway_security_policy" "foobar" {
   name        = "%s"
   location    = "us-central1"
   description = "update description"

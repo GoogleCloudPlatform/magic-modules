@@ -9,38 +9,38 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccNetworkSecurityGatewaySecurityPoliciesRule_update(t *testing.T) {
+func TestAccNetworkSecurityGatewaySecurityPolicyRule_update(t *testing.T) {
 	t.Parallel()
 
 	gatewaySecurityPolicyName := fmt.Sprintf("tf-test-gateway-sp-%s", RandString(t, 10))
 	gatewaySecurityPolicyRuleName := fmt.Sprintf("tf-test-gateway-sp-rule-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckNetworkSecurityGatewaySecurityPoliciesRuleDestroyProducer(t),
+		CheckDestroy: testAccCheckNetworkSecurityGatewaySecurityPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityGatewaySecurityPoliciesRule_basic(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName),
+				Config: testAccNetworkSecurityGatewaySecurityPolicyRule_basic(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName),
 			},
 			{
-				ResourceName:      "google_network_security_gateway_security_policies_rule.foobar",
+				ResourceName:      "google_network_security_gateway_security_policy_rule.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNetworkSecurityGatewaySecurityPoliciesRule_update(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName),
+				Config: testAccNetworkSecurityGatewaySecurityPolicyRule_update(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName),
 			},
 			{
-				ResourceName:      "google_network_security_gateway_security_policies_rule.foobar",
+				ResourceName:      "google_network_security_gateway_security_policy_rule.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNetworkSecurityGatewaySecurityPoliciesRule_basic(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName),
+				Config: testAccNetworkSecurityGatewaySecurityPolicyRule_basic(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName),
 			},
 			{
-				ResourceName:      "google_network_security_gateway_security_policies_rule.foobar",
+				ResourceName:      "google_network_security_gateway_security_policy_rule.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -48,18 +48,18 @@ func TestAccNetworkSecurityGatewaySecurityPoliciesRule_update(t *testing.T) {
 	})
 }
 
-func testAccNetworkSecurityGatewaySecurityPoliciesRule_basic(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName string) string {
+func testAccNetworkSecurityGatewaySecurityPolicyRule_basic(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName string) string {
 	return fmt.Sprintf(`
-resource "google_network_security_gateway_security_policies" "default" {
+resource "google_network_security_gateway_security_policy" "default" {
   name        = "%s"
   location    = "us-central1"
   description = "gateway security policy created to be used as reference by the rule."
 }
 	
-resource "google_network_security_gateway_security_policies_rule" "foobar" {
+resource "google_network_security_gateway_security_policy_rule" "foobar" {
   name                    = "%s"
   location                = "us-central1"
-  gateway_security_policy = google_network_security_gateway_security_policies.default.name
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
   enabled                 = true  
   description             = "my description"
   priority                = 0
@@ -70,18 +70,18 @@ resource "google_network_security_gateway_security_policies_rule" "foobar" {
 `, gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName)
 }
 
-func testAccNetworkSecurityGatewaySecurityPoliciesRule_update(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName string) string {
+func testAccNetworkSecurityGatewaySecurityPolicyRule_update(gatewaySecurityPolicyName, gatewaySecurityPolicyRuleName string) string {
 	return fmt.Sprintf(`
-resource "google_network_security_gateway_security_policies" "default" {
+resource "google_network_security_gateway_security_policy" "default" {
   name        = "%s"
   location    = "us-central1"
   description = "gateway security policy created to be used as reference by the rule."
 }
 	
-resource "google_network_security_gateway_security_policies_rule" "foobar" {
+resource "google_network_security_gateway_security_policy_rule" "foobar" {
   name                    = "%s"
   location                = "us-central1"
-  gateway_security_policy = google_network_security_gateway_security_policies.default.name
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
   enabled                 = false  
   description             = "my description updated"
   priority                = 1
