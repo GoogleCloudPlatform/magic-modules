@@ -1,163 +1,30 @@
 ---
 subcategory: "Compute Engine"
+page_title: "Google: google_compute_region_security_policy"
 description: |-
-  Creates a Security Policy resource for Google Compute Engine.
+  Represents a Google Cloud Armor security policy resource for region operations.
 ---
 
-# google\_compute\_security\_policy
+# google\_compute\_network\_edge\_security\_services
 
-A Security Policy defines an IP blacklist or whitelist that protects load balanced Google Cloud services by denying or permitting traffic from specified IP ranges. For more information
+Represents a Google Cloud Armor security policy resource for region operations.
+
 see the [official documentation](https://cloud.google.com/armor/docs/configure-security-policies)
-and the [API](https://cloud.google.com/compute/docs/reference/rest/beta/securityPolicies).
-
-Security Policy is used by [`google_compute_backend_service`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_backend_service#security_policy).
+and the [API](https://cloud.google.com/compute/docs/reference/rest/v1/regionSecurityPolicies).
 
 ## Example Usage
 
 ```hcl
-resource "google_compute_security_policy" "policy" {
-  name = "my-policy"
+resource "google_compute_region_security_policy" "policy" {
+  name        = "%s"
+  description = "default rule"
+  type = "CLOUD_ARMOR_NETWORK"
 
-  rule {
-    action   = "deny(403)"
-    priority = "1000"
-    match {
-      versioned_expr = "SRC_IPS_V1"
-      config {
-        src_ip_ranges = ["9.9.9.0/24"]
-      }
-    }
-    description = "Deny access to IPs in 9.9.9.0/24"
-  }
-
-  rule {
-    action   = "allow"
-    priority = "2147483647"
-    match {
-      versioned_expr = "SRC_IPS_V1"
-      config {
-        src_ip_ranges = ["*"]
-      }
-    }
-    description = "default rule"
+  ddos_protection_config {
+    ddos_protection = "STANDARD"
   }
 }
 ```
-
-## Example Usage - With reCAPTCHA configuration options
-
-```hcl
-resource "google_recaptcha_enterprise_key" "primary" {
-  display_name = "display-name"
-
-  labels = {
-    label-one = "value-one"
-   }
-
-  project = "my-project-name"
-
-  web_settings {
-    integration_type  = "INVISIBLE"
-    allow_all_domains = true
-    allowed_domains   = ["localhost"]
-  }
-}
-
-resource "google_compute_security_policy" "policy" {
-  name        = "my-policy"
-  description = "basic security policy"
-  type        = "CLOUD_ARMOR"
-
-  recaptcha_options_config {
-    redirect_site_key = google_recaptcha_enterprise_key.primary.name
-  }
-}
-```
-
-## Example Usage - With header actions
-
-```hcl
-resource "google_compute_security_policy" "policy" {
-	name = "my-policy"
-
-  rule {
-    action   = "allow"
-    priority = "2147483647"
-    match {
-      versioned_expr = "SRC_IPS_V1"
-      config {
-        src_ip_ranges = ["*"]
-      }
-    }
-    description = "default rule"
-  }
-
-  rule {
-    action   = "allow"
-    priority = "1000"
-    match {
-      expr {
-        expression = "request.path.matches(\"/login.html\") && token.recaptcha_session.score < 0.2"
-      }
-    }
-
-    header_action {
-      request_headers_to_adds {
-        header_name  = "reCAPTCHA-Warning"
-        header_value = "high"
-      }
-
-      request_headers_to_adds {
-        header_name  = "X-Resource"
-        header_value = "test"
-      }
-    }
-  }
-}
-```
-
-## Example Usage - With enforceOnKey value as empty string
-A scenario example that won't cause any conflict between `enforce_on_key` and `enforce_on_key_configs`, because `enforce_on_key` was specified as an empty string:
-
-```hcl
-resource "google_compute_security_policy" "policy" {
-	name        = "%s"
-	description = "throttle rule with enforce_on_key_configs"
-
-	rule {
-		action   = "throttle"
-		priority = "2147483647"
-		match {
-			versioned_expr = "SRC_IPS_V1"
-			config {
-				src_ip_ranges = ["*"]
-			}
-		}
-		description = "default rule"
-
-		rate_limit_options {
-			conform_action = "allow"
-			exceed_action = "redirect"
-
-			enforce_on_key = ""
-
-			enforce_on_key_configs {
-				enforce_on_key_type = "IP"
-			}
-			exceed_redirect_options {
-				type = "EXTERNAL_302"
-				target = "<https://www.example.com>"
-			}
-
-			rate_limit_threshold {
-				count = 10
-				interval_sec = 60
-			}
-		}
-	}
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -417,18 +284,8 @@ The following arguments are supported:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `id` - an identifier for the resource with format `projects/{{project}}/global/securityPolicies/{{name}}`
+* `id` - an identifier for the resource with format `projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}`
 
 * `fingerprint` - Fingerprint of this resource.
 
 * `self_link` - The URI of the created resource.
-
-## Import
-
-Security policies can be imported using any of the following formats
-
-```
-$ terraform import google_compute_security_policy.policy projects/{{project}}/global/securityPolicies/{{name}}
-$ terraform import google_compute_security_policy.policy {{project}}/{{name}}
-$ terraform import google_compute_security_policy.policy {{name}}
-```
