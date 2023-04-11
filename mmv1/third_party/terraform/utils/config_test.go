@@ -562,6 +562,79 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 	}
 }
 
+func TestHandleSDKDefaults_RequestReason(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValue      string
+		EnvVariables     map[string]string
+		ExpectedValue    string
+		ValueNotProvided bool
+		ExpectError      bool
+	}{
+		"request_reason value set in the provider config is not overridden by ENVs": {
+			ConfigValue: "request-reason-from-config",
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "request-reason-from-env",
+			},
+			ExpectedValue: "request-reason-from-config",
+		},
+		"request_reason can be set by environment variable, when no value supplied via the config": {
+			EnvVariables: map[string]string{
+				"CLOUDSDK_CORE_REQUEST_REASON": "request-reason-from-env",
+			},
+			ExpectedValue: "request-reason-from-env",
+		},
+		"when no values are provided via config or environment variables, the field remains unset without error": {
+			ValueNotProvided: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			// Create empty schema.ResourceData using the SDK Provider schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
+
+			// Set config value(s)
+			if tc.ConfigValue != "" {
+				d.Set("request_reason", tc.ConfigValue)
+			}
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			err := HandleSDKDefaults(d)
+
+			// Assert
+			if err != nil {
+				if !tc.ExpectError {
+					t.Fatalf("error: %v", err)
+				}
+				return
+			}
+
+			// Assert
+			v, ok := d.GetOk("request_reason")
+			if !ok && !tc.ValueNotProvided {
+				t.Fatal("expected request_reason to be set in the provider data")
+			}
+			if ok && tc.ValueNotProvided {
+				t.Fatal("expected request_reason to not be set in the provider data")
+			}
+
+			if v != tc.ExpectedValue {
+				t.Fatalf("unexpected value: wanted %v, got, %v", tc.ExpectedValue, v)
+			}
+		})
+	}
+}
+
 func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
 	config := &Config{
 		Credentials: testFakeCredentialsPath,
