@@ -6,7 +6,7 @@ description: |-
 
 # google\_alloydb\_locations
 
-Use this data source to get information about the available locations.
+Use this data source to get information about the available locations. For more details refer the [API docs](https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations).
 
 ## Example Usage
 
