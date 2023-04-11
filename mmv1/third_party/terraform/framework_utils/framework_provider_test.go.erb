@@ -85,11 +85,11 @@ func TestFrameworkProvider_CredentialsValidator(t *testing.T) {
 				return string(contents)
 			},
 		},
-		// "configuring credentials as an empty string is valid": {
-		// 	ConfigValue: func(t *testing.T) string {
-		// 		return ""
-		// 	},
-		// },
+		"configuring credentials as an empty string is valid": {
+			ConfigValue: func(t *testing.T) string {
+				return ""
+			},
+		},
 		// "leaving credentials unconfigured is valid": {
 		// 	ValueNotProvided: true,
 		// },
