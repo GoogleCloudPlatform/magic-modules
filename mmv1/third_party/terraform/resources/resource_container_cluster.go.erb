@@ -1469,6 +1469,7 @@ func ResourceContainerCluster() *schema.Resource {
 						"pod_cidr_overprovision_config": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							ForceNew: true,
 							MaxItems: 1,
 							Description: `Configuration for cluster level pod cidr overprovision. Default is disabled=false.`,

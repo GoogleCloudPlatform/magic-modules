@@ -360,6 +360,7 @@ var schemaNodePool = map[string]*schema.Schema{
 				"pod_cidr_overprovision_config": {
 					Type:     schema.TypeList,
 					Optional: true,
+					Computed: true,
 					ForceNew: true,
 					MaxItems: 1,
 					Description: `Configuration for node-pool level pod cidr overprovision. If not set, the cluster level setting will be inherited`,
