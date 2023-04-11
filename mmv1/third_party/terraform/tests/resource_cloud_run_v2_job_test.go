@@ -25,7 +25,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobFullUpdate(context),
@@ -34,7 +34,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
 			},
 		},
 	})
@@ -88,6 +88,12 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
         }
         max_retries = 5
       }
+    }
+
+    lifecycle {
+      ignore_changes = [
+        launch_stage,
+      ]
     }
   }
   resource "google_service_account" "service_account" {
@@ -153,6 +159,12 @@ resource "google_cloud_run_v2_job" "default" {
       }
       max_retries = 2
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
   }
 }
 resource "google_service_account" "service_account" {

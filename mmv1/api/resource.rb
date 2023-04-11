@@ -90,7 +90,7 @@ module Api
       #
       # [Optional] This is the name of the list of items
       # within the collection (list) json. Will default to the
-      # camelcase pluralize name of the resource.
+      # camelcase plural name of the resource.
       attr_reader :collection_url_key
       # [Optional] An ordered list of names of parameters that uniquely identify
       # the resource.
@@ -237,7 +237,7 @@ module Api
               `has exactly one :identity property"'
       end
 
-      check :collection_url_key, default: @name.pluralize.camelize(:lower)
+      check :collection_url_key, default: @name.plural.camelize(:lower)
 
       check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT PATCH]
       check :read_verb, type: Symbol, default: :GET, allowed: %i[GET POST]

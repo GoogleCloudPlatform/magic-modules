@@ -57,7 +57,8 @@
             "bar",
             "foo"
           ]
-        }
+        },
+        "zone": "us-central1-a"
       }
     },
     "iam_policy": {

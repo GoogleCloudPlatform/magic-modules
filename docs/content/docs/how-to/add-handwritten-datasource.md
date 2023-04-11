@@ -26,3 +26,16 @@ For creating a datasource based off an existing resource you can [make use of th
 schema directly](https://github.com/GoogleCloudPlatform/magic-modules/blob/1d293f7bfadacaa20580874c8e8634827fb99a14/mmv1/third_party/terraform/data_sources/data_source_cloud_run_service.go).
 Otherwise [implementing the schema directly](https://github.com/GoogleCloudPlatform/magic-modules/blob/1d293f7bfadacaa20580874c8e8634827fb99a14/mmv1/third_party/terraform/data_sources/data_source_google_compute_address.go),
 similar to normal resource creation, is the desired path.
+
+## Resourceless Datasources
+
+Datasources not backed by a resource are possible to add as well. They follow
+the same general steps as adding a resource-based datasource, except that a
+full Read method will need to be defined for them rather than calling a
+resource's Read method.
+
+Note that while resource-based datasources can depend on the resource read
+method for API calls, resourceless datasources need to make them themselves.
+An HTTP-based client that's properly configured with logging and retries **must**
+be used, such as a client from the https://github.com/googleapis/google-api-go-client
+library, or the raw HTTP client used in MMV1 through `SendRequest`.

@@ -78,6 +78,7 @@ To get started, you'll need:
   * go install golang.org/x/tools/cmd/goimports / go install golang.org/x/tools/cmd/goimports@latest
 * Terraform
   * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+    * We recommend a Terraform version of at least 1.1.8, the version used in our CI.
 * If you are getting "Too many open files" ulimit needs to be raised.
   * Mac OSX: `ulimit -n 8192`
 
