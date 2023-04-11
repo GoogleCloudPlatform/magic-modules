@@ -196,6 +196,79 @@ func TestHandleSDKDefaults_Project(t *testing.T) {
 	}
 }
 
+func TestHandleSDKDefaults_BillingProject(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValue      string
+		EnvVariables     map[string]string
+		ExpectedValue    string
+		ValueNotProvided bool
+		ExpectError      bool
+	}{
+		"billing project value set in the provider config is not overridden by ENVs": {
+			ConfigValue: "my-billing-project-from-config",
+			EnvVariables: map[string]string{
+				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
+			},
+			ExpectedValue: "my-billing-project-from-config",
+		},
+		"billing project can be set by environment variable, when no value supplied via the config": {
+			EnvVariables: map[string]string{
+				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
+			},
+			ExpectedValue: "my-billing-project-from-env",
+		},
+		"when no values are provided via config or environment variables, the field remains unset": {
+			ValueNotProvided: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			// Create empty schema.ResourceData using the SDK Provider schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
+
+			// Set config value(s)
+			if tc.ConfigValue != "" {
+				d.Set("billing_project", tc.ConfigValue)
+			}
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			err := HandleSDKDefaults(d)
+
+			// Assert
+			if err != nil {
+				if !tc.ExpectError {
+					t.Fatalf("error: %v", err)
+				}
+				return
+			}
+
+			// Assert
+			v, ok := d.GetOk("billing_project")
+			if !ok && !tc.ValueNotProvided {
+				t.Fatal("expected billing_project to be set in the provider data")
+			}
+			if ok && tc.ValueNotProvided {
+				t.Fatal("expected billing_project to not be set in the provider data")
+			}
+
+			if v != tc.ExpectedValue {
+				t.Fatalf("unexpected value: wanted %v, got, %v", tc.ExpectedValue, v)
+			}
+		})
+	}
+}
+
 // The `user_project_override` field is an odd one out, as other provider schema fields tend to be strings
 // and `user_project_override` is a boolean
 func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
