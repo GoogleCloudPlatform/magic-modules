@@ -371,6 +371,8 @@ properties:
                 - pub_sub
                 - publish_findings_to_cloud_data_catalog
                 - publish_summary_to_cscc
+                - job_notification_emails
+                - deidentify
               description: |
                 If set, the detailed findings will be persisted to the specified OutputStorageConfig. Only a single instance of this action can be specified. Compatible with: Inspect, Risk
               properties:
@@ -425,6 +427,8 @@ properties:
                 - pub_sub
                 - publish_findings_to_cloud_data_catalog
                 - publish_summary_to_cscc
+                - job_notification_emails
+                - deidentify
               description: |
                 Publish a message into a given Pub/Sub topic when the job completes.
               properties:
@@ -440,6 +444,8 @@ properties:
                 - pub_sub
                 - publish_findings_to_cloud_data_catalog
                 - publish_summary_to_cscc
+                - job_notification_emails
+                - deidentify
               allow_empty_object: true
               send_empty_value: true
               properties: []
@@ -452,8 +458,109 @@ properties:
                 - pub_sub
                 - publish_findings_to_cloud_data_catalog
                 - publish_summary_to_cscc
+                - job_notification_emails
+                - deidentify
               allow_empty_object: true
               send_empty_value: true
               properties: []
               description: |
                 Publish findings of a DlpJob to Data Catalog.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'jobNotificationEmails'
+              exactly_one_of:
+                - save_findings
+                - pub_sub
+                - publish_findings_to_cloud_data_catalog
+                - publish_summary_to_cscc
+                - job_notification_emails
+                - deidentify
+              allow_empty_object: true
+              send_empty_value: true
+              properties: []
+              description: |
+                Sends an email when the job completes. The email goes to IAM project owners and technical Essential Contacts.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'deidentify'  
+              exactly_one_of:
+                - save_findings
+                - pub_sub
+                - publish_findings_to_cloud_data_catalog
+                - publish_summary_to_cscc
+                - job_notification_emails
+                - deidentify
+              description: |
+                Create a de-identified copy of the requested table or files.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'cloudStorageOutput'
+                  required: true
+                  description: |
+                    User settable Cloud Storage bucket and folders to store de-identified files.
+                    
+                    This field must be set for cloud storage deidentification.
+                    
+                    The output Cloud Storage bucket must be different from the input bucket.
+                    
+                    De-identified files will overwrite files in the output path.
+                    
+                    Form of: gs://bucket/folder/ or gs://bucket
+                - !ruby/object:Api::Type::Array
+                  name: 'fileTypesToTransform'
+                  description: |
+                    List of user-specified file type groups to transform. If specified, only the files with these filetypes will be transformed.
+
+                    If empty, all supported files will be transformed. Supported types may be automatically added over time. 
+                    
+                    If a file type is set in this field that isn't supported by the Deidentify action then the job will fail and will not be successfully created/started.
+                  item_type: !ruby/object:Api::Type::Enum
+                    name: 'undefined'
+                    description: |
+                      This field only has a name and description because of MM
+                      limitations. It should not appear in downstreams.
+                    values:
+                      - :IMAGES
+                      - :TEXT_FILES
+                      - :CSV
+                      - :TSV
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'transformationConfig'
+                  description: |
+                    User specified deidentify templates and configs for structured, unstructured, and image files.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'deidentifyTemplate'
+                      description: |
+                        If this template is specified, it will serve as the default de-identify template.
+                    - !ruby/object:Api::Type::String
+                      name: 'structuredDeidentifyTemplate'
+                      description: |
+                        If this template is specified, it will serve as the de-identify template for structured content such as delimited files and tables.
+                    - !ruby/object:Api::Type::String
+                      name: 'imageRedactTemplate'
+                      description: |
+                        If this template is specified, it will serve as the de-identify template for images.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'transformationDetailsStorageConfig'
+                  description: |
+                    Config for storing transformation details.
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'table'
+                      required: true
+                      description: |
+                        The BigQuery table in which to store the output. 
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'datasetId'
+                          description: The ID of the dataset containing this table.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'projectId'
+                          description: The ID of the project containing this table.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'tableId'
+                          description: |
+                            The ID of the table. The ID must contain only letters (a-z,
+                            A-Z), numbers (0-9), or underscores (_). The maximum length
+                            is 1,024 characters.
