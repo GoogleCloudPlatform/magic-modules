@@ -248,7 +248,6 @@ properties:
         name: 'webSsoConfig'
         description: |
           Configuration for web single sign-on for the OIDC provider. Here, web sign-in refers to console sign-in and gcloud sign-in through the browser.
-        required: true
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'responseType'
