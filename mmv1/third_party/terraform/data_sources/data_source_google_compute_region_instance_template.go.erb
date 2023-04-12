@@ -1,6 +1,8 @@
 <% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
+
 import (
 	"encoding/json"
 	"fmt"
@@ -66,12 +68,12 @@ func datasourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta in
 			"filter": v.(string),
 		}
 
-		url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates")
+		url, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates")
 		if err != nil {
 			return err
 		}
 
-		url, err = addQueryParams(url, params)
+		url, err = AddQueryParams(url, params)
 		if err != nil {
 			return err
 		}
@@ -117,3 +119,5 @@ func retrieveInstances(d *schema.ResourceData, meta interface{}, project, region
 
 	return resourceComputeRegionInstanceTemplateRead(d, meta)
 }
+
+<% end -%>

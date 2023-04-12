@@ -167,7 +167,7 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 			pbConfigs[0].EnableBatching = types.BoolValue(true)
 		}
 
-		data.Batching, d = types.ListValueFrom(ctx, types.ObjectType{}, pbConfigs)
+		data.Batching, d = types.ListValueFrom(ctx, types.ObjectType{}.WithAttributeTypes(ProviderBatchingAttributes), pbConfigs)
 	}
 
 	if data.UserProjectOverride.IsNull() && os.Getenv("USER_PROJECT_OVERRIDE") != "" {
@@ -578,7 +578,7 @@ func GetCredentials(ctx context.Context, data ProviderModel, initialCredentialsO
 		tflog.Info(ctx, "Authenticating using configured Google JSON 'access_token'...")
 		tflog.Info(ctx, fmt.Sprintf("  -- Scopes: %s", clientScopes))
 		return googleoauth.Credentials{
-			TokenSource: staticTokenSource{oauth2.StaticTokenSource(token)},
+			TokenSource: StaticTokenSource{oauth2.StaticTokenSource(token)},
 		}
 	}
 

@@ -104,19 +104,19 @@ BREAKINGCHANGES="$(/compare_breaking_changes.sh)"
 set -e
 popd
 
-if [ $PR_NUMBER == "6880" ]; then
-  ## Missing test setup and execution
-  pushd $MM_LOCAL_PATH/tools/missing-test-detector
-  go mod edit -replace google/provider/new=$(realpath $TPGB_LOCAL_PATH)
-  go mod edit -replace google/provider/old=$(realpath $TPGB_LOCAL_PATH_OLD)
-  go mod tidy
-  export MISSINGTESTS="$(go run . -provider-dir=$TPGB_LOCAL_PATH/google-beta)"
-  retVal=$?
-  if [ $retVal -ne 0 ]; then
-      export MISSINGTESTS=""
-  fi
-  popd
+## Missing test setup and execution
+set +e
+pushd $MM_LOCAL_PATH/tools/missing-test-detector
+go mod edit -replace google/provider/new=$(realpath $TPGB_LOCAL_PATH)
+go mod edit -replace google/provider/old=$(realpath $TPGB_LOCAL_PATH_OLD)
+go mod tidy
+export MISSINGTESTS="$(go run . -provider-dir=$TPGB_LOCAL_PATH/google-beta)"
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    export MISSINGTESTS=""
 fi
+set -e
+popd
 
 # TF Conversion - for compatibility until at least Nov 15 2021
 mkdir -p $TFC_LOCAL_PATH
@@ -174,15 +174,14 @@ if [ -n "$BREAKINGCHANGES" ]; then
   fi
 fi
 
-if [ -n "$MISSINGTESTS" ]; then
-  MESSAGE="${MESSAGE}${MISSINGTESTS}${NEWLINE}${NEWLINE}"
-fi
-
 
 if [ -z "$DIFFS" ]; then
   MESSAGE="${MESSAGE}## Diff report ${NEWLINE}Your PR hasn't generated any diffs, but I'll let you know if a future commit does."
 else
   MESSAGE="${MESSAGE}## Diff report ${NEWLINE}Your PR generated some diffs in downstreams - here they are.${NEWLINE}${DIFFS}"
+  if [ -n "$MISSINGTESTS" ]; then
+    MESSAGE="${MESSAGE}${NEWLINE}${MISSINGTESTS}${NEWLINE}"
+  fi
 fi
 
 

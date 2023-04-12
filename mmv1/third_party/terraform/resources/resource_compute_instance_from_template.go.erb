@@ -146,12 +146,12 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 			return err
 		}
 	} else {
-		relativeUrl, err = replaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceTemplates/"+tpl.Name)
+		relativeUrl, err = ReplaceVars(d, config, "projects/{{project}}/regions/{{region}}/instanceTemplates/"+tpl.Name)
 		if err != nil {
 			return err
 		}
 
-		url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/" + tpl.Name)
+		url, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/" + tpl.Name)
 		if err != nil {
 			return err
 		}

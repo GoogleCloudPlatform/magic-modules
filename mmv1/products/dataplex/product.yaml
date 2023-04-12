@@ -14,7 +14,7 @@
 ---
 !ruby/object:Api::Product
 name: Dataplex
-display_name: Cloud Dataplex
+display_name: Dataplex
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

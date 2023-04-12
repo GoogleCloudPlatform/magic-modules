@@ -96,6 +96,7 @@ properties:
       - :RESOURCE
       - :IAM_POLICY
       - :ORG_POLICY
+      - :OS_INVENTORY
       - :ACCESS_POLICY
   - !ruby/object:Api::Type::NestedObject
     name: feedOutputConfig
