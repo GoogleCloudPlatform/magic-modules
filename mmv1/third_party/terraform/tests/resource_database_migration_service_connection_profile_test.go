@@ -24,6 +24,7 @@ func TestAccDatabaseMigrationServiceConnectionProfile_update(t *testing.T) {
 				ResourceName:      "google_database_migration_service_connection_profile.default",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "mysql.0.password"},
 			},
 			{
 				Config: testAccDatabaseMigrationServiceConnectionProfile_update(suffix),
@@ -32,6 +33,7 @@ func TestAccDatabaseMigrationServiceConnectionProfile_update(t *testing.T) {
 				ResourceName:      "google_database_migration_service_connection_profile.default",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "mysql.0.password"},
 			},
 		},
 	})

@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'ConnectionProfile'
 self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
+import_format: ["projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}"]
 base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
 create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}'
 update_verb: :PATCH 
