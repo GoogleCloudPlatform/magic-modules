@@ -21,7 +21,7 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
+		CheckDestroy: google.TestAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
@@ -70,7 +70,7 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
+		CheckDestroy: google.TestAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
