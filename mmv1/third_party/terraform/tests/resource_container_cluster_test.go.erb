@@ -367,6 +367,29 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:     func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_enableMultiNetworking(clusterName, npName),
+			},
+			{
+				ResourceName:      "google_container_cluster.multi_network_cluster",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 	t.Parallel()
 
@@ -4191,6 +4214,28 @@ resource "google_container_cluster" "confidential_nodes" {
   }
 
   enable_l4_ilb_subsetting = false
+}
+`, clusterName, npName)
+}
+
+func testAccContainerCluster_enableMultiNetworking(clusterName string, npName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "multi_network_cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  node_pool {
+    name = "%s"
+    initial_node_count = 1
+    node_config {
+      machine_type = "e2-medium"
+    }
+  }
+
+  enable_multi_networking = true
 }
 `, clusterName, npName)
 }
