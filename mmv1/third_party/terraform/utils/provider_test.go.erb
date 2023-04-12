@@ -266,6 +266,109 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 	}
 }
 
+func TestProvider_providerConfigure_accessToken(t *testing.T) {
+
+	cases := map[string]struct {
+		ConfigValues        map[string]interface{}
+		EnvVariables        map[string]string
+		ExpectedSchemaValue string
+		ExpectedConfigValue string
+		ExpectError         bool
+		ExpectFieldUnset    bool
+	}{
+		"access_token configured in the provider can be invalid without resulting in errors": {
+			ConfigValues: map[string]interface{}{
+				"access_token": "This is not a valid token string",
+			},
+			EnvVariables:        map[string]string{},
+			ExpectedSchemaValue: "This is not a valid token string",
+			ExpectedConfigValue: "This is not a valid token string",
+		},
+		"access_token set in the provider config is not overridden by environment variables": {
+			ConfigValues: map[string]interface{}{
+				"access_token": "value-from-config",
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_OAUTH_ACCESS_TOKEN": "value-from-env",
+			},
+			ExpectedSchemaValue: "value-from-config",
+			ExpectedConfigValue: "value-from-config",
+		},
+		"when access_token is unset in the config, an environment variable is used but doesn't update the schema data": {
+			EnvVariables: map[string]string{
+				"GOOGLE_OAUTH_ACCESS_TOKEN": "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
+			},
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+			ctx := context.Background()
+			p := Provider()
+
+			// Create empty schema.ResourceData using the SDK Provider schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
+
+			// Load Terraform config data
+			if len(tc.ConfigValues) > 0 {
+				for k, v := range tc.ConfigValues {
+					err := d.Set(k, v)
+					if err != nil {
+						t.Fatalf("error during test setup: %v", err)
+					}
+				}
+			}
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			c, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("access_token")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedSchemaValue {
+						t.Fatalf("expected access_token value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected access_token value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("access_token")
+			val := v.(string)
+			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if val != tc.ExpectedSchemaValue {
+				t.Fatalf("expected access_token value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
+			}
+			if config.AccessToken != tc.ExpectedConfigValue {
+				t.Fatalf("expected access_token value in provider struct to be %s, got %s", tc.ExpectedConfigValue, config.AccessToken)
+			}
+		})
+	}
+}
+
 func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
