@@ -51,3 +51,44 @@ func testStringValue(sPtr *string) string {
 
 	return *sPtr
 }
+
+// testAccCheckDNSManagedZoneDestroyProducerFramework is the framework version of the generated testAccCheckDNSManagedZoneDestroyProducer
+// when we automate this, we'll use the automated version and can get rid of this
+func testAccCheckDNSManagedZoneDestroyProducerFramework(t *testing.T) func(s *terraform.State) error {
+	return TestAccCheckDNSManagedZoneDestroyProducerFramework(t)
+}
+
+// TestAccCheckDNSManagedZoneDestroyProducerFramework is the framework version of the generated testAccCheckDNSManagedZoneDestroyProducer
+// when we automate this, we'll use the automated version and can get rid of this
+func TestAccCheckDNSManagedZoneDestroyProducerFramework(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_dns_managed_zone" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			p := GetFwTestProvider(t)
+
+			url, err := replaceVarsForFrameworkTest(&p.frameworkProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if !p.billingProject.IsNull() && p.billingProject.String() != "" {
+				billingProject = p.billingProject.String()
+			}
+
+			_, diags := sendFrameworkRequest(&p.frameworkProvider, "GET", billingProject, url, p.userAgent, nil)
+			if !diags.HasError() {
+				return fmt.Errorf("DNSManagedZone still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
+}
