@@ -22,7 +22,9 @@ update_mask: true
 description: |
   HttpRoute is the resource defining how HTTP traffic should be routed by a Mesh or Gateway resource.
 references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.meshes'
+  guides:
+    'Setup HTTP Services': 'https://cloud.google.com/traffic-director/docs/set-up-envoy-http-mesh'
+  api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.httpRoutes'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -64,11 +66,19 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-http-route'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_services_http_route_mesh_basic'
+    primary_resource_id: 'default'
+    vars:
+      mesh_name: 'my-mesh'
+      resource_name: 'my-http-route'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
     url_param_only: true
+    immutable: true
     description: |
       Name of the HttpRoute resource.
 properties:
@@ -98,20 +108,22 @@ properties:
     name: hostnames
     item_type: Api::Type::String
     description: |
-          Required. Set of hosts that should match against the HTTP host header to select a HttpRoute to process the request.  
+          Set of hosts that should match against the HTTP host header to select a HttpRoute to process the request.  
     required: true
-    send_empty_value: true  
   - !ruby/object:Api::Type::Array
     name: meshes
     item_type: Api::Type::String
     description: |
-          List of meshes this HttpRoute is attached to, as one of the routing rules to route the requests served by the mesh.  
+          Meshes defines a list of meshes this HttpRoute is attached to, as one of the routing rules to route the requests served by the mesh.
+          Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>.
+          The attached Mesh should be of a type SIDECAR.
     send_empty_value: true 
   - !ruby/object:Api::Type::Array
     name: gateways
     item_type: Api::Type::String
     description: |
-          List of gateways this HttpRoute is attached to, as one of the routing rules to route the requests served by the gateway.  
+          Gateways defines a list of gateways this HttpRoute is attached to, as one of the routing rules to route the requests served by the gateway.
+          Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
     send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: rules
@@ -124,14 +136,16 @@ properties:
         - !ruby/object:Api::Type::Array
           name: matches
           description: |
-            A list of matches define conditions used for matching the rule against incoming HTTP requests.
+            A list of matches define conditions used for matching the rule against incoming HTTP requests. Each match is independent, i.e. this rule will be matched if ANY one of the matches is satisfied.
+            If no matches field is specified, this rule will unconditionally match traffic.
+            If a default rule is desired to be configured, add a rule with no matches specified to the end of the rules list.
           send_empty_value: true
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: ignoreCase
                 description: |
-                  Specifies if prefixMatch and fullPathMatch matches are case sensitive.
+                  Specifies if prefixMatch and fullPathMatch matches are case sensitive. The default value is false.
                 send_empty_value: true
               - !ruby/object:Api::Type::String
                 name: fullPathMatch
@@ -144,7 +158,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: prefixMatch
                 description: |
-                  The HTTP request path value must begin with specified prefixMatch.
+                  The HTTP request path value must begin with specified prefixMatch. prefixMatch must begin with a /.
                 exactly_one_of:
                   - fullPathMatch
                   - prefixMatch
@@ -152,7 +166,7 @@ properties:
               - !ruby/object:Api::Type::String
                 name: regexMatch
                 description: |
-                  The HTTP request path value must satisfy the regular expression specified by regexMatch after removing any query parameters and anchor supplied with the original URL.
+                  The HTTP request path value must satisfy the regular expression specified by regexMatch after removing any query parameters and anchor supplied with the original URL. For regular expression grammar, please see https://github.com/google/re2/wiki/Syntax
                 exactly_one_of:
                   - fullPathMatch
                   - prefixMatch
@@ -161,7 +175,6 @@ properties:
                 name: queryParameters
                 description: |
                   Specifies a list of query parameters to match against. 
-                send_empty_value: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
@@ -180,7 +193,7 @@ properties:
                     - !ruby/object:Api::Type::String
                       name: regexMatch
                       description: |
-                        The value of the query parameter must match the regular expression specified by regexMatch.
+                        The value of the query parameter must match the regular expression specified by regexMatch.For regular expression grammar, please see https://github.com/google/re2/wiki/Syntax
                       exactly_one_of:
                         - exactMatch
                         - regexMatch
@@ -197,7 +210,6 @@ properties:
                 name: headers
                 description: |
                   Specifies a list of HTTP request headers to match against. 
-                send_empty_value: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
@@ -208,7 +220,7 @@ properties:
                     - !ruby/object:Api::Type::Boolean
                       name: invertMatch
                       description: |
-                        If specified, the match result will be inverted before checking.
+                        If specified, the match result will be inverted before checking. Default value is set to false.
                       send_empty_value: true
                     - !ruby/object:Api::Type::String
                       name: exactMatch
@@ -246,7 +258,7 @@ properties:
                     - !ruby/object:Api::Type::Boolean
                       name: presentMatch
                       description: |
-                        A header with headerName must exist.
+                        A header with headerName must exist. The match takes place whether or not the header has a value.
                       exactly_one_of:
                         - exactMatch
                         - regexMatch
@@ -306,7 +318,10 @@ properties:
                   - !ruby/object:Api::Type::Integer
                     name: weight
                     description: |
-                      Specifies the proportion of requests forwarded to the backend referenced by the serviceName field.
+                      Specifies the proportion of requests forwarded to the backend referenced by the serviceName field. This is computed as: weight/Sum(weights in this destination list). For non-zero values, there may be some epsilon from the exact proportion defined here depending on the precision an implementation supports.
+                      If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
+                      If weights are specified for any one service name, they need to be specified for all of them.
+                      If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
             - !ruby/object:Api::Type::NestedObject
               name: redirect
               description: |
@@ -319,7 +334,7 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: pathRedirect
                   description: |
-                    The path that will be used in the redirect response instead of the one that was supplied in the request.
+                    The path that will be used in the redirect response instead of the one that was supplied in the request. pathRedirect can not be supplied together with prefixRedirect. Supply one alone or neither. If neither is supplied, the path of the original request will be used for the redirect.
                 - !ruby/object:Api::Type::String
                   name: prefixRewrite
                   description: |
@@ -358,6 +373,7 @@ properties:
                       name: percentage
                       description: |
                          The percentage of traffic on which delay will be injected.
+                      send_empty_value: true
                 - !ruby/object:Api::Type::NestedObject
                   name: abort
                   description: |
@@ -371,6 +387,7 @@ properties:
                       name: percentage
                       description: |
                          The percentage of traffic which will be aborted.
+                      send_empty_value: true
             - !ruby/object:Api::Type::NestedObject
               name: requestHeaderModifier
               description: |
@@ -441,7 +458,7 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: perTryTimeout
                   description: |
-                    Specifies a non-zero timeout per retry attempt.
+                    Specifies a non-zero timeout per retry attempt. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
             - !ruby/object:Api::Type::NestedObject
               name: requestMirrorPolicy
               description: |
@@ -459,7 +476,10 @@ properties:
                     - !ruby/object:Api::Type::Integer
                       name: weight
                       description: |
-                        Specifies the proportion of requests forwarded to the backend referenced by the serviceName field.
+                        Specifies the proportion of requests forwarded to the backend referenced by the serviceName field. This is computed as: weight/Sum(weights in this destination list). For non-zero values, there may be some epsilon from the exact proportion defined here depending on the precision an implementation supports.
+                        If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
+                        If weights are specified for any one service name, they need to be specified for all of them.
+                        If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
             - !ruby/object:Api::Type::NestedObject
               name: corsPolicy
               description: |
