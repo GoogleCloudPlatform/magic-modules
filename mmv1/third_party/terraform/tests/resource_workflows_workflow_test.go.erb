@@ -30,8 +30,8 @@ func TestAccWorkflowsWorkflow_Update(t *testing.T) {
 <%# CMEK is only available in ga API -%>
 			{
 				Config: testAccWorkflowsWorkflow_CMEK(workflowName),
+			},
 <% end -%>
-			}
 		},
 	})
 }
@@ -155,12 +155,12 @@ func TestWorkflowsWorkflowStateUpgradeV0(t *testing.T) {
 	}
 }
 
-func testAccSpannerDatabase_cmek(name string) string {
-	return Sprintf(`
+func testAccWorkflowsWorkflow_CMEK(name string) string {
+	return fmt.Sprintf(`
 resource "google_kms_key_ring" "keyring" {
   provider = google-beta
   name     = "tf-test-ring%1s"
-  location = "europe-west1"
+  location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "example-key" {
@@ -191,7 +191,7 @@ resource "google_project_service_identity" "ck_sa" {
 }
 
 resource "google_workflows_workflow" "example" {
-  name          = "%2s"
+  name          = "%1s"
   region        = "us-central1"
   description   = "Magic"
   crypto_key_name = google_kms_crypto_key.example-key.id
@@ -223,5 +223,5 @@ resource "google_workflows_workflow" "example" {
       return: $${WikiResult.body[1]}
 EOF
 }
-`, randString(t, 10), name)
+`, name)
 }
