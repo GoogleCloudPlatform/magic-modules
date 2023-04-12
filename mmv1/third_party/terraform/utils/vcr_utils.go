@@ -4,11 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -23,6 +21,8 @@ import (
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
 
+	acctest "internal/terraform-provider-google/acctest"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -35,78 +35,12 @@ import (
 )
 
 var configsLock = sync.RWMutex{}
-var sourcesLock = sync.RWMutex{}
 
 var configs map[string]*Config
 var fwProviders map[string]*frameworkTestProvider
 
-var sources map[string]VcrSource
-
-// VcrSource is a source for a given VCR test with the value that seeded it
-type VcrSource struct {
-	seed   int64
-	source rand.Source
-}
-
 func isVcrEnabled() bool {
-	envPath := os.Getenv("VCR_PATH")
-	vcrMode := os.Getenv("VCR_MODE")
-	return envPath != "" && vcrMode != ""
-}
-
-// Produces a rand.Source for VCR testing based on the given mode.
-// In RECORDING mode, generates a new seed and saves it to a file, using the seed for the source
-// In REPLAYING mode, reads a seed from a file and creates a source from it
-func vcrSource(t *testing.T, path, mode string) (*VcrSource, error) {
-	sourcesLock.RLock()
-	s, ok := sources[t.Name()]
-	sourcesLock.RUnlock()
-	if ok {
-		return &s, nil
-	}
-	tflog.Debug(context.Background(), fmt.Sprintf("VCR_MODE: %s", mode))
-	switch mode {
-	case "RECORDING":
-		seed := rand.Int63()
-		s := rand.NewSource(seed)
-		vcrSource := VcrSource{seed: seed, source: s}
-		sourcesLock.Lock()
-		sources[t.Name()] = vcrSource
-		sourcesLock.Unlock()
-		return &vcrSource, nil
-	case "REPLAYING":
-		seed, err := readSeedFromFile(vcrSeedFile(path, t.Name()))
-		if err != nil {
-			return nil, fmt.Errorf("no cassette found on disk for %s, please replay this testcase in recording mode - %w", t.Name(), err)
-		}
-		s := rand.NewSource(seed)
-		vcrSource := VcrSource{seed: seed, source: s}
-		sourcesLock.Lock()
-		sources[t.Name()] = vcrSource
-		sourcesLock.Unlock()
-		return &vcrSource, nil
-	default:
-		log.Printf("[DEBUG] No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", mode)
-		return nil, errors.New("No valid VCR_MODE set")
-	}
-}
-
-func readSeedFromFile(fileName string) (int64, error) {
-	// Max number of digits for int64 is 19
-	data := make([]byte, 19)
-	f, err := os.Open(fileName)
-	if err != nil {
-		return 0, err
-	}
-	defer f.Close()
-	_, err = f.Read(data)
-	if err != nil {
-		return 0, err
-	}
-	// Remove NULL characters from seed
-	data = bytes.Trim(data, "\x00")
-	seed := string(data)
-	return StringToFixed64(seed)
+	return acctest.IsVcrEnabled()
 }
 
 func writeSeedToFile(seed int64, fileName string) error {
@@ -120,17 +54,6 @@ func writeSeedToFile(seed int64, fileName string) error {
 		return err
 	}
 	return nil
-}
-
-// Retrieves a unique test name used for writing files
-// replaces all `/` characters that would cause filepath issues
-// This matters during tests that dispatch multiple tests, for example TestAccLoggingFolderExclusion
-func vcrSeedFile(path, name string) string {
-	return filepath.Join(path, fmt.Sprintf("%s.seed", vcrFileName(name)))
-}
-
-func vcrFileName(name string) string {
-	return strings.ReplaceAll(name, "/", "_")
 }
 
 // VcrTest is a wrapper for resource.Test to swap out providers for VCR providers and handle VCR specific things
@@ -159,11 +82,11 @@ func closeRecorder(t *testing.T) {
 			}
 			envPath := os.Getenv("VCR_PATH")
 
-			sourcesLock.RLock()
-			vcrSource, ok := sources[t.Name()]
-			sourcesLock.RUnlock()
+			acctest.SourcesLock.RLock()
+			vcrSource, ok := acctest.Sources[t.Name()]
+			acctest.SourcesLock.RUnlock()
 			if ok {
-				err = writeSeedToFile(vcrSource.seed, vcrSeedFile(envPath, t.Name()))
+				err = writeSeedToFile(vcrSource.Seed, acctest.VcrSeedFile(envPath, t.Name()))
 				if err != nil {
 					t.Error(err)
 				}
@@ -174,9 +97,9 @@ func closeRecorder(t *testing.T) {
 		delete(configs, t.Name())
 		configsLock.Unlock()
 
-		sourcesLock.Lock()
-		delete(sources, t.Name())
-		sourcesLock.Unlock()
+		acctest.SourcesLock.Lock()
+		delete(acctest.Sources, t.Name())
+		acctest.SourcesLock.Unlock()
 	}
 
 	configsLock.RLock()
@@ -192,11 +115,11 @@ func closeRecorder(t *testing.T) {
 			}
 			envPath := os.Getenv("VCR_PATH")
 
-			sourcesLock.RLock()
-			vcrSource, ok := sources[t.Name()]
-			sourcesLock.RUnlock()
+			acctest.SourcesLock.RLock()
+			vcrSource, ok := acctest.Sources[t.Name()]
+			acctest.SourcesLock.RUnlock()
 			if ok {
-				err = writeSeedToFile(vcrSource.seed, vcrSeedFile(envPath, t.Name()))
+				err = writeSeedToFile(vcrSource.Seed, acctest.VcrSeedFile(envPath, t.Name()))
 				if err != nil {
 					t.Error(err)
 				}
@@ -207,9 +130,9 @@ func closeRecorder(t *testing.T) {
 		delete(fwProviders, t.Name())
 		configsLock.Unlock()
 
-		sourcesLock.Lock()
-		delete(sources, t.Name())
-		sourcesLock.Unlock()
+		acctest.SourcesLock.Lock()
+		delete(acctest.Sources, t.Name())
+		acctest.SourcesLock.Unlock()
 	}
 }
 
@@ -314,7 +237,7 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 		tflog.Debug(ctx, "No environment var set for VCR_PATH, skipping VCR")
 		return pollInterval, rndTripper, diags
 	}
-	path := filepath.Join(envPath, vcrFileName(testName))
+	path := filepath.Join(envPath, acctest.VcrFileName(testName))
 
 	rec, err := recorder.NewAsMode(path, vcrMode, rndTripper)
 	if err != nil {

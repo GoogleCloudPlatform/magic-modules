@@ -1,0 +1,46 @@
+<% autogen_exception -%>
+package acctest
+
+import (
+	"os"
+	"testing"
+	"math/rand"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+)
+
+func RandString(t *testing.T, length int) string {
+	if !IsVcrEnabled() {
+		return acctest.RandString(length)
+	}
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	s, err := vcrSource(t, envPath, vcrMode)
+	if err != nil {
+		// At this point we haven't created any resources, so fail fast
+		t.Fatal(err)
+	}
+
+	r := rand.New(s.source)
+	result := make([]byte, length)
+	set := "abcdefghijklmnopqrstuvwxyz012346789"
+	for i := 0; i < length; i++ {
+		result[i] = set[r.Intn(len(set))]
+	}
+	return string(result)
+}
+
+func RandInt(t *testing.T) int {
+	if !IsVcrEnabled() {
+		return acctest.RandInt()
+	}
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	s, err := vcrSource(t, envPath, vcrMode)
+	if err != nil {
+		// At this point we haven't created any resources, so fail fast
+		t.Fatal(err)
+	}
+
+	return rand.New(s.source).Int()
+}

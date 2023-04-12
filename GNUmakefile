@@ -52,6 +52,14 @@ else
 SED_I := -i '' -E
 endif
 
+ifeq ($(VERSION), beta)
+  OUTPUT_FOLDER := google-beta
+  TPG := github.com/hashicorp/terraform-provider-google-beta/$(OUTPUT_FOLDER)
+else 
+  OUTPUT_FOLDER := google
+  TPG := github.com/hashicorp/terraform-provider-google/$(OUTPUT_FOLDER)
+endif
+
 ifeq ($(FORCE_DCL),)
   FORCE_DCL=latest
 endif
@@ -59,6 +67,8 @@ terraform build provider:
 	@make validate_environment;
 	make mmv1
 	make tpgtools
+
+	find  $(OUTPUT_PATH)/$(OUTPUT_FOLDER) -name *.go -exec sed ${SED_I} "s=internal/terraform-provider-google=$(TPG)=g" {} \;
 
 mmv1:
 	cd mmv1;\
