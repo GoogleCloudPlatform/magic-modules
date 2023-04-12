@@ -15,7 +15,7 @@
 name: 'CapacityCommitment'
 base_url: projects/{{project}}/locations/{{location}}/capacityCommitments
 create_url: projects/{{project}}/locations/{{location}}/capacityCommitments?capacityCommitmentId={{capacity_commitment_id}}
-self_link: "{{name}}"
+self_link: "projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}"
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -26,8 +26,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Introduction to Reservations": "https://cloud.google.com/bigquery/docs/reservations-intro"
   api: "https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.capacityCommitments"
-id_format: "{{name}}"
-import_format: ["{{name}}"]
+id_format: "projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}"
+import_format: ["projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_reservation_capacity_commitment_basic"
@@ -37,8 +37,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_reservation_capacity_commitment_docs"
     skip_test: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/self_link_as_name.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'capacityCommitmentId'

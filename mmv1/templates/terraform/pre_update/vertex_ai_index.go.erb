@@ -16,7 +16,7 @@ for _, mask := range updateMask {
 }
 
 // Refreshing updateMask after adding extra schema entries
-url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
+url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
 if err != nil {
     return err
 }

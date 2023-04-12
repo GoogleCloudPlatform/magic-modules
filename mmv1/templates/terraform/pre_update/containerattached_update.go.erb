@@ -17,7 +17,7 @@ for _, mask := range updateMask {
     newUpdateMask = append(newUpdateMask, mask)
 }
 // Overwrite the previously set mask.
-url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
+url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
 if err != nil {
     return err
 }

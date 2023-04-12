@@ -74,6 +74,7 @@
       primary_resource_id: "access-level-condition"
       vars:
         access_level_name: "chromeos_no_lock"
+        account_id: "my-account-id"
   parameters:
     - !ruby/object:Api::Type::ResourceRef
       name: 'accessLevel'

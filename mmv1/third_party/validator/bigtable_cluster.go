@@ -104,7 +104,7 @@ func expandBigtableClusterDefaultStorageType(v interface{}, d TerraformResourceD
 }
 
 func expandBigtableClusterName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	cluster, err := replaceVars(d, config, "projects/{{project}}/instances/{{name}}/clusters/")
+	cluster, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}/clusters/")
 	if err != nil {
 		return nil, err
 	}
