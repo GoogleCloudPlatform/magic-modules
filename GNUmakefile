@@ -67,8 +67,8 @@ terraform build provider:
 	@make validate_environment;
 	make mmv1
 	make tpgtools
-    find  $(OUTPUT_PATH)/$(OUTPUT_FOLDER) -name *.go -exec sed ${SED_I} "s=internal/terraform-provider-google=$(TPG)=g" {} \;
 
+	find $(OUTPUT_PATH)/$(OUTPUT_FOLDER) -name *.go -exec sed ${SED_I} "s=internal/terraform-provider-google=$(TPG)=g" {} \;
 
 mmv1:
 	cd mmv1;\

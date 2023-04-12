@@ -11,13 +11,13 @@ func TestAccDataSourceAccessApprovalFolderServiceAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        GetTestOrgFromEnv(t),
-		"random_suffix": RandString(t, 10),
+		"org_id":        google.GetTestOrgFromEnv(t),
+		"random_suffix": google.RandString(t, 10),
 	}
 
 	resourceName := "data.google_access_approval_folder_service_account.aa_account"
 
-	VcrTest(t, resource.TestCase{
+	google.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
