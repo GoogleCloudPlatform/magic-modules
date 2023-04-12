@@ -72,6 +72,7 @@ func TestProvider_validateCredentials(t *testing.T) {
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
+
 			// Arrange
 			var configValue interface{}
 			if !tc.ValueNotProvided {
@@ -241,7 +242,6 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 			// Arrange
 			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
 
-
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
 
@@ -324,7 +324,6 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 			// Arrange
 			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
 
-
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
 
@@ -406,7 +405,6 @@ func TestProvider_providerConfigure_impersonateServiceAccount(t *testing.T) {
 			// Arrange
 			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
 
-
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
 
@@ -476,7 +474,6 @@ func TestProvider_providerConfigure_impersonateServiceAccountDelegates(t *testin
 
 			// Arrange
 			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
-
 
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
@@ -616,7 +613,6 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 
 			// Arrange
 			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
-
 
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
