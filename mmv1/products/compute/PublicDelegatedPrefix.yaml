@@ -56,7 +56,6 @@ properties:
     name: 'region'
     description: 'A region where the prefix will reside.'
     url_param_only: true
-    immutable: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -78,7 +77,6 @@ properties:
     name: 'parentPrefix'
     description: The URL of parent prefix. Either PublicAdvertisedPrefix or PublicDelegatedPrefix.
     required: true
-    immutable: true
     diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
