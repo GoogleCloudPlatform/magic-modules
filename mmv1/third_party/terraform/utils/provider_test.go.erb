@@ -98,6 +98,174 @@ func TestProvider_validateCredentials(t *testing.T) {
 	}
 }
 
+func TestProvider_providerConfigure_credentials(t *testing.T) {
+
+	// Read in file contents for test case below
+	credentialFileContents, err := ioutil.ReadFile(testFakeCredentialsPath)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	credentialJson := string(credentialFileContents)
+	const pathToMissingFile string = "./this/path/doesnt/exist.json" // Doesn't exist
+
+	cases := map[string]struct {
+		ConfigValues             map[string]interface{}
+		EnvVariables             map[string]string
+		ExpectError              bool
+		ExpectCredentialsUnset   bool
+		ExpectedCredentialsValue string
+	}{
+		"credentials can be configured as a path to a credentials JSON file": {
+			ConfigValues: map[string]interface{}{
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables:             map[string]string{},
+			ExpectedCredentialsValue: testFakeCredentialsPath,
+		},
+		"configuring credentials as a path to a non-existant file results in an error": {
+			ConfigValues: map[string]interface{}{
+				"credentials": pathToMissingFile,
+			},
+			ExpectError:              true,
+			ExpectedCredentialsValue: pathToMissingFile,
+		},
+		"credentials set in the config are not overridded by environment variables": {
+			ConfigValues: map[string]interface{}{
+				"credentials": credentialJson,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_CREDENTIALS":             "value-from-GOOGLE_CREDENTIALS",
+				"GOOGLE_CLOUD_KEYFILE_JSON":      "value-from-GOOGLE_CLOUD_KEYFILE_JSON",
+				"GCLOUD_KEYFILE_JSON":            "value-from-GCLOUD_KEYFILE_JSON",
+				"GOOGLE_APPLICATION_CREDENTIALS": "value-from-GOOGLE_APPLICATION_CREDENTIALS",
+			},
+			ExpectedCredentialsValue: credentialJson,
+		},
+		"when credentials is unset in the config, environment variables are used: GOOGLE_CREDENTIALS used first": {
+			EnvVariables: map[string]string{
+				"GOOGLE_CREDENTIALS":             "value-from-GOOGLE_CREDENTIALS",
+				"GOOGLE_CLOUD_KEYFILE_JSON":      "value-from-GOOGLE_CLOUD_KEYFILE_JSON",
+				"GCLOUD_KEYFILE_JSON":            "value-from-GCLOUD_KEYFILE_JSON",
+				"GOOGLE_APPLICATION_CREDENTIALS": "value-from-GOOGLE_APPLICATION_CREDENTIALS",
+			},
+			ExpectedCredentialsValue: "value-from-GOOGLE_CREDENTIALS",
+			ExpectError:              true, // due to test setup; passing in an invalid value
+		},
+		"when credentials is unset in the config, environment variables are used: GOOGLE_CLOUD_KEYFILE_JSON used second": {
+			EnvVariables: map[string]string{
+				// GOOGLE_CREDENTIALS not set
+				"GOOGLE_CLOUD_KEYFILE_JSON":      "value-from-GOOGLE_CLOUD_KEYFILE_JSON",
+				"GCLOUD_KEYFILE_JSON":            "value-from-GCLOUD_KEYFILE_JSON",
+				"GOOGLE_APPLICATION_CREDENTIALS": "value-from-GOOGLE_APPLICATION_CREDENTIALS",
+			},
+			ExpectedCredentialsValue: "value-from-GOOGLE_CLOUD_KEYFILE_JSON",
+			ExpectError:              true, // due to test setup; passing in an invalid value
+		},
+		"when credentials is unset in the config, environment variables are used: GCLOUD_KEYFILE_JSON used third": {
+			EnvVariables: map[string]string{
+				// GOOGLE_CREDENTIALS not set
+				// GOOGLE_CLOUD_KEYFILE_JSON not set
+				"GCLOUD_KEYFILE_JSON":            "value-from-GCLOUD_KEYFILE_JSON",
+				"GOOGLE_APPLICATION_CREDENTIALS": "value-from-GOOGLE_APPLICATION_CREDENTIALS",
+			},
+			ExpectedCredentialsValue: "value-from-GCLOUD_KEYFILE_JSON",
+			ExpectError:              true, // due to test setup; passing in an invalid value
+		},
+		"when credentials is unset in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used for auth but not to set values in the config": {
+			EnvVariables: map[string]string{
+				"GOOGLE_APPLICATION_CREDENTIALS": testFakeCredentialsPath,
+			},
+			ExpectCredentialsUnset: true,
+		},
+		"when credentials is set to an empty string in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used": {
+			ConfigValues: map[string]interface{}{
+				"credentials": "",
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_APPLICATION_CREDENTIALS": testFakeCredentialsPath,
+			},
+			ExpectCredentialsUnset: true,
+		},
+		"error returned if credentials is set as an empty string and GOOGLE_APPLICATION_CREDENTIALS is unset": {
+			ConfigValues: map[string]interface{}{
+				"credentials": "",
+			},
+			ExpectError: true,
+			// ErrorContainsString: "could not find default credentials",
+		},
+		"error returned if neither credentials nor access_token set in the provider config, and GOOGLE_APPLICATION_CREDENTIALS is unset": {
+			ExpectError: true,
+			// ErrorContainsString: "could not find default credentials",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx := context.Background()
+			p := Provider()
+
+			// Create empty schema.ResourceData using the SDK Provider schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
+
+			// Load Terraform config data
+			if len(tc.ConfigValues) > 0 {
+				for k, v := range tc.ConfigValues {
+					err := d.Set(k, v)
+					if err != nil {
+						t.Fatalf("error during test setup: %v", err)
+					}
+				}
+			}
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			c, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("credentials")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedCredentialsValue {
+						t.Fatalf("expected credentials value set in provider data to be %s, got %s", tc.ExpectedCredentialsValue, val)
+					}
+					if tc.ExpectCredentialsUnset {
+						t.Fatalf("expected credentials value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("credentials")
+			val := v.(string)
+			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if v != tc.ExpectedCredentialsValue {
+				t.Fatalf("expected credentials value set in provider data to be %s, got %s", tc.ExpectedCredentialsValue, val)
+			}
+			if config.Credentials != tc.ExpectedCredentialsValue {
+				t.Fatalf("expected credentials value in provider struct to be %s, got %s", tc.ExpectedCredentialsValue, config.Credentials)
+			}
+		})
+	}
+}
+
 func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
