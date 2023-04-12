@@ -54,8 +54,10 @@ endif
 
 ifeq ($(VERSION), beta)
   TPG := github.com/hashicorp/terraform-provider-google-beta/google-beta
+  OUTPUT_FOLDER := google-beta
 else 
   TPG := github.com/hashicorp/terraform-provider-google/google
+  OUTPUT_FOLDER := google
 endif
 
 ifeq ($(FORCE_DCL),)
@@ -66,7 +68,7 @@ terraform build provider:
 	make mmv1
 	make tpgtools
 
-	find  $(OUTPUT_PATH)/google-beta/service -name *.go -exec sed ${SED_I} "s=terraform-provider-google/internal=$(TPG)=g" {} \;
+	find  $(OUTPUT_PATH)/$(OUTPUT_FOLDER) -name *.go -exec sed ${SED_I} "s=internal/terraform-provider-google=$(TPG)=g" {} \;
 
 mmv1:
 	cd mmv1;\
