@@ -222,12 +222,16 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 			ConfigValues: map[string]interface{}{
 				"credentials": "",
 			},
+			EnvVariables: map[string]string{
+				"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
+			},
 			ExpectError: true,
-			// ErrorContainsString: "could not find default credentials",
 		},
 		"error returned if neither credentials nor access_token set in the provider config, and GOOGLE_APPLICATION_CREDENTIALS is unset": {
 			ExpectError: true,
-			// ErrorContainsString: "could not find default credentials",
+			EnvVariables: map[string]string{
+				"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
+			},
 		},
 	}
 
