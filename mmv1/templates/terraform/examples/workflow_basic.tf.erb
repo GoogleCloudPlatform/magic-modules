@@ -8,7 +8,6 @@ resource "google_workflows_workflow" "<%= ctx[:primary_resource_id] %>" {
   region        = "us-central1"
   description   = "Magic"
   service_account = google_service_account.test_account.id
-  crypto_key_name = "projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}"
   source_contents = <<-EOF
   # This is a sample workflow, feel free to replace it with your source code
   #

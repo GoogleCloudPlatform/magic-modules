@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -25,6 +26,12 @@ func TestAccWorkflowsWorkflow_Update(t *testing.T) {
 			{
 				Config: testAccWorkflowsWorkflow_Updated(workflowName),
 			},
+<% if version == 'ga' -%>
+<%# CMEK is only available in ga API -%>
+			{
+				Config: testAccWorkflowsWorkflow_CMEK(workflowName),
+<% end -%>
+			}
 		},
 	})
 }
@@ -146,4 +153,75 @@ func TestWorkflowsWorkflowStateUpgradeV0(t *testing.T) {
 			}
 		})
 	}
+}
+
+func testAccSpannerDatabase_cmek(name string) string {
+	return Sprintf(`
+resource "google_kms_key_ring" "keyring" {
+  provider = google-beta
+  name     = "tf-test-ring%1s"
+  location = "europe-west1"
+}
+
+resource "google_kms_crypto_key" "example-key" {
+  provider        = google-beta
+  name            = "tf-test-key%1s"
+  key_ring        = google_kms_key_ring.keyring.id
+  rotation_period = "100000s"
+}
+
+resource "google_kms_crypto_key_iam_binding" "crypto-key-binding" {
+  provider      = google-beta
+  crypto_key_id = google_kms_crypto_key.example-key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  members = [
+    "serviceAccount:${google_project_service_identity.ck_sa.email}",
+  ]
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_project_service_identity" "ck_sa" {
+  provider = google-beta
+  project  = data.google_project.project.project_id
+  service  = "workflows.googleapis.com"
+}
+
+resource "google_workflows_workflow" "example" {
+  name          = "%2s"
+  region        = "us-central1"
+  description   = "Magic"
+  crypto_key_name = google_kms_crypto_key.example-key.id
+  source_contents = <<-EOF
+  # This is a sample workflow, feel free to replace it with your source code
+  #
+  # This workflow does the following:
+  # - reads current time and date information from an external API and stores
+  #   the response in CurrentDateTime variable
+  # - retrieves a list of Wikipedia articles related to the day of the week
+  #   from CurrentDateTime
+  # - returns the list of articles as an output of the workflow
+  # FYI, In terraform you need to escape the $$ or it will cause errors.
+
+  - getCurrentTime:
+      call: http.get
+      args:
+          url: https://us-central1-workflowsample.cloudfunctions.net/datetime
+      result: CurrentDateTime
+  - readWikipedia:
+      call: http.get
+      args:
+          url: https:/fi.wikipedia.org/w/api.php
+          query:
+              action: opensearch
+              search: $${CurrentDateTime.body.dayOfTheWeek}
+      result: WikiResult
+  - returnOutput:
+      return: $${WikiResult.body[1]}
+EOF
+}
+`, randString(t, 10), name)
 }
