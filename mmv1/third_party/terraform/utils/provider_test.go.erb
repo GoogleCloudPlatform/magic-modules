@@ -129,7 +129,7 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 			ExpectError:   true,
 			ExpectedValue: pathToMissingFile,
 		},
-		"credentials set in the config are not overridded by environment variables": {
+		"credentials set in the config are not overridden by environment variables": {
 			ConfigValues: map[string]interface{}{
 				"credentials": credentialJson,
 			},
