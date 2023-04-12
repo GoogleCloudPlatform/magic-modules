@@ -471,6 +471,108 @@ func TestProvider_providerConfigure_impersonateServiceAccount(t *testing.T) {
 	}
 }
 
+func TestProvider_providerConfigure_impersonateServiceAccountDelegates(t *testing.T) {
+
+	cases := map[string]struct {
+		ConfigValues     map[string]interface{}
+		EnvVariables     map[string]string
+		ExpectedValue    []string
+		ExpectError      bool
+		ExpectFieldUnset bool
+	}{
+		"impersonate_service_account_delegates value can be set in the provider schema": {
+			ConfigValues: map[string]interface{}{
+				"impersonate_service_account_delegates": []string{
+					"projects/-/serviceAccounts/my-service-account-1@example.iam.gserviceaccount.com",
+					"projects/-/serviceAccounts/my-service-account-2@example.iam.gserviceaccount.com",
+				},
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectedValue: []string{
+				"projects/-/serviceAccounts/my-service-account-1@example.iam.gserviceaccount.com",
+				"projects/-/serviceAccounts/my-service-account-2@example.iam.gserviceaccount.com",
+			},
+		},
+		// No environment variables can be used for impersonate_service_account_delegates
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+			ctx := context.Background()
+			p := Provider()
+
+			// Create empty schema.ResourceData using the SDK Provider schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
+
+			// Load Terraform config data
+			if len(tc.ConfigValues) > 0 {
+				for k, v := range tc.ConfigValues {
+					err := d.Set(k, v)
+					if err != nil {
+						t.Fatalf("error during test setup: %v", err)
+					}
+				}
+			}
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			c, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("impersonate_service_account_delegates")
+				if ok {
+					val := v.([]interface{})
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected impersonate_service_account_delegates value to not be set in provider data, got %#v", val)
+					}
+					if len(val) != len(tc.ExpectedValue) {
+						t.Fatalf("expected impersonate_service_account_delegates value set in provider data to be %#v, got %#v", tc.ExpectedValue, val)
+					}
+					for i := 0; i < len(val); i++ {
+						if val[i].(string) != tc.ExpectedValue[i] {
+							t.Fatalf("expected impersonate_service_account_delegates value set in provider data to be %#v, got %#v", tc.ExpectedValue, val)
+						}
+					}
+
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("impersonate_service_account_delegates")
+			val := v.([]interface{})
+			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if len(val) != len(tc.ExpectedValue) {
+				t.Fatalf("expected impersonate_service_account_delegates value set in provider data to be %#v, got %#v", tc.ExpectedValue, val)
+			}
+			for i := 0; i < len(val); i++ {
+				if val[i].(string) != tc.ExpectedValue[i] {
+					t.Fatalf("expected impersonate_service_account_delegates value set in provider data to be %#v, got %#v", tc.ExpectedValue, val)
+				}
+				if config.ImpersonateServiceAccountDelegates[i] != tc.ExpectedValue[i] {
+					t.Fatalf("expected impersonate_service_account_delegates value in provider struct to be %#v, got %#v", tc.ExpectedValue, config.ImpersonateServiceAccountDelegates)
+				}
+			}
+		})
+	}
+}
+
 func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
