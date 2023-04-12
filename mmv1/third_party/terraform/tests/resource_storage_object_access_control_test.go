@@ -1,12 +1,11 @@
-package google-test
+package google_test
 
 import (
-    google "internal/terraform-provider-google"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	google "internal/terraform-provider-google"
 	"io/ioutil"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccStorageObjectAccessControl_update(t *testing.T) {

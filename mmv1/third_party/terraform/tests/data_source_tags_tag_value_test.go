@@ -1,8 +1,8 @@
-package google-test
+package google_test
 
 import (
-    google "internal/terraform-provider-google"
 	"fmt"
+	google "internal/terraform-provider-google"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"

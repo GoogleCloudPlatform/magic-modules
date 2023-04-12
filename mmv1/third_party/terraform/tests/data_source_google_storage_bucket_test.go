@@ -1,11 +1,10 @@
-package google-test
+package google_test
 
 import (
-    google "internal/terraform-provider-google"
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	google "internal/terraform-provider-google"
+	"testing"
 )
 
 func TestAccDataSourceGoogleStorageBucket_basic(t *testing.T) {

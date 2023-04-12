@@ -1,13 +1,12 @@
-package google-test
+package google_test
 
 import (
-    google "internal/terraform-provider-google"
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/bigquery/v2"
+	google "internal/terraform-provider-google"
+	"testing"
 )
 
 func TestAccBigQueryDataset_basic(t *testing.T) {

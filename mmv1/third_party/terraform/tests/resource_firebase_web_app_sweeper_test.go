@@ -1,20 +1,13 @@
-// ----------------------------------------------------------------------------
-//
-//     ***     HANDWRITTEN CODE    ***    Type: MMv1     ***
-    google "internal/terraform-provider-google"
-//
-// ----------------------------------------------------------------------------
-
 package google_test
 
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	google "internal/terraform-provider-google"
 	"log"
 	"strings"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func init() {

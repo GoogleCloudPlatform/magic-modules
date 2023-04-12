@@ -1,8 +1,8 @@
 package google_test
 
 import (
-    google "internal/terraform-provider-google"
 	"context"
+	google "internal/terraform-provider-google"
 	"log"
 	"strings"
 

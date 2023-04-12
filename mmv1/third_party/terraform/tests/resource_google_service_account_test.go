@@ -1,12 +1,11 @@
-package google-test
+package google_test
 
 import (
-    google "internal/terraform-provider-google"
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	google "internal/terraform-provider-google"
+	"testing"
 )
 
 // Test that a service account resource can be created, updated, and destroyed

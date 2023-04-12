@@ -1,10 +1,9 @@
-package google-test
+package google_test
 
 import (
-    google "internal/terraform-provider-google"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	google "internal/terraform-provider-google"
+	"testing"
 )
 
 func TestContainerClusterMigrateState(t *testing.T) {

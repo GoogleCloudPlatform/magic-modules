@@ -1,14 +1,13 @@
-package google-test
+package google_test
 
 import (
-    google "internal/terraform-provider-google"
 	"errors"
 	"fmt"
-	"strconv"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	google "internal/terraform-provider-google"
+	"strconv"
+	"testing"
 )
 
 func TestAccDataSourceGoogleContainerAttachedVersions(t *testing.T) {

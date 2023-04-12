@@ -1,11 +1,10 @@
-package google-test
+package google_test
 
 import (
-    google "internal/terraform-provider-google"
 	"context"
-	"log"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	google "internal/terraform-provider-google"
+	"log"
 )
 
 // This will sweep both Standard and Flexible App Engine App Versions

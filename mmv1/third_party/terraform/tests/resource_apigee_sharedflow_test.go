@@ -1,13 +1,12 @@
-package google-test
+package google_test
 
 import (
-    google "internal/terraform-provider-google"
 	"fmt"
-	"strings"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	google "internal/terraform-provider-google"
+	"strings"
+	"testing"
 )
 
 func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
