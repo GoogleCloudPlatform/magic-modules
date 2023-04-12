@@ -18,8 +18,8 @@ func TestAccDataSourceAccessApprovalFolderServiceAccount_basic(t *testing.T) {
 	resourceName := "data.google_access_approval_folder_service_account.aa_account"
 
 	google.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -35,7 +35,7 @@ func TestAccDataSourceAccessApprovalFolderServiceAccount_basic(t *testing.T) {
 }
 
 func testAccDataSourceAccessApprovalFolderServiceAccount_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"

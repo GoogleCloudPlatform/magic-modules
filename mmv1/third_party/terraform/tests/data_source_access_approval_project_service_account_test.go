@@ -11,14 +11,14 @@ func TestAccDataSourceAccessApprovalProjectServiceAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id": GetTestProjectFromEnv(),
+		"project_id": google.GetTestProjectFromEnv(),
 	}
 
 	resourceName := "data.google_access_approval_project_service_account.aa_account"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceAccessApprovalProjectServiceAccount_basic(context),
@@ -31,7 +31,7 @@ func TestAccDataSourceAccessApprovalProjectServiceAccount_basic(t *testing.T) {
 }
 
 func testAccDataSourceAccessApprovalProjectServiceAccount_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 data "google_access_approval_project_service_account" "aa_account" {
   project_id = "%{project_id}"
 }
