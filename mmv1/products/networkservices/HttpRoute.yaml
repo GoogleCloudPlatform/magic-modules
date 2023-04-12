@@ -181,7 +181,6 @@ properties:
                       name: queryParameter
                       description: |
                         The name of the query parameter to match.
-                      send_empty_value: true
                     - !ruby/object:Api::Type::String
                       name: exactMatch
                       description: |
@@ -216,7 +215,6 @@ properties:
                       name: header
                       description: |
                         The name of the HTTP header to match against.
-                      send_empty_value: true
                     - !ruby/object:Api::Type::Boolean
                       name: invertMatch
                       description: |
