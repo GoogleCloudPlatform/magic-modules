@@ -98,6 +98,37 @@ func TestProvider_validateCredentials(t *testing.T) {
 	}
 }
 
+// Used for testing the `providerConfigure` function
+func setupSDKProviderConfigTest(t *testing.T, configValues map[string]interface{},
+	envValues map[string]string) (context.Context, *schema.Provider, *schema.ResourceData) {
+
+	ctx := context.Background()
+	p := Provider()
+
+	// Create empty schema.ResourceData using the SDK Provider schema
+	emptyConfigMap := map[string]interface{}{}
+	d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
+
+	// Load Terraform config data
+	if len(configValues) > 0 {
+		for k, v := range configValues {
+			err := d.Set(k, v)
+			if err != nil {
+				t.Fatalf("error during test setup: %v", err)
+			}
+		}
+	}
+
+	// Set ENVs
+	if len(envValues) > 0 {
+		for k, v := range envValues {
+			t.Setenv(k, v)
+		}
+	}
+
+	return ctx, p, d
+}
+
 func TestProvider_providerConfigure_credentials(t *testing.T) {
 
 	// Read in file contents for test case below
