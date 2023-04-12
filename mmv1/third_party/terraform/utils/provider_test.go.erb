@@ -2,6 +2,7 @@
 package google
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -234,29 +235,8 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 
 			// Arrange
-			ctx := context.Background()
-			p := Provider()
+			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
 
-			// Create empty schema.ResourceData using the SDK Provider schema
-			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
-
-			// Load Terraform config data
-			if len(tc.ConfigValues) > 0 {
-				for k, v := range tc.ConfigValues {
-					err := d.Set(k, v)
-					if err != nil {
-						t.Fatalf("error during test setup: %v", err)
-					}
-				}
-			}
-
-			// Set ENVs
-			if len(tc.EnvVariables) > 0 {
-				for k, v := range tc.EnvVariables {
-					t.Setenv(k, v)
-				}
-			}
 
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
@@ -336,30 +316,10 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
+
 			// Arrange
-			ctx := context.Background()
-			p := Provider()
+			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
 
-			// Create empty schema.ResourceData using the SDK Provider schema
-			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
-
-			// Load Terraform config data
-			if len(tc.ConfigValues) > 0 {
-				for k, v := range tc.ConfigValues {
-					err := d.Set(k, v)
-					if err != nil {
-						t.Fatalf("error during test setup: %v", err)
-					}
-				}
-			}
-
-			// Set ENVs
-			if len(tc.EnvVariables) > 0 {
-				for k, v := range tc.EnvVariables {
-					t.Setenv(k, v)
-				}
-			}
 
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
@@ -438,30 +398,10 @@ func TestProvider_providerConfigure_impersonateServiceAccount(t *testing.T) {
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
+
 			// Arrange
-			ctx := context.Background()
-			p := Provider()
+			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
 
-			// Create empty schema.ResourceData using the SDK Provider schema
-			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
-
-			// Load Terraform config data
-			if len(tc.ConfigValues) > 0 {
-				for k, v := range tc.ConfigValues {
-					err := d.Set(k, v)
-					if err != nil {
-						t.Fatalf("error during test setup: %v", err)
-					}
-				}
-			}
-
-			// Set ENVs
-			if len(tc.EnvVariables) > 0 {
-				for k, v := range tc.EnvVariables {
-					t.Setenv(k, v)
-				}
-			}
 
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
@@ -529,30 +469,10 @@ func TestProvider_providerConfigure_impersonateServiceAccountDelegates(t *testin
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
+
 			// Arrange
-			ctx := context.Background()
-			p := Provider()
+			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
 
-			// Create empty schema.ResourceData using the SDK Provider schema
-			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
-
-			// Load Terraform config data
-			if len(tc.ConfigValues) > 0 {
-				for k, v := range tc.ConfigValues {
-					err := d.Set(k, v)
-					if err != nil {
-						t.Fatalf("error during test setup: %v", err)
-					}
-				}
-			}
-
-			// Set ENVs
-			if len(tc.EnvVariables) > 0 {
-				for k, v := range tc.EnvVariables {
-					t.Setenv(k, v)
-				}
-			}
 
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
@@ -689,30 +609,10 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
+
 			// Arrange
-			ctx := context.Background()
-			p := Provider()
+			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
 
-			// Create empty schema.ResourceData using the SDK Provider schema
-			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
-
-			// Load Terraform config data
-			if len(tc.ConfigValues) > 0 {
-				for k, v := range tc.ConfigValues {
-					err := d.Set(k, v)
-					if err != nil {
-						t.Fatalf("error during test setup: %v", err)
-					}
-				}
-			}
-
-			// Set ENVs
-			if len(tc.EnvVariables) > 0 {
-				for k, v := range tc.EnvVariables {
-					t.Setenv(k, v)
-				}
-			}
 
 			// Act
 			c, diags := providerConfigure(ctx, d, p)
