@@ -3,7 +3,7 @@ resource "google_compute_global_networksecurity_address_group" "basic_global_net
   description = "Sample global networksecurity_address_group"
   project     = "{{project}}"
   region      = "{{region}}"
-  items = [""]
+  items = ["208.80.154.224/32"]
   type = "IPV4"
   capacity = 100
 }
@@ -32,7 +32,7 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
       ports       = ["123"]
     }
     
-    srcAddressGroups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
+    destAddressGroups = [google_compute_region_networksecurity_address_group.basic_global_networksecurity_address_group.name]
 
   }
 
