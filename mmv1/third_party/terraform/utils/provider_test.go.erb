@@ -573,6 +573,155 @@ func TestProvider_providerConfigure_impersonateServiceAccountDelegates(t *testin
 	}
 }
 
+func TestProvider_providerConfigure_project(t *testing.T) {
+
+	cases := map[string]struct {
+		ConfigValues     map[string]interface{}
+		EnvVariables     map[string]string
+		ExpectedValue    string
+		ExpectError      bool
+		ExpectFieldUnset bool
+	}{
+		"project value set in the provider schema is not overridden by environment variables": {
+			ConfigValues: map[string]interface{}{
+				"project":     "my-project-from-config",
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_PROJECT":        "project-from-GOOGLE_PROJECT",
+				"GOOGLE_CLOUD_PROJECT":  "project-from-GOOGLE_CLOUD_PROJECT",
+				"GCLOUD_PROJECT":        "project-from-GCLOUD_PROJECT",
+				"CLOUDSDK_CORE_PROJECT": "project-from-CLOUDSDK_CORE_PROJECT",
+			},
+			ExpectedValue: "my-project-from-config",
+		},
+		"project value can be set by environment variable: GOOGLE_PROJECT is used first": {
+			ConfigValues: map[string]interface{}{
+				// project unset
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_PROJECT":        "project-from-GOOGLE_PROJECT",
+				"GOOGLE_CLOUD_PROJECT":  "project-from-GOOGLE_CLOUD_PROJECT",
+				"GCLOUD_PROJECT":        "project-from-GCLOUD_PROJECT",
+				"CLOUDSDK_CORE_PROJECT": "project-from-CLOUDSDK_CORE_PROJECT",
+			},
+			ExpectedValue: "project-from-GOOGLE_PROJECT",
+		},
+		"project value can be set by environment variable: GOOGLE_CLOUD_PROJECT is used second": {
+			ConfigValues: map[string]interface{}{
+				// project unset
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				// GOOGLE_PROJECT unset
+				"GOOGLE_CLOUD_PROJECT":  "project-from-GOOGLE_CLOUD_PROJECT",
+				"GCLOUD_PROJECT":        "project-from-GCLOUD_PROJECT",
+				"CLOUDSDK_CORE_PROJECT": "project-from-CLOUDSDK_CORE_PROJECT",
+			},
+			ExpectedValue: "project-from-GOOGLE_CLOUD_PROJECT",
+		},
+		"project value can be set by environment variable: GCLOUD_PROJECT is used third": {
+			ConfigValues: map[string]interface{}{
+				// project unset
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				// GOOGLE_PROJECT unset
+				// GOOGLE_CLOUD_PROJECT unset
+				"GCLOUD_PROJECT":        "project-from-GCLOUD_PROJECT",
+				"CLOUDSDK_CORE_PROJECT": "project-from-CLOUDSDK_CORE_PROJECT",
+			},
+			ExpectedValue: "project-from-GCLOUD_PROJECT",
+		},
+		"project value can be set by environment variable: CLOUDSDK_CORE_PROJECT is used fourth": {
+			ConfigValues: map[string]interface{}{
+				// project unset
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				// GOOGLE_PROJECT unset
+				// GOOGLE_CLOUD_PROJECT unset
+				// GCLOUD_PROJECT unset
+				"CLOUDSDK_CORE_PROJECT": "project-from-CLOUDSDK_CORE_PROJECT",
+			},
+			ExpectedValue: "project-from-CLOUDSDK_CORE_PROJECT",
+		},
+		"when no project values are provided via config or environment variables, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				// project unset
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectedValue: "",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+			ctx := context.Background()
+			p := Provider()
+
+			// Create empty schema.ResourceData using the SDK Provider schema
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, p.Schema, emptyConfigMap)
+
+			// Load Terraform config data
+			if len(tc.ConfigValues) > 0 {
+				for k, v := range tc.ConfigValues {
+					err := d.Set(k, v)
+					if err != nil {
+						t.Fatalf("error during test setup: %v", err)
+					}
+				}
+			}
+
+			// Set ENVs
+			if len(tc.EnvVariables) > 0 {
+				for k, v := range tc.EnvVariables {
+					t.Setenv(k, v)
+				}
+			}
+
+			// Act
+			c, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("project")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedValue {
+						t.Fatalf("expected project value set in provider data to be %s, got %s", tc.ExpectedValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected project value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("project")
+			val := v.(string)
+			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if val != tc.ExpectedValue {
+				t.Fatalf("expected project value set in provider data to be %s, got %s", tc.ExpectedValue, val)
+			}
+			if config.Project != tc.ExpectedValue {
+				t.Fatalf("expected project value in provider struct to be %s, got %s", tc.ExpectedValue, config.Project)
+			}
+		})
+	}
+}
+
 func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
