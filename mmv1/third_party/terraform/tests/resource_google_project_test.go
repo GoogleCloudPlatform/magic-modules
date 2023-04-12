@@ -13,12 +13,10 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
 var (
-	OriginalPolicy *cloudresourcemanager.Policy
-	TestPrefix     = "tf-test"
+	TestPrefix = "tf-test"
 )
 
 func init() {
@@ -92,7 +90,7 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// This step creates a new project
@@ -114,7 +112,7 @@ func TestAccProject_create(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// This step creates a new project
@@ -140,7 +138,7 @@ func TestAccProject_billing(t *testing.T) {
 	billingId := GetTestBillingAccountFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// This step creates a new project with a billing account
@@ -182,7 +180,7 @@ func TestAccProject_labels(t *testing.T) {
 	org := GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -225,7 +223,7 @@ func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	billingId := GetTestBillingAccountFromEnv(t)
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -242,7 +240,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	folderDisplayName := TestPrefix + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -259,7 +257,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 	pid := fmt.Sprintf("%s-%d", TestPrefix, RandInt(t))
 	folderDisplayName := TestPrefix + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{

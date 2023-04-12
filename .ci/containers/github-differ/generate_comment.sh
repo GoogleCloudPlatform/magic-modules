@@ -105,6 +105,7 @@ set -e
 popd
 
 ## Missing test setup and execution
+set +e
 pushd $MM_LOCAL_PATH/tools/missing-test-detector
 go mod edit -replace google/provider/new=$(realpath $TPGB_LOCAL_PATH)
 go mod edit -replace google/provider/old=$(realpath $TPGB_LOCAL_PATH_OLD)
@@ -114,6 +115,7 @@ retVal=$?
 if [ $retVal -ne 0 ]; then
     export MISSINGTESTS=""
 fi
+set -e
 popd
 
 # TF Conversion - for compatibility until at least Nov 15 2021
