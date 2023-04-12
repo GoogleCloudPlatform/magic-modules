@@ -1,6 +1,7 @@
 package google_test
 
 import (
+    google "internal/terraform-provider-google"
 	"bytes"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"

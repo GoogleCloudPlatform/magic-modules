@@ -1,6 +1,7 @@
 package google-test
 
 import (
+    google "internal/terraform-provider-google"
 	"fmt"
 	"regexp"
 	"strings"

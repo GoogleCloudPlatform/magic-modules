@@ -1,6 +1,7 @@
 package google_test
 
 import (
+    google "internal/terraform-provider-google"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"

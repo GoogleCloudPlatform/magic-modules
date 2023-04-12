@@ -1,6 +1,7 @@
 package google_test
 
 import (
+    google "internal/terraform-provider-google"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
