@@ -766,7 +766,7 @@ func TestAccComposerEnvironment_composerV2MasterAuthNetworksUpdate(t *testing.T)
 	})
 }
 
-func TestAccComposer1Environment_withNodeConfig_withTags(t *testing.T) {
+func TestAccComposer1Environment_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
@@ -800,7 +800,7 @@ func TestAccComposer1Environment_withNodeConfig_withTags(t *testing.T) {
 	})
 }
 
-func TestAccComposer2Environment_withNodeConfig_withTags(t *testing.T) {
+func TestAccComposer2Environment_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
