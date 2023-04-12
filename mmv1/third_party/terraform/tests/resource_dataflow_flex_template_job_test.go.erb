@@ -27,9 +27,9 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 	topic := "tf-test-topic" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_basic(job, bucket, topic),
@@ -60,9 +60,9 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 	topic2 := "tf-test-topic-2" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_basic(job, bucket, topic),
@@ -98,9 +98,9 @@ func TestAccDataflowFlexTemplateJob_streamFailUpdate(t *testing.T) {
 	topic := "tf-test-topic" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_basic(job, bucket, topic),
@@ -131,9 +131,9 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 	topic := "tf-test-topic" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    TestAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topic),
@@ -264,6 +264,8 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
+	network := "tf-test-dataflow-net" + randStr
+	subnetwork := "tf-test-dataflow-subnetwork" + randStr
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -271,7 +273,7 @@ func TestAccDataflowFlexTemplateJob_withIpConfig(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_ipConfig(job, bucket, topic),
+				Config: testAccDataflowFlexTemplateJob_ipConfig(job, network, subnetwork, bucket, topic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_ipconfig", false),
 				),
@@ -341,7 +343,7 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 				Config: testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket, topic, additionalExperiments),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_experiments", false),
-					testAccDataflowFlexTemplateJobHasAdditionalExperiments(t, "google_dataflow_flex_template_job.flex_job_experiments", additionalExperiments),
+					testAccDataflowFlexTemplateJobHasAdditionalExperiments(t, "google_dataflow_flex_template_job.flex_job_experiments", additionalExperiments, false),
 				),
 			},
 			{
@@ -388,7 +390,7 @@ func testAccDataflowFlexTemplateJobHasSubNetwork(t *testing.T, res, expected str
 	}
 }
 
-func testAccDataflowFlexTemplateJobHasAdditionalExperiments(t *testing.T, res string, experiments []string) resource.TestCheckFunc {
+func testAccDataflowFlexTemplateJobHasAdditionalExperiments(t *testing.T, res string, experiments []string, wait bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[res]
 		if !ok {
@@ -854,6 +856,12 @@ resource "google_compute_network" "net" {
   auto_create_subnetworks = false
 }
 
+resource "google_compute_subnetwork" "subnet1" {
+  name          = "%s"
+  ip_cidr_range = "10.1.0.0/24"
+  network       = google_compute_network.net.self_link
+}
+
 resource "google_storage_bucket" "bucket" {
   name = "%s"
   location = "US-CENTRAL1"
@@ -877,12 +885,6 @@ resource "google_storage_bucket_object" "schema" {
 	"completed": {{bool()}}
 }
 EOF
-}
-
-resource "google_compute_subnetwork" "subnet1" {
-  name          = "%s"
-  ip_cidr_range = "10.1.0.0/24"
-  network       = google_compute_network.net.self_link
 }
 
 data "google_storage_bucket_object" "flex_template" {
@@ -904,7 +906,7 @@ resource "google_dataflow_flex_template_job" "flex_job_subnetwork" {
   subnetwork        = google_compute_subnetwork.subnet1.self_link
 
 }
-`, topicName, network, bucket, subnetwork1, job)
+`, topicName, network, subnetwork1, bucket, job)
 }
 
 func testAccDataflowFlexTemplateJob_subnetworkUpdate(job, network, subnetwork1, subnetwork2, bucket, topicName string) string {
@@ -918,6 +920,18 @@ resource "google_pubsub_topic" "example" {
 resource "google_compute_network" "net" {
   name                    = "%s"
   auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet1" {
+  name          = "%s"
+  ip_cidr_range = "10.1.0.0/24"
+  network       = google_compute_network.net.self_link
+}
+
+resource "google_compute_subnetwork" "subnet2" {
+  name          = "%s"
+  ip_cidr_range = "10.2.0.0/24"
+  network       = google_compute_network.net.self_link
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -945,18 +959,6 @@ resource "google_storage_bucket_object" "schema" {
 EOF
 }
 
-resource "google_compute_subnetwork" "subnet1" {
-  name          = "%s"
-  ip_cidr_range = "10.1.0.0/24"
-  network       = google_compute_network.net.self_link
-}
-
-resource "google_compute_subnetwork" "subnet2" {
-  name          = "%s"
-  ip_cidr_range = "10.2.0.0/24"
-  network       = google_compute_network.net.self_link
-}
-
 data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
   bucket = "dataflow-templates"
@@ -976,15 +978,27 @@ resource "google_dataflow_flex_template_job" "flex_job_subnetwork" {
   subnetwork        = google_compute_subnetwork.subnet2.self_link
 
 }
-`, topicName, network, bucket, subnetwork1, subnetwork2, job)
+`, topicName, network, subnetwork1, subnetwork2, bucket, job)
 }
 
-func testAccDataflowFlexTemplateJob_ipConfig(job, bucket, topicName string) string {
+func testAccDataflowFlexTemplateJob_ipConfig(job, network, subnetwork, bucket, topicName string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
 resource "google_pubsub_topic" "example" {
   name = "%s"
+}
+
+resource "google_compute_network" "net" {
+  name          = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "%s"
+  ip_cidr_range = "10.1.0.0/24"
+  network       = google_compute_network.net.self_link
+  private_ip_google_access = true
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -1029,9 +1043,10 @@ resource "google_dataflow_flex_template_job" "flex_job_ipconfig" {
    "my_labels" = "value"
   }
   ip_configuration = "WORKER_IP_PRIVATE"
+  subnetwork        = google_compute_subnetwork.subnet.self_link
 
 }
-`, topicName, bucket, job)
+`, topicName, network, subnetwork, bucket, job)
 }
 
 func testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key, bucket, topicName string) string {
@@ -1223,6 +1238,5 @@ func testAccDataflowFlexJobExists(t *testing.T, resource string, wait bool) reso
 		return nil
 	}
 }
-
 
 <% end -%>
