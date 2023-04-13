@@ -14,8 +14,6 @@ import (
 	googleoauth "golang.org/x/oauth2/google"
 )
 
-const TestEnvVar = "TF_ACC"
-
 // Global MutexKV
 var mutexKV = NewMutexKV()
 
@@ -204,6 +202,9 @@ func Provider() *schema.Provider {
 			"google_compute_regions":                           DataSourceGoogleComputeRegions(),
 			"google_compute_region_network_endpoint_group":     DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 			"google_compute_region_instance_group":             DataSourceGoogleComputeRegionInstanceGroup(),
+			<% unless version == 'ga' -%>	
+			"google_compute_region_instance_template":          DataSourceGoogleComputeRegionInstanceTemplate(),
+			<% end -%>
 			"google_compute_region_ssl_certificate":            DataSourceGoogleRegionComputeSslCertificate(),
 			"google_compute_resource_policy":                   DataSourceGoogleComputeResourcePolicy(),
 			"google_compute_router":                            DataSourceGoogleComputeRouter(),
@@ -393,6 +394,9 @@ end     # products.each do
 				"google_compute_project_metadata":              ResourceComputeProjectMetadata(),
 				"google_compute_project_metadata_item":         ResourceComputeProjectMetadataItem(),
 				"google_compute_region_instance_group_manager": ResourceComputeRegionInstanceGroupManager(),
+				<% unless version == 'ga' -%>	
+				"google_compute_region_instance_template":      ResourceComputeRegionInstanceTemplate(),
+				<% end -%>
 				"google_compute_router_interface":              ResourceComputeRouterInterface(),
 				"google_compute_security_policy":               ResourceComputeSecurityPolicy(),
 				"google_compute_shared_vpc_host_project":       ResourceComputeSharedVpcHostProject(),
@@ -667,4 +671,26 @@ func validateCredentials(v interface{}, k string) (warnings []string, errors []e
 	}
 
 	return
+}
+
+func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
+	merged := make(map[string]*schema.Resource)
+	duplicates := []string{}
+
+	for _, m := range ms {
+		for k, v := range m {
+			if _, ok := merged[k]; ok {
+				duplicates = append(duplicates, k)
+			}
+
+			merged[k] = v
+		}
+	}
+
+	var err error
+	if len(duplicates) > 0 {
+		err = fmt.Errorf("saw duplicates in mergeResourceMaps: %v", duplicates)
+	}
+
+	return merged, err
 }

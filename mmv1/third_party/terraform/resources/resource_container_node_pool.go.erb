@@ -347,6 +347,7 @@ var schemaNodePool = map[string]*schema.Schema{
 					Type:         schema.TypeString,
 					Optional:     true,
 					ForceNew:     true,
+					Computed:     true,
 					Description:  `The ID of the secondary range for pod IPs. If create_pod_range is true, this ID is used for the new range. If create_pod_range is false, uses an existing secondary range with this ID.`,
 				},
 				"pod_ipv4_cidr_block": {
@@ -402,6 +403,22 @@ var schemaNodePool = map[string]*schema.Schema{
 								ForceNew:    true,
 								Computed:    true,
 								Description: `The maximum number of pods per node which use this pod network.`,
+              },
+						},
+					},
+				},
+				"pod_cidr_overprovision_config": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
+					MaxItems: 1,
+					Description: `Configuration for node-pool level pod cidr overprovision. If not set, the cluster level setting will be inherited`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"disabled": {
+								Type:     schema.TypeBool,
+								Required: true,
 							},
 						},
 					},
@@ -1127,6 +1144,7 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 			"pod_ipv4_cidr_block":             c.PodIpv4CidrBlock,
 			"pod_range":                       c.PodRange,
 			"enable_private_nodes":            c.EnablePrivateNodes,
+      "pod_cidr_overprovision_config": flattenPodCidrOverprovisionConfig(c.PodCidrOverprovisionConfig),
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfig),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfig),
 		})
@@ -1215,6 +1233,8 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 		}
 		nnc.AdditionalPodNetworkConfig = podNetworkConfigs
 	}
+
+	nnc.PodCidrOverprovisionConfig = expandPodCidrOverprovisionConfig(networkNodeConfig["pod_cidr_overprovision_config"])
 
 	return nnc
 }
