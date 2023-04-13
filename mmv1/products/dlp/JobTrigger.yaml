@@ -63,6 +63,20 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dlp_job_trigger_job_notification_emails"
+    primary_resource_id: "job_notification_emails"
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dlp_job_trigger_deidentify"
+    primary_resource_id: "deidentify"
+    vars:
+      name: "tf_test"
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      name: '"tf_test_" + RandString(t, 10)'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/wrap_object.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
@@ -513,13 +527,13 @@ properties:
                     
                     If a file type is set in this field that isn't supported by the Deidentify action then the job will fail and will not be successfully created/started.
                   item_type: !ruby/object:Api::Type::Enum
-                    name: 'undefined'
+                    name: 'fileType'
                     description: |
                       This field only has a name and description because of MM
                       limitations. It should not appear in downstreams.
                     values:
-                      - :IMAGES
-                      - :TEXT_FILES
+                      - :IMAGE
+                      - :TEXT_FILE
                       - :CSV
                       - :TSV
                 - !ruby/object:Api::Type::NestedObject

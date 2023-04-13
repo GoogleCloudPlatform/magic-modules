@@ -101,32 +101,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerPubsub(t *testing.T) {
 	})
 }
 
-func TestAccDataLossPreventionJobTrigger_dlpJobTriggerJobNotificationEmails(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"project": GetTestProjectFromEnv(),
-	}
-
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerJobNotificationEmails(context),
-			},
-			{
-				ResourceName:            "google_data_loss_prevention_job_trigger.job_notification_emails",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
-			},
-		},
-	})
-}
-
-func TestAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentify(t *testing.T) {
+func TestAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -140,10 +115,63 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentify(t *testing.T) {
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentify(context),
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyBasic(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_job_trigger.deidentify",
+				ResourceName:            "google_data_loss_prevention_job_trigger.actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyUpdate(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+		},
+	})
+}
+
+func TestAccDataLossPreventionJobTrigger_dlpJobTriggerChangingActions(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerJobNotificationEmails(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyBasic(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_dlpJobTriggerJobNotificationEmails(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.actions",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent"},
@@ -346,39 +374,9 @@ resource "google_data_loss_prevention_job_trigger" "pubsub" {
 `, context)
 }
 
-func testAccDataLossPreventionJobTrigger_dlpJobTriggerJobNotificationEmails(context map[string]interface{}) string {
+func testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyBasic(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_data_loss_prevention_job_trigger" "job_notification_emails" {
-	parent       = "projects/%{project}"
-	description  = "Description for the job_trigger created by terraform"
-	display_name = "TerraformDisplayName"
-	
-	triggers {
-		schedule {
-			recurrence_period_duration = "86400s"
-		}
-	}
-	
-	inspect_job {
-		inspect_template_name = "sample-inspect-template"
-		actions {
-			job_notification_emails {}
-		}
-		storage_config {
-			cloud_storage_options {
-				file_set {
-					url = "gs://mybucket/directory/"
-				}
-			}
-		}
-	}
-}
-`, context)
-}
-
-func testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentify(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_data_loss_prevention_job_trigger" "deidentify" {
+resource "google_data_loss_prevention_job_trigger" "actions" {
 	parent       = "projects/%{project}"
 	description  = "Description for the job_trigger created by terraform"
 	display_name = "TerraformDisplayName"
@@ -394,7 +392,7 @@ resource "google_data_loss_prevention_job_trigger" "deidentify" {
 		actions {
 			deidentify {
 				cloud_storage_output    = "gs://samplebucket/dir/"
-				file_types_to_transform = ["CSV", "TSV"]
+				file_types_to_transform = ["CSV", "IMAGE", "TSV"]
 				transformation_details_storage_config {
 					table {
 						project_id = "%{project}"
@@ -460,6 +458,124 @@ resource "google_bigquery_table" "default" {
 		}
 		]
 	EOF
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyUpdate(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "actions" {
+	parent       = "projects/%{project}"
+	description  = "Description for the job_trigger created by terraform"
+	display_name = "TerraformDisplayName"
+	
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+	
+	inspect_job {
+		inspect_template_name = "sample-inspect-template"
+		actions {
+			deidentify {
+				cloud_storage_output    = "gs://samplebucketnew/dir/"
+				file_types_to_transform = ["TEXT_FILE", "TSV"]
+				transformation_details_storage_config {
+					table {
+						project_id = "%{project}"
+						dataset_id = google_bigquery_dataset.default.dataset_id
+						table_id   = google_bigquery_table.default.table_id
+					}
+				}
+				transformation_config {
+					deidentify_template            = "updated-deidentify-template"
+					image_redact_template          = "updated-image-redact-template"
+					structured_deidentify_template = "updated-structured-deidentify-template"
+				}
+			}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+	}
+}
+	
+resource "google_bigquery_dataset" "default" {
+	dataset_id                  = "tf_test_%{random_suffix}"
+	friendly_name               = "terraform-test"
+	description                 = "Description for the dataset created by terraform"
+	location                    = "US"
+	default_table_expiration_ms = 3600000
+	
+	labels = {
+		env = "default"
+	}
+}
+	
+resource "google_bigquery_table" "default" {
+	dataset_id          = google_bigquery_dataset.default.dataset_id
+	table_id            = "tf_test_%{random_suffix}"
+	deletion_protection = false
+	
+	time_partitioning {
+		type = "DAY"
+	}
+	
+	labels = {
+		env = "default"
+	}
+	
+	schema = <<EOF
+		[
+		{
+			"name": "quantity",
+			"type": "NUMERIC",
+			"mode": "NULLABLE",
+			"description": "The quantity"
+		},
+		{
+			"name": "name",
+			"type": "STRING",
+			"mode": "NULLABLE",
+			"description": "Name of the object"
+		}
+		]
+	EOF
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_dlpJobTriggerJobNotificationEmails(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "actions" {
+	parent       = "projects/%{project}"
+	description  = "Description for the job_trigger created by terraform"
+	display_name = "TerraformDisplayName"
+	
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+	
+	inspect_job {
+		inspect_template_name = "sample-inspect-template"
+		actions {
+			job_notification_emails {}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+	}
 }
 `, context)
 }
