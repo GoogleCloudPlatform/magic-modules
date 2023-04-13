@@ -30,11 +30,11 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 					testanno = "testanno" 
 				}
 	alloydb {
-		cluster_id = "dbmsalloycluster"
+		cluster_id = "dbmsalloycluster%{random_suffix}"
 		settings {
 			initial_user {
-				user = "alloyuser"
-				password = "alloypass"
+				user = "alloyuser%{random_suffix}"
+				password = "alloypass%{random_suffix}"
 			}
 			vpc_network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 			labels	= { 
