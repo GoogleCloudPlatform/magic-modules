@@ -1,0 +1,81 @@
+<% autogen_exception -%>
+package google
+<% unless version == 'ga' -%>
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+)
+
+func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
+    t.Parallel()
+
+    tlsInspectionPolicyName := fmt.Sprintf("tf-test-tls-inspection-policy-%s", RandString(t, 10))
+    caPoolName := fmt.Sprintf("tf-test-tls-inspection-policy-%s", RandString(t, 10))
+
+    VcrTest(t, resource.TestCase{
+		PreCheck:     func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckNetworkSecurityAddressGroupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecurityTlsInspectionPolicy_basic(tlsInspectionPolicyName),
+			},
+			{
+				ResourceName:      "google_network_security_tls_inspection_policy.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccNetworkSecurityTlsInspectionPolicy_update(tlsInspectionPolicyName),
+			},
+			{
+				ResourceName:      "google_network_security_tls_inspection_policy.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccNetworkSecurityTlsInspectionPolicy_basic(caPoolName, tlsInspectionPolicyName string) string {
+    return fmt.Sprintf(`
+resource "google_privateca_ca_pool" "default" {
+    provider = google-beta
+    name = "%s"
+    location = "us-central1"
+    tier = "ENTERPRISE"
+}
+    
+resource "google_network_security_tls_inspection_policy" "foobar" {
+    provider = google-beta
+    name     = "%s"
+    location = "us-central1"
+    ca_pool    = google_privateca_ca_pool.default.name
+}
+`, caPoolName, tlsInspectionPolicyName)
+}
+
+func testAccNetworkSecurityTlsInspectionPolicy_update(caPoolName, tlsInspectionPolicyName string) string {
+    return fmt.Sprintf(`
+resource "google_privateca_ca_pool" "default" {
+provider    = google-beta
+name        = "%s"
+description = "my ca pooll"
+location    = "us-central1"
+tier        = "ENTERPRISE"
+}
+
+resource "google_network_security_tls_inspection_policy" "foobar" {
+  provider    = google-beta
+  name        = "%s"
+  location    = "us-central1"
+  description = "my tls inspection policy updated"
+  ca_pool     = google_privateca_ca_pool.default.name
+}
+`, caPoolName, tlsInspectionPolicyName)
+}
+
+<% end -%>
