@@ -1,4 +1,4 @@
-package google
+package google_test
 
 import (
 	"fmt"
@@ -6,18 +6,19 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	google "internal/terraform-provider-google"
 )
 
 func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 	// Sqladmin client
-	SkipIfVcr(t)
+	google.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := BootstrapSharedSQLInstanceBackupRun(t)
+	instance := google.BootstrapSharedSQLInstanceBackupRun(t)
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -30,16 +31,16 @@ func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 
 func TestAccDataSourceSqlBackupRun_notFound(t *testing.T) {
 	// Sqladmin client
-	SkipIfVcr(t)
+	google.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -60,7 +61,7 @@ data "google_sql_backup_run" "backup" {
 }
 
 func testAccDataSourceSqlBackupRun_notFound(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-instance-%{random_suffix}"
   database_version = "POSTGRES_11"

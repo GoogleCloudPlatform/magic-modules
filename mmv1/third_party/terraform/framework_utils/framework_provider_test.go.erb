@@ -1,5 +1,5 @@
 <% autogen_exception -%>
-package google
+package google_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"testing"
 
+	google "internal/terraform-provider-google"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -16,39 +17,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func GetFwTestProvider(t *testing.T) *frameworkTestProvider {
-	configsLock.RLock()
-	fwProvider, ok := fwProviders[t.Name()]
-	configsLock.RUnlock()
-	if ok {
-		return fwProvider
-	}
-
-	var diags diag.Diagnostics
-	p := NewFrameworkTestProvider(t.Name())
-	configureApiClient(context.Background(), &p.frameworkProvider, &diags)
-	if diags.HasError() {
-		log.Fatalf("%d errors when configuring test provider client: first is %s", diags.ErrorsCount(), diags.Errors()[0].Detail())
-	}
-
-	return p
-}
-
 func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 	// TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
-	SkipIfVcr(t)
+	google.SkipIfVcr(t)
 	t.Parallel()
 
 	moduleName := "my-module"
-	managedZoneName := fmt.Sprintf("tf-test-zone-%s", RandString(t, 10))
+	managedZoneName := fmt.Sprintf("tf-test-zone-%s", google.RandString(t, 10))
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, RandString(t, 10)),
+				Config: testAccFrameworkProviderMeta_setModuleName(moduleName, managedZoneName, google.RandString(t, 10)),
 			},
 		},
 	})
@@ -127,8 +110,8 @@ func TestFrameworkProvider_CredentialsValidator(t *testing.T) {
 func TestAccFrameworkProviderBasePath_setInvalidBasePath(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { AccTestPreCheck(t) },
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { google.AccTestPreCheck(t) },
 		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -138,12 +121,12 @@ func TestAccFrameworkProviderBasePath_setInvalidBasePath(t *testing.T) {
 						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
 					},
 				},
-				Config:      testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", RandString(t, 10)),
+				Config:      testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", google.RandString(t, 10)),
 				ExpectError: regexp.MustCompile("got HTTP response code 404 with body"),
 			},
 			{
-				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-				Config:                   testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", RandString(t, 10)),
+				ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
+				Config:                   testAccProviderBasePath_setBasePath("https://www.example.com/compute/beta/", google.RandString(t, 10)),
 				ExpectError:              regexp.MustCompile("got HTTP response code 404 with body"),
 			},
 		},
@@ -152,11 +135,11 @@ func TestAccFrameworkProviderBasePath_setInvalidBasePath(t *testing.T) {
 
 func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 	// TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
-	SkipIfVcr(t)
+	google.SkipIfVcr(t)
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { AccTestPreCheck(t) },
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { google.AccTestPreCheck(t) },
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
@@ -166,7 +149,7 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 						Source:            "hashicorp/google<%= "-" + version unless version == 'ga'  -%>",
 					},
 				},
-				Config: testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", RandString(t, 10)),
+				Config: testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", google.RandString(t, 10)),
 			},
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
@@ -180,18 +163,18 @@ func TestAccFrameworkProviderBasePath_setBasePath(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-				Config:                   testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", RandString(t, 10)),
+				ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
+				Config:                   testAccFrameworkProviderBasePath_setBasePath("https://www.googleapis.com/dns/v1beta2/", google.RandString(t, 10)),
 			},
 			{
-				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 				ResourceName:             "google_dns_managed_zone.foo",
 				ImportState:              true,
 				ImportStateVerify:        true,
 			},
 			{
-				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-				Config:                   testAccFrameworkProviderBasePath_setBasePathstep3("https://www.googleapis.com/dns/v1beta2/", RandString(t, 10)),
+				ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
+				Config:                   testAccFrameworkProviderBasePath_setBasePathstep3("https://www.googleapis.com/dns/v1beta2/", google.RandString(t, 10)),
 			},
 		},
 	})

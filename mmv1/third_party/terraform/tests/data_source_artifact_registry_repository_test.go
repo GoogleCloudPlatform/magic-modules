@@ -1,22 +1,23 @@
-package google
+package google_test
 
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	google "internal/terraform-provider-google"
 )
 
 func TestAccDataSourceGoogleArtifactRegistryRepositoryConfig(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 	funcDataName := "data.google_artifact_registry_repository.my-repo"
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckArtifactRegistryRepositoryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -31,7 +32,7 @@ func TestAccDataSourceGoogleArtifactRegistryRepositoryConfig(t *testing.T) {
 }
 
 func testAccDataSourceGoogleArtifactRegistryRepositoryConfig(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_artifact_registry_repository" "my-repo" {
   location      = "us-central1"
   repository_id = "tf-test-my-repository%{random_suffix}"

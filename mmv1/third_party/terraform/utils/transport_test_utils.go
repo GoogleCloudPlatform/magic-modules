@@ -11,6 +11,12 @@ import (
 // This function isn't a test of transport.go; instead, it is used as an alternative
 // to ReplaceVars inside tests.
 func replaceVarsForTest(config *Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
+	return ReplaceVarsForTest(config, rs, linkTmpl)
+}
+
+// This function isn't a test of transport.go; instead, it is used as an alternative
+// to ReplaceVars inside tests.
+func ReplaceVarsForTest(config *Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string
 

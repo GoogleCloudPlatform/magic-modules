@@ -39,6 +39,14 @@ func compareSelfLinkRelativePaths(_, old, new string, _ *schema.ResourceData) bo
 // Use this method when the field accepts either a name or a self_link referencing a resource.
 // The value we store (i.e. `old` in this method), must be a self_link.
 func compareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) bool {
+	return CompareSelfLinkOrResourceName("", old, new, nil)
+}
+
+// CompareSelfLinkOrResourceName checks if two resources are the same resource
+//
+// Use this method when the field accepts either a name or a self_link referencing a resource.
+// The value we store (i.e. `old` in this method), must be a self_link.
+func CompareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) bool {
 	newParts := strings.Split(new, "/")
 
 	if len(newParts) == 1 {

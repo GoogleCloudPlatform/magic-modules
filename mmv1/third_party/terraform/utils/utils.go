@@ -493,6 +493,11 @@ func checkGCSName(name string) error {
 
 // checkGoogleIamPolicy makes assertions about the contents of a google_iam_policy data source's policy_data attribute
 func checkGoogleIamPolicy(value string) error {
+	return CheckGoogleIamPolicy(value)
+}
+
+// checkGoogleIamPolicy makes assertions about the contents of a google_iam_policy data source's policy_data attribute
+func CheckGoogleIamPolicy(value string) error {
 	if strings.Contains(value, "\"description\":\"\"") {
 		return fmt.Errorf("found an empty description field (should be omitted) in google_iam_policy data source: %s", value)
 	}

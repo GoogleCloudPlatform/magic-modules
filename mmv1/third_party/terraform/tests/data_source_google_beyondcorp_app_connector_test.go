@@ -1,27 +1,28 @@
-package google
+package google_test
 
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	google "internal/terraform-provider-google"
 )
 
 func TestAccDataSourceGoogleBeyondcorpAppConnector_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -32,18 +33,18 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProject(t *testing.T)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_optionalProject(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -54,18 +55,18 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalRegion(t *testing.T) 
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_optionalRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -76,18 +77,18 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(t *test
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
+		"random_suffix": google.RandString(t, 10),
 	}
 
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+	google.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { google.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: google.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBeyondcorpAppConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					google.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -95,7 +96,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(t *test
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnector_basic(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"
@@ -119,7 +120,7 @@ data "google_beyondcorp_app_connector" "foo" {
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnector_optionalProject(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"
@@ -142,7 +143,7 @@ data "google_beyondcorp_app_connector" "foo" {
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnector_optionalRegion(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"
@@ -165,7 +166,7 @@ data "google_beyondcorp_app_connector" "foo" {
 }
 
 func testAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(context map[string]interface{}) string {
-	return Nprintf(`
+	return google.Nprintf(`
 resource "google_service_account" "service_account" {
 	account_id   = "tf-test-my-account%{random_suffix}"
 	display_name = "Test Service Account"

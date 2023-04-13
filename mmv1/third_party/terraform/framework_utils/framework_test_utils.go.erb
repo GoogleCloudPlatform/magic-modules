@@ -3,12 +3,32 @@ package google
 
 import (
 	"fmt"
+	"strings"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // General test utils
+
+func GetFwTestProvider(t *testing.T) *frameworkTestProvider {
+	configsLock.RLock()
+	fwProvider, ok := fwProviders[t.Name()]
+	configsLock.RUnlock()
+	if ok {
+		return fwProvider
+	}
+
+	var diags diag.Diagnostics
+	p := NewFrameworkTestProvider(t.Name())
+	configureApiClient(context.Background(), &p.frameworkProvider, &diags)
+	if diags.HasError() {
+		log.Fatalf("%d errors when configuring test provider client: first is %s", diags.ErrorsCount(), diags.Errors()[0].Detail())
+	}
+
+	return p
+}
 
 // testExtractResourceAttr navigates a test's state to find the specified resource (or data source) attribute and makes the value
 // accessible via the attributeValue string pointer.
