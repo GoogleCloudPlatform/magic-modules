@@ -49,6 +49,11 @@ examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "database_migration_service_connection_profile_cloudsql"
       primary_resource_id: "cloudsqlprofile"
+      ignore_read_extra:
+        - "mysql.0.password"
+        - "mysql.0.ssl.0.ca_certificate"
+        - "mysql.0.ssl.0.client_certificate"
+        - "mysql.0.ssl.0.client_key"
       vars:
         sqldb: "my-database"
         sqldb_cert: "my-cert"
@@ -59,6 +64,11 @@ examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "database_migration_service_connection_profile_postgre"
       primary_resource_id: "postgreprofile"
+      ignore_read_extra:
+        - "postgresql.0.password"
+        - "postgresql.0.ssl.0.ca_certificate"
+        - "postgresql.0.ssl.0.client_certificate"
+        - "postgresql.0.ssl.0.client_key"
       vars:
         sqldb: "my-database"
         sqldb_cert: "my-cert"
@@ -68,6 +78,8 @@ examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "database_migration_service_connection_profile_alloydb"
       primary_resource_id: "alloydbprofile"
+      ignore_read_extra:
+        - "alloydb.0.settings.0.initial_user.0.password"
       vars:
         profile: "my-profileid"
 parameters:
