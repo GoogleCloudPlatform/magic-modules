@@ -1169,7 +1169,7 @@ func flattenAdditionalPodNetworkConfig(c []*container.AdditionalPodNetworkConfig
 		result = append(result, map[string]interface{}{
 			"subnetwork":          podNetworkConfig.Subnetwork,
 			"secondary_pod_range": podNetworkConfig.SecondaryPodRange,
-			"max_pods_per_node":   podNetworkConfig.MaxPodsPerNode.MaxPodsPerNode
+			"max_pods_per_node":   podNetworkConfig.MaxPodsPerNode.MaxPodsPerNode,
 		})
 	}
 	return result
