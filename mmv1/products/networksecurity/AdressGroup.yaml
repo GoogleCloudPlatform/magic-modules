@@ -76,7 +76,6 @@ properties:
     name: "description"
     description: |
       Free-text description of the resource.
-    output: true
   - !ruby/object:Api::Type::Time
     name: "createTime"
     description: |
@@ -99,10 +98,9 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: "type"
     description: |
-      The type of the Address Group. Possible values are "IPv4" or "IPV6".
-    default_value: :IPv4
+      The type of the Address Group. Possible values are "IPV4" or "IPV6".
     values:
-      - :IPv4
+      - :IPV4
       - :IPV6
   - !ruby/object:Api::Type::Array
     name: "items"

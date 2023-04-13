@@ -1,11 +1,11 @@
 resource "google_compute_global_networksecurity_address_group" "basic_global_networksecurity_address_group" {
   name        = "{{policy}}"
-  description = "Sample global networksecurity_address_group"
+  description = "Sample global networksecurity_address_group. Update"
   project     = "{{project}}"
   region      = "{{region}}"
-  items = ["208.80.154.224/32"]
-  type = "IPV4"
-  capacity = 100
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
 }
 
 resource "google_compute_network_firewall_policy" "basic_network_firewall_policy" {

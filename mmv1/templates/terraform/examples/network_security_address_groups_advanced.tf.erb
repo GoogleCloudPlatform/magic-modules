@@ -3,7 +3,7 @@ resource "google_network_security_address_group" "<%= ctx[:primary_resource_id] 
   name        = "<%= ctx[:vars]['resource_name'] %>"
   location    = "us-central1"
   description = "my description"
-  type        = "IPv4"
+  type        = "IPV4"
   capacity    = "100"
   items       = ["208.80.154.224/32"]
 }

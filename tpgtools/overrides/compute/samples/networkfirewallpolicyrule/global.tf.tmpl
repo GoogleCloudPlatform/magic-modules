@@ -1,3 +1,13 @@
+resource "google_compute_global_networksecurity_address_group" "basic_global_networksecurity_address_group" {
+  name        = "{{policy}}"
+  project     = "{{project}}"
+  description = "Sample global networksecurity_address_group"
+  region      = "{{region}}"
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
+}
+
 resource "google_compute_network_firewall_policy" "basic_network_firewall_policy" {
   name        = "{{policy}}"
   description = "Sample global network firewall policy"
@@ -25,10 +35,8 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
     layer4_configs {
       ip_protocol = "all"
     }
-
-    destAddressGroups = [""]
     
-    srcAddressGroups = [""]
+    srcAddressGroups = [google_compute_region_networksecurity_address_group.basic_global_networksecurity_address_group.name]
   }
 }
 

@@ -1,9 +1,9 @@
 resource "google_compute_region_networksecurity_address_group" "basic_regional_networksecurity_address_group" {
   name        = "{{policy}}"
-  description = "Sample regional networksecurity_address_group"
+  description = "Sample regional networksecurity_address_group. Update"
   project     = "{{project}}"
   region      = "{{region}}"
-  items = [""]
+  items = ["208.80.154.224/32"]
   type = "IPV4"
   capacity = 100
 }

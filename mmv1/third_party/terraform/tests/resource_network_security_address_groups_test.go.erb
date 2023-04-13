@@ -15,7 +15,7 @@ func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
     addressGroupsName := fmt.Sprintf("tf-test-address-group-%s", RandString(t, 10))
 
     VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckNetworkSecurityAddressGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -42,10 +42,10 @@ func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
 func testAccNetworkSecurityAddressGroups_basic(addressGroupsName string) string {
     return fmt.Sprintf(`
 resource "google_network_security_address_group" "foobar" {
-    provider    = google-beta
     name        = "%s"
     location    = "us-central1"
-    type        = "IPv4"
+	description = "my address groups"
+    type        = "IPV4"
     capacity    = "100"
     items = ["208.80.154.224/32"]
 }
@@ -55,10 +55,10 @@ resource "google_network_security_address_group" "foobar" {
 func testAccNetworkSecurityAddressGroups_update(addressGroupsName string) string {
     return fmt.Sprintf(`
 resource "google_network_security_address_group" "foobar" {
-    provider    = google-beta
     name        = "%s"
     location    = "us-central1"
-    type        = "IPv4"
+	description = "my address groups. Update"
+    type        = "IPV4"
     capacity    = "100"
     items = ["208.80.154.224/32"]
 }
