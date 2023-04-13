@@ -204,44 +204,71 @@ func TestGetProject(t *testing.T) {
 
 func TestGetLocation(t *testing.T) {
 	cases := map[string]struct {
-		ResourceLocation string
-		ResourceRegion   string
-		ResourceZone     string
-		ProviderZone     string
+		ResourceConfig   map[string]string
+		ProviderConfig   map[string]string
 		ExpectedLocation string
-		ExpectedError    bool
+		ExpectError      bool
 	}{
-		"location is pulled from the resource config": {
-			ResourceLocation: "resource-location",
+		"returns the location value set in the resource config": {
+			ResourceConfig: map[string]string{
+				"location": "resource-location",
+			},
 			ExpectedLocation: "resource-location",
 		},
-		"location pulled from the resource config cannot be a self link": {
-			ResourceLocation: "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location",
+		"returned location values set as self links are not shortened": {
+			ResourceConfig: map[string]string{
+				"location": "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location",
+			},
 			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location", // No shortening takes place
 		},
-		"region is pulled from the resource config when location is not set": {
-			ResourceRegion:   "resource-region",
+		"returns the region value set in the resource config when location is not in the schema": {
+			ResourceConfig: map[string]string{
+				"region": "resource-region",
+			},
 			ExpectedLocation: "resource-region",
 		},
-		"region pulled from the resource config cannot be a self link": {
-			ResourceRegion:   "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region",
+		"returned region values set as self links are not shortened": {
+			ResourceConfig: map[string]string{
+				"region": "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region",
+			},
 			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region", // No shortening takes place
 		},
-		"zone is pulled from the resource config when both location and region are not set": {
-			ResourceZone:     "resource-zone",
+		"returns the zone value set in the resource config when neither location nor region in the schema": {
+			ResourceConfig: map[string]string{
+				"zone": "resource-zone",
+			},
 			ExpectedLocation: "resource-zone",
 		},
-		"zone pulled from the resource config can be a self link": {
+		"returned zone values set as self links in the resource config ARE shortened": {
 			// Results from getLocation using getZone internally
-			ResourceZone:     "https://www.googleapis.com/compute/v1/projects/my-project/zones/resource-zone",
+			// This behaviour makes sense because APIs may return a self link as the zone value
+			ResourceConfig: map[string]string{
+				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/resource-zone",
+			},
 			ExpectedLocation: "resource-zone",
 		},
-		"zone is pulled from the provider config when location and region are not set in the resource config": {
-			ProviderZone:     "provider-zone",
+		"returns the zone value from the provider config when none of location/region/zone are set in the resource config": {
+			ProviderConfig: map[string]string{
+				"zone": "provider-zone",
+			},
 			ExpectedLocation: "provider-zone",
 		},
-		"error when neither location or region set on resource, and zone is not set on the provider": {
-			ExpectedError: true,
+		"returned zone values set as self links in the provider config are NOT shortened": {
+			// This behaviour makes sense because provider config values don't originate from APIs
+			// Users should always configure the provider with the short names of regions/zones
+			ProviderConfig: map[string]string{
+				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone",
+			},
+			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone",
+		},
+		"returns an error when only a region value is set in the the provider config and none of location/region/zone are set in the resource config": {
+			ProviderConfig: map[string]string{
+				"region": "provider-region",
+			},
+			ExpectError: true,
+		},
+		"an error is returned when none of location/region/zone are set on the resource, and neither region or zone is set on the provider": {
+			ExpectError: true,
 		},
 	}
 
@@ -251,8 +278,11 @@ func TestGetLocation(t *testing.T) {
 
 			// Create provider config
 			var config Config
-			if tc.ProviderZone != "" {
-				config.Zone = tc.ProviderZone
+			if v, ok := tc.ProviderConfig["region"]; ok {
+				config.Region = v
+			}
+			if v, ok := tc.ProviderConfig["zone"]; ok {
+				config.Zone = v
 			}
 
 			// Create resource config
@@ -275,19 +305,14 @@ func TestGetLocation(t *testing.T) {
 			}
 			emptyConfigMap := map[string]interface{}{}
 			d := schema.TestResourceDataRaw(t, fictionalSchema, emptyConfigMap)
-			if tc.ResourceLocation != "" {
-				if err := d.Set("location", tc.ResourceLocation); err != nil {
-					t.Fatalf("Cannot set location: %s", err)
-				}
-			}
-			if tc.ResourceRegion != "" {
-				if err := d.Set("region", tc.ResourceRegion); err != nil {
-					t.Fatalf("Cannot set region: %s", err)
-				}
-			}
-			if tc.ResourceZone != "" {
-				if err := d.Set("zone", tc.ResourceZone); err != nil {
-					t.Fatalf("Cannot set zone: %s", err)
+
+			// Load Terraform resource config data
+			if len(tc.ResourceConfig) > 0 {
+				for k, v := range tc.ResourceConfig {
+					err := d.Set(k, v)
+					if err != nil {
+						t.Fatalf("error during test setup: %v", err)
+					}
 				}
 			}
 
@@ -296,14 +321,14 @@ func TestGetLocation(t *testing.T) {
 
 			// Assert
 			if err != nil {
-				if tc.ExpectedError {
+				if tc.ExpectError {
 					return
 				}
-				t.Fatalf("Unexpected error using test: %s", err)
+				t.Fatalf("unexpected error using test: %s", err)
 			}
 
 			if location != tc.ExpectedLocation {
-				t.Fatalf("Incorrect location: got %s, want %s", location, tc.ExpectedLocation)
+				t.Fatalf("incorrect location: got %s, want %s", location, tc.ExpectedLocation)
 			}
 		})
 	}
