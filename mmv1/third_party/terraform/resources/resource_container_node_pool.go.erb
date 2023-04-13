@@ -403,7 +403,7 @@ var schemaNodePool = map[string]*schema.Schema{
 								ForceNew:    true,
 								Computed:    true,
 								Description: `The maximum number of pods per node which use this pod network.`,
-              },
+							},
 						},
 					},
 				},
@@ -1144,7 +1144,7 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 			"pod_ipv4_cidr_block":             c.PodIpv4CidrBlock,
 			"pod_range":                       c.PodRange,
 			"enable_private_nodes":            c.EnablePrivateNodes,
-      "pod_cidr_overprovision_config": flattenPodCidrOverprovisionConfig(c.PodCidrOverprovisionConfig),
+			"pod_cidr_overprovision_config":   flattenPodCidrOverprovisionConfig(c.PodCidrOverprovisionConfig),
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfig),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfig),
 		})
