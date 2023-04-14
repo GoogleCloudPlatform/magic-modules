@@ -61,6 +61,12 @@ type ProviderModel struct {
 <% unless version == "ga" -%>
 	GkehubFeatureCustomEndpoint        types.String `tfsdk:"gkehub_feature_custom_endpoint"`
 <% end -%>
+<% if version == "private" -%>
+	VmwareCustomEndpoint                  types.String `tfsdk:"vmware_custom_endpoint"`
+	// artifact from a private internal fork- this one can be removed when the
+	// internal definition is removed.
+	RunCustomEndpoint                  types.String `tfsdk:"run_custom_endpoint"`
+<% end -%>
 }
 
 type ProviderBatching struct {
