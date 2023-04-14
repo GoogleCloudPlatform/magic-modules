@@ -1137,6 +1137,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
+// Available fields for settings vary between database versions.
 func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion string) *sqladmin.Settings {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil
