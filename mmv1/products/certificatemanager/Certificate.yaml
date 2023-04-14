@@ -160,7 +160,7 @@ properties:
         immutable: true
         description: |
           Authorizations that will be used for performing domain authorization
-        diff_suppress_func: 'projectNumberDiffSuppress'
+        diff_suppress_func: 'ProjectNumberDiffSuppress'
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'state'

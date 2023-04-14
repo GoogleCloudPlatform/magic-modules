@@ -24,7 +24,7 @@ self_link: "v3/{{name}}"
 description: This message configures which resources and services to monitor for availability.
 id_format: "{{name}}"
 import_format: ["{{name}}"]
-error_retry_predicates: ["isMonitoringConcurrentEditError"]
+error_retry_predicates: ["IsMonitoringConcurrentEditError"]
 mutex: stackdriver/groups/{{project}}
 examples:
   - !ruby/object:Provider::Terraform::Examples

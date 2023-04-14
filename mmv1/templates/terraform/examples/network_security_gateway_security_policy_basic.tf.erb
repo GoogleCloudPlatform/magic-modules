@@ -1,4 +1,4 @@
-resource "google_network_security_gateway_security_policies" "<%= ctx[:primary_resource_id] %>" {
+resource "google_network_security_gateway_security_policy" "<%= ctx[:primary_resource_id] %>" {
   provider    = google-beta
   name        = "<%= ctx[:vars]['resource_name'] %>"
   location    = "us-central1"

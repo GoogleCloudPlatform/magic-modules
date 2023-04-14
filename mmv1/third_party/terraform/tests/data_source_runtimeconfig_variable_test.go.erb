@@ -20,7 +20,7 @@ func TestAccRuntimeconfigVariableDatasource_basic(t *testing.T) {
 			{
 				Config: testAccRuntimeconfigDatasourceVariable(RandString(t, 10), RandString(t, 10), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_runtimeconfig_variable.default", "google_runtimeconfig_variable.default"),
+					CheckDataSourceStateMatchesResourceState("data.google_runtimeconfig_variable.default", "google_runtimeconfig_variable.default"),
 				),
 			},
 		},

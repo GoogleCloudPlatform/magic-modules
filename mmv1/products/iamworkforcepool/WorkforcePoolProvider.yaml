@@ -93,7 +93,7 @@ properties:
     immutable: true
     url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateWorkforcePoolProviderId'
+      function: 'ValidateWorkforcePoolProviderId'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
