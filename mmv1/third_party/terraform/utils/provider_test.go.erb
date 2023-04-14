@@ -316,6 +316,16 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
 		},
+		"when access_token is set as an empty string in the config, an environment variable is used but doesn't update the schema data": {
+			ConfigValues: map[string]interface{}{
+				"access_token": "",
+			},	
+			EnvVariables: map[string]string{
+				"GOOGLE_OAUTH_ACCESS_TOKEN": "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
+			},
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
+		},
 	}
 
 	for tn, tc := range cases {
