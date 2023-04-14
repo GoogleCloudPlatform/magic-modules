@@ -180,18 +180,12 @@ examples:
       - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_regional_steering'
-    min_version: 'beta'
-    primary_resource_id: 'default'
+    primary_resource_id: 'steering'
     vars:
       forwarding_rule_name: 'steering-rule'
       ip_name: 'website-ip'
-      external_forwarding_rule_name: 'forwarding-rule'
       backend_name: 'service-backend'
-      healthcheck_name: 'service-health-check'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-      - 'ip_address'
+      external_forwarding_rule_name: 'external-forwarding-rule'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 parameters:
@@ -231,15 +225,6 @@ properties:
       'The PSC connection status of the PSC Forwarding Rule. Possible values:
       `STATUS_UNSPECIFIED`, `PENDING`, `ACCEPTED`, `REJECTED`, `CLOSED`'
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'allowPscGlobalAccess'
-    min_version: beta
-    send_empty_value: true
-    update_verb: :PATCH
-    update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
-    description: |
-      This is used in PSC consumer ForwardingRule to control 
-      whether the PSC endpoint can be accessed from another region.
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -408,6 +393,7 @@ properties:
       forwarding rules cannot use the same `[IPAddress, IPProtocol]`
       pair, and cannot have overlapping `portRange`s.
     diff_suppress_func: 'PortRangeDiffSuppress'
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ports'
     max_size: 5
@@ -585,3 +571,30 @@ properties:
 
       This field is only used for INTERNAL load balancing.
     output: true
+  - !ruby/object:Api::Type::Array
+    name: sourceIpRanges
+    description:
+      If not empty, this Forwarding Rule will only forward the traffic when the
+      source IP address matches one of the IP addresses or CIDR ranges set here.
+      Note that a Forwarding Rule can only have up to 64 source IP ranges, and
+      this field can only be used with a regional Forwarding Rule whose scheme
+      is EXTERNAL. Each sourceIpRange entry should be either an IP address (for
+      example, 1.2.3.4) or a CIDR range (for example, 1.2.3.0/24).
+    immutable: true
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: baseForwardingRule
+    description:
+      '[Output Only] The URL for the corresponding base Forwarding Rule. By base
+      Forwarding Rule, we mean the Forwarding Rule that has the same IP address,
+      protocol, and port settings with the current Forwarding Rule, but without
+      sourceIPRanges specified. Always empty if the current Forwarding Rule does
+      not have sourceIPRanges specified.'
+    output: true
+  - !ruby/object:Api::Type::Boolean
+    name: allowPscGlobalAccess
+    description:
+      This is used in PSC consumer ForwardingRule to control whether the PSC
+      endpoint can be accessed from another region.
+    min_version: beta
+    send_empty_value: true

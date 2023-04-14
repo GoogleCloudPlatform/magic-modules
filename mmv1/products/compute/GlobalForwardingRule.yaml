@@ -438,3 +438,16 @@ properties:
     update_verb: :POST
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
     diff_suppress_func: 'compareSelfLinkRelativePaths'
+  - !ruby/object:Api::Type::Array
+    name: sourceIpRanges
+    description: If not empty, this Forwarding Rule will only forward the traffic when the source IP address matches one of the IP addresses or CIDR ranges set here. Note that a Forwarding Rule can only have up to 64 source IP ranges, and this field can only be used with a regional Forwarding Rule whose scheme is EXTERNAL. Each sourceIpRange entry should be either an IP address (for example, 1.2.3.4) or a CIDR range (for example, 1.2.3.0/24).
+    immutable: true
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: baseForwardingRule
+    description: '[Output Only] The URL for the corresponding base Forwarding Rule. By base Forwarding Rule, we mean the Forwarding Rule that has the same IP address, protocol, and port settings with the current Forwarding Rule, but without sourceIPRanges specified. Always empty if the current Forwarding Rule does not have sourceIPRanges specified.'
+    output: true
+  - !ruby/object:Api::Type::Boolean
+    name: allowPscGlobalAccess
+    description: This is used in PSC consumer ForwardingRule to control whether the PSC endpoint can be accessed from another region.
+    min_version: beta
