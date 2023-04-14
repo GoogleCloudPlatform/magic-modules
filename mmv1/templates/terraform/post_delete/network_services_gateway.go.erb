@@ -1,0 +1,21 @@
+
+if d.Get("force_destroy").(bool) {
+	fmt.Printf("[DEBUG] FELIPE ENTREI NO FORCE DESTROY %q: %#v\n\n\n\n", d.Id(), res)
+	fmt.Printf("[DEBUG] OLHA O DATA RESOURCE ---> %#v\n\n\n\n", d)
+	fmt.Printf("[DEBUG] OLHA O CONFIG ---> %#v\n\n\n\n", config)
+
+	gateways, err := gatewaysSameLocation(d, config, billingProject, userAgent)
+	if err != nil {
+		return err
+	}
+
+	if isLastSWGGateway(gateways) {
+		err := deleteAutoGenRouterSWG(d, config, billingProject, userAgent)
+		if err != nil {
+			return err
+		}
+		// This is useful if the Delete operation returns before the Get operation
+        // during post-test destroy shows the completed state of the resource.
+        time.Sleep(5 * time.Second)
+	}
+}

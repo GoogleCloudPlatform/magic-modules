@@ -1,0 +1,69 @@
+# TODO(felipegc) The certificate manager must be provisioned using location. Waiting for a related pull requested being merged.
+# resource "google_certificate_manager_certificate" "default" {
+#   provider    = google-beta
+#   name        = "ca-manager-for-swg"
+#   self_managed {
+#     pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
+#     pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+#   }
+# }
+
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "<%= ctx[:vars]['network_name'] %>"
+  routing_mode            = "REGIONAL"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider      = google-beta
+  name          = "<%= ctx[:vars]['subnetwork_name'] %>"
+  purpose       = "PRIVATE"
+  ip_cidr_range = "10.128.0.0/20"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_compute_subnetwork" "proxyonlysubnetwork" {
+  provider      = google-beta
+  name          = "<%= ctx[:vars]['proxy_only_subnetwork_name'] %>"
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  ip_cidr_range = "192.168.0.0/23"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+  role          = "ACTIVE"
+}
+
+resource "google_network_security_gateway_security_policy" "default" {
+  provider    = google-beta
+  name        = "<%= ctx[:vars]['policy_name'] %>"
+  location    = "us-central1"
+}
+
+resource "google_network_security_gateway_security_policy_rule" "default" {
+  provider                = google-beta
+  name                    = "<%= ctx[:vars]['policy_rule_name'] %>"
+  location                = "us-central1"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true  
+  priority                = 1
+  session_matcher         = "host() == 'example.com'"
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
+  provider                = google-beta
+  name                    = "<%= ctx[:vars]['gateway_name_1'] %>"
+  location                = "us-central1"
+  addresses               = ["10.128.0.99"]
+  type                    = "SECURE_WEB_GATEWAY"
+  ports                   = [443]
+  scope                   = "<%= ctx[:vars]['scope_1'] %>"
+  # TODO(felipegc) reference the created one for this example.
+  certificate_urls        = ["projects/felipegc-test-swg/locations/us-central1/certificates/felipegc-certificate"]
+  gateway_security_policy = google_network_security_gateway_security_policy.default.id
+  network                 = google_compute_network.default.id
+  subnetwork              = google_compute_subnetwork.default.id
+  force_destroy           = true
+}

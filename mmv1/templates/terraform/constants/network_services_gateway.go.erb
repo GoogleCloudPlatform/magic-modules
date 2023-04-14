@@ -1,0 +1,105 @@
+<%# The license inside this block applies to this file
+	# Copyright 2021 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func gatewaysSameLocation(d *schema.ResourceData, config *Config, billingProject, userAgent string) ([]interface{}, error) {
+	var gateways []interface{}
+
+	gatewaysUrl, err := ReplaceVars(d, config, "{{NetworkServicesBasePath}}projects/{{project}}/locations/{{location}}/gateways")
+	fmt.Printf("[DEBUG] OLHA O ERR DE REPLACE VARS---> %#v\n\n\n\n", err)
+	if err != nil {
+		return gateways, err
+	}
+
+	fmt.Printf("[DEBUG] OLHA O ROUTERS URL ---> %s\n\n\n\n", gatewaysUrl)
+
+	resp, err := SendRequest(config, "GET", billingProject, gatewaysUrl, userAgent, nil)
+	fmt.Printf("[DEBUG] OLHA O ERR DE BUSCAR OS GATEWAYS---> %#v\n\n\n\n", err)
+	fmt.Printf("[DEBUG] OLHA A RESPOSTA DE BUSCAR OS GATEWAYS---> %#v\n\n\n\n", resp)
+	if err != nil {
+		fmt.Printf("[DEBUG] VIXI Q TEM ERRO---> %#v\n\n\n\n", err)
+		return gateways, err
+	}
+
+	data, ok := resp["gateways"]
+	if !ok || data == nil {
+		return gateways, nil
+	}
+
+	gateways = data.([]interface{})
+
+	return gateways, nil
+}
+
+func deleteAutoGenRouterSWG(d *schema.ResourceData, config *Config, billingProject, userAgent string) error {
+	log.Printf("[DEBUG] Searching the network id by name %q.", d.Get("network"))
+
+	fmt.Printf("[DEBUG] PEGAR O ID DA NETWORK PARA MONTAR O NOME DO ROUTER ----> %s\n\n\n", d.Get("network"))
+
+	networkPath := fmt.Sprintf("{{ComputeBasePath}}%s", d.Get("network"))
+	networkUrl, err := ReplaceVars(d, config, networkPath)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("[DEBUG] OLHA O NETWORK URL ---> %s\n\n\n\n", networkUrl)
+
+	resp, err := SendRequest(config, "GET", billingProject, networkUrl, userAgent, nil)
+	fmt.Printf("[DEBUG] OLHA O ERR DE BUSCAR A NETWORK---> %#v\n\n\n\n", err)
+	fmt.Printf("[DEBUG] OLHA A RESPOSTA DE BUSCAR A NETWORK---> %#v\n\n\n\n", resp)
+	if err != nil {
+		return err
+	}
+
+	// The name's routerNat auto generated for swg: swg-autogen-router-{NETWORK-ID}
+	routerNatId := fmt.Sprintf("swg-autogen-router-%s", resp["id"])
+	log.Printf("[DEBUG] Deleting the auto generated router %q.", routerNatId)
+
+	fmt.Printf("[DEBUG] FINALMENTE TEMOS O ID DO ROUTER ---> %s\n\n\n", routerNatId)
+
+	routerNatPath := fmt.Sprintf("{{ComputeBasePath}}projects/{{project}}/regions/{{location}}/routers/%s", routerNatId)
+	routerUrl, err := ReplaceVars(d, config, routerNatPath)
+	if err != nil {
+		return err
+	}
+	_, err = SendRequest(config, "DELETE", billingProject, routerUrl, userAgent, nil)
+	fmt.Printf("[DEBUG] OLHA O ERR DE DELETAR A ROUTER---> %#v\n\n\n\n", err)
+	if err != nil {
+		fmt.Printf("[DEBUG] UAI ESTOU RETORNANDO ERROR???---> %#v\n\n\n\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func isLastSWGGateway(gateways []interface{}) bool {
+	for _, itemRaw := range gateways {
+		fmt.Printf("[DEBUG] VEJA COMO EH CADA ITEM RAW ---> %#v\n\n\n\n", itemRaw)
+		if itemRaw == nil {
+			continue
+		}
+		item := itemRaw.(map[string]interface{})
+
+		gType, ok := item["type"]
+		if !ok || gType == nil {
+			continue
+		}
+
+		if gType.(string) == "SECURE_WEB_GATEWAY" {
+			return false
+		}
+	}
+
+	// no gateways of type SWG found.
+	return true
+}
