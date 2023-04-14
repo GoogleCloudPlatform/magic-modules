@@ -677,7 +677,6 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 			}
 			info_types {
 				name    = "PERSON_NAME"
-				version = "latest"
 			}
 			info_types {
 				name = "LAST_NAME"
@@ -692,7 +691,9 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 				name = "FIRST_NAME"
 			}
 	
-			min_likelihood = "UNLIKELY"
+			min_likelihood     = "UNLIKELY"
+			include_quote      = false
+			exclude_info_types = false
 			rule_set {
 				info_types {
 					name = "EMAIL_ADDRESS"
