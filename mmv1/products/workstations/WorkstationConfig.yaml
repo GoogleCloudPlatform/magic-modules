@@ -157,18 +157,6 @@ properties:
     description: |
       Time when this resource was created.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'idleTimeout'
-    default_from_api: true
-    description: |
-      How long to wait before automatically stopping an instance that hasn't received any user traffic. A value of 0 indicates that this instance should never time out due to idleness. Defaults to 20 minutes.
-      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-  - !ruby/object:Api::Type::String
-    name: 'runningTimeout'
-    default_from_api: true
-    description: |
-      How long to wait before automatically stopping a workstation after it started. A value of 0 indicates that workstations using this configuration should never time out. Must be greater than 0 and less than 24 hours if encryptionKey is set. Defaults to 12 hours.
-      A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
   - !ruby/object:Api::Type::NestedObject
     name: 'host'
     description: |
