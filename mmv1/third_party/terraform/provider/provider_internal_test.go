@@ -701,20 +701,31 @@ func TestProvider_providerConfigure_billingProject(t *testing.T) {
 		ExpectFieldUnset bool
 	}{
 		"billing_project value set in the provider config is not overridden by ENVs": {
-			ConfigValue: "my-billing-project-from-config",
+			ConfigValues: map[string]interface{}{
+				"billing_project": "my-billing-project-from-config",
+				"credentials":     testFakeCredentialsPath,
+			},
 			EnvVariables: map[string]string{
 				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
 			},
 			ExpectedValue: "my-billing-project-from-config",
 		},
-		"billing_project can be set by environment variable, when no value supplied via the config": {
+		"billing project can be set by environment variable, when no value supplied via the config": {
+			ConfigValues: map[string]interface{}{
+				// billing_project unset
+				"credentials": testFakeCredentialsPath,
+			},
 			EnvVariables: map[string]string{
 				"GOOGLE_BILLING_PROJECT": "my-billing-project-from-env",
 			},
 			ExpectedValue: "my-billing-project-from-env",
 		},
 		"when no values are provided via config or environment variables, the field remains unset without error": {
-			ValueNotProvided: true,
+			ConfigValues: map[string]interface{}{
+				// billing_project unset
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectedValue: "",
 		},
 	}
 
