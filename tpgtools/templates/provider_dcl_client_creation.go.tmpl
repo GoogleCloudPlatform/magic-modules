@@ -31,6 +31,7 @@ package google
 import (
 	"time"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 {{range $index, $pkg := .}}
 	{{$pkg.PackageName}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$pkg.PackageNameWithVersion}}"
 {{- end}}
@@ -61,3 +62,20 @@ func NewDCL{{$pkg.ProductName.ToTitle}}Client(config *Config, userAgent, billing
 }
 {{end}}
 
+type DCLConfig struct {
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+	{{$pkg.BasePathIdentifier.ToTitle}}BasePath string
+{{- end}}
+{{- end}}
+}
+
+func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+	config.{{$pkg.BasePathIdentifier.ToTitle}}BasePath = d.Get(transport_tpg.{{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey).(string)
+{{- end}}
+{{- end}}
+	config.CloudBuildWorkerPoolBasePath = d.Get(transport_tpg.CloudBuildWorkerPoolEndpointEntryKey).(string)
+	return config
+}

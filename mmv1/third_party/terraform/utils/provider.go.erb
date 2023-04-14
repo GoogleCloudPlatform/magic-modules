@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
 	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/version"
 
 	googleoauth "golang.org/x/oauth2/google"
@@ -307,7 +308,7 @@ func Provider() *schema.Provider {
 		return providerConfigure(ctx, d, provider)
 	}
 
-	ConfigureDCLProvider(provider)
+	transport_tpg.ConfigureDCLProvider(provider)
 
 	return provider
 }
@@ -535,7 +536,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
-	HandleDCLCustomEndpointDefaults(d)
+	transport_tpg.HandleDCLCustomEndpointDefaults(d)
 
 	config := Config{
 		Project:             d.Get("project").(string),
