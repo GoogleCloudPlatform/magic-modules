@@ -109,7 +109,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspect(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -143,7 +143,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspectCustomInfoTypes(t *
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
