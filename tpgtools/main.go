@@ -107,8 +107,8 @@ func main() {
 	}
 
 	// product specific generation
-	generateProductsFile("provider_dcl_endpoints", productsForVersion)
-	generateProductsFile("provider_dcl_client_creation", productsForVersion)
+	generateProductsFile("provider_dcl_endpoints", productsForVersion, "transport")
+	generateProductsFile("provider_dcl_client_creation", productsForVersion, "")
 
 	if oPath == nil || *oPath == "" {
 		glog.Info("Skipping copying handwritten files, no output specified")
@@ -503,7 +503,7 @@ func generateProviderResourcesFile(resources []*Resource) {
 	}
 }
 
-func generateProductsFile(fileName string, products []*ProductMetadata) {
+func generateProductsFile(fileName string, products []*ProductMetadata, folderName string) {
 	if len(products) <= 0 {
 		return
 	}
@@ -530,7 +530,13 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 		fmt.Print(string(formatted))
 	} else {
 		outname := fileName + ".go"
-		if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644); err != nil {
+
+		DCLFolderPath := path.Join(*oPath, terraformResourceDirectory, folderName)
+		if err := os.MkdirAll(DCLFolderPath, os.ModePerm); err != nil {
+			glog.Error(fmt.Errorf("error creating Terraform DCL directory %v: %v", DCLFolderPath, err))
+		}
+
+		if err = ioutil.WriteFile(path.Join(DCLFolderPath, outname), formatted, 0644); err != nil {
 			glog.Exit(err)
 		}
 	}

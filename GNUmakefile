@@ -52,6 +52,17 @@ else
 SED_I := -i '' -E
 endif
 
+ifeq ($(VERSION), beta)
+  OUTPUT_FOLDER := google-beta
+  TPG := github.com/hashicorp/terraform-provider-google-beta
+else ifeq ($(VERSION), ga)
+  OUTPUT_FOLDER := google
+  TPG := github.com/hashicorp/terraform-provider-google
+else
+  OUTPUT_FOLDER := google-private
+  TPG := github.com/hashicorp/terraform-provider-google-private
+endif
+
 ifeq ($(FORCE_DCL),)
   FORCE_DCL=latest
 endif
@@ -59,6 +70,12 @@ terraform build provider:
 	@make validate_environment;
 	make mmv1
 	make tpgtools
+	make replace-import-destination
+
+replace-import-destination:
+	# Replace import path "terraform-provider-google/internal" with github.com/hashicorp/terraform-provider-google/google
+	# or github.com/hashicorp/terraform-provider-google-beta/google-beta in the directory google or google/beta
+	find  $(OUTPUT_PATH)/$(OUTPUT_FOLDER) -name *.go -exec sed ${SED_I} "s=terraform-provider-google/internal=$(TPG)/$(OUTPUT_FOLDER)=g" {} \;
 
 mmv1:
 	cd mmv1;\
