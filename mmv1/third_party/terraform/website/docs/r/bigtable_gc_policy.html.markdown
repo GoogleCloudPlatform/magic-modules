@@ -170,7 +170,7 @@ The following arguments are supported:
 
 `max_age` supports the following arguments:
 
-* `days` - (Optional, Deprecated in favor of duration) Number of days before applying GC policy.
+* `days` - (Optional, Deprecated in favor of duration) Number of days before applying GC policy
 
 * `duration` - (Optional) Duration before applying GC policy (ex. "8h"). This is required when `days` isn't set
 
