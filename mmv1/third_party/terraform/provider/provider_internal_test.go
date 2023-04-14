@@ -774,6 +774,89 @@ func TestProvider_providerConfigure_billingProject(t *testing.T) {
 	}
 }
 
+func TestProvider_providerConfigure_region(t *testing.T) {
+
+	cases := map[string]struct {
+		ConfigValues     map[string]interface{}
+		EnvVariables     map[string]string
+		ExpectedValue    string
+		ExpectError      bool
+		ExpectFieldUnset bool
+	}{
+		"region value set in the provider config is not overridden by ENVs": {
+			ConfigValues: map[string]interface{}{
+				"region":      "my-region-from-config",
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_REGION": "region-from-env",
+			},
+			ExpectedValue: "my-region-from-config",
+		},
+		"region value can be set by environment variable: GOOGLE_PROJECT is used first": {
+			ConfigValues: map[string]interface{}{
+				// region unset
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"GOOGLE_REGION": "region-from-env",
+			},
+			ExpectedValue: "region-from-env",
+		},
+		"when no values are provided via config or environment variables, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				// region unset
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectedValue: "",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
+
+			// Act
+			c, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("region")
+				if ok {
+					val := v.(string)
+					if val != tc.ExpectedValue {
+						t.Fatalf("expected region value set in provider data to be %s, got %s", tc.ExpectedValue, val)
+					}
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected region value to not be set in provider data, got %s", val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("region")
+			val := v.(string)
+			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if val != tc.ExpectedValue {
+				t.Fatalf("expected region value set in provider data to be %s, got %s", tc.ExpectedValue, val)
+			}
+			if config.Region != tc.ExpectedValue {
+				t.Fatalf("expected region value in provider struct to be %s, got %s", tc.ExpectedValue, config.Region)
+			}
+		})
+	}
+}
+
 func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
