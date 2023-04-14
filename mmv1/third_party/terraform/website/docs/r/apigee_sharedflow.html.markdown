@@ -66,7 +66,7 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `last_modified_at` -
   (Optional)
-  Time at which the API proxy was most recently modified, in milliseconds since epoch.
+  Time at which the API proxy was most recently modified, in milliseconds since epoch
 
 * `sub_type` -
   (Optional)
