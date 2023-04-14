@@ -3,7 +3,7 @@ var domainMappingGoogleProvidedLabels = []string{
 	"run.googleapis.com/overrideAt",
 }
 
-func domainMappingLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+func DomainMappingLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the labels provided by Google
 	for _, label := range domainMappingGoogleProvidedLabels {
 		if strings.Contains(k, label) && new == "" {

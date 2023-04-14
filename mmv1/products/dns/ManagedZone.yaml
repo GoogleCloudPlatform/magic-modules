@@ -251,7 +251,7 @@ properties:
       - :private
       - :public
     default_value: :public
-    diff_suppress_func: 'caseDiffSuppress'
+    diff_suppress_func: 'CaseDiffSuppress'
     custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
   - !ruby/object:Api::Type::NestedObject
     name: 'privateVisibilityConfig'

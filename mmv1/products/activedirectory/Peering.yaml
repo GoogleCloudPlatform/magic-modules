@@ -50,6 +50,9 @@
     - !ruby/object:Provider::Terraform::Examples
       name: "active_directory_peering_basic"
       primary_resource_id: "ad-domain-peering"
+      vars:
+        domain_name: "ad.test.hashicorptest.com"
+        project_id: "my-peered-project"
       test_env_vars:
         org_id: :ORG_ID
         billing_account: :BILLING_ACCT

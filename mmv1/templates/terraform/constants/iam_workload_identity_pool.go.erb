@@ -1,6 +1,6 @@
 const workloadIdentityPoolIdRegexp = `^[0-9a-z-]+$`
 
-func validateWorkloadIdentityPoolId(v interface{}, k string) (ws []string, errors []error) {
+func ValidateWorkloadIdentityPoolId(v interface{}, k string) (ws []string, errors []error) {
     value := v.(string)
 
     if strings.HasPrefix(value, "gcp-") {
