@@ -225,21 +225,23 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 			ExpectFieldUnset:    true,
 			ExpectedSchemaValue: "",
 		},
-		"error returned if credentials is set as an empty string and GOOGLE_APPLICATION_CREDENTIALS is unset": {
-			ConfigValues: map[string]interface{}{
-				"credentials": "",
-			},
-			EnvVariables: map[string]string{
-				"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
-			},
-			ExpectError: true,
-		},
-		"error returned if neither credentials nor access_token set in the provider config, and GOOGLE_APPLICATION_CREDENTIALS is unset": {
-			EnvVariables: map[string]string{
-				"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
-			},
-			ExpectError: true,
-		},
+		// NOTE: these tests can't run in Cloud Build due to ADC locating credentials despite `GOOGLE_APPLICATION_CREDENTIALS` being unset
+		// See https://cloud.google.com/docs/authentication/application-default-credentials#search_order
+		// "error returned if credentials is set as an empty string and GOOGLE_APPLICATION_CREDENTIALS is unset": {
+		// 	ConfigValues: map[string]interface{}{
+		// 		"credentials": "",
+		// 	},
+		// 	EnvVariables: map[string]string{
+		// 		"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
+		// 	},
+		// 	ExpectError: true,
+		// },
+		// "error returned if neither credentials nor access_token set in the provider config, and GOOGLE_APPLICATION_CREDENTIALS is unset": {
+		// 	EnvVariables: map[string]string{
+		// 		"GOOGLE_APPLICATION_CREDENTIALS": "", // setting to empty string to help test run in CI
+		// 	},
+		// 	ExpectError: true,
+		// },
 	}
 
 	for tn, tc := range cases {
