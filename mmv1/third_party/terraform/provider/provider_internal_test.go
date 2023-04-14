@@ -959,6 +959,117 @@ func TestProvider_providerConfigure_zone(t *testing.T) {
 	}
 }
 
+func TestProvider_providerConfigure_userProjectOverride(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValues     map[string]interface{}
+		EnvVariables     map[string]string
+		ExpectedValue    bool
+		ExpectFieldUnset bool
+		ExpectError      bool
+	}{
+		"user_project_override value set in the provider schema is not overridden by ENVs": {
+			ConfigValues: map[string]interface{}{
+				"user_project_override": false,
+				"credentials":           testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "true",
+			},
+			ExpectedValue: false,
+		},
+		"user_project_override can be set by environment variable: true": {
+			ConfigValues: map[string]interface{}{
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "true",
+			},
+			ExpectedValue: true,
+		},
+		"user_project_override can be set by environment variable: false": {
+			ConfigValues: map[string]interface{}{
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "false",
+			},
+			ExpectedValue: false,
+		},
+		"user_project_override can be set by environment variable: 1": {
+			ConfigValues: map[string]interface{}{
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "1",
+			},
+			ExpectedValue: true,
+		},
+		"user_project_override can be set by environment variable: 0": {
+			ConfigValues: map[string]interface{}{
+				"credentials": testFakeCredentialsPath,
+			},
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "0",
+			},
+			ExpectedValue: false,
+		},
+		"error returned due to non-boolean environment variables": {
+			EnvVariables: map[string]string{
+				"USER_PROJECT_OVERRIDE": "I'm not a boolean",
+			},
+			ExpectError: true,
+		},
+		"when no values are provided via config or environment variables, the field remains unset without error": {
+			ExpectError:      true,
+			ExpectFieldUnset: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
+
+			// Act
+			c, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("user_project_override")
+				if ok {
+					val := v.(bool)
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected user_project_override value to not be set in provider data, got %v", val)
+					}
+					if val != tc.ExpectedValue {
+						t.Fatalf("expected user_project_override value set in provider data to be %v, got %v", tc.ExpectedValue, val)
+					}
+				}
+				// Return early in tests where errors expected
+				return
+			}
+
+			v := d.Get("user_project_override")
+			val := v.(bool)
+			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+
+			if val != tc.ExpectedValue {
+				t.Fatalf("expected user_project_override value set in provider data to be %v, got %v", tc.ExpectedValue, val)
+			}
+			if config.UserProjectOverride != tc.ExpectedValue {
+				t.Fatalf("expected user_project_override value in provider struct to be %v, got %v", tc.ExpectedValue, config.UserProjectOverride)
+			}
+		})
+	}
+}
+
 func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
