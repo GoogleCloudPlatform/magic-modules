@@ -119,7 +119,3 @@ properties:
     required: true
     description: |
       Capacity of the Address Group.
-  - !ruby/object:Api::Type::String
-    name: "selfLink"
-    description: |
-      Server-defined fully-qualified URL for this resource.
