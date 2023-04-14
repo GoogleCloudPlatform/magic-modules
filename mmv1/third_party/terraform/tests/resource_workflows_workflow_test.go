@@ -25,9 +25,6 @@ func TestAccWorkflowsWorkflow_Update(t *testing.T) {
 			{
 				Config: testAccWorkflowsWorkflow_Updated(workflowName),
 			},
-			{
-				Config: testAccWorkflowsWorkflow_CMEK(workflowName),
-			},
 		},
 	})
 }
@@ -151,46 +148,35 @@ func TestWorkflowsWorkflowStateUpgradeV0(t *testing.T) {
 	}
 }
 
-func testAccWorkflowsWorkflow_CMEK(name string) string {
+func TestAccWorkflowsWorkflow_CMEK(t *testing.T) {
+	// Custom test written to test diffs
+	t.Parallel()
+
+	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", RandInt(t))
+	kms := BootstrapKMSKey(t)
+  if BootstrapPSARole(t, "service-", "gcp-sa-workflows", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckWorkflowsWorkflowDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWorkflowsWorkflow_CMEK(workflowName, kms.CryptoKey.Name),
+			},
+		},
+	})
+}
+
+func testAccWorkflowsWorkflow_CMEK(workflowName, kmsKeyName string) string {
 	return fmt.Sprintf(`
-resource "google_kms_key_ring" "keyring" {
-  provider = google-beta
-  name     = "tf-test-ring%[1]s"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "example-key" {
-  provider        = google-beta
-  name            = "tf-test-key%[1]s"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
-}
-
-resource "google_kms_crypto_key_iam_binding" "crypto-key-binding" {
-  provider      = google-beta
-  crypto_key_id = google_kms_crypto_key.example-key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  members = [
-    "serviceAccount:${google_project_service_identity.ck_sa.email}",
-  ]
-}
-
-data "google_project" "project" {
-  provider = google-beta
-}
-
-resource "google_project_service_identity" "ck_sa" {
-  provider = google-beta
-  project  = data.google_project.project.project_id
-  service  = "workflows.googleapis.com"
-}
-
 resource "google_workflows_workflow" "example" {
-  name          = "%[1]s"
+  name          = "%s"
   region        = "us-central1"
   description   = "Magic"
-  crypto_key_name = google_kms_crypto_key.example-key.id
+  crypto_key_name = "%s"
   source_contents = <<-EOF
   # This is a sample workflow, feel free to replace it with your source code
   #
@@ -219,5 +205,5 @@ resource "google_workflows_workflow" "example" {
       return: $${WikiResult.body[1]}
 EOF
 }
-`, name)
+`, workflowName, kmsKeyName)
 }
