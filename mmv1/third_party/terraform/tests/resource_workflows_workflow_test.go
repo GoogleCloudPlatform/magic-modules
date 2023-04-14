@@ -155,13 +155,13 @@ func testAccWorkflowsWorkflow_CMEK(name string) string {
 	return fmt.Sprintf(`
 resource "google_kms_key_ring" "keyring" {
   provider = google-beta
-  name     = "tf-test-ring%0s"
+  name     = "tf-test-ring%[1]s"
   location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "example-key" {
   provider        = google-beta
-  name            = "tf-test-key%0s"
+  name            = "tf-test-key%[1]s"
   key_ring        = google_kms_key_ring.keyring.id
   rotation_period = "100000s"
 }
@@ -187,7 +187,7 @@ resource "google_project_service_identity" "ck_sa" {
 }
 
 resource "google_workflows_workflow" "example" {
-  name          = "%0s"
+  name          = "%[1]s"
   region        = "us-central1"
   description   = "Magic"
   crypto_key_name = google_kms_crypto_key.example-key.id
