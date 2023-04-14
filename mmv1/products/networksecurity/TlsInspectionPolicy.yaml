@@ -56,12 +56,14 @@ examples:
     primary_resource_id: "default"
     vars:
       resource_name: "my-tls-inspection-policy"
+      privateca_ca_pool_name: "my-basic-ca-pool"
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
     name: "network_security_tls_inspection_policy_advanced"
     primary_resource_id: "default"
     vars:
       resource_name: "my-tls-inspection-policy"
+      privateca_ca_pool_name: "my-advanced-ca-pool"
 parameters:
   - !ruby/object:Api::Type::String
     name: "name"
@@ -72,7 +74,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: "location"
     description: |
-      The location of the gateway.
+      The location of the tls inspection policy.
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::Time

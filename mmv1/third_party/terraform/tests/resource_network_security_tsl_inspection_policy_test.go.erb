@@ -18,10 +18,10 @@ func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
     VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckNetworkSecurityAddressGroupDestroyProducer(t),
+		CheckDestroy: testAccCheckNetworkSecurityTlsInspectionPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityTlsInspectionPolicy_basic(tlsInspectionPolicyName),
+				Config: testAccNetworkSecurityTlsInspectionPolicy_basic(caPoolName, tlsInspectionPolicyName),
 			},
 			{
 				ResourceName:      "google_network_security_tls_inspection_policy.foobar",
@@ -29,7 +29,7 @@ func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNetworkSecurityTlsInspectionPolicy_update(tlsInspectionPolicyName),
+				Config: testAccNetworkSecurityTlsInspectionPolicy_update(caPoolName, tlsInspectionPolicyName),
 			},
 			{
 				ResourceName:      "google_network_security_tls_inspection_policy.foobar",
@@ -43,17 +43,15 @@ func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
 func testAccNetworkSecurityTlsInspectionPolicy_basic(caPoolName, tlsInspectionPolicyName string) string {
     return fmt.Sprintf(`
 resource "google_privateca_ca_pool" "default" {
-    provider = google-beta
-    name = "%s"
-    location = "us-central1"
-    tier = "ENTERPRISE"
+  name = "%s"
+  location = "us-central1"
+  tier = "ENTERPRISE"
 }
     
 resource "google_network_security_tls_inspection_policy" "foobar" {
-    provider = google-beta
-    name     = "%s"
-    location = "us-central1"
-    ca_pool    = google_privateca_ca_pool.default.name
+  name     = "%s"
+  location = "us-central1"
+  ca_pool    = google_privateca_ca_pool.default.id
 }
 `, caPoolName, tlsInspectionPolicyName)
 }
@@ -61,19 +59,17 @@ resource "google_network_security_tls_inspection_policy" "foobar" {
 func testAccNetworkSecurityTlsInspectionPolicy_update(caPoolName, tlsInspectionPolicyName string) string {
     return fmt.Sprintf(`
 resource "google_privateca_ca_pool" "default" {
-provider    = google-beta
-name        = "%s"
-description = "my ca pooll"
-location    = "us-central1"
-tier        = "ENTERPRISE"
+  name        = "%s"
+  description = "my ca pooll"
+  location    = "us-central1"
+  tier        = "ENTERPRISE"
 }
 
 resource "google_network_security_tls_inspection_policy" "foobar" {
-  provider    = google-beta
   name        = "%s"
   location    = "us-central1"
   description = "my tls inspection policy updated"
-  ca_pool     = google_privateca_ca_pool.default.name
+  ca_pool     = google_privateca_ca_pool.default.id
 }
 `, caPoolName, tlsInspectionPolicyName)
 }

@@ -1,6 +1,6 @@
 resource "google_privateca_ca_pool" "default" {
   provider  = google-beta
-  name      = "<%= ctx[:vars]['ca_pool_id'] %>"
+  name      = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
   location  = "us-central1"
   tier      = "ENTERPRISE"
 }
@@ -9,5 +9,5 @@ resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resou
   provider = google-beta
   name     = "<%= ctx[:vars]['resource_name'] %>"
   location = "us-central1"
-  ca_pool  = google_privateca_ca_pool.default.name
+  ca_pool  = google_privateca_ca_pool.default.id
 }
