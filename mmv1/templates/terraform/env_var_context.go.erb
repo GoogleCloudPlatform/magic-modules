@@ -23,5 +23,7 @@
 		"<%= var_name -%>": GetTestCustIdFromEnv(t),
 	<% elsif var_type == :IDENTITY_USER  -%>
 		"<%= var_name -%>": GetTestIdentityUserFromEnv(t),
+	<% elsif var_type == :PAP_DESCRIPTION  -%>
+		"<%= var_name -%>": GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
 	<% end -%>
 <% end -%>
