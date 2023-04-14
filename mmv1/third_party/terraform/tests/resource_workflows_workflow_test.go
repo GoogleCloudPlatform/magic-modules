@@ -154,7 +154,7 @@ func TestAccWorkflowsWorkflow_CMEK(t *testing.T) {
 
 	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", RandInt(t))
 	kms := BootstrapKMSKey(t)
-  if BootstrapPSARole(t, "service-", "gcp-sa-workflows", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+	if BootstrapPSARole(t, "service-", "gcp-sa-workflows", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
 		t.Fatal("Stopping the test because a role was added to the policy.")
 	}
 
