@@ -26,9 +26,11 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package transport
 
 import (
+	"fmt"
+	"log"
 	"time"
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -73,9 +75,41 @@ type DCLConfig struct {
 func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
-	config.{{$pkg.BasePathIdentifier.ToTitle}}BasePath = d.Get(transport_tpg.{{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey).(string)
+	config.{{$pkg.BasePathIdentifier.ToTitle}}BasePath = d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey).(string)
 {{- end}}
 {{- end}}
-	config.CloudBuildWorkerPoolBasePath = d.Get(transport_tpg.CloudBuildWorkerPoolEndpointEntryKey).(string)
+	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	return config
+}
+
+type dclLogger struct{}
+
+// Fatal records Fatal errors.
+func (l dclLogger) Fatal(args ...interface{}) {
+	log.Fatal(args...)
+}
+
+// Fatalf records Fatal errors with added arguments.
+func (l dclLogger) Fatalf(format string, args ...interface{}) {
+	log.Fatalf(fmt.Sprintf("[DEBUG][DCL FATAL] %s", format), args...)
+}
+
+// Info records Info errors.
+func (l dclLogger) Info(args ...interface{}) {
+	log.Print(args...)
+}
+
+// Infof records Info errors with added arguments.
+func (l dclLogger) Infof(format string, args ...interface{}) {
+	log.Printf(fmt.Sprintf("[DEBUG][DCL INFO] %s", format), args...)
+}
+
+// Warningf records Warning errors with added arguments.
+func (l dclLogger) Warningf(format string, args ...interface{}) {
+	log.Printf(fmt.Sprintf("[DEBUG][DCL WARNING] %s", format), args...)
+}
+
+// Warning records Warning errors.
+func (l dclLogger) Warning(args ...interface{}) {
+	log.Print(args...)
 }

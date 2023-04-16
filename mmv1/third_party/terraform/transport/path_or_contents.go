@@ -1,4 +1,4 @@
-package google
+package transport
 
 import (
 	"io/ioutil"
@@ -13,7 +13,7 @@ import (
 //
 // The boolean second return value can be called `wasPath` - it indicates if a
 // path was detected and a file loaded.
-func pathOrContents(poc string) (string, bool, error) {
+func PathOrContents(poc string) (string, bool, error) {
 	if len(poc) == 0 {
 		return poc, false, nil
 	}

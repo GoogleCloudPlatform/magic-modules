@@ -108,7 +108,7 @@ func main() {
 
 	// product specific generation
 	generateProductsFile("provider_dcl_endpoints", productsForVersion, "transport")
-	generateProductsFile("provider_dcl_client_creation", productsForVersion, "")
+	generateProductsFile("provider_dcl_client_creation", productsForVersion, "transport")
 
 	if oPath == nil || *oPath == "" {
 		glog.Info("Skipping copying handwritten files, no output specified")

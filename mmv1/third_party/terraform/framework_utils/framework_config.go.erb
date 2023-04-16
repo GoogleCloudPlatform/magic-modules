@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
 
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/sirupsen/logrus"
@@ -435,7 +436,7 @@ func (p *frameworkProvider) SetupClient(ctx context.Context, data ProviderModel,
 
 	// 4. Header Transport - outer wrapper to inject additional headers we want to apply
 	// before making requests
-	headerTransport := newTransportWithHeaders(retryTransport)
+	headerTransport := transport_tpg.NewTransportWithHeaders(retryTransport)
 	if !data.RequestReason.IsNull() {
 		headerTransport.Set("X-Goog-Request-Reason", data.RequestReason.ValueString())
 	}

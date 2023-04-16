@@ -1,5 +1,5 @@
 <% autogen_exception -%>
-package google
+package transport
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -127,5 +127,5 @@ var TagsLocationCustomEndpointEntry = &schema.Schema{
 
 func validateCustomEndpoint(v interface{}, k string) (ws []string, errors []error) {
 	re := `.*/[^/]+/$`
-	return validateRegexp(re)(v, k)
+	return ValidateRegexp(re)(v, k)
 }
