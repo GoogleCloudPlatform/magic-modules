@@ -29,7 +29,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
 docs: !ruby/object:Provider::Terraform::Docs
   note: |
-    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding 
+    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
     by using the `google_project_service_identity` resource.
    # PubSub resources don't have operations but are negatively cached
     # and eventually consistent.

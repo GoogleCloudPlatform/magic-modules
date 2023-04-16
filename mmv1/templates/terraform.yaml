@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Base terraform.yaml for product folders that have been converted over to the 
+# Base terraform.yaml for product folders that have been converted over to the
 # per-resource format.
 --- !ruby/object:Provider::Terraform::Config
 # This is for copying files over

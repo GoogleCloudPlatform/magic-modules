@@ -288,7 +288,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <% unless object.taint_resource_on_failed_create -%>
         // The resource didn't actually create
         d.SetId("")
-<%  end -%>         
+<%  end -%>
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
 
@@ -522,7 +522,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     <% unless field.default_value.nil? -%>
     if _, ok := d.GetOkExists("<%= field.name -%>"); !ok {
       if err := d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>); err != nil {
-      	return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
+        return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
       }
     }
     <% end -%>
@@ -556,7 +556,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         if casted != nil {
             for k, v := range casted.(map[string]interface{}) {
                 if err := d.Set(k, v); err != nil {
-                	return fmt.Errorf("Error setting %s: %s", k, err)
+                return fmt.Errorf("Error setting %s: %s", k, err)
                 }
             }
         }
@@ -584,7 +584,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     config := meta.(*Config)
     userAgent, err := generateUserAgentString(d, config.UserAgent)
     if err != nil {
-    	return err
+      return err
     }
 
     billingProject := ""
@@ -856,7 +856,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     config := meta.(*Config)
     userAgent, err := generateUserAgentString(d, config.UserAgent)
     if err != nil {
-    	return err
+      return err
     }
 
 <% if object.custom_code.custom_delete -%>
@@ -976,7 +976,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
   <%-  object.virtual_fields.each do |field| -%>
     <% unless field.default_value.nil? -%>
     if err := d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>); err != nil {
-    	return nil, fmt.Errorf("Error setting <%= field.name %>: %s", err)
+      return nil, fmt.Errorf("Error setting <%= field.name %>: %s", err)
     }
     <% end -%>
   <%   end -%>
