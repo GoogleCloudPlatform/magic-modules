@@ -1,12 +1,12 @@
 ---
 subcategory: "Tags"
 description: |-
-  Get a tag key within a GCP organization.
+  Get a tag key within a GCP organization or project.
 ---
 
 # google\_tags\_tag\_key
 
-Get a tag key within a GCP org by `parent` and `short_name`.
+Get a tag key within a GCP org or project by `parent` and `short_name`.
 
 ## Example Usage
 
@@ -23,7 +23,7 @@ The following arguments are supported:
 
 * `short_name` - (Required) The tag key's short_name.
 
-* `parent` - (Required) The resource name of the parent organization in format `organizations/{org_id}`.
+* `parent` - (Required) The resource name of the parent in format `organizations/{org_id}` or `projects/{project_id_or_number}.
 
 ## Attributes Reference
 
