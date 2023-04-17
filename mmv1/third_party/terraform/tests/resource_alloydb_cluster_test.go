@@ -295,32 +295,3 @@ func TestAccAlloydbCluster_maximumFields(t *testing.T) {
 		},
 	})
 }
-
-// Deleting automated backup policy should be an in-place operation
-func TestAccAlloydbCluster_deleteAutomatedBackupPolicy(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": RandString(t, 10),
-	}
-
-	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbCluster_alloydbClusterFullExample(context),
-			},
-			{
-				ResourceName:            "google_alloydb_cluster.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
-			},
-			{
-				Config:	testAccAlloydbCluster_alloydbClusterBasicExample(context),
-			}
-		},
-	})
-}
