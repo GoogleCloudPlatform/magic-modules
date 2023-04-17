@@ -260,18 +260,6 @@ properties:
                   description: |
                     Version of the information type to use. By default, the version is set to stable
           - !ruby/object:Api::Type::Array
-            name: 'contentOptions'
-            description: |
-              List of options defining data content to scan. If empty, text, images, and other content will be included.
-            item_type: !ruby/object:Api::Type::Enum
-              name: 'undefined'
-              description: |
-                This field only has a name and description because of MM
-                limitations. It should not appear in downstreams.
-              values:
-                - :CONTENT_TEXT
-                - :CONTENT_IMAGE
-          - !ruby/object:Api::Type::Array
             name: 'ruleSet'
             description: |
               Set of rules to apply to the findings for this InspectConfig. Exclusion rules, contained in the set are executed in the end,
@@ -521,79 +509,6 @@ properties:
                     - :LIKELY
                     - :VERY_LIKELY
                   default_value: :VERY_LIKELY
-                - !ruby/object:Api::Type::Array
-                  name: 'detectionRules'
-                  description: |
-                    Set of detection rules to apply to all findings of this CustomInfoType.
-                  item_type: !ruby/object:Api::Type::NestedObject
-                    properties:
-                      - !ruby/object:Api::Type::NestedObject
-                        name: 'hotwordRule'
-                        required: true
-                        description: |
-                          The rule that adjusts the likelihood of findings within a certain proximity of hotwords.
-                        properties:
-                          - !ruby/object:Api::Type::NestedObject
-                            name: 'hotwordRegex'
-                            required: true
-                            description: Regular expression pattern defining what qualifies
-                              as a hotword.
-                            properties:
-                              - !ruby/object:Api::Type::String
-                                name: 'pattern'
-                                required: true
-                                description: |
-                                  Pattern defining the regular expression. Its syntax
-                                  (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
-                              - !ruby/object:Api::Type::Array
-                                name: 'groupIndexes'
-                                description: |
-                                  The index of the submatch to extract as findings. When not specified,
-                                  the entire match is returned. No more than 3 may be included.
-                                item_type: Api::Type::Integer
-                          - !ruby/object:Api::Type::NestedObject
-                            name: 'proximity'
-                            required: true
-                            description: |
-                              Proximity of the finding within which the entire hotword must reside. The total length of the window cannot
-                              exceed 1000 characters. Note that the finding itself will be included in the window, so that hotwords may be
-                              used to match substrings of the finding itself. For example, the certainty of a phone number regex
-                              `(\d{3}) \d{3}-\d{4}` could be adjusted upwards if the area code is known to be the local area code of a company
-                              office using the hotword regex `(xxx)`, where `xxx` is the area code in question.
-                            properties:
-                              - !ruby/object:Api::Type::Integer
-                                name: 'windowBefore'
-                                description: |
-                                  Number of characters before the finding to consider. Either this or window_after must be specified
-                              - !ruby/object:Api::Type::Integer
-                                name: 'windowAfter'
-                                description: |
-                                  Number of characters after the finding to consider. Either this or window_before must be specified
-                          - !ruby/object:Api::Type::NestedObject
-                            name: 'likelihoodAdjustment'
-                            required: true
-                            description: |
-                              Likelihood adjustment to apply to all matching findings.
-                            properties:
-                              - !ruby/object:Api::Type::Enum
-                                name: 'fixedLikelihood'
-                                description: |
-                                  Set the likelihood of a finding to a fixed value. Either this or relative_likelihood can be set.
-                                values:
-                                  - :VERY_UNLIKELY
-                                  - :UNLIKELY
-                                  - :POSSIBLE
-                                  - :LIKELY
-                                  - :VERY_LIKELY
-                              - !ruby/object:Api::Type::Integer
-                                name: 'relativeLikelihood'
-                                description: |
-                                  Increase or decrease the likelihood by the specified number of levels. For example,
-                                  if a finding would be POSSIBLE without the detection rule and relativeLikelihood is 1,
-                                  then it is upgraded to LIKELY, while a value of -1 would downgrade it to UNLIKELY.
-                                  Likelihood may never drop below VERY_UNLIKELY or exceed VERY_LIKELY, so applying an
-                                  adjustment of 1 followed by an adjustment of -1 when base likelihood is VERY_LIKELY
-                                  will result in a final likelihood of LIKELY. Either this or fixed_likelihood can be set.
                 - !ruby/object:Api::Type::Enum
                   name: 'exclusionType'
                   description: |
