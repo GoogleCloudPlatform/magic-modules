@@ -236,6 +236,7 @@ module "project-services" {
     "gkeconnect.googleapis.com",
     "gkehub.googleapis.com",
     "gkemulticloud.googleapis.com",
+    "gkeonprem.googleapis.com",
     "googlecloudmessaging.googleapis.com",
     "healthcare.googleapis.com",
     "iam.googleapis.com",
