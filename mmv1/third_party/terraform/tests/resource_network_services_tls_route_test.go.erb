@@ -22,7 +22,7 @@ func TestAccNetworkServicesTlsRoute_update(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkServicesTlsRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-        Config: testAccNetworkServicesTlsRoute_basic(tlsServiceName, tlsHealthCheckName, tlsRouteName),
+  Config: testAccNetworkServicesTlsRoute_basic(tlsServiceName, tlsHealthCheckName, tlsRouteName),
 			},
 			{
 				ResourceName:      "google_network_services_tls_route.foobar",
@@ -57,6 +57,9 @@ resource "google_compute_http_health_check" "bar" {
 
 resource "google_network_services_tls_route" "foobar" { 
   name                   = "%s"
+  labels                 = {
+    foo = "bar"
+  }
   description             = "my description"
   rules                   {
     matches {
@@ -90,6 +93,9 @@ func testAccNetworkServicesTlsRoute_update(tlsServiceName string, tlsHealthCheck
 
   resource "google_network_services_tls_route" "foobar" {
     name                   = "%s"
+    labels                 = {
+      foo = "bar"
+    }
     description             = "update description"
     rules                   {
       matches {
