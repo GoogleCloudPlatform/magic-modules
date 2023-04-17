@@ -153,7 +153,7 @@ func requestRandomReviewer(prNumber, GITHUB_TOKEN string) error {
 
 func postComment(prNumber, reviewer, GITHUB_TOKEN string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
-	comment, err := readFile("./reviewer_assignment_comment.md")
+	comment, err := readFile(".ci/containers/membership-checker/REVIEWER_ASSIGNMENT_COMMENT.md")
 	if err != nil {
 		return err
 	}
