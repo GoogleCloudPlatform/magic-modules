@@ -214,6 +214,15 @@ properties:
     description: 'The PSC connection status of the PSC Forwarding Rule. Possible values:
       STATUS_UNSPECIFIED, PENDING, ACCEPTED, REJECTED, CLOSED'
     output: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'allowPscGlobalAccess'
+    min_version: beta
+    send_empty_value: true
+    update_verb: :PATCH
+    update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
+    description: |
+        This is used in PSC consumer ForwardingRule to control 
+        whether the PSC endpoint can be accessed from another region.
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
