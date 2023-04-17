@@ -91,12 +91,13 @@ func main() {
 			}
 		} else {
 			addAwaitingApprovalLabel(prNumber, GITHUB_TOKEN)
+			postAwaitingApprovalBuildLink(prNumber, GITHUB_TOKEN, projectId, commitSha)
 		}
 	}
 
 	// in community-checker job:
 	// remove awaiting-approval label from external contributor PRs
-	if target == "needs_approval" && !trusted {
+	if target == "needs_approval" {
 		removeAwaitingApprovalLabel(prNumber, GITHUB_TOKEN)
 	}
 }
