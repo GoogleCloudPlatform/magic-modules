@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"google.golang.org/api/run/v2"
 )
 
@@ -25,7 +27,7 @@ func (w *RunAdminV2OperationWaiter) QueryOp() (interface{}, error) {
 }
 
 func createRunAdminV2Waiter(config *transport_tpg.Config, op *run.GoogleLongrunningOperation, project, activity, userAgent string) (*RunAdminV2OperationWaiter, error) {
-	w := &RunAdminV2OperationWaiter{*transport_tpg.Config
+	w := &RunAdminV2OperationWaiter{
 		Config:    config,
 		UserAgent: userAgent,
 		Project:   project,
@@ -37,7 +39,7 @@ func createRunAdminV2Waiter(config *transport_tpg.Config, op *run.GoogleLongrunn
 }
 
 func runAdminV2OperationWaitTimeWithResponse(config *transport_tpg.Config, op *run.GoogleLongrunningOperation, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
-	w, err := createRunAdminV2Waiter(config, op, projec*transport_tpg.ConfigAgent)
+	w, err := createRunAdminV2Waiter(config, op, project, activity, userAgent)
 	if err != nil {
 		return err
 	}
@@ -48,8 +50,7 @@ func runAdminV2OperationWaitTimeWithResponse(config *transport_tpg.Config, op *r
 }
 
 func runAdminV2OperationWaitTime(config *transport_tpg.Config, op *run.GoogleLongrunningOperation, project, activity, userAgent string, timeout time.Duration) error {
-	if op.Done {*transport_tpg.Config
-		return nil
+	if op.Done {
 	}
 	w, err := createRunAdminV2Waiter(config, op, project, activity, userAgent)
 	if err != nil {

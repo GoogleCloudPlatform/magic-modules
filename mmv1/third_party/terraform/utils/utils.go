@@ -4,13 +4,14 @@ package google
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -73,20 +74,20 @@ func getRegion(d TerraformResourceData, config *transport_tpg.Config) (string, e
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
 func getProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	return getProjectFromSchema("project", d, confi*transport_tpg.Config
+	return getProjectFromSchema("project", d, config)
 }
 
 // getBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
 func getBillingProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	return getBillingProjectFromSchema("billing_project", *transport_tpg.Config
+	return getBillingProjectFromSchema("billing_project", d, config)
 }
 
 // getProjectFromDiff reads the "project" field from the given diff and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
 func getProjectFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
-	res, ok := d.GetOk("project")*transport_tpg.Config
+	res, ok := d.GetOk("project")
 	if ok {
 		return res.(string), nil
 	}
@@ -306,7 +307,7 @@ func Nprintf(format string, params map[string]interface{}) string {
 // and error will be returned in this case if no project is set in the resource or the
 // provider-level config
 func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	// If the service account id is already the fully qualified name*transport_tpg.Config
+	// If the service account id is already the fully qualified name
 	if strings.HasPrefix(serviceAccount, "projects/") {
 		return serviceAccount, nil
 	}
@@ -327,7 +328,7 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *t
 }
 
 func paginatedListRequest(project, baseUrl, userAgent string, config *transport_tpg.Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
-	res, err := SendRequest(config, "GET", project, baseUrl, userAgent, *transport_tpg.Config
+	res, err := SendRequest(config, "GET", project, baseUrl, userAgent, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -351,7 +352,7 @@ func paginatedListRequest(project, baseUrl, userAgent string, config *transport_
 }
 
 func getInterconnectAttachmentLink(config *transport_tpg.Config, project, region, ic, userAgent string) (string, error) {
-	if !strings.Contains(ic, "/") {*transport_tpg.Config
+	if !strings.Contains(ic, "/") {
 		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
 			project, region, ic).Do()
 		if err != nil {
@@ -411,7 +412,7 @@ func migrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*te
 }
 
 func expandString(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
-	return v.(string), nil*transport_tpg.Config
+	return v.(string), nil
 }
 
 func changeFieldSchemaToForceNew(sch *schema.Schema) {
@@ -428,7 +429,7 @@ func changeFieldSchemaToForceNew(sch *schema.Schema) {
 }
 
 func generateUserAgentString(d TerraformResourceData, currentUserAgent string) (string, error) {
-	var m ProviderMeta
+	var m transport_tpg.ProviderMeta
 
 	err := d.GetProviderMeta(&m)
 	if err != nil {
@@ -513,19 +514,6 @@ func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f fu
 		}
 		return nil
 	})
-}
-
-// MultiEnvDefault is a helper function that returns the value of the first
-// environment variable in the given list that returns a non-empty value. If
-// none of the environment variables return a value, the default value is
-// returned.
-func MultiEnvDefault(ks []string, dv interface{}) interface{} {
-	for _, k := range ks {
-		if v := os.Getenv(k); v != "" {
-			return v
-		}
-	}
-	return dv
 }
 
 func frameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {

@@ -1,13 +1,7 @@
-<% autogen_exception -%>
-
 package google
 
 import (
-	"io/ioutil"
-	"os"
-
-	"github.com/mitchellh/go-homedir"
-	transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // If the argument is a path, pathOrContents loads it and returns the contents,

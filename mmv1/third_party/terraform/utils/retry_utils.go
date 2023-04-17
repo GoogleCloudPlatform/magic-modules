@@ -1,14 +1,10 @@
-<% autogen_exception -%>
-
 package google
 
 import (
-	"log"
 	"time"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func retry(retryFunc func() error) error {
@@ -19,16 +15,16 @@ func retryTime(retryFunc func() error, minutes int) error {
 	return RetryTimeDuration(retryFunc, time.Duration(minutes)*time.Minute)
 }
 
-func RetryTimeDuration(retryFunc func() error, duration time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) error {
+func RetryTimeDuration(retryFunc func() error, duration time.Duration, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) error {
 	return transport_tpg.RetryTimeDuration(retryFunc, duration, errorRetryPredicates...)
 }
 
-func isRetryableError(topErr error, customPredicates ...RetryErrorPredicateFunc) bool {
+func isRetryableError(topErr error, customPredicates ...transport_tpg.RetryErrorPredicateFunc) bool {
 	return transport_tpg.IsRetryableError(topErr, customPredicates...)
 }
 
 // The polling overrides the default backoff logic with max backoff of 10s. The poll interval can be greater than 10s.
-func retryWithPolling(retryFunc func() (interface{}, error), timeout time.Duration, pollInterval time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) (interface{}, error) {
+func retryWithPolling(retryFunc func() (interface{}, error), timeout time.Duration, pollInterval time.Duration, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) (interface{}, error) {
 	refreshFunc := func() (interface{}, string, error) {
 		result, err := retryFunc()
 		if err == nil {

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -76,7 +76,7 @@ func resourceGoogleProjectOrganizationPolicyCreate(d *schema.ResourceData, meta 
 }
 
 func resourceGoogleProjectOrganizationPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -132,7 +132,7 @@ func resourceGoogleProjectOrganizationPolicyUpdate(d *schema.ResourceData, meta 
 }
 
 func resourceGoogleProjectOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -148,7 +148,7 @@ func resourceGoogleProjectOrganizationPolicyDelete(d *schema.ResourceData, meta 
 }
 
 func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

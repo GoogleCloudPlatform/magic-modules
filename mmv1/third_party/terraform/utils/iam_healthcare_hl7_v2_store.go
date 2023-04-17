@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	healthcare "google.golang.org/api/healthcare/v1"
 
 	"github.com/hashicorp/errwrap"
@@ -25,7 +26,7 @@ type HealthcareHl7V2StoreIamUpdater struct {
 }
 
 func NewHealthcareHl7V2StoreIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
-	hl7V2Store := d.Get("hl7_v2_store_id").(string)*transport_tpg.Config
+	hl7V2Store := d.Get("hl7_v2_store_id").(string)
 	hl7V2StoreId, err := ParseHealthcareHl7V2StoreId(hl7V2Store, config)
 
 	if err != nil {
@@ -40,7 +41,7 @@ func NewHealthcareHl7V2StoreIamUpdater(d TerraformResourceData, config *transpor
 }
 
 func Hl7V2StoreIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
-	hl7V2StoreId, err := ParseHealthcareHl7V2StoreId(d.Id(), *transport_tpg.Config
+	hl7V2StoreId, err := ParseHealthcareHl7V2StoreId(d.Id(), config)
 	if err != nil {
 		return err
 	}

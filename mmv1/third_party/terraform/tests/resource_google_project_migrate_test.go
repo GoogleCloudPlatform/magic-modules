@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestGoogleProjectMigrateState(t *testing.T) {
@@ -20,7 +21,7 @@ func TestGoogleProjectMigrateState(t *testing.T) {
 				"project_id":  "test-project",
 				"skip_delete": "true",
 			},
-			Meta: &Config{},
+			Meta: &transport_tpg.Config{},
 		},
 	}
 

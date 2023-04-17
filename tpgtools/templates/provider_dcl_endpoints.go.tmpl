@@ -46,6 +46,14 @@ var {{$pkg.BasePathIdentifier.ToTitle}}EndpointEntry = &schema.Schema{
 {{- end}}
 {{end}}
 
+type DCLConfig struct {
+{{- range $index, $pkg := . }}
+{{- if $pkg.ShouldWriteProductBasePath }}
+	{{$pkg.BasePathIdentifier.ToTitle}}BasePath string
+{{- end}}
+{{- end}}
+}
+
 func ConfigureDCLProvider(provider *schema.Provider) {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
@@ -80,20 +88,12 @@ func ConfigureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_sc
 {{- end}}
 }
 
-type DCLConfig struct {
-{{- range $index, $pkg := . }}
-{{- if $pkg.ShouldWriteProductBasePath }}
-	{{$pkg.BasePathIdentifier.ToTitle}}BasePath string
-{{- end}}
-{{- end}}
-}
-
 func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
-	config.{{$pkg.BasePathIdentifier.ToTitle}}BasePath = d.Get(transport_tpg.{{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey).(string)
+	config.{{$pkg.BasePathIdentifier.ToTitle}}BasePath = d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey).(string)
 {{- end}}
 {{- end}}
-	config.CloudBuildWorkerPoolBasePath = d.Get(transport_tpg.CloudBuildWorkerPoolEndpointEntryKey).(string)
+	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	return config
 }

@@ -4,6 +4,7 @@ package google
 import (
 	"context"
 	"fmt"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"os"
 	"strings"
@@ -940,14 +941,14 @@ func getInitializedConfig(t *testing.T) *transport_tpg.Config {
 	// Check that all required environment variables are set
 	AccTestPreCheck(t)
 
-	config := &Config{
+	config := &transport_tpg.Config{
 		Project:     GetTestProjectFromEnv(),
 		Credentials: GetTestCredsFromEnv(),
 		Region:      GetTestRegionFromEnv(),
 		Zone:        GetTestZoneFromEnv(),
 	}
 
-	ConfigureBasePaths(config)
+	transport_tpg.ConfigureBasePaths(config)
 
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {

@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -33,7 +35,7 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 		billingProject = bp
 	}
 
-	req := &BatchRequest{
+	req := &transport_tpg.BatchRequest{
 		ResourceName: project,
 		Body:         []string{service},
 		CombineF:     combineServiceUsageServicesBatches,
@@ -49,7 +51,7 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 }
 
 func tryEnableRenamedService(service, altName string, project string, d *schema.ResourceData, config *transport_tpg.Config) error {
-	userAgent, err := generateUserAgentString(d, config.UserAgent)*transport_tpg.Config
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -76,7 +78,7 @@ func tryEnableRenamedService(service, altName string, project string, d *schema.
 }
 
 func BatchRequestReadServices(project string, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
-	userAgent, err := generateUserAgentString(d, config.UserAgent)*transport_tpg.Config
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +89,7 @@ func BatchRequestReadServices(project string, d *schema.ResourceData, config *tr
 		billingProject = bp
 	}
 
-	req := &BatchRequest{
+	req := &transport_tpg.BatchRequest{
 		ResourceName: project,
 		Body:         nil,
 		// Use empty CombineF since the request is exactly the same no matter how many services we read.
@@ -115,8 +117,8 @@ func combineServiceUsageServicesBatches(srvsRaw interface{}, toAddRaw interface{
 	return append(srvs, toAdd...), nil
 }
 
-func sendBatchFuncEnableServices(config *transport_tpg.Config, userAgent, billingProject string, timeout time.Duration) BatcherSendFunc {
-	return func(project string, toEnableRaw*transport_tpg.Configterface{}, error) {
+func sendBatchFuncEnableServices(config *transport_tpg.Config, userAgent, billingProject string, timeout time.Duration) transport_tpg.BatcherSendFunc {
+	return func(project string, toEnableRaw interface{}) (interface{}, error) {
 		toEnable, ok := toEnableRaw.([]string)
 		if !ok {
 			return nil, fmt.Errorf("Expected batch body type to be []string, got %v. This is a provider error.", toEnableRaw)
@@ -125,8 +127,8 @@ func sendBatchFuncEnableServices(config *transport_tpg.Config, userAgent, billin
 	}
 }
 
-func sendListServices(config *transport_tpg.Config, billingProject, userAgent string, timeout time.Duration) BatcherSendFunc {
-	return func(project string, *transport_tpg.Confignterface{}, error) {
+func sendListServices(config *transport_tpg.Config, billingProject, userAgent string, timeout time.Duration) transport_tpg.BatcherSendFunc {
+	return func(project string, _ interface{}) (interface{}, error) {
 		return ListCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 	}
 }

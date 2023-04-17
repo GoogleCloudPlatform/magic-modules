@@ -4,6 +4,7 @@ package google
 import (
 	"context"
 	"fmt"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"io/ioutil"
 	"log"
 	"os"
@@ -369,7 +370,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 
 	// Enable the test runner to create service accounts and get an access token on behalf of
 	// the project 1 service account
-	curEmail, err := GetCurrentUserEmail(config, config.UserAgent)
+	curEmail, err := transport_tpg.GetCurrentUserEmail(config, config.UserAgent)
 	if err != nil {
 		return "", err
 	}

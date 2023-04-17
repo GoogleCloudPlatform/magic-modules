@@ -1,5 +1,3 @@
-<% autogen_exception -%>
-
 package transport
 
 import (

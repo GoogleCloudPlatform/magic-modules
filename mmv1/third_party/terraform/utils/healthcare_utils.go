@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type HealthcareDatasetId struct {
@@ -72,7 +74,6 @@ func (s *healthcareFhirStoreId) TerraformId() string {
 
 func ParseHealthcareFhirStoreId(id string, config *transport_tpg.Config) (*healthcareFhirStoreId, error) {
 	parts := strings.Split(id, "/")
-*transport_tpg.Config
 	fhirStoreIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,256})/([a-zA-Z0-9_-]{1,256})$")
 	fhirStoreIdWithoutProjectRegex := regexp.MustCompile("^([a-z0-9-])+/([a-zA-Z0-9_-]{1,256})/([a-zA-Z0-9_-]{1,256})$")
 	fhirStoreRelativeLinkRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/datasets/([a-zA-Z0-9_-]{1,256})/fhirStores/([a-zA-Z0-9_-]{1,256})$")
@@ -131,7 +132,6 @@ func (s *healthcareHl7V2StoreId) TerraformId() string {
 
 func ParseHealthcareHl7V2StoreId(id string, config *transport_tpg.Config) (*healthcareHl7V2StoreId, error) {
 	parts := strings.Split(id, "/")
-*transport_tpg.Config
 	hl7V2StoreIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,256})/([a-zA-Z0-9_-]{1,256})$")
 	hl7V2StoreIdWithoutProjectRegex := regexp.MustCompile("^([a-z0-9-])+/([a-zA-Z0-9_-]{1,256})/([a-zA-Z0-9_-]{1,256})$")
 	hl7V2StoreRelativeLinkRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/datasets/([a-zA-Z0-9_-]{1,256})/hl7V2Stores/([a-zA-Z0-9_-]{1,256})$")
@@ -190,7 +190,6 @@ func (s *healthcareDicomStoreId) TerraformId() string {
 
 func ParseHealthcareDicomStoreId(id string, config *transport_tpg.Config) (*healthcareDicomStoreId, error) {
 	parts := strings.Split(id, "/")
-*transport_tpg.Config
 	dicomStoreIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,256})/([a-zA-Z0-9_-]{1,256})$")
 	dicomStoreIdWithoutProjectRegex := regexp.MustCompile("^([a-z0-9-])+/([a-zA-Z0-9_-]{1,256})/([a-zA-Z0-9_-]{1,256})$")
 	dicomStoreRelativeLinkRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/datasets/([a-zA-Z0-9_-]{1,256})/dicomStores/([a-zA-Z0-9_-]{1,256})$")

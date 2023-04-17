@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type DialogflowCXOperationWaiter struct {
@@ -25,7 +27,7 @@ func (w *DialogflowCXOperationWaiter) QueryOp() (interface{}, error) {
 
 func createDialogflowCXWaiter(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent, location string) (*DialogflowCXOperationWaiter, error) {
 	w := &DialogflowCXOperationWaiter{
-		Config:    config,*transport_tpg.Config
+		Config:    config,
 		UserAgent: userAgent,
 		Location:  location,
 	}
@@ -38,7 +40,7 @@ func createDialogflowCXWaiter(config *transport_tpg.Config, op map[string]interf
 // nolint: deadcode,unused
 func DialogflowCXOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, activity, userAgent, location string, timeout time.Duration) error {
 	w, err := createDialogflowCXWaiter(config, op, activity, userAgent, location)
-	if err != nil {*transport_tpg.Config
+	if err != nil {
 		return err
 	}
 	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
@@ -49,7 +51,7 @@ func DialogflowCXOperationWaitTimeWithResponse(config *transport_tpg.Config, op 
 
 func DialogflowCXOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent, location string, timeout time.Duration) error {
 	if val, ok := op["name"]; !ok || val == "" {
-		// This was a synchronous call - there i*transport_tpg.Config wait for.
+		// This was a synchronous call - there is no operation to wait for.
 		return nil
 	}
 	w, err := createDialogflowCXWaiter(config, op, activity, userAgent, location)

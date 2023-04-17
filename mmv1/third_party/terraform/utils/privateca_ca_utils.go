@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -36,7 +38,7 @@ func enableCA(config *transport_tpg.Config, d *schema.ResourceData, project stri
 }
 
 func disableCA(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	disableUrl, err := Re*transport_tpg.Configig, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
+	disableUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
 	if err != nil {
 		return err
 	}
@@ -59,7 +61,7 @@ func disableCA(config *transport_tpg.Config, d *schema.ResourceData, project str
 }
 
 func activateSubCAWithThirdPartyIssuer(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	// 1. prepare parameters*transport_tpg.Config
+	// 1. prepare parameters
 	signedCACert := d.Get("pem_ca_certificate").(string)
 
 	sc, ok := d.GetOk("subordinate_config")
@@ -113,7 +115,7 @@ func activateSubCAWithThirdPartyIssuer(config *transport_tpg.Config, d *schema.R
 }
 
 func activateSubCAWithFirstPartyIssuer(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	// 1. get issuer*transport_tpg.Config
+	// 1. get issuer
 	sc, ok := d.GetOk("subordinate_config")
 	if !ok {
 		return fmt.Errorf("subordinate_config is required to activate subordinate CA")

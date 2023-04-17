@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type TagsLocationOperationWaiter struct {
@@ -31,7 +33,7 @@ func (w *TagsLocationOperationWaiter) QueryOp() (interface{}, error) {
 
 func createTagsLocationWaiter(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent string) (*TagsLocationOperationWaiter, error) {
 	w := &TagsLocationOperationWaiter{
-		Config:    config,*transport_tpg.Config
+		Config:    config,
 		UserAgent: userAgent,
 	}
 	if err := w.CommonOperationWaiter.SetOp(op); err != nil {
@@ -42,7 +44,7 @@ func createTagsLocationWaiter(config *transport_tpg.Config, op map[string]interf
 
 func TagsLocationOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
 	w, err := createTagsLocationWaiter(config, op, activity, userAgent)
-	if err != nil {*transport_tpg.Config
+	if err != nil {
 		return err
 	}
 	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
@@ -53,7 +55,7 @@ func TagsLocationOperationWaitTimeWithResponse(config *transport_tpg.Config, op 
 
 func TagsLocationOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
 	if val, ok := op["name"]; !ok || val == "" {
-		// This was a synchronous call - there i*transport_tpg.Config wait for.
+		// This was a synchronous call - there is no operation to wait for.
 		return nil
 	}
 	w, err := createTagsLocationWaiter(config, op, activity, userAgent)

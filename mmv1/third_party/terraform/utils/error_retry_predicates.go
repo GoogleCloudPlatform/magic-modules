@@ -1,10 +1,7 @@
-<% autogen_exception -%>
-
 package google
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -14,7 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // We've encountered a few common fingerprint-related strings; if this is one of
@@ -148,7 +145,7 @@ func IsCryptoKeyVersionsPendingGeneration(err error) (bool, string) {
 
 // Retry if getting a resource/operation returns a 404 for specific operations.
 // opType should describe the operation for which 404 can be retryable.
-func IsNotFoundRetryableError(opType string) RetryErrorPredicateFunc {
+func IsNotFoundRetryableError(opType string) transport_tpg.RetryErrorPredicateFunc {
 	return func(err error) (bool, string) {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
 			return true, fmt.Sprintf("Retry 404s for %s", opType)

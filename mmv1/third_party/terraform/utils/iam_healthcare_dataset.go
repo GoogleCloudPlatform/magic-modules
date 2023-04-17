@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	healthcare "google.golang.org/api/healthcare/v1"
 
 	"github.com/hashicorp/errwrap"
@@ -25,7 +26,7 @@ type HealthcareDatasetIamUpdater struct {
 }
 
 func NewHealthcareDatasetIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
-	dataset := d.Get("dataset_id").(string)*transport_tpg.Config
+	dataset := d.Get("dataset_id").(string)
 	datasetId, err := ParseHealthcareDatasetId(dataset, config)
 
 	if err != nil {
@@ -40,7 +41,7 @@ func NewHealthcareDatasetIamUpdater(d TerraformResourceData, config *transport_t
 }
 
 func DatasetIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
-	datasetId, err := ParseHealthcareDatasetId(d.Id(), con*transport_tpg.Config
+	datasetId, err := ParseHealthcareDatasetId(d.Id(), config)
 	if err != nil {
 		return err
 	}

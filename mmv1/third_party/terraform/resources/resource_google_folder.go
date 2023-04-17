@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 )
 
@@ -122,7 +122,7 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -157,7 +157,7 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -209,7 +209,7 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceGoogleFolderDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -253,7 +253,7 @@ func resourceGoogleFolderImportState(d *schema.ResourceData, m interface{}) ([]*
 
 // Util to get a Folder resource from API. Note that folder described by name is not necessarily the
 // ResourceData resource.
-func getGoogleFolder(folderName, userAgent string, d *schema.ResourceData, config *transport_tpg.Confignfig) (*resourceManagerV3.Folder, error) {
+func getGoogleFolder(folderName, userAgent string, d *schema.ResourceData, config *transport_tpg.Config) (*resourceManagerV3.Folder, error) {
 	var folder *resourceManagerV3.Folder
 	err := RetryTimeDuration(func() error {
 		var reqErr error

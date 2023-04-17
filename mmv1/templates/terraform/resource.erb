@@ -37,6 +37,8 @@ import (
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
   "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+  transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
+
 <% if object.gettable_properties.reject { |p| p.ignore_read }.any? { |prop| prop.flatten_object } -%>
   "google.golang.org/api/googleapi"
 <% end -%>

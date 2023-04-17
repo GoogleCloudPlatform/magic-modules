@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/pubsub/v1"
 )
@@ -31,7 +32,7 @@ type PubsubSubscriptionIamUpdater struct {
 }
 
 func NewPubsubSubscriptionIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)*transport_tpg.Config
+	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func NewPubsubSubscriptionIamUpdater(d TerraformResourceData, config *transport_
 }
 
 func PubsubSubscriptionIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
-	if err := d.Set("subscription", d.Id()); err != nil {*transport_tpg.Config
+	if err := d.Set("subscription", d.Id()); err != nil {
 		return fmt.Errorf("Error setting subscription: %s", err)
 	}
 	return nil

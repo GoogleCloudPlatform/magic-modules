@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceContainerRegistry() *schema.Resource {
@@ -79,7 +79,7 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

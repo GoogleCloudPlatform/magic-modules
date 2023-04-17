@@ -3,6 +3,7 @@ package google
 import (
 	"encoding/json"
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
 	"time"
 

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	datastream "google.golang.org/api/datastream/v1"
 )
 
@@ -43,7 +45,7 @@ func (w *DatastreamOperationWaiter) SetOp(op interface{}) error {
 }
 
 func createDatastreamWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*DatastreamOperationWaiter, error) {
-	w := &DatastreamOperationWaiter{*transport_tpg.Config
+	w := &DatastreamOperationWaiter{
 		Config:    config,
 		UserAgent: userAgent,
 		Project:   project,
@@ -56,7 +58,7 @@ func createDatastreamWaiter(config *transport_tpg.Config, op map[string]interfac
 
 // nolint: deadcode,unused
 func DatastreamOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
-	w, err := createDatastreamWaiter(config, op, projec*transport_tpg.ConfigAgent)
+	w, err := createDatastreamWaiter(config, op, project, activity, userAgent)
 	if err != nil {
 		return err
 	}
@@ -67,7 +69,7 @@ func DatastreamOperationWaitTimeWithResponse(config *transport_tpg.Config, op ma
 }
 
 func DatastreamOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
-	if val, ok := op["name"]; !ok || val ==*transport_tpg.Config
+	if val, ok := op["name"]; !ok || val == "" {
 		// This was a synchronous call - there is no operation to wait for.
 		return nil
 	}

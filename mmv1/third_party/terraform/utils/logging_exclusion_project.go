@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/logging/v2"
 )
 
@@ -25,7 +26,7 @@ type ProjectLoggingExclusionUpdater struct {
 }
 
 func NewProjectLoggingExclusionUpdater(d *schema.ResourceData, config *transport_tpg.Config) (ResourceLoggingExclusionUpdater, error) {
-	pid, err := getProject(d, config)*transport_tpg.Config
+	pid, err := getProject(d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func NewProjectLoggingExclusionUpdater(d *schema.ResourceData, config *transport
 }
 
 func ProjectLoggingExclusionIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
-	loggingExclusionId, err := parseLoggingExclusionId(d.Id())*transport_tpg.Config
+	loggingExclusionId, err := parseLoggingExclusionId(d.Id())
 	if err != nil {
 		return err
 	}

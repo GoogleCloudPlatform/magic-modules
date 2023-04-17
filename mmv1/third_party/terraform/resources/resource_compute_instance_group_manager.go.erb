@@ -4,6 +4,7 @@ package google
 import (
 	"fmt"
 	"log"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
 	"time"
 
@@ -612,7 +613,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		// before attempting to Read the state of the manager. This allows a graceful resumption of a Create that was killed
 		// by the upstream Terraform process exiting early such as a sigterm.
 		select {
-		case <-config.context.Done():
+		case <-config.Context.Done():
 			log.Printf("[DEBUG] Persisting %s so this operation can be resumed \n", op.Name)
 			if err := d.Set("operation", op.Name); err != nil {
 				return fmt.Errorf("Error setting operation: %s", err)

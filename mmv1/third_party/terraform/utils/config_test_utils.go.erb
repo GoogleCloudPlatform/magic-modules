@@ -4,6 +4,7 @@ package google
 import (
 	"net/http/httptest"
 	"strings"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
@@ -11,7 +12,7 @@ const testOauthScope = "https://www.googleapis.com/auth/compute"
 
 // NewTestConfig create a config using the http test server.
 func NewTestConfig(server *httptest.Server) *transport_tpg.Config {
-	cfg := &Config{}
+	cfg := &transport_tpg.Config{}
 	cfg.Client = server.Client()
 	configureTestBasePaths(cfg, server.URL)
 	return cfg

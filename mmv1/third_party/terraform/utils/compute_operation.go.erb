@@ -4,6 +4,7 @@ package google
 import (
 	"bytes"
 	"context"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 <% unless version == 'ga' -%>
 	"encoding/json"
 <% end -%>
@@ -117,7 +118,7 @@ func ComputeOperationWaitTime(config *transport_tpg.Config, res interface{}, pro
 
 	w := &ComputeOperationWaiter{
 		Service: config.NewComputeClient(userAgent),
-		Context: config.context,
+		Context: config.Context,
 		Op:      op,
 		Project: project,
 	}

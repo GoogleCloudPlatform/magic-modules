@@ -2,6 +2,8 @@ package google
 
 import (
 	"regexp"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (string, error) {

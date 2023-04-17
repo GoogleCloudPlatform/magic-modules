@@ -44,6 +44,7 @@ var vFilter = flag.String("version", "", "optional version name. If specified, t
 var mode = flag.String("mode", "", "mode for the generator. If unset, creates the provider. Options: 'serialization'")
 
 var terraformResourceDirectory = "google-beta"
+var terraformProviderModule = "github.com/hashicorp/terraform-provider-google-beta"
 
 func main() {
 	resources, products, err := loadAndModelResources()
@@ -75,8 +76,10 @@ func main() {
 	}
 	if *version == GA_VERSION {
 		terraformResourceDirectory = "google"
+		terraformProviderModule = "github.com/hashicorp/terraform-provider-google/google"
 	} else if *version == ALPHA_VERSION {
 		terraformResourceDirectory = "google-private"
+		terraformProviderModule = "github.com/hashicorp/terraform-provider-google-private"
 	}
 
 	generatedResources := make([]*Resource, 0, len(resourcesForVersion))
@@ -107,8 +110,8 @@ func main() {
 	}
 
 	// product specific generation
-	generateProductsFile("provider_dcl_endpoints", productsForVersion, "transport")
-	generateProductsFile("provider_dcl_client_creation", productsForVersion, "transport")
+	generateProductsFile("provider_dcl_endpoints", productsForVersion)
+	generateProductsFile("provider_dcl_client_creation", productsForVersion)
 
 	if oPath == nil || *oPath == "" {
 		glog.Info("Skipping copying handwritten files, no output specified")
@@ -503,7 +506,7 @@ func generateProviderResourcesFile(resources []*Resource) {
 	}
 }
 
-func generateProductsFile(fileName string, products []*ProductMetadata, folderName string) {
+func generateProductsFile(fileName string, products []*ProductMetadata) {
 	if len(products) <= 0 {
 		return
 	}
@@ -531,7 +534,7 @@ func generateProductsFile(fileName string, products []*ProductMetadata, folderNa
 	} else {
 		outname := fileName + ".go"
 
-		DCLFolderPath := path.Join(*oPath, terraformResourceDirectory, folderName)
+		DCLFolderPath := path.Join(*oPath, terraformResourceDirectory, "transport")
 		if err := os.MkdirAll(DCLFolderPath, os.ModePerm); err != nil {
 			glog.Error(fmt.Errorf("error creating Terraform DCL directory %v: %v", DCLFolderPath, err))
 		}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/spanner/v1"
 )
@@ -38,7 +39,7 @@ type SpannerDatabaseIamUpdater struct {
 }
 
 func NewSpannerDatabaseIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)*transport_tpg.Config
+	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
 	}

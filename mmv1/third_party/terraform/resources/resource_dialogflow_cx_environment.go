@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceDialogflowCXEnvironment() *schema.Resource {
@@ -175,7 +175,7 @@ func resourceDialogflowCXEnvironmentCreate(d *schema.ResourceData, meta interfac
 }
 
 func resourceDialogflowCXEnvironmentRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -232,7 +232,7 @@ func resourceDialogflowCXEnvironmentRead(d *schema.ResourceData, meta interface{
 }
 
 func resourceDialogflowCXEnvironmentUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -326,7 +326,7 @@ func resourceDialogflowCXEnvironmentUpdate(d *schema.ResourceData, meta interfac
 }
 
 func resourceDialogflowCXEnvironmentDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -380,7 +380,7 @@ func resourceDialogflowCXEnvironmentDelete(d *schema.ResourceData, meta interfac
 }
 
 func resourceDialogflowCXEnvironmentImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 
 	// current import_formats can't import fields with forward slashes in their value and parent contains slashes
 	if err := ParseImportId([]string{
@@ -400,22 +400,22 @@ func resourceDialogflowCXEnvironmentImport(d *schema.ResourceData, meta interfac
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenDialogflowCXEnvironmentName(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenDialogflowCXEnvironmentName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
 	return NameFromSelfLinkStateFunc(v)
 }
 
-func flattenDialogflowCXEnvironmentDisplayName(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenDialogflowCXEnvironmentDisplayName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXEnvironmentDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenDialogflowCXEnvironmentDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXEnvironmentVersionConfigs(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenDialogflowCXEnvironmentVersionConfigs(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
@@ -433,23 +433,23 @@ func flattenDialogflowCXEnvironmentVersionConfigs(v interface{}, d *schema.Resou
 	}
 	return transformed
 }
-func flattenDialogflowCXEnvironmentVersionConfigsVersion(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenDialogflowCXEnvironmentVersionConfigsVersion(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXEnvironmentUpdateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenDialogflowCXEnvironmentUpdateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func expandDialogflowCXEnvironmentDisplayName(v interface{}, d TerraformResourceData, config *transport_tpg.Confignfig) (interface{}, error) {
+func expandDialogflowCXEnvironmentDisplayName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandDialogflowCXEnvironmentDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Confignfig) (interface{}, error) {
+func expandDialogflowCXEnvironmentDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandDialogflowCXEnvironmentVersionConfigs(v interface{}, d TerraformResourceData, config *transport_tpg.Confignfig) (interface{}, error) {
+func expandDialogflowCXEnvironmentVersionConfigs(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -471,6 +471,6 @@ func expandDialogflowCXEnvironmentVersionConfigs(v interface{}, d TerraformResou
 	return req, nil
 }
 
-func expandDialogflowCXEnvironmentVersionConfigsVersion(v interface{}, d TerraformResourceData, config *transport_tpg.Confignfig) (interface{}, error) {
+func expandDialogflowCXEnvironmentVersionConfigsVersion(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

@@ -3,6 +3,7 @@ package google
 import (
 	"errors"
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"net/url"
 	"regexp"
 	"strings"

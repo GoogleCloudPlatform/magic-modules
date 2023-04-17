@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleFolder() *schema.Resource {
@@ -91,7 +92,7 @@ func canonicalFolderName(ba string) string {
 }
 
 func lookupOrganizationName(parent, userAgent string, d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
-	if parent == "" || strings.HasPrefix(parent, "organizations/") {*transport_tpg.Config
+	if parent == "" || strings.HasPrefix(parent, "organizations/") {
 		return parent, nil
 	} else if strings.HasPrefix(parent, "folders/") {
 		parentFolder, err := getGoogleFolder(parent, userAgent, d, config)

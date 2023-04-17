@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -30,7 +30,7 @@ func resourceGoogleProjectMigrateState(v int, s *terraform.InstanceState, meta i
 
 // This migration adjusts google_project resources to include several additional attributes
 // required to support project creation/deletion that was added in V1.
-func migrateGoogleProjectStateV0toV1(s *terraform.InstanceState, config *transport_tpg.Confignfig) (*terraform.InstanceState, error) {
+func migrateGoogleProjectStateV0toV1(s *terraform.InstanceState, config *transport_tpg.Config) (*terraform.InstanceState, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", s.Attributes)
 
 	s.Attributes["skip_delete"] = "true"
@@ -49,7 +49,7 @@ func migrateGoogleProjectStateV0toV1(s *terraform.InstanceState, config *transpo
 }
 
 // Retrieve the existing IAM Policy for a Project
-func getProjectIamPolicy(project string, config *transport_tpg.Confignfig) (*cloudresourcemanager.Policy, error) {
+func getProjectIamPolicy(project string, config *transport_tpg.Config) (*cloudresourcemanager.Policy, error) {
 	p, err := config.NewResourceManagerClient(config.UserAgent).Projects.GetIamPolicy(project,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{

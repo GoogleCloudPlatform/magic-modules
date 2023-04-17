@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type ContainerAttachedOperationWaiter struct {
@@ -28,7 +30,7 @@ func (w *ContainerAttachedOperationWaiter) QueryOp() (interface{}, error) {
 
 func createContainerAttachedWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*ContainerAttachedOperationWaiter, error) {
 	w := &ContainerAttachedOperationWaiter{
-		Config:    config,*transport_tpg.Config
+		Config:    config,
 		UserAgent: userAgent,
 		Project:   project,
 	}
@@ -41,7 +43,7 @@ func createContainerAttachedWaiter(config *transport_tpg.Config, op map[string]i
 // nolint: deadcode,unused
 func ContainerAttachedOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	w, err := createContainerAttachedWaiter(config, op, project, activity, userAgent)
-	if err != nil {*transport_tpg.Config
+	if err != nil {
 		return err
 	}
 	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {

@@ -3,6 +3,7 @@ package google
 import (
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/servicenetworking/v1"
 )
 

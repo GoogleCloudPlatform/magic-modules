@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"

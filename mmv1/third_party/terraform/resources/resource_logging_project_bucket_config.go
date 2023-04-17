@@ -6,8 +6,9 @@ import (
 	"strconv"
 	"strings"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 var loggingProjectBucketConfigSchema = map[string]*schema.Schema{
@@ -131,7 +132,7 @@ func ResourceLoggingProjectBucketConfig() *schema.Resource {
 
 func resourceLoggingProjectBucketConfigAcquireOrCreate(parentType string, iDFunc loggingBucketConfigIDFunc) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*transport_tpg.Confignfig)
+		config := meta.(*transport_tpg.Config)
 		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
@@ -167,7 +168,7 @@ func resourceLoggingProjectBucketConfigAcquireOrCreate(parentType string, iDFunc
 }
 
 func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta interface{}, id string) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -213,7 +214,7 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 }
 
 func resourceLoggingProjectBucketConfigRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -258,7 +259,7 @@ func resourceLoggingProjectBucketConfigRead(d *schema.ResourceData, meta interfa
 }
 
 func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

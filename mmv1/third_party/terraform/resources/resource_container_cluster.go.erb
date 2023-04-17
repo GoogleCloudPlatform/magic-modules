@@ -4,6 +4,7 @@ package google
 import (
 	"context"
 	"fmt"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"reflect"
 	"regexp"
@@ -2220,7 +2221,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		// before attempting to Read the state of the cluster. This allows a graceful resumption of a Create that was killed
 		// by the upstream Terraform process exiting early such as a sigterm.
 		select {
-		case <-config.context.Done():
+		case <-config.Context.Done():
 			log.Printf("[DEBUG] Persisting %s so this operation can be resumed \n", op.Name)
 			if err := d.Set("operation", op.Name); err != nil {
 				return fmt.Errorf("Error setting operation: %s", err)

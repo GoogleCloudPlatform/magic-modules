@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"google.golang.org/api/cloudbilling/v1"
 	cloudkms "google.golang.org/api/cloudkms/v1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
@@ -169,7 +171,7 @@ func getOrCreateServiceAccount(config *transport_tpg.Config, project string) (*i
 // so instead this creates a single service account once per test-suite with the correct permissions.
 // The first time this test is run it will fail, but subsequent runs will succeed.
 func impersonationServiceAccountPermissions(config *transport_tpg.Config, sa *iam.ServiceAccount, testRunner string) error {
-	log.Printf("[DEBUG] Setting service account permis*transport_tpg.Config
+	log.Printf("[DEBUG] Setting service account permissions.\n")
 	policy := iam.Policy{
 		Bindings: []*iam.Binding{},
 	}
@@ -536,19 +538,19 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 
 // BootstrapConfig returns a Config pulled from the environment.
 func BootstrapConfig(t *testing.T) *transport_tpg.Config {
-	if v := os.Getenv("TF_ACC"); v == *transport_tpg.Config
+	if v := os.Getenv("TF_ACC"); v == "" {
 		t.Skip("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
 		return nil
 	}
 
-	config := &Config{
+	config := &transport_tpg.Config{
 		Credentials: GetTestCredsFromEnv(),
 		Project:     GetTestProjectFromEnv(),
 		Region:      GetTestRegionFromEnv(),
 		Zone:        GetTestZoneFromEnv(),
 	}
 
-	ConfigureBasePaths(config)
+	transport_tpg.ConfigureBasePaths(config)
 
 	if err := config.LoadAndValidate(context.Background()); err != nil {
 		t.Fatalf("Bootstrapping failed. Unable to load test config: %s", err)

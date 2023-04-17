@@ -20,7 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
 )
 
@@ -212,7 +212,7 @@ func resourceApigeeSharedFlowUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -280,7 +280,7 @@ func getApigeeSharedFlowLastModifiedAt(d *schema.ResourceData) string {
 
 func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] resourceApigeeSharedFlowDelete")
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -311,7 +311,7 @@ func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	if err := ParseImportId([]string{
 		"organizations/(?P<org_id>[^/]+)/sharedflows/(?P<name>[^/]+)",
 		"(?P<org_id>[^/]+)/(?P<name>[^/]+)",
@@ -331,7 +331,7 @@ func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenApigeeSharedFlowMetaData(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenApigeeSharedFlowMetaData(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -348,36 +348,36 @@ func flattenApigeeSharedFlowMetaData(v interface{}, d *schema.ResourceData, conf
 		flattenApigeeSharedFlowMetaDataSubType(original["subType"], d, config)
 	return []interface{}{transformed}
 }
-func flattenApigeeSharedFlowMetaDataCreatedAt(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenApigeeSharedFlowMetaDataCreatedAt(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowMetaDataLastModifiedAt(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenApigeeSharedFlowMetaDataLastModifiedAt(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowMetaDataSubType(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenApigeeSharedFlowMetaDataSubType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowName(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenApigeeSharedFlowName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowRevision(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenApigeeSharedFlowRevision(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedFlowLatestRevisionId(v interface{}, d *schema.ResourceData, config *transport_tpg.Confignfig) interface{} {
+func flattenApigeeSharedFlowLatestRevisionId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func expandApigeeSharedFlowName(v interface{}, d TerraformResourceData, config *transport_tpg.Confignfig) (interface{}, error) {
+func expandApigeeSharedFlowName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
 // sendRequestRawBodyWithTimeout is derived from sendRequestWithTimeout with direct pass through of request body
-func sendRequestRawBodyWithTimeout(config *transport_tpg.Confignfig, method, project, rawurl, userAgent string, body io.Reader, contentType string, timeout time.Duration, errorRetryPredicates ...RetryErrorPredicateFunc) (map[string]interface{}, error) {
+func sendRequestRawBodyWithTimeout(config *transport_tpg.Config, method, project, rawurl, userAgent string, body io.Reader, contentType string, timeout time.Duration, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] sendRequestRawBodyWithTimeout start")
 	reqHeaders := make(http.Header)
 	reqHeaders.Set("User-Agent", userAgent)

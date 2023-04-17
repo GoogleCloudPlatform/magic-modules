@@ -7,8 +7,9 @@ import (
 	"strings"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"google.golang.org/api/servicenetworking/v1"
 )
 
@@ -141,7 +142,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainCreate(d *schema.ResourceData
 }
 
 func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -209,7 +210,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainRead(d *schema.ResourceData, 
 }
 
 func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Confignfig)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -233,7 +234,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData
 // NOTE(deviavir): An out of band aspect of this API is that it uses a unique formatting of network
 // different from the standard self_link URI. It requires a call to the resource manager to get the project
 // number for the current project.
-func getProjectNumber(d *schema.ResourceData, config *transport_tpg.Confignfig, project, userAgent string) (string, error) {
+func getProjectNumber(d *schema.ResourceData, config *transport_tpg.Config, project, userAgent string) (string, error) {
 	log.Printf("[DEBUG] Retrieving project number by doing a GET with the project id, as required by service networking")
 	// err == nil indicates that the billing_project value was found
 	billingProject := project

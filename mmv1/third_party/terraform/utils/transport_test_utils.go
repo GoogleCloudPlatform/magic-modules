@@ -1,6 +1,7 @@
 package google
 
 import (
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"reflect"
 	"regexp"
 	"strings"

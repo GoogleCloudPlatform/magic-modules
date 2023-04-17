@@ -3,6 +3,8 @@ package google
 import (
 	"fmt"
 	"strings"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 //These functions are used by both the `resource_container_node_pool` and `resource_container_cluster` for handling regional clusters
@@ -33,7 +35,7 @@ func getLocation(d TerraformResourceData, config *transport_tpg.Config) (string,
 // to provider's value if not given.  If neither is provided, returns an error.
 func getZone(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	res, ok := d.GetOk("zone")
-	if !ok {*transport_tpg.Config
+	if !ok {
 		if config.Zone != "" {
 			return config.Zone, nil
 		}

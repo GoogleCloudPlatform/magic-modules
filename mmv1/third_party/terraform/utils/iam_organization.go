@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -24,7 +25,7 @@ type OrganizationIamUpdater struct {
 }
 
 func NewOrganizationIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
-	return &OrganizationIamUpdater{*transport_tpg.Config
+	return &OrganizationIamUpdater{
 		resourceId: d.Get("org_id").(string),
 		d:          d,
 		Config:     config,
@@ -32,7 +33,7 @@ func NewOrganizationIamUpdater(d TerraformResourceData, config *transport_tpg.Co
 }
 
 func OrgIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
-	if err := d.Set("org_id", d.Id()); err != nil*transport_tpg.Config
+	if err := d.Set("org_id", d.Id()); err != nil {
 		return fmt.Errorf("Error setting org_id: %s", err)
 	}
 	return nil

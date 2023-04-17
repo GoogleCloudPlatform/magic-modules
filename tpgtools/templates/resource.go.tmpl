@@ -48,6 +48,7 @@ import(
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func Resource{{$.PathType}}() *schema.Resource {
@@ -271,7 +272,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
@@ -362,7 +363,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
@@ -447,7 +448,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
@@ -535,7 +536,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 {{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 {{- end }}
