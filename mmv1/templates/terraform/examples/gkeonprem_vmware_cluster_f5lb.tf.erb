@@ -35,19 +35,10 @@ resource "google_gkeonprem_vmware_cluster" "<%= ctx[:primary_resource_id] %>" {
       control_plane_vip = "10.251.133.5"
       ingress_vip = "10.251.135.19"
     }
-    metal_lb_config {
-      address_pools {
-        pool = "ingress-ip"
-        manual_assign = "true"
-        addresses = ["10.251.135.19"]
-        avoid_buggy_ips = true
-      }
-      address_pools {
-        pool = "lb-test-ip"
-        manual_assign = "true"
-        addresses = ["10.251.135.19"]
-        avoid_buggy_ips = true
-      }
+    f5_config {
+        address = "10.0.0.1"
+        partition = "test-partition"
+        snat_pool = "test-snap-pool"
     }
   }
   dataplane_v2 {
