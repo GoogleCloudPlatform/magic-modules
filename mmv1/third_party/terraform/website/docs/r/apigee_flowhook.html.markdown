@@ -22,7 +22,7 @@ The following arguments are supported:
 
 * `org_id` -
   (Required)
-  The Apigee Organization associated with the environment
+  The Apigee Organization associated with the environment.
 
 * `environment` -
   (Required)
