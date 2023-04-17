@@ -61,7 +61,7 @@ func postBuildStatus(prNumber, GITHUB_TOKEN, commitSha string, body map[string]s
 		return err
 	}
 
-	fmt.Printf("Successfully posted community-checker build link to pull request %s", prNumber)
+	fmt.Printf("Successfully posted community-checker build link to pull request %s\n", prNumber)
 
 	return nil
 }
