@@ -27,8 +27,8 @@ resource "google_compute_subnetwork" "consumer_subnet" {
 }
 
 resource "google_compute_address" "consumer_address" {
+  provider      = google-beta
   name         = "<%= ctx[:vars]['ip_name'] %>-1"
-  provider     = google-beta
   region       = "us-central1"
   subnetwork   = google_compute_subnetwork.consumer_subnet.id
   address_type = "INTERNAL"
