@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: Model
-base_url: projects/{{project}}/locations/{{location}}/models
-create_url: projects/{{project}}/locations/{{location}}/models:upload
-self_link: 'projects/{{project}}/locations/{{location}}/models/{{name}}'
+base_url: projects/{{project}}/locations/{{region}}/models
+create_url: projects/{{project}}/locations/{{region}}/models:upload
+self_link: 'projects/{{project}}/locations/{{region}}/models/{{name}}'
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -44,7 +44,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 description: "A trained machine learning Model."
-id_format: 'projects/{{project}}/locations/{{location}}/models/{{name}}'
+id_format: 'projects/{{project}}/locations/{{region}}/models/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vertex_ai_model_basic"
@@ -69,7 +69,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: templates/terraform/encoders/vertex_model_update.go.erb
 parameters:
   - !ruby/object:Api::Type::String
-    name: location
+    name: region
     description: The location for the resource
     url_param_only: true
     required: true

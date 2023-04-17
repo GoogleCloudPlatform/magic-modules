@@ -15,7 +15,7 @@ func TestAccVertexAIModel_vertexAiModelAdvancedExampleUpdate(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { TestAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVertexAIModelDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -26,7 +26,7 @@ func TestAccVertexAIModel_vertexAiModelAdvancedExampleUpdate(t *testing.T) {
 				ResourceName:            "google_vertex_ai_model.model",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"region"},
 			},
 			{
 				Config: testAccVertexAIModel_vertexAiModelAdvancedExampleUpdate(context),
@@ -35,7 +35,7 @@ func TestAccVertexAIModel_vertexAiModelAdvancedExampleUpdate(t *testing.T) {
 				ResourceName:            "google_vertex_ai_model.model",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"region"},
 			},
 		},
 	})
@@ -60,7 +60,7 @@ resource "google_vertex_ai_model" "model" {
     predict_route = "/predict"
   }
   display_name = "new-sample-model"
-  location     = "us-central1"
+  region       = "us-central1"
   artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"
   description  = "An updated sample model"
   labels = {

@@ -15,7 +15,7 @@ resource "google_vertex_ai_model" "<%= ctx[:primary_resource_id] %>" {
     predict_route = "/predict"
   }
   display_name = "sample-model"
-  location     = "us-central1"
+  region       = "us-central1"
   artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"
   description  = "A sample model"
   labels = {
