@@ -13,7 +13,7 @@
 
 ---
 !ruby/object:Api::Product
-name: gkeonprem
+name: Gkeonprem
 display_name: GKE On-Prem
 versions:
   - !ruby/object:Api::Product::Version
