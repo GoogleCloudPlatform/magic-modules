@@ -68,6 +68,9 @@ resource "google_gkeonprem_vmware_cluster" "<%= ctx[:primary_resource_id] %>" {
   auto_repair_config {
     enabled = true
   }
+  storage {
+    vsphere_csi_disabled = true
+  }
 
   provider = google-beta
   
