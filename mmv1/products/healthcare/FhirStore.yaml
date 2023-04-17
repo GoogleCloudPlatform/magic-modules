@@ -56,7 +56,6 @@ examples:
       pubsub_topic: "fhir-notifications"
   - !ruby/object:Provider::Terraform::Examples
     name: "healthcare_fhir_store_notification_configs"
-    min_version: beta
     primary_resource_id: "default"
     vars:
       dataset_name: "example-dataset"
