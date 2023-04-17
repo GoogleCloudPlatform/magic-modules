@@ -23,7 +23,7 @@ func DataSourceGoogleCloudFunctions2Function() *schema.Resource {
 }
 
 func dataSourceGoogleCloudFunctions2FunctionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	project, err := getProject(d, config)
 	if err != nil {

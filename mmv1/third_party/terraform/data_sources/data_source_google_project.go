@@ -20,7 +20,7 @@ func DataSourceGoogleProject() *schema.Resource {
 }
 
 func datasourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	if v, ok := d.GetOk("project_id"); ok {
 		project := v.(string)

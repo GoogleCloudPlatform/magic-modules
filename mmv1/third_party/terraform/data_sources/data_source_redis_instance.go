@@ -1,6 +1,8 @@
 package google
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
 func DataSourceGoogleRedisInstance() *schema.Resource {
 	// Generate datasource schema from resource
@@ -19,7 +21,7 @@ func DataSourceGoogleRedisInstance() *schema.Resource {
 }
 
 func dataSourceGoogleRedisInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	id, err := ReplaceVars(d, meta.(*Config), "projects/{{project}}/locations/{{region}}/instances/{{name}}")
+	id, err := ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{project}}/locations/{{region}}/instances/{{name}}")
 	if err != nil {
 		return err
 	}

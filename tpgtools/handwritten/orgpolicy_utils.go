@@ -9,7 +9,7 @@ import (
 // OrgPolicyPolicy has a custom import method because the parent field needs to allow an additional forward slash
 // to represent the type of parent (e.g. projects/{project_id}).
 func resourceOrgPolicyPolicyCustomImport(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	if err := ParseImportId([]string{
 		"^(?P<parent>[^/]+/?[^/]*)/policies/(?P<name>[^/]+)",
 		"^(?P<parent>[^/]+/?[^/]*)/(?P<name>[^/]+)",

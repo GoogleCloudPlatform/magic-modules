@@ -14,7 +14,7 @@ func TestKeyRingIdParsing(t *testing.T) {
 		ExpectedError       bool
 		ExpectedTerraformId string
 		ExpectedKeyRingId   string
-		Config              *Config
+		Config              *transport_tpg.Config
 	}{
 		"id is in project/location/keyRingName format": {
 			ImportId:            "test-project/us-central1/test-key-ring",

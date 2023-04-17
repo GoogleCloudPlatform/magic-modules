@@ -22,7 +22,7 @@ func DataSourceSpannerInstance() *schema.Resource {
 }
 
 func dataSourceSpannerInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	id, err := ReplaceVars(d, config, "{{project}}/{{name}}")
 	if err != nil {

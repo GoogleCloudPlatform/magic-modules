@@ -81,7 +81,7 @@ func DataSourceGoogleComputeInstanceGroup() *schema.Resource {
 }
 
 func dataSourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	if name, ok := d.GetOk("name"); ok {
 		zone, err := getZone(d, config)
 		if err != nil {

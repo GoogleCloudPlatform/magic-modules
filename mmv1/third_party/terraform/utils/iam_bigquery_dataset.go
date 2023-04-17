@@ -34,11 +34,11 @@ type BigqueryDatasetIamUpdater struct {
 	project   string
 	datasetId string
 	d         TerraformResourceData
-	Config    *Config
+	Config    *transport_tpg.Config
 }
 
-func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	project, err := getProject(d, config)*transport_tpg.Config
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +55,8 @@ func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *Config) (Reso
 	}, nil
 }
 
-func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *Config) error {
-	fv, err := parseProjectFieldValue("datasets", d.Id(), "project", d, config, false)
+func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	fv, err := parseProjectFieldValue("datasets", d.Id(), "project*transport_tpg.Configse)
 	if err != nil {
 		return err
 	}

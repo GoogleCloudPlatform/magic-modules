@@ -23,7 +23,7 @@ func DataSourceGoogleContainerCluster() *schema.Resource {
 }
 
 func datasourceContainerClusterRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	clusterName := d.Get("name").(string)
 

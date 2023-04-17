@@ -34,11 +34,11 @@ type BigtableTableIamUpdater struct {
 	instance string
 	table    string
 	d        TerraformResourceData
-	Config   *Config
+	Config   *transport_tpg.Config
 }
 
-func NewBigtableTableUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+func NewBigtableTableUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	project, err := getProject(d, config)*transport_tpg.Config
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func NewBigtableTableUpdater(d TerraformResourceData, config *Config) (ResourceI
 	}, nil
 }
 
-func BigtableTableIdParseFunc(d *schema.ResourceData, config *Config) error {
-	values := make(map[string]string)
+func BigtableTableIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	values := make(map[string]string)*transport_tpg.Config
 
 	m, err := getImportIdQualifiers([]string{"projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)/tables/(?P<table>[^/]+)"}, d, config, d.Id())
 	if err != nil {

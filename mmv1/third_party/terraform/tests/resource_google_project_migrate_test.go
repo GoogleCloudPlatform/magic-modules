@@ -48,7 +48,7 @@ func TestGoogleProjectMigrateState(t *testing.T) {
 
 func TestGoogleProjectMigrateState_empty(t *testing.T) {
 	var is *terraform.InstanceState
-	var meta *Config
+	var meta *transport_tpg.Config
 
 	// should handle nil
 	is, err := resourceGoogleProjectMigrateState(0, is, meta)

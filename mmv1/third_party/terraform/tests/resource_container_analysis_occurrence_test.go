@@ -28,7 +28,7 @@ func getTestOccurrenceAttestationPayload(t *testing.T) string {
 }
 
 func getSignedTestOccurrenceAttestationPayload(
-	t *testing.T, config *Config,
+	t *testing.T, config *transport_tpg.Config,
 	signingKey BootstrappedKMS, rawPayload string) string {
 	pbytes := []byte(rawPayload)
 	ssum := sha512.Sum512(pbytes)

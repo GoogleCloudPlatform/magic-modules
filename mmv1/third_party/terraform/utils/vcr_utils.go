@@ -37,7 +37,7 @@ import (
 var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
 
-var configs map[string]*Config
+var configs map[string]*transport_tpg.Config
 var fwProviders map[string]*frameworkTestProvider
 
 var sources map[string]VcrSource
@@ -447,8 +447,8 @@ func GetSDKProvider(testName string) *schema.Provider {
 // ConfigureFunc on our provider creates a new HTTP client and sets base paths (config.go LoadAndValidate)
 // VCR requires a single HTTP client to handle all interactions so it can record and replay responses so
 // this caches HTTP clients per test by replacing ConfigureFunc
-func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*Config, diag.Diagnostics) {
-	configsLock.RLock()
+func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*transport_tpg.Config, diag.Diagnostics) {
+	configsLock.RLock()*transport_tpg.Config
 	v, ok := configs[testName]
 	configsLock.RUnlock()
 	if ok {
@@ -460,8 +460,8 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 	}
 
 	var fwD fwDiags.Diagnostics
-	config := c.(*Config)
-	config.PollInterval, config.Client.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval)
+	config := c.(*transport_tpg.Config)
+	config.PollIn*transport_tpg.Configient.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval)
 	if fwD.HasError() {
 		diags = append(diags, *frameworkDiagsToSdkDiags(fwD)...)
 		return nil, diags

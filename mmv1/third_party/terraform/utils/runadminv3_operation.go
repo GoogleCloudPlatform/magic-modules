@@ -9,7 +9,7 @@ import (
 )
 
 type RunAdminV2OperationWaiter struct {
-	Config    *Config
+	Config    *transport_tpg.Config
 	UserAgent string
 	Project   string
 	CommonOperationWaiter
@@ -24,8 +24,8 @@ func (w *RunAdminV2OperationWaiter) QueryOp() (interface{}, error) {
 	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
-func createRunAdminV2Waiter(config *Config, op *run.GoogleLongrunningOperation, project, activity, userAgent string) (*RunAdminV2OperationWaiter, error) {
-	w := &RunAdminV2OperationWaiter{
+func createRunAdminV2Waiter(config *transport_tpg.Config, op *run.GoogleLongrunningOperation, project, activity, userAgent string) (*RunAdminV2OperationWaiter, error) {
+	w := &RunAdminV2OperationWaiter{*transport_tpg.Config
 		Config:    config,
 		UserAgent: userAgent,
 		Project:   project,
@@ -36,8 +36,8 @@ func createRunAdminV2Waiter(config *Config, op *run.GoogleLongrunningOperation, 
 	return w, nil
 }
 
-func runAdminV2OperationWaitTimeWithResponse(config *Config, op *run.GoogleLongrunningOperation, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
-	w, err := createRunAdminV2Waiter(config, op, project, activity, userAgent)
+func runAdminV2OperationWaitTimeWithResponse(config *transport_tpg.Config, op *run.GoogleLongrunningOperation, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+	w, err := createRunAdminV2Waiter(config, op, projec*transport_tpg.ConfigAgent)
 	if err != nil {
 		return err
 	}
@@ -47,8 +47,8 @@ func runAdminV2OperationWaitTimeWithResponse(config *Config, op *run.GoogleLongr
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
 }
 
-func runAdminV2OperationWaitTime(config *Config, op *run.GoogleLongrunningOperation, project, activity, userAgent string, timeout time.Duration) error {
-	if op.Done {
+func runAdminV2OperationWaitTime(config *transport_tpg.Config, op *run.GoogleLongrunningOperation, project, activity, userAgent string, timeout time.Duration) error {
+	if op.Done {*transport_tpg.Config
 		return nil
 	}
 	w, err := createRunAdminV2Waiter(config, op, project, activity, userAgent)

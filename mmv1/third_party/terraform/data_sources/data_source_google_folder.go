@@ -53,7 +53,7 @@ func DataSourceGoogleFolder() *schema.Resource {
 }
 
 func dataSourceFolderRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -90,8 +90,8 @@ func canonicalFolderName(ba string) string {
 	return "folders/" + ba
 }
 
-func lookupOrganizationName(parent, userAgent string, d *schema.ResourceData, config *Config) (string, error) {
-	if parent == "" || strings.HasPrefix(parent, "organizations/") {
+func lookupOrganizationName(parent, userAgent string, d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
+	if parent == "" || strings.HasPrefix(parent, "organizations/") {*transport_tpg.Config
 		return parent, nil
 	} else if strings.HasPrefix(parent, "folders/") {
 		parentFolder, err := getGoogleFolder(parent, userAgent, d, config)

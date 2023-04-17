@@ -378,7 +378,7 @@ func testDeploymentManagerDeploymentVerifyServiceAccountExists(t *testing.T, acc
 	}
 }
 
-func testCheckDeploymentServiceAccountExists(accountId string, config *Config) (exists bool, err error) {
+func testCheckDeploymentServiceAccountExists(accountId string, config *transport_tpg.Config) (exists bool, err error) {
 	_, err = config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Get(
 		fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", GetTestProjectFromEnv(), accountId, GetTestProjectFromEnv())).Do()
 	if err != nil {

@@ -16,7 +16,7 @@ var loggingFolderBucketConfigSchema = map[string]*schema.Schema{
 	},
 }
 
-func folderBucketConfigID(d *schema.ResourceData, config *Config) (string, error) {
+func folderBucketConfigID(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
 	folder := d.Get("folder").(string)
 	location := d.Get("location").(string)
 	bucketID := d.Get("bucket_id").(string)

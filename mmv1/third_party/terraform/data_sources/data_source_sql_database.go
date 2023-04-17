@@ -20,7 +20,7 @@ func DataSourceSqlDatabase() *schema.Resource {
 }
 
 func dataSourceSqlDatabaseRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	project, err := getProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for Database: %s", err)

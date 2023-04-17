@@ -14,7 +14,7 @@ func resourceConverterServiceAccount() ResourceConverter {
 	}
 }
 
-func GetServiceAccountCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetServiceAccountCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//iam.googleapis.com/projects/{{project}}/serviceAccounts/{{unique_id}}")
 	if err != nil {
 		return []Asset{}, err
@@ -35,7 +35,7 @@ func GetServiceAccountCaiObject(d TerraformResourceData, config *Config) ([]Asse
 	}
 }
 
-func GetServiceAccountApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func GetServiceAccountApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 
 	project, err := getProject(d, config)
@@ -105,34 +105,34 @@ func GetServiceAccountApiObject(d TerraformResourceData, config *Config) (map[st
 	return obj, nil
 }
 
-func expandServiceAccountId(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandServiceAccountId(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandServiceAccountDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandServiceAccountDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandServiceAccountDisplayName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandServiceAccountDisplayName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandServiceAccountName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandServiceAccountName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandServiceAccountEmail(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandServiceAccountEmail(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandServiceAccountDisabled(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandServiceAccountDisabled(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandServiceAccountUniqueId(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandServiceAccountUniqueId(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandServiceAccountProject(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandServiceAccountProject(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

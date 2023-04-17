@@ -1,17 +1,19 @@
 package google
 
-import "time"
+import (
+	"time"
+)
 
 func resourceConverterFolder() ResourceConverter {
 	return ResourceConverter{
-		AssetType:         "cloudresourcemanager.googleapis.com/Folder",
-		Convert:           GetFolderCaiObject,
+		AssetType: "cloudresourcemanager.googleapis.com/Folder",
+		Convert:   GetFolderCaiObject,
 	}
 }
 
-func GetFolderCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetFolderCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/folders/{{folder_id}}")
-	
+
 	if err != nil {
 		return []Asset{}, nil
 	}
@@ -32,13 +34,13 @@ func GetFolderCaiObject(d TerraformResourceData, config *Config) ([]Asset, error
 	}
 }
 
-func GetFolderApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func GetFolderApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 
 	folder := &Folder{
 		Name:        d.Get("name").(string),
-		Parent:	     d.Get("parent").(string),
+		Parent:      d.Get("parent").(string),
 		DisplayName: d.Get("display_name").(string),
-		State:       d.Get("lifecycle_state").(string), 
+		State:       d.Get("lifecycle_state").(string),
 	}
 
 	if v, ok := d.GetOkExists("create_time"); ok {
@@ -48,13 +50,13 @@ func GetFolderApiObject(d TerraformResourceData, config *Config) (map[string]int
 	return jsonMap(folder)
 }
 
-func constructTime(create_time string) *Timestamp{
+func constructTime(create_time string) *Timestamp {
 	if create_time == "" {
 		return &Timestamp{}
 	}
-	t,_:= time.Parse(time.RFC3339, create_time)
+	t, _ := time.Parse(time.RFC3339, create_time)
 	return &Timestamp{
 		Seconds: t.Unix(),
-		Nanos: t.UnixNano(),
+		Nanos:   t.UnixNano(),
 	}
 }

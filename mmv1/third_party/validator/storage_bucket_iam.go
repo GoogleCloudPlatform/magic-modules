@@ -1,6 +1,8 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Provide a separate asset type constant so we don't have to worry about name conflicts between IAM and non-IAM converter files
 const StorageBucketIAMAssetType string = "storage.googleapis.com/Bucket"
@@ -33,15 +35,15 @@ func resourceConverterStorageBucketIamMember() ResourceConverter {
 	}
 }
 
-func GetStorageBucketIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetStorageBucketIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newStorageBucketIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetStorageBucketIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetStorageBucketIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newStorageBucketIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetStorageBucketIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetStorageBucketIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newStorageBucketIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -68,7 +70,7 @@ func MergeStorageBucketIamMemberDelete(existing, incoming Asset) Asset {
 
 func newStorageBucketIamAsset(
 	d TerraformResourceData,
-	config *Config,
+	config *transport_tpg.Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
@@ -90,7 +92,7 @@ func newStorageBucketIamAsset(
 	}}, nil
 }
 
-func FetchStorageBucketIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchStorageBucketIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("bucket"); !ok {
 		return Asset{}, ErrEmptyIdentityField

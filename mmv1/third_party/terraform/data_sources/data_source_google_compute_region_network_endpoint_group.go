@@ -23,7 +23,7 @@ func DataSourceGoogleComputeRegionNetworkEndpointGroup() *schema.Resource {
 }
 
 func dataSourceComputeRegionNetworkEndpointGroupRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	if name, ok := d.GetOk("name"); ok {
 		project, err := getProject(d, config)
 		if err != nil {

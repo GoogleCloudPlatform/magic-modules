@@ -1,9 +1,9 @@
 // ----------------------------------------------------------------------------
 //
-//     This file is copied here by Magic Modules. The code for building up a
-//     sql database instance object is copied from the manually implemented
-//     provider file:
-//     third_party/terraform/resources/resource_sql_database_instance.go.erb.go
+//	This file is copied here by Magic Modules. The code for building up a
+//	sql database instance object is copied from the manually implemented
+//	provider file:
+//	third_party/terraform/resources/resource_sql_database_instance.go.erb.go
 //
 // ----------------------------------------------------------------------------
 package google
@@ -26,7 +26,7 @@ func resourceConverterSQLDatabaseInstance() ResourceConverter {
 	}
 }
 
-func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return []Asset{}, err
@@ -47,7 +47,7 @@ func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) ([
 	}
 }
 
-func GetSQLDatabaseInstanceApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func GetSQLDatabaseInstanceApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err

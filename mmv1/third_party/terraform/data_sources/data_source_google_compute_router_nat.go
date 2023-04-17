@@ -21,7 +21,7 @@ func DataSourceGoogleComputeRouterNat() *schema.Resource {
 }
 
 func dataSourceGoogleComputeRouterNatRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	id, err := ReplaceVars(d, config, "{{project}}/{{region}}/{{router}}/{{name}}")
 	if err != nil {

@@ -88,7 +88,7 @@ func TestComputeInstanceGroupMigrateState_empty(t *testing.T) {
 
 	for tn, tc := range cases {
 		var is *terraform.InstanceState
-		var meta *Config
+		var meta *transport_tpg.Config
 
 		// should handle nil
 		is, err := resourceComputeInstanceGroupMigrateState(tc.StateVersion, is, meta)

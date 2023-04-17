@@ -9,7 +9,7 @@ import (
 )
 
 type TagsLocationOperationWaiter struct {
-	Config    *Config
+	Config    *transport_tpg.Config
 	UserAgent string
 	CommonOperationWaiter
 }
@@ -29,9 +29,9 @@ func (w *TagsLocationOperationWaiter) QueryOp() (interface{}, error) {
 	}
 }
 
-func createTagsLocationWaiter(config *Config, op map[string]interface{}, activity, userAgent string) (*TagsLocationOperationWaiter, error) {
+func createTagsLocationWaiter(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent string) (*TagsLocationOperationWaiter, error) {
 	w := &TagsLocationOperationWaiter{
-		Config:    config,
+		Config:    config,*transport_tpg.Config
 		UserAgent: userAgent,
 	}
 	if err := w.CommonOperationWaiter.SetOp(op); err != nil {
@@ -40,9 +40,9 @@ func createTagsLocationWaiter(config *Config, op map[string]interface{}, activit
 	return w, nil
 }
 
-func TagsLocationOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
+func TagsLocationOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
 	w, err := createTagsLocationWaiter(config, op, activity, userAgent)
-	if err != nil {
+	if err != nil {*transport_tpg.Config
 		return err
 	}
 	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
@@ -51,9 +51,9 @@ func TagsLocationOperationWaitTimeWithResponse(config *Config, op map[string]int
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
 }
 
-func TagsLocationOperationWaitTime(config *Config, op map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
+func TagsLocationOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
 	if val, ok := op["name"]; !ok || val == "" {
-		// This was a synchronous call - there is no operation to wait for.
+		// This was a synchronous call - there i*transport_tpg.Config wait for.
 		return nil
 	}
 	w, err := createTagsLocationWaiter(config, op, activity, userAgent)

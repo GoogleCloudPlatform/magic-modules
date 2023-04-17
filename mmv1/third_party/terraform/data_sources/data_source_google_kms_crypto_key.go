@@ -17,7 +17,7 @@ func DataSourceGoogleKmsCryptoKey() *schema.Resource {
 }
 
 func dataSourceGoogleKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	keyRingId, err := parseKmsKeyRingId(d.Get("key_ring").(string), config)
 	if err != nil {

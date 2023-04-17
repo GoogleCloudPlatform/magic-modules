@@ -21,11 +21,11 @@ var IamHealthcareFhirStoreSchema = map[string]*schema.Schema{
 type HealthcareFhirStoreIamUpdater struct {
 	resourceId string
 	d          TerraformResourceData
-	Config     *Config
+	Config     *transport_tpg.Config
 }
 
-func NewHealthcareFhirStoreIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	fhirStore := d.Get("fhir_store_id").(string)
+func NewHealthcareFhirStoreIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	fhirStore := d.Get("fhir_store_id").(string)*transport_tpg.Config
 	fhirStoreId, err := ParseHealthcareFhirStoreId(fhirStore, config)
 
 	if err != nil {
@@ -39,8 +39,8 @@ func NewHealthcareFhirStoreIamUpdater(d TerraformResourceData, config *Config) (
 	}, nil
 }
 
-func FhirStoreIdParseFunc(d *schema.ResourceData, config *Config) error {
-	fhirStoreId, err := ParseHealthcareFhirStoreId(d.Id(), config)
+func FhirStoreIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	fhirStoreId, err := ParseHealthcareFhirStoreId(d.Id(), c*transport_tpg.Config
 	if err != nil {
 		return err
 	}

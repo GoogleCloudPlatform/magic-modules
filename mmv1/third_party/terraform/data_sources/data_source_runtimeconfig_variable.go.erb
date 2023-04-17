@@ -23,7 +23,7 @@ func DataSourceGoogleRuntimeconfigVariable() *schema.Resource {
 }
 
 func dataSourceGoogleRuntimeconfigVariableRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	id, err := ReplaceVars(d, config, "projects/{{project}}/configs/{{parent}}/variables/{{name}}")
 	if err != nil {

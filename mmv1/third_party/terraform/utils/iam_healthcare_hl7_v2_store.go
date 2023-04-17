@@ -21,11 +21,11 @@ var IamHealthcareHl7V2StoreSchema = map[string]*schema.Schema{
 type HealthcareHl7V2StoreIamUpdater struct {
 	resourceId string
 	d          TerraformResourceData
-	Config     *Config
+	Config     *transport_tpg.Config
 }
 
-func NewHealthcareHl7V2StoreIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	hl7V2Store := d.Get("hl7_v2_store_id").(string)
+func NewHealthcareHl7V2StoreIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	hl7V2Store := d.Get("hl7_v2_store_id").(string)*transport_tpg.Config
 	hl7V2StoreId, err := ParseHealthcareHl7V2StoreId(hl7V2Store, config)
 
 	if err != nil {
@@ -39,8 +39,8 @@ func NewHealthcareHl7V2StoreIamUpdater(d TerraformResourceData, config *Config) 
 	}, nil
 }
 
-func Hl7V2StoreIdParseFunc(d *schema.ResourceData, config *Config) error {
-	hl7V2StoreId, err := ParseHealthcareHl7V2StoreId(d.Id(), config)
+func Hl7V2StoreIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	hl7V2StoreId, err := ParseHealthcareHl7V2StoreId(d.Id(), *transport_tpg.Config
 	if err != nil {
 		return err
 	}

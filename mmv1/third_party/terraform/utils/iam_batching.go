@@ -2,8 +2,9 @@ package google
 
 import (
 	"fmt"
-	"google.golang.org/api/cloudresourcemanager/v1"
 	"time"
+
+	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 	IamBatchingDisabled = false
 )
 
-func BatchRequestModifyIamPolicy(updater ResourceIamUpdater, modify iamPolicyModifyFunc, config *Config, reqDesc string) error {
+func BatchRequestModifyIamPolicy(updater ResourceIamUpdater, modify iamPolicyModifyFunc, config *transport_tpg.Config, reqDesc string) error {
 	batchKey := fmt.Sprintf(batchKeyTmplModifyIamPolicy, updater.GetMutexKey())
 
 	request := &BatchRequest{

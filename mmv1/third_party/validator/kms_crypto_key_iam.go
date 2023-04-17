@@ -33,15 +33,15 @@ func resourceConverterKmsCryptoKeyIamMember() ResourceConverter {
 	}
 }
 
-func GetKmsCryptoKeyIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetKmsCryptoKeyIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetKmsCryptoKeyIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetKmsCryptoKeyIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetKmsCryptoKeyIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetKmsCryptoKeyIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newKmsCryptoKeyIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -68,7 +68,7 @@ func MergeKmsCryptoKeyIamMemberDelete(existing, incoming Asset) Asset {
 
 func newKmsCryptoKeyIamAsset(
 	d TerraformResourceData,
-	config *Config,
+	config *transport_tpg.Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
@@ -91,7 +91,7 @@ func newKmsCryptoKeyIamAsset(
 	}}, nil
 }
 
-func FetchKmsCryptoKeyIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchKmsCryptoKeyIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("crypto_key_id"); !ok {
 		return Asset{}, ErrEmptyIdentityField

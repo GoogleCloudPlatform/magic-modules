@@ -10,7 +10,7 @@ import (
 )
 
 type DatastreamOperationWaiter struct {
-	Config    *Config
+	Config    *transport_tpg.Config
 	UserAgent string
 	Project   string
 	Op        datastream.Operation
@@ -42,8 +42,8 @@ func (w *DatastreamOperationWaiter) SetOp(op interface{}) error {
 	return nil
 }
 
-func createDatastreamWaiter(config *Config, op map[string]interface{}, project, activity, userAgent string) (*DatastreamOperationWaiter, error) {
-	w := &DatastreamOperationWaiter{
+func createDatastreamWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*DatastreamOperationWaiter, error) {
+	w := &DatastreamOperationWaiter{*transport_tpg.Config
 		Config:    config,
 		UserAgent: userAgent,
 		Project:   project,
@@ -55,8 +55,8 @@ func createDatastreamWaiter(config *Config, op map[string]interface{}, project, 
 }
 
 // nolint: deadcode,unused
-func DatastreamOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
-	w, err := createDatastreamWaiter(config, op, project, activity, userAgent)
+func DatastreamOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+	w, err := createDatastreamWaiter(config, op, projec*transport_tpg.ConfigAgent)
 	if err != nil {
 		return err
 	}
@@ -66,8 +66,8 @@ func DatastreamOperationWaitTimeWithResponse(config *Config, op map[string]inter
 	return json.Unmarshal([]byte(w.Op.Response), response)
 }
 
-func DatastreamOperationWaitTime(config *Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
-	if val, ok := op["name"]; !ok || val == "" {
+func DatastreamOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+	if val, ok := op["name"]; !ok || val ==*transport_tpg.Config
 		// This was a synchronous call - there is no operation to wait for.
 		return nil
 	}

@@ -6,6 +6,6 @@ import (
 	storage "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/storage"
 )
 
-func forceDestroyBucketObjects(d *schema.ResourceData, config *Config, bucket *storage.Bucket) error {
+func forceDestroyBucketObjects(d *schema.ResourceData, config *transport_tpg.Config, bucket *storage.Bucket) error {
 	return nil
 }

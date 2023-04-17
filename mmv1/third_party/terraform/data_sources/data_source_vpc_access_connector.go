@@ -19,7 +19,7 @@ func DataSourceVPCAccessConnector() *schema.Resource {
 }
 
 func dataSourceVPCAccessConnectorRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	id, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/connectors/{{name}}")
 	if err != nil {

@@ -20,11 +20,11 @@ type BillingAccountLoggingExclusionUpdater struct {
 	resourceType string
 	resourceId   string
 	userAgent    string
-	Config       *Config
+	Config       *transport_tpg.Config
 }
 
-func NewBillingAccountLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (ResourceLoggingExclusionUpdater, error) {
-	billingAccount := d.Get("billing_account").(string)
+func NewBillingAccountLoggingExclusionUpdater(d *schema.ResourceData, config *transport_tpg.Config) (ResourceLoggingExclusionUpdater, error) {
+	billingAccount := d.Get("billing_account").(string)*transport_tpg.Config
 
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -39,8 +39,8 @@ func NewBillingAccountLoggingExclusionUpdater(d *schema.ResourceData, config *Co
 	}, nil
 }
 
-func BillingAccountLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) error {
-	loggingExclusionId, err := parseLoggingExclusionId(d.Id())
+func BillingAccountLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
+	loggingExclusionId, err := parseLoggingExclusionId(d.Id())*transport_tpg.Config
 	if err != nil {
 		return err
 	}

@@ -18,7 +18,7 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 		ExpectedError       bool
 		ExpectedTerraformId string
 		ExpectedCryptoKeyId string
-		Config              *Config
+		Config              *transport_tpg.Config
 	}{
 		"id is in project/location/keyRingName/cryptoKeyName format": {
 			ImportId:            "test-project/us-central1/test-key-ring/test-key-name",

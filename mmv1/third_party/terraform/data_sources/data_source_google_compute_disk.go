@@ -20,7 +20,7 @@ func DataSourceGoogleComputeDisk() *schema.Resource {
 }
 
 func dataSourceGoogleComputeDiskRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	id, err := ReplaceVars(d, config, "projects/{{project}}/zones/{{zone}}/disks/{{name}}")
 	if err != nil {

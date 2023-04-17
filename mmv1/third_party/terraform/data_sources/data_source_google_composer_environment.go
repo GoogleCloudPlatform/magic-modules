@@ -22,7 +22,7 @@ func DataSourceGoogleComposerEnvironment() *schema.Resource {
 }
 
 func dataSourceGoogleComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	project, err := getProject(d, config)
 	if err != nil {
 		return err

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
 	"google.golang.org/api/storage/v1"
 )
@@ -107,7 +108,7 @@ func getRoleEntityPair(role_entity string) (*RoleEntity, error) {
 }
 
 func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -211,7 +212,7 @@ func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Confignfig)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -254,7 +255,7 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Confignfig)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -352,7 +353,7 @@ func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Confignfig)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

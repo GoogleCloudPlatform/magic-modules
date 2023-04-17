@@ -136,7 +136,7 @@ var serviceAccountDisplay = "Bootstrapped Service Account for Terraform tests"
 // Some tests need a second service account, other than the test runner, to assert functionality on.
 // This provides a well-known service account that can be used when dynamically creating a service
 // account isn't an option.
-func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAccount, error) {
+func getOrCreateServiceAccount(config *transport_tpg.Config, project string) (*iam.ServiceAccount, error) {
 	name := fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, serviceAccountEmail, project)
 	log.Printf("[DEBUG] Verifying %s as bootstrapped service account.\n", name)
 
@@ -168,8 +168,8 @@ func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAcco
 // on a different service account. Granting permissions takes time and there is no operation to wait on
 // so instead this creates a single service account once per test-suite with the correct permissions.
 // The first time this test is run it will fail, but subsequent runs will succeed.
-func impersonationServiceAccountPermissions(config *Config, sa *iam.ServiceAccount, testRunner string) error {
-	log.Printf("[DEBUG] Setting service account permissions.\n")
+func impersonationServiceAccountPermissions(config *transport_tpg.Config, sa *iam.ServiceAccount, testRunner string) error {
+	log.Printf("[DEBUG] Setting service account permis*transport_tpg.Config
 	policy := iam.Policy{
 		Bindings: []*iam.Binding{},
 	}
@@ -535,8 +535,8 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 }
 
 // BootstrapConfig returns a Config pulled from the environment.
-func BootstrapConfig(t *testing.T) *Config {
-	if v := os.Getenv("TF_ACC"); v == "" {
+func BootstrapConfig(t *testing.T) *transport_tpg.Config {
+	if v := os.Getenv("TF_ACC"); v == *transport_tpg.Config
 		t.Skip("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
 		return nil
 	}

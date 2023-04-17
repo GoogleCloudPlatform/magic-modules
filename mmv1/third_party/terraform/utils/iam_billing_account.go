@@ -20,19 +20,19 @@ var IamBillingAccountSchema = map[string]*schema.Schema{
 type BillingAccountIamUpdater struct {
 	billingAccountId string
 	d                TerraformResourceData
-	Config           *Config
+	Config           *transport_tpg.Config
 }
 
-func NewBillingAccountIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	return &BillingAccountIamUpdater{
+func NewBillingAccountIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	return &BillingAccountIamUpdater{*transport_tpg.Config
 		billingAccountId: canonicalBillingAccountId(d.Get("billing_account_id").(string)),
 		d:                d,
 		Config:           config,
 	}, nil
 }
 
-func BillingAccountIdParseFunc(d *schema.ResourceData, _ *Config) error {
-	if err := d.Set("billing_account_id", d.Id()); err != nil {
+func BillingAccountIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
+	if err := d.Set("billing_account_id", d.Id()); err != ni*transport_tpg.Config
 		return fmt.Errorf("Error setting billing_account_id: %s", err)
 	}
 	return nil
@@ -104,8 +104,8 @@ func billingToResourceManagerPolicy(p *cloudbilling.Policy) (*cloudresourcemanag
 }
 
 // Retrieve the existing IAM Policy for a billing account
-func getBillingAccountIamPolicyByBillingAccountName(resource string, config *Config, userAgent string) (*cloudresourcemanager.Policy, error) {
-	p, err := config.NewBillingClient(userAgent).BillingAccounts.GetIamPolicy("billingAccounts/" + resource).Do()
+func getBillingAccountIamPolicyByBillingAccountName(resource string, config *transport_tpg.Config, userAgent string) (*cloudresourcemanager.Policy, error) {
+	p, err := config.NewBillingClient(userAgent).BillingAccounts.GetIamPolicy("*transport_tpg.Config + resource).Do()
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for billing account %q: {{err}}", resource), err)

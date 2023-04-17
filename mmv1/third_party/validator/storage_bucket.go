@@ -25,7 +25,7 @@ func resourceConverterStorageBucket() ResourceConverter {
 	}
 }
 
-func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetStorageBucketCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
 		return []Asset{}, err
@@ -46,7 +46,7 @@ func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) ([]Asset
 	}
 }
 
-func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func GetStorageBucketApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	project, _ := getProject(d, config)
 
 	// Get the bucket and location

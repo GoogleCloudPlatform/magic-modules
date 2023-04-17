@@ -13,7 +13,7 @@ func TestParseGlobalFieldValue(t *testing.T) {
 		IsEmptyValid         bool
 		ProjectSchemaField   string
 		ProjectSchemaValue   string
-		Config               *Config
+		Config               *transport_tpg.Config
 	}{
 		"network is a full self link": {
 			FieldValue:           "https://www.googleapis.com/compute/v1/projects/myproject/global/networks/my-network",
@@ -94,7 +94,7 @@ func TestParseZonalFieldValue(t *testing.T) {
 		ProjectSchemaValue   string
 		ZoneSchemaField      string
 		ZoneSchemaValue      string
-		Config               *Config
+		Config               *transport_tpg.Confignfig
 	}{
 		"instance is a full self link": {
 			FieldValue:           "https://www.googleapis.com/compute/v1/projects/myproject/zones/us-central1-b/instances/my-instance",
@@ -241,7 +241,7 @@ func TestParseRegionalFieldValue(t *testing.T) {
 		RegionSchemaValue    string
 		ZoneSchemaField      string
 		ZoneSchemaValue      string
-		Config               *Config
+		Config               *transport_tpg.Confignfig
 	}{
 		"subnetwork is a full self link": {
 			FieldValue:           "https://www.googleapis.com/compute/v1/projects/myproject/regions/us-central1/subnetworks/my-subnetwork",
@@ -363,7 +363,7 @@ func TestParseProjectFieldValue(t *testing.T) {
 		IsEmptyValid         bool
 		ProjectSchemaField   string
 		ProjectSchemaValue   string
-		Config               *Config
+		Config               *transport_tpg.Confignfig
 	}{
 		"instance is a full self link": {
 			FieldValue:           "https://www.googleapis.com/compute/v1/projects/myproject/instances/my-instance",

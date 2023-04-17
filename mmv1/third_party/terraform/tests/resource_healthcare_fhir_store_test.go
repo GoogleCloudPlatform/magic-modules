@@ -17,7 +17,7 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 		ExpectedError       bool
 		ExpectedTerraformId string
 		ExpectedFhirStoreId string
-		Config              *Config
+		Config              *transport_tpg.Config
 	}{
 		"id is in project/location/datasetName/fhirStoreName format": {
 			ImportId:            "test-project/us-central1/test-dataset/test-store-name",

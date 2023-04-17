@@ -18,7 +18,7 @@ func DataSourceGoogleIapClient() *schema.Resource {
 }
 
 func dataSourceGoogleIapClientRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	id, err := ReplaceVars(d, config, "{{brand}}/identityAwareProxyClients/{{client_id}}")
 	if err != nil {

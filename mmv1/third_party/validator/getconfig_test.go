@@ -9,15 +9,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type configAttrGetter func(cfg *Config) string
+type configAttrGetter func(cfg *transport_tpg.Config) string
 
-func getCredentials(cfg *Config) string {
+func getCredentials(cfg *transport_tpg.Config) string {
 	return cfg.Credentials
 }
-func getAccessToken(cfg *Config) string {
+func getAccessToken(cfg *transport_tpg.Config) string {
 	return cfg.AccessToken
 }
-func getImpersonateServiceAccount(cfg *Config) string {
+func getImpersonateServiceAccount(cfg *transport_tpg.Config) string {
 	return cfg.ImpersonateServiceAccount
 }
 

@@ -12,7 +12,7 @@ import (
 
 // CA related utilities.
 
-func enableCA(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+func enableCA(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
 	enableUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:enable")
 	if err != nil {
 		return err
@@ -35,8 +35,8 @@ func enableCA(config *Config, d *schema.ResourceData, project string, billingPro
 	return nil
 }
 
-func disableCA(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	disableUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
+func disableCA(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+	disableUrl, err := Re*transport_tpg.Configig, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
 	if err != nil {
 		return err
 	}
@@ -58,8 +58,8 @@ func disableCA(config *Config, d *schema.ResourceData, project string, billingPr
 	return nil
 }
 
-func activateSubCAWithThirdPartyIssuer(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	// 1. prepare parameters
+func activateSubCAWithThirdPartyIssuer(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+	// 1. prepare parameters*transport_tpg.Config
 	signedCACert := d.Get("pem_ca_certificate").(string)
 
 	sc, ok := d.GetOk("subordinate_config")
@@ -112,8 +112,8 @@ func activateSubCAWithThirdPartyIssuer(config *Config, d *schema.ResourceData, p
 	return nil
 }
 
-func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	// 1. get issuer
+func activateSubCAWithFirstPartyIssuer(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+	// 1. get issuer*transport_tpg.Config
 	sc, ok := d.GetOk("subordinate_config")
 	if !ok {
 		return fmt.Errorf("subordinate_config is required to activate subordinate CA")

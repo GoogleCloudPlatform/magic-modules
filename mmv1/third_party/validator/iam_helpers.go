@@ -196,7 +196,7 @@ func mergeDeleteAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBind
 func fetchIamPolicy(
 	newUpdaterFunc newResourceIamUpdaterFunc,
 	d TerraformResourceData,
-	config *Config,
+	config *transport_tpg.Config,
 	assetNameTmpl string,
 	assetType string,
 ) (Asset, error) {

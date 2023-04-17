@@ -1,6 +1,8 @@
 package google
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
 func DataSourceGoogleComputeHealthCheck() *schema.Resource {
 	// Generate datasource schema from resource
@@ -19,7 +21,7 @@ func DataSourceGoogleComputeHealthCheck() *schema.Resource {
 }
 
 func dataSourceGoogleComputeHealthCheckRead(d *schema.ResourceData, meta interface{}) error {
-	id, err := ReplaceVars(d, meta.(*Config), "projects/{{project}}/global/healthChecks/{{name}}")
+	id, err := ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{project}}/global/healthChecks/{{name}}")
 	if err != nil {
 		return err
 	}

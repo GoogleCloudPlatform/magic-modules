@@ -28,11 +28,11 @@ type BigtableInstanceIamUpdater struct {
 	project  string
 	instance string
 	d        TerraformResourceData
-	Config   *Config
+	Config   *transport_tpg.Config
 }
 
-func NewBigtableInstanceUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+func NewBigtableInstanceUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	project, err := getProject(d, config)*transport_tpg.Config
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +49,8 @@ func NewBigtableInstanceUpdater(d TerraformResourceData, config *Config) (Resour
 	}, nil
 }
 
-func BigtableInstanceIdParseFunc(d *schema.ResourceData, config *Config) error {
-	fv, err := parseProjectFieldValue("instances", d.Id(), "project", d, config, false)
+func BigtableInstanceIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	fv, err := parseProjectFieldValue("instances", d.Id(), "project*transport_tpg.Configse)
 	if err != nil {
 		return err
 	}

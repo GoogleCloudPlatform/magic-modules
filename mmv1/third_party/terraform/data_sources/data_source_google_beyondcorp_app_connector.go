@@ -22,7 +22,7 @@ func DataSourceGoogleBeyondcorpAppConnector() *schema.Resource {
 }
 
 func dataSourceGoogleBeyondcorpAppConnectorRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	name := d.Get("name").(string)
 

@@ -16,7 +16,7 @@ var loggingBillingAccountBucketConfigSchema = map[string]*schema.Schema{
 	},
 }
 
-func billingAccountBucketConfigID(d *schema.ResourceData, config *Config) (string, error) {
+func billingAccountBucketConfigID(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
 	billingAccount := d.Get("billing_account").(string)
 	location := d.Get("location").(string)
 	bucketID := d.Get("bucket_id").(string)

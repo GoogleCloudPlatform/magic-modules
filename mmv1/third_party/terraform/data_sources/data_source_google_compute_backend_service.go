@@ -22,7 +22,7 @@ func DataSourceGoogleComputeBackendService() *schema.Resource {
 }
 
 func dataSourceComputeBackendServiceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	serviceName := d.Get("name").(string)
 

@@ -24,7 +24,7 @@ func TestParseImportId(t *testing.T) {
 	cases := map[string]struct {
 		ImportId             string
 		IdRegexes            []string
-		Config               *Config
+		Config               *transport_tpg.Config
 		ExpectedSchemaValues map[string]interface{}
 		ExpectError          bool
 	}{

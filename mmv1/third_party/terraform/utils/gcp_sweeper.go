@@ -22,7 +22,7 @@ var testResourcePrefixes = []string{
 
 // SharedConfigForRegion returns a common config setup needed for the sweeper
 // functions for a given region
-func SharedConfigForRegion(region string) (*Config, error) {
+func SharedConfigForRegion(region string) (*transport_tpg.Config, error) {
 	project := GetTestProjectFromEnv()
 	if project == "" {
 		return nil, fmt.Errorf("set project using any of these env variables %v", ProjectEnvVars)

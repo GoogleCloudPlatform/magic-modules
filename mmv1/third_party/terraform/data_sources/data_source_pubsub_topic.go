@@ -19,7 +19,7 @@ func DataSourceGooglePubsubTopic() *schema.Resource {
 }
 
 func dataSourceGooglePubsubTopicRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	id, err := ReplaceVars(d, config, "projects/{{project}}/topics/{{name}}")
 	if err != nil {

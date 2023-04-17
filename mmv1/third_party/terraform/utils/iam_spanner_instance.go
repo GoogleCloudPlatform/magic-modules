@@ -30,11 +30,11 @@ type SpannerInstanceIamUpdater struct {
 	project  string
 	instance string
 	d        TerraformResourceData
-	Config   *Config
+	Config   *transport_tpg.Config
 }
 
-func NewSpannerInstanceIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+func NewSpannerInstanceIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	project, err := getProject(d, config)*transport_tpg.Config
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +47,8 @@ func NewSpannerInstanceIamUpdater(d TerraformResourceData, config *Config) (Reso
 	}, nil
 }
 
-func SpannerInstanceIdParseFunc(d *schema.ResourceData, config *Config) error {
-	id, err := extractSpannerInstanceId(d.Id())
+func SpannerInstanceIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	id, err := extractSpannerInstanceId(d.Id())*transport_tpg.Config
 	if err != nil {
 		return err
 	}

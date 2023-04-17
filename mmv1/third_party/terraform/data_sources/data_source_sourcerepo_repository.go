@@ -21,7 +21,7 @@ func DataSourceGoogleSourceRepoRepository() *schema.Resource {
 
 func dataSourceGoogleSourceRepoRepositoryRead(d *schema.ResourceData, meta interface{}) error {
 
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	id, err := ReplaceVars(d, config, "projects/{{project}}/repos/{{name}}")
 	if err != nil {

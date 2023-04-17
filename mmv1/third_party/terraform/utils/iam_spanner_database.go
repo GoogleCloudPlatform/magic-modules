@@ -34,11 +34,11 @@ type SpannerDatabaseIamUpdater struct {
 	instance string
 	database string
 	d        TerraformResourceData
-	Config   *Config
+	Config   *transport_tpg.Config
 }
 
-func NewSpannerDatabaseIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	project, err := getProject(d, config)
+func NewSpannerDatabaseIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	project, err := getProject(d, config)*transport_tpg.Config
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +52,8 @@ func NewSpannerDatabaseIamUpdater(d TerraformResourceData, config *Config) (Reso
 	}, nil
 }
 
-func SpannerDatabaseIdParseFunc(d *schema.ResourceData, config *Config) error {
-	return ParseImportId([]string{"(?P<project>[^/]+)/(?P<instance>[^/]+)/(?P<database>[^/]+)"}, d, config)
+func SpannerDatabaseIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	return ParseImportId([]string{"(?P<project>[^/]+)/(?P<instance*transport_tpg.Configase>[^/]+)"}, d, config)
 }
 
 func (u *SpannerDatabaseIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {

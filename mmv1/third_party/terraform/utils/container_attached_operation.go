@@ -7,7 +7,7 @@ import (
 )
 
 type ContainerAttachedOperationWaiter struct {
-	Config    *Config
+	Config    *transport_tpg.Config
 	UserAgent string
 	Project   string
 	CommonOperationWaiter
@@ -26,9 +26,9 @@ func (w *ContainerAttachedOperationWaiter) QueryOp() (interface{}, error) {
 	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
-func createContainerAttachedWaiter(config *Config, op map[string]interface{}, project, activity, userAgent string) (*ContainerAttachedOperationWaiter, error) {
+func createContainerAttachedWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*ContainerAttachedOperationWaiter, error) {
 	w := &ContainerAttachedOperationWaiter{
-		Config:    config,
+		Config:    config,*transport_tpg.Config
 		UserAgent: userAgent,
 		Project:   project,
 	}
@@ -39,9 +39,9 @@ func createContainerAttachedWaiter(config *Config, op map[string]interface{}, pr
 }
 
 // nolint: deadcode,unused
-func ContainerAttachedOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func ContainerAttachedOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	w, err := createContainerAttachedWaiter(config, op, project, activity, userAgent)
-	if err != nil {
+	if err != nil {*transport_tpg.Config
 		return err
 	}
 	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
@@ -50,9 +50,9 @@ func ContainerAttachedOperationWaitTimeWithResponse(config *Config, op map[strin
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
 }
 
-func ContainerAttachedOperationWaitTime(config *Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func ContainerAttachedOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	if val, ok := op["name"]; !ok || val == "" {
-		// This was a synchronous call - there is no operation to wait for.
+		// This was a synchronous call - there is no *transport_tpg.Config for.
 		return nil
 	}
 	w, err := createContainerAttachedWaiter(config, op, project, activity, userAgent)

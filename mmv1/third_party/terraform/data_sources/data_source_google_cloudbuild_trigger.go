@@ -22,7 +22,7 @@ func DataSourceGoogleCloudBuildTrigger() *schema.Resource {
 }
 
 func dataSourceGoogleCloudBuildTriggerRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	id, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}")
 	if err != nil {

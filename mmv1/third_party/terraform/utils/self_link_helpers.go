@@ -100,15 +100,15 @@ const (
 	Global
 )
 
-func GetZonalResourcePropertiesFromSelfLinkOrSchema(d *schema.ResourceData, config *Config) (string, string, string, error) {
+func GetZonalResourcePropertiesFromSelfLinkOrSchema(d *schema.ResourceData, config *transport_tpg.Config) (string, string, string, error) {
 	return getResourcePropertiesFromSelfLinkOrSchema(d, config, Zonal)
 }
 
-func GetRegionalResourcePropertiesFromSelfLinkOrSchema(d *schema.ResourceData, config *Config) (string, string, string, error) {
+func GetRegionalResourcePropertiesFromSelfLinkOrSchema(d *schema.ResourceData, config *transport_tpg.Config) (string, string, string, error) {
 	return getResourcePropertiesFromSelfLinkOrSchema(d, config, Regional)
 }
 
-func getResourcePropertiesFromSelfLinkOrSchema(d *schema.ResourceData, config *Config, locationType LocationType) (string, string, string, error) {
+func getResourcePropertiesFromSelfLinkOrSchema(d *schema.ResourceData, config *transport_tpg.Config, locationType LocationType) (string, string, string, error) {
 	if selfLink, ok := d.GetOk("self_link"); ok {
 		return GetLocationalResourcePropertiesFromSelfLinkString(selfLink.(string))
 	} else {

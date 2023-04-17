@@ -21,11 +21,11 @@ var IamHealthcareDicomStoreSchema = map[string]*schema.Schema{
 type HealthcareDicomStoreIamUpdater struct {
 	resourceId string
 	d          TerraformResourceData
-	Config     *Config
+	Config     *transport_tpg.Config
 }
 
-func NewHealthcareDicomStoreIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	dicomStore := d.Get("dicom_store_id").(string)
+func NewHealthcareDicomStoreIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	dicomStore := d.Get("dicom_store_id").(string)*transport_tpg.Config
 	dicomStoreId, err := ParseHealthcareDicomStoreId(dicomStore, config)
 
 	if err != nil {
@@ -39,8 +39,8 @@ func NewHealthcareDicomStoreIamUpdater(d TerraformResourceData, config *Config) 
 	}, nil
 }
 
-func DicomStoreIdParseFunc(d *schema.ResourceData, config *Config) error {
-	dicomStoreId, err := ParseHealthcareDicomStoreId(d.Id(), config)
+func DicomStoreIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	dicomStoreId, err := ParseHealthcareDicomStoreId(d.Id(), *transport_tpg.Config
 	if err != nil {
 		return err
 	}

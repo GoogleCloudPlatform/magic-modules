@@ -16,7 +16,7 @@ const (
 // BatchRequestEnableServices can be used to batch requests to enable services
 // across resource nodes, i.e. to batch creation of several
 // google_project_service(s) resources.
-func BatchRequestEnableService(service string, project string, d *schema.ResourceData, config *Config) error {
+func BatchRequestEnableService(service string, project string, d *schema.ResourceData, config *transport_tpg.Config) error {
 	// Renamed service create calls are relatively likely to fail, so don't try to batch the call.
 	if altName, ok := renamedServicesByOldAndNewServiceNames[service]; ok {
 		return tryEnableRenamedService(service, altName, project, d, config)
@@ -48,8 +48,8 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 	return err
 }
 
-func tryEnableRenamedService(service, altName string, project string, d *schema.ResourceData, config *Config) error {
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+func tryEnableRenamedService(service, altName string, project string, d *schema.ResourceData, config *transport_tpg.Config) error {
+	userAgent, err := generateUserAgentString(d, config.UserAgent)*transport_tpg.Config
 	if err != nil {
 		return err
 	}
@@ -75,8 +75,8 @@ func tryEnableRenamedService(service, altName string, project string, d *schema.
 	return nil
 }
 
-func BatchRequestReadServices(project string, d *schema.ResourceData, config *Config) (interface{}, error) {
-	userAgent, err := generateUserAgentString(d, config.UserAgent)
+func BatchRequestReadServices(project string, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+	userAgent, err := generateUserAgentString(d, config.UserAgent)*transport_tpg.Config
 	if err != nil {
 		return nil, err
 	}
@@ -115,8 +115,8 @@ func combineServiceUsageServicesBatches(srvsRaw interface{}, toAddRaw interface{
 	return append(srvs, toAdd...), nil
 }
 
-func sendBatchFuncEnableServices(config *Config, userAgent, billingProject string, timeout time.Duration) BatcherSendFunc {
-	return func(project string, toEnableRaw interface{}) (interface{}, error) {
+func sendBatchFuncEnableServices(config *transport_tpg.Config, userAgent, billingProject string, timeout time.Duration) BatcherSendFunc {
+	return func(project string, toEnableRaw*transport_tpg.Configterface{}, error) {
 		toEnable, ok := toEnableRaw.([]string)
 		if !ok {
 			return nil, fmt.Errorf("Expected batch body type to be []string, got %v. This is a provider error.", toEnableRaw)
@@ -125,8 +125,8 @@ func sendBatchFuncEnableServices(config *Config, userAgent, billingProject strin
 	}
 }
 
-func sendListServices(config *Config, billingProject, userAgent string, timeout time.Duration) BatcherSendFunc {
-	return func(project string, _ interface{}) (interface{}, error) {
+func sendListServices(config *transport_tpg.Config, billingProject, userAgent string, timeout time.Duration) BatcherSendFunc {
+	return func(project string, *transport_tpg.Confignterface{}, error) {
 		return ListCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 	}
 }

@@ -25,7 +25,7 @@ func (s *KmsKeyRingId) TerraformId() string {
 	return fmt.Sprintf("%s/%s/%s", s.Project, s.Location, s.Name)
 }
 
-func parseKmsKeyRingId(id string, config *Config) (*KmsKeyRingId, error) {
+func parseKmsKeyRingId(id string, config *transport_tpg.Config) (*KmsKeyRingId, error) {
 	parts := strings.Split(id, "/")
 
 	KeyRingIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})$")
@@ -141,8 +141,8 @@ func kmsCryptoKeyNextRotation(now time.Time, period string) (result string, err 
 	return
 }
 
-func ParseKmsCryptoKeyId(id string, config *Config) (*KmsCryptoKeyId, error) {
-	parts := strings.Split(id, "/")
+func ParseKmsCryptoKeyId(id string, config *transport_tpg.Config) (*KmsCryptoKeyId, error) {
+	parts := strings.Split(id, "/")*transport_tpg.Config
 
 	cryptoKeyIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})/([a-zA-Z0-9_-]{1,63})$")
 	cryptoKeyIdWithoutProjectRegex := regexp.MustCompile("^([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})/([a-zA-Z0-9_-]{1,63})$")
@@ -187,8 +187,8 @@ func ParseKmsCryptoKeyId(id string, config *Config) (*KmsCryptoKeyId, error) {
 
 	return nil, fmt.Errorf("Invalid CryptoKey id format, expecting `{projectId}/{locationId}/{KeyringName}/{cryptoKeyName}` or `{locationId}/{keyRingName}/{cryptoKeyName}, got id: %s`", id)
 }
-func parseKmsCryptoKeyVersionId(id string, config *Config) (*kmsCryptoKeyVersionId, error) {
-	cryptoKeyVersionRelativeLinkRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/keyRings/([a-zA-Z0-9_-]{1,63})/cryptoKeys/([a-zA-Z0-9_-]{1,63})/cryptoKeyVersions/([a-zA-Z0-9_-]{1,63})$")
+func parseKmsCryptoKeyVersionId(id string, config *transport_tpg.Config) (*kmsCryptoKeyVersionId, error) {
+	cryptoKeyVersionRelativeLinkRegex := regexp.MustC*transport_tpg.Config/(" + ProjectRegex + ")/locations/([a-z0-9-]+)/keyRings/([a-zA-Z0-9_-]{1,63})/cryptoKeys/([a-zA-Z0-9_-]{1,63})/cryptoKeyVersions/([a-zA-Z0-9_-]{1,63})$")
 
 	if parts := cryptoKeyVersionRelativeLinkRegex.FindStringSubmatch(id); parts != nil {
 		return &kmsCryptoKeyVersionId{
@@ -206,8 +206,8 @@ func parseKmsCryptoKeyVersionId(id string, config *Config) (*kmsCryptoKeyVersion
 	return nil, fmt.Errorf("Invalid CryptoKeyVersion id format, expecting `{projectId}/{locationId}/{KeyringName}/{cryptoKeyName}/{cryptoKeyVersion}` or `{locationId}/{keyRingName}/{cryptoKeyName}/{cryptoKeyVersion}, got id: %s`", id)
 }
 
-func clearCryptoKeyVersions(cryptoKeyId *KmsCryptoKeyId, userAgent string, config *Config) error {
-	versionsClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
+func clearCryptoKeyVersions(cryptoKeyId *KmsCryptoKeyId, userAgent string, config *transport_tpg.Config) error {
+	versionsClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.Cryp*transport_tpg.Configersions
 
 	listCall := versionsClient.List(cryptoKeyId.CryptoKeyId())
 	if config.UserProjectOverride {
@@ -238,8 +238,8 @@ func clearCryptoKeyVersions(cryptoKeyId *KmsCryptoKeyId, userAgent string, confi
 	return nil
 }
 
-func deleteCryptoKeyVersions(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema.ResourceData, userAgent string, config *Config) error {
-	versionsClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
+func deleteCryptoKeyVersions(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schema.ResourceData, userAgent string, config *transport_tpg.Config) error {
+	versionsClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions*transport_tpg.Config
 	request := &cloudkms.DestroyCryptoKeyVersionRequest{}
 	destroyCall := versionsClient.Destroy(cryptoKeyVersionId.Name, request)
 	if config.UserProjectOverride {
@@ -253,8 +253,8 @@ func deleteCryptoKeyVersions(cryptoKeyVersionId *kmsCryptoKeyVersionId, d *schem
 	return nil
 }
 
-func disableCryptoKeyRotation(cryptoKeyId *KmsCryptoKeyId, userAgent string, config *Config) error {
-	keyClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys
+func disableCryptoKeyRotation(cryptoKeyId *KmsCryptoKeyId, userAgent string, config *transport_tpg.Config) error {
+	keyClient := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys*transport_tpg.Config
 	patchCall := keyClient.Patch(cryptoKeyId.CryptoKeyId(), &cloudkms.CryptoKey{
 		NullFields: []string{"rotationPeriod", "nextRotationTime"},
 	}).

@@ -21,11 +21,11 @@ type ProjectLoggingExclusionUpdater struct {
 	resourceType string
 	resourceId   string
 	userAgent    string
-	Config       *Config
+	Config       *transport_tpg.Config
 }
 
-func NewProjectLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (ResourceLoggingExclusionUpdater, error) {
-	pid, err := getProject(d, config)
+func NewProjectLoggingExclusionUpdater(d *schema.ResourceData, config *transport_tpg.Config) (ResourceLoggingExclusionUpdater, error) {
+	pid, err := getProject(d, config)*transport_tpg.Config
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +43,8 @@ func NewProjectLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (
 	}, nil
 }
 
-func ProjectLoggingExclusionIdParseFunc(d *schema.ResourceData, config *Config) error {
-	loggingExclusionId, err := parseLoggingExclusionId(d.Id())
+func ProjectLoggingExclusionIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	loggingExclusionId, err := parseLoggingExclusionId(d.Id())*transport_tpg.Config
 	if err != nil {
 		return err
 	}

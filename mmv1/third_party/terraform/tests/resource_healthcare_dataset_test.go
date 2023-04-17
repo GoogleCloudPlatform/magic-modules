@@ -16,7 +16,7 @@ func TestAccHealthcareDatasetIdParsing(t *testing.T) {
 		ExpectedError       bool
 		ExpectedTerraformId string
 		ExpectedDatasetId   string
-		Config              *Config
+		Config              *transport_tpg.Config
 	}{
 		"id is in project/location/datasetName format": {
 			ImportId:            "test-project/us-central1/test-dataset",

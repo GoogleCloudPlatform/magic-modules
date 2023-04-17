@@ -44,7 +44,7 @@ func TestContainerNodePoolMigrateState(t *testing.T) {
 
 func TestContainerNodePoolMigrateState_empty(t *testing.T) {
 	var is *terraform.InstanceState
-	var meta *Config
+	var meta *transport_tpg.Config
 
 	// should handle nil
 	is, err := resourceContainerNodePoolMigrateState(0, is, meta)

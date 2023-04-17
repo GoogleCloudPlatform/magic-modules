@@ -22,7 +22,7 @@ func DataSourceGoogleComputeGlobalForwardingRule() *schema.Resource {
 }
 
 func dataSourceGoogleComputeGlobalForwardingRuleRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	name := d.Get("name").(string)
 

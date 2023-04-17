@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 const (
@@ -179,7 +180,7 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 }
 
 func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -241,7 +242,7 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Confignfig)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -375,7 +376,7 @@ func gcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]int
 }
 
 func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Confignfig)
 
 	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
 		// Allows for the GC policy to be abandoned without deletion to avoid possible

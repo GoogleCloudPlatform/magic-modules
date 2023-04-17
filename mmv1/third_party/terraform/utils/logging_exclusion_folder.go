@@ -21,11 +21,11 @@ type FolderLoggingExclusionUpdater struct {
 	resourceType string
 	resourceId   string
 	userAgent    string
-	Config       *Config
+	Config       *transport_tpg.Config
 }
 
-func NewFolderLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (ResourceLoggingExclusionUpdater, error) {
-	folder := parseFolderId(d.Get("folder"))
+func NewFolderLoggingExclusionUpdater(d *schema.ResourceData, config *transport_tpg.Config) (ResourceLoggingExclusionUpdater, error) {
+	folder := parseFolderId(d.Get("folder"))*transport_tpg.Config
 
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -40,8 +40,8 @@ func NewFolderLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (R
 	}, nil
 }
 
-func FolderLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) error {
-	loggingExclusionId, err := parseLoggingExclusionId(d.Id())
+func FolderLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
+	loggingExclusionId, err := parseLoggingExclusionId(d.Id())*transport_tpg.Config
 	if err != nil {
 		return err
 	}

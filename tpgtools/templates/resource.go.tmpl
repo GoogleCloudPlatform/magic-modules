@@ -204,7 +204,7 @@ func {{$.PathType}}{{$v.PackagePath}}Schema() *schema.Resource {
 {{ end }}
 
 func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 {{- range $v := .Properties }}
 	{{- if and ($v.IdentityGetter) ($v.Settable) }}
@@ -330,7 +330,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 }
 
 func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 {{- range $v := .Properties }}
 	{{- if $v.IdentityGetter }}
@@ -394,7 +394,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 
 {{- if $.Updatable }}
 func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 {{- range $v := .Properties }}
 	{{- if and ($v.IdentityGetter) ($v.Settable) }}
@@ -477,7 +477,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 {{- end }}
 
 func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 {{- range $v := .Properties }}
 	{{- if $v.IdentityGetter }}
@@ -557,7 +557,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 {{ if $.CustomImportFunction }}
 	if err := {{$.CustomImportFunction}}(d, config); err != nil {
 		return nil, fmt.Errorf("error encountered in import: %v", err)

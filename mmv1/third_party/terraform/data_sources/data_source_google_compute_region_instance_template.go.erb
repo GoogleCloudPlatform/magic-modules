@@ -43,7 +43,7 @@ func DataSourceGoogleComputeRegionInstanceTemplate() *schema.Resource {
 }
 
 func datasourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	region, err := getRegion(d, config)
 	if err != nil {

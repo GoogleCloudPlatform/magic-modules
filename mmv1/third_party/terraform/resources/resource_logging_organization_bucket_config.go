@@ -16,7 +16,7 @@ var loggingOrganizationBucketConfigSchema = map[string]*schema.Schema{
 	},
 }
 
-func organizationBucketConfigID(d *schema.ResourceData, config *Config) (string, error) {
+func organizationBucketConfigID(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
 	organization := d.Get("organization").(string)
 	location := d.Get("location").(string)
 	bucketID := d.Get("bucket_id").(string)

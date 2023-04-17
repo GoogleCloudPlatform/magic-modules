@@ -20,19 +20,19 @@ var IamOrganizationSchema = map[string]*schema.Schema{
 type OrganizationIamUpdater struct {
 	resourceId string
 	d          TerraformResourceData
-	Config     *Config
+	Config     *transport_tpg.Config
 }
 
-func NewOrganizationIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	return &OrganizationIamUpdater{
+func NewOrganizationIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	return &OrganizationIamUpdater{*transport_tpg.Config
 		resourceId: d.Get("org_id").(string),
 		d:          d,
 		Config:     config,
 	}, nil
 }
 
-func OrgIdParseFunc(d *schema.ResourceData, _ *Config) error {
-	if err := d.Set("org_id", d.Id()); err != nil {
+func OrgIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
+	if err := d.Set("org_id", d.Id()); err != nil*transport_tpg.Config
 		return fmt.Errorf("Error setting org_id: %s", err)
 	}
 	return nil

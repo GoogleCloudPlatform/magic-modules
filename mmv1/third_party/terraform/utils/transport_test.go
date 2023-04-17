@@ -8,7 +8,7 @@ func TestReplaceVars(t *testing.T) {
 	cases := map[string]struct {
 		Template      string
 		SchemaValues  map[string]interface{}
-		Config        *Config
+		Config        *transport_tpg.Config
 		Expected      string
 		ExpectedError bool
 	}{

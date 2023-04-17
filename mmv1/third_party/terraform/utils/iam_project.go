@@ -20,19 +20,19 @@ var IamProjectSchema = map[string]*schema.Schema{
 type ProjectIamUpdater struct {
 	resourceId string
 	d          TerraformResourceData
-	Config     *Config
+	Config     *transport_tpg.Config
 }
 
-func NewProjectIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
-	return &ProjectIamUpdater{
+func NewProjectIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+	return &ProjectIamUpdater{*transport_tpg.Config
 		resourceId: d.Get("project").(string),
 		d:          d,
 		Config:     config,
 	}, nil
 }
 
-func ProjectIdParseFunc(d *schema.ResourceData, _ *Config) error {
-	if err := d.Set("project", d.Id()); err != nil {
+func ProjectIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
+	if err := d.Set("project", d.Id()); err != nil {*transport_tpg.Config
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 	return nil

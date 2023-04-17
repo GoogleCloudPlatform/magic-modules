@@ -14,7 +14,7 @@ func TestComputeAddressIdParsing(t *testing.T) {
 		ImportId            string
 		ExpectedError       bool
 		ExpectedCanonicalId string
-		Config              *Config
+		Config              *transport_tpg.Config
 	}{
 		"id is a full self link": {
 			ImportId:            "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/addresses/test-address",

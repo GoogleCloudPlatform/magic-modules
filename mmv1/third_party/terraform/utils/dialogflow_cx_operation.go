@@ -7,7 +7,7 @@ import (
 )
 
 type DialogflowCXOperationWaiter struct {
-	Config    *Config
+	Config    *transport_tpg.Config
 	UserAgent string
 	CommonOperationWaiter
 	Location string
@@ -23,9 +23,9 @@ func (w *DialogflowCXOperationWaiter) QueryOp() (interface{}, error) {
 	return SendRequest(w.Config, "GET", "", url, w.UserAgent, nil)
 }
 
-func createDialogflowCXWaiter(config *Config, op map[string]interface{}, activity, userAgent, location string) (*DialogflowCXOperationWaiter, error) {
+func createDialogflowCXWaiter(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent, location string) (*DialogflowCXOperationWaiter, error) {
 	w := &DialogflowCXOperationWaiter{
-		Config:    config,
+		Config:    config,*transport_tpg.Config
 		UserAgent: userAgent,
 		Location:  location,
 	}
@@ -36,9 +36,9 @@ func createDialogflowCXWaiter(config *Config, op map[string]interface{}, activit
 }
 
 // nolint: deadcode,unused
-func DialogflowCXOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, activity, userAgent, location string, timeout time.Duration) error {
+func DialogflowCXOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, activity, userAgent, location string, timeout time.Duration) error {
 	w, err := createDialogflowCXWaiter(config, op, activity, userAgent, location)
-	if err != nil {
+	if err != nil {*transport_tpg.Config
 		return err
 	}
 	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
@@ -47,9 +47,9 @@ func DialogflowCXOperationWaitTimeWithResponse(config *Config, op map[string]int
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
 }
 
-func DialogflowCXOperationWaitTime(config *Config, op map[string]interface{}, activity, userAgent, location string, timeout time.Duration) error {
+func DialogflowCXOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent, location string, timeout time.Duration) error {
 	if val, ok := op["name"]; !ok || val == "" {
-		// This was a synchronous call - there is no operation to wait for.
+		// This was a synchronous call - there i*transport_tpg.Config wait for.
 		return nil
 	}
 	w, err := createDialogflowCXWaiter(config, op, activity, userAgent, location)

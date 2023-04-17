@@ -253,7 +253,7 @@ func testAccCheckGoogleFolderIamBindingExists(t *testing.T, expected *cloudresou
 	}
 }
 
-func getFolderIamPolicyByParentAndDisplayName(parent, displayName string, config *Config) (*cloudresourcemanager.Policy, error) {
+func getFolderIamPolicyByParentAndDisplayName(parent, displayName string, config *transport_tpg.Config) (*cloudresourcemanager.Policy, error) {
 	var folderMatch *resourceManagerV3.Folder
 	token := ""
 

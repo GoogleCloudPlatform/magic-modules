@@ -65,28 +65,28 @@ func getRegionFromZone(zone string) string {
 // - region extracted from the `zone` field in resource schema
 // - provider-level region
 // - region extracted from the provider-level zone
-func getRegion(d TerraformResourceData, config *Config) (string, error) {
+func getRegion(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	return getRegionFromSchema("region", "zone", d, config)
 }
 
 // getProject reads the "project" field from the given resource data and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
-func getProject(d TerraformResourceData, config *Config) (string, error) {
-	return getProjectFromSchema("project", d, config)
+func getProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return getProjectFromSchema("project", d, confi*transport_tpg.Config
 }
 
 // getBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
-func getBillingProject(d TerraformResourceData, config *Config) (string, error) {
-	return getBillingProjectFromSchema("billing_project", d, config)
+func getBillingProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return getBillingProjectFromSchema("billing_project", *transport_tpg.Config
 }
 
 // getProjectFromDiff reads the "project" field from the given diff and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
-func getProjectFromDiff(d *schema.ResourceDiff, config *Config) (string, error) {
-	res, ok := d.GetOk("project")
+func getProjectFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
+	res, ok := d.GetOk("project")*transport_tpg.Config
 	if ok {
 		return res.(string), nil
 	}
@@ -305,8 +305,8 @@ func Nprintf(format string, params map[string]interface{}) string {
 // A project is required if we are trying to build the FQN from a service account id and
 // and error will be returned in this case if no project is set in the resource or the
 // provider-level config
-func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *Config) (string, error) {
-	// If the service account id is already the fully qualified name
+func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	// If the service account id is already the fully qualified name*transport_tpg.Config
 	if strings.HasPrefix(serviceAccount, "projects/") {
 		return serviceAccount, nil
 	}
@@ -326,8 +326,8 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *C
 	return fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", serviceAccount, project), nil
 }
 
-func paginatedListRequest(project, baseUrl, userAgent string, config *Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
-	res, err := SendRequest(config, "GET", project, baseUrl, userAgent, nil)
+func paginatedListRequest(project, baseUrl, userAgent string, config *transport_tpg.Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
+	res, err := SendRequest(config, "GET", project, baseUrl, userAgent, *transport_tpg.Config
 	if err != nil {
 		return nil, err
 	}
@@ -350,8 +350,8 @@ func paginatedListRequest(project, baseUrl, userAgent string, config *Config, fl
 	return ls, nil
 }
 
-func getInterconnectAttachmentLink(config *Config, project, region, ic, userAgent string) (string, error) {
-	if !strings.Contains(ic, "/") {
+func getInterconnectAttachmentLink(config *transport_tpg.Config, project, region, ic, userAgent string) (string, error) {
+	if !strings.Contains(ic, "/") {*transport_tpg.Config
 		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
 			project, region, ic).Do()
 		if err != nil {
@@ -410,8 +410,8 @@ func migrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*te
 	return is, nil
 }
 
-func expandString(v interface{}, d TerraformResourceData, config *Config) (string, error) {
-	return v.(string), nil
+func expandString(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return v.(string), nil*transport_tpg.Config
 }
 
 func changeFieldSchemaToForceNew(sch *schema.Schema) {

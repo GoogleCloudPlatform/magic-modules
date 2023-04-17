@@ -85,7 +85,7 @@ func testSweepBigqueryReservation(region string) error {
 	return nil
 }
 
-func deleteAllAssignments(config *Config, reservationName string) {
+func deleteAllAssignments(config *transport_tpg.Config, reservationName string) {
 	assignmentListUrl := config.BigqueryReservationBasePath + reservationName + "/assignments"
 
 	assignmentRes, err := SendRequest(config, "GET", config.Project, assignmentListUrl, config.UserAgent, nil)

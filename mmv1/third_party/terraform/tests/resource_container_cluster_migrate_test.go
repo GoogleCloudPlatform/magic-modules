@@ -53,7 +53,7 @@ func TestContainerClusterMigrateState(t *testing.T) {
 
 func TestContainerClusterMigrateState_empty(t *testing.T) {
 	var is *terraform.InstanceState
-	var meta *Config
+	var meta *transport_tpg.Config
 
 	// should handle nil
 	is, err := resourceContainerClusterMigrateState(0, is, meta)
