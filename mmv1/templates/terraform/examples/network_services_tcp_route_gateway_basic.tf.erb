@@ -19,6 +19,9 @@ resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
     foo = "bar"
   }
   description = "my description"
+  scope = "my-scope"
+  type = "OPEN_MESH"
+  ports = [443]
 }
 
 
