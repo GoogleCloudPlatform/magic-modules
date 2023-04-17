@@ -49,7 +49,7 @@ The following arguments are supported:
 
 * `password` -
   (Optional)
-  Password for the Private Key if it's encrypted
+  Password for the Private Key if it's encrypted.
 
 
 ## Attributes Reference
