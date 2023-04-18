@@ -73,14 +73,33 @@ examples:
       policy_rule_name: 'my-policyrule-name'
       gateway_name_1: 'my-gateway1'
       scope_1: 'my-default-scope1'
+    ignore_read_extra:
+      - "delete_swg_autogen_router_on_destroy"
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_services_gateway_multiple_swg_same_network'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'my-network'
+      subnetwork_name: 'my-subnetwork-name'
+      proxy_only_subnetwork_name: 'my-proxy-only-subnetwork'
+      policy_name: 'my-policy-name'
+      policy_rule_name: 'my-policyrule-name'
+      gateway_name_1: 'my-gateway1'
+      gateway_name_2: 'my-gateway2'
+      scope_1: 'my-default-scope1'
+      scope_2: 'my-default-scope2'
+    ignore_read_extra:
+      - "delete_swg_autogen_router_on_destroy"
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
-    name: 'force_destroy'
+    name: 'delete_swg_autogen_router_on_destroy'
     default_value: false
     description: |
       When deleting a SWG gateway, this boolean option will also delete auto generated RouterNat by the gateway creation. 
       If there is no other SWG gateway remaining for that region and network it will be deleted.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_create: 'templates/terraform/custom_create/network_services_gateway.go'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.erb'
   constants: 'templates/terraform/constants/network_services_gateway.go.erb'
 parameters:

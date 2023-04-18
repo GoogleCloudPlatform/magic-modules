@@ -447,3 +447,13 @@ func IsApigeeRetryableError(err error) (bool, string) {
 
 	return false, ""
 }
+
+func IsSwgAutogenRouterRetryable(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(strings.ToLower(gerr.Body), "not ready") {
+			return true, "Waiting swg autogen router to be ready"
+		}
+	}
+
+	return false, ""
+}
