@@ -39,6 +39,7 @@ examples:
     primary_resource_id: "default"
     vars:
       instance_name: "memory-cache"
+      project_id: "my-project"
     test_env_vars:
       org_id: :ORG_ID
       billing_acct: :BILLING_ACCT
