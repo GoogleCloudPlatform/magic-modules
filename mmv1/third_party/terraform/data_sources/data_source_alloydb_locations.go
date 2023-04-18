@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -82,7 +81,6 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	url, err := ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations")
-	log.Printf("[ERROR] kanthara url : %s", url)
 	if err != nil {
 		return fmt.Errorf("Error setting api endpoint")
 	}
