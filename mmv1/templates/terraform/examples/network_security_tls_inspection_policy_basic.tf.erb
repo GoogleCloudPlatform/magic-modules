@@ -1,3 +1,5 @@
+# todo: create the certificate root authority to avoid internal error
+# https://cloudlogging.app.goo.gl/iTqQ74YbhdJJmzsaA
 resource "google_privateca_ca_pool" "default" {
   provider  = google-beta
   name      = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
