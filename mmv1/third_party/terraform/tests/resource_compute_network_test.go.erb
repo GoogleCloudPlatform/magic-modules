@@ -395,7 +395,7 @@ resource "google_compute_network" "acc_network_firewall_policy_enforcement_order
 func testAccComputeNetwork_networkFirewallPolicyEnforcementOrderUpdate(network, order string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_firewall_policy_enforcement_order" {
-  name         								= "tf-test-network-firewall-policy-enforcement-order-%s"
+  name                                      = "tf-test-network-firewall-policy-enforcement-order-%s"
   network_firewall_policy_enforcement_order = "%s"
 }
 `, network, order)
