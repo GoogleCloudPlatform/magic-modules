@@ -62,7 +62,7 @@ examples:
     name: "workstation_config_basic"
     min_version: beta
     primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-config%s\", context[\"random_suffix\"])"
     vars:
       workstation_cluster_name: "workstation-cluster"
       workstation_config_name: "workstation-config"
