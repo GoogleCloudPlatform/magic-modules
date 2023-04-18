@@ -316,10 +316,18 @@ func TestAccAlloydbCluster_deleteTimeBasedRetentionPolicy(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_withoutTimeBasedRetentionPolicy(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_policy"},
+			},
+			{
+				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
 			},
 		},
 	})
@@ -347,10 +355,11 @@ resource "google_alloydb_cluster" "default" {
       }
     }
     time_based_retention {
-	  retention_period = "3.5s"
+	  retention_period = "4.5s"
+    }
   }
   lifecycle {
-    prevent_destroy = true
+	prevent_destroy = true
   }
 }
 
@@ -383,6 +392,10 @@ resource "google_alloydb_cluster" "default" {
         nanos   = 0
       }
     }
+  }
+  lifecycle {
+	prevent_destroy = true
+  }
 }
 
 data "google_project" "project" { }
