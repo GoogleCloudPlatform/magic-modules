@@ -124,18 +124,6 @@ properties:
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'validateRFC1035Name(2, 63)'
-  - !ruby/object:Api::Type::Array
-    name: 'endpointTypes'
-    description: |
-      List of NAT-ted endpoint types supported by the Nat Gateway. If the list is empty,
-      then it will be equivalent to include ENDPOINT_TYPE_VM.
-
-      This enum field has 2 valid options:
-
-      * `ENDPOINT_TYPE_SWG`: This is used for Secure Web Gateway endpoints.
-      * `ENDPOINT_TYPE_VM`: This is the default.
-    send_empty_value: true
-    item_type: Api::Type::String
   - !ruby/object:Api::Type::Enum
     name: 'natIpAllocateOption'
     required: true
