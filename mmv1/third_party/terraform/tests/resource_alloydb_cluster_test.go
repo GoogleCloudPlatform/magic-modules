@@ -313,18 +313,17 @@ func TestAccAlloydbCluster_deleteTimeBasedRetentionPolicy(t *testing.T) {
 				Config: testAccAlloydbCluster_withTimeBasedRetentionPolicy(context),
 			},
 			{
-				ResourceName:            "google_alloydb_cluster.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_alloydb_cluster.default",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccAlloydbCluster_withoutTimeBasedRetentionPolicy(context),
 			},
 			{
-				ResourceName:            "google_alloydb_cluster.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"automated_backup_policy"},
+				ResourceName:      "google_alloydb_cluster.default",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
