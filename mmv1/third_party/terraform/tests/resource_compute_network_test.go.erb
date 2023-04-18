@@ -168,7 +168,7 @@ func TestAccComputeNetwork_networkFirewallPolicyEnforcementOrderAndUpdate(t *tes
 		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetwork_network_firewall_policy_enforcement_order_default(networkName),
+				Config: testAccComputeNetwork_networkFirewallPolicyEnforcementOrderDefault(networkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkExists(
 						t, "google_compute_network.acc_network_firewall_policy_enforcement_order", &network),
@@ -178,7 +178,7 @@ func TestAccComputeNetwork_networkFirewallPolicyEnforcementOrderAndUpdate(t *tes
 			},
 			// Test updating the enforcement order
 			{
-				Config: testAccComputeNetwork_network_firewall_policy_enforcement_order_explicit(networkName, explicitNetworkFirewallPolicyEnforcementOrder),
+				Config: testAccComputeNetwork_networkFirewallPolicyEnforcementOrderUpdate(networkName, explicitNetworkFirewallPolicyEnforcementOrder),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkExists(
 						t, "google_compute_network.acc_network_firewall_policy_enforcement_order", &network),
@@ -384,7 +384,7 @@ resource "google_compute_network" "bar" {
 `, suffix)
 }
 
-func testAccComputeNetwork_network_firewall_policy_enforcement_order_default(network string) string {
+func testAccComputeNetwork_networkFirewallPolicyEnforcementOrderDefault(network string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_firewall_policy_enforcement_order" {
   name = "tf-test-network-firewall-policy-enforcement-order-%s"
@@ -392,7 +392,7 @@ resource "google_compute_network" "acc_network_firewall_policy_enforcement_order
 `, network)
 }
 
-func testAccComputeNetwork_network_firewall_policy_enforcement_order_explicit(network, order string) string {
+func testAccComputeNetwork_networkFirewallPolicyEnforcementOrderUpdate(network, order string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_firewall_policy_enforcement_order" {
   name         								= "tf-test-network-firewall-policy-enforcement-order-%s"
