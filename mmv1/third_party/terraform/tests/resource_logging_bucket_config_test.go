@@ -17,7 +17,7 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -52,7 +52,7 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -86,6 +86,41 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	})
 }
 
+func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": RandString(t, 10),
+		"project_name":  "tf-test-" + RandString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, true),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+			{
+				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, false),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+		},
+	})
+}
+
 func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 	t.Parallel()
 
@@ -101,7 +136,7 @@ func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -136,7 +171,7 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -170,7 +205,7 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -228,6 +263,23 @@ resource "google_logging_project_bucket_config" "basic" {
 	bucket_id = "_Default"
 }
 `, context), retention, retention)
+}
+
+func testAccLoggingBucketConfigProject_analyticsEnabled(context map[string]interface{}, analytics bool) string {
+	return fmt.Sprintf(Nprintf(`
+resource "google_project" "default" {
+	project_id = "%{project_name}"
+	name       = "%{project_name}"
+	org_id     = "%{org_id}"
+}
+
+resource "google_logging_project_bucket_config" "basic" {
+	project    = google_project.default.name
+	location  = "global"
+	enable_analytics = %t
+	bucket_id = "_Default"
+}
+`, context), analytics)
 }
 
 func testAccLoggingBucketConfigProject_preCmekSettings(context map[string]interface{}, keyRingName, cryptoKeyName, cryptoKeyNameUpdate string) string {
@@ -333,7 +385,7 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 
 	for res, config := range configList {
 		VcrTest(t, resource.TestCase{
-			PreCheck:                 func() { testAccPreCheck(t) },
+			PreCheck:                 func() { AccTestPreCheck(t) },
 			ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 			Steps: []resource.TestStep{
 				{

@@ -67,12 +67,12 @@ two ways:
     appending suffixes to them, and are typically only used for names- most
     values should be constant within the configuration.
 
-## `terraform.yaml` metadata
+## `Topic.yaml` metadata
 
-Once your configuration is written, go in `terraform.yaml` and find the
+Once your configuration is written, go in `Topic.yaml` and find the
 `examples` block for the resource. Generally it'll be above the `properties`
 block. In there, append an entry such as the
-[following](https://github.com/GoogleCloudPlatform/magic-modules/blob/e7ef590f6007796f446b2d41875b3d26f4469ff4/mmv1/products/pubsub/terraform.yaml#L108-L113):
+[following](https://github.com/GoogleCloudPlatform/magic-modules/blob/67cef91ee76fc4871566f03e7caee1ef664f8aa0/mmv1/products/pubsub/Topic.yaml#L45-L73):
 
 ```yaml
       - !ruby/object:Provider::Terraform::Examples
@@ -87,11 +87,13 @@ The `name` should match the base name of your example file,
 `primary_resource_id` is an arbitrary snake_cased string that describes the
 resource, and the `vars` map should contain each key you defined previously.
 
+{{< hint danger >}}
 **Important**: Any vars that are part of the resource's id should include at
 least one hyphen or underscore; this
 [triggers addition of a `tf-test` or `tf_test` prefix](https://github.com/GoogleCloudPlatform/magic-modules/blob/6858338f013f5dc57729ec037883a3594441ea62/mmv1/provider/terraform/examples.rb#L244),
 which is what we use to detect and delete stray resources that are sometimes
 left over during test runs.
+{{< /hint >}}
 
 ## Results
 
@@ -108,7 +110,7 @@ func TestAccPubsubSubscription_pubsubSubscriptionDeadLetterExample(t *testing.T)
     }
 
     VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { testAccPreCheck(t) },
+        PreCheck:                 func() { AccTestPreCheck(t) },
         ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
         CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
         Steps: []resource.TestStep{

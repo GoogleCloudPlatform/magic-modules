@@ -410,7 +410,7 @@ var translationMap = map[string]translationIndex{
 		contextValue: "GetTestBillingAccountFromEnv(t)",
 	},
 	"test_service_account": {
-		docsValue:    "emailAddress:my@service-account.com",
+		docsValue:    "my@service-account.com",
 		contextKey:   "service_acct",
 		contextValue: "GetTestServiceAccountFromEnv(t)",
 	},
@@ -422,7 +422,7 @@ var translationMap = map[string]translationIndex{
 	"project_number": {
 		docsValue:    "my-project-number",
 		contextKey:   "project_number",
-		contextValue: "getTestProjectNumberFromEnv()",
+		contextValue: "GetTestProjectNumberFromEnv()",
 	},
 	"customer_id": {
 		docsValue:    "A01b123xz",

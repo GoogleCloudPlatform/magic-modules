@@ -31,7 +31,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 legacy_name: 'google_monitoring_service'
 id_format: "projects/{{project}}/services/{{service_id}}"
 import_format: ["projects/{{project}}/services/{{service_id}}"]
-error_retry_predicates: ["isMonitoringConcurrentEditError"]
+error_retry_predicates: ["IsMonitoringConcurrentEditError"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "monitoring_service_example"
@@ -86,7 +86,7 @@ properties:
     name: basicService
     description: |
       A well-known service type, defined by its service type and service labels.
-      Valid values are described at
+      Valid values of service types and services labels are described at
       https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/api/api-structures#basic-svc-w-basic-sli
   # BasicService info can be set on creation but is then immutable.
     immutable: true

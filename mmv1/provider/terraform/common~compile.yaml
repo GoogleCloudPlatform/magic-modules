@@ -39,6 +39,18 @@
 '<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/utils/<%= fname -%>'
 <% end -%>
 <%
+  Dir["third_party/terraform/framework_utils/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/framework_utils/<%= fname -%>'
+<% end -%>
+<%
+  Dir["third_party/terraform/framework_models/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/framework_models/<%= fname -%>'
+<% end -%>
+<%
   Dir["third_party/terraform/scripts/**/*.erb"].each do |file_path|
     fname = file_path.delete_prefix("third_party/terraform/")
 -%>

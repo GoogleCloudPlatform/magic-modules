@@ -101,6 +101,13 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "datastream_stream_postgresql_bigquery_dataset_id"
     primary_resource_id: "default"
+    vars:
+      dataset_id: "postgres"
+      stream_id: "postgres-bigquery"
+      dest_connection_profile_id: "dest-profile"
+      instance_name: "instance-name"
+      sql_user_name: "my-user"
+      source_connection_profile_id: "source-profile"
     pull_external: true
     # Random provider
     skip_vcr: true
@@ -162,7 +169,7 @@ properties:
         required: true
         description: |
           Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: "projectNumberDiffSuppress"
+        diff_suppress_func: "ProjectNumberDiffSuppress"
       - !ruby/object:Api::Type::NestedObject
         name: 'mysqlSourceConfig'
         allow_empty_object: true
@@ -748,7 +755,7 @@ properties:
         required: true
         description: |
           Destination connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: "projectNumberDiffSuppress"
+        diff_suppress_func: "ProjectNumberDiffSuppress"
       - !ruby/object:Api::Type::NestedObject
         name: 'gcsDestinationConfig'
         exactly_one_of:

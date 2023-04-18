@@ -53,6 +53,12 @@ examples:
       ha_vpn_gateway1_name: "ha-vpn-1"
       network1_name: "network1"
   - !ruby/object:Provider::Terraform::Examples
+    name: "ha_vpn_gateway_ipv6"
+    primary_resource_id: "ha_gateway1"
+    vars:
+      ha_vpn_gateway1_name: "ha-vpn-1"
+      network1_name: "network1"
+  - !ruby/object:Provider::Terraform::Examples
     name: "ha_vpn_gateway_gcp_to_gcp"
     primary_resource_id: "ha_gateway1"
         # Multiple fine-grained resources
@@ -126,6 +132,17 @@ properties:
       The network this VPN gateway is accepting traffic for.
     required: true
     immutable: true
+  - !ruby/object:Api::Type::Enum
+    name: 'stackType'
+    description: |
+      The stack type for this VPN gateway to identify the IP protocols that are enabled.
+      If not specified, IPV4_ONLY will be used.
+    default_value: :IPV4_ONLY
+    values:
+      - :IPV4_ONLY
+      - :IPV4_IPV6
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Array
     name: 'vpnInterfaces'
     description: |

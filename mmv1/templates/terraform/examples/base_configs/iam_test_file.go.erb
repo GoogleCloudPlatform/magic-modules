@@ -42,8 +42,8 @@ import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.b
 				<% import_qualifiers.push('context["project_id"]') -%>
 			<% end -%>
 		<% end -%>
-	<% elsif param == 'zone' -%>
-		<% import_qualifiers.push('GetTestZoneFromEnv()') -%>
+        <% elsif param == 'zone' and object.iam_policy.substitute_zone_value -%>
+                <% import_qualifiers.push('GetTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
 		<% if example.region_override.nil? -%>
 				<% import_qualifiers.push('GetTestRegionFromEnv()') -%>
@@ -58,7 +58,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -104,7 +104,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -146,7 +146,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 <% end -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -192,7 +192,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -228,7 +228,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -274,7 +274,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 	ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -310,7 +310,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>
@@ -372,7 +372,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 	expectedPolicyData = strings.Replace(expectedPolicyData, "<", "\\u003c", -1)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 <% else -%>

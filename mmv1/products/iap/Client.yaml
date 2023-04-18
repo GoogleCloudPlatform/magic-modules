@@ -28,14 +28,14 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients'
 id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
 import_format: ['{{brand}}/identityAwareProxyClients/{{client_id}}']
-error_retry_predicates: ["iapClient409Operation"]
+error_retry_predicates: ["IapClient409Operation"]
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "iap_client"
     primary_resource_id: "project_client"
     vars:
-      project_id: 'brand-proj-'
+      project_id: 'my-project'
     test_env_vars:
       org_id: :ORG_ID
       org_domain: :ORG_DOMAIN

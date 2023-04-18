@@ -63,7 +63,7 @@ To get started, you'll need:
   * If you're using a Mac with Homebrew installed, you can follow these
     instructions to set up Go: [YouTube video](https://www.youtube.com/watch?v=VQVyvulNnzs).
   * If you're using Cloud Shell, Go is already installed.
-  * Currently it's recommended to use Go 1.18, Go 1.19 changed the gofmt rules which causes some gofmt issue and our CIs are all on 1.18.X
+  * Currently it's recommended to use Go 1.19.
 * Ruby 3.1.0
   * You can use [`rbenv`](https://github.com/rbenv/rbenv) to manage your Ruby version(s).
   * To install `rbenv`:
@@ -78,6 +78,7 @@ To get started, you'll need:
   * go install golang.org/x/tools/cmd/goimports / go install golang.org/x/tools/cmd/goimports@latest
 * Terraform
   * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+    * We recommend a Terraform version of at least 1.1.8, the version used in our CI.
 * If you are getting "Too many open files" ulimit needs to be raised.
   * Mac OSX: `ulimit -n 8192`
 

@@ -19,7 +19,11 @@ update_verb: :PATCH
 update_mask: true
 description: |
   A Cloud Firestore Database. Currently only one database is allowed per
-  cloud project; this database must have a `database_id` of '(default)'.
+  Cloud project; this database must have a `database_id` of '(default)'.
+
+  If you wish to use Firestore with App Engine, use the
+  [`google_app_engine_application`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/app_engine_application)
+  resource instead.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/firestore/docs/'
@@ -59,6 +63,8 @@ examples:
     ignore_read_extra:
       - project
       - etag
+    vars:
+      project_id: "my-project"
   - !ruby/object:Provider::Terraform::Examples
     name: "firestore_database_datastore_mode"
     primary_resource_id: "datastore_mode_database"
@@ -68,12 +74,14 @@ examples:
     ignore_read_extra:
       - project
       - etag
+    vars:
+      project_id: "my-project"
 properties:
   - !ruby/object:Api::Type::String
     name: name
     required: true
     description: |
-      Required. The ID to use for the database, which will become the final
+      The ID to use for the database, which will become the final
       component of the database's resource name. This value should be 4-63
       characters. Valid characters are /[a-z][0-9]-/ with first character
       a letter and the last a letter or a number. Must not be
