@@ -136,6 +136,5 @@ examples:
     vars:
       bucket_id: "my-bucket"
       link_id: "mylink"
- main
     test_env_vars:
       project: :PROJECT_NAME
