@@ -178,6 +178,20 @@ examples:
       - "port_range"
       - "target"
       - "ip_address"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "forwarding_rule_regional_steering"
+    min_version: 'beta'
+    primary_resource_id: "default"
+    vars:
+      forwarding_rule_name: "steering-rule"
+      ip_name: "website-ip"
+      external_forwarding_rule_name: "forwarding-rule"
+      backend_name: "service-backend"
+      healthcheck_name: "service-health-check"
+    ignore_read_extra:
+      - "port_range"
+      - "target"
+      - "ip_address"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 parameters:
