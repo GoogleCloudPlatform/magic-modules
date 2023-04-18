@@ -13,8 +13,8 @@
 
 ---
 !ruby/object:Api::Product
-name: gkeonprem
-display_name: GKE On-Prem
+name: Gkeonprem
+display_name: Anthos On-Prem
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
@@ -23,7 +23,7 @@ scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: GKE On-Prem API
+    name: Anthos On-Prem API
     url: https://console.cloud.google.com/apis/library/gkeonprem.googleapis.com
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
