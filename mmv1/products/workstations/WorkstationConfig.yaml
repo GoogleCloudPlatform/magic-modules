@@ -11,7 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
+!ruby/object:Api::Resource
 name: "WorkstationConfig"
 self_link: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}"
 base_url: "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs"
@@ -19,7 +20,8 @@ create_url: "projects/{{project}}/locations/{{location}}/workstationClusters/{{w
 update_verb: :PATCH
 update_mask: true
 min_version: beta
-description: "A set of configuration options describing how a workstation will be\
+description:
+  "A set of configuration options describing how a workstation will be\
   \ run. Workstation configurations are intended to be shared across multiple workstations."
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -55,14 +57,17 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
-import_format: ["projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}"]
+import_format:
+  [
+    "projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}",
+  ]
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "workstation_config_basic"
     min_version: beta
     primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-config%s\", context[\"random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])'
     vars:
       workstation_cluster_name: "workstation-cluster"
       workstation_config_name: "workstation-config"
@@ -70,7 +75,6 @@ examples:
     name: "workstation_config_container"
     min_version: beta
     primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"])"
     vars:
       workstation_cluster_name: "workstation-cluster"
       workstation_config_name: "workstation-config"
@@ -78,7 +82,6 @@ examples:
     name: "workstation_config_persistent_directories"
     min_version: beta
     primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"])"
     vars:
       workstation_cluster_name: "workstation-cluster"
       workstation_config_name: "workstation-config"
@@ -86,7 +89,6 @@ examples:
     name: "workstation_config_shielded_instance_config"
     min_version: beta
     primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"])"
     vars:
       workstation_cluster_name: "workstation-cluster"
       workstation_config_name: "workstation-config"
@@ -94,7 +96,6 @@ examples:
     name: "workstation_config_encryption_key"
     min_version: beta
     primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workstation-cluster%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-workstation-cluster-config%s\", context[\"random_suffix\"])"
     vars:
       account_id: "my-account"
       workstation_cluster_name: "workstation-cluster"
@@ -138,7 +139,8 @@ properties:
       Human-readable name for this resource.
   - !ruby/object:Api::Type::KeyValuePairs
     name: "labels"
-    description: "Client-specified labels that are applied to the resource and that\
+    description:
+      "Client-specified labels that are applied to the resource and that\
       \ are also propagated to the underlying Compute Engine resources."
   - !ruby/object:Api::Type::KeyValuePairs
     name: "annotations"
