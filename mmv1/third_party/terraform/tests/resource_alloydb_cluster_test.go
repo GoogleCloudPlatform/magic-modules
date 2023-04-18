@@ -408,6 +408,9 @@ resource "google_alloydb_cluster" "default" {
     }
   }
   lifecycle {
+	ignore_changes = [
+	  automated_backup_policy[0].time_based_retention
+	]
 	prevent_destroy = true
   }
 }
@@ -443,6 +446,9 @@ resource "google_alloydb_cluster" "default" {
     }
   }
   lifecycle {
+	ignore_changes = [
+	  automated_backup_policy[0].time_based_retention
+	]
 	prevent_destroy = true
   }
 }
