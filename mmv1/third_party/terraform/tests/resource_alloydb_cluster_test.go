@@ -404,14 +404,14 @@ resource "google_alloydb_cluster" "default" {
       }
     }
     time_based_retention {
-	  retention_period = "4.5s"
+      retention_period = "4.5s"
     }
   }
   lifecycle {
-	ignore_changes = [
-	  automated_backup_policy[0].time_based_retention
-	]
-	prevent_destroy = true
+    ignore_changes = [
+      automated_backup_policy[0].time_based_retention
+    ]
+    prevent_destroy = true
   }
 }
 
@@ -446,10 +446,10 @@ resource "google_alloydb_cluster" "default" {
     }
   }
   lifecycle {
-	ignore_changes = [
-	  automated_backup_policy[0].time_based_retention
-	]
-	prevent_destroy = true
+    ignore_changes = [
+      automated_backup_policy[0].time_based_retention
+    ]
+    prevent_destroy = true
   }
 }
 
