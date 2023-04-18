@@ -44,9 +44,12 @@ func testAccNetworkSecurityAddressGroups_basic(addressGroupsName string) string 
 resource "google_network_security_address_group" "foobar" {
     name        = "%s"
     location    = "us-central1"
-	description = "my address groups"
+    description = "my address groups"
     type        = "IPV4"
     capacity    = "100"
+    labels      = {
+		foo = "bar"
+    }
     items = ["208.80.154.224/32"]
 }
 `, addressGroupsName)
@@ -57,9 +60,12 @@ func testAccNetworkSecurityAddressGroups_update(addressGroupsName string) string
 resource "google_network_security_address_group" "foobar" {
     name        = "%s"
     location    = "us-central1"
-	description = "my address groups. Update"
+    description = "my address groups. Update"
     type        = "IPV4"
     capacity    = "100"
+    labels      = {
+		foo = "foo"
+    }
     items = ["208.80.154.224/32"]
 }
 `, addressGroupsName)

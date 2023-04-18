@@ -53,7 +53,13 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
-    name: "network_security_address_groups"
+    name: "network_security_address_groups_basic"
+    primary_resource_id: "default"
+    vars:
+      resource_name: "my-address-groups"
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: "network_security_address_groups_advanced"
     primary_resource_id: "default"
     vars:
       resource_name: "my-address-groups"
@@ -113,7 +119,3 @@ properties:
     required: true
     description: |
       Capacity of the Address Group.
-  - !ruby/object:Api::Type::String
-    name: "selfLink"
-    description: |
-      Server-defined fully-qualified URL for this resource.
