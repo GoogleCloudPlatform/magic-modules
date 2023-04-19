@@ -46,14 +46,17 @@ async: !ruby/object:Api::OpAsync
 description: |-
   This represents the rollout state. This is part of the game server
   deployment.
-import_format: ["projects/{{project}}/locations/global/gameServerDeployments/{{deployment_id}}/rollout"]
+import_format:
+  [
+    'projects/{{project}}/locations/global/gameServerDeployments/{{deployment_id}}/rollout',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "game_service_deployment_rollout_basic"
-    primary_resource_id: "default"
+    name: 'game_service_deployment_rollout_basic'
+    primary_resource_id: 'default'
     vars:
-      deployment_id: "tf-test-deployment"
-      config_id: "tf-test-config"
+      deployment_id: 'tf-test-deployment'
+      config_id: 'tf-test-config'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/gameservice_rollout_create.go'
 properties:
@@ -100,4 +103,3 @@ properties:
         - !ruby/object:Api::Type::String
           name: configVersion
           description: Version of the configuration.
-
