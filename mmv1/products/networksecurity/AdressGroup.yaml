@@ -103,6 +103,7 @@ properties:
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
   - !ruby/object:Api::Type::Enum
     name: "type"
+    required: true
     description: |
       The type of the Address Group. Possible values are "IPV4" or "IPV6".
     values:
@@ -111,7 +112,6 @@ properties:
   - !ruby/object:Api::Type::Array
     name: "items"
     item_type: Api::Type::String
-    required: true
     description: |
       List of items.
   - !ruby/object:Api::Type::Integer

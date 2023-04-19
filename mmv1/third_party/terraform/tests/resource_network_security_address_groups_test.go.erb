@@ -66,7 +66,7 @@ resource "google_network_security_address_group" "foobar" {
     labels      = {
 		foo = "foo"
     }
-    items = ["208.80.154.224/32"]
+    items = ["208.80.155.224/32", "208.80.154.224/32"]
 }
 `, addressGroupsName)
 }
