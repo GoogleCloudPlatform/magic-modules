@@ -205,21 +205,30 @@ properties:
                 name: 'maxFindingsPerItem'
                 description: Max number of findings that will be returned for each item
                   scanned. The maximum returned is 2000.
-                required: true
+                at_least_one_of:
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_item
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_request
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type
               - !ruby/object:Api::Type::Integer
                 name: 'maxFindingsPerRequest'
                 description: Max number of findings that will be returned per request/job.
                   The maximum returned is 2000.
-                required: true
+                at_least_one_of:
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_item
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_request
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type
               - !ruby/object:Api::Type::Array
                 name: 'maxFindingsPerInfoType'
                 description: |
                   Configuration of findings limit given for specified infoTypes.
+                at_least_one_of:
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_item
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_request
+                  - inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::NestedObject
                       name: 'infoType'
-                      required: true
                       description: |
                         Type of information the findings limit applies to. Only one limit per infoType should be provided. If InfoTypeLimit does
                         not have an infoType, the DLP API applies the limit against all infoTypes that are found but not
@@ -238,7 +247,6 @@ properties:
                     - !ruby/object:Api::Type::Integer
                       name: 'maxFindings'
                       description: Max findings limit for the given infoType.
-                      required: true
           - !ruby/object:Api::Type::Array
             name: 'infoTypes'
             description: |
@@ -268,7 +276,6 @@ properties:
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'infoTypes'
-                  required: true
                   description: |
                     List of infoTypes this rule set is applied to.
                   item_type: !ruby/object:Api::Type::NestedObject
@@ -296,13 +303,11 @@ properties:
                         properties:
                           - !ruby/object:Api::Type::NestedObject
                             name: 'hotwordRegex'
-                            required: true
                             description: Regular expression pattern defining what qualifies
                               as a hotword.
                             properties:
                               - !ruby/object:Api::Type::String
                                 name: 'pattern'
-                                required: true
                                 description: |
                                   Pattern defining the regular expression. Its syntax
                                   (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
