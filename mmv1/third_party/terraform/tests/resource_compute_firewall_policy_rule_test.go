@@ -94,6 +94,16 @@ resource "google_compute_firewall_policy" "default" {
   description = "Resource created for Terraform acceptance testing"
 }
 
+resource "google_compute_region_networksecurity_address_group" "basic_regional_networksecurity_address_group" {
+  name        = "tf-test-policy%{random_suffix}"
+  project     = "%{project_name}"
+  description = "Sample regional networksecurity_address_group"
+  region      = "%{region}"
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
+}
+
 resource "google_compute_firewall_policy_rule" "default" {
   firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
@@ -108,6 +118,7 @@ resource "google_compute_firewall_policy_rule" "default" {
       ports = [80, 8080]
     }
     dest_ip_ranges = ["11.100.0.1/32"]
+    srcAddressGroups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 `, context)
@@ -144,6 +155,16 @@ resource "google_compute_firewall_policy" "default" {
   description = "Resource created for Terraform acceptance testing"
 }
 
+resource "google_compute_region_networksecurity_address_group" "basic_regional_networksecurity_address_group" {
+  name        = "tf-test-policy%{random_suffix}"
+  project     = "%{project_name}"
+  description = "Sample regional networksecurity_address_group"
+  region      = "%{region}"
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
+}
+
 resource "google_compute_firewall_policy_rule" "default" {
   firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
@@ -162,6 +183,8 @@ resource "google_compute_firewall_policy_rule" "default" {
       ports = [22]
     }
     dest_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    src_address_groups = []
+    dest_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
   target_resources = [google_compute_network.network1.self_link, google_compute_network.network2.self_link]
   target_service_accounts = [google_service_account.service_account.email]
@@ -280,6 +303,16 @@ resource "google_compute_firewall_policy" "default" {
   description = "Resource created for Terraform acceptance testing"
 }
 
+resource "google_compute_region_networksecurity_address_group" "basic_regional_networksecurity_address_group" {
+  name        = "tf-test-policy%{random_suffix}"
+  project     = "%{project_name}"
+  description = "Sample regional networksecurity_address_group"
+  region      = "%{region}"
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
+}
+
 resource "google_compute_firewall_policy_rule" "rule1" {
   firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
@@ -294,6 +327,7 @@ resource "google_compute_firewall_policy_rule" "rule1" {
       ports = [80, 8080]
     }
     dest_ip_ranges = ["11.100.0.1/32"]
+    dest_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 
@@ -314,6 +348,7 @@ resource "google_compute_firewall_policy_rule" "rule2" {
       ip_protocol = "all"
     }
     src_ip_ranges = ["11.100.0.1/32"]
+    src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 `, context)
@@ -332,6 +367,16 @@ resource "google_compute_firewall_policy" "default" {
   description = "Description Update"
 }
 
+resource "google_compute_region_networksecurity_address_group" "basic_regional_networksecurity_address_group" {
+  name        = "tf-test-policy%{random_suffix}"
+  project     = "%{project_name}"
+  description = "Sample regional networksecurity_address_group"
+  region      = "%{region}"
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
+}
+
 resource "google_compute_firewall_policy_rule" "rule1" {
   firewall_policy = google_compute_firewall_policy.default.id
   description = "Resource created for Terraform acceptance testing"
@@ -345,6 +390,7 @@ resource "google_compute_firewall_policy_rule" "rule1" {
       ip_protocol = "tcp"
     }
     dest_ip_ranges = ["11.100.0.1/32"]
+    dest_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 
@@ -365,6 +411,7 @@ resource "google_compute_firewall_policy_rule" "rule2" {
       ip_protocol = "all"
     }
     src_ip_ranges = ["11.100.0.1/32"]
+    src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 
@@ -382,6 +429,7 @@ resource "google_compute_firewall_policy_rule" "rule3" {
       ports = [8000]
     }
     src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 `, context)
