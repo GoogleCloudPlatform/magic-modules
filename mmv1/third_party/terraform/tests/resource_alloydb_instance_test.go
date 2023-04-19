@@ -298,7 +298,7 @@ func TestAccAlloydbInstance_updateDatabaseFlagInPrimaryInstance(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccAlloydbInstance_autoExplainEnabledInPrimaryInstance(context),
+				Config: testAccAlloydbInstance_autoExplainEnabledInPrimaryInstance(context),
 			},
 			{
 				ResourceName:      "google_alloydb_instance.primary",
@@ -306,13 +306,13 @@ func TestAccAlloydbInstance_updateDatabaseFlagInPrimaryInstance(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: TestAccAlloydbInstance_autoExplainDisabledInPrimaryInstance(context),
+				Config: testAccAlloydbInstance_autoExplainDisabledInPrimaryInstance(context),
 			},
 		},
 	})
 }
 
-func TestAccAlloydbInstance_autoExplainEnabledInPrimaryInstance(context map[string]interface{}) string {
+func testAccAlloydbInstance_autoExplainEnabledInPrimaryInstance(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_alloydb_instance" "primary" {
   cluster       = google_alloydb_cluster.default.name
@@ -352,7 +352,7 @@ resource "google_service_networking_connection" "vpc_connection" {
 `, context)
 }
 
-func TestAccAlloydbInstance_autoExplainDisabledInPrimaryInstance(context map[string]interface{}) string {
+func testAccAlloydbInstance_autoExplainDisabledInPrimaryInstance(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_alloydb_instance" "primary" {
   cluster       = google_alloydb_cluster.default.name
