@@ -24,4 +24,4 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/iam.googleapis.com/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-  - https://www.googleapis.com/auth/compute    
+  - https://www.googleapis.com/auth/compute
