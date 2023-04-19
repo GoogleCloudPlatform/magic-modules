@@ -10,7 +10,9 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   ip_protocol = "TCP"
   load_balancing_scheme = "EXTERNAL"
   port_range = "80-81"
+  base_forwarding_rule = google_compute_forwarding_rule.external_forwarding_rule.id
   source_ip_ranges = ["34.121.88.0/24", "35.187.239.137"]
+  depends_on = [google_compute_forwarding_rule.external_forwarding_rule]
 }
 
 resource "google_compute_address" "address" {
