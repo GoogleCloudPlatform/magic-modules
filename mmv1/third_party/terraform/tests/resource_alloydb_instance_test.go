@@ -168,7 +168,7 @@ func TestAccAlloydbInstance_createInstanceWithMaximumFields(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbInstance_createInstanceWithMandatoryFields(context),
+				Config: testAccAlloydbInstance_createInstanceWithMaximumFields(context),
 			},
 		},
 	})
