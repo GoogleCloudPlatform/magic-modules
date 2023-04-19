@@ -4,6 +4,8 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 const OrganizationIAMCustomRoleAssetType string = "iam.googleapis.com/Role"

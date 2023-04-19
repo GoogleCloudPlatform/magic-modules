@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 	"google.golang.org/api/storage/v1"
 )
 

@@ -1,5 +1,9 @@
 package google
 
+import (
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
+)
+
 func resourceConverterFolderOrgPolicy() ResourceConverter {
 	return ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Folder",

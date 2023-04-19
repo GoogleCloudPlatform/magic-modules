@@ -21,6 +21,8 @@ import (
 <% else -%>
 	compute "google.golang.org/api/compute/v0.beta"
 <% end -%>
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 const ComputeInstanceAssetType string = "compute.googleapis.com/Instance"

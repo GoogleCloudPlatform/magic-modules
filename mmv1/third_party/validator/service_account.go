@@ -3,6 +3,8 @@ package google
 import (
 	"fmt"
 	"reflect"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 const ServiceAccountAssetType string = "iam.googleapis.com/ServiceAccount"

@@ -3,6 +3,8 @@ package google
 import (
 	"fmt"
 	"strings"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 func resourceConverterOrgPolicyPolicy() ResourceConverter {

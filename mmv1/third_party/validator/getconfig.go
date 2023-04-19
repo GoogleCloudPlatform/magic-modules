@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 // Return the value of the private userAgent field

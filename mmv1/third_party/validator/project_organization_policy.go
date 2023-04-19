@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 

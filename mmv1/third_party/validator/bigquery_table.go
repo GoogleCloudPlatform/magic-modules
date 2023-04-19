@@ -2,6 +2,8 @@ package google
 
 import (
 	"reflect"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 const BigQueryTableAssetType string = "bigquery.googleapis.com/Table"

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 type ConvertFunc func(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error)
