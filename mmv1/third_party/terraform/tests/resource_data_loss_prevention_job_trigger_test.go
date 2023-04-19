@@ -244,6 +244,15 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspect(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent"},
 			},
+			{
+				Config: testAccDataLossPreventionJobTrigger_inspectExclusionRule(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.inspect",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
 		},
 	})
 }
@@ -1061,6 +1070,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 			custom_info_types {
                 info_type {
                     name = "MY_CUSTOM_TYPE"
+					version = "0.4"
                 }
 
 				exclusion_type = "EXCLUSION_TYPE_EXCLUDE"
@@ -1620,6 +1630,158 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 					max_findings = "80"
 					info_type {
 						name = "LAST_NAME"
+					}
+				}
+			}
+		}
+	}
+}
+`, context)
+}
+
+func testAccDataLossPreventionJobTrigger_inspectExclusionRule(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "inspect" {
+	parent = "projects/%{project}"
+	description = "Starting description"
+	display_name = "display"
+
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+
+	inspect_job {
+		inspect_template_name = "fake"
+		actions {
+			save_findings {
+				output_config {
+					table {
+						project_id = "project"
+						dataset_id = "dataset123"
+					}
+				}
+			}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+		inspect_config {
+			info_types {
+				name = "EMAIL_ADDRESS"
+			}
+			info_types {
+				name    = "PERSON_NAME"
+			}
+			info_types {
+				name = "LAST_NAME"
+			}
+			info_types {
+				name = "DOMAIN_NAME"
+			}
+			info_types {
+				name = "PHONE_NUMBER"
+			}
+			info_types {
+				name = "FIRST_NAME"
+			}
+
+			min_likelihood     = "UNLIKELY"
+			include_quote      = false
+			exclude_info_types = false
+			rule_set {
+				info_types {
+					name    = "EMAIL_ADDRESS"
+					version = "0.1"
+				}
+				rules {
+					exclusion_rule {
+						regex {
+							pattern = ".+@example.com"
+						}
+						matching_type = "MATCHING_TYPE_FULL_MATCH"
+					}
+				}
+			}
+			rule_set {
+				info_types {
+					name = "EMAIL_ADDRESS"
+				}
+				info_types {
+					name = "DOMAIN_NAME"
+				}
+				info_types {
+					name = "PHONE_NUMBER"
+				}
+				rules {
+					exclusion_rule {
+						dictionary {
+							cloud_storage_path {
+								path = "gs://mybucket/directory.txt"
+							}
+						}
+						matching_type = "MATCHING_TYPE_FULL_MATCH"
+					}
+				}
+			}
+			rule_set {
+				info_types {
+					name = "PERSON_NAME"
+				}
+				rules {
+					exclusion_rule {
+						exclude_by_hotword {
+							hotword_regex {
+								pattern 	  = "patient"
+								group_indexes = [1]
+							}
+							proximity {
+								window_before = 25
+								window_after  = 25
+							}
+						}
+						matching_type = "MATCHING_TYPE_PARTIAL_MATCH"
+					}
+				}
+			}
+			rule_set {
+				info_types {
+					name = "PERSON_NAME"
+					version = "0.1"
+				}
+				rules {
+					exclusion_rule {
+						exclude_info_types {
+							info_types {
+								name = "FIRST_NAME"
+								version = "0.1"
+							}
+						}
+						matching_type = "MATCHING_TYPE_PARTIAL_MATCH"
+					}
+				}
+			}
+
+			limits {
+				max_findings_per_item    = 10
+				max_findings_per_request = 50
+				max_findings_per_info_type {
+					max_findings = "75"
+					info_type {
+						name = "PERSON_NAME"
+						version = "0.1"
+					}
+				}
+				max_findings_per_info_type {
+					max_findings = "80"
+					info_type {
+						name = "LAST_NAME"
+						version = "0.1"
 					}
 				}
 			}
