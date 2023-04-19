@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Agent'
-base_url: "projects/{{project}}/locations/{{location}}/agents"
+base_url: 'projects/{{project}}/locations/{{location}}/agents'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -27,12 +27,12 @@ timeouts: !ruby/object:Api::Timeouts
   update_minutes: 40
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflowcx_agent_full"
-    primary_resource_id: "full_agent"
+    name: 'dialogflowcx_agent_full'
+    primary_resource_id: 'full_agent'
     vars:
-      agent_name: "dialogflowcx-agent"
-id_format: "projects/{{project}}/locations/{{location}}/agents/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/agents/{{name}}"]
+      agent_name: 'dialogflowcx-agent'
+id_format: 'projects/{{project}}/locations/{{location}}/agents/{{name}}'
+import_format: ['projects/{{project}}/locations/{{location}}/agents/{{name}}']
 skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::String

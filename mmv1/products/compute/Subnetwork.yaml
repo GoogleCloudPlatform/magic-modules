@@ -74,38 +74,39 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_basic"
-    primary_resource_id: "network-with-private-secondary-ip-ranges"
+    name: 'subnetwork_basic'
+    primary_resource_id: 'network-with-private-secondary-ip-ranges'
     vars:
-      subnetwork_name: "test-subnetwork"
-      network_name: "test-network"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"\
+      subnetwork_name: 'test-subnetwork'
+      network_name: 'test-network'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"\
       random_suffix\"])"
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_logging_config"
-    primary_resource_id: "subnet-with-logging"
+    name: 'subnetwork_logging_config'
+    primary_resource_id: 'subnet-with-logging'
     vars:
-      subnetwork_name: "log-test-subnetwork"
-      network_name: "log-test-network"
+      subnetwork_name: 'log-test-subnetwork'
+      network_name: 'log-test-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_internal_l7lb"
+    name: 'subnetwork_internal_l7lb'
     min_version: beta
-    primary_resource_id: "network-for-l7lb"
+    primary_resource_id: 'network-for-l7lb'
     vars:
-      subnetwork_name: "l7lb-test-subnetwork"
-      network_name: "l7lb-test-network"
+      subnetwork_name: 'l7lb-test-subnetwork'
+      network_name: 'l7lb-test-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_ipv6"
-    primary_resource_id: "subnetwork-ipv6"
+    name: 'subnetwork_ipv6'
+    primary_resource_id: 'subnetwork-ipv6'
     vars:
-      subnetwork_name: "ipv6-test-subnetwork"
-      network_name: "ipv6-test-network"
+      subnetwork_name: 'ipv6-test-subnetwork'
+      network_name: 'ipv6-test-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "subnetwork_internal_ipv6"
-    primary_resource_id: "subnetwork-internal-ipv6"
+    name: 'subnetwork_internal_ipv6'
+    primary_resource_id: 'subnetwork-internal-ipv6'
     vars:
-      subnetwork_name: "internal-ipv6-test-subnetwork"
-      network_name: "internal-ipv6-test-network"
+      subnetwork_name: 'internal-ipv6-test-subnetwork'
+      network_name: 'internal-ipv6-test-network'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -343,7 +344,7 @@ properties:
           Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
           https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
           The default value is 'true', which evaluates to include everything.
-        default_value: "true"
+        default_value: 'true'
   - !ruby/object:Api::Type::Enum
     name: 'stackType'
     update_verb: :PATCH

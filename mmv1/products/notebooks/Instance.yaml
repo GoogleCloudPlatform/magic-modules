@@ -33,43 +33,50 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'instance_name'
-  import_format: ["projects/{{project}}/locations/{{location}}/instances/{{instance_name}}",
-    "{{instance_name}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/instances/{{instance_name}}',
+      '{{instance_name}}',
+    ]
   base_url: projects/{{project}}/locations/{{location}}/instances/{{instance_name}}
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_basic"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic'
+    primary_resource_id: 'instance'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_basic_container"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic_container'
+    primary_resource_id: 'instance'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_basic_gpu"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_basic_gpu'
+    primary_resource_id: 'instance'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "notebook_instance_full"
-    primary_resource_id: "instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
+    name: 'notebook_instance_full'
+    primary_resource_id: 'instance'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"\
       random_suffix\"])"
-    region_override: "us-west1-a"
+    region_override: 'us-west1-a'
     vars:
-      instance_name: "notebooks-instance"
+      instance_name: 'notebooks-instance'
     test_env_vars:
       service_account: :SERVICE_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode

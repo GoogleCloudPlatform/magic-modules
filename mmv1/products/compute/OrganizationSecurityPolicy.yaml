@@ -15,7 +15,7 @@
 name: 'OrganizationSecurityPolicy'
 min_version: beta
 base_url: 'locations/global/securityPolicies?parentId={{parent}}'
-self_link: "locations/global/securityPolicies/{{policy_id}}"
+self_link: 'locations/global/securityPolicies/{{policy_id}}'
 create_url: 'locations/global/securityPolicies?parentId={{parent}}'
 update_verb: :PATCH
 description: |
@@ -24,20 +24,21 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating a firewall policy': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-policy'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies'
-id_format: "locations/global/securityPolicies/{{policy_id}}"
-import_format: ["locations/global/securityPolicies/{{policy_id}}"]
+id_format: 'locations/global/securityPolicies/{{policy_id}}'
+import_format: ['locations/global/securityPolicies/{{policy_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "organization_security_policy_basic"
-    primary_resource_id: "policy"
+    name: 'organization_security_policy_basic'
+    primary_resource_id: 'policy'
     min_version: 'beta'
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/org_security_policy.go.erb
   post_update: templates/terraform/post_update/org_security_policy.go.erb
-  post_delete: templates/terraform/post_delete/org_security_policy.go.erb
-      # TODO: Remove once b/154369201 is closed.
+  post_delete:
+    templates/terraform/post_delete/org_security_policy.go.erb
+    # TODO: Remove once b/154369201 is closed.
   test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
 parameters:
   - !ruby/object:Api::Type::String

@@ -51,12 +51,12 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "disk_resource_policy_attachment_basic"
-    primary_resource_id: "attachment"
+    name: 'disk_resource_policy_attachment_basic'
+    primary_resource_id: 'attachment'
     vars:
-      disk_name: "my-disk"
-      policy_name: "my-resource-policy"
-id_format: "{{project}}/{{zone}}/{{disk}}/{{name}}"
+      disk_name: 'my-disk'
+      policy_name: 'my-resource-policy'
+id_format: '{{project}}/{{zone}}/{{disk}}/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/compute_disk_resource_policies_attachment.go.erb
   decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.erb

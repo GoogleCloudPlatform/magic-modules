@@ -33,14 +33,15 @@ min_version: beta
 description: |
   A container for `services`. Namespaces allow administrators to group services
   together and define permissions for a collection of services.
-import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}"]
+import_format:
+  ['projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}']
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_directory_namespace_basic"
-    primary_resource_id: "example"
+    name: 'service_directory_namespace_basic'
+    primary_resource_id: 'example'
     vars:
-      namespace_id: "example-namespace"
+      namespace_id: 'example-namespace'
     min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/service_directory_namespace.go.erb

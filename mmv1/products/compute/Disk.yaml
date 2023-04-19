@@ -64,17 +64,19 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   resource_definition: templates/terraform/resource_definition/disk.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "disk_basic"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\", context[\"random_suffix\"\
+    name: 'disk_basic'
+    primary_resource_id: 'default'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-test-disk%s\", context[\"random_suffix\"\
       ])"
     vars:
-      disk_name: "test-disk"
+      disk_name: 'test-disk'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'name'
-  import_format: ["projects/{{project}}/zones/{{zone}}/disks/{{name}}", "{{name}}"]
+  import_format:
+    ['projects/{{project}}/zones/{{zone}}/disks/{{name}}', '{{name}}']
   base_url: projects/{{project}}/zones/{{zone}}/disks/{{name}}
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -104,7 +106,7 @@ parameters:
         output: true
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - !ruby/object:Api::Type::String
-        name: "kmsKeySelfLink"
+        name: 'kmsKeySelfLink'
         api_name: 'kmsKeyName'
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
@@ -153,8 +155,8 @@ parameters:
       - !ruby/object:Api::Type::String
         name: 'rsaEncryptedKey'
         description: |
-          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit 
-          customer-supplied encryption key to either encrypt or decrypt 
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
       - !ruby/object:Api::Type::String
@@ -165,7 +167,7 @@ parameters:
         output: true
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - !ruby/object:Api::Type::String
-        name: "kmsKeySelfLink"
+        name: 'kmsKeySelfLink'
         api_name: 'kmsKeyName'
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
@@ -209,7 +211,7 @@ parameters:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - !ruby/object:Api::Type::String
-        name: "kmsKeySelfLink"
+        name: 'kmsKeySelfLink'
         api_name: 'kmsKeyName'
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
@@ -341,7 +343,8 @@ properties:
     # and prevent sending or reading in API requests
     url_param_only: true
     default_value: 'SCSI'
-    deprecation_message: This field is no longer in use, disk interfaces will be automatically
+    deprecation_message:
+      This field is no longer in use, disk interfaces will be automatically
       determined on attachment. To resolve this issue, remove this field from your
       config.
     description: |
@@ -407,7 +410,8 @@ properties:
       name: 'resourcePolicy'
       resource: 'ResourcePolicy'
       imports: 'selfLink'
-      description: 'A resource policy applied to this disk for automatic snapshot
+      description:
+        'A resource policy applied to this disk for automatic snapshot
         creations.'
   - !ruby/object:Api::Type::Boolean
     name: 'multiWriter'

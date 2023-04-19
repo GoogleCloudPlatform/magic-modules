@@ -48,62 +48,63 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_basic"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\", context[\"\
+    name: 'backend_service_basic'
+    primary_resource_id: 'default'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-backend-service%s\", context[\"\
       random_suffix\"])"
     vars:
-      backend_service_name: "backend-service"
-      http_health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache_simple"
-    primary_resource_id: "default"
+    name: 'backend_service_cache_simple'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      http_health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache_include_http_headers"
-    primary_resource_id: "default"
+    name: 'backend_service_cache_include_http_headers'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
+      backend_service_name: 'backend-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache_include_named_cookies"
-    primary_resource_id: "default"
+    name: 'backend_service_cache_include_named_cookies'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
+      backend_service_name: 'backend-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_cache"
-    primary_resource_id: "default"
+    name: 'backend_service_cache'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      http_health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_traffic_director_round_robin"
+    name: 'backend_service_traffic_director_round_robin'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_traffic_director_ring_hash"
+    name: 'backend_service_traffic_director_ring_hash'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_network_endpoint"
+    name: 'backend_service_network_endpoint'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      neg_name: "network-endpoint"
+      backend_service_name: 'backend-service'
+      neg_name: 'network-endpoint'
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_external_managed"
-    primary_resource_id: "default"
+    name: 'backend_service_external_managed'
+    primary_resource_id: 'default'
     vars:
-      backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET
@@ -712,7 +713,8 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: 'generated_id'
     api_name: 'id'
-    description: 'The unique identifier for the resource. This identifier is defined
+    description:
+      'The unique identifier for the resource. This identifier is defined
       by the server.'
     output: true
   - !ruby/object:Api::Type::NestedObject
@@ -924,7 +926,7 @@ properties:
               name: 'data'
               description: |
                 An optional, arbitrary JSON object with configuration data, understood
-                by a locally installed custom policy implementation.          
+                by a locally installed custom policy implementation.
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -1202,7 +1204,7 @@ properties:
       - :TCP
       - :SSL
       - :GRPC
-  # TODO: make a ResourceRef to Security Policy
+    # TODO: make a ResourceRef to Security Policy
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'securityPolicy'

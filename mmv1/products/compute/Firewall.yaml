@@ -59,16 +59,16 @@ docs: !ruby/object:Provider::Terraform::Docs
     If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firewall_basic"
-    primary_resource_id: "default"
+    name: 'firewall_basic'
+    primary_resource_id: 'default'
     vars:
-      firewall_name: "test-firewall"
-      network_name: "test-network"
+      firewall_name: 'test-firewall'
+      network_name: 'test-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firewall_with_target_tags"
-    primary_resource_id: "rules"
+    name: 'firewall_with_target_tags'
+    primary_resource_id: 'rules'
     vars:
-      firewall_name: "my-firewall-rule"
+      firewall_name: 'my-firewall-rule'
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode

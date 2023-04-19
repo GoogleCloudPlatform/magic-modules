@@ -46,29 +46,30 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 autogen_async: false
-id_format: "projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}"]
+id_format: 'projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}'
+import_format:
+  ['projects/{{project}}/locations/{{location}}/attachedClusters/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "container_attached_cluster_basic"
-    primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
-    primary_resource_id: "primary"
+    name: 'container_attached_cluster_basic'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'primary'
     vars:
-      name: "basic"
+      name: 'basic'
   - !ruby/object:Provider::Terraform::Examples
-    name: "container_attached_cluster_full"
-    primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
-    primary_resource_id: "primary"
+    name: 'container_attached_cluster_full'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'primary'
     vars:
-      name: "basic"
+      name: 'basic'
   - !ruby/object:Provider::Terraform::Examples
-    name: "container_attached_cluster_ignore_errors"
-    primary_resource_name: "fmt.Sprintf(\"basic%s\", context[\"random_suffix\"])"
-    primary_resource_id: "primary"
+    name: 'container_attached_cluster_ignore_errors'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+    primary_resource_id: 'primary'
     vars:
-      name: "basic"
+      name: 'basic'
     ignore_read_extra:
-      - "deletion_policy"
+      - 'deletion_policy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/containerattached_cluster_diff.go
   pre_update: templates/terraform/pre_update/containerattached_update.go.erb
@@ -312,4 +313,3 @@ properties:
             name: enabled
             description: |
               Enable Managed Collection.
-

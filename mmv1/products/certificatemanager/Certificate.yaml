@@ -38,22 +38,22 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/certificates/{{name}}"]
+import_format: ['projects/{{project}}/locations/global/certificates/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "certificate_manager_google_managed_certificate"
-    primary_resource_id: "default"
+    name: 'certificate_manager_google_managed_certificate'
+    primary_resource_id: 'default'
     vars:
-      dns_auth_name: "dns-auth"
-      dns_auth_subdomain: "subdomain"
-      dns_auth_name2: "dns-auth2"
-      dns_auth_subdomain2: "subdomain2"
-      cert_name: "dns-cert"
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      dns_auth_name2: 'dns-auth2'
+      dns_auth_subdomain2: 'subdomain2'
+      cert_name: 'dns-cert'
   - !ruby/object:Provider::Terraform::Examples
-    name: "certificate_manager_self_managed_certificate"
-    primary_resource_id: "default"
+    name: 'certificate_manager_self_managed_certificate'
+    primary_resource_id: 'default'
     vars:
-      cert_name: "self-managed-cert"
+      cert_name: 'self-managed-cert'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/cert_manager.erb
 parameters:
@@ -105,7 +105,7 @@ properties:
         exactly_one_of:
           - self_managed.0.certificate_pem
           - self_managed.0.pem_certificate
-        deprecation_message: "Deprecated in favor of `pem_certificate`"
+        deprecation_message: 'Deprecated in favor of `pem_certificate`'
         description: |
           **Deprecated** The certificate chain in PEM-encoded form.
 
@@ -116,7 +116,7 @@ properties:
         exactly_one_of:
           - self_managed.0.private_key_pem
           - self_managed.0.pem_private_key
-        deprecation_message: "Deprecated in favor of `pem_private_key`"
+        deprecation_message: 'Deprecated in favor of `pem_private_key`'
         description: |
           **Deprecated** The private key of the leaf certificate in PEM-encoded form.
         sensitive: true

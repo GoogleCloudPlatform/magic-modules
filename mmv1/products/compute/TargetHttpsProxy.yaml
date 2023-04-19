@@ -45,14 +45,14 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "target_https_proxy_basic"
-    primary_resource_id: "default"
+    name: 'target_https_proxy_basic'
+    primary_resource_id: 'default'
     vars:
-      target_https_proxy_name: "test-proxy"
-      ssl_certificate_name: "my-certificate"
-      url_map_name: "url-map"
-      backend_service_name: "backend-service"
-      http_health_check_name: "http-health-check"
+      target_https_proxy_name: 'test-proxy'
+      ssl_certificate_name: 'my-certificate'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -110,7 +110,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'certificateMap'
     description: |
-      A reference to the CertificateMap resource uri that identifies a certificate map 
+      A reference to the CertificateMap resource uri that identifies a certificate map
       associated with the given target proxy. This field can only be set for global target proxies.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
     update_verb: :POST

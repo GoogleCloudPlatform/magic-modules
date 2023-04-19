@@ -40,36 +40,36 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_basic"
-    primary_resource_id: "foo"
+    name: 'resource_policy_basic'
+    primary_resource_id: 'foo'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_full"
-    primary_resource_id: "bar"
+    name: 'resource_policy_full'
+    primary_resource_id: 'bar'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_placement_policy"
-    primary_resource_id: "baz"
+    name: 'resource_policy_placement_policy'
+    primary_resource_id: 'baz'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_placement_policy_max_distance"
-    min_version: "beta"
-    primary_resource_id: "baz"
+    name: 'resource_policy_placement_policy_max_distance'
+    min_version: 'beta'
+    primary_resource_id: 'baz'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_instance_schedule_policy"
-    primary_resource_id: "hourly"
+    name: 'resource_policy_instance_schedule_policy'
+    primary_resource_id: 'hourly'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "resource_policy_snapshot_schedule_chain_name"
-    primary_resource_id: "hourly"
+    name: 'resource_policy_snapshot_schedule_chain_name'
+    primary_resource_id: 'hourly'
     vars:
-      name: "gce-policy"
+      name: 'gce-policy'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region
@@ -250,8 +250,8 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'chainName'
             description: |
-              Creates the new snapshot in the snapshot chain labeled with the 
-              specified name. The chain name must be 1-63 characters long and comply 
+              Creates the new snapshot in the snapshot chain labeled with the
+              specified name. The chain name must be 1-63 characters long and comply
               with RFC1035.
   - !ruby/object:Api::Type::NestedObject
     name: 'groupPlacementPolicy'

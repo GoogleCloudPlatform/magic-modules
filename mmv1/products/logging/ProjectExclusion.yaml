@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "ProjectExclusion"
+name: 'ProjectExclusion'
 base_url: projects/{{project}}/exclusions
 self_link: projects/{{project}}/exclusions/{{name}}
 collection_url_key: 'exclusions'

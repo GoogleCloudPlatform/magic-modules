@@ -53,7 +53,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 legacy_name: 'google_compute_router_peer'
 exclude_validator: true
-id_format: "projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}"
+id_format: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/{{name}}'
 mutex: router/{{region}}/{{router}}
 examples:
   # These examples are not used to autogenerate tests, as fine-grained
@@ -61,32 +61,32 @@ examples:
   # in a test step while parent resource still exists vs in CheckDestroy
   # when all resources have been deleted.
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_peer_basic"
-    primary_resource_id: "peer"
+    name: 'router_peer_basic'
+    primary_resource_id: 'peer'
     skip_test: true
     vars:
-      router_name: "my-router"
-      peer_name: "my-router-peer"
+      router_name: 'my-router'
+      peer_name: 'my-router-peer'
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_peer_disabled"
-    primary_resource_id: "peer"
+    name: 'router_peer_disabled'
+    primary_resource_id: 'peer'
     skip_test: true
     vars:
-      router_name: "my-router"
-      peer_name: "my-router-peer"
+      router_name: 'my-router'
+      peer_name: 'my-router-peer'
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_peer_bfd"
-    primary_resource_id: "peer"
+    name: 'router_peer_bfd'
+    primary_resource_id: 'peer'
     skip_test: true
     vars:
-      router_name: "my-router"
-      peer_name: "my-router-peer"
+      router_name: 'my-router'
+      peer_name: 'my-router-peer'
   - !ruby/object:Provider::Terraform::Examples
-    name: "router_peer_router_appliance"
-    primary_resource_id: "peer"
+    name: 'router_peer_router_appliance'
+    primary_resource_id: 'peer'
     vars:
-      router_name: "my-router"
-      peer_name: "my-router-peer"
+      router_name: 'my-router'
+      peer_name: 'my-router-peer'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'router'

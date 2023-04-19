@@ -45,12 +45,12 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "ssl_policy_basic"
-    primary_resource_id: "prod-ssl-policy"
+    name: 'ssl_policy_basic'
+    primary_resource_id: 'prod-ssl-policy'
     vars:
-      production_ssl_policy_name: "production-ssl-policy"
-      nonprod_ssl_policy_name: "nonprod-ssl-policy"
-      custom_ssl_policy_name: "custom-ssl-policy"
+      production_ssl_policy_name: 'production-ssl-policy'
+      nonprod_ssl_policy_name: 'nonprod-ssl-policy'
+      custom_ssl_policy_name: 'custom-ssl-policy'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/ssl_policy.erb'
   resource_definition: 'templates/terraform/resource_definition/ssl_policy.erb'

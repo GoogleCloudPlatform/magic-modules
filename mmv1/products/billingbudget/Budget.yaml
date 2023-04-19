@@ -33,7 +33,8 @@ docs: !ruby/object:Provider::Terraform::Docs
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
 id_format: 'billingAccounts/{{billing_account}}/budgets/{{name}}'
-import_format: ["billingAccounts/{{billing_account}}/budgets/{{name}}", "{{name}}"]
+import_format:
+  ['billingAccounts/{{billing_account}}/budgets/{{name}}', '{{name}}']
 schema_version: 1
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -78,7 +79,7 @@ examples:
     skip_docs: true
     vars:
       display_name: 'Example Billing Budget'
-      topic_name: "example-topic"
+      topic_name: 'example-topic'
     test_env_vars:
       billing_acct: :MASTER_BILLING_ACCT
 parameters:
@@ -109,14 +110,14 @@ properties:
       spend against the budget.
     default_from_api: true
     update_mask_fields:
-      - "budgetFilter.projects"
-      - "budgetFilter.labels"
-      - "budgetFilter.calendarPeriod"
-      - "budgetFilter.customPeriod"
-      - "budgetFilter.services"
-      - "budgetFilter.creditTypesTreatment"
-      - "budgetFilter.creditTypes"
-      - "budgetFilter.subaccounts"
+      - 'budgetFilter.projects'
+      - 'budgetFilter.labels'
+      - 'budgetFilter.calendarPeriod'
+      - 'budgetFilter.customPeriod'
+      - 'budgetFilter.services'
+      - 'budgetFilter.creditTypesTreatment'
+      - 'budgetFilter.creditTypes'
+      - 'budgetFilter.subaccounts'
     properties:
       - !ruby/object:Api::Type::Array
         name: projects
@@ -227,7 +228,7 @@ properties:
           - budget_filter.0.customPeriod
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/billing_budget_budget_filter_labels.erb'
-        custom_flatten: "templates/terraform/custom_flatten/billing_budget_budget_filter_labels.erb"
+        custom_flatten: 'templates/terraform/custom_flatten/billing_budget_budget_filter_labels.erb'
       - !ruby/object:Api::Type::Enum
         name: calendarPeriod
         at_least_one_of:
@@ -296,7 +297,7 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: endDate
             description: |
-              Optional. The end date of the time period. Budgets with elapsed end date won't be processed. 
+              Optional. The end date of the time period. Budgets with elapsed end date won't be processed.
               If unset, specifies to track all usage incurred since the startDate.
             properties:
               - !ruby/object:Api::Type::Integer
@@ -326,9 +327,9 @@ properties:
     description: |
       The budgeted amount for each usage period.
     update_mask_fields:
-      - "amount.specifiedAmount.currencyCode"
-      - "amount.specifiedAmount.units"
-      - "amount.specifiedAmount.nanos"
+      - 'amount.specifiedAmount.currencyCode'
+      - 'amount.specifiedAmount.units'
+      - 'amount.specifiedAmount.nanos'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: specifiedAmount
@@ -404,10 +405,10 @@ properties:
       billing account's spend, regardless of the thresholds defined
       using threshold rules.
     update_mask_fields:
-      - "notificationsRule.pubsubTopic"
-      - "notificationsRule.schemaVersion"
-      - "notificationsRule.monitoringNotificationChannels"
-      - "notificationsRule.disableDefaultIamRecipients"
+      - 'notificationsRule.pubsubTopic'
+      - 'notificationsRule.schemaVersion'
+      - 'notificationsRule.monitoringNotificationChannels'
+      - 'notificationsRule.disableDefaultIamRecipients'
     properties:
       - !ruby/object:Api::Type::String
         name: pubsubTopic
@@ -421,7 +422,7 @@ properties:
           at regular intervals to the topic.
       - !ruby/object:Api::Type::String
         name: schemaVersion
-        default_value: "1.0"
+        default_value: '1.0'
         description: |
           The schema version of the notification. Only "1.0" is
           accepted. It represents the JSON schema as defined in
@@ -447,4 +448,3 @@ properties:
           when a threshold is exceeded. Default recipients are
           those with Billing Account Administrators and Billing
           Account Users IAM roles for the target account.
-
