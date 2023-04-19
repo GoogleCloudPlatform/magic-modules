@@ -135,6 +135,8 @@ module Provider
           end
 
           FileUtils.copy_entry source, target_file
+
+          replace_import_path(output_folder, target) if File.extname(target) == '.go'
         end
       end.map(&:join)
     end
@@ -180,9 +182,36 @@ module Provider
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           file_template.generate(pwd, source, target, self)
+
+          replace_import_path(output_folder, target)
         end
       end.map(&:join)
       Dir.chdir pwd
+    end
+
+    def replace_import_path(output_folder, target)
+      return unless @target_version_name != 'ga'
+
+      # Replace the import pathes in utility files
+      case @target_version_name
+      when 'beta'
+        tpg = 'github.com/hashicorp/terraform-provider-google-beta'
+        dir = 'google-beta'
+      else
+        tpg = 'github.com/hashicorp/terraform-provider-google-private'
+        dir = 'google-private'
+      end
+
+      data = File.read("#{output_folder}/#{target}")
+      data = data.gsub(
+        'github.com/hashicorp/terraform-provider-google/google',
+        "#{tpg}/#{dir}"
+      )
+      data = data.gsub(
+        'github.com/hashicorp/terraform-provider-google/version',
+        "#{tpg}/version"
+      )
+      File.write("#{output_folder}/#{target}", data)
     end
 
     def generate_objects(output_folder, types, generate_code, generate_docs)
