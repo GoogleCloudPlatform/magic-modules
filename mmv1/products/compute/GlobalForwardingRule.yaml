@@ -46,128 +46,128 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "external_ssl_proxy_lb_mig_backend"
-    primary_resource_id: "default"
+    name: 'external_ssl_proxy_lb_mig_backend'
+    primary_resource_id: 'default'
     skip_test: true
     vars:
-      ssl_proxy_xlb_network: "ssl-proxy-xlb-network"
-      ssl_proxy_xlb_subnet: "ssl-proxy-xlb-subnet"
-      ssl_proxy_xlb_ip: "ssl-proxy-xlb-ip"
-      default_cert: "default-cert"
-      test_proxy: "test-proxy"
-      ssl_proxy_xlb_forwarding_rule: "ssl-proxy-xlb-forwarding-rule"
-      ssl_proxy_xlb_backend_service: "ssl-proxy-xlb-backend-service"
-      ssl_proxy_health_check: "ssl-proxy-health-check"
-      ssl_proxy_xlb_mig_template: "ssl-proxy-xlb-mig-template"
-      ssl_proxy_xlb_mig1: "ssl-proxy-xlb-mig1"
-      ssl_proxy_xlb_fw_allow_hc: "ssl-proxy-xlb-fw-allow-hc"
+      ssl_proxy_xlb_network: 'ssl-proxy-xlb-network'
+      ssl_proxy_xlb_subnet: 'ssl-proxy-xlb-subnet'
+      ssl_proxy_xlb_ip: 'ssl-proxy-xlb-ip'
+      default_cert: 'default-cert'
+      test_proxy: 'test-proxy'
+      ssl_proxy_xlb_forwarding_rule: 'ssl-proxy-xlb-forwarding-rule'
+      ssl_proxy_xlb_backend_service: 'ssl-proxy-xlb-backend-service'
+      ssl_proxy_health_check: 'ssl-proxy-health-check'
+      ssl_proxy_xlb_mig_template: 'ssl-proxy-xlb-mig-template'
+      ssl_proxy_xlb_mig1: 'ssl-proxy-xlb-mig1'
+      ssl_proxy_xlb_fw_allow_hc: 'ssl-proxy-xlb-fw-allow-hc'
     ignore_read_extra:
-      - "port_range"
-      - "target"
-      - "ip_address"
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "external_tcp_proxy_lb_mig_backend"
-    primary_resource_id: "default"
+    name: 'external_tcp_proxy_lb_mig_backend'
+    primary_resource_id: 'default'
     vars:
-      tcp_proxy_xlb_network: "tcp-proxy-xlb-network"
-      tcp_proxy_xlb_subnet: "tcp-proxy-xlb-subnet"
-      tcp_proxy_xlb_ip: "tcp-proxy-xlb-ip"
-      tcp_proxy_xlb_forwarding_rule: "tcp-proxy-xlb-forwarding-rule"
-      test_proxy_health_check: "test-proxy-health-check"
-      tcp_proxy_xlb_backend_service: "tcp-proxy-xlb-backend-service"
-      tcp_proxy_health_check: "tcp-proxy-health-check"
-      tcp_proxy_xlb_mig_template: "tcp-proxy-xlb-mig-template"
-      tcp_proxy_xlb_mig1: "tcp-proxy-xlb-mig1"
-      tcp_proxy_xlb_fw_allow_hc: "tcp-proxy-xlb-fw-allow-hc"
+      tcp_proxy_xlb_network: 'tcp-proxy-xlb-network'
+      tcp_proxy_xlb_subnet: 'tcp-proxy-xlb-subnet'
+      tcp_proxy_xlb_ip: 'tcp-proxy-xlb-ip'
+      tcp_proxy_xlb_forwarding_rule: 'tcp-proxy-xlb-forwarding-rule'
+      test_proxy_health_check: 'test-proxy-health-check'
+      tcp_proxy_xlb_backend_service: 'tcp-proxy-xlb-backend-service'
+      tcp_proxy_health_check: 'tcp-proxy-health-check'
+      tcp_proxy_xlb_mig_template: 'tcp-proxy-xlb-mig-template'
+      tcp_proxy_xlb_mig1: 'tcp-proxy-xlb-mig1'
+      tcp_proxy_xlb_fw_allow_hc: 'tcp-proxy-xlb-fw-allow-hc'
     min_version: beta
     ignore_read_extra:
-      - "port_range"
-      - "target"
-      - "ip_address"
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "external_http_lb_mig_backend_custom_header"
-    primary_resource_id: "default"
+    name: 'external_http_lb_mig_backend_custom_header'
+    primary_resource_id: 'default'
     vars:
-      xlb_network_name: "l7-xlb-network"
-      backend_subnet_name: "l7-xlb-subnet"
-      address_name: "l7-xlb-static-ip"
-      forwarding_rule_name: "l7-xlb-forwarding-rule"
-      target_http_proxy_name: "l7-xlb-target-http-proxy"
-      url_map_name: "l7-xlb-url-map"
-      backend_service_name: "l7-xlb-backend-service"
-      mig_template_name: "l7-xlb-mig-template"
-      hc_name: "l7-xlb-hc"
-      mig_name: "l7-xlb-mig1"
-      fw_allow_hc_name: "l7-xlb-fw-allow-hc"
+      xlb_network_name: 'l7-xlb-network'
+      backend_subnet_name: 'l7-xlb-subnet'
+      address_name: 'l7-xlb-static-ip'
+      forwarding_rule_name: 'l7-xlb-forwarding-rule'
+      target_http_proxy_name: 'l7-xlb-target-http-proxy'
+      url_map_name: 'l7-xlb-url-map'
+      backend_service_name: 'l7-xlb-backend-service'
+      mig_template_name: 'l7-xlb-mig-template'
+      hc_name: 'l7-xlb-hc'
+      mig_name: 'l7-xlb-mig1'
+      fw_allow_hc_name: 'l7-xlb-fw-allow-hc'
     min_version: beta
     ignore_read_extra:
-      - "port_range"
-      - "target"
-      - "ip_address"
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_forwarding_rule_http"
-    primary_resource_id: "default"
+    name: 'global_forwarding_rule_http'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "global-rule"
-      http_proxy_name: "target-proxy"
-      backend_service_name: "backend"
+      forwarding_rule_name: 'global-rule'
+      http_proxy_name: 'target-proxy'
+      backend_service_name: 'backend'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_forwarding_rule_internal"
+    name: 'global_forwarding_rule_internal'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "global-rule"
-      http_proxy_name: "target-proxy"
-      backend_service_name: "backend"
-      igm_name: "igm-internal"
+      forwarding_rule_name: 'global-rule'
+      http_proxy_name: 'target-proxy'
+      backend_service_name: 'backend'
+      igm_name: 'igm-internal'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_forwarding_rule_external_managed"
-    primary_resource_id: "default"
+    name: 'global_forwarding_rule_external_managed'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "global-rule"
-      http_proxy_name: "target-proxy"
-      backend_service_name: "backend"
+      forwarding_rule_name: 'global-rule'
+      http_proxy_name: 'target-proxy'
+      backend_service_name: 'backend'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_forwarding_rule_hybrid"
-    primary_resource_id: "default"
+    name: 'global_forwarding_rule_hybrid'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "global-rule"
-      http_proxy_name: "target-proxy"
-      network_name: "my-network"
-      internal_network_name: "my-internal-network"
-      subnetwork_name: "my-subnetwork"
-      default_backend_service_name: "backend-default"
-      hybrid_backend_service_name: "backend-hybrid"
-      internal_backend_service_name": "backend-internal"
-      default_neg_name: "default-neg"
-      hybrid_neg_name: "hybrid-neg"
-      internal_neg_name: "internal-neg"
-      health_check_name: "health-check"
+      forwarding_rule_name: 'global-rule'
+      http_proxy_name: 'target-proxy'
+      network_name: 'my-network'
+      internal_network_name: 'my-internal-network'
+      subnetwork_name: 'my-subnetwork'
+      default_backend_service_name: 'backend-default'
+      hybrid_backend_service_name: 'backend-hybrid'
+      internal_backend_service_name": 'backend-internal'
+      default_neg_name: 'default-neg'
+      hybrid_neg_name: 'hybrid-neg'
+      internal_neg_name: 'internal-neg'
+      health_check_name: 'health-check'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "private_service_connect_google_apis"
+    name: 'private_service_connect_google_apis'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      network_name: "my-network"
-      subnetwork_name: "my-subnetwork"
-      global_address_name: "global-psconnect-ip"
-      forwarding_rule_name: "globalrule"
+      network_name: 'my-network'
+      subnetwork_name: 'my-subnetwork'
+      global_address_name: 'global-psconnect-ip'
+      forwarding_rule_name: 'globalrule'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "ip_address"
+      - 'ip_address'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 properties:
@@ -185,7 +185,7 @@ properties:
     name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
-  # This is a multi-resource resource reference (Address, GlobalAddress)
+    # This is a multi-resource resource reference (Address, GlobalAddress)
     exclude: true
   - !ruby/object:Api::Type::String
     name: 'IPAddress'
@@ -344,10 +344,10 @@ properties:
       identifies the network that the load balanced IP should belong to
       for this global forwarding rule. If this field is not specified,
       the default network will be used.
-  # TODO(nelsonjr): When implementing new types enable converting the
-  # manifest input from a single value to a range of form NN-NN. The API
-  # accepts a single value, e.g. '80', but the API stores and returns
-  # '80-80'. This causes idempotency false positive.
+    # TODO(nelsonjr): When implementing new types enable converting the
+    # manifest input from a single value to a range of form NN-NN. The API
+    # accepts a single value, e.g. '80', but the API stores and returns
+    # '80-80'. This causes idempotency false positive.
     default_from_api: true
     min_version: beta
   - !ruby/object:Api::Type::String
@@ -372,9 +372,9 @@ properties:
       * TargetSslProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
                         1883, 5222
       * TargetVpnGateway: 500, 4500
-  # This is a multi-resource resource reference (TargetHttp(s)Proxy,
-  # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
-  # TargetInstance)
+    # This is a multi-resource resource reference (TargetHttp(s)Proxy,
+    # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
+    # TargetInstance)
     diff_suppress_func: 'PortRangeDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'target'
