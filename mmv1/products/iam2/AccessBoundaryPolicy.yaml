@@ -30,6 +30,8 @@ examples:
     vars:
       policy_name: "my-ab-policy"
       account_id: "svc-acc"
+      project_id: "my-project"
+      access_level_title: "chromeos_no_lock"
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
