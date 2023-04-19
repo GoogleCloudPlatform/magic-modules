@@ -54,7 +54,7 @@ func NewSpannerDatabaseIamUpdater(d TerraformResourceData, config *transport_tpg
 }
 
 func SpannerDatabaseIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
-	return ParseImportId([]string{"(?P<project>[^/]+)/(?P<instance*transport_tpg.Configase>[^/]+)"}, d, config)
+	return ParseImportId([]string{"(?P<project>[^/]+)/(?P<instance>[^/]+)/(?P<database>[^/]+)"}, d, config)
 }
 
 func (u *SpannerDatabaseIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {

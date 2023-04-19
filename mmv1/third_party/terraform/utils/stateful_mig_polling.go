@@ -75,7 +75,7 @@ func resourceComputeRegionPerInstanceConfigPollRead(d *schema.ResourceData, meta
 // Returns an instance name in the form zones/{zone}/instances/{instance} for the managed
 // instance matching the name of a PerInstanceConfig
 func findInstanceName(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
-	url, err := ReplaceVars(d, config, "{{ComputeBasePat*transport_tpg.Configject}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/listManagedInstances")
+	url, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/listManagedInstances")
 	if err != nil {
 		return "", err
 	}

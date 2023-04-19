@@ -54,7 +54,7 @@ func ContainerAttachedOperationWaitTimeWithResponse(config *transport_tpg.Config
 
 func ContainerAttachedOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	if val, ok := op["name"]; !ok || val == "" {
-		// This was a synchronous call - there is no *transport_tpg.Config for.
+		// This was a synchronous call - there is no operation to wait for.
 		return nil
 	}
 	w, err := createContainerAttachedWaiter(config, op, project, activity, userAgent)
