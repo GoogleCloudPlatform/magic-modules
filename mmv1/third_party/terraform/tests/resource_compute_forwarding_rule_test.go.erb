@@ -124,6 +124,7 @@ func TestAccComputeForwardingRule_serviceDirectoryRegistrations(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -155,6 +156,7 @@ func TestAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(t *testing.T
 		},
 	})
 }
+<% end -%>
 
 func TestAccComputeForwardingRule_forwardingRuleRegionalSteeringExampleUpdate(t *testing.T) {
 	t.Parallel()
@@ -323,6 +325,7 @@ resource "google_service_directory_service" "examplesvc" {
 `, poolName, ruleName, svcDirNamespace, serviceName)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeForwardingRule_forwardingRuleVpcPscExampleUpdate(context map[string]interface{}) string {
 	return Nprintf(`
 // Forwarding rule for VPC private service connect
@@ -432,6 +435,7 @@ resource "google_compute_health_check" "producer_service_health_check" {
 }
 `, context)
 }
+<% end -%>
 
 func testAccComputeForwardingRule_forwardingRuleRegionalSteeringExampleUpdate(context map[string]interface{}) string {
 	return Nprintf(`
