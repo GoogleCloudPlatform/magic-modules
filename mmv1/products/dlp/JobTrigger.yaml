@@ -444,13 +444,11 @@ properties:
                             properties:
                               - !ruby/object:Api::Type::NestedObject
                                 name: 'hotwordRegex'
-                                required: true
                                 description: Regular expression pattern defining what qualifies
                                   as a hotword.
                                 properties:
                                   - !ruby/object:Api::Type::String
                                     name: 'pattern'
-                                    required: true
                                     description: |
                                       Pattern defining the regular expression. Its syntax
                                       (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
