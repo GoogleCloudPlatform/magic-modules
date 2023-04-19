@@ -122,7 +122,33 @@ func setupSDKProviderConfigTest(t *testing.T, configValues map[string]interface{
 		}
 	}
 
-	// Set ENVs
+	// Unset any ENVs in the test environment here
+	// The testing package restores the original values afterwards
+	envVarsSets := [][]string{
+		CredsEnvVars,
+		projectNumberEnvVars,
+		ProjectEnvVars,
+		firestoreProjectEnvVars,
+		regionEnvVars,
+		zoneEnvVars,
+		orgEnvVars,
+		custIdEnvVars,
+		identityUserEnvVars,
+		orgEnvDomainVars,
+		serviceAccountEnvVars,
+		billingAccountEnvVars,
+	}
+	unsetEnvs := []string{}
+	for _, set := range envVarsSets {
+		unsetEnvs = append(unsetEnvs, set...)
+	}
+	if len(unsetEnvs) > 0 {
+		for _, env := range unsetEnvs {
+			t.Setenv(env, "") // set to an empty string to 'unset' in the test run environment
+		}
+	}
+
+	// Set ENVs for the test case
 	if len(envValues) > 0 {
 		for k, v := range envValues {
 			t.Setenv(k, v)
