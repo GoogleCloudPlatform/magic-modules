@@ -136,11 +136,7 @@ module Provider
 
           FileUtils.copy_entry source, target_file
 
-<<<<<<< HEAD
           replace_import_path(output_folder, target) if File.extname(target) == '.go'
-=======
-         replace_import_path(output_folder, target) if File.extname(target) == '.go'
->>>>>>> f89d07900 (Add transport path)
         end
       end.map(&:join)
     end
@@ -202,16 +198,11 @@ module Provider
         tpg = 'github.com/hashicorp/terraform-provider-google-beta'
         dir = 'google-beta'
       else
-<<<<<<< HEAD
-        tpg = 'internal/terraform-next'
-=======
         tpg = 'github.com/hashicorp/terraform-provider-google-private'
->>>>>>> f89d07900 (Add transport path)
         dir = 'google-private'
       end
 
       data = File.read("#{output_folder}/#{target}")
-<<<<<<< HEAD
       data = data.gsub(
         'github.com/hashicorp/terraform-provider-google/google',
         "#{tpg}/#{dir}"
@@ -220,12 +211,6 @@ module Provider
         'github.com/hashicorp/terraform-provider-google/version',
         "#{tpg}/version"
       )
-=======
-      data = data.gsub('github.com/hashicorp/terraform-provider-google/google',
-                        "#{tpg}/#{dir}")
-      data = data.gsub('github.com/hashicorp/terraform-provider-google/version',
-                        "#{tpg}/version")
->>>>>>> f89d07900 (Add transport path)
       File.write("#{output_folder}/#{target}", data)
     end
 
