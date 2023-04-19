@@ -202,6 +202,8 @@ module Provider
                         'third_party/validator/folder.go'],
                        ['converters/google/resources/getconfig_test.go',
                         'third_party/validator/getconfig_test.go'],
+                       ['converters/google/resources/transport/config_test_utils.go',
+                        'third_party/terraform/transport/config_test_utils.go'],
                        ['converters/google/resources/json_map.go',
                         'third_party/validator/json_map.go'],
                        ['converters/google/resources/project.go',

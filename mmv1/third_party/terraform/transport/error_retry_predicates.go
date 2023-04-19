@@ -8,8 +8,12 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
 	"google.golang.org/api/googleapi"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type RetryErrorPredicateFunc func(error) (bool, string)
@@ -192,4 +196,44 @@ func IsNotFilestoreQuotaError(err error) (bool, string) {
 		}
 	}
 	return isCommonRetryableErrorCode(err)
+}
+
+// Retry if App Engine operation returns a 409 with a specific message for
+// concurrent operations, or a 404 indicating p4sa has not yet propagated.
+func IsAppEngineRetryableError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "operation is already in progress") {
+			return true, "Waiting for other concurrent App Engine changes to finish"
+		}
+		if gerr.Code == 404 && strings.Contains(strings.ToLower(gerr.Body), "unable to retrieve p4sa") {
+			return true, "Waiting for P4SA propagation to GAIA"
+		}
+	}
+	return false, ""
+}
+
+// Bigtable uses gRPC and thus does not return errors of type *googleapi.Error.
+// Instead the errors returned are *status.Error. See the types of codes returned
+// here (https://pkg.go.dev/google.golang.org/grpc/codes#Code).
+func IsBigTableRetryableError(err error) (bool, string) {
+	// The error is retryable if the error code is not OK and has a retry delay.
+	// The retry delay is currently not used.
+	if errorStatus, ok := status.FromError(err); ok && errorStatus.Code() != codes.OK {
+		var retryDelayDuration time.Duration
+		for _, detail := range errorStatus.Details() {
+			retryInfo, ok := detail.(*errdetails.RetryInfo)
+			if !ok {
+				continue
+			}
+			retryDelay := retryInfo.GetRetryDelay()
+			retryDelayDuration = time.Duration(retryDelay.Seconds)*time.Second + time.Duration(retryDelay.Nanos)*time.Nanosecond
+			break
+		}
+		if retryDelayDuration != 0 {
+			// TODO: Consider sleep for `retryDelayDuration` before retrying.
+			return true, "Bigtable operation failed with a retryable error, will retry"
+		}
+	}
+
+	return false, ""
 }
