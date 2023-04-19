@@ -46,7 +46,8 @@ properties:
     description: 'The content generation of this object. Used for object versioning.'
   - !ruby/object:Api::Type::String
     name: 'id'
-    description: 'The ID of the object, including the bucket name, object name, and
+    description:
+      'The ID of the object, including the bucket name, object name, and
       generation number.'
   - !ruby/object:Api::Type::String
     name: 'md5Hash'

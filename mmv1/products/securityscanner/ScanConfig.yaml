@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: ScanConfig
 base_url: projects/{{project}}/scanConfigs
-self_link: "{{name}}"
+self_link: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -25,12 +25,12 @@ description: |
   A ScanConfig resource contains the configurations to launch a scan.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "scan_config_basic"
-    primary_resource_id: "scan-config"
+    name: 'scan_config_basic'
+    primary_resource_id: 'scan-config'
     min_version: beta
     vars:
-      address_name: "scan-basic-static-ip"
-      scan_config_name: "terraform-scan-config"
+      address_name: 'scan-basic-static-ip'
+      scan_config_name: 'terraform-scan-config'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
@@ -134,7 +134,7 @@ properties:
     name: schedule
     description: |
       The schedule of the ScanConfig
-    properties:      
+    properties:
       - !ruby/object:Api::Type::Time
         name: scheduleTime
         description: |
