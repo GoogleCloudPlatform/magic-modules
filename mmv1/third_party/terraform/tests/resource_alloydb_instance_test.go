@@ -125,14 +125,9 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-
-  initial_user {
-    password = "tf-test-alloydb-cluster%{random_suffix}"
-  }
 }
 
-data "google_project" "project" {
-}
+data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
   name = "tf-test-alloydb-cluster%{random_suffix}"
@@ -201,14 +196,9 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
-
-  initial_user {
-    password = "tf-test-alloydb-cluster%{random_suffix}"
-  }
 }
 
-data "google_project" "project" {
-}
+data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
   name = "tf-test-alloydb-cluster%{random_suffix}"
