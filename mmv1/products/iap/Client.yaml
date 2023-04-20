@@ -35,7 +35,7 @@ examples:
     name: "iap_client"
     primary_resource_id: "project_client"
     vars:
-      project_id: 'brand-proj-'
+      project_id: 'my-project'
     test_env_vars:
       org_id: :ORG_ID
       org_domain: :ORG_DOMAIN

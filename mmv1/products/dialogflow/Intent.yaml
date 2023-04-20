@@ -34,6 +34,8 @@ examples:
     name: "dialogflow_intent_full"
     primary_resource_id: "full_intent"
     vars:
+      project_id: "my-project"
+      account_id: "my-account"
       intent_name: "full-intent"
     test_env_vars:
       org_id: :ORG_ID

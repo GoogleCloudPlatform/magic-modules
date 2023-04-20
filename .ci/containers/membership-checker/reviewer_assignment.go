@@ -132,7 +132,7 @@ func requestPullRequestReviewer(prNumber, assignee, GITHUB_TOKEN string) error {
 		return fmt.Errorf("Error adding reviewer for PR %s", prNumber)
 	}
 
-	fmt.Printf("Successfully added reviewer %s to pull request %s", assignee, prNumber)
+	fmt.Printf("Successfully added reviewer %s to pull request %s\n", assignee, prNumber)
 
 	return nil
 }
@@ -153,7 +153,7 @@ func requestRandomReviewer(prNumber, GITHUB_TOKEN string) error {
 
 func postComment(prNumber, reviewer, GITHUB_TOKEN string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
-	comment, err := readFile("./reviewer_assignment_comment.md")
+	comment, err := readFile(".ci/containers/membership-checker/REVIEWER_ASSIGNMENT_COMMENT.md")
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func postComment(prNumber, reviewer, GITHUB_TOKEN string) error {
 		return fmt.Errorf("Error posting reviewer assignment comment for PR %s", prNumber)
 	}
 
-	fmt.Printf("Successfully posted reviewer assignment comment to pull request %s", prNumber)
+	fmt.Printf("Successfully posted reviewer assignment comment to pull request %s\n", prNumber)
 
 	return nil
 }

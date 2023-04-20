@@ -63,6 +63,8 @@ examples:
     ignore_read_extra:
       - project
       - etag
+    vars:
+      project_id: "my-project"
   - !ruby/object:Provider::Terraform::Examples
     name: "firestore_database_datastore_mode"
     primary_resource_id: "datastore_mode_database"
@@ -72,6 +74,8 @@ examples:
     ignore_read_extra:
       - project
       - etag
+    vars:
+      project_id: "my-project"
 properties:
   - !ruby/object:Api::Type::String
     name: name
