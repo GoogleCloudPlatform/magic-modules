@@ -190,6 +190,12 @@ resource "google_alloydb_instance" "default" {
 	  cpu_count = 4
   }
   depends_on = [google_service_networking_connection.vpc_connection]
+  lifecycle {
+    ignore_changes = [
+      gce_zone,
+      annotations
+    ]
+  }
 }
 
 resource "google_alloydb_cluster" "default" {
