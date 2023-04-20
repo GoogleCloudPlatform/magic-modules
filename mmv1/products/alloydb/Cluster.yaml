@@ -86,6 +86,37 @@
     - !ruby/object:Api::Type::KeyValuePairs
       name: "labels"
       description: "User-defined labels for the alloydb cluster."
+    - !ruby/object:Api::Type::NestedObject
+      name: "encryptionConfig"
+      description: |
+        EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
+      properties:
+        - !ruby/object:Api::Type::String
+          name: "kmsKeyName"
+          description: |
+            The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
+          immutable: true
+    - !ruby/object:Api::Type::NestedObject
+      name: "encryptionInfo"
+      description: |
+        EncryptionInfo describes the encryption information of a cluster or a backup.
+      output: true
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: 'encryptionType'
+          description: "Output only. Type of encryption."              
+          values:
+            - :TYPE_UNSPECIFIED
+            - :GOOGLE_DEFAULT_ENCRYPTION
+            - :CUSTOMER_MANAGED_ENCRYPTION
+          output: true
+        - !ruby/object:Api::Type::Array
+          name: kmsKeyVersions
+          item_type: Api::Type::String
+          description: |
+            Output only. Cloud KMS key versions that are being used to protect the database or the backup.
+          output: true
+
     - !ruby/object:Api::Type::String
       name: "network"
       required: true
@@ -143,6 +174,15 @@
         - !ruby/object:Api::Type::KeyValuePairs
           name: "labels"
           description: "Labels to apply to backups created using this configuration."
+        - !ruby/object:Api::Type::NestedObject
+          name: "encryptionConfig"
+          description: |
+            EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "kmsKeyName"
+              description: |
+                The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
         - !ruby/object:Api::Type::NestedObject
           name: "weeklySchedule"
           description: "Weekly schedule for the Backup."
