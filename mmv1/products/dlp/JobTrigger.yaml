@@ -522,7 +522,6 @@ properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'regex'
                   description: Regular expression which defines the rule.
-                  immutable: true
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'pattern'
@@ -538,7 +537,6 @@ properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'dictionary'
                   description: Dictionary which defines the rule.
-                  immutable: true
                   properties:
                     - !ruby/object:Api::Type::NestedObject
                       name: 'wordList'
@@ -564,7 +562,6 @@ properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'storedType'
                   description: A reference to a StoredInfoType to use with scanning.
-                  immutable: true
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'name'
@@ -581,7 +578,6 @@ properties:
                   name: 'surrogateType'
                   description: |
                     Message for detecting output from deidentification transformations that support reversing.
-                  immutable: true
                   properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
                   # The fields below are necessary to include the "surrogateType" in the payload                      
                   send_empty_value: true
