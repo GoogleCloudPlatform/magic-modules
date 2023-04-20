@@ -71,8 +71,8 @@ resource "google_network_services_endpoint_policy" "foobar" {
   labels                 = {
     foo = "bar"
   }
-  description            = "my description"
-  type                   = "SIDECAR_PROXY"
+  description            = "update description"
+  type                   = "GRPC_SERVER"
   traffic_port_selector {
     ports = ["8081"]
   }

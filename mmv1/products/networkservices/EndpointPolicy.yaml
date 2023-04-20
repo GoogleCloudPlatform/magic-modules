@@ -51,6 +51,12 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-endpoint-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_services_endpoint_policy_empty_match'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-endpoint-policy'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -118,18 +124,20 @@ properties:
         name: metadataLabelMatcher
         description: |
           The matcher is based on node metadata presented by xDS clients.
+        required: true
         properties:
           - !ruby/object:Api::Type::Enum
             name: metadataLabelMatchCriteria
             description: |
               Specifies how matching should be done.
+            required: true
             values:
               - :MATCH_ANY
               - :MATCH_ALL
           - !ruby/object:Api::Type::Array
             name: metadataLabels
             description: |
-               The list of label value pairs that must match labels in the provided metadata based on filterMatchCriteria 
+               The list of label value pairs that must match labels in the provided metadata based on filterMatchCriteria
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
@@ -142,9 +150,4 @@ properties:
                   description: |
                     Required. Label value presented as value corresponding to the above key, in xDS Node Metadata.
                   required: true
-
-                
-
-
-
 
