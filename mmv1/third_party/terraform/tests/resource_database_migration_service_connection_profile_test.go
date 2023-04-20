@@ -42,7 +42,7 @@ func TestAccDatabaseMigrationServiceConnectionProfile_update(t *testing.T) {
 func testAccDatabaseMigrationServiceConnectionProfile_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_database_migration_service_connection_profile" "default" {
-	location = "us-central1"		
+	location = "us-central1"
 	connection_profile_id = "tf-test-dbms-connection-profile%{random_suffix}"
 	display_name          = "tf-test-dbms-connection-profile-display%{random_suffix}"
 	labels	= { 
@@ -61,7 +61,7 @@ resource "google_database_migration_service_connection_profile" "default" {
 func testAccDatabaseMigrationServiceConnectionProfile_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_database_migration_service_connection_profile" "default" {
-	location = "us-central1"		
+	location = "us-central1"
 	connection_profile_id = "tf-test-dbms-connection-profile%{random_suffix}"
 	display_name          = "tf-test-dbms-connection-profile-updated-display%{random_suffix}"
 	labels	= { 

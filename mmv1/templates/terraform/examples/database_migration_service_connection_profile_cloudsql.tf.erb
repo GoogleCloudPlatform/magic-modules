@@ -29,11 +29,11 @@ resource "google_sql_user" "sqldb_user" {
 
 
 resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
-  location = "us-central1"    
+  location = "us-central1"
   connection_profile_id = "<%= ctx[:vars]["from_profile"] %>"
   display_name = "<%= ctx[:vars]["from_profile"] %>_display"
   labels = { 
-    estanno = "testanno" 
+    foo = "bar"
   }
   mysql {
     host = google_sql_database_instance.cloudsqldb.ip_address.0.ip_address
@@ -53,17 +53,17 @@ resource "google_database_migration_service_connection_profile" "<%= ctx[:primar
 
 
 resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>_destination" {
-  location = "us-central1"    
+  location = "us-central1"
   connection_profile_id = "<%= ctx[:vars]["to_profile"] %>"
   display_name = "<%= ctx[:vars]["to_profile"] %>_displayname"
   labels = { 
-    testlabela = "testlabelb" 
+    foo = "bar"
   }
   cloudsql {
     settings {
       database_version = "MYSQL_5_7"
       user_labels = { 
-        testuserlabela = "testuserlabelb" 
+        cloudfoo = "cloudbar"
       }
     tier = "db-n1-standard-1"
     storage_auto_resize_limit = "0"

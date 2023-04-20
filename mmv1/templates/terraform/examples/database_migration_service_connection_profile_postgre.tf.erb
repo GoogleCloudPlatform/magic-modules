@@ -24,7 +24,7 @@ resource "google_sql_user" "sqldb_user" {
 }
 
 resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
-  location = "us-central1"    
+  location = "us-central1"
   connection_profile_id = "<%= ctx[:vars]["profile"] %>"
   display_name = "<%= ctx[:vars]["profile"] %>_display"
   labels = { 
