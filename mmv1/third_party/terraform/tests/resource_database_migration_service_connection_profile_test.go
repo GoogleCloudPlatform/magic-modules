@@ -46,8 +46,8 @@ resource "google_database_migration_service_connection_profile" "default" {
 	connection_profile_id = "tf-test-dbms-connection-profile%{random_suffix}"
 	display_name          = "tf-test-dbms-connection-profile-display%{random_suffix}"
 	labels	= { 
-					foo = "bar" 
-				}
+		foo = "bar" 
+	}
 	mysql {
 	  host = "10.20.30.40"
 	  port = 3306
@@ -65,8 +65,8 @@ resource "google_database_migration_service_connection_profile" "default" {
 	connection_profile_id = "tf-test-dbms-connection-profile%{random_suffix}"
 	display_name          = "tf-test-dbms-connection-profile-updated-display%{random_suffix}"
 	labels	= { 
-					bar = "foo" 
-				}
+		bar = "foo" 
+	}
 	mysql {
 	  host = "10.20.30.50"
 	  port = 3306
