@@ -1068,18 +1068,18 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 		}
 		inspect_config {
 			custom_info_types {
-                info_type {
-                    name = "MY_CUSTOM_TYPE"
+				info_type {
+					name = "MY_CUSTOM_TYPE"
 					version = "0.4"
-                }
+				}
 
 				exclusion_type = "EXCLUSION_TYPE_EXCLUDE"
 				likelihood     = "UNLIKELY"
 
-                regex {
-                    pattern = "test*"
-                }
-            }
+				regex {
+					pattern = "test*"
+				}
+			}
 			
 			info_types {
 				name = "EMAIL_ADDRESS"
@@ -1218,18 +1218,18 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 		}
 		inspect_config {
 			custom_info_types {
-                info_type {
-                    name = "MY_CUSTOM_TYPE"
-                }
+				info_type {
+					name = "MY_CUSTOM_TYPE"
+				}
 
 				likelihood = "UNLIKELY"
 
-                dictionary {
+				dictionary {
 					word_list {
 						words = ["TEST"]
 					}
 				}
-            }
+			}
 
 			info_types {
 				name = "EMAIL_ADDRESS"
@@ -1368,16 +1368,16 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 		}
 		inspect_config {
 			custom_info_types {
-                info_type {
-                    name = "MY_CUSTOM_TYPE"
-                }
+				info_type {
+					name = "MY_CUSTOM_TYPE"
+				}
 
-                likelihood = "UNLIKELY"
+				likelihood = "UNLIKELY"
 
-                stored_type {
+				stored_type {
 					name = google_data_loss_prevention_stored_info_type.basic.id
 				}
-            }
+			}
 
 			info_types {
 				name = "EMAIL_ADDRESS"
@@ -1527,14 +1527,14 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 		}
 		inspect_config {
 			custom_info_types {
-                info_type {
-                    name = "MY_CUSTOM_TYPE"
-                }
+				info_type {
+					name = "MY_CUSTOM_TYPE"
+				}
 
-                likelihood = "UNLIKELY"
+				likelihood = "UNLIKELY"
 
-                surrogate_type {}
-            }
+				surrogate_type {}
+			}
 
 			info_types {
 				name = "EMAIL_ADDRESS"
