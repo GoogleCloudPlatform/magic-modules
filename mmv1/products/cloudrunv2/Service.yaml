@@ -319,6 +319,10 @@ properties:
                   name: "cpuIdle"
                   description: |-
                     Determines whether CPU should be throttled or not outside of requests.
+                - !ruby/object:Api::Type::Boolean
+                  name: "startupCpuBoost"
+                  description: |-
+                    Determines whether CPU should be boosted on startup of a new container instance above the requested CPU threshold, this can help reduce cold-start latency.
             - !ruby/object:Api::Type::Array
               name: "ports"
               description: |-
