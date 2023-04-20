@@ -62,8 +62,8 @@ examples:
         from_profile: "my-fromprofileid"
         to_profile: "my-toprofileid"
     - !ruby/object:Provider::Terraform::Examples
-      name: "database_migration_service_connection_profile_postgre"
-      primary_resource_id: "postgreprofile"
+      name: "database_migration_service_connection_profile_postgres"
+      primary_resource_id: "postgresprofile"
       ignore_read_extra:
         - "postgresql.0.password"
         - "postgresql.0.ssl.0.ca_certificate"
@@ -349,6 +349,7 @@ properties:
           Output only. The Cloud SQL instance ID that this connection profile is associated with.
       - !ruby/object:Api::Type::NestedObject
         name: 'settings'
+        immutable: true
         description: |
           Immutable. Metadata used to create the destination Cloud SQL database.
         properties:

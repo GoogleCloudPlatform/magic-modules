@@ -46,7 +46,7 @@ resource "google_database_migration_service_connection_profile" "default" {
 	connection_profile_id = "tf-test-dbms-connection-profile%{random_suffix}"
 	display_name          = "tf-test-dbms-connection-profile-display%{random_suffix}"
 	labels	= { 
-					testanno = "testanno" 
+					foo = "bar" 
 				}
 	mysql {
 	  host = "10.20.30.40"
@@ -63,9 +63,9 @@ func testAccDatabaseMigrationServiceConnectionProfile_update(context map[string]
 resource "google_database_migration_service_connection_profile" "default" {
 	location = "us-central1"		
 	connection_profile_id = "tf-test-dbms-connection-profile%{random_suffix}"
-	display_name          = "tf-test-dbms-connection-profile-display%{random_suffix}"
+	display_name          = "tf-test-dbms-connection-profile-updated-display%{random_suffix}"
 	labels	= { 
-					testanno = "testanno" 
+					bar = "foo" 
 				}
 	mysql {
 	  host = "10.20.30.50"
