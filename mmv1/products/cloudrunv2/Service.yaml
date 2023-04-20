@@ -319,6 +319,10 @@ properties:
                   name: "cpuIdle"
                   description: |-
                     Determines whether CPU should be throttled or not outside of requests.
+                - !ruby/object:Api::Type::Boolean
+                  name: "startupCpuBoost"
+                  description: |-
+                    Determines whether CPU should be boosted on startup of a new container instance above the requested CPU threshold, this can help reduce cold-start latency.
             - !ruby/object:Api::Type::Array
               name: "ports"
               description: |-
@@ -395,6 +399,12 @@ properties:
                       default_value: "/"
                       description: |-
                         Path to access on the HTTP server. Defaults to '/'.
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Number must be in the range 1 to 65535.
+                        If not specified, defaults to the same value as container.ports[0].containerPort.
+                      default_from_api: true
                     - !ruby/object:Api::Type::Array
                       name: "httpHeaders"
                       description: |-
@@ -436,7 +446,8 @@ properties:
                     - !ruby/object:Api::Type::Integer
                       name: port
                       description: |-
-                        Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to the same value as container.ports[0].containerPort.
+                        Port number to access on the container. Number must be in the range 1 to 65535.
+                        If not specified, defaults to the same value as container.ports[0].containerPort.
                       default_from_api: true
                     - !ruby/object:Api::Type::String
                       name: service
@@ -486,6 +497,12 @@ properties:
                       default_value: "/"
                       description: |-
                         Path to access on the HTTP server. Defaults to '/'.
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Must be in the range 1 to 65535.
+                        If not specified, defaults to the same value as container.ports[0].containerPort.
+                      default_from_api: true
                     - !ruby/object:Api::Type::Array
                       name: "httpHeaders"
                       description: |-
@@ -517,7 +534,8 @@ properties:
                     - !ruby/object:Api::Type::Integer
                       name: port
                       description: |-
-                        Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+                        Port number to access on the container. Must be in the range 1 to 65535.
+                        If not specified, defaults to the same value as container.ports[0].containerPort.
                       default_from_api: true
                 - !ruby/object:Api::Type::NestedObject
                   name: grpc
@@ -533,7 +551,8 @@ properties:
                     - !ruby/object:Api::Type::Integer
                       name: port
                       description: |-
-                        Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to the same value as container.ports[0].containerPort.
+                        Port number to access on the container. Number must be in the range 1 to 65535.
+                        If not specified, defaults to the same value as container.ports[0].containerPort.
                       default_from_api: true
                     - !ruby/object:Api::Type::String
                       name: service
@@ -618,6 +637,10 @@ properties:
         description: |-
           Sets the maximum number of requests that each serving instance can receive.
         default_from_api: true
+      - !ruby/object:Api::Type::Boolean
+        name: "sessionAffinity"
+        description: |-
+          Enables session affinity. For more information, go to https://cloud.google.com/run/docs/configuring/session-affinity
   - !ruby/object:Api::Type::Array
     name: "traffic"
     description: |-
