@@ -2,12 +2,17 @@ package main
 
 import (
 	"bytes"
+	"embed"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"golang.org/x/exp/slices"
+)
+
+var (
+	//go:embed *
+	embededFiles embed.FS
 )
 
 func requestCall(url, method, credentials string, result interface{}, body interface{}) (int, error) {
@@ -38,7 +43,7 @@ func requestCall(url, method, credentials string, result interface{}, body inter
 }
 
 func readFile(filename string) (string, error) {
-	contents, err := ioutil.ReadFile(filename)
+	contents, err := embededFiles.ReadFile(filename)
 	if err != nil {
 		return "", err
 	}
