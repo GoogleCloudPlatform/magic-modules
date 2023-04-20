@@ -13,7 +13,8 @@ func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
     t.Parallel()
 
     tlsInspectionPolicyName := fmt.Sprintf("tf-test-tls-inspection-policy-%s", RandString(t, 10))
-    caPoolName := fmt.Sprintf("tf-test-tls-inspection-policy-%s", RandString(t, 10))
+    caPoolName := fmt.Sprintf("tf-test-tls-ca-pool-%s", RandString(t, 10))
+	certificateAuthorityName := fmt.Sprintf("tf-test-tls-certificate-authority-%s", RandString(t, 10))
 
     VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
@@ -21,7 +22,7 @@ func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
 		CheckDestroy: testAccCheckNetworkSecurityTlsInspectionPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityTlsInspectionPolicy_basic(caPoolName, tlsInspectionPolicyName),
+				Config: testAccNetworkSecurityTlsInspectionPolicy_basic(caPoolName, certificateAuthorityName, tlsInspectionPolicyName),
 			},
 			{
 				ResourceName:      "google_network_security_tls_inspection_policy.foobar",
@@ -29,7 +30,7 @@ func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNetworkSecurityTlsInspectionPolicy_update(caPoolName, tlsInspectionPolicyName),
+				Config: testAccNetworkSecurityTlsInspectionPolicy_update(caPoolName, certificateAuthorityName, tlsInspectionPolicyName),
 			},
 			{
 				ResourceName:      "google_network_security_tls_inspection_policy.foobar",
@@ -40,23 +41,55 @@ func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
 	})
 }
 
-func testAccNetworkSecurityTlsInspectionPolicy_basic(caPoolName, tlsInspectionPolicyName string) string {
+func testAccNetworkSecurityTlsInspectionPolicy_basic(caPoolName, certificateAuthorityName, tlsInspectionPolicyName string) string {
     return fmt.Sprintf(`
 resource "google_privateca_ca_pool" "default" {
   name = "%s"
   location = "us-central1"
   tier = "ENTERPRISE"
 }
-    
+
+resource "google_privateca_certificate_authority" "default" {
+  pool = google_privateca_ca_pool.default.name
+  certificate_authority_id = "%s"
+  location = "us-central1"
+  lifetime = "86400s"
+  type = "SELF_SIGNED"
+  deletion_protection = false
+  config {
+    subject_config {
+      subject {
+        organization = "Test LLC"
+        common_name = "my-ca"
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign = true
+        }
+        extended_key_usage {}
+      }
+    }
+  }
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+}
+
 resource "google_network_security_tls_inspection_policy" "foobar" {
   name     = "%s"
   location = "us-central1"
   ca_pool    = google_privateca_ca_pool.default.id
 }
-`, caPoolName, tlsInspectionPolicyName)
+`, caPoolName, certificateAuthorityName, tlsInspectionPolicyName)
 }
 
-func testAccNetworkSecurityTlsInspectionPolicy_update(caPoolName, tlsInspectionPolicyName string) string {
+func testAccNetworkSecurityTlsInspectionPolicy_update(caPoolName, certificateAuthorityName, tlsInspectionPolicyName string) string {
     return fmt.Sprintf(`
 resource "google_privateca_ca_pool" "default" {
   name        = "%s"
@@ -65,13 +98,46 @@ resource "google_privateca_ca_pool" "default" {
   tier        = "ENTERPRISE"
 }
 
+resource "google_privateca_certificate_authority" "default" {
+  pool = google_privateca_ca_pool.default.name
+  certificate_authority_id = "%s"
+  location = "us-central1"
+  desired_state = "DISABLED"
+  lifetime = "86400s"
+  type = "SELF_SIGNED"
+  deletion_protection = false
+  config {
+    subject_config {
+      subject {
+        organization = "Test LLC"
+        common_name = "my-ca"
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign = true
+        }
+        extended_key_usage {}
+      }
+    }
+  }
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+}
+
 resource "google_network_security_tls_inspection_policy" "foobar" {
   name        = "%s"
   location    = "us-central1"
   description = "my tls inspection policy updated"
   ca_pool     = google_privateca_ca_pool.default.id
 }
-`, caPoolName, tlsInspectionPolicyName)
+`, caPoolName, certificateAuthorityName, tlsInspectionPolicyName)
 }
 
 <% end -%>

@@ -57,6 +57,7 @@ examples:
     vars:
       resource_name: "my-tls-inspection-policy"
       privateca_ca_pool_name: "my-basic-ca-pool"
+      privateca_certificate_authority_name: "my-basic-certificate-authority"
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
     name: "network_security_tls_inspection_policy_advanced"
@@ -64,6 +65,7 @@ examples:
     vars:
       resource_name: "my-tls-inspection-policy"
       privateca_ca_pool_name: "my-advanced-ca-pool"
+      privateca_certificate_authority_name: "my-advanced-certificate-authority"
 parameters:
   - !ruby/object:Api::Type::String
     name: "name"
