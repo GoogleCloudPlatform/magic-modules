@@ -183,7 +183,7 @@ resource "google_alloydb_instance" "default" {
   }
   gce_zone = "us-east1-a"
   database_flags = {
-	  alloydb.enable_auto_explain = "true"
+	  "alloydb.enable_auto_explain" = "true"
   }
   availability_type = "REGIONAL"
   machine_config {
@@ -319,7 +319,7 @@ resource "google_alloydb_instance" "primary" {
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
   database_flags = {
-	  alloydb.enable_auto_explain = "true"
+	  "alloydb.enable_auto_explain" = "true"
   }
   depends_on = [google_service_networking_connection.vpc_connection]
 }
@@ -359,7 +359,7 @@ resource "google_alloydb_instance" "primary" {
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
   database_flags = {
-	  alloydb.enable_auto_explain = "false"
+	  "alloydb.enable_auto_explain" = "false"
   }
   depends_on = [google_service_networking_connection.vpc_connection]
 }
