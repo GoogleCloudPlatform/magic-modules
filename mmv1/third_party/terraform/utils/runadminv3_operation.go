@@ -51,6 +51,7 @@ func runAdminV2OperationWaitTimeWithResponse(config *transport_tpg.Config, op *r
 
 func runAdminV2OperationWaitTime(config *transport_tpg.Config, op *run.GoogleLongrunningOperation, project, activity, userAgent string, timeout time.Duration) error {
 	if op.Done {
+		return nil
 	}
 	w, err := createRunAdminV2Waiter(config, op, project, activity, userAgent)
 	if err != nil {
