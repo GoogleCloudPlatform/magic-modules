@@ -64,6 +64,11 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - !ruby/object:Api::Type::String
+    name: region
+    description: The region for the resource
+    url_param_only: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
