@@ -252,5 +252,5 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
   ]
 }
-	`, context)
+`, context)
 }
