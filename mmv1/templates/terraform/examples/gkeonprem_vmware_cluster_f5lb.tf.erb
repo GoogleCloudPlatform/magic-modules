@@ -1,4 +1,5 @@
 resource "google_gkeonprem_vmware_cluster" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta  
   name = "cluster-<%= ctx[:vars]['name'] %>"
   location = "us-west1"
   admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
@@ -62,6 +63,4 @@ resource "google_gkeonprem_vmware_cluster" "<%= ctx[:primary_resource_id] %>" {
   storage {
     vsphere_csi_disabled = true
   }
-  provider = google-beta
-  
 }

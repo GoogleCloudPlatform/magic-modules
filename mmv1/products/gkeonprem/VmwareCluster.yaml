@@ -199,28 +199,34 @@ properties:
             name: ipBlocks
             description: Represents the configuration values for static IP allocation
               to nodes.
+            required: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
                   name: "netmask"
                   description: The netmask used by the VMware User Cluster.
+                  required: true
                 - !ruby/object:Api::Type::String
                   name: "gateway"
                   description: The network gateway used by the VMware User Cluster.
+                  required: true
                 - !ruby/object:Api::Type::Array
                   name: "ips"
                   description: The node's network configurations used by the VMware
                     User Cluster.
+                  required: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::String
                         name: "ip"
                         description: IP could be an IP address (like 1.2.3.4) or a
                           CIDR (like 1.2.3.0/24).
+                        required: true
                       - !ruby/object:Api::Type::String
                         name: "hostname"
                         description: Hostname of the machine. VM's name will be used
                           if this field is empty.
+                        required: true
       - !ruby/object:Api::Type::NestedObject
         name: "dhcpIpConfig"
         description: Configuration settings for a DHCP IP configuration.
@@ -286,6 +292,7 @@ properties:
                       name: "hostname"
                       description: Hostname of the machine. VM's name will be used
                         if this field is empty.
+                      default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: loadBalancer
     description: Load Balancer configuration.
@@ -438,6 +445,7 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: username
+              required: true
               description: The name of the user, e.g. `my-gcp-id@gmail.com`.
   - !ruby/object:Api::Type::NestedObject
     name: validationCheck
