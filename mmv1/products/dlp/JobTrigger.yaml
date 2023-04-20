@@ -320,7 +320,6 @@ properties:
                                 item_type: Api::Type::Integer
                           - !ruby/object:Api::Type::NestedObject
                             name: 'proximity'
-                            required: true
                             description: |
                               Proximity of the finding within which the entire hotword must reside. The total length of the window cannot
                               exceed 1000 characters. Note that the finding itself will be included in the window, so that hotwords may be
@@ -338,7 +337,6 @@ properties:
                                   Number of characters after the finding to consider. Either this or window_before must be specified
                           - !ruby/object:Api::Type::NestedObject
                             name: 'likelihoodAdjustment'
-                            required: true
                             description: |
                               Likelihood adjustment to apply to all matching findings.
                             properties:
