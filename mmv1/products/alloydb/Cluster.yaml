@@ -232,7 +232,7 @@
         - !ruby/object:Api::Type::NestedObject
           name: "timeBasedRetention"
           description: |
-            Time-based Backup retention policy.
+            Time-based Backup retention policy. Conflicts with 'quantity_based_retention', both can't be set together.
           conflicts:
             - automated_backup_policy.0.quantity_based_retention
           properties:
@@ -246,7 +246,7 @@
           conflicts:
             - automated_backup_policy.0.time_based_retention
           description: |
-            Quantity-based Backup retention policy to retain recent backups.
+            Quantity-based Backup retention policy to retain recent backups. Conflicts with 'time_based_retention', both can't be set together.
           properties:
             - !ruby/object:Api::Type::Integer
               name: "count"
