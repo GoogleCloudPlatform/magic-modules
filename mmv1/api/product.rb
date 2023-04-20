@@ -65,6 +65,13 @@ module Api
     def validate
       super
       set_variables @objects, :__product
+
+      # name comes from Named, and product names must start with a capital
+      caps = ('A'..'Z').to_a
+      unless caps.include? @name[0]
+        raise "product name `#{@name}` must start with a capital letter."
+      end
+
       check :display_name, type: String
       check :objects, type: Array, item_type: Api::Resource
       check :scopes, type: Array, item_type: String, required: true

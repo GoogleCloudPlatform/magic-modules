@@ -84,6 +84,7 @@
         The ID of the alloydb backup.
     - !ruby/object:Api::Type::String
       name: "location"
+      required: true
       immutable: true
       url_param_only: true
       description: |
