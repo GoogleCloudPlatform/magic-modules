@@ -1,4 +1,4 @@
-config := meta.(*Config)
+config := meta.(*transport_tpg.Config)
 
 if err := ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 	return nil, err

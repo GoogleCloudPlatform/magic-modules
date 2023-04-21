@@ -4,12 +4,13 @@ package google
 import (
 	"context"
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"os"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/version"
+	"github.com/hashicorp/terraform-provider-google/version"
 
 	googleoauth "golang.org/x/oauth2/google"
 )
@@ -26,8 +27,8 @@ func Provider() *schema.Provider {
 	// mtls is enabled.
 	if isMtls() {
 		// if mtls is enabled switch all default endpoints to use the mtls endpoint
-		for key, bp := range DefaultBasePaths {
-			DefaultBasePaths[key] = getMtlsEndpoint(bp)
+		for key, bp := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = getMtlsEndpoint(bp)
 		}
 	}
 
@@ -122,27 +123,27 @@ func Provider() *schema.Provider {
 			"<%= product[:definitions].name.underscore -%>_custom_endpoint": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validateCustomEndpoint,
+				ValidateFunc: transport_tpg.ValidateCustomEndpoint,
 			},
 			<% end -%>
 
 			// Handwritten Products / Versioned / Atypical Entries
-			CloudBillingCustomEndpointEntryKey:           CloudBillingCustomEndpointEntry,
-			ComposerCustomEndpointEntryKey:               ComposerCustomEndpointEntry,
-			ContainerCustomEndpointEntryKey:              ContainerCustomEndpointEntry,
-			DataflowCustomEndpointEntryKey:               DataflowCustomEndpointEntry,
-			IamCredentialsCustomEndpointEntryKey:         IamCredentialsCustomEndpointEntry,
-			ResourceManagerV3CustomEndpointEntryKey:      ResourceManagerV3CustomEndpointEntry,
+			transport_tpg.CloudBillingCustomEndpointEntryKey:           transport_tpg.CloudBillingCustomEndpointEntry,
+			transport_tpg.ComposerCustomEndpointEntryKey:               transport_tpg.ComposerCustomEndpointEntry,
+			transport_tpg.ContainerCustomEndpointEntryKey:              transport_tpg.ContainerCustomEndpointEntry,
+			transport_tpg.DataflowCustomEndpointEntryKey:               transport_tpg.DataflowCustomEndpointEntry,
+			transport_tpg.IamCredentialsCustomEndpointEntryKey:         transport_tpg.IamCredentialsCustomEndpointEntry,
+			transport_tpg.ResourceManagerV3CustomEndpointEntryKey:      transport_tpg.ResourceManagerV3CustomEndpointEntry,
 			<% unless version == "ga" -%>
-			RuntimeConfigCustomEndpointEntryKey:          RuntimeConfigCustomEndpointEntry,
+			transport_tpg.RuntimeConfigCustomEndpointEntryKey:          transport_tpg.RuntimeConfigCustomEndpointEntry,
 			<% end -%>
-			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
-			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
-			TagsLocationCustomEndpointEntryKey:           TagsLocationCustomEndpointEntry,
+			transport_tpg.IAMCustomEndpointEntryKey:                    transport_tpg.IAMCustomEndpointEntry,
+			transport_tpg.ServiceNetworkingCustomEndpointEntryKey:      transport_tpg.ServiceNetworkingCustomEndpointEntry,
+			transport_tpg.TagsLocationCustomEndpointEntryKey:           transport_tpg.TagsLocationCustomEndpointEntry,
 			
 			// dcl
-			ContainerAwsCustomEndpointEntryKey:           ContainerAwsCustomEndpointEntry,
-			ContainerAzureCustomEndpointEntryKey:         ContainerAzureCustomEndpointEntry,
+			transport_tpg.ContainerAwsCustomEndpointEntryKey:           transport_tpg.ContainerAwsCustomEndpointEntry,
+			transport_tpg.ContainerAzureCustomEndpointEntryKey:         transport_tpg.ContainerAzureCustomEndpointEntry,
 		},
 
 		ProviderMetaSchema: map[string]*schema.Schema{
@@ -158,6 +159,8 @@ func Provider() *schema.Provider {
 			"google_access_approval_organization_service_account": DataSourceAccessApprovalOrganizationServiceAccount(),
 			"google_access_approval_project_service_account":   DataSourceAccessApprovalProjectServiceAccount(),
 			"google_active_folder":                             DataSourceGoogleActiveFolder(),
+			"google_alloydb_locations":                         DataSourceAlloydbLocations(),
+ 			"google_alloydb_supported_database_flags":          DataSourceAlloydbSupportedDatabaseFlags(),
 			"google_artifact_registry_repository":              DataSourceArtifactRegistryRepository(),
 			"google_app_engine_default_service_account":        DataSourceGoogleAppEngineDefaultServiceAccount(),
 			"google_beyondcorp_app_connection":                 DataSourceGoogleBeyondcorpAppConnection(),
@@ -307,7 +310,7 @@ func Provider() *schema.Provider {
 		return providerConfigure(ctx, d, provider)
 	}
 
-	ConfigureDCLProvider(provider)
+	transport_tpg.ConfigureDCLProvider(provider)
 
 	return provider
 }
@@ -531,13 +534,13 @@ end     # products.each do
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
-	err := HandleSDKDefaults(d)
+	err := transport_tpg.HandleSDKDefaults(d)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
-	HandleDCLCustomEndpointDefaults(d)
+	transport_tpg.HandleDCLCustomEndpointDefaults(d)
 
-	config := Config{
+	config := transport_tpg.Config{
 		Project:             d.Get("project").(string),
 		Region:              d.Get("region").(string),
 		Zone:                d.Get("zone").(string),
@@ -614,7 +617,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.Scopes[i] = scope.(string)
 	}
 
-	batchCfg, err := ExpandProviderBatchingConfig(d.Get("batching"))
+	batchCfg, err := transport_tpg.ExpandProviderBatchingConfig(d.Get("batching"))
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
@@ -626,24 +629,24 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	<% end -%>
 
 	// Handwritten Products / Versioned / Atypical Entries
-	config.CloudBillingBasePath = d.Get(CloudBillingCustomEndpointEntryKey).(string)
-	config.ComposerBasePath = d.Get(ComposerCustomEndpointEntryKey).(string)
-	config.ContainerBasePath = d.Get(ContainerCustomEndpointEntryKey).(string)
-	config.DataflowBasePath = d.Get(DataflowCustomEndpointEntryKey).(string)
-	config.IamCredentialsBasePath = d.Get(IamCredentialsCustomEndpointEntryKey).(string)
-	config.ResourceManagerV3BasePath = d.Get(ResourceManagerV3CustomEndpointEntryKey).(string)
+	config.CloudBillingBasePath = d.Get(transport_tpg.CloudBillingCustomEndpointEntryKey).(string)
+	config.ComposerBasePath = d.Get(transport_tpg.ComposerCustomEndpointEntryKey).(string)
+	config.ContainerBasePath = d.Get(transport_tpg.ContainerCustomEndpointEntryKey).(string)
+	config.DataflowBasePath = d.Get(transport_tpg.DataflowCustomEndpointEntryKey).(string)
+	config.IamCredentialsBasePath = d.Get(transport_tpg.IamCredentialsCustomEndpointEntryKey).(string)
+	config.ResourceManagerV3BasePath = d.Get(transport_tpg.ResourceManagerV3CustomEndpointEntryKey).(string)
 	<% unless version == "ga" -%>
-	config.RuntimeConfigBasePath = d.Get(RuntimeConfigCustomEndpointEntryKey).(string)
+	config.RuntimeConfigBasePath = d.Get(transport_tpg.RuntimeConfigCustomEndpointEntryKey).(string)
 	<% end -%>
-	config.IAMBasePath = d.Get(IAMCustomEndpointEntryKey).(string)
-	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
-	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
-	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
-	config.TagsLocationBasePath = d.Get(TagsLocationCustomEndpointEntryKey).(string)
+	config.IAMBasePath = d.Get(transport_tpg.IAMCustomEndpointEntryKey).(string)
+	config.ServiceNetworkingBasePath = d.Get(transport_tpg.ServiceNetworkingCustomEndpointEntryKey).(string)
+	config.ServiceUsageBasePath = d.Get(transport_tpg.ServiceUsageCustomEndpointEntryKey).(string)
+	config.BigtableAdminBasePath = d.Get(transport_tpg.BigtableAdminCustomEndpointEntryKey).(string)
+	config.TagsLocationBasePath = d.Get(transport_tpg.TagsLocationCustomEndpointEntryKey).(string)
 	
 	// dcl
-	config.ContainerAwsBasePath = d.Get(ContainerAwsCustomEndpointEntryKey).(string)
-	config.ContainerAzureBasePath = d.Get(ContainerAzureCustomEndpointEntryKey).(string)
+	config.ContainerAwsBasePath = d.Get(transport_tpg.ContainerAwsCustomEndpointEntryKey).(string)
+	config.ContainerAzureBasePath = d.Get(transport_tpg.ContainerAzureCustomEndpointEntryKey).(string)
 
 	stopCtx, ok := schema.StopContext(ctx)
 	if !ok {
@@ -653,7 +656,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		return nil, diag.FromErr(err)
 	}
 
-	return ProviderDCLConfigure(d, &config), nil
+	return transport_tpg.ProviderDCLConfigure(d, &config), nil
 }
 
 func validateCredentials(v interface{}, k string) (warnings []string, errors []error) {

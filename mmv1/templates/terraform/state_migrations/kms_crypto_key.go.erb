@@ -27,7 +27,7 @@ func resourceKMSCryptoKeyResourceV0() *schema.Resource {
 func ResourceKMSCryptoKeyUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	keyRingId := rawState["key_ring"].(string)
 	parsed, err := parseKmsKeyRingId(keyRingId, config)
 	if err != nil {
