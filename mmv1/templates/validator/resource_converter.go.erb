@@ -45,7 +45,7 @@ func resourceConverter<%= resource_name -%>() ResourceConverter {
     }
 }
 
-func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
     name, err := assetName(d, config, "<%= asset_name_template -%>")
     if err != nil {
         return []Asset{}, err
@@ -66,7 +66,7 @@ func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) 
     }
 }
 
-func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
 <%    if prop.flatten_object -%>
