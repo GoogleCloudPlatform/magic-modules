@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -84,6 +85,43 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 				ImportStateId:     subscriptionShort,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubSubscription_detach(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscription_detach(topic, subscriptionShort, false),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscription_detach(topic, subscriptionShort, true),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config:      testAccPubsubSubscription_detach(topic, subscriptionShort, false),
+				ExpectError: regexp.MustCompile(".*This method is not supported on detached subscriptions.*"),
 			},
 		},
 	})
@@ -250,6 +288,20 @@ resource "google_pubsub_subscription" "foo" {
   topic = google_pubsub_topic.foo.id
 }
 `, topic, subscription)
+}
+
+func testAccPubsubSubscription_detach(topic, subscription string, detached bool) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name     = "%s"
+  topic    = google_pubsub_topic.foo.id
+  detached = "%t"
+}
+`, topic, subscription, detached)
 }
 
 func TestGetComputedTopicName(t *testing.T) {
