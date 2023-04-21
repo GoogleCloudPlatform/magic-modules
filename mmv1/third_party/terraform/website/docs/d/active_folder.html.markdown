@@ -29,4 +29,4 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following attributes are exported:
 
-* `name` - The resource name of the Folder. This uniquely identifies the folder.
+* `name` - The resource name of the Folder. This uniquely identifies the folder
