@@ -1,6 +1,10 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
+)
 
 func resourceConverterFolderIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -30,15 +34,15 @@ func resourceConverterFolderIamMember() ResourceConverter {
 	}
 }
 
-func GetFolderIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetFolderIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newFolderIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetFolderIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetFolderIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newFolderIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetFolderIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetFolderIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newFolderIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -65,7 +69,7 @@ func MergeFolderIamMemberDelete(existing, incoming Asset) Asset {
 
 func newFolderIamAsset(
 	d TerraformResourceData,
-	config *Config,
+	config *transport_tpg.Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
@@ -88,7 +92,7 @@ func newFolderIamAsset(
 	}}, nil
 }
 
-func FetchFolderIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchFolderIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	if _, ok := d.GetOk("folder"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}

@@ -1,8 +1,12 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
 
-func expandMonitoringSloRollingPeriodDays(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
+)
+
+func expandMonitoringSloRollingPeriodDays(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil {
 		return nil, nil
 	}
