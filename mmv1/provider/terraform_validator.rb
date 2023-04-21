@@ -404,10 +404,12 @@ module Provider
     def replace_import_path(output_folder, target)
       # Replace import paths to reference the resources dir instead of the google provider
       data = File.read("#{output_folder}/#{target}")
+      # rubocop:disable Layout/LineLength
       data = data.gsub(
         %r{(?<!provider ")github.com/hashicorp/terraform-provider-google/google},
         'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
       )
+      # rubocop:enable Layout/LineLength
       File.write("#{output_folder}/#{target}", data)
     end
   end
