@@ -257,8 +257,11 @@ resource "google_alloydb_instance" "primary" {
 
 resource "google_alloydb_instance" "read_pool" {
   cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}-read"
   instance_type = "READ_POOL"
+  read_pool_config {
+    node_count = 4
+  }
   depends_on = [google_service_networking_connection.vpc_connection, google_alloydb_instance.primary]
 }
 
