@@ -1611,7 +1611,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 					hotword_rule {
 						hotword_regex {
 							pattern = "patient"
-							group_index = [1]
+							group_indexes = [1]
 						}
 						proximity {
 							window_before = 50
