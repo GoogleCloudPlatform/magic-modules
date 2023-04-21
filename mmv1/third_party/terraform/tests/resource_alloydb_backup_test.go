@@ -190,7 +190,7 @@ resource "google_alloydb_backup" "default" {
 resource "google_alloydb_cluster" "default" {
   location = "us-central1"
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network    = google_compute_network.default.id
 }
 
 data "google_project" "project" { }
@@ -212,7 +212,7 @@ resource "google_compute_global_address" "private_ip_alloc" {
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   prefix_length = 16
-  network       = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network       = google_compute_network.default.id
   lifecycle {
 	ignore_changes = [
 		address,
@@ -226,7 +226,7 @@ resource "google_compute_global_address" "private_ip_alloc" {
 }
 
 resource "google_service_networking_connection" "vpc_connection" {
-  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  network                 = google_compute_network.default.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
