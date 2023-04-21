@@ -405,8 +405,8 @@ module Provider
       # Replace import paths to reference the resources dir instead of the google provider
       data = File.read("#{output_folder}/#{target}")
       data = data.gsub(
-        /(?<!provider ")github.com\/hashicorp\/terraform-provider-google\/google/,
-        "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
+        %r{(?<!provider ")github.com/hashicorp/terraform-provider-google/google},
+        'github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources'
       )
       File.write("#{output_folder}/#{target}", data)
     end
