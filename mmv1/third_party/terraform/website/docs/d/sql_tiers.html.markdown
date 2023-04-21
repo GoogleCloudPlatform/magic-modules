@@ -6,7 +6,7 @@ description: |-
 
 # google\_sql\_tiers
 
-Get all available machine types (tiers) for Cloud SQL, for example, db-custom-1-3840. For more information see the
+Get all available machine types (tiers) for given project, for example, db-custom-1-3840. For more information see the
 [official documentation](https://cloud.google.com/sql/)
 and
 [API](https://cloud.google.com/sql/docs/mysql/admin-api/rest/v1beta4/tiers/list).
@@ -33,13 +33,13 @@ output "avaialble_tiers" {
 
 The following arguments are supported:
 
-* `project` - (Optional) The ID of the project in which the resource belongs. If `project` is not provided, the provider project is used.
+* `project` - (Optional) Project ID of the project for which to list tiers. If `project` is not provided, the provider project is used.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `tiers` - A list of all available machine types (tiers) for Cloud SQL project. Each contains:
+* `tiers` - A list of all available machine types (tiers) for project. Each contains:
   * `tier` - An identifier for the machine type, for example, db-custom-1-3840.
   * `ram` - The maximum ram usage of this tier in bytes.
   * `disk_quota` - The maximum disk size of this tier in bytes.
