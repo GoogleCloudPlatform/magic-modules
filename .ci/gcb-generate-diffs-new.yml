@@ -119,7 +119,7 @@ steps:
       args:
           - 'head'
           - 'terraform-google-conversion'
-          - 'ga'
+          - 'beta'
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
@@ -129,7 +129,7 @@ steps:
       args:
           - 'base'
           - 'terraform-google-conversion'
-          - 'ga'
+          - 'beta'
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
