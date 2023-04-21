@@ -3,8 +3,6 @@ package google
 import (
 	"fmt"
 	"strings"
-
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // List of prefixes used for test resource names
@@ -24,7 +22,7 @@ var testResourcePrefixes = []string{
 
 // SharedConfigForRegion returns a common config setup needed for the sweeper
 // functions for a given region
-func SharedConfigForRegion(region string) (*transport_tpg.Config, error) {
+func SharedConfigForRegion(region string) (*Config, error) {
 	project := GetTestProjectFromEnv()
 	if project == "" {
 		return nil, fmt.Errorf("set project using any of these env variables %v", ProjectEnvVars)
@@ -34,13 +32,13 @@ func SharedConfigForRegion(region string) (*transport_tpg.Config, error) {
 		return nil, fmt.Errorf("set credentials using any of these env variables %v", CredsEnvVars)
 	}
 
-	conf := &transport_tpg.Config{
+	conf := &Config{
 		Credentials: GetTestCredsFromEnv(),
 		Region:      region,
 		Project:     project,
 	}
 
-	transport_tpg.ConfigureBasePaths(conf)
+	ConfigureBasePaths(conf)
 
 	return conf, nil
 }

@@ -2,7 +2,6 @@ package google
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleKmsCryptoKey() *schema.Resource {
@@ -18,7 +17,7 @@ func DataSourceGoogleKmsCryptoKey() *schema.Resource {
 }
 
 func dataSourceGoogleKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	keyRingId, err := parseKmsKeyRingId(d.Get("key_ring").(string), config)
 	if err != nil {

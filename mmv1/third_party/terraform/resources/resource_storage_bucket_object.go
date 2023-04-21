@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"crypto/md5"
@@ -268,7 +266,7 @@ func compareCryptoKeyVersions(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -353,7 +351,7 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -391,7 +389,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -469,7 +467,7 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

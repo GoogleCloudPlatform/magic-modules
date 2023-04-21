@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -16,7 +15,7 @@ func resourceConverterProjectOrgPolicy() ResourceConverter {
 	}
 }
 
-func GetProjectOrgPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetProjectOrgPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
 	if err != nil {
 		return []Asset{}, err
@@ -37,7 +36,7 @@ func MergeProjectOrgPolicy(existing, incoming Asset) Asset {
 	return existing
 }
 
-func GetProjectOrgPolicyApiObject(d TerraformResourceData, config *transport_tpg.Config) (OrgPolicy, error) {
+func GetProjectOrgPolicyApiObject(d TerraformResourceData, config *Config) (OrgPolicy, error) {
 
 	listPolicy, err := expandListOrganizationPolicy(d.Get("list_policy").([]interface{}))
 	if err != nil {

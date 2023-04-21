@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -75,7 +73,7 @@ func ResourceMonitoringDashboard() *schema.Resource {
 }
 
 func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -110,7 +108,7 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -144,7 +142,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -177,7 +175,7 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -199,7 +197,7 @@ func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	// current import_formats can't import fields with forward slashes in their value
 	parts, err := getImportIdQualifiers([]string{"projects/(?P<project>[^/]+)/dashboards/(?P<id>[^/]+)", "(?P<id>[^/]+)"}, d, config, d.Id())

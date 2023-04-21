@@ -4,7 +4,6 @@ package google
 import (
 	"encoding/json"
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"time"
 
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
@@ -42,7 +41,7 @@ func (e gkeonpremOpError) Error() string {
 }
 
 type gkeonpremOperationWaiter struct {
-	Config    *transport_tpg.Config
+	Config    *Config
 	UserAgent string
 	Project   string
 	Op        CommonOperation
@@ -100,7 +99,7 @@ func (w *gkeonpremOperationWaiter) QueryOp() (interface{}, error) {
 	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
-func creategkeonpremWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*gkeonpremOperationWaiter, error) {
+func creategkeonpremWaiter(config *Config, op map[string]interface{}, project, activity, userAgent string) (*gkeonpremOperationWaiter, error) {
 	w := &gkeonpremOperationWaiter{
 		Config:    config,
 		UserAgent: userAgent,
@@ -113,7 +112,7 @@ func creategkeonpremWaiter(config *transport_tpg.Config, op map[string]interface
 }
 
 // nolint: deadcode,unused
-func GkeonpremOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func GkeonpremOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	w, err := creategkeonpremWaiter(config, op, project, activity, userAgent)
 	if err != nil {
 		return err
@@ -124,7 +123,7 @@ func GkeonpremOperationWaitTimeWithResponse(config *transport_tpg.Config, op map
 	return json.Unmarshal([]byte(w.Op.Response), response)
 }
 
-func GkeonpremOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func GkeonpremOperationWaitTime(config *Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	if val, ok := op["name"]; !ok || val == "" {
 		// This was a synchronous call - there is no operation to wait for.
 		return nil

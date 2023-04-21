@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestComputeInstanceGroupMigrateState(t *testing.T) {
@@ -26,7 +25,7 @@ func TestComputeInstanceGroupMigrateState(t *testing.T) {
 				"name": "instancegroup-test",
 			},
 			ExpectedId: "us-central1-c/instancegroup-test",
-			Meta:       &transport_tpg.Config{},
+			Meta:       &Config{},
 		},
 		"v0 to v2": {
 			StateVersion: 0,
@@ -45,7 +44,7 @@ func TestComputeInstanceGroupMigrateState(t *testing.T) {
 				"instances.1519187872": "https://www.googleapis.com/compute/v1/projects/project_name/zones/zone_name/instances/instancegroup-test-0",
 			},
 			ExpectedId: "us-central1-c/instancegroup-test",
-			Meta:       &transport_tpg.Config{},
+			Meta:       &Config{},
 		},
 	}
 
@@ -89,7 +88,7 @@ func TestComputeInstanceGroupMigrateState_empty(t *testing.T) {
 
 	for tn, tc := range cases {
 		var is *terraform.InstanceState
-		var meta *transport_tpg.Config
+		var meta *Config
 
 		// should handle nil
 		is, err := resourceComputeInstanceGroupMigrateState(tc.StateVersion, is, meta)

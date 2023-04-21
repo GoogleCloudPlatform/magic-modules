@@ -36,14 +36,6 @@
 -%>
 '<%= dir -%>/<%= fname -%>': 'third_party/terraform/data_sources/<%= fname -%>'
 <% end -%>
-
-<%
-  Dir["third_party/terraform/transport/*.go"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/transport/<%= fname -%>': 'third_party/terraform/transport/<%= fname -%>'
-<% end -%>
-
 <%
   Dir["third_party/terraform/utils/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]

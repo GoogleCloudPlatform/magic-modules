@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"path"
 	"testing"
 
@@ -18,7 +17,7 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 		ExpectedError       bool
 		ExpectedTerraformId string
 		ExpectedFhirStoreId string
-		Config              *transport_tpg.Config
+		Config              *Config
 	}{
 		"id is in project/location/datasetName/fhirStoreName format": {
 			ImportId:            "test-project/us-central1/test-dataset/test-store-name",
@@ -37,12 +36,12 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 			ExpectedError:       false,
 			ExpectedTerraformId: "test-project/us-central1/test-dataset/test-store-name",
 			ExpectedFhirStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/fhirStores/test-store-name",
-			Config:              &transport_tpg.Config{Project: "test-project"},
+			Config:              &Config{Project: "test-project"},
 		},
 		"id is in location/datasetName/fhirStoreName format without project in config": {
 			ImportId:      "us-central1/test-dataset/test-store-name",
 			ExpectedError: true,
-			Config:        &transport_tpg.Config{Project: ""},
+			Config:        &Config{Project: ""},
 		},
 	}
 

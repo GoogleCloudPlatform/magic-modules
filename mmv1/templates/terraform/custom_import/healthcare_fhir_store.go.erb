@@ -1,5 +1,5 @@
 
-  config := meta.(*transport_tpg.Config)
+  config := meta.(*Config)
 
   fhirStoreId, err := ParseHealthcareFhirStoreId(d.Id(), config)
   if err != nil {

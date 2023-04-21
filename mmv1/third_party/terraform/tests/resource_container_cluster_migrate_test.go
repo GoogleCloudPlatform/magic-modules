@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestContainerClusterMigrateState(t *testing.T) {
@@ -26,7 +25,7 @@ func TestContainerClusterMigrateState(t *testing.T) {
 				"additional_zones.90274510":   "us-central1-c",
 				"additional_zones.1919306328": "us-central1-b",
 			},
-			Meta: &transport_tpg.Config{},
+			Meta: &Config{},
 		},
 	}
 
@@ -54,7 +53,7 @@ func TestContainerClusterMigrateState(t *testing.T) {
 
 func TestContainerClusterMigrateState_empty(t *testing.T) {
 	var is *terraform.InstanceState
-	var meta *transport_tpg.Config
+	var meta *Config
 
 	// should handle nil
 	is, err := resourceContainerClusterMigrateState(0, is, meta)

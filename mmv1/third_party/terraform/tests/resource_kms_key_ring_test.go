@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestKeyRingIdParsing(t *testing.T) {
@@ -15,7 +14,7 @@ func TestKeyRingIdParsing(t *testing.T) {
 		ExpectedError       bool
 		ExpectedTerraformId string
 		ExpectedKeyRingId   string
-		Config              *transport_tpg.Config
+		Config              *Config
 	}{
 		"id is in project/location/keyRingName format": {
 			ImportId:            "test-project/us-central1/test-key-ring",
@@ -38,12 +37,12 @@ func TestKeyRingIdParsing(t *testing.T) {
 			ExpectedError:       false,
 			ExpectedTerraformId: "test-project/us-central1/test-key-ring",
 			ExpectedKeyRingId:   "projects/test-project/locations/us-central1/keyRings/test-key-ring",
-			Config:              &transport_tpg.Config{Project: "test-project"},
+			Config:              &Config{Project: "test-project"},
 		},
 		"id is in location/keyRingName format without project in config": {
 			ImportId:      "us-central1/test-key-ring",
 			ExpectedError: true,
-			Config:        &transport_tpg.Config{Project: ""},
+			Config:        &Config{Project: ""},
 		},
 	}
 

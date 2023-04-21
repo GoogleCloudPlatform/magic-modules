@@ -5,8 +5,6 @@ import (
 	"log"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
@@ -95,7 +93,7 @@ func ResourceSqlSslCert() *schema.Resource {
 }
 
 func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -145,7 +143,7 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -202,7 +200,7 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

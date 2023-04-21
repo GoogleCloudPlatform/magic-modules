@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleComposerImageVersions() *schema.Resource {
@@ -44,7 +43,7 @@ func DataSourceGoogleComposerImageVersions() *schema.Resource {
 }
 
 func dataSourceGoogleComposerImageVersionsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -43,7 +42,7 @@ func ResourceGoogleProjectOrganizationPolicy() *schema.Resource {
 }
 
 func resourceProjectOrgPolicyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+):constraints/(?P<constraint>[^/]+)",
@@ -76,7 +75,7 @@ func resourceGoogleProjectOrganizationPolicyCreate(d *schema.ResourceData, meta 
 }
 
 func resourceGoogleProjectOrganizationPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -132,7 +131,7 @@ func resourceGoogleProjectOrganizationPolicyUpdate(d *schema.ResourceData, meta 
 }
 
 func resourceGoogleProjectOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -148,7 +147,7 @@ func resourceGoogleProjectOrganizationPolicyDelete(d *schema.ResourceData, meta 
 }
 
 func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

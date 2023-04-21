@@ -4,7 +4,6 @@ package google
 import (
 	"fmt"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -36,10 +35,10 @@ type DataprocClusterIamUpdater struct {
 	region  string
 	cluster string
 	d       TerraformResourceData
-	Config  *transport_tpg.Config
+	Config  *Config
 }
 
-func NewDataprocClusterUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewDataprocClusterUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
@@ -66,7 +65,7 @@ func NewDataprocClusterUpdater(d TerraformResourceData, config *transport_tpg.Co
 	}, nil
 }
 
-func DataprocClusterIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+func DataprocClusterIdParseFunc(d *schema.ResourceData, config *Config) error {
 	fv, err := parseRegionalFieldValue("clusters", d.Id(), "project", "region", "zone", d, config, true)
 	if err != nil {
 		return err

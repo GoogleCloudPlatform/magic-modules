@@ -5,8 +5,6 @@ import (
 	"strings"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/iam/v1"
@@ -82,7 +80,7 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 }
 
 func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -135,7 +133,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 
 func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) PollReadFunc {
 	return func() (map[string]interface{}, error) {
-		config := meta.(*transport_tpg.Config)
+		config := meta.(*Config)
 		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return nil, err
@@ -152,7 +150,7 @@ func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) Po
 }
 
 func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -195,7 +193,7 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -210,7 +208,7 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 }
 
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -272,7 +270,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/serviceAccounts/(?P<email>[^/]+)",
 		"(?P<project>[^/]+)/(?P<email>[^/]+)",

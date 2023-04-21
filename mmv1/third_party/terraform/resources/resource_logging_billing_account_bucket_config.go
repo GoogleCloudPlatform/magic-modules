@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 var loggingBillingAccountBucketConfigSchema = map[string]*schema.Schema{
@@ -17,7 +16,7 @@ var loggingBillingAccountBucketConfigSchema = map[string]*schema.Schema{
 	},
 }
 
-func billingAccountBucketConfigID(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
+func billingAccountBucketConfigID(d *schema.ResourceData, config *Config) (string, error) {
 	billingAccount := d.Get("billing_account").(string)
 	location := d.Get("location").(string)
 	bucketID := d.Get("bucket_id").(string)

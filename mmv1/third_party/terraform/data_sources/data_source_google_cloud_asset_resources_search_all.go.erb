@@ -4,7 +4,6 @@ package google
 <% unless version == 'ga' -%>
 import (
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -85,7 +84,7 @@ func DataSourceGoogleCloudAssetResourcesSearchAll() *schema.Resource {
 }
 
 func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

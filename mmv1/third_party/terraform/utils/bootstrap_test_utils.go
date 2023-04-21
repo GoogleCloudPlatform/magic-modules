@@ -9,8 +9,6 @@ import (
 	"testing"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"google.golang.org/api/cloudbilling/v1"
 	cloudkms "google.golang.org/api/cloudkms/v1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
@@ -138,7 +136,7 @@ var serviceAccountDisplay = "Bootstrapped Service Account for Terraform tests"
 // Some tests need a second service account, other than the test runner, to assert functionality on.
 // This provides a well-known service account that can be used when dynamically creating a service
 // account isn't an option.
-func getOrCreateServiceAccount(config *transport_tpg.Config, project string) (*iam.ServiceAccount, error) {
+func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAccount, error) {
 	name := fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, serviceAccountEmail, project)
 	log.Printf("[DEBUG] Verifying %s as bootstrapped service account.\n", name)
 
@@ -170,7 +168,7 @@ func getOrCreateServiceAccount(config *transport_tpg.Config, project string) (*i
 // on a different service account. Granting permissions takes time and there is no operation to wait on
 // so instead this creates a single service account once per test-suite with the correct permissions.
 // The first time this test is run it will fail, but subsequent runs will succeed.
-func impersonationServiceAccountPermissions(config *transport_tpg.Config, sa *iam.ServiceAccount, testRunner string) error {
+func impersonationServiceAccountPermissions(config *Config, sa *iam.ServiceAccount, testRunner string) error {
 	log.Printf("[DEBUG] Setting service account permissions.\n")
 	policy := iam.Policy{
 		Bindings: []*iam.Binding{},
@@ -537,20 +535,20 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 }
 
 // BootstrapConfig returns a Config pulled from the environment.
-func BootstrapConfig(t *testing.T) *transport_tpg.Config {
+func BootstrapConfig(t *testing.T) *Config {
 	if v := os.Getenv("TF_ACC"); v == "" {
 		t.Skip("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
 		return nil
 	}
 
-	config := &transport_tpg.Config{
+	config := &Config{
 		Credentials: GetTestCredsFromEnv(),
 		Project:     GetTestProjectFromEnv(),
 		Region:      GetTestRegionFromEnv(),
 		Zone:        GetTestZoneFromEnv(),
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
+	ConfigureBasePaths(config)
 
 	if err := config.LoadAndValidate(context.Background()); err != nil {
 		t.Fatalf("Bootstrapping failed. Unable to load test config: %s", err)

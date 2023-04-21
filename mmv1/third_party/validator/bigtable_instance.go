@@ -2,8 +2,6 @@ package google
 
 import (
 	"reflect"
-
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 func resourceConverterBigtableInstance() ResourceConverter {
@@ -13,7 +11,7 @@ func resourceConverterBigtableInstance() ResourceConverter {
 	}
 }
 
-func GetBigtableInstanceCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetBigtableInstanceCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//bigtable.googleapis.com/projects/{{project}}/instances/{{name}}")
 
 	if err != nil {
@@ -35,7 +33,7 @@ func GetBigtableInstanceCaiObject(d TerraformResourceData, config *transport_tpg
 	}
 }
 
-func GetBigtableInstanceApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetBigtableInstanceApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	nameProp, err := expandBigtableInstanceName(d.Get("name"), d, config)
 	if err != nil {
@@ -61,15 +59,15 @@ func GetBigtableInstanceApiObject(d TerraformResourceData, config *transport_tpg
 	return obj, nil
 }
 
-func expandBigtableInstanceName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandBigtableInstanceName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 }
 
-func expandBigtableDisplayName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandBigtableDisplayName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigtableInstanceLabels(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandBigtableInstanceLabels(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}

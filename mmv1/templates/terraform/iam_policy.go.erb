@@ -22,8 +22,6 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
-
-	transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
 )
 <% resource_name = product_ns + object.name -%>
 <%
@@ -64,11 +62,11 @@ type <%= resource_name -%>IamUpdater struct {
 	<%= param.camelize(:lower) -%> string
 <% end # resource_params.each -%>
 	d       TerraformResourceData
-	Config  *transport_tpg.Config
+	Config  *Config
 }
 
 <% provider_default_values = ['project', 'location', 'region', 'zone'] -%>
-func <%= resource_name -%>IamUpdaterProducer(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func <%= resource_name -%>IamUpdaterProducer(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
 	values := make(map[string]string)
 
 <% resource_params.each do |param| -%>
@@ -131,7 +129,7 @@ func <%= resource_name -%>IamUpdaterProducer(d TerraformResourceData, config *tr
 	return u, nil
 }
 
-func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) error {
 	values := make(map[string]string)
 
 <% resource_params.each do |param| -%>

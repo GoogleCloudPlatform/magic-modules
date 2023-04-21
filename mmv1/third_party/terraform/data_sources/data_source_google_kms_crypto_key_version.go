@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"strings"
 
@@ -60,7 +59,7 @@ func DataSourceGoogleKmsCryptoKeyVersion() *schema.Resource {
 }
 
 func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

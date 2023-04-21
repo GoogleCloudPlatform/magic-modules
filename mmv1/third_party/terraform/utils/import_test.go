@@ -1,7 +1,6 @@
 package google
 
 import (
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"testing"
 )
 
@@ -25,7 +24,7 @@ func TestParseImportId(t *testing.T) {
 	cases := map[string]struct {
 		ImportId             string
 		IdRegexes            []string
-		Config               *transport_tpg.Config
+		Config               *Config
 		ExpectedSchemaValues map[string]interface{}
 		ExpectError          bool
 	}{
@@ -58,7 +57,7 @@ func TestParseImportId(t *testing.T) {
 		},
 		"short id with default project and region": {
 			ImportId: "my-subnetwork",
-			Config: &transport_tpg.Config{
+			Config: &Config{
 				Project: "default-project",
 				Region:  "default-region",
 			},
@@ -71,7 +70,7 @@ func TestParseImportId(t *testing.T) {
 		},
 		"short id with default project and zone": {
 			ImportId: "my-instance",
-			Config: &transport_tpg.Config{
+			Config: &Config{
 				Project: "default-project",
 				Zone:    "default-zone",
 			},
@@ -84,7 +83,7 @@ func TestParseImportId(t *testing.T) {
 		},
 		"short id with two nondefault fields with default project and zone": {
 			ImportId: "my-cluster/my-node-pool",
-			Config: &transport_tpg.Config{
+			Config: &Config{
 				Project: "default-project",
 				Zone:    "default-zone",
 			},
@@ -98,7 +97,7 @@ func TestParseImportId(t *testing.T) {
 		},
 		"short id with default project and region inferred from default zone": {
 			ImportId: "my-subnetwork",
-			Config: &transport_tpg.Config{
+			Config: &Config{
 				Project: "default-project",
 				Zone:    "us-east1-a",
 			},
@@ -128,7 +127,7 @@ func TestParseImportId(t *testing.T) {
 		}
 		config := tc.Config
 		if config == nil {
-			config = &transport_tpg.Config{}
+			config = &Config{}
 		}
 
 		if err := ParseImportId(tc.IdRegexes, d, config); err == nil {

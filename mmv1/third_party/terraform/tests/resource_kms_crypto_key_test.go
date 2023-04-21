@@ -3,7 +3,6 @@ package google
 import (
 	"context"
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"testing"
 	"time"
 
@@ -19,7 +18,7 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 		ExpectedError       bool
 		ExpectedTerraformId string
 		ExpectedCryptoKeyId string
-		Config              *transport_tpg.Config
+		Config              *Config
 	}{
 		"id is in project/location/keyRingName/cryptoKeyName format": {
 			ImportId:            "test-project/us-central1/test-key-ring/test-key-name",
@@ -42,12 +41,12 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 			ExpectedError:       false,
 			ExpectedTerraformId: "test-project/us-central1/test-key-ring/test-key-name",
 			ExpectedCryptoKeyId: "projects/test-project/locations/us-central1/keyRings/test-key-ring/cryptoKeys/test-key-name",
-			Config:              &transport_tpg.Config{Project: "test-project"},
+			Config:              &Config{Project: "test-project"},
 		},
 		"id is in location/keyRingName/cryptoKeyName format without project in config": {
 			ImportId:      "us-central1/test-key-ring/test-key-name",
 			ExpectedError: true,
-			Config:        &transport_tpg.Config{Project: ""},
+			Config:        &Config{Project: ""},
 		},
 	}
 
@@ -125,7 +124,7 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
-			Meta: &transport_tpg.Config{},
+			Meta: &Config{},
 		},
 		"key_ring link fmt stays as link fmt": {
 			Attributes: map[string]interface{}{
@@ -134,7 +133,7 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
-			Meta: &transport_tpg.Config{},
+			Meta: &Config{},
 		},
 		"key_ring without project to link fmt": {
 			Attributes: map[string]interface{}{
@@ -143,7 +142,7 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
-			Meta: &transport_tpg.Config{
+			Meta: &Config{
 				Project: "my-project",
 			},
 		},

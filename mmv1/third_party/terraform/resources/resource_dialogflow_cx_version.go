@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceDialogflowCXVersion() *schema.Resource {
@@ -105,7 +104,7 @@ The score values range from 0.0 (completely uncertain) to 1.0 (completely certai
 }
 
 func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -194,7 +193,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -254,7 +253,7 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -338,7 +337,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -392,7 +391,7 @@ func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{})
 }
 
 func resourceDialogflowCXVersionImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	// current import_formats can't import fields with forward slashes in their value and parent contains slashes
 	if err := ParseImportId([]string{
@@ -412,22 +411,22 @@ func resourceDialogflowCXVersionImport(d *schema.ResourceData, meta interface{})
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenDialogflowCXVersionName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenDialogflowCXVersionName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	if v == nil {
 		return v
 	}
 	return NameFromSelfLinkStateFunc(v)
 }
 
-func flattenDialogflowCXVersionDisplayName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenDialogflowCXVersionDisplayName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenDialogflowCXVersionDescription(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionNluSettings(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenDialogflowCXVersionNluSettings(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -444,30 +443,30 @@ func flattenDialogflowCXVersionNluSettings(v interface{}, d *schema.ResourceData
 		flattenDialogflowCXVersionNluSettingsModelTrainingMode(original["modelTrainingMode"], d, config)
 	return []interface{}{transformed}
 }
-func flattenDialogflowCXVersionNluSettingsModelType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenDialogflowCXVersionNluSettingsModelType(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionNluSettingsClassificationThreshold(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenDialogflowCXVersionNluSettingsClassificationThreshold(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionNluSettingsModelTrainingMode(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenDialogflowCXVersionNluSettingsModelTrainingMode(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionCreateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenDialogflowCXVersionCreateTime(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionState(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenDialogflowCXVersionState(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
-func expandDialogflowCXVersionDisplayName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandDialogflowCXVersionDisplayName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandDialogflowCXVersionDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandDialogflowCXVersionDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }

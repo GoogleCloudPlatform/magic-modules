@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudfunctions/v1"
 
 	"fmt"
@@ -58,7 +57,7 @@ func (s *cloudFunctionId) locationId() string {
 	return fmt.Sprintf("projects/%s/locations/%s", s.Project, s.Region)
 }
 
-func parseCloudFunctionId(d *schema.ResourceData, config *transport_tpg.Config) (*cloudFunctionId, error) {
+func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*cloudFunctionId, error) {
 	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/functions/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
@@ -463,7 +462,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 }
 
 func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -615,7 +614,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -745,7 +744,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 
 func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG]: Updating google_cloudfunctions_function")
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -913,7 +912,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

@@ -3,8 +3,6 @@ package google
 import (
 	"fmt"
 	"strings"
-
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 func resourceConverterKmsKeyRingIamPolicy() ResourceConverter {
@@ -35,15 +33,15 @@ func resourceConverterKmsKeyRingIamMember() ResourceConverter {
 	}
 }
 
-func GetKmsKeyRingIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetKmsKeyRingIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newKmsKeyRingIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetKmsKeyRingIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetKmsKeyRingIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newKmsKeyRingIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetKmsKeyRingIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetKmsKeyRingIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newKmsKeyRingIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -70,7 +68,7 @@ func MergeKmsKeyRingIamMemberDelete(existing, incoming Asset) Asset {
 
 func newKmsKeyRingIamAsset(
 	d TerraformResourceData,
-	config *transport_tpg.Config,
+	config *Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
@@ -93,7 +91,7 @@ func newKmsKeyRingIamAsset(
 	}}, nil
 }
 
-func FetchKmsKeyRingIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchKmsKeyRingIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("key_ring_id"); !ok {
 		return Asset{}, ErrEmptyIdentityField

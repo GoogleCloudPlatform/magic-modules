@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -542,7 +540,7 @@ func diffSuppressEmptyStartTimeOfDay(k, old, new string, d *schema.ResourceData)
 }
 
 func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -585,7 +583,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -645,7 +643,7 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -717,7 +715,7 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

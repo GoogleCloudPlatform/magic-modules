@@ -1,6 +1,8 @@
 package google
 
-func expandComputeRouteNextHopInstance(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+func expandComputeRouteNextHopInstance(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
 		return nil
 	}
@@ -15,7 +17,7 @@ func expandComputeRouteNextHopInstance(v interface{}, d TerraformResourceData, c
 	return &nextInstance.SelfLink
 }
 
-func expandComputeVpnTunnelRegion(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+func expandComputeVpnTunnelRegion(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
 		return nil
 	}

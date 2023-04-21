@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleComputeBackendService() *schema.Resource {
@@ -23,7 +22,7 @@ func DataSourceGoogleComputeBackendService() *schema.Resource {
 }
 
 func dataSourceComputeBackendServiceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	serviceName := d.Get("name").(string)
 

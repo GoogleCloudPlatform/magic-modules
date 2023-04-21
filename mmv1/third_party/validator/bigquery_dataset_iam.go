@@ -1,10 +1,6 @@
 package google
 
-import (
-	"fmt"
-
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
-)
+import "fmt"
 
 func resourceConverterBigqueryDatasetIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -34,15 +30,15 @@ func resourceConverterBigqueryDatasetIamMember() ResourceConverter {
 	}
 }
 
-func GetBigqueryDatasetIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetBigqueryDatasetIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newBigqueryDatasetIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetBigqueryDatasetIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetBigqueryDatasetIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newBigqueryDatasetIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetBigqueryDatasetIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetBigqueryDatasetIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newBigqueryDatasetIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -69,7 +65,7 @@ func MergeBigqueryDatasetIamMemberDelete(existing, incoming Asset) Asset {
 
 func newBigqueryDatasetIamAsset(
 	d TerraformResourceData,
-	config *transport_tpg.Config,
+	config *Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
@@ -91,7 +87,7 @@ func newBigqueryDatasetIamAsset(
 	}}, nil
 }
 
-func FetchBigqueryDatasetIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchBigqueryDatasetIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("dataset_id"); !ok {
 		return Asset{}, ErrEmptyIdentityField

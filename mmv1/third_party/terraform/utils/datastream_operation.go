@@ -6,13 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	datastream "google.golang.org/api/datastream/v1"
 )
 
 type DatastreamOperationWaiter struct {
-	Config    *transport_tpg.Config
+	Config    *Config
 	UserAgent string
 	Project   string
 	Op        datastream.Operation
@@ -44,7 +42,7 @@ func (w *DatastreamOperationWaiter) SetOp(op interface{}) error {
 	return nil
 }
 
-func createDatastreamWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*DatastreamOperationWaiter, error) {
+func createDatastreamWaiter(config *Config, op map[string]interface{}, project, activity, userAgent string) (*DatastreamOperationWaiter, error) {
 	w := &DatastreamOperationWaiter{
 		Config:    config,
 		UserAgent: userAgent,
@@ -57,7 +55,7 @@ func createDatastreamWaiter(config *transport_tpg.Config, op map[string]interfac
 }
 
 // nolint: deadcode,unused
-func DatastreamOperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func DatastreamOperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	w, err := createDatastreamWaiter(config, op, project, activity, userAgent)
 	if err != nil {
 		return err
@@ -68,7 +66,7 @@ func DatastreamOperationWaitTimeWithResponse(config *transport_tpg.Config, op ma
 	return json.Unmarshal([]byte(w.Op.Response), response)
 }
 
-func DatastreamOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+func DatastreamOperationWaitTime(config *Config, op map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	if val, ok := op["name"]; !ok || val == "" {
 		// This was a synchronous call - there is no operation to wait for.
 		return nil

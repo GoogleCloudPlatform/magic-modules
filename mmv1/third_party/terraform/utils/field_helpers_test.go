@@ -1,7 +1,6 @@
 package google
 
 import (
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"testing"
 )
 
@@ -14,7 +13,7 @@ func TestParseGlobalFieldValue(t *testing.T) {
 		IsEmptyValid         bool
 		ProjectSchemaField   string
 		ProjectSchemaValue   string
-		Config               *transport_tpg.Config
+		Config               *Config
 	}{
 		"network is a full self link": {
 			FieldValue:           "https://www.googleapis.com/compute/v1/projects/myproject/global/networks/my-network",
@@ -26,25 +25,25 @@ func TestParseGlobalFieldValue(t *testing.T) {
 		},
 		"network is a partial relative self link": {
 			FieldValue:           "global/networks/my-network",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/global/networks/my-network",
 		},
 		"network is the name only": {
 			FieldValue:           "my-network",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/global/networks/my-network",
 		},
 		"network is the name only and has a project set in schema": {
 			FieldValue:           "my-network",
 			ProjectSchemaField:   "project",
 			ProjectSchemaValue:   "schema-project",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/schema-project/global/networks/my-network",
 		},
 		"network is the name only and has a project set in schema but the field is not specified.": {
 			FieldValue:           "my-network",
 			ProjectSchemaValue:   "schema-project",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/global/networks/my-network",
 		},
 		"network is empty and it is valid": {
@@ -95,7 +94,7 @@ func TestParseZonalFieldValue(t *testing.T) {
 		ProjectSchemaValue   string
 		ZoneSchemaField      string
 		ZoneSchemaValue      string
-		Config               *transport_tpg.Config
+		Config               *Config
 	}{
 		"instance is a full self link": {
 			FieldValue:           "https://www.googleapis.com/compute/v1/projects/myproject/zones/us-central1-b/instances/my-instance",
@@ -107,14 +106,14 @@ func TestParseZonalFieldValue(t *testing.T) {
 		},
 		"instance is a partial relative self link": {
 			FieldValue:           "zones/us-central1-b/instances/my-instance",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/zones/us-central1-b/instances/my-instance",
 		},
 		"instance is the name only": {
 			FieldValue:           "my-instance",
 			ZoneSchemaField:      "zone",
 			ZoneSchemaValue:      "us-east1-a",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/zones/us-east1-a/instances/my-instance",
 		},
 		"instance is the name only and has a project set in schema": {
@@ -123,7 +122,7 @@ func TestParseZonalFieldValue(t *testing.T) {
 			ProjectSchemaValue:   "schema-project",
 			ZoneSchemaField:      "zone",
 			ZoneSchemaValue:      "us-east1-a",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/schema-project/zones/us-east1-a/instances/my-instance",
 		},
 		"instance is the name only and has a project set in schema but the field is not specified.": {
@@ -131,18 +130,18 @@ func TestParseZonalFieldValue(t *testing.T) {
 			ProjectSchemaValue:   "schema-project",
 			ZoneSchemaField:      "zone",
 			ZoneSchemaValue:      "us-east1-a",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/zones/us-east1-a/instances/my-instance",
 		},
 		"instance is the name only and no zone field is specified": {
 			FieldValue:    "my-instance",
-			Config:        &transport_tpg.Config{Project: "default-project"},
+			Config:        &Config{Project: "default-project"},
 			ExpectedError: true,
 		},
 		"instance is the name only and no value for zone field is specified": {
 			FieldValue:      "my-instance",
 			ZoneSchemaField: "zone",
-			Config:          &transport_tpg.Config{Project: "default-project"},
+			Config:          &Config{Project: "default-project"},
 			ExpectedError:   true,
 		},
 		"instance is empty and it is valid": {
@@ -242,7 +241,7 @@ func TestParseRegionalFieldValue(t *testing.T) {
 		RegionSchemaValue    string
 		ZoneSchemaField      string
 		ZoneSchemaValue      string
-		Config               *transport_tpg.Config
+		Config               *Config
 	}{
 		"subnetwork is a full self link": {
 			FieldValue:           "https://www.googleapis.com/compute/v1/projects/myproject/regions/us-central1/subnetworks/my-subnetwork",
@@ -254,14 +253,14 @@ func TestParseRegionalFieldValue(t *testing.T) {
 		},
 		"subnetwork is a partial relative self link": {
 			FieldValue:           "regions/us-central1/subnetworks/my-subnetwork",
-			Config:               &transport_tpg.Config{Project: "default-project", Region: "default-region"},
+			Config:               &Config{Project: "default-project", Region: "default-region"},
 			ExpectedRelativeLink: "projects/default-project/regions/us-central1/subnetworks/my-subnetwork",
 		},
 		"subnetwork is the name only": {
 			FieldValue:           "my-subnetwork",
 			RegionSchemaField:    "region",
 			RegionSchemaValue:    "us-east1",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/regions/us-east1/subnetworks/my-subnetwork",
 		},
 		"subnetwork is the name only and has a project set in schema": {
@@ -270,7 +269,7 @@ func TestParseRegionalFieldValue(t *testing.T) {
 			ProjectSchemaValue:   "schema-project",
 			RegionSchemaField:    "region",
 			RegionSchemaValue:    "us-east1",
-			Config:               &transport_tpg.Config{Project: "default-project", Region: "default-region"},
+			Config:               &Config{Project: "default-project", Region: "default-region"},
 			ExpectedRelativeLink: "projects/schema-project/regions/us-east1/subnetworks/my-subnetwork",
 		},
 		"subnetwork is the name only and has a project set in schema but the field is not specified.": {
@@ -278,7 +277,7 @@ func TestParseRegionalFieldValue(t *testing.T) {
 			ProjectSchemaValue:   "schema-project",
 			RegionSchemaField:    "region",
 			RegionSchemaValue:    "us-east1",
-			Config:               &transport_tpg.Config{Project: "default-project", Region: "default-region"},
+			Config:               &Config{Project: "default-project", Region: "default-region"},
 			ExpectedRelativeLink: "projects/default-project/regions/us-east1/subnetworks/my-subnetwork",
 		},
 		"subnetwork is the name only and region is extracted from the one field.": {
@@ -287,7 +286,7 @@ func TestParseRegionalFieldValue(t *testing.T) {
 			RegionSchemaField:    "region",
 			ZoneSchemaField:      "zone",
 			ZoneSchemaValue:      "us-central1-a",
-			Config:               &transport_tpg.Config{Project: "default-project", Region: "default-region"},
+			Config:               &Config{Project: "default-project", Region: "default-region"},
 			ExpectedRelativeLink: "projects/default-project/regions/us-central1/subnetworks/my-subnetwork",
 		},
 		"subnetwork is the name only and region is extracted from the provider-level zone.": {
@@ -295,18 +294,18 @@ func TestParseRegionalFieldValue(t *testing.T) {
 			ProjectSchemaValue:   "schema-project",
 			RegionSchemaField:    "region",
 			ZoneSchemaField:      "zone",
-			Config:               &transport_tpg.Config{Project: "default-project", Zone: "us-central1-c"},
+			Config:               &Config{Project: "default-project", Zone: "us-central1-c"},
 			ExpectedRelativeLink: "projects/default-project/regions/us-central1/subnetworks/my-subnetwork",
 		},
 		"subnetwork is the name only and no region field is specified": {
 			FieldValue:           "my-subnetwork",
-			Config:               &transport_tpg.Config{Project: "default-project", Region: "default-region"},
+			Config:               &Config{Project: "default-project", Region: "default-region"},
 			ExpectedRelativeLink: "projects/default-project/regions/default-region/subnetworks/my-subnetwork",
 		},
 		"subnetwork is the name only and no value for region field is specified": {
 			FieldValue:           "my-subnetwork",
 			RegionSchemaField:    "region",
-			Config:               &transport_tpg.Config{Project: "default-project", Region: "default-region"},
+			Config:               &Config{Project: "default-project", Region: "default-region"},
 			ExpectedRelativeLink: "projects/default-project/regions/default-region/subnetworks/my-subnetwork",
 		},
 		"subnetwork is empty and it is valid": {
@@ -364,7 +363,7 @@ func TestParseProjectFieldValue(t *testing.T) {
 		IsEmptyValid         bool
 		ProjectSchemaField   string
 		ProjectSchemaValue   string
-		Config               *transport_tpg.Config
+		Config               *Config
 	}{
 		"instance is a full self link": {
 			FieldValue:           "https://www.googleapis.com/compute/v1/projects/myproject/instances/my-instance",
@@ -376,25 +375,25 @@ func TestParseProjectFieldValue(t *testing.T) {
 		},
 		"instance is a partial relative self link": {
 			FieldValue:           "projects/instances/my-instance",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/instances/my-instance",
 		},
 		"instance is the name only": {
 			FieldValue:           "my-instance",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/instances/my-instance",
 		},
 		"instance is the name only and has a project set in schema": {
 			FieldValue:           "my-instance",
 			ProjectSchemaField:   "project",
 			ProjectSchemaValue:   "schema-project",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/schema-project/instances/my-instance",
 		},
 		"instance is the name only and has a project set in schema but the field is not specified.": {
 			FieldValue:           "my-instance",
 			ProjectSchemaValue:   "schema-project",
-			Config:               &transport_tpg.Config{Project: "default-project"},
+			Config:               &Config{Project: "default-project"},
 			ExpectedRelativeLink: "projects/default-project/instances/my-instance",
 		},
 		"instance is empty and it is valid": {

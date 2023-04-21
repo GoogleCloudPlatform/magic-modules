@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleCloudBuildTrigger() *schema.Resource {
@@ -23,7 +22,7 @@ func DataSourceGoogleCloudBuildTrigger() *schema.Resource {
 }
 
 func dataSourceGoogleCloudBuildTriggerRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	id, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}")
 	if err != nil {

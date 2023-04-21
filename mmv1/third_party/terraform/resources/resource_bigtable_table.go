@@ -9,7 +9,6 @@ import (
 	"cloud.google.com/go/bigtable"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceBigtableTable() *schema.Resource {
@@ -93,7 +92,7 @@ func ResourceBigtableTable() *schema.Resource {
 }
 
 func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -170,7 +169,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -224,7 +223,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -289,7 +288,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -335,7 +334,7 @@ func flattenColumnFamily(families []string) []map[string]interface{} {
 
 // TODO(rileykarson): Fix the stored import format after rebasing 3.0.0
 func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/instances/(?P<instance_name>[^/]+)/tables/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<instance_name>[^/]+)/(?P<name>[^/]+)",

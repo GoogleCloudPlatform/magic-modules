@@ -37,8 +37,6 @@ import (
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
   "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-  transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
-
 <% if object.gettable_properties.reject { |p| p.ignore_read }.any? { |prop| prop.flatten_object } -%>
   "google.golang.org/api/googleapi"
 <% end -%>
@@ -166,7 +164,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project && object.async&.allow?('create') -%>
     var project string
 <% end -%>
-    config := meta.(*transport_tpg.Config)
+    config := meta.(*Config)
 <%  if object.custom_code.custom_create -%>
     <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
 <%  else  -%>
@@ -382,7 +380,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%    if object.async.custom_poll_read -%>
 <%= lines(compile(pwd + '/' + object.async.custom_poll_read)) -%>
 <%    else -%>
-        config := meta.(*transport_tpg.Config)
+        config := meta.(*Config)
 
         url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
         if err != nil {
@@ -447,7 +445,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%  end -%>
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
-    config := meta.(*transport_tpg.Config)
+    config := meta.(*Config)
     userAgent, err := generateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
@@ -583,7 +581,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project && object.async&.allow?('update') -%>
     var project string
 <% end -%>
-    config := meta.(*transport_tpg.Config)
+    config := meta.(*Config)
     userAgent, err := generateUserAgentString(d, config.UserAgent)
     if err != nil {
     	return err
@@ -855,7 +853,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     return nil
 <% else -%>
-    config := meta.(*transport_tpg.Config)
+    config := meta.(*Config)
     userAgent, err := generateUserAgentString(d, config.UserAgent)
     if err != nil {
     	return err
@@ -957,7 +955,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <% if object.custom_code.custom_import -%>
 <%= lines(compile(pwd + '/' + object.custom_code.custom_import)) -%>
 <% else -%>
-    config := meta.(*transport_tpg.Config)
+    config := meta.(*Config)
     if err := ParseImportId([]string{
 <%   for import_id in import_id_formats_from_resource(object) -%>
         "<%= format2regex(import_id) %>",

@@ -67,15 +67,15 @@ func resourceConverter<%= resource_name -%>IamMember() ResourceConverter {
     }
 }
 
-func Get<%= resource_name -%>IamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func Get<%= resource_name -%>IamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return new<%= resource_name -%>IamAsset(d, config, expandIamPolicyBindings)
 }
 
-func Get<%= resource_name -%>IamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func Get<%= resource_name -%>IamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return new<%= resource_name -%>IamAsset(d, config, expandIamRoleBindings)
 }
 
-func Get<%= resource_name -%>IamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func Get<%= resource_name -%>IamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return new<%= resource_name -%>IamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -102,7 +102,7 @@ func Merge<%= resource_name -%>IamMemberDelete(existing, incoming Asset) Asset {
 
 func new<%= resource_name -%>IamAsset(
 	d TerraformResourceData,
-	config *transport_tpg.Config,
+	config *Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
@@ -124,7 +124,7 @@ func new<%= resource_name -%>IamAsset(
 	}}, nil
 }
 
-func Fetch<%= resource_name -%>IamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func Fetch<%= resource_name -%>IamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
   <% resource_params.each do |param| -%>
   if _, ok := d.GetOk("<%= param.underscore -%>"); !ok {

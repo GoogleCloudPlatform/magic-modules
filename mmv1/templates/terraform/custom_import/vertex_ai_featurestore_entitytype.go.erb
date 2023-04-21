@@ -1,4 +1,4 @@
-config := meta.(*transport_tpg.Config)
+config := meta.(*Config)
 if err := ParseImportId([]string{
 	"(?P<featurestore>.+)/entityTypes/(?P<name>[^/]+)",
 }, d, config); err != nil {

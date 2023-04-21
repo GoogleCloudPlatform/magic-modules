@@ -48,7 +48,6 @@ import(
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func Resource{{$.PathType}}() *schema.Resource {
@@ -205,7 +204,7 @@ func {{$.PathType}}{{$v.PackagePath}}Schema() *schema.Resource {
 {{ end }}
 
 func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 {{- range $v := .Properties }}
 	{{- if and ($v.IdentityGetter) ($v.Settable) }}
@@ -272,7 +271,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
+	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
@@ -331,7 +330,7 @@ should be converted to use the DCL's ID method, so normalization can be uniform.
 }
 
 func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 {{- range $v := .Properties }}
 	{{- if $v.IdentityGetter }}
@@ -363,7 +362,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
+	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
@@ -395,7 +394,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 
 {{- if $.Updatable }}
 func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 {{- range $v := .Properties }}
 	{{- if and ($v.IdentityGetter) ($v.Settable) }}
@@ -448,7 +447,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
+	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	{{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 	{{- end }}
@@ -478,7 +477,7 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 {{- end }}
 
 func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 {{- range $v := .Properties }}
 	{{- if $v.IdentityGetter }}
@@ -536,7 +535,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 	if bp, err := getBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
+	client := NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 {{- if $.AppendToBasePath }}
 	client.Config.BasePath += "{{$.AppendToBasePath}}"
 {{- end }}
@@ -558,7 +557,7 @@ func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 {{ if $.CustomImportFunction }}
 	if err := {{$.CustomImportFunction}}(d, config); err != nil {
 		return nil, fmt.Errorf("error encountered in import: %v", err)

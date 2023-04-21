@@ -5,8 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -91,7 +89,7 @@ func DataSourceGoogleComputeAddress() *schema.Resource {
 }
 
 func dataSourceGoogleComputeAddressRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -160,7 +158,7 @@ func (s computeAddressId) canonicalId() string {
 	return fmt.Sprintf(computeAddressIdTemplate, s.Project, s.Region, s.Name)
 }
 
-func parseComputeAddressId(id string, config *transport_tpg.Config) (*computeAddressId, error) {
+func parseComputeAddressId(id string, config *Config) (*computeAddressId, error) {
 	var parts []string
 	if computeAddressLinkRegex.MatchString(id) {
 		parts = computeAddressLinkRegex.FindStringSubmatch(id)

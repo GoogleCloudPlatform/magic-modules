@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/serviceusage/v1"
 )
@@ -133,7 +132,7 @@ func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) (
 }
 
 func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -171,7 +170,7 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -230,7 +229,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	if disable := d.Get("disable_on_destroy"); !(disable.(bool)) {
 		log.Printf("[WARN] Project service %q disable_on_destroy is false, skip disabling service", d.Id())
@@ -261,7 +260,7 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 }
 
 // Disables a project service.
-func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool) error {
+func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *Config, disableDependentServices bool) error {
 	err := RetryTimeDuration(func() error {
 		billingProject := project
 		userAgent, err := generateUserAgentString(d, config.UserAgent)

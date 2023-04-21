@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/compute/v1"
@@ -68,7 +66,7 @@ func ResourceServiceNetworkingConnection() *schema.Resource {
 }
 
 func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -135,7 +133,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 }
 
 func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -203,7 +201,7 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 }
 
 func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -258,7 +256,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 }
 
 func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -360,7 +358,7 @@ func parseConnectionId(id string) (*connectionId, error) {
 // NOTE(craigatgoogle): An out of band aspect of this API is that it uses a unique formatting of network
 // different from the standard self_link URI. It requires a call to the resource manager to get the project
 // number for the current project.
-func retrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *transport_tpg.Config, network, userAgent string) (string, error) {
+func retrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *Config, network, userAgent string) (string, error) {
 	networkFieldValue, err := ParseNetworkFieldValue(network, d, config)
 	if err != nil {
 		return "", errwrap.Wrapf("Failed to retrieve network field value, err: {{err}}", err)

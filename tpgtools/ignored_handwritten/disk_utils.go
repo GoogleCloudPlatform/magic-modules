@@ -198,7 +198,7 @@ func suppressWindowsFamilyDiff(imageName, familyName string) bool {
 	return strings.Contains(updatedImageName, updatedFamilyString)
 }
 
-func expandComputeDiskType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+func expandComputeDiskType(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
 		return nil
 	}
@@ -212,7 +212,7 @@ func expandComputeDiskType(v interface{}, d TerraformResourceData, config *trans
 	return &rl
 }
 
-func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
 		return nil
 	}
@@ -234,7 +234,7 @@ func expandComputeDiskSourceImage(v interface{}, d TerraformResourceData, config
 	return &f
 }
 
-func expandComputeDiskSnapshot(v interface{}, d TerraformResourceData, config *transport_tpg.Config) *string {
+func expandComputeDiskSnapshot(v interface{}, d TerraformResourceData, config *Config) *string {
 	if v == "" {
 		return nil
 	}
@@ -263,7 +263,7 @@ func ConvertSelfLinkToV1UnlessNil(v interface{}) *string {
 }
 
 func flattenComputeDiskSnapshot(v interface{}, d *schema.ResourceData, meta interface{}) *string {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	if v == nil {
 		return nil
 	}
@@ -283,7 +283,7 @@ func flattenComputeDiskSnapshot(v interface{}, d *schema.ResourceData, meta inte
 }
 
 func flattenComputeDiskImage(v interface{}, d *schema.ResourceData, meta interface{}) *string {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	if v == nil {
 		return nil
 	}

@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -342,7 +341,7 @@ func TestAccStorageObjectAcl_noOwner(t *testing.T) {
 	oldConfigureFunc := provider.ConfigureContextFunc
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		c, diagnostics := oldConfigureFunc(ctx, d)
-		config := c.(*transport_tpg.Config)
+		config := c.(*Config)
 		roundTripper := &testRoundTripper{RoundTripper: config.Client.Transport, bucketName: bucketName, objectName: objectName}
 		config.Client.Transport = roundTripper
 		return c, diagnostics

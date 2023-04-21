@@ -19,8 +19,6 @@ import (
 	"strings"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -96,7 +94,7 @@ func validateExtensionHeaders(v interface{}, k string) (ws []string, errors []er
 }
 
 func dataSourceGoogleSignedUrlRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	// Build UrlData object from data source attributes
 	urlData := &UrlData{}
@@ -175,7 +173,8 @@ func dataSourceGoogleSignedUrlRead(d *schema.ResourceData, meta interface{}) err
 //  2. `credentials` attribute in the provider definition.
 //  3. A JSON file whose path is specified by the GOOGLE_APPLICATION_CREDENTIALS environment variable.
 func loadJwtConfig(d *schema.ResourceData, meta interface{}) (*jwt.Config, error) {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
+
 	credentials := ""
 	if v, ok := d.GetOk("credentials"); ok {
 		log.Println("[DEBUG] using data source credentials to sign URL")

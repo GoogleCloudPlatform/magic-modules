@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func sourceRepoImport(d *schema.ResourceData, config *transport_tpg.Config) error {
+func sourceRepoImport(d *schema.ResourceData, config *Config) error {
 	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/repos/(?P<name>.+)",
 		"(?P<name>.+)",
@@ -24,7 +24,7 @@ func sourceRepoImport(d *schema.ResourceData, config *transport_tpg.Config) erro
 	return nil
 }
 
-func runtimeconfigVariableImport(d *schema.ResourceData, config *transport_tpg.Config) error {
+func runtimeconfigVariableImport(d *schema.ResourceData, config *Config) error {
 	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/configs/(?P<parent>[^/]+)/variables/(?P<name>.+)",
 		"(?P<parent>[^/]+)/(?P<name>.+)",

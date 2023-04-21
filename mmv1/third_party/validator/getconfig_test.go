@@ -7,19 +7,17 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
-type configAttrGetter func(cfg *transport_tpg.Config) string
+type configAttrGetter func(cfg *Config) string
 
-func getCredentials(cfg *transport_tpg.Config) string {
+func getCredentials(cfg *Config) string {
 	return cfg.Credentials
 }
-func getAccessToken(cfg *transport_tpg.Config) string {
+func getAccessToken(cfg *Config) string {
 	return cfg.AccessToken
 }
-func getImpersonateServiceAccount(cfg *transport_tpg.Config) string {
+func getImpersonateServiceAccount(cfg *Config) string {
 	return cfg.ImpersonateServiceAccount
 }
 

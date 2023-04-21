@@ -45,7 +45,7 @@ func resourceDatastreamStreamCustomDiff(_ context.Context, diff *schema.Resource
 
 <% unless compiler == "terraformvalidator-codegen" -%>
 // waitForDatastreamStreamReady waits for an agent pool to reach a stable state to indicate that it's ready.
-func waitForDatastreamStreamReady(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
+func waitForDatastreamStreamReady(d *schema.ResourceData, config *Config, timeout time.Duration) error {
 	return resource.Retry(timeout, func() *resource.RetryError {
 		if err := resourceDatastreamStreamRead(d, config); err != nil {
 			return resource.NonRetryableError(err)

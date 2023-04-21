@@ -2,7 +2,6 @@ package google
 
 import (
 	"context"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"strings"
 
@@ -86,7 +85,7 @@ func testSweepBigqueryReservation(region string) error {
 	return nil
 }
 
-func deleteAllAssignments(config *transport_tpg.Config, reservationName string) {
+func deleteAllAssignments(config *Config, reservationName string) {
 	assignmentListUrl := config.BigqueryReservationBasePath + reservationName + "/assignments"
 
 	assignmentRes, err := SendRequest(config, "GET", config.Project, assignmentListUrl, config.UserAgent, nil)

@@ -14,7 +14,7 @@
 -%>
 
 //Use it to delete TagTemplate Field
-func deleteTagTemplateField(d *schema.ResourceData, config *transport_tpg.Config, name, billingProject, userAgent string) (error) {
+func deleteTagTemplateField(d *schema.ResourceData, config *Config, name, billingProject, userAgent string) (error) {
 
 	url_delete, err := ReplaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields/"+name+"?force={{force_delete}}")
 	if err != nil {
@@ -31,7 +31,7 @@ func deleteTagTemplateField(d *schema.ResourceData, config *transport_tpg.Config
 }
 
 //Use it to create TagTemplate Field
-func createTagTemplateField(d *schema.ResourceData, config *transport_tpg.Config, body map[string]interface{}, name, billingProject, userAgent string) (error) {
+func createTagTemplateField(d *schema.ResourceData, config *Config, body map[string]interface{}, name, billingProject, userAgent string) (error) {
 
 	url_create, err := ReplaceVars(d, config, "{{DataCatalogBasePath}}{{name}}/fields")
 	if err != nil {

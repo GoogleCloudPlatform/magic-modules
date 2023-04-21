@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	appengine "google.golang.org/api/appengine/v1"
 )
 
@@ -200,7 +199,7 @@ func appEngineApplicationLocationIDCustomizeDiff(_ context.Context, d *schema.Re
 }
 
 func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -242,7 +241,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -314,7 +313,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

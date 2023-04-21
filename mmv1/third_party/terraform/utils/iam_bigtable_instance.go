@@ -3,7 +3,6 @@ package google
 import (
 	"fmt"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/bigtableadmin/v2"
 
 	"github.com/hashicorp/errwrap"
@@ -29,10 +28,10 @@ type BigtableInstanceIamUpdater struct {
 	project  string
 	instance string
 	d        TerraformResourceData
-	Config   *transport_tpg.Config
+	Config   *Config
 }
 
-func NewBigtableInstanceUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewBigtableInstanceUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
@@ -50,7 +49,7 @@ func NewBigtableInstanceUpdater(d TerraformResourceData, config *transport_tpg.C
 	}, nil
 }
 
-func BigtableInstanceIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+func BigtableInstanceIdParseFunc(d *schema.ResourceData, config *Config) error {
 	fv, err := parseProjectFieldValue("instances", d.Id(), "project", d, config, false)
 	if err != nil {
 		return err

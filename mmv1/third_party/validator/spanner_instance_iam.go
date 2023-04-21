@@ -1,10 +1,6 @@
 package google
 
-import (
-	"fmt"
-
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
-)
+import "fmt"
 
 func resourceConverterSpannerInstanceIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -34,15 +30,15 @@ func resourceConverterSpannerInstanceIamMember() ResourceConverter {
 	}
 }
 
-func GetSpannerInstanceIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetSpannerInstanceIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newSpannerInstanceIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetSpannerInstanceIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetSpannerInstanceIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newSpannerInstanceIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetSpannerInstanceIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
+func GetSpannerInstanceIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
 	return newSpannerInstanceIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -69,7 +65,7 @@ func MergeSpannerInstanceIamMemberDelete(existing, incoming Asset) Asset {
 
 func newSpannerInstanceIamAsset(
 	d TerraformResourceData,
-	config *transport_tpg.Config,
+	config *Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
@@ -91,7 +87,7 @@ func newSpannerInstanceIamAsset(
 	}}, nil
 }
 
-func FetchSpannerInstanceIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
+func FetchSpannerInstanceIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("instance"); !ok {
 		return Asset{}, ErrEmptyIdentityField

@@ -3,7 +3,6 @@ package google
 import (
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/servicenetworking/v1"
 )
 
@@ -22,7 +21,7 @@ func (w *ServiceNetworkingOperationWaiter) QueryOp() (interface{}, error) {
 	return opGetCall.Do()
 }
 
-func ServiceNetworkingOperationWaitTime(config *transport_tpg.Config, op *servicenetworking.Operation, activity, userAgent, project string, timeout time.Duration) error {
+func ServiceNetworkingOperationWaitTime(config *Config, op *servicenetworking.Operation, activity, userAgent, project string, timeout time.Duration) error {
 	w := &ServiceNetworkingOperationWaiter{
 		Service:             config.NewServiceNetworkingClient(userAgent),
 		Project:             project,

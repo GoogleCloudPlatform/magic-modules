@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func deleteComputeNetworkDefaultRoutes(d *schema.ResourceData, config *transport_tpg.Config, res *compute.Network) error {
+func deleteComputeNetworkDefaultRoutes(d *schema.ResourceData, config *Config, res *compute.Network) error {
 	if d.Get("delete_default_routes_on_create").(bool) {
 		url, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/global/networks")
 		networkLink := fmt.Sprintf("%s/%s", url, d.Get("name").(string))
@@ -34,7 +34,7 @@ func deleteComputeNetworkDefaultRoutes(d *schema.ResourceData, config *transport
 	return nil
 }
 
-func getVpnTunnelLink(config *transport_tpg.Config, project string, region string, tunnel string) (string, error) {
+func getVpnTunnelLink(config *Config, project string, region string, tunnel string) (string, error) {
 	if !strings.Contains(tunnel, "/") {
 		// Tunnel value provided is just the name, lookup the tunnel SelfLink
 		tunnelData, err := config.clientCompute.VpnTunnels.Get(

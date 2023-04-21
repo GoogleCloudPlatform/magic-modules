@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestGoogleProjectMigrateState(t *testing.T) {
@@ -21,7 +20,7 @@ func TestGoogleProjectMigrateState(t *testing.T) {
 				"project_id":  "test-project",
 				"skip_delete": "true",
 			},
-			Meta: &transport_tpg.Config{},
+			Meta: &Config{},
 		},
 	}
 
@@ -49,7 +48,7 @@ func TestGoogleProjectMigrateState(t *testing.T) {
 
 func TestGoogleProjectMigrateState_empty(t *testing.T) {
 	var is *terraform.InstanceState
-	var meta *transport_tpg.Config
+	var meta *Config
 
 	// should handle nil
 	is, err := resourceGoogleProjectMigrateState(0, is, meta)

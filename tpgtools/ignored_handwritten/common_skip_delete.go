@@ -8,7 +8,7 @@ import (
 )
 
 // Skip delete for DNS record set if the record is for the primary NS record
-func rrefSkipDelete(c *transport_tpg.Config, recordSet *dns.ResourceRecordSet) (bool, error) {
+func rrefSkipDelete(c *Config, recordSet *dns.ResourceRecordSet) (bool, error) {
 	if *recordSet.DnsType != "NS" {
 		// Only skip for NS records in some circumstances
 		return false, nil

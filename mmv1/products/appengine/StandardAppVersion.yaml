@@ -56,7 +56,7 @@
   import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
   id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
   mutex: "apps/{{project}}"
-  error_retry_predicates: ["transport_tpg.IsAppEngineRetryableError"]
+  error_retry_predicates: ["IsAppEngineRetryableError"]
   virtual_fields:
     - !ruby/object:Api::Type::Boolean
       name: 'noop_on_destroy'

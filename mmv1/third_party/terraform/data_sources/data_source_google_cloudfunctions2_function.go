@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleCloudFunctions2Function() *schema.Resource {
@@ -24,7 +23,7 @@ func DataSourceGoogleCloudFunctions2Function() *schema.Resource {
 }
 
 func dataSourceGoogleCloudFunctions2FunctionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	project, err := getProject(d, config)
 	if err != nil {

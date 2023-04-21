@@ -5,8 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"google.golang.org/api/googleapi"
 )
 
@@ -47,7 +45,7 @@ var imageMap = map[string]string{
 	"windows-sql": "windows-sql-cloud",
 }
 
-func resolveImageImageExists(c *transport_tpg.Config, project, name, userAgent string) (bool, error) {
+func resolveImageImageExists(c *Config, project, name, userAgent string) (bool, error) {
 	if _, err := c.NewComputeClient(userAgent).Images.Get(project, name).Do(); err == nil {
 		return true, nil
 	} else if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
@@ -57,7 +55,7 @@ func resolveImageImageExists(c *transport_tpg.Config, project, name, userAgent s
 	}
 }
 
-func resolveImageFamilyExists(c *transport_tpg.Config, project, name, userAgent string) (bool, error) {
+func resolveImageFamilyExists(c *Config, project, name, userAgent string) (bool, error) {
 	if _, err := c.NewComputeClient(userAgent).Images.GetFromFamily(project, name).Do(); err == nil {
 		return true, nil
 	} else if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
@@ -92,7 +90,7 @@ func sanityTestRegexMatches(expected int, got []string, regexType, name string) 
 //	If not, check if it could be a GCP-provided image, and if it exists. If it does, return it as projects/{project}/global/images/{image}.
 //	If not, check if it's a family in the current project. If it is, return it as global/images/family/{family}.
 //	If not, check if it could be a GCP-provided family, and if it exists. If it does, return it as projects/{project}/global/images/family/{family}
-func resolveImage(c *transport_tpg.Config, project, name, userAgent string) (string, error) {
+func resolveImage(c *Config, project, name, userAgent string) (string, error) {
 	var builtInProject string
 	for k, v := range imageMap {
 		if strings.Contains(name, k) {

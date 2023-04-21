@@ -1,4 +1,4 @@
-func getExistingFirebaseProjectId(config *transport_tpg.Config, d *schema.ResourceData, billingProject string, userAgent string) (string, error) {
+func getExistingFirebaseProjectId(config *Config, d *schema.ResourceData, billingProject string, userAgent string) (string, error) {
 	url, err := ReplaceVars(d, config, "{{FirebaseBasePath}}projects/{{project}}")
 	if err != nil {
 		return "", err

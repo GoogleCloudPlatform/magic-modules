@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestContainerNodePoolMigrateState(t *testing.T) {
@@ -45,7 +44,7 @@ func TestContainerNodePoolMigrateState(t *testing.T) {
 
 func TestContainerNodePoolMigrateState_empty(t *testing.T) {
 	var is *terraform.InstanceState
-	var meta *transport_tpg.Config
+	var meta *Config
 
 	// should handle nil
 	is, err := resourceContainerNodePoolMigrateState(0, is, meta)

@@ -3,12 +3,11 @@ package google
 import (
 	"fmt"
 
-	runtimeconfig "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/runtimeconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	runtimeconfig "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/runtimeconfig"
 )
 
-func runtimeconfigVariableValidateTextOrValueSet(d *schema.ResourceData, config *transport_tpg.Config, res *runtimeconfig.Variable) error {
+func runtimeconfigVariableValidateTextOrValueSet(d *schema.ResourceData, config *Config, res *runtimeconfig.Variable) error {
 	// Validate that both text and value are not set
 	_, textSet := d.GetOk("text")
 	_, valueSet := d.GetOk("value")

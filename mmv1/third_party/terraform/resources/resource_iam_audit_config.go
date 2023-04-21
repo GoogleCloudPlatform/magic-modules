@@ -6,8 +6,6 @@ import (
 	"log"
 	"strings"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -65,7 +63,7 @@ func ResourceIamAuditConfigWithBatching(parentSpecificSchema map[string]*schema.
 
 func resourceIamAuditConfigRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*transport_tpg.Config)
+		config := meta.(*Config)
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err
@@ -111,7 +109,7 @@ func iamAuditConfigImport(resourceIdParser resourceIdParserFunc) schema.StateFun
 		if resourceIdParser == nil {
 			return nil, errors.New("Import not supported for this IAM resource.")
 		}
-		config := m.(*transport_tpg.Config)
+		config := m.(*Config)
 		s := strings.Fields(d.Id())
 		if len(s) != 2 {
 			d.SetId("")
@@ -138,7 +136,7 @@ func iamAuditConfigImport(resourceIdParser resourceIdParserFunc) schema.StateFun
 
 func resourceIamAuditConfigCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*transport_tpg.Config)
+		config := meta.(*Config)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -167,7 +165,7 @@ func resourceIamAuditConfigCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc
 
 func resourceIamAuditConfigDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) schema.DeleteFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*transport_tpg.Config)
+		config := meta.(*Config)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {

@@ -20,8 +20,6 @@ import (
 	"testing"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
 
@@ -39,7 +37,7 @@ import (
 var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
 
-var configs map[string]*transport_tpg.Config
+var configs map[string]*Config
 var fwProviders map[string]*frameworkTestProvider
 
 var sources map[string]VcrSource
@@ -222,7 +220,7 @@ func isReleaseDiffEnabled() bool {
 
 func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.TestCase {
 	var releaseProvider string
-	packagePath := fmt.Sprint(reflect.TypeOf(transport_tpg.Config{}).PkgPath())
+	packagePath := fmt.Sprint(reflect.TypeOf(Config{}).PkgPath())
 	if strings.Contains(packagePath, "google-beta") {
 		releaseProvider = "google-beta"
 	} else {
@@ -449,7 +447,7 @@ func GetSDKProvider(testName string) *schema.Provider {
 // ConfigureFunc on our provider creates a new HTTP client and sets base paths (config.go LoadAndValidate)
 // VCR requires a single HTTP client to handle all interactions so it can record and replay responses so
 // this caches HTTP clients per test by replacing ConfigureFunc
-func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*transport_tpg.Config, diag.Diagnostics) {
+func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*Config, diag.Diagnostics) {
 	configsLock.RLock()
 	v, ok := configs[testName]
 	configsLock.RUnlock()
@@ -462,7 +460,7 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 	}
 
 	var fwD fwDiags.Diagnostics
-	config := c.(*transport_tpg.Config)
+	config := c.(*Config)
 	config.PollInterval, config.Client.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval)
 	if fwD.HasError() {
 		diags = append(diags, *frameworkDiagsToSdkDiags(fwD)...)

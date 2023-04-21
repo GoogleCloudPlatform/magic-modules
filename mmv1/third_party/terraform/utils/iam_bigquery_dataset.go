@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -36,10 +34,10 @@ type BigqueryDatasetIamUpdater struct {
 	project   string
 	datasetId string
 	d         TerraformResourceData
-	Config    *transport_tpg.Config
+	Config    *Config
 }
 
-func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
@@ -57,7 +55,7 @@ func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *transport_tpg
 	}, nil
 }
 
-func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *Config) error {
 	fv, err := parseProjectFieldValue("datasets", d.Id(), "project", d, config, false)
 	if err != nil {
 		return err

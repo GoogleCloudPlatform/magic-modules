@@ -26,7 +26,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package transport
+package google
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -75,7 +75,7 @@ func HandleDCLCustomEndpointDefaults(d *schema.ResourceData) {
 }
 
 // plugin-framework provider set-up
-func ConfigureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_schema.Schema) {
+func configureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_schema.Schema) {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
 	frameworkSchema.Attributes["{{$pkg.BasePathIdentifier}}_custom_endpoint"] = framework_schema.StringAttribute{
@@ -97,3 +97,4 @@ func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	return config
 }
+

@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -21,10 +20,10 @@ var IamProjectSchema = map[string]*schema.Schema{
 type ProjectIamUpdater struct {
 	resourceId string
 	d          TerraformResourceData
-	Config     *transport_tpg.Config
+	Config     *Config
 }
 
-func NewProjectIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+func NewProjectIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
 	return &ProjectIamUpdater{
 		resourceId: d.Get("project").(string),
 		d:          d,
@@ -32,7 +31,7 @@ func NewProjectIamUpdater(d TerraformResourceData, config *transport_tpg.Config)
 	}, nil
 }
 
-func ProjectIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
+func ProjectIdParseFunc(d *schema.ResourceData, _ *Config) error {
 	if err := d.Set("project", d.Id()); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}

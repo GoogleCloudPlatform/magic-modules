@@ -5,8 +5,6 @@ import (
 	"log"
 	"time"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -18,7 +16,7 @@ const (
 // BatchRequestEnableServices can be used to batch requests to enable services
 // across resource nodes, i.e. to batch creation of several
 // google_project_service(s) resources.
-func BatchRequestEnableService(service string, project string, d *schema.ResourceData, config *transport_tpg.Config) error {
+func BatchRequestEnableService(service string, project string, d *schema.ResourceData, config *Config) error {
 	// Renamed service create calls are relatively likely to fail, so don't try to batch the call.
 	if altName, ok := renamedServicesByOldAndNewServiceNames[service]; ok {
 		return tryEnableRenamedService(service, altName, project, d, config)
@@ -35,7 +33,7 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 		billingProject = bp
 	}
 
-	req := &transport_tpg.BatchRequest{
+	req := &BatchRequest{
 		ResourceName: project,
 		Body:         []string{service},
 		CombineF:     combineServiceUsageServicesBatches,
@@ -50,7 +48,7 @@ func BatchRequestEnableService(service string, project string, d *schema.Resourc
 	return err
 }
 
-func tryEnableRenamedService(service, altName string, project string, d *schema.ResourceData, config *transport_tpg.Config) error {
+func tryEnableRenamedService(service, altName string, project string, d *schema.ResourceData, config *Config) error {
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -77,7 +75,7 @@ func tryEnableRenamedService(service, altName string, project string, d *schema.
 	return nil
 }
 
-func BatchRequestReadServices(project string, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+func BatchRequestReadServices(project string, d *schema.ResourceData, config *Config) (interface{}, error) {
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
@@ -89,7 +87,7 @@ func BatchRequestReadServices(project string, d *schema.ResourceData, config *tr
 		billingProject = bp
 	}
 
-	req := &transport_tpg.BatchRequest{
+	req := &BatchRequest{
 		ResourceName: project,
 		Body:         nil,
 		// Use empty CombineF since the request is exactly the same no matter how many services we read.
@@ -117,7 +115,7 @@ func combineServiceUsageServicesBatches(srvsRaw interface{}, toAddRaw interface{
 	return append(srvs, toAdd...), nil
 }
 
-func sendBatchFuncEnableServices(config *transport_tpg.Config, userAgent, billingProject string, timeout time.Duration) transport_tpg.BatcherSendFunc {
+func sendBatchFuncEnableServices(config *Config, userAgent, billingProject string, timeout time.Duration) BatcherSendFunc {
 	return func(project string, toEnableRaw interface{}) (interface{}, error) {
 		toEnable, ok := toEnableRaw.([]string)
 		if !ok {
@@ -127,7 +125,7 @@ func sendBatchFuncEnableServices(config *transport_tpg.Config, userAgent, billin
 	}
 }
 
-func sendListServices(config *transport_tpg.Config, billingProject, userAgent string, timeout time.Duration) transport_tpg.BatcherSendFunc {
+func sendListServices(config *Config, billingProject, userAgent string, timeout time.Duration) BatcherSendFunc {
 	return func(project string, _ interface{}) (interface{}, error) {
 		return ListCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 	}

@@ -1,4 +1,4 @@
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	if err := ParseImportId([]string{
 		"(?P<taxonomy>projects/[^/]+/locations/[^/]+/taxonomies/[^/]+)/policyTags/(?P<name>.+)"}, d, config); err != nil {

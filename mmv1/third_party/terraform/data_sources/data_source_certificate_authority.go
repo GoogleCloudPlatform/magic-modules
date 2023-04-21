@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourcePrivatecaCertificateAuthority() *schema.Resource {
@@ -26,7 +25,7 @@ func DataSourcePrivatecaCertificateAuthority() *schema.Resource {
 }
 
 func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return fmt.Errorf("Error generating user agent: %s", err)

@@ -4,7 +4,6 @@ package google
 <% unless version == 'ga' -%>
 
 import (
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -44,7 +43,7 @@ func DataSourceGoogleComputeRegionInstanceTemplate() *schema.Resource {
 }
 
 func datasourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
+	config := meta.(*Config)
 
 	region, err := getRegion(d, config)
 	if err != nil {

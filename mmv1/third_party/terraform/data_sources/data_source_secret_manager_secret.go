@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceSecretManagerSecret() *schema.Resource {
@@ -20,7 +19,7 @@ func DataSourceSecretManagerSecret() *schema.Resource {
 }
 
 func dataSourceSecretManagerSecretRead(d *schema.ResourceData, meta interface{}) error {
-	id, err := ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{project}}/secrets/{{secret_id}}")
+	id, err := ReplaceVars(d, meta.(*Config), "projects/{{project}}/secrets/{{secret_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

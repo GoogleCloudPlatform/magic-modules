@@ -1,4 +1,4 @@
-package transport_test
+package google
 
 import (
 	"context"
@@ -8,12 +8,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	google_tpg "github.com/hashicorp/terraform-provider-google/google"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"golang.org/x/oauth2/google"
 )
-
-const testOauthScope = "https://www.googleapis.com/auth/compute"
 
 func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 	cases := map[string]struct {
@@ -47,7 +43,7 @@ func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -62,7 +58,7 @@ func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 			}
 
 			// Act
-			err := transport_tpg.HandleSDKDefaults(d)
+			err := HandleSDKDefaults(d)
 
 			// Assert
 			if err != nil {
@@ -144,7 +140,7 @@ func TestHandleSDKDefaults_Region(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -159,7 +155,7 @@ func TestHandleSDKDefaults_Region(t *testing.T) {
 			}
 
 			// Act
-			err := transport_tpg.HandleSDKDefaults(d)
+			err := HandleSDKDefaults(d)
 
 			// Assert
 			if err != nil {
@@ -241,7 +237,7 @@ func TestHandleSDKDefaults_Zone(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -256,7 +252,7 @@ func TestHandleSDKDefaults_Zone(t *testing.T) {
 			}
 
 			// Act
-			err := transport_tpg.HandleSDKDefaults(d)
+			err := HandleSDKDefaults(d)
 
 			// Assert
 			if err != nil {
@@ -341,7 +337,7 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.SetViaConfig {
@@ -356,7 +352,7 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 			}
 
 			// Act
-			err := transport_tpg.HandleSDKDefaults(d)
+			err := HandleSDKDefaults(d)
 
 			// Assert
 			if err != nil {
@@ -413,7 +409,7 @@ func TestHandleSDKDefaults_RequestReason(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, google_tpg.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, Provider().Schema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -428,7 +424,7 @@ func TestHandleSDKDefaults_RequestReason(t *testing.T) {
 			}
 
 			// Act
-			err := transport_tpg.HandleSDKDefaults(d)
+			err := HandleSDKDefaults(d)
 
 			// Assert
 			if err != nil {
@@ -455,13 +451,13 @@ func TestHandleSDKDefaults_RequestReason(t *testing.T) {
 }
 
 func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
-	config := &transport_tpg.Config{
-		Credentials: transport_tpg.TestFakeCredentialsPath,
+	config := &Config{
+		Credentials: testFakeCredentialsPath,
 		Project:     "my-gce-project",
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
+	ConfigureBasePaths(config)
 
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -470,17 +466,17 @@ func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
 }
 
 func TestConfigLoadAndValidate_accountFileJSON(t *testing.T) {
-	contents, err := ioutil.ReadFile(transport_tpg.TestFakeCredentialsPath)
+	contents, err := ioutil.ReadFile(testFakeCredentialsPath)
 	if err != nil {
 		t.Fatalf("error: %v", err)
 	}
-	config := &transport_tpg.Config{
+	config := &Config{
 		Credentials: string(contents),
 		Project:     "my-gce-project",
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
+	ConfigureBasePaths(config)
 
 	err = config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -489,13 +485,13 @@ func TestConfigLoadAndValidate_accountFileJSON(t *testing.T) {
 }
 
 func TestConfigLoadAndValidate_accountFileJSONInvalid(t *testing.T) {
-	config := &transport_tpg.Config{
+	config := &Config{
 		Credentials: "{this is not json}",
 		Project:     "my-gce-project",
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
+	ConfigureBasePaths(config)
 
 	if config.LoadAndValidate(context.Background()) == nil {
 		t.Fatalf("expected error, but got nil")
@@ -503,21 +499,21 @@ func TestConfigLoadAndValidate_accountFileJSONInvalid(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_credentials(t *testing.T) {
-	if os.Getenv(google_tpg.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", google_tpg.TestEnvVar)
+	if os.Getenv(TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	google_tpg.AccTestPreCheck(t)
+	AccTestPreCheck(t)
 
-	creds := google_tpg.GetTestCredsFromEnv()
-	proj := google_tpg.GetTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
-	config := &transport_tpg.Config{
+	config := &Config{
 		Credentials: creds,
 		Project:     proj,
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
+	ConfigureBasePaths(config)
 
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -531,23 +527,23 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_impersonated(t *testing.T) {
-	if os.Getenv(google_tpg.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", google_tpg.TestEnvVar)
+	if os.Getenv(TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	google_tpg.AccTestPreCheck(t)
+	AccTestPreCheck(t)
 
-	serviceaccount := transport_tpg.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
-	creds := google_tpg.GetTestCredsFromEnv()
-	proj := google_tpg.GetTestProjectFromEnv()
+	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
-	config := &transport_tpg.Config{
+	config := &Config{
 		Credentials:               creds,
 		ImpersonateServiceAccount: serviceaccount,
 		Project:                   proj,
 		Region:                    "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
+	ConfigureBasePaths(config)
 
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -561,16 +557,16 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
-	if os.Getenv(google_tpg.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", google_tpg.TestEnvVar)
+	if os.Getenv(TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	google_tpg.AccTestPreCheck(t)
+	AccTestPreCheck(t)
 
-	creds := google_tpg.GetTestCredsFromEnv()
-	proj := google_tpg.GetTestProjectFromEnv()
-	serviceaccount := transport_tpg.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
+	serviceaccount := MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
-	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), transport_tpg.DefaultClientScopes...)
+	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), DefaultClientScopes...)
 	if err != nil {
 		t.Fatalf("invalid test credentials: %s", err)
 	}
@@ -580,14 +576,14 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 		t.Fatalf("Unable to generate test access token: %s", err)
 	}
 
-	config := &transport_tpg.Config{
+	config := &Config{
 		AccessToken:               token.AccessToken,
 		ImpersonateServiceAccount: serviceaccount,
 		Project:                   proj,
 		Region:                    "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
+	ConfigureBasePaths(config)
 
 	err = config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -601,13 +597,13 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_accessToken(t *testing.T) {
-	if os.Getenv(google_tpg.TestEnvVar) == "" {
-		t.Skipf("Network access not allowed; use %s=1 to enable", google_tpg.TestEnvVar)
+	if os.Getenv(TestEnvVar) == "" {
+		t.Skipf("Network access not allowed; use %s=1 to enable", TestEnvVar)
 	}
-	google_tpg.AccTestPreCheck(t)
+	AccTestPreCheck(t)
 
-	creds := google_tpg.GetTestCredsFromEnv()
-	proj := google_tpg.GetTestProjectFromEnv()
+	creds := GetTestCredsFromEnv()
+	proj := GetTestProjectFromEnv()
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
 	if err != nil {
@@ -619,13 +615,13 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 		t.Fatalf("Unable to generate test access token: %s", err)
 	}
 
-	config := &transport_tpg.Config{
+	config := &Config{
 		AccessToken: token.AccessToken,
 		Project:     proj,
 		Region:      "us-central1",
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
+	ConfigureBasePaths(config)
 
 	err = config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -639,14 +635,14 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 }
 
 func TestConfigLoadAndValidate_customScopes(t *testing.T) {
-	config := &transport_tpg.Config{
-		Credentials: transport_tpg.TestFakeCredentialsPath,
+	config := &Config{
+		Credentials: testFakeCredentialsPath,
 		Project:     "my-gce-project",
 		Region:      "us-central1",
 		Scopes:      []string{"https://www.googleapis.com/auth/compute"},
 	}
 
-	transport_tpg.ConfigureBasePaths(config)
+	ConfigureBasePaths(config)
 
 	err := config.LoadAndValidate(context.Background())
 	if err != nil {
@@ -663,12 +659,12 @@ func TestConfigLoadAndValidate_customScopes(t *testing.T) {
 
 func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 	// Use default batching config
-	batchCfg, err := transport_tpg.ExpandProviderBatchingConfig(nil)
+	batchCfg, err := ExpandProviderBatchingConfig(nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	config := &transport_tpg.Config{
-		Credentials:    transport_tpg.TestFakeCredentialsPath,
+	config := &Config{
+		Credentials:    testFakeCredentialsPath,
 		Project:        "my-gce-project",
 		Region:         "us-central1",
 		BatchingConfig: batchCfg,
@@ -679,16 +675,16 @@ func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expectedDur := time.Second * transport_tpg.DefaultBatchSendIntervalSec
+	expectedDur := time.Second * DefaultBatchSendIntervalSec
 	if config.RequestBatcherServiceUsage.SendAfter != expectedDur {
 		t.Fatalf("expected SendAfter to be %d seconds, got %v",
-			transport_tpg.DefaultBatchSendIntervalSec,
+			DefaultBatchSendIntervalSec,
 			config.RequestBatcherServiceUsage.SendAfter)
 	}
 }
 
 func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
-	batchCfg, err := transport_tpg.ExpandProviderBatchingConfig([]interface{}{
+	batchCfg, err := ExpandProviderBatchingConfig([]interface{}{
 		map[string]interface{}{
 			"send_after":      "1s",
 			"enable_batching": false,
@@ -704,8 +700,8 @@ func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 		t.Fatalf("expected EnableBatching to be false")
 	}
 
-	config := &transport_tpg.Config{
-		Credentials:    transport_tpg.TestFakeCredentialsPath,
+	config := &Config{
+		Credentials:    testFakeCredentialsPath,
 		Project:        "my-gce-project",
 		Region:         "us-central1",
 		BatchingConfig: batchCfg,
@@ -742,8 +738,8 @@ func TestRemoveBasePathVersion(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		if c.Expected != transport_tpg.RemoveBasePathVersion(c.BaseURL) {
-			t.Errorf("replace url failed: got %s wanted %s", transport_tpg.RemoveBasePathVersion(c.BaseURL), c.Expected)
+		if c.Expected != RemoveBasePathVersion(c.BaseURL) {
+			t.Errorf("replace url failed: got %s wanted %s", RemoveBasePathVersion(c.BaseURL), c.Expected)
 		}
 	}
 }
