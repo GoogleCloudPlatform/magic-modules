@@ -198,7 +198,7 @@ module Provider
         tpg = 'github.com/hashicorp/terraform-provider-google-beta'
         dir = 'google-beta'
       else
-        tpg = 'github.com/hashicorp/terraform-provider-google-private'
+        tpg = 'internal/terraform-next'
         dir = 'google-private'
       end
 
