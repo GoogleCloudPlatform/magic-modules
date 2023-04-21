@@ -79,7 +79,7 @@ func main() {
 		terraformProviderModule = "github.com/hashicorp/terraform-provider-google/google"
 	} else if *version == ALPHA_VERSION {
 		terraformResourceDirectory = "google-private"
-		terraformProviderModule = "github.com/hashicorp/terraform-provider-google-private"
+		terraformProviderModule = "internal/terraform-next"
 	}
 
 	generatedResources := make([]*Resource, 0, len(resourcesForVersion))
