@@ -182,7 +182,7 @@ func testAccAlloydbBackup_createBackupWithMandatoryFields(context map[string]int
 	return Nprintf(`
 resource "google_alloydb_backup" "default" {
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
-  location = "us-east1"
+  location = "us-central1"
   cluster_name = google_alloydb_cluster.default.name
   depends_on = [google_alloydb_instance.default]
 }
@@ -213,6 +213,16 @@ resource "google_compute_global_address" "private_ip_alloc" {
   purpose       = "VPC_PEERING"
   prefix_length = 16
   network       = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  lifecycle {
+	ignore_changes = [
+		address,
+		creation_timestamp,
+		id,
+		network,
+		project,
+		self_link
+	]
+  }
 }
 
 resource "google_service_networking_connection" "vpc_connection" {
