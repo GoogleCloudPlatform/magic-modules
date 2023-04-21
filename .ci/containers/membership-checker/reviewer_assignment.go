@@ -4,6 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	_ "embed"
+)
+
+var (
+	//go:embed REVIEWER_ASSIGNMENT_COMMENT.md
+	reviewerAssignmentComment string
 )
 
 func requestReviewer(author, prNumber, GITHUB_TOKEN string) error {
@@ -153,12 +160,8 @@ func requestRandomReviewer(prNumber, GITHUB_TOKEN string) error {
 
 func postComment(prNumber, reviewer, GITHUB_TOKEN string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
-	comment, err := readFile("REVIEWER_ASSIGNMENT_COMMENT.md")
-	if err != nil {
-		return err
-	}
 
-	comment = strings.Replace(comment, "{{reviewer}}", reviewer, 1)
+	comment := strings.Replace(reviewerAssignmentComment, "{{reviewer}}", reviewer, 1)
 
 	body := map[string]string{
 		"body": comment,

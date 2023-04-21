@@ -2,17 +2,11 @@ package main
 
 import (
 	"bytes"
-	"embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"golang.org/x/exp/slices"
-)
-
-var (
-	//go:embed *
-	embededFiles embed.FS
 )
 
 func requestCall(url, method, credentials string, result interface{}, body interface{}) (int, error) {
@@ -40,14 +34,6 @@ func requestCall(url, method, credentials string, result interface{}, body inter
 	}
 
 	return resp.StatusCode, nil
-}
-
-func readFile(filename string) (string, error) {
-	contents, err := embededFiles.ReadFile(filename)
-	if err != nil {
-		return "", err
-	}
-	return string(contents), nil
 }
 
 func removes(s1 []string, s2 []string) []string {
