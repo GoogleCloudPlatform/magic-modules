@@ -1464,10 +1464,10 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 						}
 						proximity {
 							window_before = 25
-							windows_after = 25
+							window_after  = 25
 						}
 						likelihood_adjustment {
-							fixed_likelihood = "VERY_LIKELY"
+							relative_likelihood = 1
 						}
 					}
 				}
@@ -1569,6 +1569,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 					exclusion_rule {
 						regex {
 							pattern = ".+@example.com"
+							group_indexes = [1]
 						}
 						matching_type = "MATCHING_TYPE_FULL_MATCH"
 					}
@@ -1610,6 +1611,7 @@ resource "google_data_loss_prevention_job_trigger" "inspect" {
 					hotword_rule {
 						hotword_regex {
 							pattern = "patient"
+							group_index = [1]
 						}
 						proximity {
 							window_before = 50
