@@ -10,7 +10,7 @@
   // 1) if the new or old values contain '/', the prefix of that is 'projects'.
   // 2) if either is non-numeric, a project with that ID exists.
   // 3) the project IDs represented by both the new and old values are the same.
-  config := meta.(*Config)
+  config := meta.(*transport_tpg.Config)
 
   userAgent, err := generateUserAgentString(d, config.UserAgent)
   if err != nil {

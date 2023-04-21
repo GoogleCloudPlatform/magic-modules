@@ -1,6 +1,10 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
+)
 
 func resourceConverterProjectIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -30,15 +34,15 @@ func resourceConverterProjectIamMember() ResourceConverter {
 	}
 }
 
-func GetProjectIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetProjectIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newProjectIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetProjectIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetProjectIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newProjectIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetProjectIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetProjectIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newProjectIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -65,7 +69,7 @@ func MergeProjectIamMemberDelete(existing, incoming Asset) Asset {
 
 func newProjectIamAsset(
 	d TerraformResourceData,
-	config *Config,
+	config *transport_tpg.Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
@@ -89,7 +93,7 @@ func newProjectIamAsset(
 	}}, nil
 }
 
-func FetchProjectIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchProjectIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	if _, ok := d.GetOk("project"); !ok {
 		return Asset{}, ErrEmptyIdentityField
 	}
