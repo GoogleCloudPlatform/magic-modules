@@ -41,4 +41,4 @@ The following additional attributes are exported:
 
 * `id` - The billing account ID.
 * `name` - The resource name of the billing account in the form `billingAccounts/{billing_account_id}`.
-* `project_ids` - The IDs of any projects associated with the billing account.
+* `project_ids` - The IDs of any projects associated with the billing account
