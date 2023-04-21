@@ -1,5 +1,9 @@
 package google
 
+import (
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
+)
+
 func resourceConverterFolderOrgPolicy() ResourceConverter {
 	return ResourceConverter{
 		AssetType:         "cloudresourcemanager.googleapis.com/Folder",
@@ -8,7 +12,7 @@ func resourceConverterFolderOrgPolicy() ResourceConverter {
 	}
 }
 
-func GetFolderOrgPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetFolderOrgPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/{{folder}}")
 	if err != nil {
 		return []Asset{}, err
@@ -29,7 +33,7 @@ func MergeFolderOrgPolicy(existing, incoming Asset) Asset {
 	return existing
 }
 
-func GetFolderOrgPolicyApiObject(d TerraformResourceData, config *Config) (OrgPolicy, error) {
+func GetFolderOrgPolicyApiObject(d TerraformResourceData, config *transport_tpg.Config) (OrgPolicy, error) {
 
 	listPolicy, err := expandListOrganizationPolicy(d.Get("list_policy").([]interface{}))
 	if err != nil {

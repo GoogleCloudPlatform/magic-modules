@@ -319,6 +319,10 @@ properties:
                   name: "cpuIdle"
                   description: |-
                     Determines whether CPU should be throttled or not outside of requests.
+                - !ruby/object:Api::Type::Boolean
+                  name: "startupCpuBoost"
+                  description: |-
+                    Determines whether CPU should be boosted on startup of a new container instance above the requested CPU threshold, this can help reduce cold-start latency.
             - !ruby/object:Api::Type::Array
               name: "ports"
               description: |-
@@ -633,6 +637,10 @@ properties:
         description: |-
           Sets the maximum number of requests that each serving instance can receive.
         default_from_api: true
+      - !ruby/object:Api::Type::Boolean
+        name: "sessionAffinity"
+        description: |-
+          Enables session affinity. For more information, go to https://cloud.google.com/run/docs/configuring/session-affinity
   - !ruby/object:Api::Type::Array
     name: "traffic"
     description: |-
