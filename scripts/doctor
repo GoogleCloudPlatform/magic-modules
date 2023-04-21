@@ -43,10 +43,12 @@ else
     if [ $found -eq 0 ]; then
         exitcode=1
         warn "yel" "   bundler not found. Run 'gem install bundler' to install it."
-    elif [ $found -gt 1 ]; then
-        warn "yel" "   too many bundle found. You may have something overriding 'bundle'."
     else
-        warn "grn" "   found!"
+        if grep -q "Bundler version" <<< "$(bundle version)"; then
+            warn "grn" "   found!"
+        else
+            warn "yel" "   wrong bundle found. You may have something incompatible overriding 'bundle'."
+        fi
     fi
 fi
 
