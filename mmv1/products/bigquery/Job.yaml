@@ -65,7 +65,7 @@ examples:
     primary_resource_id: "job"
     vars:
       job_id: "job_load"
-      bucket_name: "bq-geojson" # Keep small(er) to avoid downstream acctest having too-long a bucket name
+      bucket_name: "bq-geojson" # Bucket name should not exceed 8-10 characters
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
