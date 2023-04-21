@@ -42,7 +42,16 @@ else
     count_in_path "bundler"
     if [ $found -eq 0 ]; then
         exitcode=1
-        warn "yel" "   bundler not found. Run 'gem install bundler' to install it it."
+        warn "yel" "   bundler not found. Run 'gem install bundler' to install it."
+    else
+        warn "grn" "   found!"
+    fi
+    count_in_path "bundle"
+    if [ $found -eq 0 ]; then
+        exitcode=1
+        warn "yel" "   bundler not found. Run 'gem install bundler' to install it."
+    elif [ $found -gt 1 ]; then
+        warn "yel" "   too many bundle found. You may have something overriding 'bundle'."
     else
         warn "grn" "   found!"
     fi
