@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccGKEBackupBackupPlan_update(t *testing.T) {
+func TestAccGkeBackupBackupPlan_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -21,7 +21,7 @@ func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 		CheckDestroy:             testAccCheckGKEBackupBackupPlanDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGKEBackupBackupPlan_basic(context),
+				Config: testAccGkeBackupBackupPlan_basic(context),
 			},
 			{
 				ResourceName:      "google_gke_backup_backup_plan.backupplan",
@@ -29,7 +29,7 @@ func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccGKEBackupBackupPlan_full(context),
+				Config: testAccGkeBackupBackupPlan_full(context),
 			},
 			{
 				ResourceName:      "google_gke_backup_backup_plan.backupplan",
@@ -40,7 +40,7 @@ func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 	})
 }
 
-func testAccGKEBackupBackupPlan_basic(context map[string]interface{}) string {
+func testAccGkeBackupBackupPlan_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "tf-test-testcluster%{random_suffix}"
@@ -69,7 +69,7 @@ resource "google_gke_backup_backup_plan" "backupplan" {
 `, context)
 }
 
-func testAccGKEBackupBackupPlan_full(context map[string]interface{}) string {
+func testAccGkeBackupBackupPlan_full(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "tf-test-testcluster%{random_suffix}"

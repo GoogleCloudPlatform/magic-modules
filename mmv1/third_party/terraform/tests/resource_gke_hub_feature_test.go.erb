@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
+func TestAccGkeHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
   // VCR fails to handle batched project services
   SkipIfVcr(t)
   t.Parallel()
@@ -28,7 +28,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
-        Config: testAccGKEHubFeature_gkehubFeatureMciUpdateStart(context),
+        Config: testAccGkeHubFeature_gkehubFeatureMciUpdateStart(context),
       },
       {
         ResourceName:      "google_gke_hub_feature.feature",
@@ -36,7 +36,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
         ImportStateVerify: true,
       },
       {
-        Config: testAccGKEHubFeature_gkehubFeatureMciChangeMembership(context),
+        Config: testAccGkeHubFeature_gkehubFeatureMciChangeMembership(context),
       },
       {
         ResourceName:      "google_gke_hub_feature.feature",
@@ -47,7 +47,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
   })
 }
 
-func testAccGKEHubFeature_gkehubFeatureMciUpdateStart(context map[string]interface{}) string {
+func testAccGkeHubFeature_gkehubFeatureMciUpdateStart(context map[string]interface{}) string {
   return gkeHubFeatureProjectSetup(context) + Nprintf(`
 
 resource "google_container_cluster" "primary" {
@@ -106,7 +106,7 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
-func testAccGKEHubFeature_gkehubFeatureMciChangeMembership(context map[string]interface{}) string {
+func testAccGkeHubFeature_gkehubFeatureMciChangeMembership(context map[string]interface{}) string {
   return gkeHubFeatureProjectSetup(context) + Nprintf(`
 resource "google_container_cluster" "primary" {
   name               = "tf-test%{random_suffix}"
@@ -167,7 +167,7 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
-func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
+func TestAccGkeHubFeature_gkehubFeatureMcsd(t *testing.T) {
   // VCR fails to handle batched project services
   SkipIfVcr(t)
   t.Parallel()
@@ -184,7 +184,7 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
       {
-        Config: testAccGKEHubFeature_gkehubFeatureMcsd(context),
+        Config: testAccGkeHubFeature_gkehubFeatureMcsd(context),
       },
       {
         ResourceName:      "google_gke_hub_feature.feature",
@@ -192,7 +192,7 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
         ImportStateVerify: true,
       },
       {
-        Config: testAccGKEHubFeature_gkehubFeatureMcsdUpdate(context),
+        Config: testAccGkeHubFeature_gkehubFeatureMcsdUpdate(context),
       },
       {
         ResourceName:      "google_gke_hub_feature.feature",
@@ -203,7 +203,7 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
   })
 }
 
-func testAccGKEHubFeature_gkehubFeatureMcsd(context map[string]interface{}) string {
+func testAccGkeHubFeature_gkehubFeatureMcsd(context map[string]interface{}) string {
   return gkeHubFeatureProjectSetup(context) + Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
@@ -218,7 +218,7 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
-func testAccGKEHubFeature_gkehubFeatureMcsdUpdate(context map[string]interface{}) string {
+func testAccGkeHubFeature_gkehubFeatureMcsdUpdate(context map[string]interface{}) string {
   return gkeHubFeatureProjectSetup(context) + Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "multiclusterservicediscovery"
