@@ -2,6 +2,8 @@ package google
 
 import (
 	"reflect"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
 )
 
 const BigQueryTableAssetType string = "bigquery.googleapis.com/Table"
@@ -13,7 +15,7 @@ func resourceConverterBigQueryTable() ResourceConverter {
 	}
 }
 
-func GetBigQueryTableCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetBigQueryTableCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 
 	if err != nil {
@@ -35,7 +37,7 @@ func GetBigQueryTableCaiObject(d TerraformResourceData, config *Config) ([]Asset
 	}
 }
 
-func GetBigQueryTableApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func GetBigQueryTableApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	tableReferenceProp, err := expandBigQueryTableTableReference(nil, d, config)
 
@@ -97,7 +99,7 @@ func GetBigQueryTableApiObject(d TerraformResourceData, config *Config) (map[str
 	return obj, nil
 }
 
-func expandBigQueryTableTableReference(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableTableReference(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	transformed := make(map[string]interface{})
 
 	transformedProjectId, err := expandBigQueryTableTableReferenceProjectId(d.Get("project"), d, config)
@@ -124,7 +126,7 @@ func expandBigQueryTableTableReference(v interface{}, d TerraformResourceData, c
 	return transformed, nil
 }
 
-func expandBigQueryTableExpirationTime(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableExpirationTime(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	transformed := make(map[string]interface{})
 
 	transformedExpirationTimeValue, err := expandBigQueryTableExpirationTimeValue(d.Get("expiration_time"), d, config)
@@ -138,7 +140,7 @@ func expandBigQueryTableExpirationTime(v interface{}, d TerraformResourceData, c
 	return transformed, nil
 }
 
-func expandBigQueryTableEncyptionConfiguration(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableEncyptionConfiguration(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -157,27 +159,27 @@ func expandBigQueryTableEncyptionConfiguration(v interface{}, d TerraformResourc
 	return transformed, nil
 }
 
-func expandBigQueryTableTableReferenceProjectId(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableTableReferenceProjectId(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableTableReferenceDatasetId(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableTableReferenceDatasetId(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableTableReferenceTableId(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableTableReferenceTableId(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableExpirationTimeValue(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableExpirationTimeValue(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableEncyptionConfigurationKmsKeyName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableEncyptionConfigurationKmsKeyName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -220,15 +222,15 @@ func expandBigQueryTableTimePartition(v interface{}, d TerraformResourceData, co
 	return transformed, nil
 }
 
-func expandBigQueryTableTimePartitionType(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableTimePartitionType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableTimePartitionExpirationMs(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableTimePartitionExpirationMs(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableTimeField(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableTimeField(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	transformed := make(map[string]interface{})
 
 	transformedValue, err := expandBigQueryTableTimeFieldValue(v, d, config)
@@ -242,23 +244,23 @@ func expandBigQueryTableTimeField(v interface{}, d TerraformResourceData, config
 	return transformed, nil
 }
 
-func expandBigQueryTableTimeFieldValue(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableTimeFieldValue(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableRequirePartitionFilter(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableRequirePartitionFilter(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableFriendlyName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableFriendlyName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandBigQueryTableLabels(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
+func expandBigQueryTableLabels(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -269,6 +271,6 @@ func expandBigQueryTableLabels(v interface{}, d TerraformResourceData, config *C
 	return m, nil
 }
 
-func expandBigQueryTableLocation(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryTableLocation(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

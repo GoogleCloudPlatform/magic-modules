@@ -1,6 +1,10 @@
 package google
 
-import "fmt"
+import (
+	"fmt"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
+)
 
 func resourceConverterPubsubSubscriptionIamPolicy() ResourceConverter {
 	return ResourceConverter{
@@ -30,15 +34,15 @@ func resourceConverterPubsubSubscriptionIamMember() ResourceConverter {
 	}
 }
 
-func GetPubsubSubscriptionIamPolicyCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetPubsubSubscriptionIamPolicyCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newPubsubSubscriptionIamAsset(d, config, expandIamPolicyBindings)
 }
 
-func GetPubsubSubscriptionIamBindingCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetPubsubSubscriptionIamBindingCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newPubsubSubscriptionIamAsset(d, config, expandIamRoleBindings)
 }
 
-func GetPubsubSubscriptionIamMemberCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetPubsubSubscriptionIamMemberCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	return newPubsubSubscriptionIamAsset(d, config, expandIamMemberBindings)
 }
 
@@ -65,7 +69,7 @@ func MergePubsubSubscriptionIamMemberDelete(existing, incoming Asset) Asset {
 
 func newPubsubSubscriptionIamAsset(
 	d TerraformResourceData,
-	config *Config,
+	config *transport_tpg.Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) ([]Asset, error) {
 	bindings, err := expandBindings(d)
@@ -87,7 +91,7 @@ func newPubsubSubscriptionIamAsset(
 	}}, nil
 }
 
-func FetchPubsubSubscriptionIamPolicy(d TerraformResourceData, config *Config) (Asset, error) {
+func FetchPubsubSubscriptionIamPolicy(d TerraformResourceData, config *transport_tpg.Config) (Asset, error) {
 	// Check if the identity field returns a value
 	if _, ok := d.GetOk("subscription"); !ok {
 		return Asset{}, ErrEmptyIdentityField
