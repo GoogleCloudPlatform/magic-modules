@@ -6,7 +6,7 @@ description: |-
 
 # google\_sql\_tiers
 
-Get all available machine types (tiers) for given project, for example, db-custom-1-3840. For more information see the
+Get all available machine types (tiers) for a project, for example, db-custom-1-3840. For more information see the
 [official documentation](https://cloud.google.com/sql/)
 and
 [API](https://cloud.google.com/sql/docs/mysql/admin-api/rest/v1beta4/tiers/list).
