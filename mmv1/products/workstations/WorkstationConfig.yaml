@@ -213,35 +213,36 @@ properties:
             name: 'shieldedInstanceConfig'
             description: |
               A set of Compute Engine Shielded instance options.
-            default_from_api: true
+            diff_suppress_func: 'EmptyOrUnsetBlockDiffSuppress'
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'enableSecureBoot'
                 description: |
                   Whether the instance has Secure Boot enabled.
-                default_value: false
+                send_empty_value: true
               - !ruby/object:Api::Type::Boolean
                 name: 'enableVtpm'
                 description: |
                   Whether the instance has the vTPM enabled.
-                default_value: false
+                send_empty_value: true
               - !ruby/object:Api::Type::Boolean
                 name: 'enableIntegrityMonitoring'
                 description: |
                   Whether the instance has integrity monitoring enabled.
-                default_value: false
+                send_empty_value: true
           - !ruby/object:Api::Type::NestedObject
             name: 'confidentialInstanceConfig'
             description: |
               A set of Compute Engine Confidential VM instance options.
-            default_from_api: true
+            # TODO(esu): To be removed once the main enable option becomes required.
+            diff_suppress_func: 'EmptyOrUnsetBlockDiffSuppress'
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: "enableConfidentialCompute"
                 # TODO(esu): Change this to required in next breaking release.
                 description: |
                   Whether the instance has confidential compute enabled.
-                default_value: false
+                send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: 'persistentDirectories'
     description: |

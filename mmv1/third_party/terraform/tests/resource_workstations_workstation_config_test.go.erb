@@ -374,8 +374,8 @@ resource "google_workstations_workstation_config" "default" {
     gce_instance {
       machine_type                = "e2-standard-2"
       boot_disk_size_gb           = 35
-
       pool_size                   = 0
+
       disable_public_ip_addresses = false
 
       shielded_instance_config {
