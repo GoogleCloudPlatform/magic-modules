@@ -22,7 +22,7 @@
   self_link: "{{access_level}}"
   create_verb: :PATCH
   delete_verb: :PATCH
-  input: true
+  immutable: true
   update_mask: true
   identity:
     - ipSubnetworks
@@ -74,6 +74,7 @@
       primary_resource_id: "access-level-condition"
       vars:
         access_level_name: "chromeos_no_lock"
+        account_id: "my-account-id"
   parameters:
     - !ruby/object:Api::Type::ResourceRef
       name: 'accessLevel'
@@ -82,7 +83,7 @@
       description: |
         The name of the Access Level to add this condition to.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::Array

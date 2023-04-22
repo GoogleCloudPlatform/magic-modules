@@ -4,13 +4,14 @@ package google
 <% unless version == 'ga' -%>
 import (
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleRuntimeconfigConfig() *schema.Resource {
+func DataSourceGoogleRuntimeconfigConfig() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceRuntimeconfigConfig().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceRuntimeconfigConfig().Schema)
 	addRequiredFieldsToSchema(dsSchema, "name")
 	addOptionalFieldsToSchema(dsSchema, "project")
 
@@ -21,9 +22,9 @@ func dataSourceGoogleRuntimeconfigConfig() *schema.Resource {
 }
 
 func dataSourceGoogleRuntimeconfigConfigRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/configs/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/configs/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

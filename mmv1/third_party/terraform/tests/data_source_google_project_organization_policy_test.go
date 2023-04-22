@@ -8,15 +8,15 @@ import (
 )
 
 func TestAccDataSourceGoogleProjectOrganizationPolicy_basic(t *testing.T) {
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleProjectOrganizationPolicy_basic(project),
-				Check: checkDataSourceStateMatchesResourceState(
+				Check: CheckDataSourceStateMatchesResourceState(
 					"data.google_project_organization_policy.data",
 					"google_project_organization_policy.resource"),
 			},

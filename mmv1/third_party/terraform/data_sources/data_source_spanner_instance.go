@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceSpannerInstance() *schema.Resource {
+func DataSourceSpannerInstance() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceSpannerInstance().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceSpannerInstance().Schema)
 
 	addRequiredFieldsToSchema(dsSchema, "name")
 	addOptionalFieldsToSchema(dsSchema, "config")       // not sure why this is configurable
@@ -22,9 +23,9 @@ func dataSourceSpannerInstance() *schema.Resource {
 }
 
 func dataSourceSpannerInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	id, err := replaceVars(d, config, "{{project}}/{{name}}")
+	id, err := ReplaceVars(d, config, "{{project}}/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

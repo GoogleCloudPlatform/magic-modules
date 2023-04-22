@@ -5,9 +5,10 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleComputeInstanceGroup() *schema.Resource {
+func DataSourceGoogleComputeInstanceGroup() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceComputeInstanceGroupRead,
 		Schema: map[string]*schema.Schema{
@@ -81,7 +82,7 @@ func dataSourceGoogleComputeInstanceGroup() *schema.Resource {
 }
 
 func dataSourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	if name, ok := d.GetOk("name"); ok {
 		zone, err := getZone(d, config)
 		if err != nil {

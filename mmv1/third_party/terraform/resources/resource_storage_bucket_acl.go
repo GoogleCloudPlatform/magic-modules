@@ -7,12 +7,14 @@ import (
 	"strconv"
 	"strings"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"google.golang.org/api/storage/v1"
 )
 
-func resourceStorageBucketAcl() *schema.Resource {
+func ResourceStorageBucketAcl() *schema.Resource {
 	return &schema.Resource{
 		Create:        resourceStorageBucketAclCreate,
 		Read:          resourceStorageBucketAclRead,
@@ -107,8 +109,8 @@ func getRoleEntityPair(role_entity string) (*RoleEntity, error) {
 }
 
 func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -130,7 +132,7 @@ func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) er
 		default_acl = v.(string)
 	}
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}")
 	if err != nil {
 		return err
 	}
@@ -211,8 +213,8 @@ func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -254,15 +256,15 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	bucket := d.Get("bucket").(string)
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}")
 	if err != nil {
 		return err
 	}
@@ -352,15 +354,15 @@ func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	bucket := d.Get("bucket").(string)
 
-	lockName, err := replaceVars(d, config, "storage/buckets/{{bucket}}")
+	lockName, err := ReplaceVars(d, config, "storage/buckets/{{bucket}}")
 	if err != nil {
 		return err
 	}

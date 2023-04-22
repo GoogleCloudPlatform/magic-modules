@@ -9,10 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	appengine "google.golang.org/api/appengine/v1"
 )
 
-func resourceAppEngineApplication() *schema.Resource {
+func ResourceAppEngineApplication() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAppEngineApplicationCreate,
 		Read:   resourceAppEngineApplicationRead,
@@ -199,8 +200,8 @@ func appEngineApplicationLocationIDCustomizeDiff(_ context.Context, d *schema.Re
 }
 
 func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -214,7 +215,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	lockName, err := replaceVars(d, config, "apps/{{project}}")
+	lockName, err := ReplaceVars(d, config, "apps/{{project}}")
 	if err != nil {
 		return err
 	}
@@ -230,7 +231,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 	d.SetId(project)
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(config, op, project, "App Engine app to create", userAgent, d.Timeout(schema.TimeoutCreate))
+	waitErr := AppEngineOperationWaitTime(config, op, project, "App Engine app to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		d.SetId("")
 		return waitErr
@@ -241,8 +242,8 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -313,8 +314,8 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -324,7 +325,7 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	lockName, err := replaceVars(d, config, "apps/{{project}}")
+	lockName, err := ReplaceVars(d, config, "apps/{{project}}")
 	if err != nil {
 		return err
 	}
@@ -338,7 +339,7 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 	}
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(config, op, pid, "App Engine app to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+	waitErr := AppEngineOperationWaitTime(config, op, pid, "App Engine app to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if waitErr != nil {
 		return waitErr
 	}

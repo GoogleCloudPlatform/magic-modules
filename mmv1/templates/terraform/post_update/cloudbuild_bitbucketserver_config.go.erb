@@ -12,7 +12,7 @@ if d.HasChange("connected_repositories") {
 	removeRepos := oReposSet.Difference(nReposSet).List()
 	createRepos := nReposSet.Difference(oReposSet).List()
 
-	url, err = replaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}:removeBitbucketServerConnectedRepository")
+	url, err = ReplaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}:removeBitbucketServerConnectedRepository")
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ if d.HasChange("connected_repositories") {
 	for _, repo := range removeRepos {
 		obj := make(map[string]interface{})
 		obj["connectedRepository"] = repo
-		res, err = sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+		res, err = SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			return fmt.Errorf("Error removing connected_repositories: %s", err)
 		}
@@ -29,7 +29,7 @@ if d.HasChange("connected_repositories") {
 
 	// if repos to create, prepare and send batchCreate request
 	if len(createRepos) > 0 {
-		parent, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}")
+		parent, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}")
 		if err != nil {
 			return fmt.Errorf("Error constructing id: %s", err)
 		}
@@ -48,17 +48,17 @@ if d.HasChange("connected_repositories") {
 		obj = make(map[string]interface{})
 		obj["requests"] = requests
 
-		url, err = replaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}/connectedRepositories:batchCreate")
+		url, err = ReplaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}/connectedRepositories:batchCreate")
 		if err != nil {
 			return err
 		}
 
-		res, err = sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+		res, err = SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			return fmt.Errorf("Error creating connected_repositories: %s", err)
 		}
 
-		err = cloudBuildOperationWaitTime(
+		err = CloudBuildOperationWaitTime(
 			config, res, project, "Updating connected_repositories on BitbucketServerConfig", userAgent,
 			d.Timeout(schema.TimeoutUpdate))
 		if err != nil {

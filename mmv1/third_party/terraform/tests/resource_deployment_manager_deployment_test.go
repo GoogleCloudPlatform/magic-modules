@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -14,16 +15,16 @@ import (
 func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 	t.Parallel()
 
-	randSuffix := randString(t, 10)
+	randSuffix := RandString(t, 10)
 	deploymentId := "tf-dm-" + randSuffix
 	accountId := "tf-dm-account-" + randSuffix
 	yamlPath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yml.tmpl", map[string]interface{}{
 		"account_id": accountId,
 	})
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -44,14 +45,14 @@ func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDeploymentManagerDestroyInvalidDeployment(t, deploymentName),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDeploymentManagerDestroyInvalidDeployment(t, deploymentName),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccDeploymentManagerDeployment_invalidCreatePolicy(deploymentName, accountId),
@@ -64,14 +65,14 @@ func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDeploymentManagerDeployment_createDeletePolicy(deploymentName, accountId),
@@ -89,16 +90,16 @@ func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 	importFilepath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yml.tmpl", map[string]interface{}{
 		"account_id": "{{ env['name'] }}",
 	})
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -120,14 +121,14 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 func TestAccDeploymentManagerDeployment_update(t *testing.T) {
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-first" + randStr
 	accountId2 := "tf-dm-second" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(t, accountId)),
@@ -352,7 +353,7 @@ EOF
 
 func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -366,7 +367,7 @@ func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, ac
 
 func testDeploymentManagerDeploymentVerifyServiceAccountExists(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -378,11 +379,11 @@ func testDeploymentManagerDeploymentVerifyServiceAccountExists(t *testing.T, acc
 	}
 }
 
-func testCheckDeploymentServiceAccountExists(accountId string, config *Config) (exists bool, err error) {
-	_, err = config.NewIamClient(config.userAgent).Projects.ServiceAccounts.Get(
-		fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", getTestProjectFromEnv(), accountId, getTestProjectFromEnv())).Do()
+func testCheckDeploymentServiceAccountExists(accountId string, config *transport_tpg.Config) (exists bool, err error) {
+	_, err = config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Get(
+		fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", GetTestProjectFromEnv(), accountId, GetTestProjectFromEnv())).Do()
 	if err != nil {
-		if isGoogleApiErrorWithCode(err, 404) {
+		if IsGoogleApiErrorWithCode(err, 404) {
 			return false, nil
 		}
 		return false, fmt.Errorf("unexpected error while trying to confirm deployment service account %q exists: %v", accountId, err)
@@ -398,10 +399,10 @@ func testAccCheckDeploymentManagerDestroyInvalidDeployment(t *testing.T, deploym
 			}
 		}
 
-		config := googleProviderConfig(t)
-		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.DeploymentManagerBasePath, getTestProjectFromEnv(), deploymentName)
-		_, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
-		if !isGoogleApiErrorWithCode(err, 404) {
+		config := GoogleProviderConfig(t)
+		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.DeploymentManagerBasePath, GetTestProjectFromEnv(), deploymentName)
+		_, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
+		if !IsGoogleApiErrorWithCode(err, 404) {
 			return fmt.Errorf("Unexpected error while trying to confirm DeploymentManagerDeployment deleted: %v", err)
 		}
 		if err == nil {
@@ -421,14 +422,14 @@ func testAccCheckDeploymentManagerDeploymentDestroyProducer(t *testing.T) func(s
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{DeploymentManagerBasePath}}projects/{{project}}/global/deployments/{{name}}")
 			if err != nil {
 				return err
 			}
 
-			_, err = sendRequest(config, "GET", "", url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", "", url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("DeploymentManagerDeployment still exists at %s", url)
 			}

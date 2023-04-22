@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/googleapi"
@@ -23,9 +24,9 @@ type ServicesCall interface {
 	Do(opts ...googleapi.CallOption) (*serviceusage.Operation, error)
 }
 
-// resourceGoogleProject returns a *schema.Resource that allows a customer
+// ResourceGoogleProject returns a *schema.Resource that allows a customer
 // to declare a Google Cloud Project resource.
-func resourceGoogleProject() *schema.Resource {
+func ResourceGoogleProject() *schema.Resource {
 	return &schema.Resource{
 		SchemaVersion: 1,
 
@@ -108,8 +109,8 @@ func resourceGoogleProject() *schema.Resource {
 }
 
 func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -136,7 +137,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	var op *cloudresourcemanager.Operation
-	err = retryTimeDuration(func() (reqErr error) {
+	err = RetryTimeDuration(func() (reqErr error) {
 		op, reqErr = config.NewResourceManagerClient(userAgent).Projects.Create(project).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutCreate))
@@ -155,7 +156,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating folder", userAgent, d.Timeout(schema.TimeoutCreate))
+	waitErr := ResourceManagerOperationWaitTime(config, opAsMap, "creating folder", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource wasn't actually created
 		d.SetId("")
@@ -192,12 +193,12 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 			billingProject = bp
 		}
 
-		if err = enableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, billingProject, userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
+		if err = EnableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, billingProject, userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
 			return errwrap.Wrapf("Error enabling the Compute Engine API required to delete the default network: {{err}} ", err)
 		}
 
 		if err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default"); err != nil {
-			if isGoogleApiErrorWithCode(err, 404) {
+			if IsGoogleApiErrorWithCode(err, 404) {
 				log.Printf("[DEBUG] Default network not found for project %q, no need to delete it", project.ProjectId)
 			} else {
 				return errwrap.Wrapf(fmt.Sprintf("Error deleting default network in project %s: {{err}}", project.ProjectId), err)
@@ -207,7 +208,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceGoogleProjectCheckPreRequisites(config *Config, d *schema.ResourceData, userAgent string) error {
+func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *schema.ResourceData, userAgent string) error {
 	ib, ok := d.GetOk("billing_account")
 	if !ok {
 		return nil
@@ -245,8 +246,8 @@ func resourceGoogleProjectCheckPreRequisites(config *Config, d *schema.ResourceD
 }
 
 func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -301,13 +302,13 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var ba *cloudbilling.ProjectBillingInfo
-	err = retryTimeDuration(func() (reqErr error) {
-		ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(prefixedProject(pid)).Do()
+	err = RetryTimeDuration(func() (reqErr error) {
+		ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutRead))
 	// Read the billing account
 	if err != nil && !isApiNotEnabledError(err) {
-		return fmt.Errorf("Error reading billing account for project %q: %v", prefixedProject(pid), err)
+		return fmt.Errorf("Error reading billing account for project %q: %v", PrefixedProject(pid), err)
 	} else if isApiNotEnabledError(err) {
 		log.Printf("[WARN] Billing info API not enabled, please enable it to read billing info about project %q: %s", pid, err.Error())
 	} else if ba.BillingAccountName != "" {
@@ -319,7 +320,7 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		// recognize.
 		_ba := strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/")
 		if ba.BillingAccountName == _ba {
-			return fmt.Errorf("Error parsing billing account for project %q. Expected value to begin with 'billingAccounts/' but got %s", prefixedProject(pid), ba.BillingAccountName)
+			return fmt.Errorf("Error parsing billing account for project %q. Expected value to begin with 'billingAccounts/' but got %s", PrefixedProject(pid), ba.BillingAccountName)
 		}
 		if err := d.Set("billing_account", _ba); err != nil {
 			return fmt.Errorf("Error setting billing_account: %s", err)
@@ -329,7 +330,7 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func prefixedProject(pid string) string {
+func PrefixedProject(pid string) string {
 	return "projects/" + pid
 }
 
@@ -367,8 +368,8 @@ func parseFolderId(v interface{}) string {
 }
 
 func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -381,7 +382,7 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	// because the API doesn't support patch, so we need the actual object
 	p, err := readGoogleProject(d, config, userAgent)
 	if err != nil {
-		if isGoogleApiErrorWithCode(err, 404) {
+		if IsGoogleApiErrorWithCode(err, 404) {
 			return fmt.Errorf("Project %q does not exist.", pid)
 		}
 		return fmt.Errorf("Error checking project %q: %s", pid, err)
@@ -432,9 +433,9 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	return resourceGoogleProjectRead(d, meta)
 }
 
-func updateProject(config *Config, d *schema.ResourceData, projectName, userAgent string, desiredProject *cloudresourcemanager.Project) (*cloudresourcemanager.Project, error) {
+func updateProject(config *transport_tpg.Config, d *schema.ResourceData, projectName, userAgent string, desiredProject *cloudresourcemanager.Project) (*cloudresourcemanager.Project, error) {
 	var newProj *cloudresourcemanager.Project
-	if err := retryTimeDuration(func() (updateErr error) {
+	if err := RetryTimeDuration(func() (updateErr error) {
 		newProj, updateErr = config.NewResourceManagerClient(userAgent).Projects.Update(desiredProject.ProjectId, desiredProject).Do()
 		return updateErr
 	}, d.Timeout(schema.TimeoutUpdate)); err != nil {
@@ -444,8 +445,8 @@ func updateProject(config *Config, d *schema.ResourceData, projectName, userAgen
 }
 
 func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -453,7 +454,7 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 	if !d.Get("skip_delete").(bool) {
 		parts := strings.Split(d.Id(), "/")
 		pid := parts[len(parts)-1]
-		if err := retryTimeDuration(func() error {
+		if err := RetryTimeDuration(func() error {
 			_, delErr := config.NewResourceManagerClient(userAgent).Projects.Delete(pid).Do()
 			return delErr
 		}, d.Timeout(schema.TimeoutDelete)); err != nil {
@@ -489,8 +490,8 @@ func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*sc
 }
 
 // Delete a compute network along with the firewall rules inside it.
-func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId, networkName string) error {
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Config, projectId, networkName string) error {
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -517,7 +518,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
-			err = computeOperationWaitTime(config, op, projectId, "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
+			err = ComputeOperationWaitTime(config, op, projectId, "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
 			if err != nil {
 				return err
 			}
@@ -530,7 +531,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 	return deleteComputeNetwork(projectId, networkName, userAgent, config)
 }
 
-func updateProjectBillingAccount(d *schema.ResourceData, config *Config, userAgent string) error {
+func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.Config, userAgent string) error {
 	parts := strings.Split(d.Id(), "/")
 	pid := parts[len(parts)-1]
 	name := d.Get("billing_account").(string)
@@ -540,27 +541,27 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *Config, userAge
 		ba.BillingAccountName = "billingAccounts/" + name
 	}
 	updateBillingInfoFunc := func() error {
-		_, err := config.NewBillingClient(userAgent).Projects.UpdateBillingInfo(prefixedProject(pid), ba).Do()
+		_, err := config.NewBillingClient(userAgent).Projects.UpdateBillingInfo(PrefixedProject(pid), ba).Do()
 		return err
 	}
-	err := retryTimeDuration(updateBillingInfoFunc, d.Timeout(schema.TimeoutUpdate))
+	err := RetryTimeDuration(updateBillingInfoFunc, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		if err := d.Set("billing_account", ""); err != nil {
 			return fmt.Errorf("Error setting billing_account: %s", err)
 		}
 		if _err, ok := err.(*googleapi.Error); ok {
-			return fmt.Errorf("Error setting billing account %q for project %q: %v", name, prefixedProject(pid), _err)
+			return fmt.Errorf("Error setting billing account %q for project %q: %v", name, PrefixedProject(pid), _err)
 		}
-		return fmt.Errorf("Error setting billing account %q for project %q: %v", name, prefixedProject(pid), err)
+		return fmt.Errorf("Error setting billing account %q for project %q: %v", name, PrefixedProject(pid), err)
 	}
 	for retries := 0; retries < 3; retries++ {
 		var ba *cloudbilling.ProjectBillingInfo
-		err = retryTimeDuration(func() (reqErr error) {
-			ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(prefixedProject(pid)).Do()
+		err = RetryTimeDuration(func() (reqErr error) {
+			ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(PrefixedProject(pid)).Do()
 			return reqErr
 		}, d.Timeout(schema.TimeoutRead))
 		if err != nil {
-			return fmt.Errorf("Error getting billing info for project %q: %v", prefixedProject(pid), err)
+			return fmt.Errorf("Error getting billing info for project %q: %v", PrefixedProject(pid), err)
 		}
 		baName := strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/")
 		if baName == name {
@@ -572,26 +573,26 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *Config, userAge
 		name, strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/"))
 }
 
-func deleteComputeNetwork(project, network, userAgent string, config *Config) error {
+func deleteComputeNetwork(project, network, userAgent string, config *transport_tpg.Config) error {
 	op, err := config.NewComputeClient(userAgent).Networks.Delete(
 		project, network).Do()
 	if err != nil {
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Deleting Network", userAgent, 10*time.Minute)
+	err = ComputeOperationWaitTime(config, op, project, "Deleting Network", userAgent, 10*time.Minute)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func readGoogleProject(d *schema.ResourceData, config *Config, userAgent string) (*cloudresourcemanager.Project, error) {
+func readGoogleProject(d *schema.ResourceData, config *transport_tpg.Config, userAgent string) (*cloudresourcemanager.Project, error) {
 	var p *cloudresourcemanager.Project
 	// Read the project
 	parts := strings.Split(d.Id(), "/")
 	pid := parts[len(parts)-1]
-	err := retryTimeDuration(func() (reqErr error) {
+	err := RetryTimeDuration(func() (reqErr error) {
 		p, reqErr = config.NewResourceManagerClient(userAgent).Projects.Get(pid).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutRead))
@@ -599,7 +600,7 @@ func readGoogleProject(d *schema.ResourceData, config *Config, userAgent string)
 }
 
 // Enables services. WARNING: Use BatchRequestEnableServices for better batching if possible.
-func enableServiceUsageProjectServices(services []string, project, billingProject, userAgent string, config *Config, timeout time.Duration) error {
+func EnableServiceUsageProjectServices(services []string, project, billingProject, userAgent string, config *transport_tpg.Config, timeout time.Duration) error {
 	// ServiceUsage does not allow more than 20 services to be enabled per
 	// batchEnable API call. See
 	// https://cloud.google.com/service-usage/docs/reference/rest/v1/services/batchEnable
@@ -624,10 +625,10 @@ func enableServiceUsageProjectServices(services []string, project, billingProjec
 	return waitForServiceUsageEnabledServices(services, project, billingProject, userAgent, config, timeout)
 }
 
-func doEnableServicesRequest(services []string, project, billingProject, userAgent string, config *Config, timeout time.Duration) error {
+func doEnableServicesRequest(services []string, project, billingProject, userAgent string, config *transport_tpg.Config, timeout time.Duration) error {
 	var op *serviceusage.Operation
 	var call ServicesCall
-	err := retryTimeDuration(func() error {
+	err := RetryTimeDuration(func() error {
 		var rerr error
 		if len(services) == 1 {
 			// BatchEnable returns an error for a single item, so just enable
@@ -648,7 +649,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 		return handleServiceUsageRetryableError(rerr)
 	},
 		timeout,
-		serviceUsageServiceBeingActivated,
+		ServiceUsageServiceBeingActivated,
 	)
 	if err != nil {
 		return errwrap.Wrapf("failed to send enable services request: {{err}}", err)
@@ -665,10 +666,10 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 // if a service has been renamed, this function will list both the old and new
 // forms of the service. LIST responses are expected to return only the old or
 // new form, but we'll always return both.
-func listCurrentlyEnabledServices(project, billingProject, userAgent string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
+func ListCurrentlyEnabledServices(project, billingProject, userAgent string, config *transport_tpg.Config, timeout time.Duration) (map[string]struct{}, error) {
 	log.Printf("[DEBUG] Listing enabled services for project %s", project)
 	apiServices := make(map[string]struct{})
-	err := retryTimeDuration(func() error {
+	err := RetryTimeDuration(func() error {
 		ctx := context.Background()
 		call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project))
 		if config.UserProjectOverride && billingProject != "" {
@@ -704,13 +705,13 @@ func listCurrentlyEnabledServices(project, billingProject, userAgent string, con
 // waitForServiceUsageEnabledServices doesn't resend enable requests - it just
 // waits for service enablement status to propagate. Essentially, it waits until
 // all services show up as enabled when listing services on the project.
-func waitForServiceUsageEnabledServices(services []string, project, billingProject, userAgent string, config *Config, timeout time.Duration) error {
+func waitForServiceUsageEnabledServices(services []string, project, billingProject, userAgent string, config *transport_tpg.Config, timeout time.Duration) error {
 	missing := make([]string, 0, len(services))
 	delay := time.Duration(0)
 	interval := time.Second
-	err := retryTimeDuration(func() error {
+	err := RetryTimeDuration(func() error {
 		// Get the list of services that are enabled on the project
-		enabledServices, err := listCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
+		enabledServices, err := ListCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
 		if err != nil {
 			return err
 		}

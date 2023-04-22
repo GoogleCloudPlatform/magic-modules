@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -142,7 +143,7 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 	},
 }
 
-func resourceGoogleOrganizationPolicy() *schema.Resource {
+func ResourceGoogleOrganizationPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleOrganizationPolicyCreate,
 		Read:   resourceGoogleOrganizationPolicyRead,
@@ -187,15 +188,15 @@ func resourceGoogleOrganizationPolicyCreate(d *schema.ResourceData, meta interfa
 }
 
 func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 	org := "organizations/" + d.Get("org_id").(string)
 
 	var policy *cloudresourcemanager.OrgPolicy
-	err = retryTimeDuration(func() (readErr error) {
+	err = RetryTimeDuration(func() (readErr error) {
 		policy, readErr = config.NewResourceManagerClient(userAgent).Organizations.GetOrgPolicy(org, &cloudresourcemanager.GetOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
@@ -243,14 +244,14 @@ func resourceGoogleOrganizationPolicyUpdate(d *schema.ResourceData, meta interfa
 }
 
 func resourceGoogleOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 	org := "organizations/" + d.Get("org_id").(string)
 
-	err = retryTimeDuration(func() error {
+	err = RetryTimeDuration(func() error {
 		_, dErr := config.NewResourceManagerClient(userAgent).Organizations.ClearOrgPolicy(org, &cloudresourcemanager.ClearOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
@@ -293,8 +294,8 @@ func isOrganizationPolicyUnset(d *schema.ResourceData) bool {
 }
 
 func setOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -311,7 +312,7 @@ func setOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	err = retryTimeDuration(func() (setErr error) {
+	err = RetryTimeDuration(func() (setErr error) {
 		_, setErr = config.NewResourceManagerClient(userAgent).Organizations.SetOrgPolicy(org, &cloudresourcemanager.SetOrgPolicyRequest{
 			Policy: &cloudresourcemanager.OrgPolicy{
 				Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),

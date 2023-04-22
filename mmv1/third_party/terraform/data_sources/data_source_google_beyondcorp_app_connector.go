@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleBeyondcorpAppConnector() *schema.Resource {
+func DataSourceGoogleBeyondcorpAppConnector() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceBeyondcorpAppConnector().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceBeyondcorpAppConnector().Schema)
 
 	addRequiredFieldsToSchema(dsSchema, "name")
 
@@ -22,7 +23,7 @@ func dataSourceGoogleBeyondcorpAppConnector() *schema.Resource {
 }
 
 func dataSourceGoogleBeyondcorpAppConnectorRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	name := d.Get("name").(string)
 

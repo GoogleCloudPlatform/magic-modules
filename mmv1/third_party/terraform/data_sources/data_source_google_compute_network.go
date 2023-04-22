@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleComputeNetwork() *schema.Resource {
+func DataSourceGoogleComputeNetwork() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleComputeNetworkRead,
 
@@ -46,8 +47,8 @@ func dataSourceGoogleComputeNetwork() *schema.Resource {
 }
 
 func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

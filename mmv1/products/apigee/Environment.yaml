@@ -29,10 +29,10 @@
       resource_inside_response: true
     status: !ruby/object:Api::OpAsync::Status
       path: 'done'
-      complete: True
+      complete: true
       allowed:
-        - True
-        - False
+        - true
+        - false
     error: !ruby/object:Api::OpAsync::Error
       path: 'error'
       message: 'message'
@@ -45,6 +45,60 @@
     import_format: ["{{%org_id}}/environments/{{name}}", "{{name}}"]
     base_url: "{{org_id}}/environments/{{name}}"
     self_link: "{{org_id}}/environments/{{name}}"
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
+    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments/create'
+  
+  autogen_async: true
+  import_format: ["{{org_id}}/environments/{{name}}", "{{org_id}}/{{name}}"]
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_environment_basic"
+      vars:
+        environment_name: 'my-environment'
+      skip_test: true
+        # This is a more verbose version of the above that creates all
+        # the resources needed for the acceptance test.
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_environment_basic_test"
+      primary_resource_id: "apigee_environment"
+      primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\", context[\"random_suffix\"\
+        ]), fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+        # Resource creation race
+      skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_environment_basic_deployment_apiproxy_type_test"
+      primary_resource_id: "apigee_environment"
+      primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\", context[\"random_suffix\"\
+        ]), fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+        # Resource creation race
+      skip_vcr: true
+    - !ruby/object:Provider::Terraform::Examples
+      name: "apigee_environment_nodeconfig_test"
+      primary_resource_id: "apigee_environment"
+      primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\", context[\"random_suffix\"\
+        ]), fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+      test_env_vars:
+        org_id: :ORG_ID
+        billing_account: :BILLING_ACCT
+      skip_docs: true
+      min_version: beta
+        # Resource creation race
+      skip_vcr: true
+  timeouts: !ruby/object:Api::Timeouts
+    insert_minutes: 30
+    delete_minutes: 30
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    custom_import: templates/terraform/custom_import/apigee_environment.go.erb
   parameters:
     - !ruby/object:Api::Type::String
       name: 'orgId'
@@ -52,7 +106,7 @@
         The Apigee Organization associated with the Apigee environment,
         in the format `organizations/{{org_name}}`.
       required: true
-      input: true
+      immutable: true
       url_param_only: true
   properties:
     - !ruby/object:Api::Type::String
@@ -60,19 +114,19 @@
       description: |
         The resource ID of the environment.
       required: true
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::String
       name: 'displayName'
       description: |
         Display name of the environment.
       required: false
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::String
       name: 'description'
       description: |
         Description of the environment.
       required: false
-      input: true
+      immutable: true
     - !ruby/object:Api::Type::Enum
       name: 'deploymentType'
       description: |
@@ -87,7 +141,8 @@
         - "DEPLOYMENT_TYPE_UNSPECIFIED"
         - "PROXY"
         - "ARCHIVE"
-      input: true
+      immutable: true
+      default_from_api: true
     - !ruby/object:Api::Type::Enum
       name: 'apiProxyType'
       description: |
@@ -97,11 +152,13 @@
         - "API_PROXY_TYPE_UNSPECIFIED"
         - "PROGRAMMABLE"
         - "CONFIGURABLE"
-      input: true
+      immutable: true
+      default_from_api: true
     - !ruby/object:Api::Type::NestedObject
       name: 'nodeConfig'
       description: |
         NodeConfig for setting the min/max number of nodes associated with the environment.
+      default_from_api: true
       properties:
         - !ruby/object:Api::Type::String
           name: 'minNodeCount'
@@ -121,9 +178,3 @@
             The current total number of gateway nodes that each environment currently has across
             all instances.
           output: true
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      'Creating an environment':
-        'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
-    api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments/create'
-

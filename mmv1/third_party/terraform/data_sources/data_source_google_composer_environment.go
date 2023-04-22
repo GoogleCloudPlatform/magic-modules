@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleComposerEnvironment() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComposerEnvironment().Schema)
+func DataSourceGoogleComposerEnvironment() *schema.Resource {
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceComposerEnvironment().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "name")
@@ -22,7 +23,7 @@ func dataSourceGoogleComposerEnvironment() *schema.Resource {
 }
 
 func dataSourceGoogleComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	project, err := getProject(d, config)
 	if err != nil {
 		return err

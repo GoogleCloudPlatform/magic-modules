@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/logging/v2"
 )
 
@@ -20,13 +21,13 @@ type BillingAccountLoggingExclusionUpdater struct {
 	resourceType string
 	resourceId   string
 	userAgent    string
-	Config       *Config
+	Config       *transport_tpg.Config
 }
 
-func NewBillingAccountLoggingExclusionUpdater(d *schema.ResourceData, config *Config) (ResourceLoggingExclusionUpdater, error) {
+func NewBillingAccountLoggingExclusionUpdater(d *schema.ResourceData, config *transport_tpg.Config) (ResourceLoggingExclusionUpdater, error) {
 	billingAccount := d.Get("billing_account").(string)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +40,7 @@ func NewBillingAccountLoggingExclusionUpdater(d *schema.ResourceData, config *Co
 	}, nil
 }
 
-func billingAccountLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) error {
+func BillingAccountLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
 	loggingExclusionId, err := parseLoggingExclusionId(d.Id())
 	if err != nil {
 		return err

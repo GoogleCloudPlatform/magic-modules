@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleComputeGlobalForwardingRule() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeGlobalForwardingRule().Schema)
+func DataSourceGoogleComputeGlobalForwardingRule() *schema.Resource {
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceComputeGlobalForwardingRule().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "name")
@@ -22,7 +23,7 @@ func dataSourceGoogleComputeGlobalForwardingRule() *schema.Resource {
 }
 
 func dataSourceGoogleComputeGlobalForwardingRuleRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	name := d.Get("name").(string)
 

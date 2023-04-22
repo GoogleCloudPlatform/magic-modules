@@ -10,13 +10,13 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudRunV2JobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobFull(context),
@@ -25,7 +25,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobFullUpdate(context),
@@ -34,7 +34,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
 			},
 		},
 	})
@@ -88,6 +88,12 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
         }
         max_retries = 5
       }
+    }
+
+    lifecycle {
+      ignore_changes = [
+        launch_stage,
+      ]
     }
   }
   resource "google_service_account" "service_account" {
@@ -151,8 +157,14 @@ resource "google_cloud_run_v2_job" "default" {
         connector = google_vpc_access_connector.connector.id
         egress = "ALL_TRAFFIC"
       }
-      max_retries = 2
+      max_retries = 0
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
   }
 }
 resource "google_service_account" "service_account" {

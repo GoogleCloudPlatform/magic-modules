@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 const (
@@ -57,7 +58,7 @@ func resourceBigtableGCPolicyCustomizeDiff(_ context.Context, d *schema.Resource
 	return resourceBigtableGCPolicyCustomizeDiffFunc(d)
 }
 
-func resourceBigtableGCPolicy() *schema.Resource {
+func ResourceBigtableGCPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create:        resourceBigtableGCPolicyUpsert,
 		Read:          resourceBigtableGCPolicyRead,
@@ -179,8 +180,8 @@ func resourceBigtableGCPolicy() *schema.Resource {
 }
 
 func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -221,7 +222,7 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 	// Mutations to gc policies can only happen one-at-a-time and take some amount of time.
 	// Use a fixed polling rate of 30s based on the RetryInfo returned by the server rather than
 	// the standard up-to-10s exponential backoff for those operations.
-	_, err = retryWithPolling(retryFunc, timeout, pollInterval, isBigTableRetryableError)
+	_, err = retryWithPolling(retryFunc, timeout, pollInterval, transport_tpg.IsBigTableRetryableError)
 	if err != nil {
 		return err
 	}
@@ -241,8 +242,8 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -375,7 +376,7 @@ func gcPolicyToGCRuleString(gc bigtable.GCPolicy, topLevel bool) (map[string]int
 }
 
 func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
 		// Allows for the GC policy to be abandoned without deletion to avoid possible
@@ -384,7 +385,7 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 		return nil
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -410,7 +411,7 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 	// The default delete timeout is 20 minutes.
 	timeout := d.Timeout(schema.TimeoutDelete)
 	pollInterval := time.Duration(30) * time.Second
-	_, err = retryWithPolling(retryFunc, timeout, pollInterval, isBigTableRetryableError)
+	_, err = retryWithPolling(retryFunc, timeout, pollInterval, transport_tpg.IsBigTableRetryableError)
 	if err != nil {
 		return err
 	}

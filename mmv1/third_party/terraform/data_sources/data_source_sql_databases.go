@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"sort"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-func dataSourceSqlDatabases() *schema.Resource {
+func DataSourceSqlDatabases() *schema.Resource {
 
 	return &schema.Resource{
 		Read: dataSourceSqlDatabasesRead,
@@ -29,7 +30,7 @@ func dataSourceSqlDatabases() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
-					Schema: datasourceSchemaFromResourceSchema(resourceSQLDatabase().Schema),
+					Schema: datasourceSchemaFromResourceSchema(ResourceSQLDatabase().Schema),
 				},
 			},
 		},
@@ -37,8 +38,8 @@ func dataSourceSqlDatabases() *schema.Resource {
 }
 
 func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -47,10 +48,10 @@ func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 	var databases *sqladmin.DatabasesListResponse
-	err = retryTimeDuration(func() (rerr error) {
+	err = RetryTimeDuration(func() (rerr error) {
 		databases, rerr = config.NewSqlAdminClient(userAgent).Databases.List(project, d.Get("instance").(string)).Do()
 		return rerr
-	}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
+	}, d.Timeout(schema.TimeoutRead), IsSqlOperationInProgressError)
 
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Databases in %q instance", d.Get("instance").(string)))

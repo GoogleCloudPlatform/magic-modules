@@ -1,10 +1,13 @@
 package google
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
 
-func dataSourceGoogleComputeHealthCheck() *schema.Resource {
+func DataSourceGoogleComputeHealthCheck() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeHealthCheck().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceComputeHealthCheck().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "name")
@@ -19,7 +22,7 @@ func dataSourceGoogleComputeHealthCheck() *schema.Resource {
 }
 
 func dataSourceGoogleComputeHealthCheckRead(d *schema.ResourceData, meta interface{}) error {
-	id, err := replaceVars(d, meta.(*Config), "projects/{{project}}/global/healthChecks/{{name}}")
+	id, err := ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{project}}/global/healthChecks/{{name}}")
 	if err != nil {
 		return err
 	}

@@ -11,14 +11,14 @@ import (
 func TestAccComputeTargetTcpProxy_update(t *testing.T) {
 	t.Parallel()
 
-	target := fmt.Sprintf("ttcp-test-%s", randString(t, 10))
-	backend := fmt.Sprintf("ttcp-test-%s", randString(t, 10))
-	hc := fmt.Sprintf("ttcp-test-%s", randString(t, 10))
+	target := fmt.Sprintf("ttcp-test-%s", RandString(t, 10))
+	backend := fmt.Sprintf("ttcp-test-%s", RandString(t, 10))
+	hc := fmt.Sprintf("ttcp-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeTargetTcpProxyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeTargetTcpProxyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeTargetTcpProxy_basic1(target, backend, hc),
@@ -49,10 +49,10 @@ func testAccCheckComputeTargetTcpProxyExists(t *testing.T, n string) resource.Te
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
-		found, err := config.NewComputeClient(config.userAgent).TargetTcpProxies.Get(
+		found, err := config.NewComputeClient(config.UserAgent).TargetTcpProxies.Get(
 			config.Project, name).Do()
 		if err != nil {
 			return err

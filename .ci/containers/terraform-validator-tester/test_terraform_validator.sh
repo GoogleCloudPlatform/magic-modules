@@ -7,8 +7,8 @@ mm_commit_sha=$2
 build_id=$3
 project_id=$4
 build_step=$5
+gh_repo=$6
 github_username=modular-magician
-gh_repo=terraform-validator
 
 new_branch="auto-pr-$pr_number"
 git_remote=https://$github_username:$GITHUB_TOKEN@github.com/$github_username/$gh_repo
@@ -30,10 +30,10 @@ else
 fi
 
 post_body=$( jq -n \
-	--arg context "terraform-validator-test" \
-	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-	--arg state "pending" \
-	'{context: $context, target_url: $target_url, state: $state}')
+  --arg context "${gh_repo}-test" \
+  --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
+  --arg state "pending" \
+  '{context: $context, target_url: $target_url, state: $state}')
 
 curl \
   -X POST \
@@ -56,10 +56,10 @@ else
 fi
 
 post_body=$( jq -n \
-	--arg context "terraform-validator-test" \
-	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-	--arg state "${state}" \
-	'{context: $context, target_url: $target_url, state: $state}')
+  --arg context "${gh_repo}-test" \
+  --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
+  --arg state "${state}" \
+  '{context: $context, target_url: $target_url, state: $state}')
 
 curl \
   -X POST \

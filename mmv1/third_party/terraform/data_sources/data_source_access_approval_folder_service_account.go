@@ -2,10 +2,12 @@ package google
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceAccessApprovalFolderServiceAccount() *schema.Resource {
+func DataSourceAccessApprovalFolderServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAccessApprovalFolderServiceAccountRead,
 		Schema: map[string]*schema.Schema{
@@ -27,13 +29,13 @@ func dataSourceAccessApprovalFolderServiceAccount() *schema.Resource {
 }
 
 func dataSourceAccessApprovalFolderServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{AccessApprovalBasePath}}folders/{{folder_id}}/serviceAccount")
+	url, err := ReplaceVars(d, config, "{{AccessApprovalBasePath}}folders/{{folder_id}}/serviceAccount")
 	if err != nil {
 		return err
 	}
@@ -45,7 +47,7 @@ func dataSourceAccessApprovalFolderServiceAccountRead(d *schema.ResourceData, me
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("AccessApprovalFolderServiceAccount %q", d.Id()))
 	}

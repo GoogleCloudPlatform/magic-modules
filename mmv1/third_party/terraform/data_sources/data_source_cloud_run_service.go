@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleCloudRunService() *schema.Resource {
+func DataSourceGoogleCloudRunService() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudRunService().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceCloudRunService().Schema)
 	addRequiredFieldsToSchema(dsSchema, "name", "location")
 	addOptionalFieldsToSchema(dsSchema, "project")
 
@@ -19,9 +20,9 @@ func dataSourceGoogleCloudRunService() *schema.Resource {
 }
 
 func dataSourceGoogleCloudRunServiceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	id, err := replaceVars(d, config, "locations/{{location}}/namespaces/{{project}}/services/{{name}}")
+	id, err := ReplaceVars(d, config, "locations/{{location}}/namespaces/{{project}}/services/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

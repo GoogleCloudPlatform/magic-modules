@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -34,10 +36,10 @@ type BigqueryDatasetIamUpdater struct {
 	project   string
 	datasetId string
 	d         TerraformResourceData
-	Config    *Config
+	Config    *transport_tpg.Config
 }
 
-func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
+func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
@@ -55,7 +57,7 @@ func NewBigqueryDatasetIamUpdater(d TerraformResourceData, config *Config) (Reso
 	}, nil
 }
 
-func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *Config) error {
+func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
 	fv, err := parseProjectFieldValue("datasets", d.Id(), "project", d, config, false)
 	if err != nil {
 		return err
@@ -76,12 +78,12 @@ func BigqueryDatasetIdParseFunc(d *schema.ResourceData, config *Config) error {
 func (u *BigqueryDatasetIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
 	url := fmt.Sprintf("%s%s", u.Config.BigQueryBasePath, u.GetResourceId())
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := sendRequest(u.Config, "GET", u.project, url, userAgent, nil)
+	res, err := SendRequest(u.Config, "GET", u.project, url, userAgent, nil)
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -104,12 +106,12 @@ func (u *BigqueryDatasetIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 		"access": access,
 	}
 
-	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	userAgent, err := generateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	_, err = sendRequest(u.Config, "PATCH", u.project, url, userAgent, obj)
+	_, err = SendRequest(u.Config, "PATCH", u.project, url, userAgent, obj)
 	if err != nil {
 		return fmt.Errorf("Error creating DatasetAccess: %s", err)
 	}

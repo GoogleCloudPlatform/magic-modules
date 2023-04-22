@@ -1,6 +1,6 @@
 parent := d.Get("parent").(string)
 var opRes map[string]interface{}
-err = computeOrgOperationWaitTimeWithResponse(
+err = ComputeOrgOperationWaitTimeWithResponse(
 	config, res, &opRes, parent, "Creating OrganizationSecurityPolicy", userAgent,
 	d.Timeout(schema.TimeoutCreate))
 
@@ -19,7 +19,7 @@ if err := d.Set("policy_id", policyId.(string)); err != nil {
 }
 
 // Store the ID now.
-id, err = replaceVars(d, config, "locations/global/securityPolicies/{{policy_id}}")
+id, err = ReplaceVars(d, config, "locations/global/securityPolicies/{{policy_id}}")
 if err != nil {
 	return fmt.Errorf("Error constructing id: %s", err)
 }

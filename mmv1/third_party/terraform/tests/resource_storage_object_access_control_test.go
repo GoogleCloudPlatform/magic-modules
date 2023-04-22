@@ -12,20 +12,20 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("%s-%d", "tf-test-acl-object", randInt(t))
+	objectName := fmt.Sprintf("%s-%d", "tf-test-acl-object", RandInt(t))
 	objectData := []byte("data data data")
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck: func() {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			AccTestPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectAccessControlBasic(bucketName, objectName, "READER", "allUsers"),
@@ -51,20 +51,20 @@ func TestAccStorageObjectAccessControl_updateWithSlashes(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	objectName := fmt.Sprintf("%s-%d", "tf-test/acl/object", randInt(t))
+	objectName := fmt.Sprintf("%s-%d", "tf-test/acl/object", RandInt(t))
 	objectData := []byte("data data data")
 	if err := ioutil.WriteFile(tfObjectAcl.Name(), objectData, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck: func() {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)
 			}
-			testAccPreCheck(t)
+			AccTestPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageObjectAccessControlBasic(bucketName, objectName, "READER", "allUsers"),

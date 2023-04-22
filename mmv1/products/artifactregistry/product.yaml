@@ -19,10 +19,10 @@ scopes:
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://artifactregistry.googleapis.com/v1beta2/
+    base_url: https://artifactregistry.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://artifactregistry.googleapis.com/v1/    
+    base_url: https://artifactregistry.googleapis.com/v1/
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Artifact Registry API

@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleComputeBackendBucket() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeBackendBucket().Schema)
+func DataSourceGoogleComputeBackendBucket() *schema.Resource {
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceComputeBackendBucket().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "name")
@@ -22,7 +23,7 @@ func dataSourceGoogleComputeBackendBucket() *schema.Resource {
 }
 
 func dataSourceComputeBackendBucketRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	backendBucketName := d.Get("name").(string)
 

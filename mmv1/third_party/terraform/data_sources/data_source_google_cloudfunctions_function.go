@@ -2,11 +2,12 @@ package google
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleCloudFunctionsFunction() *schema.Resource {
+func DataSourceGoogleCloudFunctionsFunction() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceCloudFunctionsFunction().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceCloudFunctionsFunction().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "name")
@@ -21,7 +22,7 @@ func dataSourceGoogleCloudFunctionsFunction() *schema.Resource {
 }
 
 func dataSourceGoogleCloudFunctionsFunctionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	project, err := getProject(d, config)
 	if err != nil {

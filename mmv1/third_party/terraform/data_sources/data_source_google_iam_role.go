@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleIamRole() *schema.Resource {
+func DataSourceGoogleIamRole() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleIamRoleRead,
 		Schema: map[string]*schema.Schema{
@@ -32,8 +33,8 @@ func dataSourceGoogleIamRole() *schema.Resource {
 }
 
 func dataSourceGoogleIamRoleRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

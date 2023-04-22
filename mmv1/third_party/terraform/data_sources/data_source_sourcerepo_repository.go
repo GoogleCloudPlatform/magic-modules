@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleSourceRepoRepository() *schema.Resource {
+func DataSourceGoogleSourceRepoRepository() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceSourceRepoRepository().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceSourceRepoRepository().Schema)
 
 	addRequiredFieldsToSchema(dsSchema, "name")
 	addOptionalFieldsToSchema(dsSchema, "project")
@@ -21,9 +22,9 @@ func dataSourceGoogleSourceRepoRepository() *schema.Resource {
 
 func dataSourceGoogleSourceRepoRepositoryRead(d *schema.ResourceData, meta interface{}) error {
 
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/repos/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/repos/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

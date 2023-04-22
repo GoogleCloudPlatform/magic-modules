@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleComputeHaVpnGateway() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeHaVpnGateway().Schema)
+func DataSourceGoogleComputeHaVpnGateway() *schema.Resource {
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceComputeHaVpnGateway().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "name")
@@ -23,7 +24,7 @@ func dataSourceGoogleComputeHaVpnGateway() *schema.Resource {
 }
 
 func dataSourceGoogleComputeHaVpnGatewayRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	name := d.Get("name").(string)
 

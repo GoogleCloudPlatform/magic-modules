@@ -10,16 +10,16 @@ import (
 func TestAccComputeProjectDefaultNetworkTier_basic(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
-	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
+	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, pname, org, billingId),
+				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_default_network_tier.fizzbuzz",
@@ -33,16 +33,16 @@ func TestAccComputeProjectDefaultNetworkTier_basic(t *testing.T) {
 func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
-	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
+	projectID := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, pname, org, billingId),
+				Config: testAccComputeProject_defaultNetworkTier_premium(projectID, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_default_network_tier.fizzbuzz",
@@ -51,7 +51,7 @@ func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 			},
 
 			{
-				Config: testAccComputeProject_defaultNetworkTier_standard(projectID, pname, org, billingId),
+				Config: testAccComputeProject_defaultNetworkTier_standard(projectID, org, billingId),
 			},
 			{
 				ResourceName:      "google_compute_project_default_network_tier.fizzbuzz",
@@ -62,7 +62,7 @@ func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 	})
 }
 
-func testAccComputeProject_defaultNetworkTier_premium(projectID, name, org, billing string) string {
+func testAccComputeProject_defaultNetworkTier_premium(projectID, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {
   project_id      = "%s"
@@ -81,10 +81,10 @@ resource "google_compute_project_default_network_tier" "fizzbuzz" {
   network_tier = "PREMIUM"
   depends_on   = [google_project_service.compute]
 }
-`, projectID, name, org, billing)
+`, projectID, projectID, org, billing)
 }
 
-func testAccComputeProject_defaultNetworkTier_standard(projectID, name, org, billing string) string {
+func testAccComputeProject_defaultNetworkTier_standard(projectID, org, billing string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {
   project_id      = "%s"
@@ -103,5 +103,5 @@ resource "google_compute_project_default_network_tier" "fizzbuzz" {
   network_tier = "STANDARD"
   depends_on   = [google_project_service.compute]
 }
-`, projectID, name, org, billing)
+`, projectID, projectID, org, billing)
 }

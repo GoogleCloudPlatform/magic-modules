@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleContainerCluster() *schema.Resource {
+func DataSourceGoogleContainerCluster() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceContainerCluster().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceContainerCluster().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "name")
@@ -23,7 +24,7 @@ func dataSourceGoogleContainerCluster() *schema.Resource {
 }
 
 func datasourceContainerClusterRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	clusterName := d.Get("name").(string)
 

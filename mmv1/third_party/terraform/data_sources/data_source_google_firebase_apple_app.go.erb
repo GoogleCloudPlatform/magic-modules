@@ -4,15 +4,19 @@ package google
 import (
         "fmt"
 
+        transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
         "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleFirebaseAppleApp() *schema.Resource {
+func DataSourceGoogleFirebaseAppleApp() *schema.Resource {
         // Generate datasource schema from resource
-        dsSchema := datasourceSchemaFromResourceSchema(resourceFirebaseAppleApp().Schema)
+        dsSchema := datasourceSchemaFromResourceSchema(ResourceFirebaseAppleApp().Schema)
 
         // Set 'Required' schema elements
         addRequiredFieldsToSchema(dsSchema, "app_id")
+
+        // Allow specifying a project
+        addOptionalFieldsToSchema(dsSchema, "project")
 
         return &schema.Resource{
                 Read:   dataSourceGoogleFirebaseAppleAppRead,
@@ -21,7 +25,7 @@ func dataSourceGoogleFirebaseAppleApp() *schema.Resource {
 }
 
 func dataSourceGoogleFirebaseAppleAppRead(d *schema.ResourceData, meta interface{}) error {
-        config := meta.(*Config)
+        config := meta.(*transport_tpg.Config)
         appId := d.Get("app_id")
         project, err := getProject(d, config)
         if err != nil {

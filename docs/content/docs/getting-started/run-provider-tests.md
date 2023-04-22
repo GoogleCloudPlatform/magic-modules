@@ -11,6 +11,8 @@ weight: 30
 
 ## Setup
 
+Authentication is described in more detail [here](https://github.com/hashicorp/terraform-provider-google/wiki/Developer-Best-Practices#authentication).
+
 Tests generally assume the following environment variables must be set in order to run tests:
 
 ```
@@ -102,7 +104,7 @@ Breakpoint 1 set at 0x1de072b for github.com/terraform-providers/terraform-provi
    542:
    543:         var svc compute.BackendService
    544:         resource.Test(t, resource.TestCase{
-   545:                 PreCheck:     func() { testAccPreCheck(t) },
+   545:                 PreCheck:     func() { AccTestPreCheck(t) },
 (dlv)
 ```
 

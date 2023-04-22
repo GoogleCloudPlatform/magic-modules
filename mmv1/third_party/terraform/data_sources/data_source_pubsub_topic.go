@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGooglePubsubTopic() *schema.Resource {
+func DataSourceGooglePubsubTopic() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourcePubsubTopic().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourcePubsubTopic().Schema)
 	addRequiredFieldsToSchema(dsSchema, "name")
 	addOptionalFieldsToSchema(dsSchema, "project")
 
@@ -19,9 +20,9 @@ func dataSourceGooglePubsubTopic() *schema.Resource {
 }
 
 func dataSourceGooglePubsubTopicRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/topics/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/topics/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

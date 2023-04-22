@@ -1,8 +1,6 @@
 resource "google_project" "project" {
-  provider = "google-beta"
-
-  project_id = "tf-test%{random_suffix}"
-  name       = "tf-test%{random_suffix}"
+  project_id = "<%= ctx[:vars]['project_id'] %>"
+  name       = "<%= ctx[:vars]['project_id'] %>"
   org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
 }
 
@@ -13,8 +11,6 @@ resource "time_sleep" "wait_60_seconds" {
 }
 
 resource "google_project_service" "firestore" {
-  provider = "google-beta"
-
   project = google_project.project.project_id
   service = "firestore.googleapis.com"
 
@@ -23,8 +19,6 @@ resource "google_project_service" "firestore" {
 }
 
 resource "google_firestore_database" "<%= ctx[:primary_resource_id] %>" {
-  provider = "google-beta"
-
   project                     = google_project.project.project_id
   name                        = "(default)"
   location_id                 = "nam5"

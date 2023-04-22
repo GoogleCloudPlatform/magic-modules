@@ -161,11 +161,12 @@ comment="#### Tests analytics ${NEWLINE}"
 comment+="Total tests: \`$(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TESTS_COUNT))\` ${NEWLINE}"
 comment+="Passed tests \`$PASSED_TESTS_COUNT\` ${NEWLINE}"
 comment+="Skipped tests: \`$SKIPPED_TESTS_COUNT\` ${NEWLINE}"
-comment+="Failed tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
+comment+="Affected tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   comment+="#### Action taken ${NEWLINE}"
-  comment+="<details> <summary>Triggering VCR tests in RECORDING mode for the tests that failed during VCR. Click here to see the failed tests</summary><blockquote>$FAILED_TESTS_PATTERN </blockquote></details>"
+  comment+="<details> <summary>Found $FAILED_TESTS_COUNT affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary><blockquote>$FAILED_TESTS_PATTERN </blockquote></details> ${NEWLINE}${NEWLINE}"
+  comment+="[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/docs/getting-started/contributing/#general-contributing-steps)"
   add_comment "${comment}"
   # Clear fixtures folder
   rm $VCR_PATH/*
@@ -177,7 +178,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   export VCR_MODE=RECORDING
   FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test$test_suffix.log | awk '{print $3}')
   # test_exit_code=0
-  parallel --jobs 20 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run="{}$" -timeout 90m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" ">" testlog/recording_build/{}_recording_test.log ::: $FAILED_TESTS
+  parallel --jobs 16 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta -parallel 1 -v -run="{}$" -timeout 120m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" ">" testlog/recording_build/{}_recording_test.log ::: $FAILED_TESTS
 
   test_exit_code=$?
 

@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-func dataSourceSqlBackupRun() *schema.Resource {
+func DataSourceSqlBackupRun() *schema.Resource {
 
 	return &schema.Resource{
 		Read: dataSourceSqlBackupRunRead,
@@ -55,8 +56,8 @@ func dataSourceSqlBackupRun() *schema.Resource {
 }
 
 func dataSourceSqlBackupRunRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -103,7 +104,7 @@ func dataSourceSqlBackupRunRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error setting status: %s", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{instance}}/backupRuns/{{backup_id}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{instance}}/backupRuns/{{backup_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

@@ -10,9 +10,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func resourceDialogflowCXVersion() *schema.Resource {
+func ResourceDialogflowCXVersion() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDialogflowCXVersionCreate,
 		Read:   resourceDialogflowCXVersionRead,
@@ -104,8 +105,8 @@ The score values range from 0.0 (completely uncertain) to 1.0 (completely certai
 }
 
 func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -124,7 +125,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 		obj["description"] = descriptionProp
 	}
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions")
 	if err != nil {
 		return err
 	}
@@ -151,13 +152,13 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Version: %s", err)
 	}
 
 	// Store the ID now
-	id, err := replaceVars(d, config, "{{parent}}/versions/{{name}}")
+	id, err := ReplaceVars(d, config, "{{parent}}/versions/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -166,7 +167,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	// Use the resource in the operation response to populate
 	// identity fields and d.Id() before read
 	var opRes map[string]interface{}
-	err = dialogflowCXOperationWaitTimeWithResponse(
+	err = DialogflowCXOperationWaitTimeWithResponse(
 		config, res, &opRes, "Creating Version", userAgent, location,
 		d.Timeout(schema.TimeoutCreate))
 	if err != nil {
@@ -181,7 +182,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	// This may have caused the ID to update - update it if so.
-	id, err = replaceVars(d, config, "{{parent}}/versions/{{name}}")
+	id, err = ReplaceVars(d, config, "{{parent}}/versions/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -193,13 +194,13 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -225,7 +226,7 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("DialogflowCXVersion %q", d.Id()))
 	}
@@ -253,8 +254,8 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -275,7 +276,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 		obj["description"] = descriptionProp
 	}
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -290,9 +291,9 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 	if d.HasChange("description") {
 		updateMask = append(updateMask, "description")
 	}
-	// updateMask is a URL parameter but not present in the schema, so replaceVars
+	// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 	// won't set it
-	url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
 	}
@@ -317,7 +318,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return fmt.Errorf("Error updating Version %q: %s", d.Id(), err)
@@ -325,7 +326,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 		log.Printf("[DEBUG] Finished updating Version %q: %#v", d.Id(), res)
 	}
 
-	err = dialogflowCXOperationWaitTime(
+	err = DialogflowCXOperationWaitTime(
 		config, res, "Updating Version", userAgent, location,
 		d.Timeout(schema.TimeoutUpdate))
 
@@ -337,15 +338,15 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
 	billingProject := ""
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/versions/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -373,12 +374,12 @@ func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{})
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "Version")
 	}
 
-	err = dialogflowCXOperationWaitTime(
+	err = DialogflowCXOperationWaitTime(
 		config, res, "Deleting Version", userAgent, location,
 		d.Timeout(schema.TimeoutDelete))
 
@@ -391,10 +392,10 @@ func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{})
 }
 
 func resourceDialogflowCXVersionImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	// current import_formats can't import fields with forward slashes in their value and parent contains slashes
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"(?P<parent>.+)/versions/(?P<name>[^/]+)",
 		"(?P<parent>.+)/(?P<name>[^/]+)",
 	}, d, config); err != nil {
@@ -402,7 +403,7 @@ func resourceDialogflowCXVersionImport(d *schema.ResourceData, meta interface{})
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "{{parent}}/versions/{{name}}")
+	id, err := ReplaceVars(d, config, "{{parent}}/versions/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -411,22 +412,22 @@ func resourceDialogflowCXVersionImport(d *schema.ResourceData, meta interface{})
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenDialogflowCXVersionName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
 	return NameFromSelfLinkStateFunc(v)
 }
 
-func flattenDialogflowCXVersionDisplayName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionDisplayName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionDescription(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionNluSettings(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionNluSettings(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -443,30 +444,30 @@ func flattenDialogflowCXVersionNluSettings(v interface{}, d *schema.ResourceData
 		flattenDialogflowCXVersionNluSettingsModelTrainingMode(original["modelTrainingMode"], d, config)
 	return []interface{}{transformed}
 }
-func flattenDialogflowCXVersionNluSettingsModelType(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionNluSettingsModelType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionNluSettingsClassificationThreshold(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionNluSettingsClassificationThreshold(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionNluSettingsModelTrainingMode(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionNluSettingsModelTrainingMode(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionCreateTime(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionCreateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionState(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionState(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func expandDialogflowCXVersionDisplayName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDialogflowCXVersionDisplayName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandDialogflowCXVersionDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDialogflowCXVersionDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

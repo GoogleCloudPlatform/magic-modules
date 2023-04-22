@@ -5,12 +5,14 @@ import (
 	"errors"
 	"fmt"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const nonUniqueWriterAccount = "serviceAccount:cloud-logs@system.gserviceaccount.com"
 
-func resourceLoggingProjectSink() *schema.Resource {
+func ResourceLoggingProjectSink() *schema.Resource {
 	schm := &schema.Resource{
 		Create:        resourceLoggingProjectSinkCreate,
 		Read:          resourceLoggingProjectSinkRead,
@@ -41,8 +43,8 @@ func resourceLoggingProjectSink() *schema.Resource {
 }
 
 func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -87,8 +89,8 @@ func resourceLoggingProjectSinkCustomizeDiffFunc(diff TerraformResourceDiff) err
 }
 
 func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -124,8 +126,8 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -143,8 +145,8 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

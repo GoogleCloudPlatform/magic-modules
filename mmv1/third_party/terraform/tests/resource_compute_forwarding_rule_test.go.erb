@@ -11,13 +11,13 @@ import (
 func TestAccComputeForwardingRule_update(t *testing.T) {
 	t.Parallel()
 
-	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
+	poolName := fmt.Sprintf("tf-%s", RandString(t, 10))
+	ruleName := fmt.Sprintf("tf-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeForwardingRule_basic(poolName, ruleName),
@@ -42,16 +42,16 @@ func TestAccComputeForwardingRule_update(t *testing.T) {
 func TestAccComputeForwardingRule_ip(t *testing.T) {
 	t.Parallel()
 
-	addrName := fmt.Sprintf("tf-%s", randString(t, 10))
-	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
+	addrName := fmt.Sprintf("tf-%s", RandString(t, 10))
+	poolName := fmt.Sprintf("tf-%s", RandString(t, 10))
+	ruleName := fmt.Sprintf("tf-%s", RandString(t, 10))
 	addressRefFieldRaw := "address"
 	addressRefFieldID := "id"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeForwardingRule_ip(addrName, poolName, ruleName, addressRefFieldID),
@@ -77,13 +77,13 @@ func TestAccComputeForwardingRule_ip(t *testing.T) {
 func TestAccComputeForwardingRule_networkTier(t *testing.T) {
 	t.Parallel()
 
-	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
+	poolName := fmt.Sprintf("tf-%s", RandString(t, 10))
+	ruleName := fmt.Sprintf("tf-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeForwardingRule_networkTier(poolName, ruleName),
@@ -102,15 +102,15 @@ func TestAccComputeForwardingRule_networkTier(t *testing.T) {
 func TestAccComputeForwardingRule_serviceDirectoryRegistrations(t *testing.T) {
 	t.Parallel()
 
-	poolName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	ruleName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	svcDirNamespace := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	poolName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	ruleName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	svcDirNamespace := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	serviceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleName, svcDirNamespace, serviceName),

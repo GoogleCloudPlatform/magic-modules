@@ -12,7 +12,8 @@
         "datasetReference": {
           "datasetId": "example_dataset"
         },
-        "location": "US"
+        "location": "US",
+        "friendlyName": ""
       }
     },
     "iam_policy": {

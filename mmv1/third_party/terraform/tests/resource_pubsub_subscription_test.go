@@ -11,13 +11,13 @@ import (
 func TestAccPubsubSubscription_emptyTTL(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
-	subscription := fmt.Sprintf("tf-test-sub-%s", randString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscription_emptyTTL(topic, subscription),
@@ -35,13 +35,13 @@ func TestAccPubsubSubscription_emptyTTL(t *testing.T) {
 func TestAccPubsubSubscription_basic(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
-	subscription := fmt.Sprintf("tf-test-sub-%s", randString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscription_basic(topic, subscription, "bar", 20, false),
@@ -59,13 +59,13 @@ func TestAccPubsubSubscription_basic(t *testing.T) {
 func TestAccPubsubSubscription_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
-	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", randString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscription_basic(topic, subscriptionShort, "bar", 20, false),
@@ -92,14 +92,14 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 func TestAccPubsubSubscription_push(t *testing.T) {
 	t.Parallel()
 
-	topicFoo := fmt.Sprintf("tf-test-topic-foo-%s", randString(t, 10))
-	subscription := fmt.Sprintf("tf-test-sub-foo-%s", randString(t, 10))
-	saAccount := fmt.Sprintf("tf-test-pubsub-%s", randString(t, 10))
+	topicFoo := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-sub-foo-%s", RandString(t, 10))
+	saAccount := fmt.Sprintf("tf-test-pubsub-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscription_push(topicFoo, saAccount, subscription),
@@ -121,13 +121,13 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 func TestAccPubsubSubscription_pollOnCreate(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-foo-%s", randString(t, 10))
-	subscription := fmt.Sprintf("tf-test-topic-foo-%s", randString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-topic-foo-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				// Create only the topic
@@ -282,13 +282,13 @@ func TestGetComputedTopicName(t *testing.T) {
 
 func testAccCheckPubsubSubscriptionCache404(t *testing.T, subName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
-		url := fmt.Sprintf("%sprojects/%s/subscriptions/%s", config.PubsubBasePath, getTestProjectFromEnv(), subName)
-		resp, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
+		config := GoogleProviderConfig(t)
+		url := fmt.Sprintf("%sprojects/%s/subscriptions/%s", config.PubsubBasePath, GetTestProjectFromEnv(), subName)
+		resp, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
 		if err == nil {
 			return fmt.Errorf("Expected Pubsub Subscription %q not to exist, was found", resp["name"])
 		}
-		if !isGoogleApiErrorWithCode(err, 404) {
+		if !IsGoogleApiErrorWithCode(err, 404) {
 			return fmt.Errorf("Got non-404 error while trying to read Pubsub Subscription %q: %v", subName, err)
 		}
 		return nil

@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"log"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 )
 
-func dataSourceGoogleServiceAccountAccessToken() *schema.Resource {
+func DataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 
 	return &schema.Resource{
 		Read: dataSourceGoogleServiceAccountAccessTokenRead,
@@ -55,8 +56,8 @@ func dataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 }
 
 func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

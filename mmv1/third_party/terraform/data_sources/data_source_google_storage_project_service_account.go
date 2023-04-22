@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleStorageProjectServiceAccount() *schema.Resource {
+func DataSourceGoogleStorageProjectServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleStorageProjectServiceAccountRead,
 		Schema: map[string]*schema.Schema{
@@ -34,8 +35,8 @@ func dataSourceGoogleStorageProjectServiceAccount() *schema.Resource {
 }
 
 func dataSourceGoogleStorageProjectServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

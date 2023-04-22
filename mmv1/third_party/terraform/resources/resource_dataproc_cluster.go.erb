@@ -4,6 +4,7 @@ package google
 import (
 	"errors"
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"regexp"
 	"strconv"
@@ -146,7 +147,7 @@ func resourceDataprocPropertyDiffSuppress(k, old, new string, d *schema.Resource
 	return false
 }
 
-func resourceDataprocCluster() *schema.Resource {
+func ResourceDataprocCluster() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataprocClusterCreate,
 		Read:   resourceDataprocClusterRead,
@@ -951,8 +952,6 @@ by Dataproc`,
 										Description:  `The set of optional components to activate on the cluster.`,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
-											ValidateFunc: validation.StringInSlice([]string{"COMPONENT_UNSPECIFIED", "ANACONDA", "DOCKER", "DRUID", "HBASE", "FLINK",
-												 "HIVE_WEBHCAT", "JUPYTER", "KERBEROS", "PRESTO", "RANGER", "SOLR", "ZEPPELIN", "ZOOKEEPER"}, false),
 										},
 									},
 								},
@@ -1006,14 +1005,14 @@ by Dataproc`,
 							AtLeastOneOf:     clusterConfigKeys,
 							MaxItems:         1,
 							Description:      `The autoscaling policy config associated with the cluster.`,
-							DiffSuppressFunc: emptyOrUnsetBlockDiffSuppress,
+							DiffSuppressFunc: EmptyOrUnsetBlockDiffSuppress,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"policy_uri": {
 										Type:             schema.TypeString,
 										Required:         true,
 										Description:      `The autoscaling policy used by the cluster.`,
-										DiffSuppressFunc: locationDiffSuppress,
+										DiffSuppressFunc: LocationDiffSuppress,
 									},
 								},
 							},
@@ -1065,7 +1064,7 @@ by Dataproc`,
 										Type:             schema.TypeString,
 										Optional:         true,
 										Description:      `The time when cluster will be auto-deleted. A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".`,
-										DiffSuppressFunc: timestampDiffSuppress(time.RFC3339Nano),
+										DiffSuppressFunc: TimestampDiffSuppress(time.RFC3339Nano),
 										AtLeastOneOf: []string{
 											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
 											"cluster_config.0.lifecycle_config.0.auto_delete_time",
@@ -1155,6 +1154,8 @@ func instanceConfigSchema(parent string) *schema.Schema {
 		"cluster_config.0." + parent + ".0.accelerators",
 	}
 
+	masterConfig := strings.Contains(parent, "master")
+
 	return &schema.Schema{
 		Type:         schema.TypeList,
 		Optional:     true,
@@ -1167,6 +1168,7 @@ func instanceConfigSchema(parent string) *schema.Schema {
 				"num_instances": {
 					Type:         schema.TypeInt,
 					Optional:     true,
+					ForceNew:     masterConfig,
 					Computed:     true,
 					Description:  `Specifies the number of master/worker nodes to create. If not specified, GCP will default to a predetermined computed value.`,
 					AtLeastOneOf: instanceConfigKeys,
@@ -1293,8 +1295,8 @@ func acceleratorsSchema() *schema.Resource {
 }
 
 func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1353,7 +1355,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 	return resourceDataprocClusterRead(d, meta)
 }
 
-func expandVirtualClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.VirtualClusterConfig, error) {
+func expandVirtualClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (*dataproc.VirtualClusterConfig, error) {
 	conf := &dataproc.VirtualClusterConfig{}
 
 	if v, ok := d.GetOk("virtual_cluster_config"); ok {
@@ -1535,7 +1537,7 @@ func expandGkeNodePoolAutoscalingConfig(cfg map[string]interface{}) *dataproc.Gk
 	return conf
 }
 
-func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.ClusterConfig, error) {
+func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (*dataproc.ClusterConfig, error) {
 	conf := &dataproc.ClusterConfig{
 		// SDK requires GceClusterConfig to be specified,
 		// even if no explicit values specified
@@ -1616,7 +1618,7 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 	return conf, nil
 }
 
-func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.GceClusterConfig, error) {
+func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (*dataproc.GceClusterConfig, error) {
 	conf := &dataproc.GceClusterConfig{}
 
 	v, ok := d.GetOk("cluster_config.0.gce_cluster_config")
@@ -1943,8 +1945,8 @@ func expandAccelerators(configured []interface{}) []*dataproc.AcceleratorConfig 
 }
 
 func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -2050,8 +2052,8 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -2532,8 +2534,8 @@ func extractInitTimeout(t string) (int, error) {
 }
 
 func resourceDataprocClusterDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

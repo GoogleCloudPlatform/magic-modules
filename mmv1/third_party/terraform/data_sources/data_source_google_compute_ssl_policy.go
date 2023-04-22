@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleComputeSslPolicy() *schema.Resource {
+func DataSourceGoogleComputeSslPolicy() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeSslPolicy().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceComputeSslPolicy().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "name")
@@ -23,7 +24,7 @@ func dataSourceGoogleComputeSslPolicy() *schema.Resource {
 }
 
 func datasourceComputeSslPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	project, err := getProject(d, config)
 	if err != nil {

@@ -11,24 +11,36 @@ import (
 func TestAccComputeRouterInterface_basic(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
+	name := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	context := map[string]interface{}{
+		"name":   name,
+		"region": "us-central1",
+	}
+	importIdFourPart := fmt.Sprintf("%s/%s/%s/%s", GetTestProjectFromEnv(), context["region"], context["name"], context["name"]) // name reused in config
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRouterInterfaceBasic(routerName),
+				Config: testAccComputeRouterInterfaceBasic(context),
 				Check: testAccCheckComputeRouterInterfaceExists(
 					t, "google_compute_router_interface.foobar"),
 			},
 			{
 				ResourceName:      "google_compute_router_interface.foobar",
-				ImportState:       true,
+				ImportState:       true, // Will use the 3 part {{region}}/{{router}}/{{name}} import id by default as it's the id in state
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeRouterInterfaceKeepRouter(routerName),
+				ResourceName:      "google_compute_router_interface.foobar",
+				ImportState:       true,
+				ImportStateId:     importIdFourPart, // Make test step use 4 part {{project}}/{{region}}/{{router}}/{{name}} import id
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterInterfaceKeepRouter(name),
 				Check: testAccCheckComputeRouterInterfaceDelete(
 					t, "google_compute_router_interface.foobar"),
 			},
@@ -39,11 +51,11 @@ func TestAccComputeRouterInterface_basic(t *testing.T) {
 func TestAccComputeRouterInterface_redundant(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
+	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRouterInterfaceRedundant(routerName),
@@ -62,11 +74,11 @@ func TestAccComputeRouterInterface_redundant(t *testing.T) {
 func TestAccComputeRouterInterface_withTunnel(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
+	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRouterInterfaceWithTunnel(routerName),
@@ -85,11 +97,11 @@ func TestAccComputeRouterInterface_withTunnel(t *testing.T) {
 func TestAccComputeRouterInterface_withPrivateIpAddress(t *testing.T) {
 	t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
+	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRouterInterfaceWithPrivateIpAddress(routerName),
@@ -107,21 +119,21 @@ func TestAccComputeRouterInterface_withPrivateIpAddress(t *testing.T) {
 
 func testAccCheckComputeRouterInterfaceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		routersService := config.NewComputeClient(config.userAgent).Routers
+		routersService := config.NewComputeClient(config.UserAgent).Routers
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_router" {
 				continue
 			}
 
-			project, err := getTestProject(rs.Primary, config)
+			project, err := GetTestProject(rs.Primary, config)
 			if err != nil {
 				return err
 			}
 
-			region, err := getTestRegion(rs.Primary, config)
+			region, err := GetTestRegion(rs.Primary, config)
 			if err != nil {
 				return err
 			}
@@ -142,21 +154,21 @@ func testAccCheckComputeRouterInterfaceDestroyProducer(t *testing.T) func(s *ter
 
 func testAccCheckComputeRouterInterfaceDelete(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		routersService := config.NewComputeClient(config.userAgent).Routers
+		routersService := config.NewComputeClient(config.UserAgent).Routers
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_router_interface" {
 				continue
 			}
 
-			project, err := getTestProject(rs.Primary, config)
+			project, err := GetTestProject(rs.Primary, config)
 			if err != nil {
 				return err
 			}
 
-			region, err := getTestRegion(rs.Primary, config)
+			region, err := GetTestRegion(rs.Primary, config)
 			if err != nil {
 				return err
 			}
@@ -194,14 +206,14 @@ func testAccCheckComputeRouterInterfaceExists(t *testing.T, n string) resource.T
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		project, err := getTestProject(rs.Primary, config)
+		project, err := GetTestProject(rs.Primary, config)
 		if err != nil {
 			return err
 		}
 
-		region, err := getTestRegion(rs.Primary, config)
+		region, err := GetTestRegion(rs.Primary, config)
 		if err != nil {
 			return err
 		}
@@ -209,7 +221,7 @@ func testAccCheckComputeRouterInterfaceExists(t *testing.T, n string) resource.T
 		name := rs.Primary.Attributes["name"]
 		routerName := rs.Primary.Attributes["router"]
 
-		routersService := config.NewComputeClient(config.userAgent).Routers
+		routersService := config.NewComputeClient(config.UserAgent).Routers
 		router, err := routersService.Get(project, region, routerName).Do()
 
 		if err != nil {
@@ -227,32 +239,32 @@ func testAccCheckComputeRouterInterfaceExists(t *testing.T, n string) resource.T
 	}
 }
 
-func testAccComputeRouterInterfaceBasic(routerName string) string {
-	return fmt.Sprintf(`
+func testAccComputeRouterInterfaceBasic(context map[string]interface{}) string {
+	return Nprintf(`
 resource "google_compute_network" "foobar" {
-  name = "%s-net"
+  name = "%{name}-net"
 }
 
 resource "google_compute_subnetwork" "foobar" {
-  name          = "%s-subnet"
+  name          = "%{name}-subnet"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
+  region        = "%{region}"
 }
 
 resource "google_compute_address" "foobar" {
-  name   = "%s-addr"
+  name   = "%{name}-addr"
   region = google_compute_subnetwork.foobar.region
 }
 
 resource "google_compute_vpn_gateway" "foobar" {
-  name    = "%s-gateway"
+  name    = "%{name}-gateway"
   network = google_compute_network.foobar.self_link
   region  = google_compute_subnetwork.foobar.region
 }
 
 resource "google_compute_forwarding_rule" "foobar_esp" {
-  name        = "%s-fr1"
+  name        = "%{name}-fr1"
   region      = google_compute_vpn_gateway.foobar.region
   ip_protocol = "ESP"
   ip_address  = google_compute_address.foobar.address
@@ -260,7 +272,7 @@ resource "google_compute_forwarding_rule" "foobar_esp" {
 }
 
 resource "google_compute_forwarding_rule" "foobar_udp500" {
-  name        = "%s-fr2"
+  name        = "%{name}-fr2"
   region      = google_compute_forwarding_rule.foobar_esp.region
   ip_protocol = "UDP"
   port_range  = "500-500"
@@ -269,7 +281,7 @@ resource "google_compute_forwarding_rule" "foobar_udp500" {
 }
 
 resource "google_compute_forwarding_rule" "foobar_udp4500" {
-  name        = "%s-fr3"
+  name        = "%{name}-fr3"
   region      = google_compute_forwarding_rule.foobar_udp500.region
   ip_protocol = "UDP"
   port_range  = "4500-4500"
@@ -278,7 +290,7 @@ resource "google_compute_forwarding_rule" "foobar_udp4500" {
 }
 
 resource "google_compute_router" "foobar" {
-  name    = "%s"
+  name    = "%{name}"
   region  = google_compute_forwarding_rule.foobar_udp500.region
   network = google_compute_network.foobar.self_link
   bgp {
@@ -287,12 +299,12 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_router_interface" "foobar" {
-  name     = "%s"
+  name     = "%{name}"
   router   = google_compute_router.foobar.name
   region   = google_compute_router.foobar.region
   ip_range = "169.254.3.1/30"
 }
-`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
+`, context)
 }
 
 func testAccComputeRouterInterfaceRedundant(routerName string) string {

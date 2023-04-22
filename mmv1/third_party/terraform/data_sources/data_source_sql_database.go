@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceSqlDatabase() *schema.Resource {
+func DataSourceSqlDatabase() *schema.Resource {
 
-	dsSchema := datasourceSchemaFromResourceSchema(resourceSQLDatabase().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceSQLDatabase().Schema)
 	addRequiredFieldsToSchema(dsSchema, "name")
 	addRequiredFieldsToSchema(dsSchema, "instance")
 	addOptionalFieldsToSchema(dsSchema, "project")
@@ -20,7 +21,7 @@ func dataSourceSqlDatabase() *schema.Resource {
 }
 
 func dataSourceSqlDatabaseRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	project, err := getProject(d, config)
 	if err != nil {
 		return fmt.Errorf("Error fetching project for Database: %s", err)

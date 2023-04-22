@@ -2,10 +2,12 @@ package google
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleComputeDefaultServiceAccount() *schema.Resource {
+func DataSourceGoogleComputeDefaultServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleComputeDefaultServiceAccountRead,
 		Schema: map[string]*schema.Schema{
@@ -35,8 +37,8 @@ func dataSourceGoogleComputeDefaultServiceAccount() *schema.Resource {
 }
 
 func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

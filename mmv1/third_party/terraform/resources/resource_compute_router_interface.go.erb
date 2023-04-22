@@ -4,6 +4,7 @@ package google
 import (
 	"fmt"
 	"log"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"time"
 
 	"strings"
@@ -18,7 +19,7 @@ import (
 <% end -%>
 )
 
-func resourceComputeRouterInterface() *schema.Resource {
+func ResourceComputeRouterInterface() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeRouterInterfaceCreate,
 		Read:   resourceComputeRouterInterfaceRead,
@@ -114,8 +115,8 @@ func resourceComputeRouterInterface() *schema.Resource {
 }
 
 func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -205,7 +206,7 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error patching router %s/%s: %s", region, routerName, err)
 	}
 	d.SetId(fmt.Sprintf("%s/%s/%s", region, routerName, ifaceName))
-	err = computeOperationWaitTime(config, op, project, "Patching router", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, op, project, "Patching router", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		d.SetId("")
 		return fmt.Errorf("Error waiting to patch router %s/%s: %s", region, routerName, err)
@@ -215,8 +216,8 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 }
 
 func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -285,8 +286,8 @@ func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}
 }
 
 func resourceComputeRouterInterfaceDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -360,7 +361,7 @@ func resourceComputeRouterInterfaceDelete(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error patching router %s/%s: %s", region, routerName, err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Patching router", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, op, project, "Patching router", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return fmt.Errorf("Error waiting to patch router %s/%s: %s", region, routerName, err)
 	}
@@ -371,19 +372,35 @@ func resourceComputeRouterInterfaceDelete(d *schema.ResourceData, meta interface
 
 func resourceComputeRouterInterfaceImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid router interface specifier. Expecting {region}/{router}/{interface}")
+	switch len(parts) {
+	case 3:
+		// {{region}}/{{router}}/{{name}} import id
+		if err := d.Set("region", parts[0]); err != nil {
+			return nil, fmt.Errorf("error setting region: %s", err)
+		}
+		if err := d.Set("router", parts[1]); err != nil {
+			return nil, fmt.Errorf("error setting router: %s", err)
+		}
+		if err := d.Set("name", parts[2]); err != nil {
+			return nil, fmt.Errorf("error setting name: %s", err)
+		}
+		return []*schema.ResourceData{d}, nil
+	case 4:
+		// {{project}}/{{region}}/{{router}}/{{name}} import id
+		if err := d.Set("project", parts[0]); err != nil {
+			return nil, fmt.Errorf("error setting project: %s", err)
+		}
+		if err := d.Set("region", parts[1]); err != nil {
+			return nil, fmt.Errorf("error setting region: %s", err)
+		}
+		if err := d.Set("router", parts[2]); err != nil {
+			return nil, fmt.Errorf("error setting router: %s", err)
+		}
+		if err := d.Set("name", parts[3]); err != nil {
+			return nil, fmt.Errorf("error setting name: %s", err)
+		}
+		return []*schema.ResourceData{d}, nil
 	}
 
-	if err := d.Set("region", parts[0]); err != nil {
-		return nil, fmt.Errorf("Error setting region: %s", err)
-	}
-	if err := d.Set("router", parts[1]); err != nil {
-		return nil, fmt.Errorf("Error setting router: %s", err)
-	}
-	if err := d.Set("name", parts[2]); err != nil {
-		return nil, fmt.Errorf("Error setting name: %s", err)
-	}
-
-	return []*schema.ResourceData{d}, nil
+	return nil, fmt.Errorf("invalid router interface specifier. Expecting either {region}/{router}/{interface} or {project}/{region}/{router}/{interface} import id format")
 }

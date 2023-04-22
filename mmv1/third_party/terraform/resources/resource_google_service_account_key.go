@@ -5,12 +5,14 @@ import (
 	"log"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/iam/v1"
 )
 
-func resourceGoogleServiceAccountKey() *schema.Resource {
+func ResourceGoogleServiceAccountKey() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleServiceAccountKeyCreate,
 		Read:   resourceGoogleServiceAccountKeyRead,
@@ -94,8 +96,8 @@ func resourceGoogleServiceAccountKey() *schema.Resource {
 }
 
 func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -146,8 +148,8 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 }
 
 func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -161,7 +163,7 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 			return nil
 		} else {
 			// This resource also returns 403 when it's not found.
-			if isGoogleApiErrorWithCode(err, 403) {
+			if IsGoogleApiErrorWithCode(err, 403) {
 				log.Printf("[DEBUG] Got a 403 error trying to read service account key %s, assuming it's gone.", d.Id())
 				d.SetId("")
 				return nil
@@ -184,8 +186,8 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 }
 
 func resourceGoogleServiceAccountKeyDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -197,7 +199,7 @@ func resourceGoogleServiceAccountKeyDelete(d *schema.ResourceData, meta interfac
 			return nil
 		} else {
 			// This resource also returns 403 when it's not found.
-			if isGoogleApiErrorWithCode(err, 403) {
+			if IsGoogleApiErrorWithCode(err, 403) {
 				log.Printf("[DEBUG] Got a 403 error trying to read service account key %s, assuming it's gone.", d.Id())
 				d.SetId("")
 				return nil

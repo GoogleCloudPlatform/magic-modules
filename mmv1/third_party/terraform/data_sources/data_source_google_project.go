@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleProject() *schema.Resource {
+func DataSourceGoogleProject() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceGoogleProject().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceGoogleProject().Schema)
 
 	addOptionalFieldsToSchema(dsSchema, "project_id")
 
@@ -20,7 +21,7 @@ func dataSourceGoogleProject() *schema.Resource {
 }
 
 func datasourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	if v, ok := d.GetOk("project_id"); ok {
 		project := v.(string)

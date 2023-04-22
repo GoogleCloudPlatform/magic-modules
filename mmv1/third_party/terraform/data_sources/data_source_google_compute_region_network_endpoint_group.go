@@ -5,11 +5,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleComputeRegionNetworkEndpointGroup() *schema.Resource {
+func DataSourceGoogleComputeRegionNetworkEndpointGroup() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeRegionNetworkEndpointGroup().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceComputeRegionNetworkEndpointGroup().Schema)
 
 	addOptionalFieldsToSchema(dsSchema, "name")
 	addOptionalFieldsToSchema(dsSchema, "region")
@@ -23,7 +24,7 @@ func dataSourceGoogleComputeRegionNetworkEndpointGroup() *schema.Resource {
 }
 
 func dataSourceComputeRegionNetworkEndpointGroupRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	if name, ok := d.GetOk("name"); ok {
 		project, err := getProject(d, config)
 		if err != nil {

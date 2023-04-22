@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func resourceComputeSharedVpcHostProject() *schema.Resource {
+func ResourceComputeSharedVpcHostProject() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeSharedVpcHostProjectCreate,
 		Read:   resourceComputeSharedVpcHostProjectRead,
@@ -35,8 +36,8 @@ func resourceComputeSharedVpcHostProject() *schema.Resource {
 }
 
 func resourceComputeSharedVpcHostProjectCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -49,7 +50,7 @@ func resourceComputeSharedVpcHostProjectCreate(d *schema.ResourceData, meta inte
 
 	d.SetId(hostProject)
 
-	err = computeOperationWaitTime(config, op, hostProject, "Enabling Shared VPC Host", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, op, hostProject, "Enabling Shared VPC Host", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		d.SetId("")
 		return err
@@ -59,8 +60,8 @@ func resourceComputeSharedVpcHostProjectCreate(d *schema.ResourceData, meta inte
 }
 
 func resourceComputeSharedVpcHostProjectRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -85,8 +86,8 @@ func resourceComputeSharedVpcHostProjectRead(d *schema.ResourceData, meta interf
 }
 
 func resourceComputeSharedVpcHostProjectDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -98,7 +99,7 @@ func resourceComputeSharedVpcHostProjectDelete(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error disabling Shared VPC Host %q: %s", hostProject, err)
 	}
 
-	err = computeOperationWaitTime(config, op, hostProject, "Disabling Shared VPC Host", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, op, hostProject, "Disabling Shared VPC Host", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}

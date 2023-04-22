@@ -36,7 +36,7 @@ resource "google_compute_instance_group_manager" "appserver" {
   zone               = "us-central1-a"
 
   version {
-    instance_template  = google_compute_instance_template.appserver.id
+    instance_template  = google_compute_instance_template.appserver.self_link_unique
   }
 
   all_instances_config {
@@ -76,12 +76,12 @@ resource "google_compute_instance_group_manager" "appserver" {
 
   version {
     name              = "appserver"
-    instance_template = google_compute_instance_template.appserver.id
+    instance_template = google_compute_instance_template.appserver.self_link_unique
   }
 
   version {
     name              = "appserver-canary"
-    instance_template = google_compute_instance_template.appserver-canary.id
+    instance_template = google_compute_instance_template.appserver-canary.self_link_unique
     target_size {
       fixed = 1
     }
@@ -250,7 +250,7 @@ all_instances_config {
 ```hcl
 version {
   name              = "appserver-canary"
-  instance_template = google_compute_instance_template.appserver-canary.id
+  instance_template = google_compute_instance_template.appserver-canary.self_link_unique
 
   target_size {
     fixed = 1
@@ -261,7 +261,7 @@ version {
 ```hcl
 version {
   name              = "appserver-canary"
-  instance_template = google_compute_instance_template.appserver-canary.id
+  instance_template = google_compute_instance_template.appserver-canary.self_link_unique
 
   target_size {
     percent = 20
@@ -271,7 +271,7 @@ version {
 
 * `name` - (Required) - Version name.
 
-* `instance_template` - (Required) - The full URL to an instance template from which all new instances of this version will be created.
+* `instance_template` - (Required) - The full URL to an instance template from which all new instances of this version will be created. It is recommended to reference instance templates through their unique id (`self_link_unique` attribute).
 
 * `target_size` - (Optional) - The number of instances calculated as a fixed number or a percentage depending on the settings. Structure is [documented below](#nested_target_size).
 
@@ -294,13 +294,13 @@ one of which has a `target_size.percent` of `60` will create 2 instances of that
 
 <a name="nested_stateful_internal_ip"></a>The `stateful_internal_ip` block supports:
 
-* `network_interface_name` - (Required), The network interface name of the internal Ip.
+* `interface_name` - (Required), The network interface name of the internal Ip. Possible value: `nic0`
 
 * `delete_rule` - (Optional), A value that prescribes what should happen to the internal ip when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the ip when the VM is deleted, but do not delete the ip. `ON_PERMANENT_INSTANCE_DELETION` will delete the internal ip when the VM is permanently deleted from the instance group.
 
 <a name="nested_stateful_external_ip"></a>The `stateful_external_ip` block supports:
 
-* `network_interface_name` - (Required), The network interface name of the external Ip.
+* `interface_name` - (Required), The network interface name of the external Ip. Possible value: `nic0`
 
 * `delete_rule` - (Optional), A value that prescribes what should happen to the external ip when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the ip when the VM is deleted, but do not delete the ip. `ON_PERMANENT_INSTANCE_DELETION` will delete the external ip when the VM is permanently deleted from the instance group.
 

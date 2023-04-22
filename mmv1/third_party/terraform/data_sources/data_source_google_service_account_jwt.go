@@ -3,6 +3,7 @@ package google
 import (
 	"encoding/json"
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleServiceAccountJwt() *schema.Resource {
+func DataSourceGoogleServiceAccountJwt() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleServiceAccountJwtRead,
 		Schema: map[string]*schema.Schema{
@@ -52,9 +53,9 @@ var (
 )
 
 func dataSourceGoogleServiceAccountJwtRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 
 	if err != nil {
 		return err

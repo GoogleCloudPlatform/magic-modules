@@ -9,9 +9,10 @@ import (
 	"cloud.google.com/go/bigtable"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func resourceBigtableTable() *schema.Resource {
+func ResourceBigtableTable() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBigtableTableCreate,
 		Read:   resourceBigtableTableRead,
@@ -92,8 +93,8 @@ func resourceBigtableTable() *schema.Resource {
 }
 
 func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -159,7 +160,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error creating table. %s", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -169,8 +170,8 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -223,8 +224,8 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -288,8 +289,8 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -334,8 +335,8 @@ func flattenColumnFamily(families []string) []map[string]interface{} {
 
 // TODO(rileykarson): Fix the stored import format after rebasing 3.0.0
 func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	if err := parseImportId([]string{
+	config := meta.(*transport_tpg.Config)
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/instances/(?P<instance_name>[^/]+)/tables/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<instance_name>[^/]+)/(?P<name>[^/]+)",
 		"(?P<instance_name>[^/]+)/(?P<name>[^/]+)",
@@ -344,7 +345,7 @@ func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

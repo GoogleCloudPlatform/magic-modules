@@ -21,17 +21,17 @@ if v, ok := d.GetOkExists("connected_repositories"); !isEmptyValue(reflect.Value
     obj = make(map[string]interface{})
     obj["requests"] = requests
 
-    url, err = replaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}/connectedRepositories:batchCreate")
+    url, err = ReplaceVars(d, config, "{{CloudBuildBasePath}}projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}/connectedRepositories:batchCreate")
     if err != nil {
         return err
     }
 
-    res, err = sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+    res, err = SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
     if err != nil {
         return fmt.Errorf("Error creating connected_repositories: %s", err)
     }
 
-    err = cloudBuildOperationWaitTime(
+    err = CloudBuildOperationWaitTime(
         config, res, project, "Creating connected_repositories on BitbucketServerConfig", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {

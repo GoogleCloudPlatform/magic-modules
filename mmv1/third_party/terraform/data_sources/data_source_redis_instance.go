@@ -1,10 +1,13 @@
 package google
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
 
-func dataSourceGoogleRedisInstance() *schema.Resource {
+func DataSourceGoogleRedisInstance() *schema.Resource {
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceRedisInstance().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceRedisInstance().Schema)
 
 	// Set 'Required' schema elements
 	addRequiredFieldsToSchema(dsSchema, "name")
@@ -19,7 +22,7 @@ func dataSourceGoogleRedisInstance() *schema.Resource {
 }
 
 func dataSourceGoogleRedisInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	id, err := replaceVars(d, meta.(*Config), "projects/{{project}}/locations/{{region}}/instances/{{name}}")
+	id, err := ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{project}}/locations/{{region}}/instances/{{name}}")
 	if err != nil {
 		return err
 	}

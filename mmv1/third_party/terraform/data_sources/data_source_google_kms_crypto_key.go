@@ -2,10 +2,11 @@ package google
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleKmsCryptoKey() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(resourceKMSCryptoKey().Schema)
+func DataSourceGoogleKmsCryptoKey() *schema.Resource {
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceKMSCryptoKey().Schema)
 	addRequiredFieldsToSchema(dsSchema, "name")
 	addRequiredFieldsToSchema(dsSchema, "key_ring")
 
@@ -17,19 +18,19 @@ func dataSourceGoogleKmsCryptoKey() *schema.Resource {
 }
 
 func dataSourceGoogleKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	keyRingId, err := parseKmsKeyRingId(d.Get("key_ring").(string), config)
 	if err != nil {
 		return err
 	}
 
-	cryptoKeyId := kmsCryptoKeyId{
+	cryptoKeyId := KmsCryptoKeyId{
 		KeyRingId: *keyRingId,
 		Name:      d.Get("name").(string),
 	}
 
-	d.SetId(cryptoKeyId.cryptoKeyId())
+	d.SetId(cryptoKeyId.CryptoKeyId())
 
 	return resourceKMSCryptoKeyRead(d, meta)
 }

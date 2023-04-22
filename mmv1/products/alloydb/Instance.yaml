@@ -43,6 +43,20 @@
       path: "error"
       message: "message"
     include_project: true
+  import_format: ["{{cluster}}/instances/{{instance_id}}"]
+  autogen_async: true
+  custom_code: !ruby/object:Provider::Terraform::CustomCode
+    custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
+  examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "alloydb_instance_basic"
+      primary_resource_id: "default"
+      vars:
+        alloydb_cluster_name: "alloydb-cluster"
+        alloydb_instance_name: "alloydb-instance"
+      ignore_read_extra:
+        - "reconciling"
+        - "update_time"
   parameters:
     - !ruby/object:Api::Type::ResourceRef
       name: 'cluster'
@@ -50,14 +64,14 @@
         Identifies the alloydb cluster. Must be in the format
         'projects/{project}/locations/{location}/clusters/{cluster_id}'
       required: true
-      input: true
+      immutable: true
       resource: 'Cluster'
       imports: 'name'
       url_param_only: true
     - !ruby/object:Api::Type::String
       name: "instanceId"
       required: true
-      input: true
+      immutable: true
       url_param_only: true
       description: |
         The ID of the alloydb instance.
@@ -87,7 +101,8 @@
       description: "User-defined labels for the alloydb instance."
     - !ruby/object:Api::Type::KeyValuePairs
       name: "annotations"
-      description: "Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels."
+      description: "Annotations to allow client tools to store small amount of arbitrary\
+        \ data. This is distinct from labels."
     - !ruby/object:Api::Type::String
       name: "state"
       output: true
@@ -97,6 +112,7 @@
       name: "displayName"
       description: |
         User-settable and human-readable display name for the Instance.
+      ignore_read: true
     - !ruby/object:Api::Type::String
       name: "gceZone"
       description: |
@@ -108,7 +124,11 @@
         Set to true if the current state of Instance does not match the user's intended state, and the service is actively updating the resource to reconcile them. This can happen due to user-triggered updates or system actions like failover or maintenance.
     - !ruby/object:Api::Type::KeyValuePairs
       name: "databaseFlags"
-      description: "Database flags. Set at instance level. * They are copied from primary instance on read instance creation. * Read instances can set new or override existing flags that are relevant for reads, e.g. for enabling columnar cache on a read instance. Flags set on read instance may or may not be present on primary."
+      description: "Database flags. Set at instance level. * They are copied from primary\
+        \ instance on read instance creation. * Read instances can set new or override\
+        \ existing flags that are relevant for reads, e.g. for enabling columnar cache\
+        \ on a read instance. Flags set on read instance may or may not be present on\
+        \ primary."
     - !ruby/object:Api::Type::Enum
       name: "availabilityType"
       description: |
@@ -117,12 +137,13 @@
         - :AVAILABILITY_TYPE_UNSPECIFIED
         - :ZONAL
         - :REGIONAL
+      default_from_api: true
     - !ruby/object:Api::Type::Enum
       name: "instanceType"
       required: true
-      input: true
+      immutable: true
       description: |
-        The type of the instance.
+        The type of the instance. If the instance type is READ_POOL, provide the associated PRIMARY instance in the `depends_on` meta-data attribute.
       values:
         - :PRIMARY
         - :READ_POOL
@@ -140,9 +161,12 @@
           description: "Read capacity, i.e. number of nodes in a read pool instance."
     - !ruby/object:Api::Type::NestedObject
       name: "machineConfig"
-      description: "Configurations for the machines that host the underlying database engine."
+      description: "Configurations for the machines that host the underlying database\
+        \ engine."
+      default_from_api: true
       properties:
         - !ruby/object:Api::Type::Integer
           name: "cpuCount"
           description: "The number of CPU's in the VM instance."
-
+  
+          default_from_api: true

@@ -10,14 +10,14 @@ import (
 func TestAccDataSourceComputeRegionSslCertificate(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceComputeRegionSslCertificateConfig(randString(t, 10)),
+				Config: testAccDataSourceComputeRegionSslCertificateConfig(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores(
+					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_region_ssl_certificate.cert",
 						"google_compute_region_ssl_certificate.foobar",
 						map[string]struct{}{

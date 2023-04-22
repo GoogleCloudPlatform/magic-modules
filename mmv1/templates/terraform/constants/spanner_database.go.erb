@@ -44,7 +44,7 @@ func resourceSpannerDBDdlCustomDiff(_ context.Context, diff *schema.ResourceDiff
 	return resourceSpannerDBDdlCustomDiffFunc(diff)
 }
 
-func validateDatabaseRetentionPeriod(v interface{}, k string) (ws []string, errors []error) {
+func ValidateDatabaseRetentionPeriod(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	valueError := fmt.Errorf("version_retention_period should be in range [1h, 7d], in a format resembling 1d, 24h, 1440m, or 86400s")
 
@@ -80,4 +80,20 @@ func validateDatabaseRetentionPeriod(v interface{}, k string) (ws []string, erro
 	}
 
 	return
+}
+
+func resourceSpannerDBVirtualUpdate(d *schema.ResourceData, resourceSchema map[string]*schema.Schema) bool {
+	// deletion_protection is the only virtual field
+	if d.HasChange("deletion_protection") {
+		for field := range resourceSchema {
+			if field == "deletion_protection" {
+				continue
+			}
+			if d.HasChange(field) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
 }

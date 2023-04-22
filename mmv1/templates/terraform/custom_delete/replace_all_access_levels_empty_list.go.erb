@@ -1,13 +1,13 @@
 obj := make(map[string]interface{})
 obj["accessLevels"] = []string{}
 
-url, err := replaceVars(d, config, "{{AccessContextManagerBasePath}}{{parent}}/accessLevels:replaceAll")
+url, err := ReplaceVars(d, config, "{{AccessContextManagerBasePath}}{{parent}}/accessLevels:replaceAll")
 if err != nil {
 	return err
 }
 
 log.Printf("[DEBUG] Deleting AccessLevels %q: %#v", d.Id(), obj)
-res, err := sendRequestWithTimeout(config, "POST", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+res, err := SendRequestWithTimeout(config, "POST", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {
 	return fmt.Errorf("Error deleting AccessLevels %q: %s", d.Id(), err)
@@ -15,7 +15,7 @@ if err != nil {
 	log.Printf("[DEBUG] Finished deleting AccessLevels %q: %#v", d.Id(), res)
 }
 
-err = accessContextManagerOperationWaitTime(
+err = AccessContextManagerOperationWaitTime(
 	config, res, "Updating AccessLevels", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 

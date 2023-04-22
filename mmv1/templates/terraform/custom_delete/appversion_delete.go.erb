@@ -9,7 +9,7 @@ if err != nil {
 	return err
 }
 
-lockName, err := replaceVars(d, config, "apps/{{project}}/services/{{service}}")
+lockName, err := ReplaceVars(d, config, "apps/{{project}}/services/{{service}}")
 if err != nil {
 	return err
 }
@@ -17,17 +17,17 @@ mutexKV.Lock(lockName)
 defer mutexKV.Unlock(lockName)
 
 if d.Get("delete_service_on_destroy") == true {
-	url, err := replaceVars(d, config, "{{AppEngineBasePath}}apps/{{project}}/services/{{service}}")
+	url, err := ReplaceVars(d, config, "{{AppEngineBasePath}}apps/{{project}}/services/{{service}}")
 	if err != nil {
 		return err
 	}
 	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting Service %q", d.Id())
-	res, err := sendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	res, err := SendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 	if err != nil {
 		return handleNotFoundError(err, d, "Service")
 	}
-	err = appEngineOperationWaitTime(
+	err = AppEngineOperationWaitTime(
 		config, res, project, "Deleting Service", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
@@ -37,17 +37,17 @@ if d.Get("delete_service_on_destroy") == true {
 	log.Printf("[DEBUG] Finished deleting Service %q: %#v", d.Id(), res)
 	return nil
 } else {
-	url, err := replaceVars(d, config, "{{AppEngineBasePath}}apps/{{project}}/services/{{service}}/versions/{{version_id}}")
+	url, err := ReplaceVars(d, config, "{{AppEngineBasePath}}apps/{{project}}/services/{{service}}/versions/{{version_id}}")
 	if err != nil {
 		return err
 	}
 	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting AppVersion %q", d.Id())
-	res, err := sendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	res, err := SendRequestWithTimeout(config, "DELETE", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 	if err != nil {
 		return handleNotFoundError(err, d, "AppVersion")
 	}
-	err = appEngineOperationWaitTime(
+	err = AppEngineOperationWaitTime(
 		config, res, project, "Deleting AppVersion", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 

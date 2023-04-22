@@ -9,6 +9,7 @@
       "discovery_name": "Dataset",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
+        "friendlyName": "",
         "datasetReference": {
           "datasetId": "test-dataset"
         },

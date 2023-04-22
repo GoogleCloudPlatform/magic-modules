@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func dataSourceGoogleLoggingProjectCmekSettings() *schema.Resource {
+func DataSourceGoogleLoggingProjectCmekSettings() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleLoggingProjectCmekSettingsRead,
 		Schema: map[string]*schema.Schema{
@@ -51,13 +52,13 @@ func dataSourceGoogleLoggingProjectCmekSettings() *schema.Resource {
 }
 
 func dataSourceGoogleLoggingProjectCmekSettingsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/cmekSettings")
+	url, err := ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/cmekSettings")
 	if err != nil {
 		return err
 	}
@@ -75,7 +76,7 @@ func dataSourceGoogleLoggingProjectCmekSettingsRead(d *schema.ResourceData, meta
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("LoggingProjectCmekSettings %q", d.Id()))
 	}

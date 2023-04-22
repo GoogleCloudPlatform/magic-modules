@@ -14,13 +14,13 @@ func TestAccComputeBackendServiceSignedUrlKey_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeBackendServiceSignedUrlKeyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceSignedUrlKeyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeBackendServiceSignedUrlKey_basic(context),
@@ -55,7 +55,7 @@ resource "google_compute_http_health_check" "zero" {
 func testAccCheckComputeBackendServiceSignedUrlKeyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		exists, err := checkComputeBackendServiceSignedUrlKeyExists(t, s)
-		if err != nil && !isGoogleApiErrorWithCode(err, 404) {
+		if err != nil && !IsGoogleApiErrorWithCode(err, 404) {
 			return err
 		}
 		if exists {
@@ -87,7 +87,7 @@ func checkComputeBackendServiceSignedUrlKeyExists(t *testing.T, s *terraform.Sta
 			continue
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		keyName := rs.Primary.Attributes["name"]
 
 		url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/backendServices/{{backend_service}}")
@@ -95,7 +95,7 @@ func checkComputeBackendServiceSignedUrlKeyExists(t *testing.T, s *terraform.Sta
 			return false, err
 		}
 
-		res, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
+		res, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
 		if err != nil {
 			return false, err
 		}

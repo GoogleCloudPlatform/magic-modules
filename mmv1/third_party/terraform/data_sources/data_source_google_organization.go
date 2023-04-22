@@ -5,11 +5,12 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func dataSourceGoogleOrganization() *schema.Resource {
+func DataSourceGoogleOrganization() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceOrganizationRead,
 		Schema: map[string]*schema.Schema{
@@ -49,8 +50,8 @@ func dataSourceGoogleOrganization() *schema.Resource {
 }
 
 func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error 
 	if v, ok := d.GetOk("domain"); ok {
 		filter := fmt.Sprintf("domain=%s", v.(string))
 		var resp *cloudresourcemanager.SearchOrganizationsResponse
-		err := retryTimeDuration(func() (err error) {
+		err := RetryTimeDuration(func() (err error) {
 			resp, err = config.NewResourceManagerClient(userAgent).Organizations.Search(&cloudresourcemanager.SearchOrganizationsRequest{
 				Filter: filter,
 			}).Do()
@@ -90,7 +91,7 @@ func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error 
 
 	} else if v, ok := d.GetOk("organization"); ok {
 		var resp *cloudresourcemanager.Organization
-		err := retryTimeDuration(func() (err error) {
+		err := RetryTimeDuration(func() (err error) {
 			resp, err = config.NewResourceManagerClient(userAgent).Organizations.Get(canonicalOrganizationName(v.(string))).Do()
 			return err
 		}, d.Timeout(schema.TimeoutRead))

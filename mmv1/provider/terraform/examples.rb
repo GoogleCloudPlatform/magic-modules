@@ -77,7 +77,7 @@ module Provider
       #   - tests config will have `"network = my-vpc%{random_suffix}"`
       #     with context
       #       map[string]interface{}{
-      #         "random_suffix": randString()
+      #         "random_suffix": RandString()
       #       }
       #
       # If test_vars_overrides["network"] = "nameOfVpc()"
@@ -160,9 +160,10 @@ module Provider
           ORG_TARGET: '123456789',
           BILLING_ACCT: '000000-0000000-0000000-000000',
           MASTER_BILLING_ACCT: '000000-0000000-0000000-000000',
-          SERVICE_ACCT: 'emailAddress:my@service-account.com',
+          SERVICE_ACCT: 'my@service-account.com',
           CUST_ID: 'A01b123xz',
-          IDENTITY_USER: 'cloud_identity_user'
+          IDENTITY_USER: 'cloud_identity_user',
+          PAP_DESCRIPTION: 'description'
         }
         @vars ||= {}
         @test_env_vars ||= {}
@@ -310,6 +311,24 @@ module Provider
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
         check :skip_vcr, type: TrueClass
         check :pull_external, type: :boolean, default: false
+      end
+
+      def merge(other)
+        result = self.class.new
+        instance_variables.each do |v|
+          result.instance_variable_set(v, instance_variable_get(v))
+        end
+
+        other.instance_variables.each do |v|
+          if other.instance_variable_get(v).instance_of?(Array)
+            result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
+                                                       other.instance_variable_get(v)))
+          else
+            result.instance_variable_set(v, other.instance_variable_get(v))
+          end
+        end
+
+        result
       end
     end
   end

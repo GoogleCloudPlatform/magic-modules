@@ -4,6 +4,7 @@ package google
 import (
 	"fmt"
 	"log"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -17,7 +18,7 @@ import (
 <% end -%>
 )
 
-func resourceComputeProjectDefaultNetworkTier() *schema.Resource {
+func ResourceComputeProjectDefaultNetworkTier() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeProjectDefaultNetworkTierCreateOrUpdate,
 		Read:   resourceComputeProjectDefaultNetworkTierRead,
@@ -54,8 +55,8 @@ func resourceComputeProjectDefaultNetworkTier() *schema.Resource {
 }
 
 func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceDa
 	}
 
 	log.Printf("[DEBUG] SetDefaultNetworkTier: %d (%s)", op.Id, op.SelfLink)
-	err = computeOperationWaitTime(config, op, projectID, "SetDefaultNetworkTier", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, op, projectID, "SetDefaultNetworkTier", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("SetDefaultNetworkTier failed: %s", err)
 	}
@@ -85,8 +86,8 @@ func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceDa
 }
 
 func resourceComputeProjectDefaultNetworkTierRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

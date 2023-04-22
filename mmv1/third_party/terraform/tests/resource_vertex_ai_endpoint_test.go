@@ -27,16 +27,16 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"endpoint_name": fmt.Sprint(randInt(t) % 9999999999),
+		"endpoint_name": fmt.Sprint(RandInt(t) % 9999999999),
 		"kms_key_name":  BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
-		"network_name":  BootstrapSharedTestNetwork(t, "vertex"),
-		"random_suffix": randString(t, 10),
+		"network_name":  BootstrapSharedTestNetwork(t, "vertex-ai-endpoint-update"),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckVertexAIEndpointDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIEndpoint_vertexAiEndpointNetwork(context),
@@ -45,7 +45,7 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 				ResourceName:            "google_vertex_ai_endpoint.endpoint",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "location"},
+				ImportStateVerifyIgnore: []string{"etag", "location", "region"},
 			},
 			{
 				Config: testAccVertexAIEndpoint_vertexAiEndpointNetworkUpdate(context),
@@ -54,7 +54,7 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 				ResourceName:            "google_vertex_ai_endpoint.endpoint",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "location"},
+				ImportStateVerifyIgnore: []string{"etag", "location", "region"},
 			},
 		},
 	})
@@ -67,6 +67,7 @@ resource "google_vertex_ai_endpoint" "endpoint" {
   display_name = "sample-endpoint"
   description  = "A sample vertex endpoint"
   location     = "us-central1"
+  region       = "us-central1"
   labels       = {
     label-one = "value-one"
   }
@@ -114,6 +115,7 @@ resource "google_vertex_ai_endpoint" "endpoint" {
   display_name = "new-sample-endpoint"
   description  = "An updated sample vertex endpoint"
   location     = "us-central1"
+  region       = "us-central1"
   labels       = {
     label-two = "value-two"
   }
@@ -164,7 +166,7 @@ func testAccCheckVertexAIEndpointDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{VertexAIBasePath}}projects/{{project}}/locations/{{location}}/endpoints/{{name}}")
 			if err != nil {
@@ -177,7 +179,7 @@ func testAccCheckVertexAIEndpointDestroyProducer(t *testing.T) func(s *terraform
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("VertexAIEndpoint still exists at %s", url)
 			}

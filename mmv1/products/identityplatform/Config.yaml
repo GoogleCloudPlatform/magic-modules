@@ -1,0 +1,59 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Config'
+base_url: 'projects/{{project}}/config'
+self_link: 'projects/{{project}}/config'
+create_url: 'projects/{{project}}/identityPlatform:initializeAuth'
+update_verb: :PATCH
+update_mask: true
+description: |
+  Identity Platform configuration for a Cloud project. Identity Platform is an
+  end-to-end authentication system for third-party users to access apps
+  and services.
+
+  This entity is created only once during intialization and cannot be deleted, 
+  individual Identity Providers may be disabled instead.  This resource may only
+  be created in billing-enabled projects.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/identity-platform/docs'
+  api: 'https://cloud.google.com/identity-platform/docs/reference/rest/v2/Config'
+import_format: ["projects/{{project}}/config", "projects/{{project}}", "{{project}}"]
+skip_delete: true
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "identity_platform_config_basic"
+    primary_resource_id: "default"
+    vars:
+      instance_name: "memory-cache"
+      project_id: "my-project"
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_acct: :BILLING_ACCT
+        # Resource creation race
+    skip_vcr: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      The name of the Config resource
+  - !ruby/object:Api::Type::Boolean
+    name: 'autodeleteAnonymousUsers'
+    description: |
+      Whether anonymous users will be auto-deleted after a period of 30 days

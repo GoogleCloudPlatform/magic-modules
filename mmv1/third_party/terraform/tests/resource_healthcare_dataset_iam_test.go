@@ -15,45 +15,45 @@ const DEFAULT_HEALTHCARE_TEST_LOCATION = "us-central1"
 func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 	t.Parallel()
 
-	projectId := getTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	projectId := GetTestProjectFromEnv()
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
-	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	datasetId := &healthcareDatasetId{
+	datasetId := &HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
 				Config: testAccHealthcareDatasetIamBinding_basic(account, datasetName, roleId),
-				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.datasetId(), roleId, []string{
+				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.DatasetId(), roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				}),
 			},
 			{
 				ResourceName:      "google_healthcare_dataset_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s %s", datasetId.terraformId(), roleId),
+				ImportStateId:     fmt.Sprintf("%s %s", datasetId.TerraformId(), roleId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				// Test Iam Binding update
 				Config: testAccHealthcareDatasetIamBinding_update(account, datasetName, roleId),
-				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.datasetId(), roleId, []string{
+				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.DatasetId(), roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 					fmt.Sprintf("serviceAccount:%s-2@%s.iam.gserviceaccount.com", account, projectId),
 				}),
 			},
 			{
 				ResourceName:      "google_healthcare_dataset_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s %s", datasetId.terraformId(), roleId),
+				ImportStateId:     fmt.Sprintf("%s %s", datasetId.TerraformId(), roleId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -64,31 +64,31 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 func TestAccHealthcareDatasetIamMember(t *testing.T) {
 	t.Parallel()
 
-	projectId := getTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	projectId := GetTestProjectFromEnv()
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.datasetViewer"
-	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	datasetId := &healthcareDatasetId{
+	datasetId := &HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccHealthcareDatasetIamMember_basic(account, datasetName, roleId),
-				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.datasetId(), roleId, []string{
+				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.DatasetId(), roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				}),
 			},
 			{
 				ResourceName:      "google_healthcare_dataset_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", datasetId.terraformId(), roleId, account, projectId),
+				ImportStateId:     fmt.Sprintf("%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", datasetId.TerraformId(), roleId, account, projectId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -99,30 +99,30 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	projectId := getTestProjectFromEnv()
-	account := fmt.Sprintf("tf-test-%d", randInt(t))
+	projectId := GetTestProjectFromEnv()
+	account := fmt.Sprintf("tf-test-%d", RandInt(t))
 	roleId := "roles/healthcare.datasetAdmin"
-	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	datasetName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	datasetId := &healthcareDatasetId{
+	datasetId := &HealthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccHealthcareDatasetIamPolicy_basic(account, datasetName, roleId),
-				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.datasetId(), roleId, []string{
+				Check: testAccCheckGoogleHealthcareDatasetIam(t, datasetId.DatasetId(), roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				}),
 			},
 			{
 				ResourceName:      "google_healthcare_dataset_iam_policy.foo",
-				ImportStateId:     datasetId.terraformId(),
+				ImportStateId:     datasetId.TerraformId(),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -132,8 +132,8 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 
 func testAccCheckGoogleHealthcareDatasetIam(t *testing.T, datasetId, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
-		p, err := config.NewHealthcareClient(config.userAgent).Projects.Locations.Datasets.GetIamPolicy(datasetId).Do()
+		config := GoogleProviderConfig(t)
+		p, err := config.NewHealthcareClient(config.UserAgent).Projects.Locations.Datasets.GetIamPolicy(datasetId).Do()
 		if err != nil {
 			return err
 		}

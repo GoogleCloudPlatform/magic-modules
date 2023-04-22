@@ -13,13 +13,13 @@ wrappedReq := map[string]interface{}{
 	"networkEndpoints": []interface{}{endpointObj},
 }
 
-attachUrl, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/global/networkEndpointGroups/{{name}}/attachNetworkEndpoints")
+attachUrl, err := ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/global/networkEndpointGroups/{{name}}/attachNetworkEndpoints")
 if err != nil {
 	return err
 }
 
 log.Printf("[DEBUG] Creating new GlobalNetworkEndpoint: %#v", wrappedReq)
-_, err = sendRequestWithTimeout(config, "POST", project, attachUrl, userAgent, wrappedReq, d.Timeout(schema.TimeoutCreate))
+_, err = SendRequestWithTimeout(config, "POST", project, attachUrl, userAgent, wrappedReq, d.Timeout(schema.TimeoutCreate))
 if err != nil {
 	return fmt.Errorf("Error creating GlobalNetworkEndpoint: %s", err)
 }
