@@ -33,7 +33,7 @@ output "avaialble_tiers" {
 
 The following arguments are supported:
 
-* `project` - (Optional) Project ID of the project for which to list tiers. If `project` is not provided, the provider project is used.
+* `project` - (Optional) The Project ID for which to list tiers. If `project` is not provided, the project defined within the default provider configuration is used.
 
 ## Attributes Reference
 
