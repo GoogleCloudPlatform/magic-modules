@@ -1,0 +1,167 @@
+<% autogen_exception -%>
+
+package acctest
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"math/rand"
+	"net/http"
+	"os"
+	"path/filepath"
+	"reflect"
+	"regexp"
+	"strconv"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google"
+	"github.com/hashicorp/terraform-provider-google/google/acctest_helper"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/dnaeon/go-vcr/recorder"
+
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"google.golang.org/api/cloudbilling/v1"
+	"google.golang.org/api/cloudresourcemanager/v1"
+)
+
+var sourcesLock = sync.RWMutex{}
+
+var fwProviders map[string]*frameworkTestProvider
+
+var sources map[string]VcrSource
+
+var TestAccProviders map[string]*schema.Provider
+var testAccProvider *schema.Provider
+
+func init() {
+	fwProviders = make(map[string]*frameworkTestProvider)
+	sources = make(map[string]VcrSource)
+	testAccProvider = google.Provider()
+	TestAccProviders = map[string]*schema.Provider{
+		"google": testAccProvider,
+	}
+}
+
+func GoogleProviderConfig(t *testing.T) *transport_tpg.Config {
+	acctest_helper.ConfigsLock.RLock()
+	config, ok := acctest_helper.Configs[t.Name()]
+	acctest_helper.ConfigsLock.RUnlock()
+	if ok {
+		return config
+	}
+
+	sdkProvider := google.Provider()
+	rc := terraform.ResourceConfig{}
+	sdkProvider.Configure(context.Background(), &rc)
+	return sdkProvider.Meta().(*transport_tpg.Config)
+}
+
+// MuxedProviders returns the correct test provider (between the sdk version or the framework version)
+func MuxedProviders(testName string) (func() tfprotov5.ProviderServer, error) {
+	ctx := context.Background()
+
+	providers := []func() tfprotov5.ProviderServer{
+		providerserver.NewProtocol5(NewFrameworkTestProvider(testName)), // framework provider
+		acctest_helper.GetSDKProvider(testName).GRPCProvider,                           // sdk provider
+	}
+
+	muxServer, err := tf5muxserver.NewMuxServer(ctx, providers...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return muxServer.ProviderServer, nil
+}
+
+// ProtoV5ProviderFactories returns a muxed ProviderServer that uses the provider code from this repo (SDK and plugin-framework).
+// Used to set ProtoV5ProviderFactories in a resource.TestStep within an acceptance test.
+func ProtoV5ProviderFactories(t *testing.T) map[string]func() (tfprotov5.ProviderServer, error) {
+	return map[string]func() (tfprotov5.ProviderServer, error){
+		"google": func() (tfprotov5.ProviderServer, error) {
+			provider, err := MuxedProviders(t.Name())
+			return provider(), err
+		},
+	}
+}
+
+// ProtoV5ProviderBetaFactories returns the same as ProtoV5ProviderFactories only the provider is mapped with
+// "google-beta" to ensure that registry examples use `google-beta` if the example is versioned as beta;
+// normal beta tests should continue to use ProtoV5ProviderFactories
+func ProtoV5ProviderBetaFactories(t *testing.T) map[string]func() (tfprotov5.ProviderServer, error) {
+	return map[string]func() (tfprotov5.ProviderServer, error){
+<%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
+<% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
+		"google-<%= aliased_version -%>": func() (tfprotov5.ProviderServer, error) {
+			provider, err := MuxedProviders(t.Name())
+			return provider(), err
+		},
+<% end -%>
+	}
+}
+
+// MuxedProviders configures the providers, thus, if we want the providers to be configured
+// to use VCR, the configure functions need to be altered. The only way to do this is to create
+// test versions of the provider that will call the same configure function, only append the VCR
+// configuration to it.
+
+func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
+	return &frameworkTestProvider{
+		FrameworkProvider: google.FrameworkProvider{
+			version: "test",
+		},
+		TestName: testName,
+	}
+}
+
+// frameworkTestProvider is a test version of the plugin-framework version of the provider
+// that embeds FrameworkProvider whose configure function we can use
+// the Configure function is overwritten in the framework_provider_test file
+type frameworkTestProvider struct {
+	FrameworkProvider google.FrameworkProvider
+	TestName          string
+}
+
+// Configure is here to overwrite the FrameworkProvider configure function for VCR testing
+func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	p.FrameworkProvider.Configure(ctx, req, resp)
+	if isVcrEnabled() {
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		var diags fwDiags.Diagnostics
+		p.PollInterval, p.client.Transport, diags = acctest_helper.HandleVCRConfiguration(ctx, p.TestName, p.client.Transport, p.PollInterval)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+
+		ConfigsLock.Lock()
+		fwProviders[p.TestName] = p
+		ConfigsLock.Unlock()
+		return
+	} else {
+		tflog.Debug(ctx, "VCR_PATH or VCR_MODE not set, skipping VCR")
+	}
+}

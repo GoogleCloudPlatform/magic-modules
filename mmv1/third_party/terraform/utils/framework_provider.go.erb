@@ -23,7 +23,7 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces
 var (
-    _ provider.ProviderWithMetaSchema = &frameworkProvider{}
+    _ provider.ProviderWithMetaSchema = &FrameworkProvider{}
 
     defaultClientScopes = []string{
         "https://www.googleapis.com/auth/cloud-platform",
@@ -33,18 +33,18 @@ var (
 
 // New is a helper function to simplify provider server and testing implementation.
 func New(version string) provider.ProviderWithMetaSchema {
-    return &frameworkProvider{
-        version: version,
+    return &FrameworkProvider{
+        Version: version,
     }
 }
 
-// frameworkProvider is the provider implementation.
-type frameworkProvider struct {
+// FrameworkProvider is the provider implementation.
+type FrameworkProvider struct {
     billingProject types.String
-    client *http.Client
+    Client *http.Client
     context context.Context
     gRPCLoggingOptions []option.ClientOption
-    pollInterval time.Duration
+    PollInterval time.Duration
     project types.String
     region types.String
     zone types.String
@@ -54,7 +54,7 @@ type frameworkProvider struct {
     tokenSource oauth2.TokenSource
     userAgent string
     userProjectOverride bool
-    version string
+    Version string
 
     // paths for client setup
     <% products.each do |product| -%>
@@ -63,13 +63,13 @@ type frameworkProvider struct {
 }
 
 // Metadata returns the provider type name.
-func (p *frameworkProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (p *FrameworkProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
     resp.TypeName = "google"
-    resp.Version = p.version
+    resp.Version = p.Version
 }
 
 // MetaSchema returns the provider meta schema.
-func (p *frameworkProvider) MetaSchema(_ context.Context, _ provider.MetaSchemaRequest, resp *provider.MetaSchemaResponse) {
+func (p *FrameworkProvider) MetaSchema(_ context.Context, _ provider.MetaSchemaRequest, resp *provider.MetaSchemaResponse) {
     resp.Schema = metaschema.Schema{
         Attributes: map[string]metaschema.Attribute{
             "module_name": metaschema.StringAttribute{
@@ -80,7 +80,7 @@ func (p *frameworkProvider) MetaSchema(_ context.Context, _ provider.MetaSchemaR
 }
 
 // Schema defines the provider-level schema for configuration data.
-func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
     resp.Schema = schema.Schema{
         Attributes: map[string]schema.Attribute{
             "credentials": schema.StringAttribute{
@@ -244,7 +244,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
 }
 
 // Configure prepares an API client for data sources and resources.
-func (p *frameworkProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+func (p *FrameworkProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
     var data ProviderModel
 
     resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -266,7 +266,7 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
 
 
 // DataSources defines the data sources implemented in the provider.
-func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {
     return []func() datasource.DataSource{
         NewGoogleClientConfigDataSource,
         NewGoogleClientOpenIDUserinfoDataSource,
@@ -282,6 +282,6 @@ func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.D
 }
 
 // Resources defines the resources implemented in the provider.
-func (p *frameworkProvider) Resources(_ context.Context) []func() resource.Resource {
+func (p *FrameworkProvider) Resources(_ context.Context) []func() resource.Resource {
     return nil
 }

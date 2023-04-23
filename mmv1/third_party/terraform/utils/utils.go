@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest_helper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
@@ -272,7 +272,7 @@ func mergeSchemas(a, b map[string]*schema.Schema) map[string]*schema.Schema {
 }
 
 func StringToFixed64(v string) (int64, error) {
-	return strconv.ParseInt(v, 10, 64)
+	return acctest_helper.StringToFixed64(v)
 }
 
 func extractFirstMapConfig(m []interface{}) map[string]interface{} {

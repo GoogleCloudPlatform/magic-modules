@@ -1,4 +1,4 @@
-package google
+package acctest_helper
 
 import (
 	"bytes"
@@ -25,24 +25,28 @@ import (
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var configsLock = sync.RWMutex{}
-var sourcesLock = sync.RWMutex{}
-
-var configs map[string]*transport_tpg.Config
 var fwProviders map[string]*frameworkTestProvider
 
+var ConfigsLock = sync.RWMutex{}
+var sourcesLock = sync.RWMutex{}
+
+var Configs map[string]*transport_tpg.Config
+
 var sources map[string]VcrSource
+
+func init() {
+	Configs = make(map[string]*transport_tpg.Config)
+	sources = make(map[string]VcrSource)
+}
 
 // VcrSource is a source for a given VCR test with the value that seeded it
 type VcrSource struct {
@@ -148,9 +152,9 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 
 // We need to explicitly close the VCR recorder to save the cassette
 func closeRecorder(t *testing.T) {
-	configsLock.RLock()
-	config, ok := configs[t.Name()]
-	configsLock.RUnlock()
+	ConfigsLock.RLock()
+	config, ok := Configs[t.Name()]
+	ConfigsLock.RUnlock()
 	if ok {
 		// We did not cache the config if it does not use VCR
 		if !t.Failed() && isVcrEnabled() {
@@ -172,18 +176,18 @@ func closeRecorder(t *testing.T) {
 			}
 		}
 		// Clean up test config
-		configsLock.Lock()
-		delete(configs, t.Name())
-		configsLock.Unlock()
+		ConfigsLock.Lock()
+		delete(Configs, t.Name())
+		ConfigsLock.Unlock()
 
 		sourcesLock.Lock()
 		delete(sources, t.Name())
 		sourcesLock.Unlock()
 	}
 
-	configsLock.RLock()
+	ConfigsLock.RLock()
 	fwProvider, fwOk := fwProviders[t.Name()]
-	configsLock.RUnlock()
+	ConfigsLock.RUnlock()
 	if fwOk {
 		// We did not cache the config if it does not use VCR
 		if !t.Failed() && isVcrEnabled() {
@@ -205,9 +209,9 @@ func closeRecorder(t *testing.T) {
 			}
 		}
 		// Clean up test config
-		configsLock.Lock()
+		ConfigsLock.Lock()
 		delete(fwProviders, t.Name())
-		configsLock.Unlock()
+		ConfigsLock.Unlock()
 
 		sourcesLock.Lock()
 		delete(sources, t.Name())
@@ -369,66 +373,6 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 	return pollInterval, rec, diags
 }
 
-// MuxedProviders configures the providers, thus, if we want the providers to be configured
-// to use VCR, the configure functions need to be altered. The only way to do this is to create
-// test versions of the provider that will call the same configure function, only append the VCR
-// configuration to it.
-
-func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
-	return &frameworkTestProvider{
-		frameworkProvider: frameworkProvider{
-			version: "test",
-		},
-		TestName: testName,
-	}
-}
-
-// frameworkTestProvider is a test version of the plugin-framework version of the provider
-// that embeds frameworkProvider whose configure function we can use
-// the Configure function is overwritten in the framework_provider_test file
-type frameworkTestProvider struct {
-	frameworkProvider
-	TestName string
-}
-
-// Configure is here to overwrite the frameworkProvider configure function for VCR testing
-func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	p.frameworkProvider.Configure(ctx, req, resp)
-	if isVcrEnabled() {
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
-		var diags fwDiags.Diagnostics
-		p.pollInterval, p.client.Transport, diags = HandleVCRConfiguration(ctx, p.TestName, p.client.Transport, p.pollInterval)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-
-		configsLock.Lock()
-		fwProviders[p.TestName] = p
-		configsLock.Unlock()
-		return
-	} else {
-		tflog.Debug(ctx, "VCR_PATH or VCR_MODE not set, skipping VCR")
-	}
-}
-
-func configureApiClient(ctx context.Context, p *frameworkProvider, diags *fwDiags.Diagnostics) {
-	var data ProviderModel
-	var d fwDiags.Diagnostics
-
-	// Set defaults if needed - the only attribute without a default is ImpersonateServiceAccountDelegates
-	// this is a bit of a hack, but we'll just initialize it here so that it's been initialized at least
-	data.ImpersonateServiceAccountDelegates, d = types.ListValue(types.StringType, []attr.Value{})
-	diags.Append(d...)
-	if diags.HasError() {
-		return
-	}
-	p.LoadAndValidateFramework(ctx, data, "test", diags)
-}
-
 // GetSDKProvider gets the SDK provider with an overwritten configure function to be called by MuxedProviders
 func GetSDKProvider(testName string) *schema.Provider {
 	prov := Provider()
@@ -450,9 +394,9 @@ func GetSDKProvider(testName string) *schema.Provider {
 // VCR requires a single HTTP client to handle all interactions so it can record and replay responses so
 // this caches HTTP clients per test by replacing ConfigureFunc
 func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc schema.ConfigureContextFunc, testName string) (*transport_tpg.Config, diag.Diagnostics) {
-	configsLock.RLock()
-	v, ok := configs[testName]
-	configsLock.RUnlock()
+	ConfigsLock.RLock()
+	v, ok := Configs[testName]
+	ConfigsLock.RUnlock()
 	if ok {
 		return v, nil
 	}
@@ -469,8 +413,59 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 		return nil, diags
 	}
 
-	configsLock.Lock()
-	configs[testName] = config
-	configsLock.Unlock()
+	ConfigsLock.Lock()
+	Configs[testName] = config
+	ConfigsLock.Unlock()
 	return config, nil
+}
+
+// General test utils
+
+func RandString(t *testing.T, length int) string {
+	if !isVcrEnabled() {
+		return acctest.RandString(length)
+	}
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	s, err := vcrSource(t, envPath, vcrMode)
+	if err != nil {
+		// At this point we haven't created any resources, so fail fast
+		t.Fatal(err)
+	}
+
+	r := rand.New(s.source)
+	result := make([]byte, length)
+	set := "abcdefghijklmnopqrstuvwxyz012346789"
+	for i := 0; i < length; i++ {
+		result[i] = set[r.Intn(len(set))]
+	}
+	return string(result)
+}
+
+func RandInt(t *testing.T) int {
+	if !isVcrEnabled() {
+		return acctest.RandInt()
+	}
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	s, err := vcrSource(t, envPath, vcrMode)
+	if err != nil {
+		// At this point we haven't created any resources, so fail fast
+		t.Fatal(err)
+	}
+
+	return rand.New(s.source).Int()
+}
+
+func StringToFixed64(v string) (int64, error) {
+	return strconv.ParseInt(v, 10, 64)
+}
+
+// Some tests fail during VCR. One common case is race conditions when creating resources.
+// If a test config adds two fine-grained resources with the same parent it is undefined
+// which will be created first, causing VCR to fail ~50% of the time
+func SkipIfVcr(t *testing.T) {
+	if isVcrEnabled() {
+		t.Skipf("VCR enabled, skipping test: %s", t.Name())
+	}
 }

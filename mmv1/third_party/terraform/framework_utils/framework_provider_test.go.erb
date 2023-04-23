@@ -26,12 +26,26 @@ func GetFwTestProvider(t *testing.T) *frameworkTestProvider {
 
 	var diags diag.Diagnostics
 	p := NewFrameworkTestProvider(t.Name())
-	configureApiClient(context.Background(), &p.frameworkProvider, &diags)
+	configureApiClient(context.Background(), &p.FrameworkProvider, &diags)
 	if diags.HasError() {
 		log.Fatalf("%d errors when configuring test provider client: first is %s", diags.ErrorsCount(), diags.Errors()[0].Detail())
 	}
 
 	return p
+}
+
+func configureApiClient(ctx context.Context, p *google.FrameworkProvider, diags *fwDiags.Diagnostics) {
+	var data ProviderModel
+	var d fwDiags.Diagnostics
+
+	// Set defaults if needed - the only attribute without a default is ImpersonateServiceAccountDelegates
+	// this is a bit of a hack, but we'll just initialize it here so that it's been initialized at least
+	data.ImpersonateServiceAccountDelegates, d = types.ListValue(types.StringType, []attr.Value{})
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	p.LoadAndValidateFramework(ctx, data, "test", diags)
 }
 
 func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {

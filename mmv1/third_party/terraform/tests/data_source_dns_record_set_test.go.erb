@@ -88,7 +88,7 @@ func testAccCheckDnsRecordSetDestroyProducerFramework(t *testing.T) func(s *terr
 
 			p := GetFwTestProvider(t)
 
-			url, err := replaceVarsForFrameworkTest(&p.frameworkProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
+			url, err := replaceVarsForFrameworkTest(&p.FrameworkProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
 			if err != nil {
 				return err
 			}
@@ -99,7 +99,7 @@ func testAccCheckDnsRecordSetDestroyProducerFramework(t *testing.T) func(s *terr
 				billingProject = p.billingProject.String()
 			}
 
-			_, diags := sendFrameworkRequest(&p.frameworkProvider, "GET", billingProject, url, p.userAgent, nil)
+			_, diags := sendFrameworkRequest(&p.FrameworkProvider, "GET", billingProject, url, p.userAgent, nil)
 			if !diags.HasError() {
 				return fmt.Errorf("DNSResourceDnsRecordSet still exists at %s", url)
 			}
