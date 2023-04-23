@@ -29,7 +29,7 @@ func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion st
 	return ua
 }
 
-func GetCurrentUserEmailFramework(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
+func GetCurrentUserEmailFramework(p *FrameworkProvider, userAgent string, diags *diag.Diagnostics) string {
 	// When environment variables UserProjectOverride and BillingProject are set for the provider,
 	// the header X-Goog-User-Project is set for the API requests.
 	// But it causes an error when calling GetCurrUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".

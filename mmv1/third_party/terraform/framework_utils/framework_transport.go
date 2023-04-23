@@ -12,11 +12,11 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-func sendFrameworkRequest(p *frameworkProvider, method, project, rawurl, userAgent string, body map[string]interface{}, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) (map[string]interface{}, diag.Diagnostics) {
+func sendFrameworkRequest(p *FrameworkProvider, method, project, rawurl, userAgent string, body map[string]interface{}, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) (map[string]interface{}, diag.Diagnostics) {
 	return sendFrameworkRequestWithTimeout(p, method, project, rawurl, userAgent, body, DefaultRequestTimeout, errorRetryPredicates...)
 }
 
-func sendFrameworkRequestWithTimeout(p *frameworkProvider, method, project, rawurl, userAgent string, body map[string]interface{}, timeout time.Duration, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) (map[string]interface{}, diag.Diagnostics) {
+func sendFrameworkRequestWithTimeout(p *FrameworkProvider, method, project, rawurl, userAgent string, body map[string]interface{}, timeout time.Duration, errorRetryPredicates ...transport_tpg.RetryErrorPredicateFunc) (map[string]interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	reqHeaders := make(http.Header)

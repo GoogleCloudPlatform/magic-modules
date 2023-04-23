@@ -1,10 +1,11 @@
 package google
 
 import (
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"reflect"
 	"regexp"
 	"strings"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -56,7 +57,7 @@ func replaceVarsForTest(config *transport_tpg.Config, rs *terraform.ResourceStat
 
 // This function isn't a test of transport.go; instead, it is used as an alternative
 // to ReplaceVars inside tests.
-func replaceVarsForFrameworkTest(prov *frameworkProvider, rs *terraform.ResourceState, linkTmpl string) (string, error) {
+func replaceVarsForFrameworkTest(prov *FrameworkProvider, rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string
 
