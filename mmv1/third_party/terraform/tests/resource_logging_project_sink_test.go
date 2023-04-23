@@ -34,6 +34,7 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 func TestAccLoggingProjectSink_default(t *testing.T) {
 	t.Parallel()
 	sinkName := "_Default"
+	projectID := "tf-test-" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { AccTestPreCheck(t) },
@@ -41,10 +42,18 @@ func TestAccLoggingProjectSink_default(t *testing.T) {
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingProjectSink_loggingbucket(sinkName, GetTestProjectFromEnv()),
+				Config: testAccLoggingProjectSink_defaultloggingbucket(sinkName, projectID, ""),
 			},
 			{
-				ResourceName:      "google_logging_project_sink.loggingbucket",
+				ResourceName:      "google_logging_project_sink.defaultloggingbucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingProjectSink_defaultloggingbucket(sinkName, projectID, `NOT LOG_ID("externalaudit.googleapis.com/activity")`),
+			},
+			{
+				ResourceName:      "google_logging_project_sink.defaultloggingbucket",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -586,4 +595,31 @@ resource "google_logging_project_sink" "loggingbucket" {
 }
 
 `, name, project, project)
+}
+
+func testAccLoggingProjectSink_defaultloggingbucket(name, project, filter string) string {
+	if filter == "" {
+		filter = `NOT LOG_ID("externalaudit.googleapis.com/activity") 
+		AND NOT LOG_ID("cloudaudit.googleapis.com/system_event")
+		AND NOT LOG_ID("externalaudit.googleapis.com/system_event") 
+		AND NOT LOG_ID("cloudaudit.googleapis.com/access_transparency") 
+		AND NOT LOG_ID("externalaudit.googleapis.com/access_transparency")`
+	}
+
+	return fmt.Sprintf(`
+resource "google_project" "defaultloggingbucket" {
+	name        = "%s"
+	project_id  = "%s"
+}
+
+resource "google_logging_project_sink" "defaultloggingbucket" {
+  name        = "%s"
+  project     = "%s"
+  destination = "logging.googleapis.com/projects/%s/locations/global/buckets/_Default"
+  unique_writer_identity = true
+  filter =<<EOF
+  	%s
+  EOF
+}
+`, project, project, name, project, project, filter)
 }
