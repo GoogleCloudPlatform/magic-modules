@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		// The API won't remove the the field unless an empty network array is sent.
@@ -42,7 +42,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 	return transformed, nil
 }
 
-func expand<%= prefix -%><%= titlelize_property(property) -%>Networks(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>Networks(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	v = v.(*schema.Set).List()
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
@@ -65,7 +65,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>Networks(v interfac
 	return req, nil
 }
 
-func expand<%= prefix -%><%= titlelize_property(property) -%>GkeClusters(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>GkeClusters(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -87,7 +87,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>GkeClusters(v inter
 	return req, nil
 }
 
-func expand<%= prefix -%><%= titlelize_property(property) -%>NetworksNetworkUrl(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>NetworksNetworkUrl(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil || v.(string) == "" {
 		return "", nil
 	} else if strings.HasPrefix(v.(string), "https://") {
@@ -100,6 +100,6 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>NetworksNetworkUrl(
 	return ConvertSelfLinkToV1(url), nil
 }
 
-func expandDNSManagedZonePrivateVisibilityConfigGkeClustersGkeClusterName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDNSManagedZonePrivateVisibilityConfigGkeClustersGkeClusterName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

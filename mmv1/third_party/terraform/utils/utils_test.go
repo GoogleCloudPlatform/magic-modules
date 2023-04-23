@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -169,7 +170,7 @@ func TestGetProject(t *testing.T) {
 			// Arrange
 
 			// Create provider config
-			var config Config
+			var config transport_tpg.Config
 			if tc.ProviderProject != "" {
 				config.Project = tc.ProviderProject
 			}
@@ -202,6 +203,138 @@ func TestGetProject(t *testing.T) {
 	}
 }
 
+func TestGetLocation(t *testing.T) {
+	cases := map[string]struct {
+		ResourceConfig   map[string]string
+		ProviderConfig   map[string]string
+		ExpectedLocation string
+		ExpectError      bool
+	}{
+		"returns the location value set in the resource config": {
+			ResourceConfig: map[string]string{
+				"location": "resource-location",
+			},
+			ExpectedLocation: "resource-location",
+		},
+		"returned location values set as self links are not shortened": {
+			ResourceConfig: map[string]string{
+				"location": "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location",
+			},
+			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location", // No shortening takes place
+		},
+		"returns the region value set in the resource config when location is not in the schema": {
+			ResourceConfig: map[string]string{
+				"region": "resource-region",
+			},
+			ExpectedLocation: "resource-region",
+		},
+		"returned region values set as self links are not shortened": {
+			ResourceConfig: map[string]string{
+				"region": "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region",
+			},
+			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region", // No shortening takes place
+		},
+		"returns the zone value set in the resource config when neither location nor region in the schema": {
+			ResourceConfig: map[string]string{
+				"zone": "resource-zone",
+			},
+			ExpectedLocation: "resource-zone",
+		},
+		"returned zone values set as self links in the resource config ARE shortened": {
+			// Results from getLocation using getZone internally
+			// This behaviour makes sense because APIs may return a self link as the zone value
+			ResourceConfig: map[string]string{
+				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/resource-zone",
+			},
+			ExpectedLocation: "resource-zone",
+		},
+		"returns the zone value from the provider config when none of location/region/zone are set in the resource config": {
+			ProviderConfig: map[string]string{
+				"zone": "provider-zone",
+			},
+			ExpectedLocation: "provider-zone",
+		},
+		"returned zone values set as self links in the provider config are NOT shortened": {
+			// This behaviour makes sense because provider config values don't originate from APIs
+			// Users should always configure the provider with the short names of regions/zones
+			ProviderConfig: map[string]string{
+				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone",
+			},
+			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone",
+		},
+		"returns an error when only a region value is set in the the provider config and none of location/region/zone are set in the resource config": {
+			ProviderConfig: map[string]string{
+				"region": "provider-region",
+			},
+			ExpectError: true,
+		},
+		"an error is returned when none of location/region/zone are set on the resource, and neither region or zone is set on the provider": {
+			ExpectError: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Arrange
+
+			// Create provider config
+			var config transport_tpg.Config
+			if v, ok := tc.ProviderConfig["region"]; ok {
+				config.Region = v
+			}
+			if v, ok := tc.ProviderConfig["zone"]; ok {
+				config.Zone = v
+			}
+
+			// Create resource config
+			// Here use a fictional schema as example because we need to have all of
+			// location, region, and zone fields present in the schema for the test,
+			// and no real resources would contain all of these
+			fictionalSchema := map[string]*schema.Schema{
+				"location": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"region": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"zone": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			}
+			emptyConfigMap := map[string]interface{}{}
+			d := schema.TestResourceDataRaw(t, fictionalSchema, emptyConfigMap)
+
+			// Load Terraform resource config data
+			if len(tc.ResourceConfig) > 0 {
+				for k, v := range tc.ResourceConfig {
+					err := d.Set(k, v)
+					if err != nil {
+						t.Fatalf("error during test setup: %v", err)
+					}
+				}
+			}
+
+			// Act
+			location, err := getLocation(d, &config)
+
+			// Assert
+			if err != nil {
+				if tc.ExpectError {
+					return
+				}
+				t.Fatalf("unexpected error using test: %s", err)
+			}
+
+			if location != tc.ExpectedLocation {
+				t.Fatalf("incorrect location: got %s, want %s", location, tc.ExpectedLocation)
+			}
+		})
+	}
+}
+
 func TestGetZone(t *testing.T) {
 	cases := map[string]struct {
 		ResourceZone  string
@@ -214,13 +347,12 @@ func TestGetZone(t *testing.T) {
 			ProviderZone: "bar",
 			ExpectedZone: "foo",
 		},
+		"zone value from resource can be a self link": {
+			ResourceZone: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
+			ExpectedZone: "us-central1-a",
+		},
 		"zone is pulled from provider config when not set on resource": {
 			ProviderZone: "bar",
-			ExpectedZone: "bar",
-		},
-		"zone value from resource is retrieved by splitting on slashes and selecting last element": {
-			// Unclear why this is the case - documenting this behaviour in a test case
-			ResourceZone: "this/is/foo/bar",
 			ExpectedZone: "bar",
 		},
 		"error returned when zone not set on either provider or resource": {
@@ -232,7 +364,7 @@ func TestGetZone(t *testing.T) {
 			// Arrange
 
 			// Create provider config
-			var config Config
+			var config transport_tpg.Config
 			if tc.ProviderZone != "" {
 				config.Zone = tc.ProviderZone
 			}
@@ -280,6 +412,10 @@ func TestGetRegion(t *testing.T) {
 			ProviderZone:   "lol-a",
 			ExpectedRegion: "foo",
 		},
+		"region pulled from resource config can be a self link": {
+			ResourceRegion: "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1",
+			ExpectedRegion: "us-central1",
+		},
 		"region is pulled from region on provider config when region unset in resource config": {
 			ProviderRegion: "bar",
 			ProviderZone:   "lol-a",
@@ -298,7 +434,7 @@ func TestGetRegion(t *testing.T) {
 			// Arrange
 
 			// Create provider config
-			var config Config
+			var config transport_tpg.Config
 			if tc.ProviderRegion != "" {
 				config.Region = tc.ProviderRegion
 			}
@@ -622,7 +758,7 @@ func TestServiceAccountFQN(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		config := &Config{Project: tc.project}
+		config := &transport_tpg.Config{Project: tc.project}
 		d := &schema.ResourceData{}
 		serviceAccountName, err := serviceAccountFQN(tc.serviceAccount, d, config)
 		if err != nil {
@@ -690,18 +826,6 @@ func TestRetryTimeDuration_noretry(t *testing.T) {
 	if i != 1 {
 		t.Errorf("expected error function to be called exactly once, but was called %d times", i)
 	}
-}
-
-type TimeoutError struct {
-	timeout bool
-}
-
-func (e *TimeoutError) Timeout() bool {
-	return e.timeout
-}
-
-func (e *TimeoutError) Error() string {
-	return "timeout error"
 }
 
 func TestRetryTimeDuration_URLTimeoutsShouldRetry(t *testing.T) {

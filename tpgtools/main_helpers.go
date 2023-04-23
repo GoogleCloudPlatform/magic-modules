@@ -80,6 +80,10 @@ func formatSource(source *bytes.Buffer) ([]byte, error) {
 		return []byte(source.String()), err
 	}
 
+	// Replace import path based on version (beta/alpha)
+	if terraformResourceDirectory != "google" {
+		output = bytes.Replace(output, []byte("github.com/hashicorp/terraform-provider-google/google"), []byte(terraformProviderModule+"/"+terraformResourceDirectory), -1)
+	}
 	return output, nil
 }
 
