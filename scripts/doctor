@@ -44,7 +44,7 @@ else
         exitcode=1
         warn "yel" "   bundler not found. Run 'gem install bundler' to install it."
     else
-        if grep -q "Bundler version" <<< "$(bundle version)"; then
+        if grep -qi "^Bundler" <<< "$(bundle version)"; then
             warn "grn" "   found!"
         else
             warn "yel" "   wrong bundle found. You may have something incompatible overriding 'bundle'."
