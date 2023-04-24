@@ -1,10 +1,11 @@
 <% autogen_exception -%>
-package google
+package google_test
 
 import (
 	"context"
 	"errors"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"fmt"
 	"io/ioutil"
 	"regexp"
@@ -740,7 +741,7 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 	topicName := "tf-test-topic-" + RandString(t, 10)
 
 	config := BootstrapConfig(t)
-	accessToken, err := setupProjectsAndGetAccessToken(org, billing, pid, "pubsub", config)
+	accessToken, err := acctest.SetupProjectsAndGetAccessToken(org, billing, pid, "pubsub", config)
 	if err != nil {
 		t.Error(err)
 	}
@@ -781,7 +782,7 @@ func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 	pid := "tf-test-" + RandString(t, 10)
 
 	config := BootstrapConfig(t)
-	accessToken, err := setupProjectsAndGetAccessToken(org, billing, pid, "cloudkms", config)
+	accessToken, err := acctest.SetupProjectsAndGetAccessToken(org, billing, pid, "cloudkms", config)
 	if err != nil {
 		t.Error(err)
 	}

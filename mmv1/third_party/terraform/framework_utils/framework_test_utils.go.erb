@@ -51,3 +51,109 @@ func testStringValue(sPtr *string) string {
 
 	return *sPtr
 }
+
+// This function isn't a test of transport.go; instead, it is used as an alternative
+// to ReplaceVars inside tests.
+func ReplaceVarsForFrameworkTest(prov *google.FrameworkProvider, rs *terraform.ResourceState, linkTmpl string) (string, error) {
+	re := regexp.MustCompile("{{([[:word:]]+)}}")
+	var project, region, zone string
+
+	if strings.Contains(linkTmpl, "{{project}}") {
+		project = rs.Primary.Attributes["project"]
+	}
+
+	if strings.Contains(linkTmpl, "{{region}}") {
+		region = GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
+	}
+
+	if strings.Contains(linkTmpl, "{{zone}}") {
+		zone = GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
+	}
+
+	replaceFunc := func(s string) string {
+		m := re.FindStringSubmatch(s)[1]
+		if m == "project" {
+			return project
+		}
+		if m == "region" {
+			return region
+		}
+		if m == "zone" {
+			return zone
+		}
+
+		if v, ok := rs.Primary.Attributes[m]; ok {
+			return v
+		}
+
+		// Attempt to draw values from the provider
+		if f := reflect.Indirect(reflect.ValueOf(prov)).FieldByName(m); f.IsValid() {
+			return f.String()
+		}
+
+		return ""
+	}
+
+	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
+}
+
+
+// MuxedProviders configures the providers, thus, if we want the providers to be configured
+// to use VCR, the configure functions need to be altered. The only way to do this is to create
+// test versions of the provider that will call the same configure function, only append the VCR
+// configuration to it.
+
+func NewFrameworkTestProvider(testName string) *frameworkTestProvider {
+	return &frameworkTestProvider{
+		FrameworkProvider: google.FrameworkProvider{
+			version: "test",
+		},
+		TestName: testName,
+	}
+}
+
+// frameworkTestProvider is a test version of the plugin-framework version of the provider
+// that embeds google.FrameworkProvider whose configure function we can use
+// the Configure function is overwritten in the framework_provider_test file
+type frameworkTestProvider struct {
+	FrameworkProvider google.FrameworkProvider
+	TestName          string
+}
+
+// Configure is here to overwrite the FrameworkProvider configure function for VCR testing
+func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	p.FrameworkProvider.Configure(ctx, req, resp)
+	if isVcrEnabled() {
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		var diags fwDiags.Diagnostics
+		p.pollInterval, p.client.Transport, diags = HandleVCRConfiguration(ctx, p.TestName, p.client.Transport, p.pollInterval)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+
+		configsLock.Lock()
+		fwProviders[p.TestName] = p
+		configsLock.Unlock()
+		return
+	} else {
+		tflog.Debug(ctx, "VCR_PATH or VCR_MODE not set, skipping VCR")
+	}
+}
+
+func configureApiClient(ctx context.Context, p *google.FrameworkProvider, diags *fwDiags.Diagnostics) {
+	var data ProviderModel
+	var d fwDiags.Diagnostics
+
+	// Set defaults if needed - the only attribute without a default is ImpersonateServiceAccountDelegates
+	// this is a bit of a hack, but we'll just initialize it here so that it's been initialized at least
+	data.ImpersonateServiceAccountDelegates, d = types.ListValue(types.StringType, []attr.Value{})
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	p.LoadAndValidateFramework(ctx, data, "test", diags)
+}

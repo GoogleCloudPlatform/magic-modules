@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	"fmt"
+
 	"google.golang.org/api/dns/v1"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -123,11 +124,11 @@ func (d *GoogleDnsKeysDataSource) Configure(ctx context.Context, req datasource.
 		return
 	}
 
-	p, ok := req.ProviderData.(*frameworkProvider)
+	p, ok := req.ProviderData.(*transport_tpg.FrameworkProvider)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *frameworkProvider, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *FrameworkProvider, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}

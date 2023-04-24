@@ -3,7 +3,6 @@ package google
 import (
 	"context"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 
@@ -11,25 +10,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 const uaEnvVar = "TF_APPEND_USER_AGENT"
 
-func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion string) string {
-	ua := fmt.Sprintf("Terraform/%s (+https://www.terraform.io) Terraform-Plugin-SDK/%s %s/%s", tfVersion, "terraform-plugin-framework", name, provVersion)
-
-	if add := os.Getenv(uaEnvVar); add != "" {
-		add = strings.TrimSpace(add)
-		if len(add) > 0 {
-			ua += " " + add
-			tflog.Debug(ctx, fmt.Sprintf("Using modified User-Agent: %s", ua))
-		}
-	}
-
-	return ua
-}
-
-func GetCurrentUserEmailFramework(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
+func GetCurrentUserEmailFramework(p *transport_tpg.FrameworkProvider, userAgent string, diags *diag.Diagnostics) string {
 	// When environment variables UserProjectOverride and BillingProject are set for the provider,
 	// the header X-Goog-User-Project is set for the API requests.
 	// But it causes an error when calling GetCurrUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".

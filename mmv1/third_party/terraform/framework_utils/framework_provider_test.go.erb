@@ -16,24 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func GetFwTestProvider(t *testing.T) *frameworkTestProvider {
-	configsLock.RLock()
-	fwProvider, ok := fwProviders[t.Name()]
-	configsLock.RUnlock()
-	if ok {
-		return fwProvider
-	}
-
-	var diags diag.Diagnostics
-	p := NewFrameworkTestProvider(t.Name())
-	configureApiClient(context.Background(), &p.frameworkProvider, &diags)
-	if diags.HasError() {
-		log.Fatalf("%d errors when configuring test provider client: first is %s", diags.ErrorsCount(), diags.Errors()[0].Detail())
-	}
-
-	return p
-}
-
 func TestAccFrameworkProviderMeta_setModuleName(t *testing.T) {
 	// TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
 	SkipIfVcr(t)
