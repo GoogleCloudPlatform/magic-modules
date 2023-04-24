@@ -8,8 +8,6 @@ import (
 )
 
 func TestAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(t *testing.T) {
-  // VCR fails to handle batched project services
-  SkipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{}

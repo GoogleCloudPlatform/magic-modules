@@ -25,8 +25,8 @@ id_format: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_
 import_format: ["projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}"]
 taint_resource_on_failed_create: true
 timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 55
-  delete_minutes: 50
+  insert_minutes: 60
+  delete_minutes: 60
   update_minutes: 60
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -35,7 +35,6 @@ examples:
     primary_resource_id: "nodepool-basic"
     vars:
       name: "nodepool"
-      cluster_name: "cluster"
     test_env_vars:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
@@ -44,7 +43,6 @@ examples:
     primary_resource_id: "nodepool-full"
     vars:
       name: "nodepool"
-      cluster_name: "cluster"
     test_env_vars:
       project: "fake-backend-360322"
 skip_sweeper: true
