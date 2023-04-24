@@ -39,7 +39,7 @@ async: !ruby/object:Api::OpAsync
 docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
 import_format: ["projects/{{project}}/locations/{{location}}/certificates/{{name}}"]
-# id_format: "projects/{{project}}/locations/{{location}}/certificates/{{name}}"
+id_format: "projects/{{project}}/locations/{{location}}/certificates/{{name}}"
 schema_version: 1
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -63,7 +63,6 @@ examples:
       cert_name: "self-managed-cert"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_read: templates/terraform/pre_read/certificatemanager_certificate.go.erb
-  post_import: templates/terraform/post_import/certificatemanager_certificate.go.erb
   post_create: templates/terraform/post_create/certificatemanager_certificate.go.erb
   constants: templates/terraform/constants/cert_manager.erb
 parameters:
