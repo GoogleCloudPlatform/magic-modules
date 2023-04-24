@@ -35,7 +35,7 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
       ports       = ["123"]
     }
     
-    dest_address_groups = [google_compute_region_networksecurity_address_group.basic_global_networksecurity_address_group.name]
+    dest_address_groups = [google_compute_global_networksecurity_address_group.basic_global_networksecurity_address_group.name]
 
   }
 
