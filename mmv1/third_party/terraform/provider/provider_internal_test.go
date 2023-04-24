@@ -762,7 +762,7 @@ func TestProvider_providerConfigure_billingProject(t *testing.T) {
 
 			v := d.Get("billing_project")
 			val := v.(string)
-			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected billing_project value set in provider data to be %s, got %s", tc.ExpectedValue, val)
@@ -845,7 +845,7 @@ func TestProvider_providerConfigure_region(t *testing.T) {
 
 			v := d.Get("region")
 			val := v.(string)
-			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected region value set in provider data to be %s, got %s", tc.ExpectedValue, val)
@@ -947,7 +947,7 @@ func TestProvider_providerConfigure_zone(t *testing.T) {
 
 			v := d.Get("zone")
 			val := v.(string)
-			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected zone value set in provider data to be %s, got %s", tc.ExpectedValue, val)
@@ -1058,7 +1058,7 @@ func TestProvider_providerConfigure_userProjectOverride(t *testing.T) {
 
 			v := d.Get("user_project_override")
 			val := v.(bool)
-			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected user_project_override value set in provider data to be %v, got %v", tc.ExpectedValue, val)
