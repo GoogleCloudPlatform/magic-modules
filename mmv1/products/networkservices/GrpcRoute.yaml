@@ -100,40 +100,34 @@ properties:
     item_type: Api::Type::String
     description: |
           Required. Service hostnames with an optional port for which this route describes traffic.  
-    required: true
-    send_empty_value: true  
+    required: true  
   - !ruby/object:Api::Type::Array
     name: meshes
     item_type: Api::Type::String
     description: |
-          List of meshes this GrpcRoute is attached to, as one of the routing rules to route the requests served by the mesh.  
-    send_empty_value: true 
+          List of meshes this GrpcRoute is attached to, as one of the routing rules to route the requests served by the mesh.   
   - !ruby/object:Api::Type::Array
     name: gateways
     item_type: Api::Type::String
     description: |
           List of gateways this GrpcRoute is attached to, as one of the routing rules to route the requests served by the gateway.  
-    send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: rules
     description: |
           Rules that define how traffic is routed and handled.  
     required: true
-    send_empty_value: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties: 
         - !ruby/object:Api::Type::Array
           name: matches
           description: |
             Matches define conditions used for matching the rule against incoming gRPC requests.
-          send_empty_value: true
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
               - !ruby/object:Api::Type::Array
                 name: headers
                 description: |
                   Specifies a list of HTTP request headers to match against. 
-                send_empty_value: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
@@ -159,7 +153,6 @@ properties:
                 name: method
                 description: |
                   A gRPC method to match against. If this field is empty or omitted, will match all methods.
-                send_empty_value: true
                 properties:
                   - !ruby/object:Api::Type::String
                     name: grpcService
@@ -180,7 +173,6 @@ properties:
           name: action
           description: |
               Required. A detailed rule defining how to route traffic.
-          send_empty_value: true
           properties:
             - !ruby/object:Api::Type::Array
               name: destinations
@@ -238,10 +230,20 @@ properties:
               properties:
                 - !ruby/object:Api::Type::Array
                   name: retryConditions
-                  item_type: Api::Type::String
                   description: |
                     Specifies one or more conditions when this retry policy applies.
+                  item_type: !ruby/object:Api::Type::Enum
+                      name: retryCondition
+                      description: Condition when this retry policy applies.
+                      values:
+                            - :connect-failure
+                            - :refused-stream
+                            - :cancelled
+                            - :deadline-exceeded
+                            - :resource-exhausted
+                            - :unavailable
                 - !ruby/object:Api::Type::Integer
                   name: numRetries
                   description: |
                     Specifies the allowed number of retries.
+

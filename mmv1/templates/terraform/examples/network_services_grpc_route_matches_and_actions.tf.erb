@@ -36,7 +36,7 @@ resource "google_network_services_grpc_route" "<%= ctx[:primary_resource_id] %>"
        }
      }
       retry_policy {
-          retry_conditions = ["server_error"]
+          retry_conditions = ["cancelled"]
           num_retries = 1
       }
     }
