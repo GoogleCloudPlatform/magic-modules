@@ -236,6 +236,23 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
+
+      transformations {
+        info_types {
+          name = "RDC_EXAMPLE"
+        }
+        primitive_transformation {
+          replace_dictionary_config {
+            word_list {
+              words = [
+                "foo",
+                "bar",
+                "baz",
+              ]
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -268,6 +285,7 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
       transformations {
         info_types {
           name = "EMAIL_ADDRESS"
+          version = "0.1"
         }
         info_types {
           name = "LAST_NAME"
@@ -383,6 +401,25 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
             surrogate_info_type {
               name = "CUSTOM_INFO_TYPE"
               version = "version-2"
+            }
+          }
+        }
+      }
+
+      transformations {
+        info_types {
+          name = "RDC_EXAMPLE"
+        }
+        primitive_transformation {
+          replace_dictionary_config {
+            word_list {
+              words = [
+                # update list - deletion and addition
+                "foo",
+                "baz",
+                "fizz",
+                "buzz",
+              ]
             }
           }
         }
@@ -518,6 +555,14 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         }
         primitive_transformation {
           redact_config {}
+        }
+      }
+      field_transformations {
+        fields {
+          name = "unconditionally-replace-field"
+        }
+        primitive_transformation {
+          replace_with_info_type_config = false
         }
       }
       field_transformations {
@@ -774,6 +819,16 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         }
       }
 
+      field_transformations {
+        fields {
+          name = "unconditionally-replace-field"
+        }
+        primitive_transformation {
+          # update values of replace_with_info_type_config
+          replace_with_info_type_config = true
+        }
+      }
+
       # update to remove field_transformations block using redact_config
 
       field_transformations {
@@ -967,6 +1022,129 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         }
       }
 
+    }
+  }
+}
+`, context)
+}
+
+func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTransformationsUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"organization":  GetTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
+		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDeidentifyTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTransformationsBasic(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTransformationsUpdate(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_deidentify_template.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTransformationsBasic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "basic" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    image_transformations {
+      transforms {
+        redaction_color {
+          red = 0.5
+          blue = 1
+          green = 0.2
+        }
+        selected_info_types {
+          info_types {
+            name = "COLOR_INFO"
+          }
+        }
+      }
+    }
+
+    image_transformations {
+      transforms {
+        all_info_types {}
+      }
+    }
+
+    image_transformations {
+      transforms {
+        all_text {}
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_imageTransformationsUpdate(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_data_loss_prevention_deidentify_template" "basic" {
+  parent = "organizations/%{organization}"
+  description = "Description"
+  display_name = "Displayname"
+
+  deidentify_config {
+    image_transformations {
+      transforms {
+        redaction_color {
+          red = 0.3
+          blue = 0.5
+          green = 0.9
+        }
+        selected_info_types {
+          info_types {
+            name = "COLOR_INFO"
+            version = "0.1"
+          }
+        }
+      }
+    }
+
+    image_transformations {
+      transforms {
+        redaction_color {
+          red = 0.1
+          blue = 0.2
+          green = 0.9
+        }
+        all_info_types {}
+      }
+    }
+
+    image_transformations {
+      transforms {
+        redaction_color {
+          red = 0.1
+          blue = 0.2
+          green = 0.3
+        }
+        all_text {}
+      }
     }
   }
 }
