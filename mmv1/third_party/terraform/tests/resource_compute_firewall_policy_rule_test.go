@@ -121,7 +121,7 @@ resource "google_compute_firewall_policy_rule" "default" {
     dest_fqdns = []
     dest_region_codes = []
     dest_threat_intelligences = []
-    srcAddressGroups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
+    src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 `, context)
