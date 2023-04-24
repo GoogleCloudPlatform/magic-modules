@@ -23,15 +23,17 @@ var (
 		"zli82016",
 		"trodge",
 		"hao-nan-li",
-	}
-
-	// This is for new team members who are onboarding
-	trustedContributors = []string{
 		"NickElliot",
 	}
 
+	// This is for new team members who are onboarding
+	trustedContributors = []string{}
+
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
-	onVacationReviewers = []string{}
+	onVacationReviewers = []string{
+		"roaks3",
+		"shuyama1",
+	}
 )
 
 // Check if a user is team member to not request a random reviewer
