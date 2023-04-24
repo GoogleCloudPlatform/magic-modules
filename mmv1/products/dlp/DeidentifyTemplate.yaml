@@ -146,7 +146,7 @@ properties:
                         - !ruby/object:Api::Type::String
                           name: 'version'
                           description: |
-                            Version of the information type to use. By default, the version is set to stable
+                            Version name for this InfoType.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'allInfoTypes'
                   description: Apply transformation to all findings not specified in other ImageTransformation's selectedInfoTypes.
@@ -200,7 +200,7 @@ properties:
                       - !ruby/object:Api::Type::String
                         name: 'version'
                         description: |
-                          Version of the information type to use. By default, the version is set to stable
+                          Version name for this InfoType.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'primitiveTransformation'
                   required: true
@@ -567,6 +567,7 @@ properties:
                               required: true
                               description: |
                                 Words or phrases defining the dictionary. The dictionary must contain at least one phrase and every phrase must contain at least 2 characters that are letters or digits.
+                              item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'recordTransformations'
         description: Treat the dataset as structured. Transformations can be applied
@@ -1830,5 +1831,4 @@ properties:
                                           - :FRIDAY
                                           - :SATURDAY
                                           - :SUNDAY
-
-                              
+                
