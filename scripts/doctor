@@ -39,12 +39,16 @@ if [ $found -eq 0 ] || ! ruby -e "exit Gem::Version.new(RUBY_VERSION) >= Gem::Ve
 else
     warn "grn" "   found!"
 
-    count_in_path "bundler"
+    count_in_path "bundle"
     if [ $found -eq 0 ]; then
         exitcode=1
-        warn "yel" "   bundler not found. Run 'gem install bundler' to install it it."
+        warn "yel" "   bundler not found. Run 'gem install bundler' to install it."
     else
-        warn "grn" "   found!"
+        if grep -qi "^Bundler" <<< "$(bundle version)"; then
+            warn "grn" "   found!"
+        else
+            warn "yel" "   wrong bundle found. You may have something incompatible overriding 'bundle'."
+        fi
     fi
 fi
 
