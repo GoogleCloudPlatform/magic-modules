@@ -27,18 +27,22 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   allowed_iam_role: 'roles/bigquery.dataOwner'
   iam_conditions_request_type: :REQUEST_BODY
   iam_policy_version: '1'
-id_format: "{{table_id}}"
-import_format: ["projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}",
-  "{{table_id}}"]
+id_format: '{{table_id}}'
+import_format:
+  [
+    'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}',
+    '{{table_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_bigquery_table"
-    primary_resource_id: "test"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\", context[\"random_suffix\"\
+    name: 'bigquery_bigquery_table'
+    primary_resource_id: 'test'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf_test_dataset_id%s\", context[\"random_suffix\"\
       ]), fmt.Sprintf(\"tf_test_table_id%s\", context[\"random_suffix\"])"
     vars:
-      dataset_id: "dataset_id"
-      table_id: "table_id"
+      dataset_id: 'dataset_id'
+      table_id: 'table_id'
 parameters:
   # TODO(alexstephen): Remove once we have support for placing
   # nested object fields in URL
@@ -330,7 +334,8 @@ properties:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'schema'
-        description: 'The schema for the data. Schema is required for CSV and JSON
+        description:
+          'The schema for the data. Schema is required for CSV and JSON
           formats'
         properties:
           - !ruby/object:Api::Type::Array
@@ -442,7 +447,8 @@ properties:
                     properties:
                       - !ruby/object:Api::Type::Enum
                         name: 'encoding'
-                        description: The encoding of the values when the type is not
+                        description:
+                          The encoding of the values when the type is not
                           STRING
                         values:
                           - :TEXT
@@ -464,7 +470,8 @@ properties:
                         required: true
                       - !ruby/object:Api::Type::Enum
                         name: 'type'
-                        description: The type to convert the value in cells of this
+                        description:
+                          The type to convert the value in cells of this
                           column
                         values:
                           - :BYTES
@@ -488,7 +495,8 @@ properties:
                     exposed for all columns in this column family
                 - !ruby/object:Api::Type::Enum
                   name: 'type'
-                  description: The type to convert the value in cells of this column
+                  description:
+                    The type to convert the value in cells of this column
                     family
                   values:
                     - :BYTES

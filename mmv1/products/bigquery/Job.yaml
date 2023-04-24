@@ -24,8 +24,13 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'BigQuery Jobs Intro': 'https://cloud.google.com/bigquery/docs/jobs-overview'
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs'
-import_format: ["projects/{{project}}/jobs/{{job_id}}/location/{{location}}", "projects/{{project}}/jobs/{{job_id}}",
-  "{{project}}/{{job_id}}", "{{job_id}}"]
+import_format:
+  [
+    'projects/{{project}}/jobs/{{job_id}}/location/{{location}}',
+    'projects/{{project}}/jobs/{{job_id}}',
+    '{{project}}/{{job_id}}',
+    '{{job_id}}',
+  ]
 skip_delete: true
 id_format: projects/{{project}}/jobs/{{job_id}}
 async: !ruby/object:Provider::Terraform::PollAsync
@@ -33,104 +38,104 @@ async: !ruby/object:Provider::Terraform::PollAsync
   actions: ['create']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_query"
-    primary_resource_id: "job"
+    name: 'bigquery_job_query'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_query"
-      account_name: "bqowner"
+      job_id: 'job_query'
+      account_name: 'bqowner'
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_query_table_reference"
-    primary_resource_id: "job"
+    name: 'bigquery_job_query_table_reference'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_query"
-      account_name: "bqowner"
+      job_id: 'job_query'
+      account_name: 'bqowner'
     ignore_read_extra:
-      - "etag"
-      - "query.0.default_dataset.0.dataset_id"
-      - "query.0.destination_table.0.table_id"
-      - "status.0.state"
+      - 'etag'
+      - 'query.0.default_dataset.0.dataset_id'
+      - 'query.0.destination_table.0.table_id'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_load"
-    primary_resource_id: "job"
+    name: 'bigquery_job_load'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_load"
+      job_id: 'job_load'
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_load_geojson"
-    primary_resource_id: "job"
+    name: 'bigquery_job_load_geojson'
+    primary_resource_id: 'job'
     vars:
       job_id: "job_load"
       bucket_name: "bq-geojson" # Keep small(er) to avoid downstream acctest having too-long a bucket name
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_load_table_reference"
-    primary_resource_id: "job"
+    name: 'bigquery_job_load_table_reference'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_load"
+      job_id: 'job_load'
     ignore_read_extra:
-      - "etag"
-      - "load.0.destination_table.0.table_id"
-      - "status.0.state"
-    skip_docs: true      # there are a lot of examples for this resource, so omitting some that are similar to others
+      - 'etag'
+      - 'load.0.destination_table.0.table_id'
+      - 'status.0.state'
+    skip_docs: true # there are a lot of examples for this resource, so omitting some that are similar to others
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_copy"
-    primary_resource_id: "job"
+    name: 'bigquery_job_copy'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_copy"
-      account_name: "bqowner"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      job_id: 'job_copy'
+      account_name: 'bqowner'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_copy_table_reference"
-    primary_resource_id: "job"
+    name: 'bigquery_job_copy_table_reference'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_copy"
-      account_name: "bqowner"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      job_id: 'job_copy'
+      account_name: 'bqowner'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
-      - "etag"
-      - "copy.0.destination_table.0.table_id"
-      - "copy.0.source_tables.0.table_id"
-      - "copy.0.source_tables.1.table_id"
-      - "status.0.state"
-    skip_docs: true      # there are a lot of examples for this resource, so omitting some that are similar to others
+      - 'etag'
+      - 'copy.0.destination_table.0.table_id'
+      - 'copy.0.source_tables.0.table_id'
+      - 'copy.0.source_tables.1.table_id'
+      - 'status.0.state'
+    skip_docs: true # there are a lot of examples for this resource, so omitting some that are similar to others
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_extract"
-    primary_resource_id: "job"
+    name: 'bigquery_job_extract'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_extract"
-      account_name: "bqowner"
+      job_id: 'job_extract'
+      account_name: 'bqowner'
     ignore_read_extra:
-      - "etag"
-      - "status.0.state"
+      - 'etag'
+      - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_job_extract_table_reference"
-    primary_resource_id: "job"
+    name: 'bigquery_job_extract_table_reference'
+    primary_resource_id: 'job'
     vars:
-      job_id: "job_extract"
-      account_name: "bqowner"
+      job_id: 'job_extract'
+      account_name: 'bqowner'
     ignore_read_extra:
-      - "etag"
-      - "extract.0.source_table.0.table_id"
-      - "status.0.state"
-    skip_docs: true      # there are a lot of examples for this resource, so omitting some that are similar to others
+      - 'etag'
+      - 'extract.0.source_table.0.table_id'
+      - 'status.0.state'
+    skip_docs: true # there are a lot of examples for this resource, so omitting some that are similar to others
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_job.go
   encoder: templates/terraform/encoders/bigquery_job.go.erb
@@ -216,7 +221,8 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'resourceUri'
-                  description: 'A code resource to load from a Google Cloud Storage
+                  description:
+                    'A code resource to load from a Google Cloud Storage
                     URI (gs://bucket/path).'
                   # TODO (mbang): exactly_one_of: resourceUri, inlineCode
                 - !ruby/object:Api::Type::String
@@ -357,7 +363,8 @@ properties:
                   - configuration.0.query.0.script_options.0.key_result_statement
               - !ruby/object:Api::Type::String
                 name: 'statementByteBudget'
-                description: 'Limit on the number of bytes billed per statement. Exceeding
+                description:
+                  'Limit on the number of bytes billed per statement. Exceeding
                   this budget results in an error.'
                 at_least_one_of:
                   - configuration.0.query.0.script_options.0.statement_timeout_ms

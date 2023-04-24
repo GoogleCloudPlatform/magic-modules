@@ -112,7 +112,6 @@ examples:
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "cloud_run_service_probes"
-    min_version: beta
     primary_resource_id: "default"
     vars:
       cloud_run_service_name: "cloudrun-srv"
@@ -518,7 +517,6 @@ properties:
                               This must match the Name of a Volume.
                     - !ruby/object:Api::Type::NestedObject
                       name: startupProbe
-                      min_version: beta
                       description: |-
                         Startup probe of application within the container.
                         All other probes are disabled if a startup probe is provided, until it
@@ -632,7 +630,6 @@ properties:
                                 If this is not specified, the default behavior is defined by gRPC.
                     - !ruby/object:Api::Type::NestedObject
                       name: livenessProbe
-                      min_version: beta
                       description: |-
                         Periodic probe of container liveness. Container will be restarted if the probe fails.
                       properties:
