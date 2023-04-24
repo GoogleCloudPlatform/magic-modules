@@ -1,6 +1,6 @@
 <% autogen_exception -%>
 package google
-<% if version == 'beta' -%>
+<% unless version == 'ga' -%>
 import (
 	"encoding/json"
 	"fmt"
