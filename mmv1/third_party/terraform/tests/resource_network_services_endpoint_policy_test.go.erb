@@ -75,7 +75,7 @@ resource "google_network_services_endpoint_policy" "foobar" {
   description            = "update description"
   type                   = "GRPC_SERVER"
   traffic_port_selector {
-    ports = ["8081"]
+    ports = []
   }
   endpoint_matcher {
     metadata_label_matcher {
