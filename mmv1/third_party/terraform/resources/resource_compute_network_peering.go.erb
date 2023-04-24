@@ -110,9 +110,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateEnum([]string{"IPV4_ONLY", "IPV4_IPV6", ""}),
-				Description: `Which IP version(s) of traffic and routes are allowed to be imported or exported between peer networks. The default value is IPV4_ONLY. 
-				Default value: "IPV4_ONLY" 
-				Possible values: ["IPV4_ONLY", "IPV4_IPV6"]`,
+				Description: `Which IP version(s) of traffic and routes are allowed to be imported or exported between peer networks. The default value is IPV4_ONLY. Possible values: ["IPV4_ONLY", "IPV4_IPV6"]`,
 				Default: "IPV4_ONLY",
 			},
 		},
