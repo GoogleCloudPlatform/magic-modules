@@ -118,6 +118,9 @@ resource "google_compute_firewall_policy_rule" "default" {
       ports = [80, 8080]
     }
     dest_ip_ranges = ["11.100.0.1/32"]
+    dest_fqdns = []
+    dest_region_codes = []
+    dest_threat_intelligences = []
     srcAddressGroups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
@@ -183,6 +186,9 @@ resource "google_compute_firewall_policy_rule" "default" {
       ports = [22]
     }
     dest_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    dest_fqdns = ["google.com"]
+    dest_region_codes = ["US"]
+    dest_threat_intelligences = ["iplist-known-malicious-ips"]
     src_address_groups = []
     dest_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
@@ -237,6 +243,9 @@ resource "google_compute_firewall_policy_rule" "default" {
       ports = [22]
     }
     src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    src_fqdns = ["google.com"]
+    src_region_codes = ["US"]
+    src_threat_intelligences = ["iplist-known-malicious-ips"]
   }
   target_resources = [google_compute_network.network1.self_link]
   target_service_accounts = [google_service_account.service_account.email, google_service_account.service_account2.email]
@@ -327,6 +336,9 @@ resource "google_compute_firewall_policy_rule" "rule1" {
       ports = [80, 8080]
     }
     dest_ip_ranges = ["11.100.0.1/32"]
+    dest_fqdns = ["google.com"]
+    dest_region_codes = ["US"]
+    dest_threat_intelligences = ["iplist-known-malicious-ips"]
     dest_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
@@ -348,6 +360,9 @@ resource "google_compute_firewall_policy_rule" "rule2" {
       ip_protocol = "all"
     }
     src_ip_ranges = ["11.100.0.1/32"]
+    src_fqdns = ["google.com"]
+    src_region_codes = ["US"]
+    src_threat_intelligences = ["iplist-known-malicious-ips"]
     src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
@@ -390,6 +405,9 @@ resource "google_compute_firewall_policy_rule" "rule1" {
       ip_protocol = "tcp"
     }
     dest_ip_ranges = ["11.100.0.1/32"]
+    dest_fqdns = ["google.com"]
+    dest_region_codes = ["US"]
+    dest_threat_intelligences = ["iplist-known-malicious-ips"]
     dest_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
@@ -411,6 +429,9 @@ resource "google_compute_firewall_policy_rule" "rule2" {
       ip_protocol = "all"
     }
     src_ip_ranges = ["11.100.0.1/32"]
+    src_fqdns = ["google.com"]
+    src_region_codes = ["US"]
+    src_threat_intelligences = ["iplist-known-malicious-ips"]
     src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
@@ -429,6 +450,9 @@ resource "google_compute_firewall_policy_rule" "rule3" {
       ports = [8000]
     }
     src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    src_fqdns = ["google.com"]
+    src_region_codes = ["US"]
+    src_threat_intelligences = ["iplist-known-malicious-ips"]
     src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
@@ -462,6 +486,9 @@ resource "google_compute_firewall_policy_rule" "rule1" {
       ports = [80, 8080]
     }
     dest_ip_ranges = ["11.100.0.1/32"]
+    dest_fqdns = ["google.com"]
+    dest_region_codes = ["US"]
+    dest_threat_intelligences = ["iplist-known-malicious-ips"]
   }
 }
 
@@ -479,6 +506,9 @@ resource "google_compute_firewall_policy_rule" "rule3" {
       ports = [8000]
     }
     src_ip_ranges = ["11.100.0.1/32", "10.0.0.0/24"]
+    src_fqdns = ["google.com"]
+    src_region_codes = ["US"]
+    src_threat_intelligences = ["iplist-known-malicious-ips"]
   }
 }
 `, context)

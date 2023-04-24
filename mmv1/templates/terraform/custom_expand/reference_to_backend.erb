@@ -25,7 +25,7 @@
   #      bar/baz -> https://compute.googleapis.com/v1/projects/provider-project/regions/bar/backendServices/baz
   #      foo/bar/baz -> https://compute.googleapis.com/v1/projects/foo/regions/bar/backendServices/baz
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   // This method returns a full self link from whatever the input is.
   if v == nil || v.(string) == "" {
     // It does not try to construct anything from empty.

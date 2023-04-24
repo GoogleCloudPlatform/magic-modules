@@ -14,7 +14,7 @@
 -%>
 // KmsKeyName switched from using a key name to a key version, this will separate the key name from the key version and save them
 // separately in state.  https://github.com/hashicorp/terraform-provider-google/issues/9208
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return []map[string]interface{}{}
 	}

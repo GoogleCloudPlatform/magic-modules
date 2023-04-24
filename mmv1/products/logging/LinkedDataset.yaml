@@ -126,13 +126,15 @@ examples:
     name: "logging_linked_dataset_basic"
     primary_resource_id: "logging_linked_dataset"
     vars:
-      bucket_id: "mybucket"
+      bucket_id: "my-bucket"
+      link_id: "mylink"
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: "logging_linked_dataset_all_params"
     primary_resource_id: "logging_linked_dataset"
     vars:
-      bucket_id: "mybucket"
+      bucket_id: "my-bucket"
+      link_id: "mylink"
     test_env_vars:
       project: :PROJECT_NAME
