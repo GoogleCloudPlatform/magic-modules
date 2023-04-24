@@ -4,6 +4,7 @@ package google
 import (
 	"context"
 	"errors"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"fmt"
 	"io/ioutil"
@@ -124,7 +125,7 @@ func setupSDKProviderConfigTest(t *testing.T, configValues map[string]interface{
 
 	// Unset any ENVs in the test environment here
 	// The testing package restores the original values afterwards
-	envs := providerConfigEnvNames()
+	envs := acctest.ProviderConfigEnvNames()
 	if len(envs) > 0 {
 		for _, k := range envs {
 			t.Setenv(k, "")

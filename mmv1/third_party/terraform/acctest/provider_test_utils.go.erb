@@ -1,96 +1,155 @@
 <% autogen_exception -%>
-package google
+package acctest
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-const TestEnvVar = acctest.TestEnvVar
+const TestEnvVar = "TF_ACC"
 
-var TestAccProviders map[string]*schema.Provider
-var testAccProvider *schema.Provider
+// ProviderConfigEnvNames returns a list of all the environment variables that could be set by a user to configure the provider
+func ProviderConfigEnvNames() []string {
 
-// providerConfigEnvNames returns a list of all the environment variables that could be set by a user to configure the provider
-func providerConfigEnvNames() []string {
-	return acctest.ProviderConfigEnvNames()
+	envs := []string{}
+
+	// Use existing collections of ENV names
+	envVarsSets := [][]string{
+		CredsEnvVars,   // credentials field
+		ProjectEnvVars, // project field
+		RegionEnvVars,  //region field
+		ZoneEnvVars,    // zone field
+	}
+	for _, set := range envVarsSets {
+		envs = append(envs, set...)
+	}
+
+	// Add remaining ENVs
+	envs = append(envs, "GOOGLE_OAUTH_ACCESS_TOKEN")          // access_token field 
+	envs = append(envs, "GOOGLE_BILLING_PROJECT")             // billing_project field 
+	envs = append(envs, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") // impersonate_service_account field
+	envs = append(envs, "USER_PROJECT_OVERRIDE")              // user_project_override field
+	envs = append(envs, "CLOUDSDK_CORE_REQUEST_REASON")       // request_reason field
+
+	return envs
 }
 
-var CredsEnvVars = acctest.CredsEnvVars
+var CredsEnvVars = []string{
+	"GOOGLE_CREDENTIALS",
+	"GOOGLE_CLOUD_KEYFILE_JSON",
+	"GCLOUD_KEYFILE_JSON",
+	"GOOGLE_APPLICATION_CREDENTIALS",
+	"GOOGLE_USE_DEFAULT_CREDENTIALS",
+}
 
-var projectNumberEnvVars = acctest.ProjectNumberEnvVars
+var ProjectNumberEnvVars = []string{
+	"GOOGLE_PROJECT_NUMBER",
+}
 
-var ProjectEnvVars = acctest.ProjectEnvVars
+var ProjectEnvVars = []string{
+	"GOOGLE_PROJECT",
+	"GCLOUD_PROJECT",
+	"CLOUDSDK_CORE_PROJECT",
+}
 
-var firestoreProjectEnvVars = acctest.FirestoreProjectEnvVars
+var FirestoreProjectEnvVars = []string{
+	"GOOGLE_FIRESTORE_PROJECT",
+}
 
-var regionEnvVars = acctest.RegionEnvVars
+var RegionEnvVars = []string{
+	"GOOGLE_REGION",
+	"GCLOUD_REGION",
+	"CLOUDSDK_COMPUTE_REGION",
+}
 
-var zoneEnvVars = acctest.ZoneEnvVars
+var ZoneEnvVars = []string{
+	"GOOGLE_ZONE",
+	"GCLOUD_ZONE",
+	"CLOUDSDK_COMPUTE_ZONE",
+}
 
-var orgEnvVars = acctest.OrgEnvVars
+var OrgEnvVars = []string{
+	"GOOGLE_ORG",
+}
 
 // This value is the Customer ID of the GOOGLE_ORG_DOMAIN workspace.
 // See https://admin.google.com/ac/accountsettings when logged into an org admin for the value.
-var custIdEnvVars = acctest.CustIdEnvVars
+var CustIdEnvVars = []string{
+	"GOOGLE_CUST_ID",
+}
 
 // This value is the username of an identity account within the GOOGLE_ORG_DOMAIN workspace.
 // For example in the org example.com with a user "foo@example.com", this would be set to "foo".
 // See https://admin.google.com/ac/users when logged into an org admin for a list.
-var identityUserEnvVars = acctest.IdentityUserEnvVars
+var IdentityUserEnvVars = []string{
+	"GOOGLE_IDENTITY_USER",
+}
 
-var orgEnvDomainVars = acctest.OrgEnvDomainVars
+var OrgEnvDomainVars = []string{
+	"GOOGLE_ORG_DOMAIN",
+}
 
-var serviceAccountEnvVars = acctest.ServiceAccountEnvVars
+var ServiceAccountEnvVars = []string{
+	"GOOGLE_SERVICE_ACCOUNT",
+}
 
-var orgTargetEnvVars = acctest.OrgTargetEnvVars
+var OrgTargetEnvVars = []string{
+	"GOOGLE_ORG_2",
+}
 
 // This is the billing account that will be charged for the infrastructure used during testing. For
 // that reason, it is also the billing account used for creating new projects.
-var billingAccountEnvVars = acctest.BillingAccountEnvVars
+var BillingAccountEnvVars = []string{
+	"GOOGLE_BILLING_ACCOUNT",
+}
 
 // This is the billing account that will be modified to test billing-related functionality. It is
 // expected to have more permissions granted to the test user and support subaccounts.
-var masterBillingAccountEnvVars = acctest.MasterBillingAccountEnvVars
+var MasterBillingAccountEnvVars = []string{
+	"GOOGLE_MASTER_BILLING_ACCOUNT",
+}
 
 // This value is the description used for test PublicAdvertisedPrefix setup to avoid required DNS
 // setup. This is only used during integration tests and would be invalid to surface to users
-var papDescriptionEnvVars = acctest.PapDescriptionEnvVars
-
-func init() {
-	configs = make(map[string]*transport_tpg.Config)
-	fwProviders = make(map[string]*frameworkTestProvider)
-	sources = make(map[string]VcrSource)
-	testAccProvider = Provider()
-	TestAccProviders = map[string]*schema.Provider{
-		"google": testAccProvider,
-	}
-}
-
-func GoogleProviderConfig(t *testing.T) *transport_tpg.Config {
-	configsLock.RLock()
-	config, ok := configs[t.Name()]
-	configsLock.RUnlock()
-	if ok {
-		return config
-	}
-
-	sdkProvider := Provider()
-	rc := terraform.ResourceConfig{}
-	sdkProvider.Configure(context.Background(), &rc)
-	return sdkProvider.Meta().(*transport_tpg.Config)
+var PapDescriptionEnvVars = []string{
+	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 }
 
 func AccTestPreCheck(t *testing.T) {
-	acctest.AccTestPreCheck(t)
+	if v := os.Getenv("GOOGLE_CREDENTIALS_FILE"); v != "" {
+		creds, err := ioutil.ReadFile(v)
+		if err != nil {
+			t.Fatalf("Error reading GOOGLE_CREDENTIALS_FILE path: %s", err)
+		}
+		os.Setenv("GOOGLE_CREDENTIALS", string(creds))
+	}
+
+	if v := transport_tpg.MultiEnvSearch(CredsEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(CredsEnvVars, ", "))
+	}
+
+	if v := transport_tpg.MultiEnvSearch(ProjectEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ProjectEnvVars, ", "))
+	}
+
+	if v := transport_tpg.MultiEnvSearch(RegionEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(RegionEnvVars, ", "))
+	}
+
+	if v := transport_tpg.MultiEnvSearch(ZoneEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ZoneEnvVars, ", "))
+	}
 }
 
 // GetTestRegion has the same logic as the provider's getRegion, to be used in tests.
@@ -117,101 +176,101 @@ func GetTestProject(is *terraform.InstanceState, config *transport_tpg.Config) (
 
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
-	return MultiEnvSearch(projectNumberEnvVars)
+	return transport_tpg.MultiEnvSearch(ProjectNumberEnvVars)
 }
 
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectFromEnv() string {
-	return MultiEnvSearch(ProjectEnvVars)
+	return transport_tpg.MultiEnvSearch(ProjectEnvVars)
 }
 
 // AccTestPreCheck ensures at least one of the credentials env variables is set.
 func GetTestCredsFromEnv() string {
 	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
-	if MultiEnvSearch(CredsEnvVars) == "true" {
+	if transport_tpg.MultiEnvSearch(CredsEnvVars) == "true" {
 		return ""
 	}
-	return MultiEnvSearch(CredsEnvVars)
+	return transport_tpg.MultiEnvSearch(CredsEnvVars)
 }
 
 // AccTestPreCheck ensures at least one of the region env variables is set.
 func GetTestRegionFromEnv() string {
-	return MultiEnvSearch(regionEnvVars)
+	return transport_tpg.MultiEnvSearch(RegionEnvVars)
 }
 
 func GetTestZoneFromEnv() string {
-	return MultiEnvSearch(zoneEnvVars)
+	return transport_tpg.MultiEnvSearch(ZoneEnvVars)
 }
 
 func GetTestCustIdFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, custIdEnvVars...)
-	return MultiEnvSearch(custIdEnvVars)
+	SkipIfEnvNotSet(t, CustIdEnvVars...)
+	return transport_tpg.MultiEnvSearch(CustIdEnvVars)
 }
 
 func GetTestIdentityUserFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, identityUserEnvVars...)
-	return MultiEnvSearch(identityUserEnvVars)
+	SkipIfEnvNotSet(t, IdentityUserEnvVars...)
+	return transport_tpg.MultiEnvSearch(IdentityUserEnvVars)
 }
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
 func GetTestFirestoreProjectFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, firestoreProjectEnvVars...)
-	return MultiEnvSearch(firestoreProjectEnvVars)
+	SkipIfEnvNotSet(t, FirestoreProjectEnvVars...)
+	return transport_tpg.MultiEnvSearch(FirestoreProjectEnvVars)
 }
 
 // Returns the raw organization id like 1234567890, skipping the test if one is
 // not found.
 func GetTestOrgFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, orgEnvVars...)
-	return MultiEnvSearch(orgEnvVars)
+	SkipIfEnvNotSet(t, OrgEnvVars...)
+	return transport_tpg.MultiEnvSearch(OrgEnvVars)
 }
 
 // Alternative to GetTestOrgFromEnv that doesn't need *testing.T
 // If using this, you need to process unset values at the call site
 func UnsafeGetTestOrgFromEnv() string {
-	return MultiEnvSearch(orgEnvVars)
+	return transport_tpg.MultiEnvSearch(OrgEnvVars)
 }
 
 func GetTestOrgDomainFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, orgEnvDomainVars...)
-	return MultiEnvSearch(orgEnvDomainVars)
+	SkipIfEnvNotSet(t, OrgEnvDomainVars...)
+	return transport_tpg.MultiEnvSearch(OrgEnvDomainVars)
 }
 
 func GetTestOrgTargetFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, orgTargetEnvVars...)
-	return MultiEnvSearch(orgTargetEnvVars)
+	SkipIfEnvNotSet(t, OrgTargetEnvVars...)
+	return transport_tpg.MultiEnvSearch(OrgTargetEnvVars)
 }
 
 // This is the billing account that will be charged for the infrastructure used during testing. For
 // that reason, it is also the billing account used for creating new projects.
 func GetTestBillingAccountFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, billingAccountEnvVars...)
-	return MultiEnvSearch(billingAccountEnvVars)
+	SkipIfEnvNotSet(t, BillingAccountEnvVars...)
+	return transport_tpg.MultiEnvSearch(BillingAccountEnvVars)
 }
 
 // This is the billing account that will be modified to test billing-related functionality. It is
 // expected to have more permissions granted to the test user and support subaccounts.
 func GetTestMasterBillingAccountFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, masterBillingAccountEnvVars...)
-	return MultiEnvSearch(masterBillingAccountEnvVars)
+	SkipIfEnvNotSet(t, MasterBillingAccountEnvVars...)
+	return transport_tpg.MultiEnvSearch(MasterBillingAccountEnvVars)
 }
 
 func GetTestServiceAccountFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, serviceAccountEnvVars...)
-	return MultiEnvSearch(serviceAccountEnvVars)
+	SkipIfEnvNotSet(t, ServiceAccountEnvVars...)
+	return transport_tpg.MultiEnvSearch(ServiceAccountEnvVars)
 }
 
 func GetTestPublicAdvertisedPrefixDescriptionFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, papDescriptionEnvVars...)
-	return MultiEnvSearch(papDescriptionEnvVars)
+	SkipIfEnvNotSet(t, PapDescriptionEnvVars...)
+	return transport_tpg.MultiEnvSearch(PapDescriptionEnvVars)
 }
 
 // Some tests fail during VCR. One common case is race conditions when creating resources.
 // If a test config adds two fine-grained resources with the same parent it is undefined
 // which will be created first, causing VCR to fail ~50% of the time
 func SkipIfVcr(t *testing.T) {
-	if isVcrEnabled() {
+	if IsVcrEnabled() {
 		t.Skipf("VCR enabled, skipping test: %s", t.Name())
 	}
 }

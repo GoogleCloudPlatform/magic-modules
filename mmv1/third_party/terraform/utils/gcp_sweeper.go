@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -27,11 +28,11 @@ var testResourcePrefixes = []string{
 func SharedConfigForRegion(region string) (*transport_tpg.Config, error) {
 	project := GetTestProjectFromEnv()
 	if project == "" {
-		return nil, fmt.Errorf("set project using any of these env variables %v", ProjectEnvVars)
+		return nil, fmt.Errorf("set project using any of these env variables %v", acctest.ProjectEnvVars)
 	}
 
-	if v := MultiEnvSearch(CredsEnvVars); v == "" {
-		return nil, fmt.Errorf("set credentials using any of these env variables %v", CredsEnvVars)
+	if v := MultiEnvSearch(acctest.CredsEnvVars); v == "" {
+		return nil, fmt.Errorf("set credentials using any of these env variables %v", acctest.CredsEnvVars)
 	}
 
 	conf := &transport_tpg.Config{

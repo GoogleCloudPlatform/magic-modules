@@ -20,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/dnaeon/go-vcr/cassette"
@@ -51,9 +52,7 @@ type VcrSource struct {
 }
 
 func isVcrEnabled() bool {
-	envPath := os.Getenv("VCR_PATH")
-	vcrMode := os.Getenv("VCR_MODE")
-	return envPath != "" && vcrMode != ""
+	return acctest.IsVcrEnabled()
 }
 
 // Produces a rand.Source for VCR testing based on the given mode.
