@@ -6,12 +6,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccProjectIamCustomRole_basic(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	roleId := "tfIamCustomRole" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{

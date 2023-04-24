@@ -8,16 +8,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"google.golang.org/api/cloudkms/v1"
 )
 
 func TestAccKmsSecret_basic(t *testing.T) {
 	// Nested tests confuse VCR
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	projectOrg := GetTestOrgFromEnv(t)
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
 
 	projectId := "tf-test-" + RandString(t, 10)
 	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))

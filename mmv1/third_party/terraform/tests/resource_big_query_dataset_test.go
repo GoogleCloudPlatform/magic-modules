@@ -147,7 +147,7 @@ func TestAccBigQueryDataset_cmek(t *testing.T) {
 	t.Parallel()
 
 	kms := BootstrapKMSKeyInLocation(t, "us")
-	pid := GetTestProjectFromEnv()
+	pid := acctest.GetTestProjectFromEnv()
 	datasetID1 := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{

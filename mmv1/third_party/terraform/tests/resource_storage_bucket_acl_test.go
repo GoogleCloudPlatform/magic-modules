@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"os"
 	"testing"
 
@@ -25,7 +26,7 @@ func TestAccStorageBucketAcl_basic(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -46,7 +47,7 @@ func TestAccStorageBucketAcl_upgrade(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -84,7 +85,7 @@ func TestAccStorageBucketAcl_upgradeSingleUser(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -122,7 +123,7 @@ func TestAccStorageBucketAcl_downgrade(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -177,7 +178,7 @@ func TestAccStorageBucketAcl_unordered(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),

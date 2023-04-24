@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"reflect"
 	"sort"
 	"testing"
@@ -14,8 +15,8 @@ func TestAccPrivatecaCaPoolIamMemberAllAuthenticatedUsersCasing(t *testing.T) {
 	t.Parallel()
 
 	capool := "tf-test-pool-iam-" + RandString(t, 10)
-	project := GetTestProjectFromEnv()
-	region := GetTestRegionFromEnv()
+	project := acctest.GetTestProjectFromEnv()
+	region := acctest.GetTestRegionFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

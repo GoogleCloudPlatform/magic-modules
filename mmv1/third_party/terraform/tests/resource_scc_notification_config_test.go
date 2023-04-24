@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        GetTestOrgFromEnv(t),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 

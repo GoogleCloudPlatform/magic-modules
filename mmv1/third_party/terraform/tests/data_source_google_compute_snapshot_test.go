@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccSnapshotDatasource_name(t *testing.T) {
@@ -14,7 +15,7 @@ func TestAccSnapshotDatasource_name(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_name(GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccSnapshot_name(acctest.GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
@@ -35,7 +36,7 @@ func TestAccSnapshotDatasource_filter(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_filter(GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccSnapshot_filter(acctest.GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",
@@ -56,7 +57,7 @@ func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshot_filter_mostRecent(GetTestProjectFromEnv(), RandString(t, 10)),
+				Config: testAccSnapshot_filter_mostRecent(acctest.GetTestProjectFromEnv(), RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_snapshot.default",

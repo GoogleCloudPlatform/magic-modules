@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"golang.org/x/oauth2/google"
 )
 
@@ -118,7 +119,7 @@ func TestAccStorageSignedUrl_basic(t *testing.T) {
 
 func TestAccStorageSignedUrl_accTest(t *testing.T) {
 	// URL includes an expires time
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", RandInt(t))

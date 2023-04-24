@@ -4,12 +4,12 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
@@ -211,7 +211,7 @@ func TestAccComputeRegionDisk_cloneDisk(t *testing.T) {
 
 func testAccCheckComputeRegionDiskExists(t *testing.T, n string, disk *compute.Disk) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		p := GetTestProjectFromEnv()
+		p := acctest.GetTestProjectFromEnv()
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)

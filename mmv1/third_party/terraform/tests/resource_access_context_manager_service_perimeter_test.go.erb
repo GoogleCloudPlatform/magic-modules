@@ -14,7 +14,7 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 func testAccAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -34,7 +34,7 @@ func testAccAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
 }
 
 func testAccAccessContextManagerServicePerimeter_updateTest(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

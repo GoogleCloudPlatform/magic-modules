@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 )
 
@@ -13,7 +14,7 @@ func TestAccFolderIamPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	folderDisplayName := "tf-test-" + RandString(t, 10)
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 
 	VcrTest(t, resource.TestCase{
@@ -45,7 +46,7 @@ func TestAccFolderIamPolicy_auditConfigs(t *testing.T) {
 	t.Parallel()
 
 	folderDisplayName := "tf-test-" + RandString(t, 10)
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 
 	VcrTest(t, resource.TestCase{

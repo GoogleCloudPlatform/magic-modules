@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func TestAccDataSourceGoogleBillingAccount_byFullName(t *testing.T) {
-	billingId := GetTestMasterBillingAccountFromEnv(t)
+	billingId := acctest.GetTestMasterBillingAccountFromEnv(t)
 	name := "billingAccounts/" + billingId
 
 	VcrTest(t, resource.TestCase{
@@ -29,7 +30,7 @@ func TestAccDataSourceGoogleBillingAccount_byFullName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleBillingAccount_byShortName(t *testing.T) {
-	billingId := GetTestMasterBillingAccountFromEnv(t)
+	billingId := acctest.GetTestMasterBillingAccountFromEnv(t)
 	name := "billingAccounts/" + billingId
 
 	VcrTest(t, resource.TestCase{
@@ -49,7 +50,7 @@ func TestAccDataSourceGoogleBillingAccount_byShortName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleBillingAccount_byFullNameClosed(t *testing.T) {
-	billingId := GetTestMasterBillingAccountFromEnv(t)
+	billingId := acctest.GetTestMasterBillingAccountFromEnv(t)
 	name := "billingAccounts/" + billingId
 
 	VcrTest(t, resource.TestCase{

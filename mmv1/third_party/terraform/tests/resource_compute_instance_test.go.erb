@@ -4,7 +4,6 @@ package google
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"log"
 <% unless version == 'ga' -%>
 	"reflect"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
@@ -91,7 +91,7 @@ func computeInstanceImportStep(zone, instanceName string, additionalImportIgnore
 	return resource.TestStep{
 		ResourceName:            "google_compute_instance.foobar",
 		ImportState:             true,
-		ImportStateId:           fmt.Sprintf("%s/%s/%s", GetTestProjectFromEnv(), zone, instanceName),
+		ImportStateId:           fmt.Sprintf("%s/%s/%s", acctest.GetTestProjectFromEnv(), zone, instanceName),
 		ImportStateVerify:       true,
 		ImportStateVerifyIgnore: append(ignores, additionalImportIgnores...),
 	}
@@ -1197,13 +1197,13 @@ func TestAccComputeInstance_subnet_custom(t *testing.T) {
 
 func TestAccComputeInstance_subnet_xpn(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
-	org := GetTestOrgFromEnv(t)
-	billingId := GetTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 	projectName := fmt.Sprintf("tf-test-xpn-%d", time.Now().Unix())
 
 	VcrTest(t, resource.TestCase{
@@ -1307,7 +1307,7 @@ func TestAccComputeInstance_networkPerformanceConfig(t *testing.T) {
 	// in it /unable to find the resource/ as the start operation
 	// never completes successful. I suspect a bad configuration
 	// but am unsure.
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	var instance compute.Instance
@@ -2608,7 +2608,7 @@ func testAccCheckComputeInstanceExists(t *testing.T, n string, instance interfac
 		panic("Attempted to check existence of Instance that was nil.")
 	}
 
-	return testAccCheckComputeInstanceExistsInProject(t, n, GetTestProjectFromEnv(), instance.(*compute.Instance))
+	return testAccCheckComputeInstanceExistsInProject(t, n, acctest.GetTestProjectFromEnv(), instance.(*compute.Instance))
 }
 
 func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, instance *compute.Instance) resource.TestCheckFunc {

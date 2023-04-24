@@ -48,7 +48,7 @@ func testSweep<%= sweeper_name -%>(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := GetTestBillingAccountFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
 	d := &ResourceDataMock{

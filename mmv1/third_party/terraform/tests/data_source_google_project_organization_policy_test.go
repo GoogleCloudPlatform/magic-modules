@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceGoogleProjectOrganizationPolicy_basic(t *testing.T) {
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

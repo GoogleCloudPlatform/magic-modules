@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func TestAccDataSourceGoogleOrganization_byFullName(t *testing.T) {
-	orgId := GetTestOrgFromEnv(t)
+	orgId := acctest.GetTestOrgFromEnv(t)
 	name := "organizations/" + orgId
 
 	VcrTest(t, resource.TestCase{
@@ -28,7 +29,7 @@ func TestAccDataSourceGoogleOrganization_byFullName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleOrganization_byShortName(t *testing.T) {
-	orgId := GetTestOrgFromEnv(t)
+	orgId := acctest.GetTestOrgFromEnv(t)
 	name := "organizations/" + orgId
 
 	VcrTest(t, resource.TestCase{

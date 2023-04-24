@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
@@ -14,7 +15,7 @@ func TestAccVertexAIIndex_updated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       GetTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 

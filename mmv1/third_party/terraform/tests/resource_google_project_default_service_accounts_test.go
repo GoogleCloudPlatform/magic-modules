@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
@@ -14,9 +15,9 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsBasic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_project_default_service_accounts.acceptance"
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	billingAccount := acctest.GetTestBillingAccountFromEnv(t)
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -54,9 +55,9 @@ resource "google_project_default_service_accounts" "acceptance" {
 func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	billingAccount := acctest.GetTestBillingAccountFromEnv(t)
 	action := "DISABLE"
 	restorePolicy := "REVERT"
 
@@ -72,7 +73,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					SleepInSecondsForTest(5),
+					acctest.SleepInSecondsForTest(5),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -83,9 +84,9 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	billingAccount := acctest.GetTestBillingAccountFromEnv(t)
 	action := "DELETE"
 	restorePolicy := "REVERT"
 
@@ -101,7 +102,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					SleepInSecondsForTest(10),
+					acctest.SleepInSecondsForTest(10),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -112,9 +113,9 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	billingAccount := acctest.GetTestBillingAccountFromEnv(t)
 	action := "DELETE"
 	restorePolicy := "REVERT_AND_IGNORE_FAILURE"
 
@@ -129,7 +130,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					SleepInSecondsForTest(10),
+					acctest.SleepInSecondsForTest(10),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -140,9 +141,9 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure
 func TestAccResourceGoogleProjectDefaultServiceAccountsDeprivilege(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	project := fmt.Sprintf("tf-test-%d", RandInt(t))
-	billingAccount := GetTestBillingAccountFromEnv(t)
+	billingAccount := acctest.GetTestBillingAccountFromEnv(t)
 	action := "DEPRIVILEGE"
 	restorePolicy := "REVERT"
 
@@ -158,7 +159,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeprivilege(t *testing.T)
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					SleepInSecondsForTest(5),
+					acctest.SleepInSecondsForTest(5),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},

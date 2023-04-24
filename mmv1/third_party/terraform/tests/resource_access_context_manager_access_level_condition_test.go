@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"reflect"
 	"testing"
 
@@ -14,8 +15,8 @@ import (
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
 func testAccAccessContextManagerAccessLevelCondition_basicTest(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
-	project := GetTestProjectFromEnv()
+	org := acctest.GetTestOrgFromEnv(t)
+	project := acctest.GetTestProjectFromEnv()
 
 	serviceAccountName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 

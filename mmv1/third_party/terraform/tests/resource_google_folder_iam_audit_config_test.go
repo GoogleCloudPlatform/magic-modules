@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 func TestAccFolderIamAuditConfig_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	VcrTest(t, resource.TestCase{
@@ -37,10 +38,10 @@ func TestAccFolderIamAuditConfig_basic(t *testing.T) {
 // Test that multiple IAM audit configs can be applied to a folder, one at a time
 func TestAccFolderIamAuditConfig_multiple(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
@@ -71,10 +72,10 @@ func TestAccFolderIamAuditConfig_multiple(t *testing.T) {
 // Test that multiple IAM audit configs can be applied to a folder all at once
 func TestAccFolderIamAuditConfig_multipleAtOnce(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
@@ -102,7 +103,7 @@ func TestAccFolderIamAuditConfig_multipleAtOnce(t *testing.T) {
 func TestAccFolderIamAuditConfig_update(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 
@@ -136,10 +137,10 @@ func TestAccFolderIamAuditConfig_update(t *testing.T) {
 // Test that an IAM audit config can be removed from a folder
 func TestAccFolderIamAuditConfig_remove(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
@@ -174,7 +175,7 @@ func TestAccFolderIamAuditConfig_remove(t *testing.T) {
 func TestAccFolderIamAuditConfig_addFirstExemptMember(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	members := []string{}
@@ -207,7 +208,7 @@ func TestAccFolderIamAuditConfig_addFirstExemptMember(t *testing.T) {
 func TestAccFolderIamAuditConfig_removeLastExemptMember(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	service := "cloudkms.googleapis.com"
 	members2 := []string{}
@@ -240,7 +241,7 @@ func TestAccFolderIamAuditConfig_removeLastExemptMember(t *testing.T) {
 func TestAccFolderIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	logType := "DATA_READ"
 	logType2 := "DATA_WRITE"

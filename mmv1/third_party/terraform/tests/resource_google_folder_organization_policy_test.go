@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"reflect"
 	"sort"
 	"testing"
@@ -16,7 +17,7 @@ func TestAccFolderOrganizationPolicy_boolean(t *testing.T) {
 
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -55,7 +56,7 @@ func TestAccFolderOrganizationPolicy_list_allowAll(t *testing.T) {
 
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -78,8 +79,8 @@ func TestAccFolderOrganizationPolicy_list_allowSome(t *testing.T) {
 	t.Parallel()
 
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
-	org := GetTestOrgFromEnv(t)
-	project := GetTestProjectFromEnv()
+	org := acctest.GetTestOrgFromEnv(t)
+	project := acctest.GetTestProjectFromEnv()
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -102,7 +103,7 @@ func TestAccFolderOrganizationPolicy_list_denySome(t *testing.T) {
 	t.Parallel()
 
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -125,7 +126,7 @@ func TestAccFolderOrganizationPolicy_list_update(t *testing.T) {
 	t.Parallel()
 
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
@@ -152,7 +153,7 @@ func TestAccFolderOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 	t.Parallel()
 
 	folder := fmt.Sprintf("tf-test-%d", RandInt(t))
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),

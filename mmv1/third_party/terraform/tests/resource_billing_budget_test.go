@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -12,7 +13,7 @@ func TestAccBillingBudget_billingBudgetCurrencycode(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  GetTestMasterBillingAccountFromEnv(t),
+		"billing_acct":  acctest.GetTestMasterBillingAccountFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -70,7 +71,7 @@ func TestAccBillingBudget_billingBudgetUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  GetTestMasterBillingAccountFromEnv(t),
+		"billing_acct":  acctest.GetTestMasterBillingAccountFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -127,7 +128,7 @@ func TestAccBillingBudget_billingFilterSubaccounts(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"master_billing_acct": GetTestMasterBillingAccountFromEnv(t),
+		"master_billing_acct": acctest.GetTestMasterBillingAccountFromEnv(t),
 		"random_suffix":       RandString(t, 10),
 	}
 
@@ -542,9 +543,9 @@ func TestAccBillingBudget_budgetFilterProjectsOrdering(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org":                  GetTestOrgFromEnv(t),
-		"billing_acct":         GetTestMasterBillingAccountFromEnv(t),
-		"project_billing_acct": GetTestBillingAccountFromEnv(t),
+		"org":                  acctest.GetTestOrgFromEnv(t),
+		"billing_acct":         acctest.GetTestMasterBillingAccountFromEnv(t),
+		"project_billing_acct": acctest.GetTestBillingAccountFromEnv(t),
 		"random_suffix_1":      RandString(t, 10),
 		"random_suffix_2":      RandString(t, 10),
 	}

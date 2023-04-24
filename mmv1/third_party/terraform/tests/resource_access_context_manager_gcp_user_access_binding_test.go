@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
@@ -17,9 +18,9 @@ func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        GetTestOrgFromEnv(t),
-		"org_domain":    GetTestOrgDomainFromEnv(t),
-		"cust_id":       GetTestCustIdFromEnv(t),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
+		"cust_id":       acctest.GetTestCustIdFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 

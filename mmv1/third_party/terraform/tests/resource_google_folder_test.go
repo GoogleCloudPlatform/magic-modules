@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 )
@@ -15,7 +16,7 @@ func TestAccFolder_rename(t *testing.T) {
 
 	folderDisplayName := "tf-test-" + RandString(t, 10)
 	newFolderDisplayName := "tf-test-renamed-" + RandString(t, 10)
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 	folder := resourceManagerV3.Folder{}
 
@@ -53,7 +54,7 @@ func TestAccFolder_moveParent(t *testing.T) {
 
 	folder1DisplayName := "tf-test-" + RandString(t, 10)
 	folder2DisplayName := "tf-test-" + RandString(t, 10)
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	parent := "organizations/" + org
 	folder1 := resourceManagerV3.Folder{}
 	folder2 := resourceManagerV3.Folder{}

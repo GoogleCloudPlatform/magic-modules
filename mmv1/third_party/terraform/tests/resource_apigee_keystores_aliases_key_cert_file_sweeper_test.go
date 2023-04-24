@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -35,7 +36,7 @@ func testSweepApigeeKeystoresAliasesKeyCertFile(region string) error {
 	}
 
 	t := &testing.T{}
-	billingId := GetTestBillingAccountFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 
 	// Setup variables to replace in list template
 	d := &ResourceDataMock{

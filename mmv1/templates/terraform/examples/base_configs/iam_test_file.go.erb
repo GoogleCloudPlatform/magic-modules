@@ -7,6 +7,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+<% if version == 'private' -%>
+    "internal/terraform-next/google-private/acctest"
+<% else -%>
+    "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
+<% end -%>
 )
 
 <%# Since most resources define a "basic" config as their first example, we can reuse that config to create a resource to test IAM resources with. -%>
@@ -37,16 +43,16 @@ import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.b
 		<% if i != params.size - 1 -%>
 			<%# If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment -%>
 			<% if object.iam_policy.test_project_name.nil? -%>
-				<% import_qualifiers.push('GetTestProjectFromEnv()') -%>
+				<% import_qualifiers.push('acctest.GetTestProjectFromEnv()') -%>
 			<% else -%>
 				<% import_qualifiers.push('context["project_id"]') -%>
 			<% end -%>
 		<% end -%>
         <% elsif param == 'zone' and object.iam_policy.substitute_zone_value -%>
-                <% import_qualifiers.push('GetTestZoneFromEnv()') -%>
+                <% import_qualifiers.push('acctest.GetTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
 		<% if example.region_override.nil? -%>
-				<% import_qualifiers.push('GetTestRegionFromEnv()') -%>
+				<% import_qualifiers.push('acctest.GetTestRegionFromEnv()') -%>
 			<% else -%>
 				<% import_qualifiers.push("\"#{example.region_override}\"") -%>
 			<% end -%>
@@ -138,7 +144,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := GetTestServiceAccountFromEnv(t)
+	sa := acctest.GetTestServiceAccountFromEnv(t)
 <% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
@@ -222,7 +228,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 
 func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
@@ -304,7 +310,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 
 func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
@@ -355,7 +361,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 
 <% unless object.iam_policy.admin_iam_role.nil? -%>
 	// This may skip test, so do it first
-	sa := GetTestServiceAccountFromEnv(t)
+	sa := acctest.GetTestServiceAccountFromEnv(t)
 <% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>

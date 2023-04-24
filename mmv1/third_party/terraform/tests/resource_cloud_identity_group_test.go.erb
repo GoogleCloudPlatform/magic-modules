@@ -4,12 +4,15 @@ package google
 import (
 	"fmt"
 	"strings"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+<<<<<<< HEAD
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+=======
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+>>>>>>> 5be991d23 (Add acctest package to .go files)
 )
 
 // Intended to fix https://github.com/hashicorp/terraform-provider-google/issues/10001
@@ -48,8 +51,8 @@ func TestAccCloudIdentityGroup(t *testing.T) {
 
 func testAccCloudIdentityGroup_updateTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_domain":    GetTestOrgDomainFromEnv(t),
-		"cust_id":       GetTestCustIdFromEnv(t),
+		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
+		"cust_id":       acctest.GetTestCustIdFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -90,8 +93,8 @@ resource "google_cloud_identity_group" "cloud_identity_group_basic" {
 
 func testAccCloudIdentityGroup_cloudIdentityGroupsBasicExampleTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_domain":    GetTestOrgDomainFromEnv(t),
-		"cust_id":       GetTestCustIdFromEnv(t),
+		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
+		"cust_id":       acctest.GetTestCustIdFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 

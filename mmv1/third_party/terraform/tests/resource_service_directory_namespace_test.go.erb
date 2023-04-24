@@ -13,7 +13,7 @@ import (
 func TestAccServiceDirectoryNamespace_serviceDirectoryNamespaceUpdateExample(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	location := "us-central1"
 	testId := fmt.Sprintf("tf-test-example-namespace%s", RandString(t, 10))
 

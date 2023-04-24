@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/cloudbilling/v1"
@@ -70,7 +71,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 		}
 	}
 
-	projectID := GetTestProjectFromEnv()
+	projectID := acctest.GetTestProjectFromEnv()
 	keyRingParent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 	keyRingName := fmt.Sprintf("%s/keyRings/%s", keyRingParent, SharedKeyRing)
 	keyParent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", projectID, locationID, SharedKeyRing)
@@ -219,7 +220,7 @@ func BootstrapServiceAccount(t *testing.T, project, testRunner string) string {
 const SharedTestADDomainPrefix = "tf-bootstrap-ad"
 
 func BootstrapSharedTestADDomain(t *testing.T, testId string, networkName string) string {
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	sharedADDomain := fmt.Sprintf("%s.%s.com", SharedTestADDomainPrefix, testId)
 	adDomainName := fmt.Sprintf("projects/%s/locations/global/domains/%s", project, sharedADDomain)
 
@@ -277,7 +278,7 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 // Returns the name of a network, creating it if it hasn't been created in the
 // test project.
 func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	networkName := SharedTestNetworkPrefix + testId
 
 	config := BootstrapConfig(t)
@@ -325,7 +326,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 		return nil
 	}
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	// The filter endpoint works differently if you provide both the parent id and parent type, and
 	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
@@ -443,7 +444,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 		return nil
 	}
 
-	projectIDSuffix := strings.Replace(GetTestProjectFromEnv(), "ci-test-project-", "", 1)
+	projectIDSuffix := strings.Replace(acctest.GetTestProjectFromEnv(), "ci-test-project-", "", 1)
 	projectID := projectIDPrefix + projectIDSuffix
 
 	crmClient := config.NewResourceManagerClient(config.UserAgent)
@@ -453,7 +454,7 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 		if !transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
 			t.Fatalf("Error getting bootstrapped project: %s", err)
 		}
-		org := GetTestOrgFromEnv(t)
+		org := acctest.GetTestOrgFromEnv(t)
 
 		op, err := crmClient.Projects.Create(&cloudresourcemanager.Project{
 			ProjectId: projectID,
@@ -546,10 +547,10 @@ func BootstrapConfig(t *testing.T) *transport_tpg.Config {
 	}
 
 	config := &transport_tpg.Config{
-		Credentials: GetTestCredsFromEnv(),
-		Project:     GetTestProjectFromEnv(),
-		Region:      GetTestRegionFromEnv(),
-		Zone:        GetTestZoneFromEnv(),
+		Credentials: acctest.GetTestCredsFromEnv(),
+		Project:     acctest.GetTestProjectFromEnv(),
+		Region:      acctest.GetTestRegionFromEnv(),
+		Zone:        acctest.GetTestZoneFromEnv(),
 	}
 
 	transport_tpg.ConfigureBasePaths(config)
@@ -566,7 +567,7 @@ const SharedTestSQLInstanceNamePrefix = "tf-bootstrap-"
 // BootstrapSharedSQLInstanceBackupRun will return a shared SQL db instance that
 // has a backup created for it.
 func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -653,7 +654,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 }
 
 func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	poolName := "static-ca-pool"
 
 	config := BootstrapConfig(t)

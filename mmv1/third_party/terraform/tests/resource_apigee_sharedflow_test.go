@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
@@ -11,14 +12,14 @@ import (
 )
 
 func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	fmt.Printf("from t: org_id %s", GetTestOrgFromEnv(t))
+	fmt.Printf("from t: org_id %s", acctest.GetTestOrgFromEnv(t))
 
 	context := map[string]interface{}{
-		"org_id":          GetTestOrgFromEnv(t),
-		"billing_account": GetTestBillingAccountFromEnv(t),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   RandString(t, 10),
 	}
 

@@ -4,11 +4,11 @@ package google
 import (
 	"fmt"
 	"regexp"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccContainerNodePool_basic(t *testing.T) {
@@ -108,7 +108,7 @@ func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 
 func TestAccContainerNodePool_namePrefix(t *testing.T) {
 	// Randomness
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
@@ -133,7 +133,7 @@ func TestAccContainerNodePool_namePrefix(t *testing.T) {
 
 func TestAccContainerNodePool_noName(t *testing.T) {
 	// Randomness
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
@@ -299,7 +299,7 @@ func TestAccContainerNodePool_withReservationAffinitySpecific(t *testing.T) {
 func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
 
-	pid := GetTestProjectFromEnv()
+	pid := acctest.GetTestProjectFromEnv()
 	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
 
@@ -435,7 +435,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 	t.Parallel()
 	// Unit test, no interactions
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
@@ -617,7 +617,7 @@ resource "google_container_node_pool" "with_enable_private_nodes" {
 <% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 	// Uses generated time-based rotation time
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))

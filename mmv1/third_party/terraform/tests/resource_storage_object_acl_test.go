@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"io"
 	"io/ioutil"
@@ -323,7 +324,7 @@ func (t *testRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 
 // Test that we don't fail if there's no owner for object
 func TestAccStorageObjectAcl_noOwner(t *testing.T) {
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	bucketName := testBucketName(t)

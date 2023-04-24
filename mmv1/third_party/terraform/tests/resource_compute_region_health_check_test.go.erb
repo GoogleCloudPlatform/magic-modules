@@ -4,10 +4,10 @@ package google
 import (
 	"fmt"
 	"regexp"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeRegionHealthCheck_tcp_update(t *testing.T) {
@@ -144,7 +144,7 @@ func TestAccComputeRegionHealthCheck_typeTransition(t *testing.T) {
 
 func TestAccComputeRegionHealthCheck_tcpAndSsl_shouldFail(t *testing.T) {
 	// This is essentially a unit test, no interactions
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	hckName := fmt.Sprintf("tf-test-%s", RandString(t, 10))

@@ -4,14 +4,15 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func testAccDataSourceCloudIdentityGroupMemberships_basicTest(t *testing.T) {
 
 	context := map[string]interface{}{
-		"org_domain":    GetTestOrgDomainFromEnv(t),
-		"cust_id":       GetTestCustIdFromEnv(t),
-		"identity_user": GetTestIdentityUserFromEnv(t),
+		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
+		"cust_id":       acctest.GetTestCustIdFromEnv(t),
+		"identity_user": acctest.GetTestIdentityUserFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 

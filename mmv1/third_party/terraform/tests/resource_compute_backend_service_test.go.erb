@@ -597,7 +597,7 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 
 func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
 	// Instance template uses UniqueId in some cases
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	fr := fmt.Sprintf("forwardrule-test-%s", RandString(t, 10))

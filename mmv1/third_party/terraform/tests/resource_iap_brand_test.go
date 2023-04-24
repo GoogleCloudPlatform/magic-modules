@@ -4,14 +4,15 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccIapBrand_iapBrandExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        GetTestOrgFromEnv(t),
-		"org_domain":    GetTestOrgDomainFromEnv(t),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
+		"org_domain":    acctest.GetTestOrgDomainFromEnv(t),
 		"random_suffix": RandString(t, 10),
 	}
 

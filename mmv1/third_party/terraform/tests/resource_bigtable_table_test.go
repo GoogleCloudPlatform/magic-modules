@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 
 func TestAccBigtableTable_basic(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -37,7 +38,7 @@ func TestAccBigtableTable_basic(t *testing.T) {
 
 func TestAccBigtableTable_splitKeys(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -63,7 +64,7 @@ func TestAccBigtableTable_splitKeys(t *testing.T) {
 
 func TestAccBigtableTable_family(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -89,7 +90,7 @@ func TestAccBigtableTable_family(t *testing.T) {
 
 func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -149,7 +150,7 @@ func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 
 func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -208,7 +209,7 @@ func TestAccBigtableTable_deletion_protection_unprotected(t *testing.T) {
 
 func TestAccBigtableTable_familyMany(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -234,7 +235,7 @@ func TestAccBigtableTable_familyMany(t *testing.T) {
 
 func TestAccBigtableTable_familyUpdate(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))

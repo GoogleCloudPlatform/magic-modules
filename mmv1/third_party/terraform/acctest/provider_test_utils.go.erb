@@ -124,7 +124,7 @@ var PapDescriptionEnvVars = []string{
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 }
 
-func acctest.AccTestPreCheck(t *testing.T) {
+func AccTestPreCheck(t *testing.T) {
 	if v := os.Getenv("GOOGLE_CREDENTIALS_FILE"); v != "" {
 		creds, err := ioutil.ReadFile(v)
 		if err != nil {
@@ -172,17 +172,17 @@ func GetTestProject(is *terraform.InstanceState, config *transport_tpg.Config) (
 	return "", fmt.Errorf("%q: required field is not set", "project")
 }
 
-// acctest.AccTestPreCheck ensures at least one of the project env variables is set.
+// AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ProjectNumberEnvVars)
 }
 
-// acctest.AccTestPreCheck ensures at least one of the project env variables is set.
+// AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ProjectEnvVars)
 }
 
-// acctest.AccTestPreCheck ensures at least one of the credentials env variables is set.
+// AccTestPreCheck ensures at least one of the credentials env variables is set.
 func GetTestCredsFromEnv() string {
 	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
 	if transport_tpg.MultiEnvSearch(CredsEnvVars) == "true" {
@@ -191,7 +191,7 @@ func GetTestCredsFromEnv() string {
 	return transport_tpg.MultiEnvSearch(CredsEnvVars)
 }
 
-// acctest.AccTestPreCheck ensures at least one of the region env variables is set.
+// AccTestPreCheck ensures at least one of the region env variables is set.
 func GetTestRegionFromEnv() string {
 	return transport_tpg.MultiEnvSearch(RegionEnvVars)
 }

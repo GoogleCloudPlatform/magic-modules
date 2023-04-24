@@ -12,7 +12,7 @@ import (
 func TestAccComputeFirewallPolicy_update(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	policyName := fmt.Sprintf("tf-test-firewall-policy-%s", RandString(t, 10))
 	folderName := fmt.Sprintf("tf-test-folder-%s", RandString(t, 10))
 

@@ -4,13 +4,13 @@ package google
 import (
 	"fmt"
   "strconv"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
@@ -28,7 +28,7 @@ const (
 func TestAccDataflowJob_basic(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -60,7 +60,7 @@ func TestAccDataflowJob_basic(t *testing.T) {
 func TestAccDataflowJobSkipWait_basic(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -92,7 +92,7 @@ func TestAccDataflowJobSkipWait_basic(t *testing.T) {
 func TestAccDataflowJob_withRegion(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -123,7 +123,7 @@ func TestAccDataflowJob_withRegion(t *testing.T) {
 func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -156,7 +156,7 @@ func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 func TestAccDataflowJob_withNetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -189,7 +189,7 @@ func TestAccDataflowJob_withNetwork(t *testing.T) {
 func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -223,7 +223,7 @@ func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 func TestAccDataflowJob_withLabels(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -257,7 +257,7 @@ func TestAccDataflowJob_withLabels(t *testing.T) {
 func TestAccDataflowJob_withIpConfig(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -288,7 +288,7 @@ func TestAccDataflowJob_withIpConfig(t *testing.T) {
 func TestAccDataflowJob_withKmsKey(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -325,7 +325,7 @@ func TestAccDataflowJob_withKmsKey(t *testing.T) {
 func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -358,7 +358,7 @@ func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
 func TestAccDataflowJob_streamUpdate(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	suffix := RandString(t, 10)
@@ -392,7 +392,7 @@ func TestAccDataflowJob_streamUpdate(t *testing.T) {
 func TestAccDataflowJob_virtualUpdate(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	suffix := RandString(t, 10)

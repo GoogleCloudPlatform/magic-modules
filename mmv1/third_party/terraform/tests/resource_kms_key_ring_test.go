@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -73,8 +74,8 @@ func TestKeyRingIdParsing(t *testing.T) {
 
 func TestAccKmsKeyRing_basic(t *testing.T) {
 	projectId := fmt.Sprintf("tf-test-%d", RandInt(t))
-	projectOrg := GetTestOrgFromEnv(t)
-	projectBillingAccount := GetTestBillingAccountFromEnv(t)
+	projectOrg := acctest.GetTestOrgFromEnv(t)
+	projectBillingAccount := acctest.GetTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{

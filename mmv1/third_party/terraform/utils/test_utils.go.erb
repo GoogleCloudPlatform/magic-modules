@@ -16,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acctest_tpg "github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 type ResourceDataMock struct {
@@ -187,7 +189,7 @@ func MuxedProviders(testName string) (func() tfprotov5.ProviderServer, error) {
 }
 
 func RandString(t *testing.T, length int) string {
-	if !isVcrEnabled() {
+	if !acctest_tpg.IsVcrEnabled() {
 		return acctest.RandString(length)
 	}
 	envPath := os.Getenv("VCR_PATH")
@@ -208,7 +210,7 @@ func RandString(t *testing.T, length int) string {
 }
 
 func RandInt(t *testing.T) int {
-	if !isVcrEnabled() {
+	if !acctest_tpg.IsVcrEnabled() {
 		return acctest.RandInt()
 	}
 	envPath := os.Getenv("VCR_PATH")

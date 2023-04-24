@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       GetTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -45,7 +46,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerUpdateExample2(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       GetTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -80,7 +81,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerPubsub(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": GetTestProjectFromEnv(),
+		"project": acctest.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -105,7 +106,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyUpdate(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       GetTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -140,7 +141,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerChangingActions(t *testing
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       GetTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 
@@ -184,7 +185,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerHybridUpdate(t *testing.T)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": GetTestProjectFromEnv(),
+		"project": acctest.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -218,7 +219,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspect(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": GetTestProjectFromEnv(),
+		"project": acctest.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{
@@ -261,7 +262,7 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerInspectCustomInfoTypes(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project": GetTestProjectFromEnv(),
+		"project": acctest.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{

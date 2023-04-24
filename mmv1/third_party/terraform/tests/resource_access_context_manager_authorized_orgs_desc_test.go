@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 
 func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
 	context := map[string]interface{}{
-		"org_id": GetTestOrgFromEnv(t),
+		"org_id": acctest.GetTestOrgFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{

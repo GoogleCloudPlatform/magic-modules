@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccMemcacheInstance_update(t *testing.T) {
 	t.Parallel()
 	// Temporary as CI has used up servicenetworking quota
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 
 	prefix := fmt.Sprintf("%d", RandInt(t))
 	name := fmt.Sprintf("tf-test-%s", prefix)

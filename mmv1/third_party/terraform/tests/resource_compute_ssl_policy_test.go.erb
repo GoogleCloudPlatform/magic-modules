@@ -170,7 +170,7 @@ func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *compu
 
 		config := GoogleProviderConfig(t)
 
-		project, err := GetTestProject(rs.Primary, config)
+		project, err := acctest.GetTestProject(rs.Primary, config)
 		if err != nil {
 			return err
 		}

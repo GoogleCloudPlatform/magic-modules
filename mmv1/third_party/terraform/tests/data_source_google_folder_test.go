@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func TestAccDataSourceGoogleFolder_byFullName(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "tf-test-" + RandString(t, 10)
@@ -30,7 +31,7 @@ func TestAccDataSourceGoogleFolder_byFullName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "tf-test-" + RandString(t, 10)
@@ -50,7 +51,7 @@ func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "tf-test-" + RandString(t, 10)

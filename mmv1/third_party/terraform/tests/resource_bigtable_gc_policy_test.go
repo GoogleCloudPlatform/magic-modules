@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 
 func TestAccBigtableGCPolicy_basic(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -39,7 +40,7 @@ func TestAccBigtableGCPolicy_basic(t *testing.T) {
 
 func TestAccBigtableGCPolicy_abandoned(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -72,7 +73,7 @@ func TestAccBigtableGCPolicy_abandoned(t *testing.T) {
 
 func TestAccBigtableGCPolicy_swapOffDeprecated(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -110,7 +111,7 @@ func TestAccBigtableGCPolicy_swapOffDeprecated(t *testing.T) {
 
 func TestAccBigtableGCPolicy_union(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -136,7 +137,7 @@ func TestAccBigtableGCPolicy_union(t *testing.T) {
 // Testing multiple GC policies; one per column family.
 func TestAccBigtableGCPolicy_multiplePolicies(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
@@ -164,7 +165,7 @@ func TestAccBigtableGCPolicy_multiplePolicies(t *testing.T) {
 }
 
 func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))

@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeRouterInterface_basic(t *testing.T) {
@@ -16,7 +17,7 @@ func TestAccComputeRouterInterface_basic(t *testing.T) {
 		"name":   name,
 		"region": "us-central1",
 	}
-	importIdFourPart := fmt.Sprintf("%s/%s/%s/%s", GetTestProjectFromEnv(), context["region"], context["name"], context["name"]) // name reused in config
+	importIdFourPart := fmt.Sprintf("%s/%s/%s/%s", acctest.GetTestProjectFromEnv(), context["region"], context["name"], context["name"]) // name reused in config
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -128,12 +129,12 @@ func testAccCheckComputeRouterInterfaceDestroyProducer(t *testing.T) func(s *ter
 				continue
 			}
 
-			project, err := GetTestProject(rs.Primary, config)
+			project, err := acctest.GetTestProject(rs.Primary, config)
 			if err != nil {
 				return err
 			}
 
-			region, err := GetTestRegion(rs.Primary, config)
+			region, err := acctest.GetTestRegion(rs.Primary, config)
 			if err != nil {
 				return err
 			}
@@ -163,12 +164,12 @@ func testAccCheckComputeRouterInterfaceDelete(t *testing.T, n string) resource.T
 				continue
 			}
 
-			project, err := GetTestProject(rs.Primary, config)
+			project, err := acctest.GetTestProject(rs.Primary, config)
 			if err != nil {
 				return err
 			}
 
-			region, err := GetTestRegion(rs.Primary, config)
+			region, err := acctest.GetTestRegion(rs.Primary, config)
 			if err != nil {
 				return err
 			}
@@ -208,12 +209,12 @@ func testAccCheckComputeRouterInterfaceExists(t *testing.T, n string) resource.T
 
 		config := GoogleProviderConfig(t)
 
-		project, err := GetTestProject(rs.Primary, config)
+		project, err := acctest.GetTestProject(rs.Primary, config)
 		if err != nil {
 			return err
 		}
 
-		region, err := GetTestRegion(rs.Primary, config)
+		region, err := acctest.GetTestRegion(rs.Primary, config)
 		if err != nil {
 			return err
 		}

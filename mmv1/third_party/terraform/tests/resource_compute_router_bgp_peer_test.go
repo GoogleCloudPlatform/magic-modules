@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccComputeRouterPeer_basic(t *testing.T) {
@@ -309,12 +310,12 @@ func testAccCheckComputeRouterPeerDestroyProducer(t *testing.T) func(s *terrafor
 				continue
 			}
 
-			project, err := GetTestProject(rs.Primary, config)
+			project, err := acctest.GetTestProject(rs.Primary, config)
 			if err != nil {
 				return err
 			}
 
-			region, err := GetTestRegion(rs.Primary, config)
+			region, err := acctest.GetTestRegion(rs.Primary, config)
 			if err != nil {
 				return err
 			}
@@ -344,12 +345,12 @@ func testAccCheckComputeRouterPeerDelete(t *testing.T, n string) resource.TestCh
 				continue
 			}
 
-			project, err := GetTestProject(rs.Primary, config)
+			project, err := acctest.GetTestProject(rs.Primary, config)
 			if err != nil {
 				return err
 			}
 
-			region, err := GetTestRegion(rs.Primary, config)
+			region, err := acctest.GetTestRegion(rs.Primary, config)
 			if err != nil {
 				return err
 			}
@@ -389,12 +390,12 @@ func testAccCheckComputeRouterPeerExists(t *testing.T, n string) resource.TestCh
 
 		config := GoogleProviderConfig(t)
 
-		project, err := GetTestProject(rs.Primary, config)
+		project, err := acctest.GetTestProject(rs.Primary, config)
 		if err != nil {
 			return err
 		}
 
-		region, err := GetTestRegion(rs.Primary, config)
+		region, err := acctest.GetTestRegion(rs.Primary, config)
 		if err != nil {
 			return err
 		}

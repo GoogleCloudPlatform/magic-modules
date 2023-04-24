@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
 	"time"
@@ -62,7 +63,7 @@ func TestMaintenanceVersionDiffSuppress(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
 	// Randomness
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	VcrTest(t, resource.TestCase{
@@ -203,7 +204,7 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 // be left on the instance.
 func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *testing.T) {
 	// Service Networking
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	databaseName := "tf-test-" + RandString(t, 10)
@@ -815,7 +816,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testing.T) {
 	// Service Networking
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	databaseName := "tf-test-" + RandString(t, 10)
@@ -853,7 +854,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t *testing.T) {
 	// Service Networking
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	databaseName := "tf-test-" + RandString(t, 10)
@@ -886,7 +887,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *testing.T) {
 	// Service Networking
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	databaseName := "tf-test-" + RandString(t, 10)
@@ -919,7 +920,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *
 
 func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 	// Sqladmin client
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -947,7 +948,7 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	// Sqladmin client
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -984,7 +985,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 	// Sqladmin client
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -1012,7 +1013,7 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_cloneWithSettings(t *testing.T) {
 	// Sqladmin client
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -1040,7 +1041,7 @@ func TestAccSqlDatabaseInstance_cloneWithSettings(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 	// Sqladmin client
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -1220,7 +1221,7 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    GetTestProjectFromEnv(),
+		"project_id":    acctest.GetTestProjectFromEnv(),
 		"key_name":      "tf-test-key-" + RandString(t, 10),
 		"instance_name": "tf-test-sql-" + RandString(t, 10),
 	}
@@ -1254,7 +1255,7 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    GetTestProjectFromEnv(),
+		"project_id":    acctest.GetTestProjectFromEnv(),
 		"key_name":      "tf-test-key-" + RandString(t, 10),
 		"instance_name": "tf-test-sql-" + RandString(t, 10),
 	}
@@ -1340,7 +1341,7 @@ func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_SqlServerAuditConfig(t *testing.T) {
 	// Service Networking
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 	databaseName := "tf-test-" + RandString(t, 10)
 	rootPassword := RandString(t, 15)

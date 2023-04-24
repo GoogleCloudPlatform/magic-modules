@@ -220,7 +220,7 @@ func TestAccDNSManagedZone_forceDestroy(t *testing.T) {
 	//t.Parallel()
 
 	zoneSuffix := RandString(t, 10)
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -624,7 +624,7 @@ func TestAccDNSManagedZone_importWithProject(t *testing.T) {
 	t.Parallel()
 
 	zoneSuffix := RandString(t, 10)
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

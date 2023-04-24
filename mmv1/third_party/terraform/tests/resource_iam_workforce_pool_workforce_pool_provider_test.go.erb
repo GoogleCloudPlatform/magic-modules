@@ -15,7 +15,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 
 	random_suffix := RandString(t, 10)
 	context := map[string]interface{}{
-		"org_id":        GetTestOrgFromEnv(t),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
 		"random_suffix": random_suffix,
 	}
 
@@ -63,7 +63,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_saml(t *testing.T) {
 
 	random_suffix := RandString(t, 10)
 	context := map[string]interface{}{
-		"org_id":        GetTestOrgFromEnv(t),
+		"org_id":        acctest.GetTestOrgFromEnv(t),
 		"random_suffix": random_suffix,
 	}
 

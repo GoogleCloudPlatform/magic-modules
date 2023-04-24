@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestDomainMappingLabelDiffSuppress(t *testing.T) {
@@ -66,7 +67,7 @@ func TestAccCloudRunDomainMapping_foregroundDeletion(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"namespace":     GetTestProjectFromEnv(),
+		"namespace":     acctest.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 

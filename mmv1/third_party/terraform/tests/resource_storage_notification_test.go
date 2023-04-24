@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"os"
 	"reflect"
 	"testing"
@@ -18,7 +19,7 @@ var (
 func TestAccStorageNotification_basic(t *testing.T) {
 	t.Parallel()
 
-	SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
 
 	var notification storage.Notification
 	bucketName := testBucketName(t)
@@ -62,7 +63,7 @@ func TestAccStorageNotification_basic(t *testing.T) {
 func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 	t.Parallel()
 
-	SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
+	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
 
 	var notification storage.Notification
 	bucketName := testBucketName(t)

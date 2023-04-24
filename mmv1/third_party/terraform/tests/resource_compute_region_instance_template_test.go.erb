@@ -4,7 +4,6 @@ package google
 
 <% unless version == 'ga' -%>
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 import (
 	"encoding/json"
 	"fmt"
@@ -16,6 +15,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 <% if version == "ga" -%>
@@ -546,12 +546,12 @@ func TestAccComputeRegionInstanceTemplate_subnet_custom(t *testing.T) {
 
 func TestAccComputeRegionInstanceTemplate_subnet_xpn(t *testing.T) {
 	// Randomness
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	org := GetTestOrgFromEnv(t)
-	billingId := GetTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billingId := acctest.GetTestBillingAccountFromEnv(t)
 	projectName := fmt.Sprintf("tf-testxpn-%d", time.Now().Unix())
 
 	VcrTest(t, resource.TestCase{
@@ -1029,7 +1029,7 @@ func TestAccComputeRegionInstanceTemplate_with18TbScratchDisk(t *testing.T) {
 
 func TestAccComputeRegionInstanceTemplate_imageResourceTest(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 	diskName := "tf-test-disk-" + RandString(t, 10)
 	computeImage := "tf-test-image-" + RandString(t, 10)
@@ -1340,7 +1340,7 @@ func testAccCheckComputeRegionInstanceTemplateExists(t *testing.T, n string, ins
 		panic("Attempted to check existence of Instance template that was nil.")
 	}
 
-	return testAccCheckComputeRegionInstanceTemplateExistsInProject(t, n, GetTestProjectFromEnv(), instanceTemplate.(*compute.InstanceTemplate))
+	return testAccCheckComputeRegionInstanceTemplateExistsInProject(t, n, acctest.GetTestProjectFromEnv(), instanceTemplate.(*compute.InstanceTemplate))
 }
 
 func testAccCheckComputeRegionInstanceTemplateExistsInProject(t *testing.T, n, p string, instanceTemplate *compute.InstanceTemplate) resource.TestCheckFunc {

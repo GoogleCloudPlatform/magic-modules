@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 
 func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 	// Sqladmin client
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instance := BootstrapSharedSQLInstanceBackupRun(t)
@@ -30,7 +31,7 @@ func TestAccDataSourceSqlBackupRun_basic(t *testing.T) {
 
 func TestAccDataSourceSqlBackupRun_notFound(t *testing.T) {
 	// Sqladmin client
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{

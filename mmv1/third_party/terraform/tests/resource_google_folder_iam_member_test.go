@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -12,7 +13,7 @@ import (
 func TestAccFolderIamMember_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -41,10 +42,10 @@ func TestAccFolderIamMember_basic(t *testing.T) {
 
 // Test that multiple IAM bindings can be applied to a folder
 func TestAccFolderIamMember_multiple(t *testing.T) {
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -83,10 +84,10 @@ func TestAccFolderIamMember_multiple(t *testing.T) {
 
 // Test that an IAM binding can be removed from a folder
 func TestAccFolderIamMember_remove(t *testing.T) {
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 // Logging exclusions don't always work when making parallel requests, so run tests serially
@@ -163,7 +164,7 @@ resource "google_logging_project_exclusion" "basic" {
   description = "Basic Project Logging Exclusion"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, name, GetTestProjectFromEnv())
+`, name, acctest.GetTestProjectFromEnv())
 }
 
 func testAccLoggingProjectExclusion_basicUpdated(name string) string {
@@ -173,7 +174,7 @@ resource "google_logging_project_exclusion" "basic" {
   description = "Basic Project Logging Exclusion"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=INFO"
 }
-`, name, GetTestProjectFromEnv())
+`, name, acctest.GetTestProjectFromEnv())
 }
 
 func testAccLoggingProjectExclusion_basicDisabled(name string) string {
@@ -184,7 +185,7 @@ resource "google_logging_project_exclusion" "basic" {
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   disabled    = true
 }
-`, name, GetTestProjectFromEnv())
+`, name, acctest.GetTestProjectFromEnv())
 }
 
 func testAccLoggingProjectExclusion_multipleCfg(exclusionName string) string {
@@ -196,7 +197,7 @@ resource "google_logging_project_exclusion" "basic%d" {
 	description = "Basic Project Logging Exclusion"
 	filter = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, i, exclusionName, i, GetTestProjectFromEnv())
+`, i, exclusionName, i, acctest.GetTestProjectFromEnv())
 	}
 	return s
 }

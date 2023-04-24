@@ -6,10 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceGoogleTagsTagKey_default(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
 	shortName := "tf-test-" + RandString(t, 10)
@@ -29,7 +30,7 @@ func TestAccDataSourceGoogleTagsTagKey_default(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleTagsTagKey_dot(t *testing.T) {
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
 	shortName := "terraform.test." + RandString(t, 10)

@@ -33,7 +33,7 @@ func TestAccApiGatewayApiConfig_apigatewayApiConfigBasicExampleUpdated(t *testin
 
 func TestAccApiGatewayApiConfig_generatedPrefix(t *testing.T) {
 	// Random generated id within resource
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{

@@ -13,7 +13,7 @@ import (
 func TestAccSpannerDatabase_basic(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	rnd := RandString(t, 10)
 	instanceName := fmt.Sprintf("tf-test-%s", rnd)
 	databaseName := fmt.Sprintf("tfgen_%s", rnd)
@@ -550,7 +550,7 @@ func TestValidateDatabaseRetentionPeriod(t *testing.T) {
 }
 
 func TestAccSpannerDatabase_deletionProtection(t *testing.T) {
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -605,7 +605,7 @@ resource "google_spanner_database" "database" {
 <% unless version == 'ga' -%>
 <%# Field is not beta, but google_project_service_identity dependency is -%>
 func TestAccSpannerDatabase_cmek(t *testing.T) {
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{

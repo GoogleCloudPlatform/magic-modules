@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccRedisInstance_update(t *testing.T) {
@@ -194,7 +195,7 @@ func TestAccRedisInstance_regionFromLocation(t *testing.T) {
 	// didn't fall back to that one.
 	region := "us-west1"
 	zone := "us-west1-a"
-	if GetTestRegionFromEnv() == "us-west1" {
+	if acctest.GetTestRegionFromEnv() == "us-west1" {
 		region = "us-central1"
 		zone = "us-central1-a"
 	}

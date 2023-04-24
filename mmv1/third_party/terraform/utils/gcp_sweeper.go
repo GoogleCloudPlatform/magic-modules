@@ -26,17 +26,17 @@ var testResourcePrefixes = []string{
 // SharedConfigForRegion returns a common config setup needed for the sweeper
 // functions for a given region
 func SharedConfigForRegion(region string) (*transport_tpg.Config, error) {
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 	if project == "" {
 		return nil, fmt.Errorf("set project using any of these env variables %v", acctest.ProjectEnvVars)
 	}
 
-	if v := MultiEnvSearch(acctest.CredsEnvVars); v == "" {
+	if v := transport_tpg.MultiEnvSearch(acctest.CredsEnvVars); v == "" {
 		return nil, fmt.Errorf("set credentials using any of these env variables %v", acctest.CredsEnvVars)
 	}
 
 	conf := &transport_tpg.Config{
-		Credentials: GetTestCredsFromEnv(),
+		Credentials: acctest.GetTestCredsFromEnv(),
 		Region:      region,
 		Project:     project,
 	}

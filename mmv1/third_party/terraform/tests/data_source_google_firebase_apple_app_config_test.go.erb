@@ -12,11 +12,11 @@ import (
 
 func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
 	// TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":   GetTestProjectFromEnv(),
+		"project_id":   acctest.GetTestProjectFromEnv(),
 		"bundle_id":    "apple.app." + RandString(t, 5),
 		"display_name": "tf-test Display Name AppleAppConfig DataSource",
 		"app_store_id": 12345,

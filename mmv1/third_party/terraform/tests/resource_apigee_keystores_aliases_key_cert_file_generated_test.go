@@ -15,8 +15,8 @@ func TestAccApigeeKeystoresAliasesKeyCertFile_apigeeKeystoresAliasesKeyCertFileT
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          GetTestOrgFromEnv(t),
-		"billing_account": GetTestBillingAccountFromEnv(t),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   RandString(t, 10),
 	}
 

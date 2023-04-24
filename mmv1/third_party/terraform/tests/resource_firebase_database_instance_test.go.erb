@@ -26,8 +26,8 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    GetTestProjectFromEnv(),
-		"region":        GetTestRegionFromEnv(),
+		"project_id":    acctest.GetTestProjectFromEnv(),
+		"region":        acctest.GetTestRegionFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 

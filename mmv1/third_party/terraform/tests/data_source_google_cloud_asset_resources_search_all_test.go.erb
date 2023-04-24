@@ -4,17 +4,17 @@ package google
 <% unless version == 'ga' -%>
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceGoogleCloudAssetResourcesSearchAll_basic(t *testing.T) {
 	t.Parallel()
 
-	project := GetTestProjectFromEnv()
+	project := acctest.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

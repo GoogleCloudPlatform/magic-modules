@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"strings"
 	"testing"
 
@@ -16,7 +17,7 @@ func TestAccActiveDirectoryDomainTrust_activeDirectoryDomainTrustBasicExample(t 
 
 	// This test continues to fail due to AD setup required
 	// Skipping in VCR to allow for fully successful test runs
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{

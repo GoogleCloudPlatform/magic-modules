@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"sort"
 	"testing"
@@ -16,7 +17,7 @@ import (
 func TestAccFolderIamBinding_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -46,10 +47,10 @@ func TestAccFolderIamBinding_basic(t *testing.T) {
 // Test that multiple IAM bindings can be applied to a folder, one at a time
 func TestAccFolderIamBinding_multiple(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -93,10 +94,10 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 // Test that multiple IAM bindings can be applied to a folder all at once
 func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -131,7 +132,7 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 func TestAccFolderIamBinding_update(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -181,10 +182,10 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 // Test that an IAM binding can be removed from a folder
 func TestAccFolderIamBinding_remove(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

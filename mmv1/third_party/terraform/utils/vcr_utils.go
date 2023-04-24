@@ -51,9 +51,9 @@ type VcrSource struct {
 	source rand.Source
 }
 
-func isVcrEnabled() bool {
-	return acctest.IsVcrEnabled()
-}
+// func acctest.IsVcrEnabled() bool {
+// 	return acctest.IsVcrEnabled()
+// }
 
 // Produces a rand.Source for VCR testing based on the given mode.
 // In RECORDING mode, generates a new seed and saves it to a file, using the seed for the source
@@ -137,7 +137,7 @@ func vcrFileName(name string) string {
 // VcrTest is a wrapper for resource.Test to swap out providers for VCR providers and handle VCR specific things
 // Can be called when VCR is not enabled, and it will behave as normal
 func VcrTest(t *testing.T, c resource.TestCase) {
-	if isVcrEnabled() {
+	if acctest.IsVcrEnabled() {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
 		c = initializeReleaseDiffTest(c, t.Name())
@@ -152,7 +152,7 @@ func closeRecorder(t *testing.T) {
 	configsLock.RUnlock()
 	if ok {
 		// We did not cache the config if it does not use VCR
-		if !t.Failed() && isVcrEnabled() {
+		if !t.Failed() && acctest.IsVcrEnabled() {
 			// If a test succeeds, write new seed/yaml to files
 			err := config.Client.Transport.(*recorder.Recorder).Stop()
 			if err != nil {
@@ -185,7 +185,7 @@ func closeRecorder(t *testing.T) {
 	configsLock.RUnlock()
 	if fwOk {
 		// We did not cache the config if it does not use VCR
-		if !t.Failed() && isVcrEnabled() {
+		if !t.Failed() && acctest.IsVcrEnabled() {
 			// If a test succeeds, write new seed/yaml to files
 			err := fwProvider.client.Transport.(*recorder.Recorder).Stop()
 			if err != nil {
@@ -393,7 +393,7 @@ type frameworkTestProvider struct {
 // Configure is here to overwrite the frameworkProvider configure function for VCR testing
 func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	p.frameworkProvider.Configure(ctx, req, resp)
-	if isVcrEnabled() {
+	if acctest.IsVcrEnabled() {
 		if resp.Diagnostics.HasError() {
 			return
 		}
@@ -431,7 +431,7 @@ func configureApiClient(ctx context.Context, p *frameworkProvider, diags *fwDiag
 // GetSDKProvider gets the SDK provider with an overwritten configure function to be called by MuxedProviders
 func GetSDKProvider(testName string) *schema.Provider {
 	prov := Provider()
-	if isVcrEnabled() {
+	if acctest.IsVcrEnabled() {
 		old := prov.ConfigureContextFunc
 		prov.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			return getCachedConfig(ctx, d, old, testName)

@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"testing"
 
@@ -34,7 +35,7 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 
 func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 	// Multiple fine grained items applied in same config
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	// Generate a config of two config keys

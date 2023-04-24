@@ -3,6 +3,7 @@ package google
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"strings"
 	"testing"
@@ -895,7 +896,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	projectID := GetTestProjectFromEnv()
+	projectID := acctest.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -934,7 +935,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 	tableID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 	connectionID := fmt.Sprintf("tf_test_%s", RandString(t, 10))
 
-	projectID := GetTestProjectFromEnv()
+	projectID := acctest.GetTestProjectFromEnv()
 
 	VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1013,7 +1014,7 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": RandString(t, 8),
-		"project":       GetTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 	}
 
 	VcrTest(t, resource.TestCase{

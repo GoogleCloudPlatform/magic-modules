@@ -4,12 +4,13 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceRegionNetworkEndpointGroup_basic(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
-		"project":       GetTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 		"region":        "us-central1",
 		"random_suffix": RandString(t, 10),
 	}

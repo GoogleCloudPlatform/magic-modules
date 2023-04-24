@@ -12,7 +12,7 @@ func TestAccDataSourceGoogleFirebaseWebApp(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":   GetTestProjectFromEnv(),
+		"project_id":   acctest.GetTestProjectFromEnv(),
 		"display_name": "tf_test Display Name WebApp DataSource",
 	}
 

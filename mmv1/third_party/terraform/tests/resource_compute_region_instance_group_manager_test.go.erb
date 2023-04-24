@@ -4,13 +4,13 @@ package google
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"log"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func init() {
@@ -171,7 +171,7 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 
 func TestAccRegionInstanceGroupManager_updateLifecycle(t *testing.T) {
 	// Randomness in instance template
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	tag1 := "tag1"
@@ -207,7 +207,7 @@ func TestAccRegionInstanceGroupManager_updateLifecycle(t *testing.T) {
 
 func TestAccRegionInstanceGroupManager_rollingUpdatePolicy(t *testing.T) {
 	// Randomness in instance template
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	igm := fmt.Sprintf("tf-test-rigm-%s", RandString(t, 10))
@@ -255,7 +255,7 @@ func TestAccRegionInstanceGroupManager_rollingUpdatePolicy(t *testing.T) {
 
 func TestAccRegionInstanceGroupManager_separateRegions(t *testing.T) {
 	// Randomness in instance template
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	igm1 := fmt.Sprintf("tf-test-rigm-%s", RandString(t, 10))

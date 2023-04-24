@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccLoggingLogView_loggingLogViewBasicExampleUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       GetTestProjectFromEnv(),
+		"project":       acctest.GetTestProjectFromEnv(),
 		"random_suffix": RandString(t, 10),
 	}
 

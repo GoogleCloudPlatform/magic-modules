@@ -4,7 +4,6 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"regexp"
 	"strings"
 	"testing"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	compute "google.golang.org/api/compute/v0.beta"
 )
@@ -19,7 +19,7 @@ import (
 func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 	// This resource uses custom retry logic that cannot be sped up without
 	// modifying the actual resource
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -44,7 +44,7 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 	// This resource uses custom retry logic that cannot be sped up without
 	// modifying the actual resource
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -75,7 +75,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
 	// This resource uses custom retry logic that cannot be sped up without
 	// modifying the actual resource
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)
@@ -107,7 +107,7 @@ func TestAccDataflowFlexTemplateJob_streamUpdateFail(t *testing.T) {
 func TestAccDataflowFlexTemplateJob_withServiceAccount(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randStr := RandString(t, 10)

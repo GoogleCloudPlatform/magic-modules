@@ -4,7 +4,6 @@ package google
 import (
 	"fmt"
 	"io/ioutil"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"log"
 	"strings"
 	"testing"
@@ -15,6 +14,7 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/dataproc/v1"
 )
@@ -315,7 +315,7 @@ func testAccCheckDataprocJobDestroyProducer(t *testing.T) func(s *terraform.Stat
 			}
 			attributes := rs.Primary.Attributes
 
-			project, err := GetTestProject(rs.Primary, config)
+			project, err := acctest.GetTestProject(rs.Primary, config)
 			if err != nil {
 				return err
 			}
@@ -345,7 +345,7 @@ func testAccCheckDataprocJobCompletesSuccessfully(t *testing.T, n string, job *d
 
 		attributes := s.RootModule().Resources[n].Primary.Attributes
 		region := attributes["region"]
-		project, err := GetTestProject(s.RootModule().Resources[n].Primary, config)
+		project, err := acctest.GetTestProject(s.RootModule().Resources[n].Primary, config)
 		if err != nil {
 			return err
 		}
@@ -409,7 +409,7 @@ func testAccCheckDataprocJobExists(t *testing.T, n string, job *dataproc.Job) re
 		config := GoogleProviderConfig(t)
 		parts := strings.Split(s.RootModule().Resources[n].Primary.ID, "/")
 		jobId := parts[len(parts)-1]
-		project, err := GetTestProject(s.RootModule().Resources[n].Primary, config)
+		project, err := acctest.GetTestProject(s.RootModule().Resources[n].Primary, config)
 		if err != nil {
 			return err
 		}

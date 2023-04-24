@@ -47,7 +47,7 @@ func TestAccComputeInstanceGroup_basic(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateId:     fmt.Sprintf("%s/%s/%s", GetTestProjectFromEnv(), zone, instanceName),
+				ImportStateId:     fmt.Sprintf("%s/%s/%s", acctest.GetTestProjectFromEnv(), zone, instanceName),
 			},
 		},
 	})

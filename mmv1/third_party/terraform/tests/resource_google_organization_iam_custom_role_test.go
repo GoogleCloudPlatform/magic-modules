@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"reflect"
 	"sort"
 	"testing"
@@ -13,7 +14,7 @@ import (
 func TestAccOrganizationIamCustomRole_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	roleId := "tfIamCustomRole" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
@@ -53,7 +54,7 @@ func TestAccOrganizationIamCustomRole_basic(t *testing.T) {
 func TestAccOrganizationIamCustomRole_undelete(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	roleId := "tfIamCustomRole" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
@@ -83,7 +84,7 @@ func TestAccOrganizationIamCustomRole_undelete(t *testing.T) {
 func TestAccOrganizationIamCustomRole_createAfterDestroy(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	roleId := "tfIamCustomRole" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{

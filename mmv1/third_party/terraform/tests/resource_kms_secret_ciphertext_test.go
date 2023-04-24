@@ -3,6 +3,7 @@ package google
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"log"
 	"testing"
 

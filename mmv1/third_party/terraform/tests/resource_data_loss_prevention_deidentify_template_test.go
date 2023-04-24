@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_infoTypeTransformationsUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  GetTestOrgFromEnv(t),
+		"organization":  acctest.GetTestOrgFromEnv(t),
 		"random_suffix": RandString(t, 10),
 		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
@@ -434,7 +435,7 @@ func TestAccDataLossPreventionDeidentifyTemplate_dlpDeidentifyTemplate_recordTra
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"organization":  GetTestOrgFromEnv(t),
+		"organization":  acctest.GetTestOrgFromEnv(t),
 		"random_suffix": RandString(t, 10),
 		"kms_key_name":  BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
 	}
