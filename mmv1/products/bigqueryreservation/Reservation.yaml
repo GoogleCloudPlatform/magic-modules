@@ -21,13 +21,13 @@ description: |
   A reservation is a mechanism used to guarantee BigQuery slots to users.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Introduction to Reservations": "https://cloud.google.com/bigquery/docs/reservations-intro"
-  api: "https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservations/create"
+    'Introduction to Reservations': 'https://cloud.google.com/bigquery/docs/reservations-intro'
+  api: 'https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservations/create'
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_reservation_basic"
-    primary_resource_id: "reservation"
+    name: 'bigquery_reservation_basic'
+    primary_resource_id: 'reservation'
     vars:
       name: 'my-reservation'
 parameters:
