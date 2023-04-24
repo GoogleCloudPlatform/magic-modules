@@ -14,7 +14,7 @@ func TestAccDataSourceGoogleForwardingRule(t *testing.T) {
 	ruleName := fmt.Sprintf("tf-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{

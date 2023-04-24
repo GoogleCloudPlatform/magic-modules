@@ -506,7 +506,7 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 	if os.Getenv(google_tpg.TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", google_tpg.TestEnvVar)
 	}
-	google_tpg.AccTestPreCheck(t)
+	acctest.AccTestPreCheck(t)
 
 	creds := google_tpg.GetTestCredsFromEnv()
 	proj := google_tpg.GetTestProjectFromEnv()
@@ -534,7 +534,7 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	if os.Getenv(google_tpg.TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", google_tpg.TestEnvVar)
 	}
-	google_tpg.AccTestPreCheck(t)
+	acctest.AccTestPreCheck(t)
 
 	serviceaccount := transport_tpg.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 	creds := google_tpg.GetTestCredsFromEnv()
@@ -564,7 +564,7 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 	if os.Getenv(google_tpg.TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", google_tpg.TestEnvVar)
 	}
-	google_tpg.AccTestPreCheck(t)
+	acctest.AccTestPreCheck(t)
 
 	creds := google_tpg.GetTestCredsFromEnv()
 	proj := google_tpg.GetTestProjectFromEnv()
@@ -604,7 +604,7 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 	if os.Getenv(google_tpg.TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", google_tpg.TestEnvVar)
 	}
-	google_tpg.AccTestPreCheck(t)
+	acctest.AccTestPreCheck(t)
 
 	creds := google_tpg.GetTestCredsFromEnv()
 	proj := google_tpg.GetTestProjectFromEnv()

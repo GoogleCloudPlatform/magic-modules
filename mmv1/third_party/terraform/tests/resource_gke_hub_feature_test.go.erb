@@ -24,7 +24,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -180,7 +180,7 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{

@@ -26,7 +26,7 @@ func TestAccGKEHubFeatureMembership_gkehubFeatureAcmUpdate(t *testing.T) {
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -336,7 +336,7 @@ func TestAccGKEHubFeatureMembership_gkehubFeatureAcmAllFields(t *testing.T) {
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -595,7 +595,7 @@ func TestAccGKEHubFeatureMembership_gkehubFeatureAcmOci(t *testing.T) {
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -793,7 +793,7 @@ func TestAccGKEHubFeatureMembership_gkehubFeatureMesh(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{

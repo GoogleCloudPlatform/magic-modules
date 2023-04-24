@@ -13,7 +13,7 @@ func TestAccComputeRouterPeer_basic(t *testing.T) {
 
 	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -41,7 +41,7 @@ func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 
 	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -74,7 +74,7 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 
 	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -117,7 +117,7 @@ func TestAccComputeRouterPeer_bfd(t *testing.T) {
 
 	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -160,7 +160,7 @@ func TestAccComputeRouterPeer_routerApplianceInstance(t *testing.T) {
 
 	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -184,7 +184,7 @@ func TestAccComputeRouterPeer_Ipv6Basic(t *testing.T) {
 	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
 	resourceName := "google_compute_router_peer.foobar"
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -211,7 +211,7 @@ func TestAccComputeRouterPeer_UpdateIpv6Address(t *testing.T) {
 	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
 	resourceName := "google_compute_router_peer.foobar"
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -251,7 +251,7 @@ func TestAccComputeRouterPeer_EnableDisableIpv6(t *testing.T) {
 	routerName := fmt.Sprintf("tf-test-router-%s", RandString(t, 10))
 	resourceName := "google_compute_router_peer.foobar"
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
 		Steps: []resource.TestStep{

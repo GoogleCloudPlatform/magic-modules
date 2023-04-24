@@ -939,7 +939,7 @@ func getInitializedConfig(t *testing.T) *transport_tpg.Config {
 	// Migrate tests are non standard and handle the config directly
 	SkipIfVcr(t)
 	// Check that all required environment variables are set
-	AccTestPreCheck(t)
+	acctest.AccTestPreCheck(t)
 
 	config := &transport_tpg.Config{
 		Project:     GetTestProjectFromEnv(),
