@@ -204,6 +204,7 @@ module "project-services" {
     "dataflow.googleapis.com",
     "dataform.googleapis.com",
     "datafusion.googleapis.com",
+    "datamigration.googleapis.com",
     "dataplex.googleapis.com",
     "dataproc.googleapis.com",
     "datastore.googleapis.com",
