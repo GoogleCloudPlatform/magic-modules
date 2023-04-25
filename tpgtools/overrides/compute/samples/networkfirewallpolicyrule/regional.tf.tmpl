@@ -40,7 +40,7 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
       name = "tagValues/${google_tags_tag_value.basic_value.name}"
     }
     
-    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.name]
+    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.id]
   }
 }
 
