@@ -140,7 +140,7 @@ properties:
     description: |
       A hash of the resource.
     output: true
-    - !ruby/object:Api::Type::NestedObject
+  - !ruby/object:Api::Type::NestedObject
       name: "encryptionConfig"
       description: |
         EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
