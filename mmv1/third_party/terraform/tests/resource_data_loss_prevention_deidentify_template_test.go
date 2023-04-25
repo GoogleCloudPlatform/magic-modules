@@ -559,14 +559,6 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
       }
       field_transformations {
         fields {
-          name = "unconditionally-replace-field"
-        }
-        primitive_transformation {
-          replace_with_info_type_config = false
-        }
-      }
-      field_transformations {
-        fields {
           name = "unconditionally-char-masked-field"
         }
         primitive_transformation {
@@ -816,16 +808,6 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
               string_value = "dude.born.after.shrek2@example.com"
             }
           }
-        }
-      }
-
-      field_transformations {
-        fields {
-          name = "unconditionally-replace-field"
-        }
-        primitive_transformation {
-          # update values of replace_with_info_type_config
-          replace_with_info_type_config = true
         }
       }
 
