@@ -1,6 +1,7 @@
 name: Build and Unit Test GA Provider
+
 on:
-  repository_dispatch:
+  workflow_dispatch:
     types: [build-ga-provider]
     inputs:
       repo:
@@ -14,6 +15,7 @@ on:
       branch:
         description: 'The branch or sha to execute against'
         required: true
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
