@@ -2,7 +2,6 @@ name: Build and Unit Test GA Provider
 
 on:
   workflow_dispatch:
-    types: [build-ga-provider]
     inputs:
       repo:
         description: 'The owner the fork'
