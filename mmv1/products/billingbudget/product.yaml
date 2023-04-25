@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Product
 name: Billing
 # Strictly speaking it should be Billing Budget but setting it to Cloud Billing will put in the same doc section as billing accounts.
-display_name: Cloud Billing 
+display_name: Cloud Billing
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

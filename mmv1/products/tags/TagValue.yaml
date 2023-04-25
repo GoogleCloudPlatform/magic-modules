@@ -71,7 +71,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: namespacedName
     description: |
-      Output only. Namespaced name of the TagValue. Will be in the format {organizationId}/{tag_key_short_name}/{shortName}.
+      Output only. Namespaced name of the TagValue. Will be in the format {parentNamespace}/{tagKeyShortName}/{shortName}.
     output: true
   - !ruby/object:Api::Type::String
     name: description
