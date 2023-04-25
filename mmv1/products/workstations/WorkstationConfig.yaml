@@ -219,16 +219,19 @@ properties:
                 name: 'enableSecureBoot'
                 description: |
                   Whether the instance has Secure Boot enabled.
+                default_from_api: true
                 send_empty_value: true
               - !ruby/object:Api::Type::Boolean
                 name: 'enableVtpm'
                 description: |
                   Whether the instance has the vTPM enabled.
+                default_from_api: true
                 send_empty_value: true
               - !ruby/object:Api::Type::Boolean
                 name: 'enableIntegrityMonitoring'
                 description: |
                   Whether the instance has integrity monitoring enabled.
+                default_from_api: true
                 send_empty_value: true
           - !ruby/object:Api::Type::NestedObject
             name: 'confidentialInstanceConfig'
@@ -241,6 +244,7 @@ properties:
                 # TODO(esu): Change this to required in next breaking release.
                 description: |
                   Whether the instance has confidential compute enabled.
+                default_from_api: true
                 send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: 'persistentDirectories'
