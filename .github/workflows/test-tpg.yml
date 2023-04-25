@@ -3,7 +3,7 @@ name: Build and Unit Test GA Provider
 on:
   workflow_dispatch:
     inputs:
-      repo:
+      owner:
         description: 'The owner the fork'
         required: false
         default: 'modular-magician'
