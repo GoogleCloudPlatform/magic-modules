@@ -62,8 +62,6 @@ examples:
     vars:
       cert_name: "self-managed-cert"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_read: templates/terraform/pre_read/certificatemanager_certificate.go.erb
-  post_create: templates/terraform/post_create/certificatemanager_certificate.go.erb
   constants: templates/terraform/constants/cert_manager.erb
 parameters:
   - !ruby/object:Api::Type::String

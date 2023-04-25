@@ -46,7 +46,7 @@ func TestAccCertificateManagerCertificate_migration(t *testing.T) {
 			{
 				ResourceName:            "google_certificate_manager_certificate.default",
 				ImportState:             true,
-				ImportStateVerifyIgnore: []string{"self_managed"},
+				ImportStateVerifyIgnore: []string{"location", "self_managed"},
 				ProviderFactories:       newVersion,
 			},
 		},
@@ -69,7 +69,9 @@ func configWithDescritption(name string) string {
 func newConfigWithDescription(name string) string {
 	return fmt.Sprintf(`
 	provider "mynewprovider" {}
+	
 	resource "google_certificate_manager_certificate" "default" {
+		provider    = mynewprovider
 		name        = "%s"
 		description = "Migrated Global cert"
 		self_managed {
