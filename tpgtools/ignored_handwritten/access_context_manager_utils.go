@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func servicePerimeterImport(d *schema.ResourceData, config *Config) error {
+func servicePerimeterImport(d *schema.ResourceData, config *transport_tpg.Config) error {
 	// current import_formats can't import fields with forward slashes in their value
 	if err := ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 		return err
@@ -22,7 +22,7 @@ func servicePerimeterImport(d *schema.ResourceData, config *Config) error {
 	return nil
 }
 
-func accessLevelImport(d *schema.ResourceData, config *Config) error {
+func accessLevelImport(d *schema.ResourceData, config *transport_tpg.Config) error {
 	// current import_formats can't import fields with forward slashes in their value
 	if err := ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 		return err

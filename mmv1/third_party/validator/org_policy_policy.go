@@ -3,6 +3,8 @@ package google
 import (
 	"fmt"
 	"strings"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
 func resourceConverterOrgPolicyPolicy() ResourceConverter {
@@ -12,7 +14,7 @@ func resourceConverterOrgPolicyPolicy() ResourceConverter {
 	}
 }
 
-func GetV2OrgPoliciesCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetV2OrgPoliciesCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	assetNamePattern, assetType, err := getAssetNameAndTypeFromParent(d.Get("parent").(string))
 	if err != nil {
 		return []Asset{}, err
@@ -35,7 +37,7 @@ func GetV2OrgPoliciesCaiObject(d TerraformResourceData, config *Config) ([]Asset
 
 }
 
-func GetV2OrgPoliciesApiObject(d TerraformResourceData, config *Config) (V2OrgPolicies, error) {
+func GetV2OrgPoliciesApiObject(d TerraformResourceData, config *transport_tpg.Config) (V2OrgPolicies, error) {
 	spec, err := expandSpecV2OrgPolicies(d.Get("spec").([]interface{}))
 	if err != nil {
 		return V2OrgPolicies{}, err
