@@ -22,7 +22,7 @@ func TestAccDataSourceGoogleBeyondcorpAppGateway_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppGateway_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
 				),
 			},
 		},
@@ -44,7 +44,7 @@ func TestAccDataSourceGoogleBeyondcorpAppGateway_optionalProject(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppGateway_optionalProject(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
 				),
 			},
 		},
@@ -66,7 +66,7 @@ func TestAccDataSourceGoogleBeyondcorpAppGateway_optionalRegion(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppGateway_optionalRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
 				),
 			},
 		},
@@ -88,7 +88,7 @@ func TestAccDataSourceGoogleBeyondcorpAppGateway_optionalProjectRegion(t *testin
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppGateway_optionalProjectRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_gateway.foo", "google_beyondcorp_app_gateway.foo"),
 				),
 			},
 		},

@@ -23,7 +23,7 @@ func TestAccDataSourceGoogleFirebaseHostingChannel(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleFirebaseHostingChannel(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState(
+					acctest.CheckDataSourceStateMatchesResourceState(
 						"data.google_firebase_hosting_channel.channel",
 						"google_firebase_hosting_channel.channel",
 					),

@@ -21,7 +21,7 @@ func TestAccDataSourceGoogleSourceRepoRepository_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleSourceRepoRepositoryConfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_sourcerepo_repository.bar", "google_sourcerepo_repository.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_sourcerepo_repository.bar", "google_sourcerepo_repository.foo"),
 				),
 			},
 		},

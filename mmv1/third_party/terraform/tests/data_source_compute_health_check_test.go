@@ -18,7 +18,7 @@ func TestAccComputeHealthCheckDatasource_basic(t *testing.T) {
 			{
 				Config: testAccComputeHealthCheckDatasourceConfig(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_compute_health_check.hc", "google_compute_health_check.hc"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_health_check.hc", "google_compute_health_check.hc"),
 				),
 			},
 		},

@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 

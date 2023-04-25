@@ -22,7 +22,7 @@ func TestAccDataSourceComputeNetworkPeering_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceComputeNetworkPeering_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_compute_network_peering.peering1_ds", "google_compute_network_peering.peering1"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_network_peering.peering1_ds", "google_compute_network_peering.peering1"),
 				),
 			},
 		},

@@ -98,7 +98,7 @@ func testAccCheckActiveDirectoryDomainDestroyProducer(t *testing.T) func(s *terr
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}{{name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{ActiveDirectoryBasePath}}{{name}}")
 			if err != nil {
 				return err
 			}

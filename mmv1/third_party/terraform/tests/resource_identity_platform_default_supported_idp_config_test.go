@@ -55,7 +55,7 @@ func testAccCheckIdentityPlatformDefaultSupportedIdpConfigDestroyProducer(t *tes
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{IdentityPlatformBasePath}}projects/{{project}}/defaultSupportedIdpConfigs/{{client_id}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{IdentityPlatformBasePath}}projects/{{project}}/defaultSupportedIdpConfigs/{{client_id}}")
 			if err != nil {
 				return err
 			}

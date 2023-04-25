@@ -425,7 +425,7 @@ func testAccCheckDeploymentManagerDeploymentDestroyProducer(t *testing.T) func(s
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{DeploymentManagerBasePath}}projects/{{project}}/global/deployments/{{name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{DeploymentManagerBasePath}}projects/{{project}}/global/deployments/{{name}}")
 			if err != nil {
 				return err
 			}

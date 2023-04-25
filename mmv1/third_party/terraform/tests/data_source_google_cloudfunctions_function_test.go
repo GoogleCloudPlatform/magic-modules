@@ -27,7 +27,7 @@ func TestAccDataSourceGoogleCloudFunctionsFunction_basic(t *testing.T) {
 				Config: testAccDataSourceGoogleCloudFunctionsFunctionConfig(functionName,
 					bucketName, zipFilePath),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState(funcDataNameHttp,
+					acctest.CheckDataSourceStateMatchesResourceState(funcDataNameHttp,
 						"google_cloudfunctions_function.function_http"),
 				),
 			},

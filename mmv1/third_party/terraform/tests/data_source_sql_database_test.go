@@ -22,7 +22,7 @@ func TestAccDataSourceSqlDatabase_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceSqlDatabase_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_sql_database.qa",
 						"google_sql_database.db",
 						map[string]struct{}{

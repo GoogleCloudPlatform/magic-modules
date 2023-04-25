@@ -184,7 +184,7 @@ func testAccCheckIAM2AccessBoundaryPolicyDestroyProducer(t *testing.T) func(s *t
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{IAM2BasePath}}policies/{{parent}}/accessboundarypolicies/{{name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{IAM2BasePath}}policies/{{parent}}/accessboundarypolicies/{{name}}")
 			if err != nil {
 				return err
 			}

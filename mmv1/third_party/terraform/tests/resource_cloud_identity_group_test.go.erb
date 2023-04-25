@@ -147,7 +147,7 @@ func testAccCheckCloudIdentityGroupDestroyProducer(t *testing.T) func(s *terrafo
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{CloudIdentityBasePath}}{{name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{CloudIdentityBasePath}}{{name}}")
 			if err != nil {
 				return err
 			}

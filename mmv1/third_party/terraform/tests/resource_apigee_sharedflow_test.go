@@ -129,7 +129,7 @@ func testAccCheckApigeeSharedFlowDestroyProducer(t *testing.T) func(s *terraform
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
 			if err != nil {
 				return err
 			}

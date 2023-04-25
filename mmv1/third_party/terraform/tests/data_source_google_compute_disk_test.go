@@ -22,7 +22,7 @@ func TestAccDataSourceGoogleComputeDisk_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleComputeDisk_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_compute_disk.foo", "google_compute_disk.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_disk.foo", "google_compute_disk.foo"),
 				),
 			},
 		},

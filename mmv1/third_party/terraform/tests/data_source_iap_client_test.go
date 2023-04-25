@@ -23,7 +23,7 @@ func TestAccIapClient_Datasource_basic(t *testing.T) {
 			{
 				Config: testAccIapClientDatasourceConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceStateWithIgnores(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_iap_client.project_client",
 						"google_iap_client.project_client",
 						map[string]struct{}{

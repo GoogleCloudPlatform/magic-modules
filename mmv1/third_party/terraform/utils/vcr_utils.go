@@ -51,9 +51,9 @@ type VcrSource struct {
 	source rand.Source
 }
 
-// func acctest.IsVcrEnabled() bool {
-// 	return acctest.IsVcrEnabled()
-// }
+func isVcrEnabled() bool {
+	return acctest.IsVcrEnabled()
+}
 
 // Produces a rand.Source for VCR testing based on the given mode.
 // In RECORDING mode, generates a new seed and saves it to a file, using the seed for the source

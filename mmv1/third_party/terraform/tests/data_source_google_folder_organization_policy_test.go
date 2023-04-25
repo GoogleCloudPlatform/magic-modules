@@ -18,7 +18,7 @@ func TestAccDataSourceGoogleFolderOrganizationPolicy_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleFolderOrganizationPolicy_basic(org, folder),
-				Check: CheckDataSourceStateMatchesResourceState(
+				Check: acctest.CheckDataSourceStateMatchesResourceState(
 					"data.google_folder_organization_policy.data",
 					"google_folder_organization_policy.resource",
 				),

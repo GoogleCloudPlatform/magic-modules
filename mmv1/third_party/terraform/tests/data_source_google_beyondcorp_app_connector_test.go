@@ -22,7 +22,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -44,7 +44,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProject(t *testing.T)
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_optionalProject(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -66,7 +66,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalRegion(t *testing.T) 
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_optionalRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},
@@ -88,7 +88,7 @@ func TestAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(t *test
 			{
 				Config: testAccDataSourceGoogleBeyondcorpAppConnector_optionalProjectRegion(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_beyondcorp_app_connector.foo", "google_beyondcorp_app_connector.foo"),
 				),
 			},
 		},

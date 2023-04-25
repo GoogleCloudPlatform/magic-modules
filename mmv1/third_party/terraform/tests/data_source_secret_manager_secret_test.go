@@ -22,7 +22,7 @@ func TestAccDataSourceSecretManagerSecret_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceSecretManagerSecret_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_secret_manager_secret.foo", "google_secret_manager_secret.bar"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_secret_manager_secret.foo", "google_secret_manager_secret.bar"),
 				),
 			},
 		},

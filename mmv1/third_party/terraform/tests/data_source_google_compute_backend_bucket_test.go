@@ -21,7 +21,7 @@ func TestAccDataSourceComputeBackendBucket_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeBackendBucket_basic(backendBucketName, bucketName),
-				Check:  CheckDataSourceStateMatchesResourceState("data.google_compute_backend_bucket.baz", "google_compute_backend_bucket.foobar"),
+				Check:  acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_backend_bucket.baz", "google_compute_backend_bucket.foobar"),
 			},
 		},
 	})

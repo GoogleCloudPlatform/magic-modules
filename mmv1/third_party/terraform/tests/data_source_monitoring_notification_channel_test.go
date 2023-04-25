@@ -17,7 +17,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_byDisplayName(t *testi
 			{
 				Config: testAccDataSourceGoogleMonitoringNotificationChannel_byDisplayName(fmt.Sprintf("tf-test-%d", RandInt(t))),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState(
+					acctest.CheckDataSourceStateMatchesResourceState(
 						"data.google_monitoring_notification_channel.default",
 						"google_monitoring_notification_channel.default"),
 				),
@@ -34,7 +34,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_byTypeAndLabel(t *test
 			{
 				Config: testAccDataSourceGoogleMonitoringNotificationChannel_byTypeAndLabel(fmt.Sprintf("tf-test-%d", RandInt(t))),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState(
+					acctest.CheckDataSourceStateMatchesResourceState(
 						"data.google_monitoring_notification_channel.default",
 						"google_monitoring_notification_channel.default"),
 				),
@@ -51,7 +51,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_UserLabel(t *testing.T
 			{
 				Config: testAccDataSourceGoogleMonitoringNotificationChannel_byTypeAndUserLabel(fmt.Sprintf("tf-test-%d", RandInt(t))),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState(
+					acctest.CheckDataSourceStateMatchesResourceState(
 						"data.google_monitoring_notification_channel.default",
 						"google_monitoring_notification_channel.default"),
 				),
@@ -68,7 +68,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_byDisplayNameAndType(t
 			{
 				Config: testAccDataSourceGoogleMonitoringNotificationChannel_byDisplayNameAndType(fmt.Sprintf("tf-test-%d", RandInt(t))),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState(
+					acctest.CheckDataSourceStateMatchesResourceState(
 						"data.google_monitoring_notification_channel.email",
 						"google_monitoring_notification_channel.email"),
 				),

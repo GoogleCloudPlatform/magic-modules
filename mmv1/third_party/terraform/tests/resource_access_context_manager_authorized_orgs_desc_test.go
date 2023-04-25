@@ -64,7 +64,7 @@ func testAccCheckAccessContextManagerAuthorizedOrgsDescDestroyProducer(t *testin
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{name}}")
 			if err != nil {
 				return err
 			}

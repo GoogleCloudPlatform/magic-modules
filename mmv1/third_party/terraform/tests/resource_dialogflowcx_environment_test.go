@@ -260,7 +260,7 @@ func testAccCheckDialogflowCXEnvironmentDestroyProducer(t *testing.T) func(s *te
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{DialogflowCXBasePath}}{{parent}}/environments/{{name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{DialogflowCXBasePath}}{{parent}}/environments/{{name}}")
 			if err != nil {
 				return err
 			}

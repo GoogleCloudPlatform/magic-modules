@@ -18,7 +18,7 @@ func TestAccRedisInstanceDatasource_basic(t *testing.T) {
 			{
 				Config: testAccRedisInstanceDatasourceConfig(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_redis_instance.redis", "google_redis_instance.redis"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_redis_instance.redis", "google_redis_instance.redis"),
 				),
 			},
 		},

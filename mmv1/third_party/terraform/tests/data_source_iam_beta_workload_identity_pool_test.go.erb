@@ -24,7 +24,7 @@ func TestAccDataSourceIAMBetaWorkloadIdentityPool_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceIAMBetaWorkloadIdentityPoolBasic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_iam_workload_identity_pool.foo", "google_iam_workload_identity_pool.bar"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_iam_workload_identity_pool.foo", "google_iam_workload_identity_pool.bar"),
 				),
 			},
 		},

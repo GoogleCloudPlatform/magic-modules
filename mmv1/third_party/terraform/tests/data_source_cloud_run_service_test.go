@@ -22,7 +22,7 @@ func TestAccDataSourceGoogleCloudRunService_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleCloudRunService_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_cloud_run_service.foo", "google_cloud_run_service.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_cloud_run_service.foo", "google_cloud_run_service.foo"),
 				),
 			},
 		},
@@ -44,7 +44,7 @@ func TestAccDataSourceGoogleCloudRunService_optionalProject(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleCloudRunService_optionalProject(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_cloud_run_service.foo", "google_cloud_run_service.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_cloud_run_service.foo", "google_cloud_run_service.foo"),
 				),
 			},
 		},

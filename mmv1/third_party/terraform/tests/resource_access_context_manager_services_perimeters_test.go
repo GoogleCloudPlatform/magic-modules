@@ -57,7 +57,7 @@ func testAccCheckAccessContextManagerServicePerimetersDestroyProducer(t *testing
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{parent}}/servicePerimeters")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{parent}}/servicePerimeters")
 			if err != nil {
 				return err
 			}

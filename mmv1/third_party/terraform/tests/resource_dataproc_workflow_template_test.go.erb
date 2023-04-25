@@ -199,7 +199,7 @@ func funcAccTestDataprocWorkflowTemplateCheckDestroy(t *testing.T) func(s *terra
 
       config := GoogleProviderConfig(t)
 
-      url, err := replaceVarsForTest(config, rs, "{{DataprocBasePath}}projects/{{project}}/locations/{{location}}/workflowTemplates/{{name}}")
+      url, err := acctest.ReplaceVarsForTest(config, rs, "{{DataprocBasePath}}projects/{{project}}/locations/{{location}}/workflowTemplates/{{name}}")
       if err != nil {
         return err
       }

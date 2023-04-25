@@ -305,7 +305,7 @@ func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.St
 
       config := GoogleProviderConfig(t)
 
-      url, err := replaceVarsForTest(config, rs, "{{GkeHubBasePath}}projects/{{project}}/locations/{{location}}/features/{{name}}")
+      url, err := acctest.ReplaceVarsForTest(config, rs, "{{GkeHubBasePath}}projects/{{project}}/locations/{{location}}/features/{{name}}")
       if err != nil {
         return err
       }

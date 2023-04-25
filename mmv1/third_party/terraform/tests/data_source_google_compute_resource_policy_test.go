@@ -27,7 +27,7 @@ func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix),
-				Check:  CheckDataSourceStateMatchesResourceState(rsFullName, dsFullName),
+				Check:  acctest.CheckDataSourceStateMatchesResourceState(rsFullName, dsFullName),
 			},
 		},
 	})

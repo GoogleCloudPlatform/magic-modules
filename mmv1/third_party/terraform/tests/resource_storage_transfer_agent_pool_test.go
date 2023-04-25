@@ -171,7 +171,7 @@ func testAccCheckStorageTransferAgentPoolDestroyProducer(t *testing.T) func(s *t
 
 			config := GoogleProviderConfig(t)
 
-			url, err := replaceVarsForTest(config, rs, "{{StorageTransferBasePath}}projects/{{project}}/agentPools/{{name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{StorageTransferBasePath}}projects/{{project}}/agentPools/{{name}}")
 			if err != nil {
 				return err
 			}

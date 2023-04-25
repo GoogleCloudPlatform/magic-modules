@@ -123,7 +123,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 		<% else -%>
 		config := GoogleProviderConfig(t)
 
-		url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+		url, err := acctest.ReplaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 		if err != nil {
 			return err
 		}

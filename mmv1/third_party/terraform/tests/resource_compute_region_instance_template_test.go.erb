@@ -1313,7 +1313,7 @@ func testAccCheckComputeRegionInstanceTemplateDestroyProducer(t *testing.T) func
 			splits := strings.Split(rs.Primary.ID, "/")
 			name := splits[len(splits)-1]
 		
-			url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+name)
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+name)
 			if err != nil {
 				return err
 			}
@@ -1359,7 +1359,7 @@ func testAccCheckComputeRegionInstanceTemplateExistsInProject(t *testing.T, n, p
 		splits := strings.Split(rs.Primary.ID, "/")
 		templateName := splits[len(splits)-1]
 	
-		url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+templateName)
+		url, err := acctest.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceTemplates/"+templateName)
 
 		billingProject := ""
 

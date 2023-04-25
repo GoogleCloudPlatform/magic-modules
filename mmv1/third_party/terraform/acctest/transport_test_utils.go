@@ -1,24 +1,19 @@
-package google
+package acctest
 
 import (
 	"reflect"
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // This function isn't a test of transport.go; instead, it is used as an alternative
 // to ReplaceVars inside tests.
-func replaceVarsForTest(config *transport_tpg.Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
-	return acctest.ReplaceVarsForTest(config, rs, linkTmpl)
-}
-
-// This function isn't a test of transport.go; instead, it is used as an alternative
-// to ReplaceVars inside tests.
-func replaceVarsForFrameworkTest(prov *frameworkProvider, rs *terraform.ResourceState, linkTmpl string) (string, error) {
+func ReplaceVarsForTest(config *transport_tpg.Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string
 
@@ -27,11 +22,11 @@ func replaceVarsForFrameworkTest(prov *frameworkProvider, rs *terraform.Resource
 	}
 
 	if strings.Contains(linkTmpl, "{{region}}") {
-		region = GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
+		region = tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
 	}
 
 	if strings.Contains(linkTmpl, "{{zone}}") {
-		zone = GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
+		zone = tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
 	}
 
 	replaceFunc := func(s string) string {
@@ -50,8 +45,8 @@ func replaceVarsForFrameworkTest(prov *frameworkProvider, rs *terraform.Resource
 			return v
 		}
 
-		// Attempt to draw values from the provider
-		if f := reflect.Indirect(reflect.ValueOf(prov)).FieldByName(m); f.IsValid() {
+		// Attempt to draw values from the provider config
+		if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
 			return f.String()
 		}
 

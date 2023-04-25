@@ -22,7 +22,7 @@ func TestAccDataSourceGoogleComputeRouterNat_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleComputeRouterNat_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					CheckDataSourceStateMatchesResourceState("data.google_compute_router_nat.foo", "google_compute_router_nat.nat"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_router_nat.foo", "google_compute_router_nat.nat"),
 				),
 			},
 		},
