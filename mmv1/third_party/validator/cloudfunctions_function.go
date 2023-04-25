@@ -3,7 +3,7 @@ package google
 import (
 	"reflect"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-validator/converters/google/resources/transport"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
 func GetCloudFunctionsFunctionCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
