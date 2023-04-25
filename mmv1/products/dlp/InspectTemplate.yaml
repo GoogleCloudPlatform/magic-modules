@@ -76,16 +76,6 @@ properties:
     name: 'displayName'
     description: |
       User set display name of the inspect template.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    description: |
-      The creation timestamp of an inspectTemplate. Set by the server.
-    output: true
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
-    description: |
-      The last update timestamp of an inspectTemplate. Set by the server.
-    output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'inspectConfig'
     description: The core content of the template.
@@ -501,9 +491,4 @@ properties:
                   description: |
                     Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`
                     or `projects/project-id/storedInfoTypes/432452342`.
-                - !ruby/object:Api::Type::String
-                  name: 'createTime'
-                  output: true
-                  description: |
-                    Timestamp indicating when the version of the StoredInfoType used for inspection was created. Set by the server.
 
