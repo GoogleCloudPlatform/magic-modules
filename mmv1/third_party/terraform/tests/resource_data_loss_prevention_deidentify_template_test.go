@@ -1102,7 +1102,6 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
           }
         }
       }
-
       # Update allInfoTypes and allText by removing the block
     }
   }
