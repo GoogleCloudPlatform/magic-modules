@@ -94,11 +94,10 @@ resource "google_compute_firewall_policy" "default" {
   description = "Resource created for Terraform acceptance testing"
 }
 
-resource "google_compute_region_networksecurity_address_group" "basic_regional_networksecurity_address_group" {
+resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
   name        = "tf-test-policy%{random_suffix}"
-  project     = "%{project_name}"
   description = "Sample regional networksecurity_address_group"
-  region      = "%{region}"
+  location    = "us-central1"
   items       = ["208.80.154.224/32"]
   type        = "IPV4"
   capacity    = 100
@@ -121,7 +120,7 @@ resource "google_compute_firewall_policy_rule" "default" {
     dest_fqdns = []
     dest_region_codes = []
     dest_threat_intelligences = []
-    src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
+    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 `, context)
@@ -158,11 +157,10 @@ resource "google_compute_firewall_policy" "default" {
   description = "Resource created for Terraform acceptance testing"
 }
 
-resource "google_compute_region_networksecurity_address_group" "basic_regional_networksecurity_address_group" {
+resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
   name        = "tf-test-policy%{random_suffix}"
-  project     = "%{project_name}"
   description = "Sample regional networksecurity_address_group"
-  region      = "%{region}"
+  location    = "us-central1"
   items       = ["208.80.154.224/32"]
   type        = "IPV4"
   capacity    = 100
@@ -190,7 +188,7 @@ resource "google_compute_firewall_policy_rule" "default" {
     dest_region_codes = ["US"]
     dest_threat_intelligences = ["iplist-known-malicious-ips"]
     src_address_groups = []
-    dest_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
+    dest_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.name]
   }
   target_resources = [google_compute_network.network1.self_link, google_compute_network.network2.self_link]
   target_service_accounts = [google_service_account.service_account.email]
@@ -312,11 +310,10 @@ resource "google_compute_firewall_policy" "default" {
   description = "Resource created for Terraform acceptance testing"
 }
 
-resource "google_compute_region_networksecurity_address_group" "basic_regional_networksecurity_address_group" {
+resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
   name        = "tf-test-policy%{random_suffix}"
-  project     = "%{project_name}"
   description = "Sample regional networksecurity_address_group"
-  region      = "%{region}"
+  location    = "us-central1"
   items       = ["208.80.154.224/32"]
   type        = "IPV4"
   capacity    = 100
@@ -339,7 +336,7 @@ resource "google_compute_firewall_policy_rule" "rule1" {
     dest_fqdns = ["google.com"]
     dest_region_codes = ["US"]
     dest_threat_intelligences = ["iplist-known-malicious-ips"]
-    dest_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
+    dest_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 
@@ -363,7 +360,7 @@ resource "google_compute_firewall_policy_rule" "rule2" {
     src_fqdns = ["google.com"]
     src_region_codes = ["US"]
     src_threat_intelligences = ["iplist-known-malicious-ips"]
-    src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
+    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 `, context)
@@ -382,11 +379,10 @@ resource "google_compute_firewall_policy" "default" {
   description = "Description Update"
 }
 
-resource "google_compute_region_networksecurity_address_group" "basic_regional_networksecurity_address_group" {
+resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
   name        = "tf-test-policy%{random_suffix}"
-  project     = "%{project_name}"
   description = "Sample regional networksecurity_address_group"
-  region      = "%{region}"
+  location    = "us-central1"
   items       = ["208.80.154.224/32"]
   type        = "IPV4"
   capacity    = 100
@@ -408,7 +404,7 @@ resource "google_compute_firewall_policy_rule" "rule1" {
     dest_fqdns = ["google.com"]
     dest_region_codes = ["US"]
     dest_threat_intelligences = ["iplist-known-malicious-ips"]
-    dest_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
+    dest_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 
@@ -432,7 +428,7 @@ resource "google_compute_firewall_policy_rule" "rule2" {
     src_fqdns = ["google.com"]
     src_region_codes = ["US"]
     src_threat_intelligences = ["iplist-known-malicious-ips"]
-    src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
+    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 
@@ -453,7 +449,7 @@ resource "google_compute_firewall_policy_rule" "rule3" {
     src_fqdns = ["google.com"]
     src_region_codes = ["US"]
     src_threat_intelligences = ["iplist-known-malicious-ips"]
-    src_address_groups = [google_compute_region_networksecurity_address_group.basic_regional_networksecurity_address_group.name]
+    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.name]
   }
 }
 `, context)

@@ -1,8 +1,7 @@
-resource "google_compute_global_networksecurity_address_group" "basic_global_networksecurity_address_group" {
+resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
   name        = "{{policy}}"
-  project     = "{{project}}"
   description = "Sample global networksecurity_address_group"
-  region      = "{{region}}"
+  location    = "{{region}}"
   items       = ["208.80.154.224/32"]
   type        = "IPV4"
   capacity    = 100
@@ -39,7 +38,7 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
       ip_protocol = "all"
     }
     
-    src_address_groups = [google_compute_global_networksecurity_address_group.basic_global_networksecurity_address_group.name]
+    src_address_groups = [google_compute_networksecurity_address_group.basic_global_networksecurity_address_group.name]
   }
 }
 
