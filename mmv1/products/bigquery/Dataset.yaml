@@ -23,61 +23,61 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Datasets Intro': 'https://cloud.google.com/bigquery/docs/datasets-intro'
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
-import_format: ["projects/{{project}}/datasets/{{dataset_id}}"]
+import_format: ['projects/{{project}}/datasets/{{dataset_id}}']
 delete_url: projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_basic"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_basic'
+    primary_resource_id: 'dataset'
     vars:
-      dataset_id: "example_dataset"
-      account_name: "bqowner"
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_with_max_time_travel_hours"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_with_max_time_travel_hours'
+    primary_resource_id: 'dataset'
     skip_docs: true
     vars:
-      dataset_id: "example_dataset"
-      account_name: "bqowner"
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_cmek"
+    name: 'bigquery_dataset_cmek'
     skip_test: true
-    primary_resource_id: "dataset"
+    primary_resource_id: 'dataset'
     vars:
-      dataset_id: "example_dataset"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      dataset_id: 'example_dataset'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_authorized_dataset"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_authorized_dataset'
+    primary_resource_id: 'dataset'
     vars:
-      private: "private"
-      public: "public"
-      account_name: "bqowner"
+      private: 'private'
+      public: 'public'
+      account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_authorized_routine"
-    primary_resource_id: "private"
+    name: 'bigquery_dataset_authorized_routine'
+    primary_resource_id: 'private'
     vars:
-      private_dataset: "private_dataset"
-      public_dataset: "public_dataset"
-      public_routine: "public_routine"
+      private_dataset: 'private_dataset'
+      public_dataset: 'public_dataset'
+      public_routine: 'public_routine'
     test_env_vars:
       service_account: :SERVICE_ACCT
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_case_insensitive_names"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_case_insensitive_names'
+    primary_resource_id: 'dataset'
     skip_docs: true
     vars:
-      dataset_id: "example_dataset"
-      account_name: "bqowner"
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_dataset_default_collation_set"
-    primary_resource_id: "dataset"
+    name: 'bigquery_dataset_default_collation_set'
+    primary_resource_id: 'dataset'
     skip_docs: true
     vars:
-      dataset_id: "example_dataset"
-      account_name: "bqowner"
+      dataset_id: 'example_dataset'
+      account_name: 'bqowner'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'delete_contents_on_destroy'
@@ -90,7 +90,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_dataset.go.erb
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
-    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`. 
+    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
     The API does accept both formats but it will always return the legacy format which results in Terraform
     showing permanent diff on each plan and apply operation.
 properties:
@@ -100,7 +100,8 @@ properties:
     exclude: true
   - !ruby/object:Api::Type::String
     name: 'maxTimeTravelHours'
-    description: 'Defines the time travel window in hours. The value can be from 48
+    description:
+      'Defines the time travel window in hours. The value can be from 48
       to 168 hours (2 to 7 days).'
     default_from_api: true
   - !ruby/object:Api::Type::Array
