@@ -1,15 +1,15 @@
-<% autogen_exception -%>
 package acctest
 
 import (
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -34,8 +34,8 @@ func ProviderConfigEnvNames() []string {
 	}
 
 	// Add remaining ENVs
-	envs = append(envs, "GOOGLE_OAUTH_ACCESS_TOKEN")          // access_token field 
-	envs = append(envs, "GOOGLE_BILLING_PROJECT")             // billing_project field 
+	envs = append(envs, "GOOGLE_OAUTH_ACCESS_TOKEN")          // access_token field
+	envs = append(envs, "GOOGLE_BILLING_PROJECT")             // billing_project field
 	envs = append(envs, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") // impersonate_service_account field
 	envs = append(envs, "USER_PROJECT_OVERRIDE")              // user_project_override field
 	envs = append(envs, "CLOUDSDK_CORE_REQUEST_REASON")       // request_reason field

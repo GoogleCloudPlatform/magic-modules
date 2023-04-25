@@ -23,7 +23,7 @@ func init() {
 }
 
 func testSweepAccessContextManagerPolicies(region string) error {
-	config, err := SharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		log.Fatalf("error getting shared config for region %q: %s", region, err)
 	}

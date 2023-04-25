@@ -24,7 +24,7 @@ func testSweepFirebaseAndroidApp(region string) error {
 	resourceName := "FirebaseAndroidApp"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := SharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -82,7 +82,7 @@ func testSweepFirebaseAndroidApp(region string) error {
 		}
 
 		// Skip resources that shouldn't be sweeped
-		if !IsSweepableTestResource(obj["displayName"].(string)) {
+		if !acctest.IsSweepableTestResource(obj["displayName"].(string)) {
 			nonPrefixCount++
 			continue
 		}

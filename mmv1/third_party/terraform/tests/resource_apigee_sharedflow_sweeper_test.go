@@ -23,7 +23,7 @@ func testSweepApigeeSharedFlow(region string) error {
 	resourceName := "ApigeeSharedFlow"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := SharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -86,7 +86,7 @@ func testSweepApigeeSharedFlow(region string) error {
 			return nil
 		}
 		// Skip resources that shouldn't be sweeped
-		if !IsSweepableTestResource(name) {
+		if !acctest.IsSweepableTestResource(name) {
 			nonPrefixCount++
 			continue
 		}
