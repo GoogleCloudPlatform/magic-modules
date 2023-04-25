@@ -1080,18 +1080,15 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         selected_info_types {
           info_types {
             name = "COLOR_INFO"
+            version = "latest"
           }
         }
       }
-    }
 
-    image_transformations {
       transforms {
         all_info_types {}
       }
-    }
 
-    image_transformations {
       transforms {
         all_text {}
       }
@@ -1118,33 +1115,13 @@ resource "google_data_loss_prevention_deidentify_template" "basic" {
         }
         selected_info_types {
           info_types {
-            name = "COLOR_INFO"
+            name = "COLOR_EXAMPLE"
             version = "0.1"
           }
         }
       }
-    }
 
-    image_transformations {
-      transforms {
-        redaction_color {
-          red = 0.1
-          blue = 0.2
-          green = 0.9
-        }
-        all_info_types {}
-      }
-    }
-
-    image_transformations {
-      transforms {
-        redaction_color {
-          red = 0.1
-          blue = 0.2
-          green = 0.3
-        }
-        all_text {}
-      }
+      # Update allInfoTypes and allText by removing the block
     }
   }
 }

@@ -14,19 +14,15 @@ resource "google_data_loss_prevention_deidentify_template" "<%= ctx[:primary_res
         selected_info_types {
           info_types {
             name = "COLOR_INFO"
-            version = "0.1"
+            version = "latest"
           }
         }
       }
-    }
-  
-    image_transformations {
+
       transforms {
         all_info_types {}
       }
-    }
-  
-    image_transformations {
+
       transforms {
         all_text {}
       }
