@@ -14,12 +14,17 @@
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	transformed := make(map[string]interface{})
-	original := v.(map[string]interface{})
 
+	// Defaults for when no value is provided by API.
+	transformed["enable_confidential_compute"] = false
+
+	if v == nil {
+		return []interface{}{transformed}
+	}
+
+	original := v.(map[string]interface{})
 	if original["enableConfidentialCompute"] != nil {
 		transformed["enable_confidential_compute"] = original["enableConfidentialCompute"]
-	} else {
-		transformed["enable_confidential_compute"] = false
 	}
 
 	return []interface{}{transformed}
