@@ -3495,6 +3495,29 @@ func TestAccContainerCluster_withEnableKubernetesAlpha(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withEnableK8sBetaAPIs(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", RandString(t, 10))
+	npName := fmt.Sprintf("tf-test-np-%s", RandString(t, 10))
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withEnableK8sBetaAPIs(clusterName, npName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withIPv4Error(t *testing.T) {
 	t.Parallel()
 
@@ -7088,6 +7111,27 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   enable_kubernetes_alpha = true
+
+  node_pool {
+    name = "%s"
+	initial_node_count = 1
+	management {
+		auto_repair = false
+		auto_upgrade = false
+	}
+  }
+}
+`, cluster, np)
+}
+
+func testAccContainerCluster_withEnableK8sBetaAPIs(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  enable_k8s_beta_apis {
+	enabled_apis = ["autoscaling/v2beta1/horizontalpodautoscalers"]
+  }
 
   node_pool {
     name = "%s"
