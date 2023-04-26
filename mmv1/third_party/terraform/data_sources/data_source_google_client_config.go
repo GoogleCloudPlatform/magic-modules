@@ -123,10 +123,22 @@ func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	data.Id = types.StringValue(fmt.Sprintf("projects/%s/regions/%s/zones/%s", d.providerConfig.project.String(), d.providerConfig.region.String(), d.providerConfig.zone.String()))
+	locationInfo := data.getLocationDescription(d.providerConfig)
+	region, err := locationInfo.getRegion()
+	if err != nil {
+		diags.AddError("Error getting region value", err.Error())
+		return
+	}
+	zone, err := locationInfo.getZone()
+	if err != nil {
+		diags.AddError("Error getting zone value", err.Error())
+		return
+	}
+
+	data.Id = types.StringValue(fmt.Sprintf("projects/%s/regions/%s/zones/%s", d.providerConfig.project.String(), region.String(), zone.String()))
 	data.Project = d.providerConfig.project
-	data.Region = d.providerConfig.region
-	data.Zone = d.providerConfig.zone
+	data.Region = region
+	data.Zone = zone
 
 	token, err := d.providerConfig.tokenSource.Token()
 	if err != nil {
