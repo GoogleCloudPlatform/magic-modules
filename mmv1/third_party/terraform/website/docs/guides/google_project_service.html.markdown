@@ -9,7 +9,7 @@ description: |-
 ## Enabling Multiple Services in a Config
 
 Users may want to activate many services simultaneously within a single Terraform config. The `google_project_service.service` field only supports a single value, but Terraform itself provides list iteration with [for_each](https://developer.hashicorp.com/terraform/language/meta-arguments/for_each).
-A simple example:
+For example:
 
 ```
 variable "services" {
@@ -23,11 +23,11 @@ resource "google_project_service" "services" {
 }
 ```
 
-For a more robust example, Google recommends this [project_services module](https://github.com/terraform-google-modules/terraform-google-project-factory/tree/master/modules/project_services). This module aims to simplify the configuration needed for service enablement to [this example](https://github.com/terraform-google-modules/terraform-google-project-factory/tree/master/modules/project_services#example-usage).
+For a more robust example, Google recommends this [project_services module](https://github.com/terraform-google-modules/terraform-google-project-factory/tree/master/modules/project_services). The `project_services` module simplifies configuring multiple services on a project at once as shown in [this example](https://github.com/terraform-google-modules/terraform-google-project-factory/tree/master/modules/project_services#example-usage).
 
 ## Request Rate Errors
 
-The service management API called by the google_project_service resource has rate limits on the requesting user account if no quota project is set. When using the default (credentials) quota project or a billing_project users enabling many GCP services simultaneously may experience rate limit errors from the API. `google_project_service` supports batching multiple resources into smaller requests, see the `batching` [reference documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference.html#batching).
+The service management API called by the google_project_service resource uses request rate quota on the project of the account used to call the API (i.e. against the Terraform credentials) by default. That project (or a fixed `billing_project`) may exceed your request rate quota in larger configurations. `google_project_service` batches multiple changes into single requests when possible, see the `batching` [reference documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference.html#batching) for details.
 
 Minimizing the number of total resources in root modules will help maximize the provider’s ability to batch requests. Oversized root modules slow Terraform’s execution time and can cause same-type requests to miss the batch window set by [batching.send_after](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference.html#send_after). See Google’s [guidance on root modules](https://cloud.google.com/docs/terraform/best-practices-for-terraform#root-modules).
 
