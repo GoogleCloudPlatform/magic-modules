@@ -536,6 +536,7 @@ end     # products.each do
 				"google_logging_project_exclusion":             logging.ResourceLoggingExclusion(logging.ProjectLoggingExclusionSchema, logging.NewProjectLoggingExclusionUpdater, logging.ProjectLoggingExclusionIdParseFunc),
 				"google_logging_project_bucket_config":         logging.ResourceLoggingProjectBucketConfig(),
 				"google_monitoring_dashboard":                  monitoring.ResourceMonitoringDashboard(),
+				"google_os_config_os_policy_assignment":        osconfig.ResourceOSConfigOSPolicyAssignment(),
 				<% unless version == 'ga' -%>
 				"google_project_service_identity":              resourcemanager.ResourceProjectServiceIdentity(),
 				<% end -%>
