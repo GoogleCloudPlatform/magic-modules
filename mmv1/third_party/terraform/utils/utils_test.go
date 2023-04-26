@@ -420,30 +420,32 @@ func TestGetZone(t *testing.T) {
 func TestGetRegion(t *testing.T) {
 	cases := map[string]struct {
 		ResourceRegion string
+		ResourceZone   string
 		ProviderRegion string
 		ProviderZone   string
 		ExpectedRegion string
 		ExpectedZone   string
 		ExpectedError  bool
 	}{
-		"region is pulled from resource config instead of provider config": {
-			ResourceRegion: "foo",
-			ProviderRegion: "bar",
-			ProviderZone:   "lol-a",
-			ExpectedRegion: "foo",
+		"region is sourced from the region field in resource config": {
+			ResourceRegion: "resource-region",
+			ResourceZone:   "resource-zone-a",
+			ProviderRegion: "provider-region",
+			ProviderZone:   "provider-zone-a",
+			ExpectedRegion: "resource-region",
 		},
-		"region pulled from resource config can be a self link": {
+		"region sourced from resource config can be a self link": {
 			ResourceRegion: "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1",
 			ExpectedRegion: "us-central1",
 		},
-		"region is pulled from region on provider config when region unset in resource config": {
-			ProviderRegion: "bar",
-			ProviderZone:   "lol-a",
-			ExpectedRegion: "bar",
+		"region is sourced from region on provider config when region/zone unset in resource config": {
+			ProviderRegion: "provider-region",
+			ProviderZone:   "provider-zone-a",
+			ExpectedRegion: "provider-region",
 		},
-		"region is pulled from zone on provider config when region unset in both resource and provider config": {
-			ProviderZone:   "lol-a",
-			ExpectedRegion: "lol",
+		"region is sourced from zone on provider config when region unset in both resource and provider config": {
+			ProviderZone:   "provider-zone-a",
+			ExpectedRegion: "provider-zone",
 		},
 		"error returned when region not set on resource and neither region or zone set on provider": {
 			ExpectedError: true,
@@ -485,6 +487,11 @@ func TestGetRegion(t *testing.T) {
 			if tc.ResourceRegion != "" {
 				if err := d.Set("region", tc.ResourceRegion); err != nil {
 					t.Fatalf("Cannot set region: %s", err)
+				}
+			}
+			if tc.ResourceZone != "" {
+				if err := d.Set("zone", tc.ResourceZone); err != nil {
+					t.Fatalf("Cannot set zone: %s", err)
 				}
 			}
 
