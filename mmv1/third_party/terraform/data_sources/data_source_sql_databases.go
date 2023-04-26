@@ -2,9 +2,10 @@ package google
 
 import (
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"sort"
 	"strings"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -51,7 +52,7 @@ func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error 
 	err = RetryTimeDuration(func() (rerr error) {
 		databases, rerr = config.NewSqlAdminClient(userAgent).Databases.List(project, d.Get("instance").(string)).Do()
 		return rerr
-	}, d.Timeout(schema.TimeoutRead), IsSqlOperationInProgressError)
+	}, d.Timeout(schema.TimeoutRead), transport_tpg.IsSqlOperationInProgressError)
 
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Databases in %q instance", d.Get("instance").(string)))

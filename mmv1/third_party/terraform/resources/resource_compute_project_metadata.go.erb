@@ -153,6 +153,6 @@ func resourceComputeProjectMetadataSet(projectID, userAgent string, config *tran
 		return ComputeOperationWaitTime(config, op, project.Name, "SetCommonMetadata", userAgent, timeout)
 	}
 
-	err := MetadataRetryWrapper(createMD)
+	err := transport_tpg.MetadataRetryWrapper(createMD)
 	return err
 }

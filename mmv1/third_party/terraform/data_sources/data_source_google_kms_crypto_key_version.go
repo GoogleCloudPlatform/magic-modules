@@ -2,9 +2,10 @@ package google
 
 import (
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"strings"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -116,7 +117,7 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 		}
 		log.Printf("[DEBUG] Getting public key of CryptoKeyVersion: %#v", url)
 
-		res, err = SendRequestWithTimeout(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil, d.Timeout(schema.TimeoutRead), IsCryptoKeyVersionsPendingGeneration)
+		res, err = SendRequestWithTimeout(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil, d.Timeout(schema.TimeoutRead), transport_tpg.IsCryptoKeyVersionsPendingGeneration)
 
 		if err != nil {
 			log.Printf("Error generating public key: %s", err)

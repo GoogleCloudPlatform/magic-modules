@@ -262,7 +262,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			err = RetryTimeDuration(func() (rerr error) {
 				fetchedInstance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
 				return rerr
-			}, d.Timeout(schema.TimeoutRead), IsSqlOperationInProgressError)
+			}, d.Timeout(schema.TimeoutRead), transport_tpg.IsSqlOperationInProgressError)
 			if err != nil {
 				return handleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("instance").(string)))
 			}
@@ -512,7 +512,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		return nil
-	}, d.Timeout(schema.TimeoutDelete), IsSqlOperationInProgressError, IsSqlInternalError)
+	}, d.Timeout(schema.TimeoutDelete), transport_tpg.IsSqlOperationInProgressError, IsSqlInternalError)
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete"+

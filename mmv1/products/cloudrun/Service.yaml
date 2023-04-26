@@ -38,7 +38,7 @@ docs: !ruby/object:Provider::Terraform::Docs
 id_format: 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
 import_format:
   ['locations/{{location}}/namespaces/{{project}}/services/{{name}}']
-error_retry_predicates: ['IsCloudRunCreationConflict']
+error_retry_predicates: ['transport_tpg.IsCloudRunCreationConflict']
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckKnativeStatusFunc(res)
   actions: ['create', 'update']

@@ -192,7 +192,7 @@ func loadJwtConfig(d *schema.ResourceData, meta interface{}) (*jwt.Config, error
 	}
 
 	if strings.TrimSpace(credentials) != "" {
-		contents, _, err := pathOrContents(credentials)
+		contents, _, err := transport_tpg.PathOrContents(credentials)
 		if err != nil {
 			return nil, errwrap.Wrapf("Error loading credentials: {{err}}", err)
 		}

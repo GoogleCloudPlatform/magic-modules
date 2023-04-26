@@ -116,7 +116,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	err = RetryTimeDuration(func() (operr error) {
 		_, saerr := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 		return saerr
-	}, d.Timeout(schema.TimeoutCreate), IsNotFoundRetryableError("service account creation"))
+	}, d.Timeout(schema.TimeoutCreate), transport_tpg.IsNotFoundRetryableError("service account creation"))
 
 	if err != nil {
 		return fmt.Errorf("Error reading service account after creation: %s", err)

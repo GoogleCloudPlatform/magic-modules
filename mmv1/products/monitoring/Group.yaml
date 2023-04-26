@@ -28,7 +28,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: '{{name}}'
 import_format: ['{{name}}']
 mutex: stackdriver/groups/{{project}}
-error_retry_predicates: ['IsMonitoringConcurrentEditError']
+error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_group_basic'

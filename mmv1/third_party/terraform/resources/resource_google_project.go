@@ -649,7 +649,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 		return handleServiceUsageRetryableError(rerr)
 	},
 		timeout,
-		ServiceUsageServiceBeingActivated,
+		transport_tpg.ServiceUsageServiceBeingActivated,
 	)
 	if err != nil {
 		return errwrap.Wrapf("failed to send enable services request: {{err}}", err)

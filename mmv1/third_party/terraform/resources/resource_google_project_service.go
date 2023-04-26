@@ -289,7 +289,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 			return waitErr
 		}
 		return nil
-	}, d.Timeout(schema.TimeoutDelete), ServiceUsageServiceBeingActivated)
+	}, d.Timeout(schema.TimeoutDelete), transport_tpg.ServiceUsageServiceBeingActivated)
 	if err != nil {
 		return fmt.Errorf("Error disabling service %q for project %q: %v", service, project, err)
 	}

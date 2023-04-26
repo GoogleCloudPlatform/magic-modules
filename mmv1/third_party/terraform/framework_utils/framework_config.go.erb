@@ -559,7 +559,7 @@ func GetCredentials(ctx context.Context, data ProviderModel, initialCredentialsO
 	}
 
 	if !data.AccessToken.IsNull() {
-		contents, _, err := pathOrContents(data.AccessToken.ValueString())
+		contents, _, err := transport_tpg.PathOrContents(data.AccessToken.ValueString())
 		if err != nil {
 			diags.AddError("error loading access token", err.Error())
 			return googleoauth.Credentials{}
@@ -584,7 +584,7 @@ func GetCredentials(ctx context.Context, data ProviderModel, initialCredentialsO
 	}
 
 	if !data.Credentials.IsNull() {
-		contents, _, err := pathOrContents(data.Credentials.ValueString())
+		contents, _, err := transport_tpg.PathOrContents(data.Credentials.ValueString())
 		if err != nil {
 			diags.AddError(fmt.Sprintf("error loading credentials: %s", err), err.Error())
 			return googleoauth.Credentials{}
