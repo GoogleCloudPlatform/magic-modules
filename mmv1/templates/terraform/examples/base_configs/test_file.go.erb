@@ -15,6 +15,12 @@ import (
 <% unless object.skip_delete -%>
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 <% end -%>
+
+<% if version == 'private' -%>
+    transport_tpg "internal/terraform-next/google-private/transport"
+<% else -%>
+    transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
+<% end -%>
 )
 <%
 
