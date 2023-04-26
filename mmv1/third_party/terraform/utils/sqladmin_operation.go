@@ -70,13 +70,13 @@ func (w *SqlAdminOperationWaiter) QueryOp() (interface{}, error) {
 
 	var op interface{}
 	var err error
-	err = RetryTimeDuration(
+	err = transport_tpg.RetryTimeDuration(
 		func() error {
 			op, err = w.Service.Operations.Get(w.Project, w.Op.Name).Do()
 			return err
 		},
 
-		DefaultRequestTimeout,
+		transport_tpg.DefaultRequestTimeout,
 	)
 
 	return op, err

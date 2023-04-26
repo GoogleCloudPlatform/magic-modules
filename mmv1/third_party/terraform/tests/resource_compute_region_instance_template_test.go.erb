@@ -15,6 +15,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
@@ -1322,7 +1323,7 @@ func testAccCheckComputeRegionInstanceTemplateDestroyProducer(t *testing.T) func
 				billingProject = config.BillingProject
 			}
 
-			instanceTemplate, err := SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+			instanceTemplate, err := transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			_ = instanceTemplate
 			if err == nil {
 				return fmt.Errorf("Instance template still exists")
@@ -1365,7 +1366,7 @@ func testAccCheckComputeRegionInstanceTemplateExistsInProject(t *testing.T, n, p
 			billingProject = config.BillingProject
 		}
 
-		found, err := SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
+		found, err := transport_tpg.SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 		if err != nil {
 			return err
 		}

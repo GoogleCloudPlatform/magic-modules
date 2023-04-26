@@ -113,7 +113,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 
 	d.SetId(sa.Name)
 
-	err = RetryTimeDuration(func() (operr error) {
+	err = transport_tpg.RetryTimeDuration(func() (operr error) {
 		_, saerr := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 		return saerr
 	}, d.Timeout(schema.TimeoutCreate), transport_tpg.IsNotFoundRetryableError("service account creation"))
@@ -161,7 +161,7 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 	// Confirm the service account exists
 	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Service Account %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", d.Id()))
 	}
 
 	if err := d.Set("email", sa.Email); err != nil {

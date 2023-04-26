@@ -8,6 +8,15 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// We've encountered a few common fingerprint-related strings; if this is one of
+// them, we're confident this is an error due to fingerprints.
+var FINGERPRINT_FAIL_ERRORS = transport_tpg.FINGERPRINT_FAIL_ERRORS
+
+// Retry the operation if it looks like a fingerprint mismatch.
+func IsFingerprintError(err error) (bool, string) {
+	return transport_tpg.IsFingerprintError(err)
+}
+
 // If a permission necessary to provision a resource is created in the same config
 // as the resource itself, the permission may not have propagated by the time terraform
 // attempts to create the resource. This allows those errors to be retried until the timeout expires

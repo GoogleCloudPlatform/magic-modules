@@ -15,8 +15,8 @@ func DataSourceComputeNetworkPeering() *schema.Resource {
 	dsSchema := datasourceSchemaFromResourceSchema(ResourceComputeNetworkPeering().Schema)
 	addRequiredFieldsToSchema(dsSchema, "name", "network")
 
-	dsSchema["name"].ValidateFunc = validateRegexp(regexGCEName)
-	dsSchema["network"].ValidateFunc = validateRegexp(peerNetworkLinkRegex)
+	dsSchema["name"].ValidateFunc = transport_tpg.ValidateRegexp(regexGCEName)
+	dsSchema["network"].ValidateFunc = transport_tpg.ValidateRegexp(peerNetworkLinkRegex)
 	return &schema.Resource{
 		Read:   dataSourceComputeNetworkPeeringRead,
 		Schema: dsSchema,

@@ -49,13 +49,13 @@ func dataSourceSqlDatabasesRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 	var databases *sqladmin.DatabasesListResponse
-	err = RetryTimeDuration(func() (rerr error) {
+	err = transport_tpg.RetryTimeDuration(func() (rerr error) {
 		databases, rerr = config.NewSqlAdminClient(userAgent).Databases.List(project, d.Get("instance").(string)).Do()
 		return rerr
 	}, d.Timeout(schema.TimeoutRead), transport_tpg.IsSqlOperationInProgressError)
 
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Databases in %q instance", d.Get("instance").(string)))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Databases in %q instance", d.Get("instance").(string)))
 	}
 	flattenedDatabases := flattenDatabases(databases.Items)
 

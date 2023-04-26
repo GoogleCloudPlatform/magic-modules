@@ -87,7 +87,7 @@ var rfc1918Networks = []string{
 // https://cloud.google.com/compute/docs/naming-resources#resource-name-format
 func validateGCEName(v interface{}, k string) (ws []string, errors []error) {
 	re := `^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$`
-	return validateRegexp(re)(v, k)
+	return transport_tpg.ValidateRegexp(re)(v, k)
 }
 
 // Ensure that the BGP ASN value of Cloud Router is a valid value as per RFC6996 or a value of 16550
@@ -163,7 +163,7 @@ func validateRFC1035Name(min, max int) schema.SchemaValidateFunc {
 		}
 	}
 
-	return validateRegexp(fmt.Sprintf("^"+RFC1035NameTemplate+"$", min-2, max-2))
+	return transport_tpg.ValidateRegexp(fmt.Sprintf("^"+RFC1035NameTemplate+"$", min-2, max-2))
 }
 
 func validateIpCidrRange(v interface{}, k string) (warnings []string, errors []error) {

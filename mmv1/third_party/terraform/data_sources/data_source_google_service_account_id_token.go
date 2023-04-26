@@ -29,14 +29,14 @@ func DataSourceGoogleServiceAccountIdToken() *schema.Resource {
 			"target_service_account": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
+				ValidateFunc: transport_tpg.ValidateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
 			},
 			"delegates": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: validateRegexp(ServiceAccountLinkRegex),
+					ValidateFunc: transport_tpg.ValidateRegexp(ServiceAccountLinkRegex),
 				},
 			},
 			"include_email": {

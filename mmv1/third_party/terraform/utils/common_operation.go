@@ -112,7 +112,7 @@ func CommonRefreshFunc(w Waiter) resource.StateRefreshFunc {
 		op, err := w.QueryOp()
 		if err != nil {
 			// Retry 404 when getting operation (not resource state)
-			if isRetryableError(err, transport_tpg.IsNotFoundRetryableError("GET operation")) {
+			if transport_tpg.IsRetryableError(err, transport_tpg.IsNotFoundRetryableError("GET operation")) {
 				log.Printf("[DEBUG] Dismissed retryable error on GET operation %q: %s", w.OpName(), err)
 				return nil, "done: false", nil
 			}
