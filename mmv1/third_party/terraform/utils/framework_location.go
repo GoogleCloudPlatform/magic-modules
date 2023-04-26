@@ -24,6 +24,31 @@ type LocationDescription struct {
 	ProviderZone   types.String
 }
 
+func (ld *LocationDescription) getLocation() (types.String, error) {
+	// Location from resource config
+	if !ld.ResourceLocation.IsNull() && !ld.ResourceLocation.IsUnknown() {
+		return ld.ResourceLocation, nil
+	}
+
+	// Location from region in resource config
+	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() {
+		return ld.ResourceRegion, nil
+	}
+
+	// Location from zone in resource config
+	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() {
+		location := GetResourceNameFromSelfLink(ld.ResourceZone.ValueString()) // Zone could be a self link
+		return types.StringValue(location), nil
+	}
+
+	// Location from zone in provider config
+	if !ld.ProviderZone.IsNull() {
+		return ld.ProviderZone, nil
+	}
+
+	return types.StringNull(), nil
+}
+
 func (ld *LocationDescription) getRegion() (types.String, error) {
 	// Region from resource config
 	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() {

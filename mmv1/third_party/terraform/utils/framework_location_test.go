@@ -140,3 +140,96 @@ func TestLocationDescription_getRegion(t *testing.T) {
 		})
 	}
 }
+
+func TestLocationDescription_getLocation(t *testing.T) {
+	cases := map[string]struct {
+		ld               LocationDescription
+		ExpectedLocation types.String
+		ExpectedError    bool
+	}{
+		"returns the value of the location field in resource config": {
+			ld: LocationDescription{
+				ResourceLocation: types.StringValue("resource-location"),
+			},
+			ExpectedLocation: types.StringValue("resource-location"),
+		},
+		"does not shorten the location value when it is set as a self link in the resource config": {
+			ld: LocationDescription{
+				ResourceLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location"),
+			},
+			ExpectedLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location"),
+		},
+		"returns the region value set in the resource config when location is not in the schema": {
+			ld: LocationDescription{
+				ResourceRegion: types.StringValue("resource-region"),
+			},
+			ExpectedLocation: types.StringValue("resource-region"),
+		},
+		"does not shorten the region value when it is set as a self link in the resource config": {
+			ld: LocationDescription{
+				ResourceRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/resource-region"),
+			},
+			ExpectedLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/resource-region"),
+		},
+		"returns the zone value set in the resource config when neither location nor region in the schema": {
+			ld: LocationDescription{
+				ResourceZone: types.StringValue("resource-zone"),
+			},
+			ExpectedLocation: types.StringValue("resource-zone"),
+		},
+		"shortens zone values set as self links in the resource config": {
+			ld: LocationDescription{
+				ResourceZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/resource-zone"),
+			},
+			ExpectedLocation: types.StringValue("resource-zone"),
+		},
+		"returns the zone value from the provider config when none of location/region/zone are set in the resource config": {
+			ld: LocationDescription{
+				ProviderZone: types.StringValue("provider-zone"),
+			},
+			ExpectedLocation: types.StringValue("provider-zone"),
+		},
+		"does not shorten the zone value when it is set as a self link in the provider config": {
+			ld: LocationDescription{
+				ProviderZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone"),
+			},
+			ExpectedLocation: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone"),
+		},
+		"does not use the region value set in the provider config": {
+			ld: LocationDescription{
+				ProviderRegion: types.StringValue("provider-zone"),
+			},
+			ExpectedError: true,
+		},
+		"returns an error when none of location/region/zone are set on the resource, and neither region or zone is set on the provider": {
+			ExpectedError: true,
+		},
+		"returns an error that mention non-standard schema field names when location value can't be found": {
+			ld: LocationDescription{
+				LocationSchemaField: types.StringValue("foobar"),
+			},
+			ExpectedError: true,
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			region, err := tc.ld.getLocation()
+
+			if err != nil {
+				if tc.ExpectedError {
+					if !tc.ld.LocationSchemaField.IsNull() {
+						if !strings.Contains(err.Error(), tc.ld.LocationSchemaField.ValueString()) {
+							t.Fatalf("expected error to use provider schema field value %s, instead got: %s", tc.ld.LocationSchemaField.ValueString(), err)
+						}
+					}
+					return
+				}
+				t.Fatalf("unexpected error using test: %s", err)
+			}
+			if region != tc.ExpectedLocation {
+				t.Fatalf("Incorrect location: got %s, want %s", region, tc.ExpectedLocation)
+			}
+		})
+	}
+}
