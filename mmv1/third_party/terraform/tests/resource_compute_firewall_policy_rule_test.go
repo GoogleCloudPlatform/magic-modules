@@ -168,7 +168,6 @@ resource "google_compute_firewall_policy_rule" "default" {
     dest_fqdns = ["google.com"]
     dest_region_codes = ["US"]
     dest_threat_intelligences = ["iplist-known-malicious-ips"]
-    src_address_groups = []
   }
   target_resources = [google_compute_network.network1.self_link, google_compute_network.network2.self_link]
   target_service_accounts = [google_service_account.service_account.email]
