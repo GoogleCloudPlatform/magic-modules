@@ -434,9 +434,18 @@ func TestGetRegion(t *testing.T) {
 			ProviderZone:   "provider-zone-a",
 			ExpectedRegion: "resource-region",
 		},
-		"region sourced from resource config can be a self link": {
+		"region sourced from the region field in resource config can be a self link": {
 			ResourceRegion: "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1",
 			ExpectedRegion: "us-central1",
+		},
+		"region is sourced from zone on resource config when region unset in resource config": {
+			ResourceZone:   "resource-zone-a",
+			ProviderRegion: "provider-region",
+			ExpectedRegion: "resource-zone",
+		},
+		"region cannot be sourced from the zone field in resource config if it is a self link": {
+			ResourceZone:   "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
+			ExpectedRegion: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1", // Value is not shortenedfrom URI to name
 		},
 		"region is sourced from region on provider config when region/zone unset in resource config": {
 			ProviderRegion: "provider-region",
