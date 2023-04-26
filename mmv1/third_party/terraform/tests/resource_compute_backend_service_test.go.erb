@@ -284,6 +284,22 @@ func TestAccComputeBackendService_withCdnPolicy(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccComputeBackendService_withCdnPolicyBypassCacheOnRequestHeaders(serviceName, checkName, "Proxy-Authorization"),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withCdnPolicyBypassCacheOnRequestHeaders(serviceName, checkName, "Authorization"),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -1401,7 +1417,7 @@ resource "google_compute_http_health_check" "zero" {
 `, serviceName, checkName)
 }
 
-func testAccComputeBackendService_withCdnPolicyBypassCacheOnRequestHeaders(serviceName, checkName string) string {
+func testAccComputeBackendService_withCdnPolicyBypassCacheOnRequestHeaders(serviceName, checkName, headerName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
   name          = "%s"
@@ -1417,10 +1433,7 @@ resource "google_compute_backend_service" "foobar" {
       query_string_whitelist = ["foo", "bar"]
     }
     bypass_cache_on_request_headers {
-      header_name = "Authorization"
-    }
-    bypass_cache_on_request_headers {
-      header_name = "Proxy-Authorization"
+      header_name = "%s"
     }
   }
 }
@@ -1431,7 +1444,7 @@ resource "google_compute_http_health_check" "zero" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
-`, serviceName, checkName)
+`, serviceName, headerName, checkName)
 }
 
 <% end -%>
