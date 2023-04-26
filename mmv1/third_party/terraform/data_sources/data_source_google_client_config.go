@@ -37,8 +37,8 @@ type GoogleClientConfigModel struct {
 
 func (m *GoogleClientConfigModel) getLocationDescription(providerConfig *frameworkProvider) LocationDescription {
 	return LocationDescription{
-		RegionSchemaField: types.ValueString("region"),
-		ZoneSchemaField:   types.ValueString("zone"),
+		RegionSchemaField: types.StringValue("region"),
+		ZoneSchemaField:   types.StringValue("zone"),
 		ResourceRegion:    m.Region,
 		ResourceZone:      m.Zone,
 		ProviderRegion:    providerConfig.region,
