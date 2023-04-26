@@ -160,6 +160,9 @@ for more information.
     this cluster. Note that when this option is enabled, the cluster cannot be upgraded
     and will be automatically deleted after 30 days.
 
+* `enable_k8s_beta_apis` - (Optional) List of Kubernetes Beta featuresto enable for
+    this cluster. See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/use-beta-apis)
+
 * `enable_tpu` - (Optional) Whether to enable Cloud TPU resources in this cluster.
     See the [official documentation](https://cloud.google.com/tpu/docs/kubernetes-engine-setup).
 
