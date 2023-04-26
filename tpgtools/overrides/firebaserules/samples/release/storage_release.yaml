@@ -11,18 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: minimal_release
-description: Creates a minimal Firebase Rules Release
+name: storage_release
+description: Creates a Firebase Rules Release for a Storage bucket
 type: release
 versions:
 - ga
-resource: samples/minimal.release.json
-dependencies:
-- samples/minimal.ruleset.json
+resource: ./storage_release.tf.tmpl
 variables:
 - name: project
   type: project
-- name: release
-  type: resource_name
-- name: ruleset
+- name: region 
+  type: region
+- name: bucket
   type: resource_name
