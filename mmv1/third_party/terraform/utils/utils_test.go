@@ -346,18 +346,18 @@ func TestGetZone(t *testing.T) {
 		ExpectedZone  string
 		ExpectedError bool
 	}{
-		"zone is pulled from resource config instead of provider config": {
-			ResourceZone: "foo",
-			ProviderZone: "bar",
-			ExpectedZone: "foo",
+		"zone is sourced from resource config instead of provider config": {
+			ResourceZone: "resource-zone",
+			ProviderZone: "provider-zone",
+			ExpectedZone: "resource-zone",
 		},
-		"zone value from resource can be a self link": {
+		"zone sourced from the resource config can be a self link": {
 			ResourceZone: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
 			ExpectedZone: "us-central1-a",
 		},
-		"zone is pulled from provider config when not set on resource": {
-			ProviderZone: "bar",
-			ExpectedZone: "bar",
+		"zone is sourced from provider config when not set in resource config": {
+			ProviderZone: "provider-zone",
+			ExpectedZone: "provider-zone",
 		},
 		"error returned when zone not set on either provider or resource": {
 			ExpectedError: true,
