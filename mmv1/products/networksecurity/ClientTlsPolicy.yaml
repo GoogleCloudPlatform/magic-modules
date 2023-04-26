@@ -51,6 +51,12 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-client-tls-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: 'network_security_client_tls_policy_advanced'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-client-tls-policy'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -97,6 +103,9 @@ properties:
         name: 'grpcEndpoint'
         description: |
           gRPC specific configuration to access the gRPC server to obtain the cert and private key.
+        exactly_one_of:
+          - grpc_endpoint
+          - certificate_provider_instance
         properties:
           - !ruby/object:Api::Type::String
             name: 'targetUri'
@@ -107,6 +116,9 @@ properties:
         name: 'certificateProviderInstance'
         description: |
           The certificate provider instance specification that will be passed to the data plane, which will be used to load necessary credential information.
+        exactly_one_of:
+          - grpc_endpoint
+          - certificate_provider_instance
         properties:
           - !ruby/object:Api::Type::String
             name: 'pluginInstance'
@@ -123,21 +135,26 @@ properties:
           name: 'grpcEndpoint'
           description: |
             gRPC specific configuration to access the gRPC server to obtain the cert and private key.
+          exactly_one_of:
+            - grpc_endpoint
+            - certificate_provider_instance
           properties:
             - !ruby/object:Api::Type::String
               name: 'targetUri'
               description: |
                 The target URI of the gRPC endpoint. Only UDS path is supported, and should start with "unix:".
               required: true
-            - !ruby/object:Api::Type::NestedObject
-              name: 'certificateProviderInstance'
+        - !ruby/object:Api::Type::NestedObject
+          name: 'certificateProviderInstance'
+          description: |
+            The certificate provider instance specification that will be passed to the data plane, which will be used to load necessary credential information.
+          exactly_one_of:
+            - grpc_endpoint
+            - certificate_provider_instance
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'pluginInstance'
               description: |
-                The certificate provider instance specification that will be passed to the data plane, which will be used to load necessary credential information.
-              properties:
-                - !ruby/object:Api::Type::String
-                  name: 'pluginInstance'
-                  description: |
-                    Plugin instance name, used to locate and load CertificateProvider instance configuration. Set to "google_cloud_private_spiffe" to use Certificate Authority Service certificate provider instance.
-                  required: true
-
+                Plugin instance name, used to locate and load CertificateProvider instance configuration. Set to "google_cloud_private_spiffe" to use Certificate Authority Service certificate provider instance.
+              required: true
 
