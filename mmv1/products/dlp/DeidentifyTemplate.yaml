@@ -126,13 +126,10 @@ properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'selectedInfoTypes'
                   description: Apply transformation to the selected infoTypes.
-                  exactly_one_of:
-                    - transforms.0.selected_info_types
-                    - transforms.0.all_info_types
-                    - transforms.0.all_text
                   properties:
                   - !ruby/object:Api::Type::Array
                     name: 'infoTypes'
+                    required: true
                     description: |
                       InfoTypes to apply the transformation to. Leaving this empty will apply the transformation to apply to
                       all findings that correspond to infoTypes that were requested in InspectConfig.
@@ -150,10 +147,6 @@ properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'allInfoTypes'
                   description: Apply transformation to all findings not specified in other ImageTransformation's selectedInfoTypes.
-                  exactly_one_of:
-                    - transforms.0.selected_info_types
-                    - transforms.0.all_info_types
-                    - transforms.0.all_text
                   properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#allinfotypes
                     # The fields below are necessary to include the "allInfoTypes" transformation in the payload
                   send_empty_value: true
@@ -161,10 +154,6 @@ properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'allText'
                   description: Apply transformation to all text that doesn't match an infoType.
-                  exactly_one_of:
-                    - transforms.0.selected_info_types
-                    - transforms.0.all_info_types
-                    - transforms.0.all_text
                   properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#alltext
                     # The fields below are necessary to include the "allText" transformation in the payload
                   send_empty_value: true
