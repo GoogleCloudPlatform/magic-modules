@@ -374,9 +374,25 @@ func TestGetZone(t *testing.T) {
 			}
 
 			// Create resource config
-			// Here use ResourceComputeDisk schema as example - because it has a zone field in schema
+			// Here use a fictional schema as example because we need to have all of
+			// location, region, and zone fields present in the schema for the test,
+			// and no real resources would contain all of these
+			fictionalSchema := map[string]*schema.Schema{
+				"location": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"region": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"zone": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			}
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, fictionalSchema, emptyConfigMap)
 			if tc.ResourceZone != "" {
 				if err := d.Set("zone", tc.ResourceZone); err != nil {
 					t.Fatalf("Cannot set zone: %s", err)
@@ -447,9 +463,25 @@ func TestGetRegion(t *testing.T) {
 			}
 
 			// Create resource config
-			// Here use ResourceComputeSubnetwork schema as example - because it has a region field in schema
+			// Here use a fictional schema as example because we need to have all of
+			// location, region, and zone fields present in the schema for the test,
+			// and no real resources would contain all of these
+			fictionalSchema := map[string]*schema.Schema{
+				"location": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"region": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"zone": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			}
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, ResourceComputeSubnetwork().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, fictionalSchema, emptyConfigMap)
 			if tc.ResourceRegion != "" {
 				if err := d.Set("region", tc.ResourceRegion); err != nil {
 					t.Fatalf("Cannot set region: %s", err)
