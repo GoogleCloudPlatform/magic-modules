@@ -14,6 +14,7 @@ import (
 var (
 	_ datasource.DataSource              = &GoogleClientConfigDataSource{}
 	_ datasource.DataSourceWithConfigure = &GoogleClientConfigDataSource{}
+	_ LocationDescriber                  = &GoogleClientConfigModel{}
 )
 
 func NewGoogleClientConfigDataSource() datasource.DataSource {
@@ -32,6 +33,17 @@ type GoogleClientConfigModel struct {
 	Region      types.String `tfsdk:"region"`
 	Zone        types.String `tfsdk:"zone"`
 	AccessToken types.String `tfsdk:"access_token"`
+}
+
+func (m *GoogleClientConfigModel) getLocationDescription(providerConfig *frameworkProvider) LocationDescription {
+	return LocationDescription{
+		RegionSchemaField: types.ValueString("region"),
+		ZoneSchemaField:   types.ValueString("zone"),
+		ResourceRegion:    m.Region,
+		ResourceZone:      m.Zone,
+		ProviderRegion:    providerConfig.region,
+		ProviderZone:      providerConfig.zone,
+	}
 }
 
 func (d *GoogleClientConfigDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
