@@ -1,5 +1,5 @@
 ---
-page_title: "Common Issues/FAQ"
+page_title: "Common issues/FAQ"
 description: |-
   Common issues and frequently asked questions when using the provider.
 ---
@@ -10,7 +10,7 @@ description: |-
 
 Services must be [enabled in a project](https://cloud.google.com/service-usage/docs/enable-disable) before their service API can be used by the provider. The [`google_project_service` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_project_service) enables GCP service APIs with Terraform. 
 
-For `google_project_service` guidance and troubleshooting, see the [advanced user guide](/docs/providers/google/guides/provider_reference.html).
+For `google_project_service` guidance and troubleshooting, see the [advanced user guide](/docs/providers/google/guides/google_project_service.html).
 
 ## API not enabled in a different project than the resource
 

@@ -1,5 +1,5 @@
 ---
-page_title: "User Guide for google_project_service"
+page_title: "User guide for google_project_service"
 description: |-
   An advanced user guide for the google_project_service resource
 ---
@@ -23,7 +23,9 @@ resource "google_project_service" "services" {
 }
 ```
 
-For a more robust example, Google recommends this [project_services module](https://github.com/terraform-google-modules/terraform-google-project-factory/tree/master/modules/project_services). The `project_services` module simplifies configuring multiple services on a project at once as shown in [this example](https://github.com/terraform-google-modules/terraform-google-project-factory/tree/master/modules/project_services#example-usage).
+For a more robust example, Google recommends the [project_services module](https://github.com/terraform-google-modules/terraform-google-project-factory/tree/master/modules/project_services). The `project_services` module simplifies configuring multiple services on a project at once as shown in [this example](https://github.com/terraform-google-modules/terraform-google-project-factory/tree/master/modules/project_services#example-usage).
+
+-> **Note** Even though `google_project_service` represents a single resource, the Google provider will batch multiple changes into a single request when possible. See the `batching` [reference documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference.html#batching) for details.
 
 ## Request Rate Errors
 
