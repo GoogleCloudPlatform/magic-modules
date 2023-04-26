@@ -418,14 +418,15 @@ func flattenBigtableCluster(c *bigtable.ClusterInfo) map[string]interface{} {
 }
 
 func getUnavailableClusterZones(clusters []interface{}, unavailableZones []string) []string {
-	zones := make([]string, len(clusters))
-	for i, c := range clusters {
+	var zones []string
+
+	for _, c := range clusters {
 		cluster := c.(map[string]interface{})
 		zone := cluster["zone"].(string)
 
 		for _, unavailableZone := range unavailableZones {
 			if zone == unavailableZone {
-				zones[i] = zone
+				zones = append(zones, zone)
 				break
 			}
 		}
