@@ -13,29 +13,29 @@ func TestLocationDescription_getZone(t *testing.T) {
 		ExpectedZone  types.String
 		ExpectedError bool
 	}{
-		"zone is sourced from resource config instead of provider config": {
+		"returns the value of the zone field in resource config": {
 			ld: LocationDescription{
 				ResourceZone: types.StringValue("resource-zone"),
 				ProviderZone: types.StringValue("provider-zone"),
 			},
 			ExpectedZone: types.StringValue("resource-zone"),
 		},
-		"zone value from resource can be a self link": {
+		"shortens zone values set as self links in the resource config": {
 			ld: LocationDescription{
 				ResourceZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a"),
 			},
 			ExpectedZone: types.StringValue("us-central1-a"),
 		},
-		"zone is sourced from provider config when not set on resource": {
+		"returns the value of the zone field in provider config when zone is unset in resource config": {
 			ld: LocationDescription{
 				ProviderZone: types.StringValue("provider-zone"),
 			},
 			ExpectedZone: types.StringValue("provider-zone"),
 		},
-		"error returned when zone not set on either provider or resource": {
+		"returns an error when a zone value can't be found": {
 			ExpectedError: true,
 		},
-		"error mentions a non-standard schema field name when zone value can't be sourced from provider/resource ": {
+		"returns an error that mention non-standard schema field names when a zone value can't be found": {
 			ld: LocationDescription{
 				ZoneSchemaField: types.StringValue("foobar"),
 			},
@@ -71,44 +71,47 @@ func TestLocationDescription_getRegion(t *testing.T) {
 		ExpectedRegion types.String
 		ExpectedError  bool
 	}{
-		"region is sourced from the region field in resource config": {
+		"returns the value of the region field in resource config": {
 			ld: LocationDescription{
 				ResourceRegion: types.StringValue("resource-region"),
 				ProviderRegion: types.StringValue("provider-region"),
 			},
 			ExpectedRegion: types.StringValue("resource-region"),
 		},
-		"region sourced from the region field in resource config can be a self link": {
+		"shortens region values set as self links in the resource config": {
 			ld: LocationDescription{
 				ResourceRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1"),
 			},
 			ExpectedRegion: types.StringValue("us-central1"),
 		},
-		"region is sourced from zone on resource config when region unset in resource config": {
+		"returns a region derived from the zone field in resource config when region is unset": {
 			ld: LocationDescription{
 				ResourceZone: types.StringValue("provider-zone-a"),
 			},
 			ExpectedRegion: types.StringValue("provider-zone"),
 		},
-		"region cannot be sourced from the zone field in resource config if it is a self link": {
+		"does not shorten region values when derived from a zone self link set in the resource config": {
 			ld: LocationDescription{
 				ResourceZone: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a"),
 			},
 			ExpectedRegion: types.StringValue("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1"), // Value isn't sortened from URI to name
 		},
-		"region is sourced from region on provider config when region/zone unset in resource config": {
+		"returns the value of the region field in provider config when region/zone is unset in resource config": {
 			ld: LocationDescription{
 				ProviderRegion: types.StringValue("provider-region"),
 			},
 			ExpectedRegion: types.StringValue("provider-region"),
 		},
-		"region is sourced from zone on provider config when region unset in both resource and provider config": {
+		"returns a region derived from the zone field in provider config when region unset in both resource and provider config": {
 			ld: LocationDescription{
 				ProviderZone: types.StringValue("provider-zone-a"),
 			},
 			ExpectedRegion: types.StringValue("provider-zone"),
 		},
-		"error mentions a non-standard schema field name when region value can't be sourced from provider/resource ": {
+		"returns an error when zone values can't be found": {
+			ExpectedError: true,
+		},
+		"returns an error that mention non-standard schema field names when region value can't be found": {
 			ld: LocationDescription{
 				ZoneSchemaField: types.StringValue("foobar"),
 			},
