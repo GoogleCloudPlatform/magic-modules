@@ -70,6 +70,8 @@ virtual_fields:
       If set to `true`, default routes (`0.0.0.0/0`) will be deleted
       immediately after network creation. Defaults to `false`.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/default_provider_values.erb'
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
 properties:
   - !ruby/object:Api::Type::String
@@ -166,10 +168,9 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'networkFirewallPolicyEnforcementOrder'
-    update_verb: :PATCH
-    update_url: projects/{{project}}/global/networks/{{name}}
     description: |
-      Set the order that Firewall Rules and Firewall Policies are evaluated.
+      Set the order that Firewall Rules and Firewall Policies are evaluated. Needs to be either 'AFTER_CLASSIC_FIREWALL' or 'BEFORE_CLASSIC_FIREWALL' Default 'AFTER_CLASSIC_FIREWALL'
+    immutable: true
     values:
       - :BEFORE_CLASSIC_FIREWALL
       - :AFTER_CLASSIC_FIREWALL
