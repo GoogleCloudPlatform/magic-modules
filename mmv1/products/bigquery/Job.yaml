@@ -77,6 +77,14 @@ examples:
       - 'etag'
       - 'status.0.state'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_job_load_parquet'
+    primary_resource_id: 'job'
+    vars:
+      job_id: "job_load"
+    ignore_read_extra:
+      - 'etag'
+      - 'status.0.state'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_job_load_table_reference'
     primary_resource_id: 'job'
     vars:
@@ -600,6 +608,22 @@ properties:
                 description: |
                   Describes the Cloud KMS encryption key version used to protect destination BigQuery table.
                 output: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'parquetOptions'
+            description: |
+              Parquet Options for load and make external tables.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'enumAsString'
+                description: |
+                  If sourceFormat is set to PARQUET, indicates whether to infer Parquet ENUM logical type as STRING instead of BYTES by default.
+              - !ruby/object:Api::Type::Boolean
+                name: 'enableListInference'
+                description: |
+                  If sourceFormat is set to PARQUET, indicates whether to use schema inference specifically for Parquet LIST logical type.
+                at_least_one_of:
+                  - configuration.0.load.0.parquet_options.0.enum_as_string
+                  - configuration.0.load.0.parquet_options.0.enable_list_inference
       - !ruby/object:Api::Type::NestedObject
         name: 'copy'
         description: 'Copies a table.'
