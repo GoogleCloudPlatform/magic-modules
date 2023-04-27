@@ -479,7 +479,7 @@ Google Cloud KMS.`,
 										Type:             schema.TypeString,
 										Required:         true,
 										ForceNew:         true,
-										DiffSuppressFunc: IpCidrRangeDiffSuppress,
+										DiffSuppressFunc: verify.IpCidrRangeDiffSuppress,
 										Description:      `The IP CIDR range represented by this alias IP range. This IP CIDR range must belong to the specified subnetwork and cannot contain IP addresses reserved by system or used by other network interfaces. At the time of writing only a netmask (e.g. /24) may be supplied, with a CIDR format resulting in an API error.`,
 									},
 									"subnetwork_range_name": {
@@ -605,7 +605,7 @@ Google Cloud KMS.`,
 							AtLeastOneOf:     schedulingInstTemplateKeys,
 							ForceNew:         true,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
-							DiffSuppressFunc: EmptyOrDefaultStringSuppress(""),
+							DiffSuppressFunc: verify.EmptyOrDefaultStringSuppress(""),
 							Description:      `Specifies node affinities or anti-affinities to determine which sole-tenant nodes your instances and managed instance groups will use as host systems.`,
 						},
 						"min_node_cpus": {
@@ -721,7 +721,7 @@ be from 0 to 999,999,999 inclusive.`,
 				// Since this block is used by the API based on which
 				// image being used, the field needs to be marked as Computed.
 				Computed:         true,
-				DiffSuppressFunc: EmptyOrDefaultStringSuppress(""),
+				DiffSuppressFunc: verify.EmptyOrDefaultStringSuppress(""),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_secure_boot": {

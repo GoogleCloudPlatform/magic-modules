@@ -304,7 +304,7 @@ properties:
       your config.
     description: |
       Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-    diff_suppress_func: 'AlwaysDiffSuppress'
+    diff_suppress_func: 'verify.AlwaysDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'sourceDisk'
     description: |

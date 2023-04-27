@@ -173,7 +173,7 @@ properties:
         required: true
         description: |
           Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: 'ProjectNumberDiffSuppress'
+        diff_suppress_func: 'verify.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::NestedObject
         name: 'mysqlSourceConfig'
         allow_empty_object: true
@@ -759,7 +759,7 @@ properties:
         required: true
         description: |
           Destination connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: 'ProjectNumberDiffSuppress'
+        diff_suppress_func: 'verify.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::NestedObject
         name: 'gcsDestinationConfig'
         exactly_one_of:

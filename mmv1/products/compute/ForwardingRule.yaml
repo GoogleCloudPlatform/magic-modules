@@ -280,7 +280,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'InternalIpDiffSuppress'
+    diff_suppress_func: 'verify.InternalIpDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -302,7 +302,7 @@ properties:
       - :SCTP
       - :ICMP
       - :L3_DEFAULT
-    diff_suppress_func: 'CaseDiffSuppress'
+    diff_suppress_func: 'verify.CaseDiffSuppress'
     default_from_api: true
   # This is a multi-resource resource reference (BackendService (global), RegionBackendService)
   # We have custom expands that manage this.
@@ -392,7 +392,7 @@ properties:
       For internal forwarding rules within the same VPC network, two or more
       forwarding rules cannot use the same `[IPAddress, IPProtocol]`
       pair, and cannot have overlapping `portRange`s.
-    diff_suppress_func: 'PortRangeDiffSuppress'
+    diff_suppress_func: 'verify.PortRangeDiffSuppress'
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ports'

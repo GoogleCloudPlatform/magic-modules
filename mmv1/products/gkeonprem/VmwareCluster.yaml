@@ -78,7 +78,7 @@ properties:
       This is the full resource name of the admin cluster's hub membership.
       In the future, references to other resource types might be allowed if
       admin clusters are modeled as their own resources.
-    diff_suppress_func: ProjectNumberDiffSuppress
+    diff_suppress_func: verify.ProjectNumberDiffSuppress
   - !ruby/object:Api::Type::String
     name: "description"
     description: |

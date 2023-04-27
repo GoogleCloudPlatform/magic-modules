@@ -57,7 +57,7 @@ automatically, for as long as it's authorized to do so.`,
 							Type:             schema.TypeList,
 							Optional:         true,
 							ForceNew:         true,
-							DiffSuppressFunc: ProjectNumberDiffSuppress,
+							DiffSuppressFunc: verify.ProjectNumberDiffSuppress,
 							Description:      `Authorizations that will be used for performing domain authorization`,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,7 +20,7 @@ func iamMemberCaseDiffSuppress(k, old, new string, d *schema.ResourceData) bool 
 	if isCaseSensitive {
 		return old == new
 	}
-	return CaseDiffSuppress(k, old, new, d)
+	return verify.CaseDiffSuppress(k, old, new, d)
 }
 
 func validateIAMMember(i interface{}, k string) ([]string, []error) {

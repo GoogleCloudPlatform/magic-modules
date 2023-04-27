@@ -4,7 +4,6 @@ package google
 import (
 	"context"
 	"crypto/sha256"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -19,6 +18,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/hashstructure"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
@@ -350,7 +352,7 @@ func ResourceComputeInstance() *schema.Resource {
 									"ip_cidr_range": {
 										Type:             schema.TypeString,
 										Required:         true,
-										DiffSuppressFunc: IpCidrRangeDiffSuppress,
+										DiffSuppressFunc: verify.IpCidrRangeDiffSuppress,
 										Description:      `The IP CIDR range represented by this alias IP range.`,
 									},
 									"subnetwork_range_name": {
@@ -624,7 +626,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Optional:         true,
 							AtLeastOneOf:     schedulingKeys,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
-							DiffSuppressFunc: EmptyOrDefaultStringSuppress(""),
+							DiffSuppressFunc: verify.EmptyOrDefaultStringSuppress(""),
 							Description:      `Specifies node affinities or anti-affinities to determine which sole-tenant nodes your instances and managed instance groups will use as host systems.`,
 						},
 						
@@ -752,7 +754,7 @@ be from 0 to 999,999,999 inclusive.`,
 				// Since this block is used by the API based on which
 				// image being used, the field needs to be marked as Computed.
 				Computed:         true,
-				DiffSuppressFunc: EmptyOrDefaultStringSuppress(""),
+				DiffSuppressFunc: verify.EmptyOrDefaultStringSuppress(""),
 				Description:      `The shielded vm config being used by the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

@@ -315,7 +315,7 @@ properties:
       - CMEK
     description: |
       Disk encryption method used on the boot and data disks, defaults to GMEK.
-    diff_suppress_func: 'EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
+    diff_suppress_func: 'verify.EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
   - !ruby/object:Api::Type::String
     name: 'kmsKey'
     description: |

@@ -872,7 +872,7 @@ is set to true. Defaults to ZONAL.`,
 						"point_in_time": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							DiffSuppressFunc: TimestampDiffSuppress(time.RFC3339Nano),
+							DiffSuppressFunc: verify.TimestampDiffSuppress(time.RFC3339Nano),
 							Description:      `The timestamp of the point in time that should be restored.`,
 						},
 						"database_names": {
