@@ -128,7 +128,7 @@ func setupTestResourceDataFromConfigMap(t *testing.T, s map[string]*schema.Schem
 // unsetProviderConfigEnvs unsets any ENVs in the test environment that
 // configure the provider.
 // The testing package will restore the original values after the test
-func unsetTestProviderConfigEnvs() {
+func unsetTestProviderConfigEnvs(t *testing.T) {
 	envs := providerConfigEnvNames()
 	if len(envs) > 0 {
 		for _, k := range envs {
