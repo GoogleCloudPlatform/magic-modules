@@ -20,7 +20,7 @@ func TestAccNetworkSecurityClientTlsPolicy_update(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkSecurityClientTlsPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-        Config: testAccNetworkSecurityClientTlsPolicy_basic(clientTlsPolicyName),
+                               Config: testAccNetworkSecurityClientTlsPolicy_basic(clientTlsPolicyName),
 			},
 			{
 				ResourceName:      "google_network_security_client_tls_policy.foobar",
