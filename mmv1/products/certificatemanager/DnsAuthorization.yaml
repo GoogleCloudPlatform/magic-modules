@@ -46,6 +46,7 @@ examples:
     vars:
       dns_auth_name: "dns-auth"
       zone_name: "my-zone"
+      sub_domain_name: "tf"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'

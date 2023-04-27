@@ -32,6 +32,7 @@ examples:
     vars:
       policy_name: "my-deny-policy"
       account_id: "svc-acc"
+      project_name: "my-project"
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT

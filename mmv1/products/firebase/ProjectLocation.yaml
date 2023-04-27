@@ -44,6 +44,8 @@ examples:
     primary_resource_id: "basic"
     test_env_vars:
       org_id: :ORG_ID
+    vars:
+      project_name: "my-project"
 properties:
   - !ruby/object:Api::Type::String
     name: locationId
