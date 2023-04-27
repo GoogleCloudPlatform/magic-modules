@@ -19,7 +19,7 @@
                            pwd: pwd)) -%>
 <% else -%>
 <% if tf_types.include?(property.class) -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 <% if property.is_a?(Api::Type::NestedObject) -%>
   if v == nil {
     return nil

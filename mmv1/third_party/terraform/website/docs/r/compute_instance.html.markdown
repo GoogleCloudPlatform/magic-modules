@@ -186,9 +186,6 @@ is desired, you will need to modify your state file manually using
     in `guest-os-features`, and `network_interface.0.nic-type` must be `GVNIC`
     in order for this setting to take effect.
 
-* `stopping_with_local_ssd_discard` - (Optional) Whether allow data on the local ssd to be discarded. The instance can not be stopped when a local ssd being attached to the instance.
-True to allow data to be discarded. Default is False. Setting true to allow the local ssd to be recreated. https://cloud.google.com/compute/docs/disks/local-ssd
-
 ---
 
 <a name="nested_boot_disk"></a>The `boot_disk` block supports:
@@ -349,8 +346,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 <a name="nested_service_account"></a>The `service_account` block supports:
 
-* `email` - (Optional) The service account e-mail address. If not given, the
-    default Google Compute Engine service account is used.
+* `email` - (Optional) The service account e-mail address.
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `scopes` - (Required) A list of service scopes. Both OAuth2 URLs and gcloud

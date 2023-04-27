@@ -28,6 +28,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'logging_log_view_basic'
     primary_resource_id: 'logging_log_view'
+    vars:
+      log_view_name: "my-view"
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
