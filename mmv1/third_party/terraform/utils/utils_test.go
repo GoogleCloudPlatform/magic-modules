@@ -20,6 +20,25 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var fictionalSchema = map[string]*schema.Schema{
+	"location": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"region": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"zone": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"project": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+}
+
 func TestConvertStringArr(t *testing.T) {
 	input := make([]interface{}, 3)
 	input[0] = "aaa"
@@ -151,18 +170,24 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 
 func TestGetProject(t *testing.T) {
 	cases := map[string]struct {
-		ResourceProject string
-		ProviderProject string
+		ResourceConfig  map[string]interface{}
+		ProviderConfig  map[string]string
 		ExpectedProject string
 		ExpectedError   bool
 	}{
 		"project is pulled from resource config instead of provider config": {
-			ResourceProject: "foo",
-			ProviderProject: "bar",
-			ExpectedProject: "foo",
+			ResourceConfig: map[string]interface{}{
+				"project": "resource-project",
+			},
+			ProviderConfig: map[string]string{
+				"project": "provider-project",
+			},
+			ExpectedProject: "resource-project",
 		},
 		"project is pulled from provider config when not set on resource": {
-			ProviderProject: "bar",
+			ProviderConfig: map[string]string{
+				"project": "provider-project",
+			},
 			ExpectedProject: "bar",
 		},
 		"error returned when project not set on either provider or resource": {
@@ -175,19 +200,13 @@ func TestGetProject(t *testing.T) {
 
 			// Create provider config
 			var config transport_tpg.Config
-			if tc.ProviderProject != "" {
-				config.Project = tc.ProviderProject
+			if v, ok := tc.ProviderConfig["project"]; ok {
+				config.Project = v
 			}
 
 			// Create resource config
-			// Here use ResourceComputeDisk schema as example
-			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, ResourceComputeDisk().Schema, emptyConfigMap)
-			if tc.ResourceProject != "" {
-				if err := d.Set("project", tc.ResourceProject); err != nil {
-					t.Fatalf("Cannot set project: %s", err)
-				}
-			}
+			// Here use a fictional schema that includes a project field
+			d := setupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
 			project, err := getProject(d, &config)
@@ -209,37 +228,37 @@ func TestGetProject(t *testing.T) {
 
 func TestGetLocation(t *testing.T) {
 	cases := map[string]struct {
-		ResourceConfig   map[string]string
+		ResourceConfig   map[string]interface{}
 		ProviderConfig   map[string]string
 		ExpectedLocation string
 		ExpectError      bool
 	}{
 		"returns the value of the location field in resource config": {
-			ResourceConfig: map[string]string{
+			ResourceConfig: map[string]interface{}{
 				"location": "resource-location",
 			},
 			ExpectedLocation: "resource-location",
 		},
 		"does not shorten the location value when it is set as a self link in the resource config": {
-			ResourceConfig: map[string]string{
+			ResourceConfig: map[string]interface{}{
 				"location": "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location",
 			},
 			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location", // No shortening takes place
 		},
 		"returns the region value set in the resource config when location is not in the schema": {
-			ResourceConfig: map[string]string{
+			ResourceConfig: map[string]interface{}{
 				"region": "resource-region",
 			},
 			ExpectedLocation: "resource-region",
 		},
 		"does not shorten the region value when it is set as a self link in the resource config": {
-			ResourceConfig: map[string]string{
+			ResourceConfig: map[string]interface{}{
 				"region": "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region",
 			},
 			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region", // No shortening takes place
 		},
 		"returns the zone value set in the resource config when neither location nor region in the schema": {
-			ResourceConfig: map[string]string{
+			ResourceConfig: map[string]interface{}{
 				"zone": "resource-zone",
 			},
 			ExpectedLocation: "resource-zone",
@@ -247,7 +266,7 @@ func TestGetLocation(t *testing.T) {
 		"shortens zone values set as self links in the resource config": {
 			// Results from getLocation using getZone internally
 			// This behaviour makes sense because APIs may return a self link as the zone value
-			ResourceConfig: map[string]string{
+			ResourceConfig: map[string]interface{}{
 				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/resource-zone",
 			},
 			ExpectedLocation: "resource-zone",
@@ -294,32 +313,7 @@ func TestGetLocation(t *testing.T) {
 			// Here use a fictional schema as example because we need to have all of
 			// location, region, and zone fields present in the schema for the test,
 			// and no real resources would contain all of these
-			fictionalSchema := map[string]*schema.Schema{
-				"location": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-				"region": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-				"zone": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-			}
-			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, fictionalSchema, emptyConfigMap)
-
-			// Load Terraform resource config data
-			if len(tc.ResourceConfig) > 0 {
-				for k, v := range tc.ResourceConfig {
-					err := d.Set(k, v)
-					if err != nil {
-						t.Fatalf("error during test setup: %v", err)
-					}
-				}
-			}
+			d := setupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
 			location, err := getLocation(d, &config)
@@ -341,22 +335,30 @@ func TestGetLocation(t *testing.T) {
 
 func TestGetZone(t *testing.T) {
 	cases := map[string]struct {
-		ResourceZone  string
-		ProviderZone  string
-		ExpectedZone  string
-		ExpectedError bool
+		ResourceConfig map[string]interface{}
+		ProviderConfig map[string]string
+		ExpectedZone   string
+		ExpectedError  bool
 	}{
 		"returns the value of the zone field in resource config": {
-			ResourceZone: "resource-zone",
-			ProviderZone: "provider-zone",
+			ResourceConfig: map[string]interface{}{
+				"zone": "resource-zone",
+			},
+			ProviderConfig: map[string]string{
+				"zone": "provider-zone",
+			},
 			ExpectedZone: "resource-zone",
 		},
 		"shortens zone values set as self links in the resource config": {
-			ResourceZone: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
+			ResourceConfig: map[string]interface{}{
+				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
+			},
 			ExpectedZone: "us-central1-a",
 		},
 		"returns the value of the zone field in provider config when zone is unset in resource config": {
-			ProviderZone: "provider-zone",
+			ProviderConfig: map[string]string{
+				"zone": "provider-zone",
+			},
 			ExpectedZone: "provider-zone",
 		},
 		"returns an error when a zone value can't be found": {
@@ -369,35 +371,15 @@ func TestGetZone(t *testing.T) {
 
 			// Create provider config
 			var config transport_tpg.Config
-			if tc.ProviderZone != "" {
-				config.Zone = tc.ProviderZone
+			if v, ok := tc.ProviderConfig["zone"]; ok {
+				config.Zone = v
 			}
 
 			// Create resource config
 			// Here use a fictional schema as example because we need to have all of
 			// location, region, and zone fields present in the schema for the test,
 			// and no real resources would contain all of these
-			fictionalSchema := map[string]*schema.Schema{
-				"location": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-				"region": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-				"zone": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-			}
-			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, fictionalSchema, emptyConfigMap)
-			if tc.ResourceZone != "" {
-				if err := d.Set("zone", tc.ResourceZone); err != nil {
-					t.Fatalf("Cannot set zone: %s", err)
-				}
-			}
+			d := setupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
 			zone, err := getZone(d, &config)
@@ -419,39 +401,50 @@ func TestGetZone(t *testing.T) {
 
 func TestGetRegion(t *testing.T) {
 	cases := map[string]struct {
-		ResourceRegion string
-		ResourceZone   string
-		ProviderRegion string
-		ProviderZone   string
+		ResourceConfig map[string]interface{}
+		ProviderConfig map[string]string
 		ExpectedRegion string
-		ExpectedZone   string
 		ExpectedError  bool
 	}{
 		"returns the value of the region field in resource config": {
-			ResourceRegion: "resource-region",
-			ResourceZone:   "resource-zone-a",
-			ProviderRegion: "provider-region",
-			ProviderZone:   "provider-zone-a",
+			ResourceConfig: map[string]interface{}{
+				"region": "resource-region",
+				"zone":   "resource-zone-a",
+			},
+			ProviderConfig: map[string]string{
+				"region": "provider-region",
+				"zone":   "provider-zone-a",
+			},
 			ExpectedRegion: "resource-region",
 		},
 		"shortens region values set as self links in the resource config": {
-			ResourceRegion: "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1",
+			ResourceConfig: map[string]interface{}{
+				"region": "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1",
+			},
 			ExpectedRegion: "us-central1",
 		},
 		"returns a region derived from the zone field in resource config when region is unset": {
-			ResourceZone:   "resource-zone-a",
+			ResourceConfig: map[string]interface{}{
+				"zone": "resource-zone-a",
+			},
 			ExpectedRegion: "resource-zone",
 		},
 		"does not shorten region values when derived from a zone self link set in the resource config": {
-			ResourceZone:   "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
+			ResourceConfig: map[string]interface{}{
+				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
+			},
 			ExpectedRegion: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1", // Value is not shortenedfrom URI to name
 		},
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
-			ProviderRegion: "provider-region",
+			ProviderConfig: map[string]string{
+				"region": "provider-region",
+			},
 			ExpectedRegion: "provider-region",
 		},
 		"returns a region derived from the zone field in provider config when region unset in both resource and provider config": {
-			ProviderZone:   "provider-zone-a",
+			ProviderConfig: map[string]string{
+				"zone": "provider-zone-a",
+			},
 			ExpectedRegion: "provider-zone",
 		},
 		"returns an error when region values can't be found": {
@@ -464,43 +457,18 @@ func TestGetRegion(t *testing.T) {
 
 			// Create provider config
 			var config transport_tpg.Config
-			if tc.ProviderRegion != "" {
-				config.Region = tc.ProviderRegion
+			if v, ok := tc.ProviderConfig["region"]; ok {
+				config.Region = v
 			}
-			if tc.ProviderZone != "" {
-				config.Zone = tc.ProviderZone
+			if v, ok := tc.ProviderConfig["zone"]; ok {
+				config.Zone = v
 			}
 
 			// Create resource config
 			// Here use a fictional schema as example because we need to have all of
 			// location, region, and zone fields present in the schema for the test,
 			// and no real resources would contain all of these
-			fictionalSchema := map[string]*schema.Schema{
-				"location": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-				"region": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-				"zone": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-			}
-			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, fictionalSchema, emptyConfigMap)
-			if tc.ResourceRegion != "" {
-				if err := d.Set("region", tc.ResourceRegion); err != nil {
-					t.Fatalf("Cannot set region: %s", err)
-				}
-			}
-			if tc.ResourceZone != "" {
-				if err := d.Set("zone", tc.ResourceZone); err != nil {
-					t.Fatalf("Cannot set zone: %s", err)
-				}
-			}
+			d := setupTestResourceDataFromConfigMap(t, fictionalSchema, tc.ResourceConfig)
 
 			// Act
 			region, err := getRegion(d, &config)
