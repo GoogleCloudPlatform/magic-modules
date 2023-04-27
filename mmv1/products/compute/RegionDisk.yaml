@@ -71,6 +71,15 @@ examples:
       region_disk_name: "my-region-disk"
       disk_name: "my-disk"
       snapshot_name: "my-snapshot"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "region_disk_async"
+    primary_resource_id: "primary"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\", context[\"random_suffix\"\
+      ])"
+    min_version: beta
+    vars:
+      region_disk_name: "primary-region-disk"
+      secondary_region_disk_name: "secondary-region-disk"
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET
@@ -312,3 +321,13 @@ properties:
       be used to determine whether the image was taken from the current
       or a previous instance of a given disk name.
     output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'asyncPrimaryDisk'
+    min_version: 'beta'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'disk'
+        description: |
+          Primary disk for asynchronous disk replication.
+        required: true
+    diff_suppress_func: 'compareSelfLinkRelativePaths'
