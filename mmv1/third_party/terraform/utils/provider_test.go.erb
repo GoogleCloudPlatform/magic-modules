@@ -125,6 +125,18 @@ func setupTestResourceDataFromConfigMap(t *testing.T, s map[string]*schema.Schem
 	return d
 }
 
+// unsetProviderConfigEnvs unsets any ENVs in the test environment that
+// configure the provider.
+// The testing package will restore the original values after the test
+func unsetTestProviderConfigEnvs() {
+	envs := providerConfigEnvNames()
+	if len(envs) > 0 {
+		for _, k := range envs {
+			t.Setenv(k, "")
+		}
+	}
+}
+
 func setupTestEnvs(t *testing.T, envValues map[string]string) {
 	// Set ENVs
 	if len(envValues) > 0 {
@@ -252,6 +264,7 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
+			unsetTestProviderConfigEnvs(t)
 			setupTestEnvs(t, tc.EnvVariables)
 			p := Provider()
 			d := setupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
@@ -347,6 +360,7 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
+			unsetTestProviderConfigEnvs(t)
 			setupTestEnvs(t, tc.EnvVariables)
 			p := Provider()
 			d := setupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
@@ -431,6 +445,7 @@ func TestProvider_providerConfigure_impersonateServiceAccount(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
+			unsetTestProviderConfigEnvs(t)
 			setupTestEnvs(t, tc.EnvVariables)
 			p := Provider()
 			d := setupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
@@ -504,6 +519,7 @@ func TestProvider_providerConfigure_impersonateServiceAccountDelegates(t *testin
 
 			// Arrange
 			ctx := context.Background()
+			unsetTestProviderConfigEnvs(t)
 			setupTestEnvs(t, tc.EnvVariables)
 			p := Provider()
 			d := setupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
@@ -646,6 +662,7 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 
 			// Arrange
 			ctx := context.Background()
+			unsetTestProviderConfigEnvs(t)
 			setupTestEnvs(t, tc.EnvVariables)
 			p := Provider()
 			d := setupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
