@@ -15,8 +15,13 @@ func TestLocationDescription_getZone(t *testing.T) {
 	}{
 		"returns the value of the zone field in resource config": {
 			ld: LocationDescription{
-				ResourceZone: types.StringValue("resource-zone"),
-				ProviderZone: types.StringValue("provider-zone"),
+				// A resource would not have all 3 fields set, but if they were all present zone is used
+				ResourceZone:     types.StringValue("resource-zone"),
+				ResourceRegion:   types.StringValue("resource-region"),
+				ResourceLocation: types.StringValue("resource-location"),
+				// Provider config doesn't override resource config
+				ProviderRegion: types.StringValue("provider-region"),
+				ProviderZone:   types.StringValue("provider-zone"),
 			},
 			ExpectedZone: types.StringValue("resource-zone"),
 		},
@@ -73,8 +78,13 @@ func TestLocationDescription_getRegion(t *testing.T) {
 	}{
 		"returns the value of the region field in resource config": {
 			ld: LocationDescription{
-				ResourceRegion: types.StringValue("resource-region"),
+				// A resource would not have all 3 fields set, but if they were all present region is used first
+				ResourceRegion:   types.StringValue("resource-region"),
+				ResourceLocation: types.StringValue("resource-location"),
+				ResourceZone:     types.StringValue("resource-zone"),
+				// Provider config doesn't override resource config
 				ProviderRegion: types.StringValue("provider-region"),
+				ProviderZone:   types.StringValue("provider-zone"),
 			},
 			ExpectedRegion: types.StringValue("resource-region"),
 		},
@@ -149,7 +159,13 @@ func TestLocationDescription_getLocation(t *testing.T) {
 	}{
 		"returns the value of the location field in resource config": {
 			ld: LocationDescription{
+				// A resource would not have all 3 fields set, but if they were all present location is used first
 				ResourceLocation: types.StringValue("resource-location"),
+				ResourceRegion:   types.StringValue("resource-region"),
+				ResourceZone:     types.StringValue("resource-zone"),
+				// Provider config doesn't override resource config
+				ProviderRegion: types.StringValue("provider-region"),
+				ProviderZone:   types.StringValue("provider-zone"),
 			},
 			ExpectedLocation: types.StringValue("resource-location"),
 		},
