@@ -12,130 +12,161 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-  name: "Backup"
-  self_link: "projects/{{project}}/locations/{{location}}/backups/{{backup_id}}"
-  base_url: "projects/{{project}}/locations/{{location}}/backups"
-  create_url: "projects/{{project}}/locations/{{location}}/backups?backupId={{backup_id}}"
-  update_verb: :PATCH
-  update_mask: true
-  description: "An AlloyDB Backup."
-  references: !ruby/object:Api::Resource::ReferenceLinks
-    guides:
-      "AlloyDB": "https://cloud.google.com/alloydb/docs/"
-    api: "https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups/create"
-  async: !ruby/object:Api::OpAsync
-    operation: !ruby/object:Api::OpAsync::Operation
-      path: "name"
-      base_url: "{{op_id}}"
-      wait_ms: 1000
-      timeouts: !ruby/object:Api::Timeouts
-        insert_minutes: 10
-        update_minutes: 10
-        delete_minutes: 10
-    result: !ruby/object:Api::OpAsync::Result
-      path: "response"
-    status: !ruby/object:Api::OpAsync::Status
-      path: "done"
-      complete: true
-      allowed:
-        - true
-        - false
-    error: !ruby/object:Api::OpAsync::Error
-      path: "error"
-      message: "message"
-  import_format: ["projects/{{project}}/locations/{{location}}/backups/{{backup_id}}"]
-  autogen_async: true
-  examples:
-    - !ruby/object:Provider::Terraform::Examples
-      name: "alloydb_backup_basic"
-      primary_resource_id: "default"
-      vars:
-        alloydb_backup_id: "alloydb-backup"
-        alloydb_cluster_name: "alloydb-cluster"
-        alloydb_instance_name: "alloydb-instance"
-        network_name: "alloydb-network"
-      test_vars_overrides:
-        network_name: 'BootstrapSharedTestNetwork(t, "alloydb-basic")'
-      ignore_read_extra:
-        - "reconciling"
-        - "update_time"
-    - !ruby/object:Provider::Terraform::Examples
-      name: "alloydb_backup_full"
-      primary_resource_id: "default"
-      vars:
-        alloydb_backup_id: "alloydb-backup"
-        alloydb_cluster_name: "alloydb-cluster"
-        alloydb_instance_name: "alloydb-instance"
-        network_name: "alloydb-network"
-      test_vars_overrides:
-        network_name: 'BootstrapSharedTestNetwork(t, "alloydb-full")'
-      ignore_read_extra:
-        - "reconciling"
-        - "update_time"
-  custom_code: !ruby/object:Provider::Terraform::CustomCode
-    encoder: templates/terraform/encoders/alloydb_backup.erb
-  parameters:
-    - !ruby/object:Api::Type::String
-      name: "backupId"
-      required: true
-      immutable: true
-      url_param_only: true
-      description: |
-        The ID of the alloydb backup.
-    - !ruby/object:Api::Type::String
-      name: "location"
-      required: true
-      immutable: true
-      url_param_only: true
-      description: |
-        The location where the alloydb backup should reside.
-  properties:
-    - !ruby/object:Api::Type::String
-      name: "name"
-      output: true
-      description: |
-        Output only. The name of the backup resource with the format: * projects/{project}/locations/{region}/backups/{backupId}
-    - !ruby/object:Api::Type::String
-      name: "uid"
-      output: true
-      description: |
-        Output only. The system-generated UID of the resource. The UID is assigned when the resource is created, and it is retained until it is deleted.
-    - !ruby/object:Api::Type::String
-      name: "clusterName"
-      description: "The full resource name of the backup source cluster (e.g., projects/{project}/locations/{location}/clusters/{clusterId})."
-      required: true
-      immutable: true
-      diff_suppress_func: "ProjectNumberDiffSuppress"
-    - !ruby/object:Api::Type::KeyValuePairs
-      name: "labels"
-      description: "User-defined labels for the alloydb backup."
-    - !ruby/object:Api::Type::Time
-      name: "createTime"
-      description: |
-        Time the Backup was created in UTC.
-      output: true
-    - !ruby/object:Api::Type::Time
-      name: "updateTime"
-      description: |
-        Time the Backup was updated in UTC.
-      output: true
-    - !ruby/object:Api::Type::String
-      name: "state"
-      output: true
-      description: |
-        The current state of the backup.
-    - !ruby/object:Api::Type::String
-      name: "description"
-      description: |
-        User-provided description of the backup.
-      immutable: true
-    - !ruby/object:Api::Type::Boolean
-      name: "reconciling"
-      output: true
-      description: |
-        If true, indicates that the service is actively updating the resource. This can happen due to user-triggered updates or system actions like failover or maintenance.
-    - !ruby/object:Api::Type::String
-      name: 'etag'
-      description: |
-        A hash of the resource.
-      output: true
+name: 'Backup'
+self_link: 'projects/{{project}}/locations/{{location}}/backups/{{backup_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/backups'
+create_url: 'projects/{{project}}/locations/{{location}}/backups?backupId={{backup_id}}'
+update_verb: :PATCH
+update_mask: true
+description: 'An AlloyDB Backup.'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
+  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups/create'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 10
+      update_minutes: 10
+      delete_minutes: 10
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+import_format:
+  ['projects/{{project}}/locations/{{location}}/backups/{{backup_id}}']
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_backup_basic'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'BootstrapSharedTestNetwork(t, "alloydb-basic")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_backup_full'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'BootstrapSharedTestNetwork(t, "alloydb-full")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/alloydb_backup.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'backupId'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID of the alloydb backup.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location where the alloydb backup should reside.
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    output: true
+    description: |
+      Output only. The name of the backup resource with the format: * projects/{project}/locations/{region}/backups/{backupId}
+  - !ruby/object:Api::Type::String
+    name: 'uid'
+    output: true
+    description: |
+      Output only. The system-generated UID of the resource. The UID is assigned when the resource is created, and it is retained until it is deleted.
+  - !ruby/object:Api::Type::String
+    name: 'clusterName'
+    description: 'The full resource name of the backup source cluster (e.g., projects/{project}/locations/{location}/clusters/{clusterId}).'
+    required: true
+    immutable: true
+    diff_suppress_func: 'ProjectNumberDiffSuppress'
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'labels'
+    description: 'User-defined labels for the alloydb backup.'
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    description: |
+      Time the Backup was created in UTC.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    description: |
+      Time the Backup was updated in UTC.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'state'
+    output: true
+    description: |
+      The current state of the backup.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      User-provided description of the backup.
+    immutable: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'reconciling'
+    output: true
+    description: |
+      If true, indicates that the service is actively updating the resource. This can happen due to user-triggered updates or system actions like failover or maintenance.
+  - !ruby/object:Api::Type::String
+    name: 'etag'
+    description: |
+      A hash of the resource.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: "encryptionConfig"
+    description: |
+      EncryptionConfig describes the encryption config of a cluster or a backup that is encrypted with a CMEK (customer-managed encryption key).
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "kmsKeyName"
+        description: |
+          The fully-qualified resource name of the KMS key. Each Cloud KMS key is regionalized and has the following format: projects/[PROJECT]/locations/[REGION]/keyRings/[RING]/cryptoKeys/[KEY_NAME].
+        immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    name: "encryptionInfo"
+    description: |
+      EncryptionInfo describes the encryption information of a cluster or a backup.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'encryptionType'
+        description: "Output only. Type of encryption."              
+        values:
+          - :TYPE_UNSPECIFIED
+          - :GOOGLE_DEFAULT_ENCRYPTION
+          - :CUSTOMER_MANAGED_ENCRYPTION
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: kmsKeyVersions
+        item_type: Api::Type::String
+        description: |
+          Output only. Cloud KMS key versions that are being used to protect the database or the backup.
+        output: true
