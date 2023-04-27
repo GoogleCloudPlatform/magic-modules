@@ -15,5 +15,10 @@ resource "google_network_security_client_tls_policy" "<%= ctx[:primary_resource_
       target_uri = "unix:mypath"
     }
   }
+  server_validation_ca {
+    grpc_endpoint {
+      target_uri = "unix:mypath1"
+    }
+  }
 }
 

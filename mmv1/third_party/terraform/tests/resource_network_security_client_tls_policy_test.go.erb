@@ -48,6 +48,16 @@ func testAccNetworkSecurityClientTlsPolicy_basic(clientTlsPolicyName string) str
     }
     description            = "my description"
     sni                    = "secure.example.com"
+		client_certificate {
+    certificate_provider_instance {
+        plugin_instance = "google_cloud_private_spiffe"
+      }
+    }
+  	server_validation_ca {
+    	grpc_endpoint {
+      	target_uri = "unix:mypath"
+    	}
+  	}
   }
 `, clientTlsPolicyName)
 }
@@ -61,6 +71,21 @@ func testAccNetworkSecurityClientTlsPolicy_update(clientTlsPolicyName string) st
     }
     description            = "updated description"
     sni                    = "secure1.example.com"
+		client_certificate {
+    certificate_provider_instance {
+        plugin_instance = "google_cloud"
+      }
+    }
+  	server_validation_ca {
+    	grpc_endpoint {
+      	target_uri = "unix:mypath1"
+    	}
+  	}
+		server_validation_ca {
+    	grpc_endpoint {
+      	target_uri = "unix:mypath2"
+    	}
+  	}
   }
 `, clientTlsPolicyName)
 }
