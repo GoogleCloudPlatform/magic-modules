@@ -70,6 +70,12 @@ examples:
     primary_resource_id: "hourly"
     vars:
       name: "gce-policy"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "resource_policy_consistency_group"
+    min_version: "beta"
+    primary_resource_id: "cgroup"
+    vars:
+      name: "gce-policy"
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: region
@@ -100,6 +106,7 @@ properties:
     conflicts:
       - 'group_placement_policy'
       - 'instance_schedule_policy'
+      - 'disk_consistency_group_policy'
     description: |
       Policy for creating snapshots of persistent disks.
     properties:
@@ -258,6 +265,7 @@ properties:
     conflicts:
       - 'instance_schedule_policy'
       - 'snapshot_schedule_policy'
+      - 'disk_consistency_group_policy'
     description: |
       Resource policy for instances used for placement configuration.
     properties:
@@ -291,6 +299,7 @@ properties:
     conflicts:
       - 'snapshot_schedule_policy'
       - 'group_placement_policy'
+      - 'disk_consistency_group_policy'
     description: |
       Resource policy for scheduling instance operations.
     properties:
@@ -334,3 +343,22 @@ properties:
         name: 'expirationTime'
         description: |
           The expiration time of the schedule. The timestamp is an RFC3339 string.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'diskConsistencyGroupPolicy'
+    min_version: 'beta'
+    conflicts:
+      - 'snapshot_schedule_policy'
+      - 'group_placement_policy'
+      - 'instance_schedule_policy'
+    description: |
+      Replication consistency group for asynchronous disk replication.
+    send_empty_value: true
+    properties: 
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        immutable: true
+        required: true
+        description: |
+          Enable disk consistency on the resource policy.
+    custom_expand: 'templates/terraform/custom_expand/disk_consistency_group_policy.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/disk_consistency_group_policy.erb'

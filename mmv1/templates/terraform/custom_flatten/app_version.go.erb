@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	original := v.(map[string]interface{})
 	transformed := make(map[string]interface{})
 	transformed["zip"] = d.Get("deployment.0.zip")
@@ -25,7 +25,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	return []interface{}{transformed}
 }
 
-func flattenAppEngineFlexibleAppVersionDeploymentContainer(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenAppEngineFlexibleAppVersionDeploymentContainer(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -39,11 +39,11 @@ func flattenAppEngineFlexibleAppVersionDeploymentContainer(v interface{}, d *sch
 	return []interface{}{transformed}
 }
 
-func flattenAppEngineFlexibleAppVersionDeploymentContainerImage(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenAppEngineFlexibleAppVersionDeploymentContainerImage(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenAppEngineFlexibleAppVersionDeploymentCloudBuildOptions(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenAppEngineFlexibleAppVersionDeploymentCloudBuildOptions(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -59,10 +59,10 @@ func flattenAppEngineFlexibleAppVersionDeploymentCloudBuildOptions(v interface{}
 	return []interface{}{transformed}
 }
 
-func flattenAppEngineFlexibleAppVersionDeploymentCloudBuildOptionsAppYamlPath(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenAppEngineFlexibleAppVersionDeploymentCloudBuildOptionsAppYamlPath(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenAppEngineFlexibleAppVersionDeploymentCloudBuildOptionsCloudBuildTimeout(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenAppEngineFlexibleAppVersionDeploymentCloudBuildOptionsCloudBuildTimeout(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }

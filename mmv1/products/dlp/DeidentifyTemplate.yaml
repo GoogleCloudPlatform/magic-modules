@@ -37,6 +37,11 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dlp_deidentify_template_image_transformations"
+    primary_resource_id: "basic"
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/wrap_object.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
@@ -68,11 +73,91 @@ properties:
     name: 'displayName'
     description: |
       User set display name of the template.
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    description: |
+      The creation timestamp of an deidentifyTemplate. Set by the server.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
+    description: |
+      The last update timestamp of an deidentifyTemplate. Set by the server.
+    output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'deidentifyConfig'
     required: true
     description: Configuration of the deidentify template
     properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'imageTransformations'
+        description: Treat the dataset as an image and redact.
+        exactly_one_of:
+          - deidentify_config.0.info_type_transformations
+          - deidentify_config.0.record_transformations
+          - deidentify_config.0.image_transformations
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'transforms'
+            required: true
+            description: |
+              For determination of how redaction of images should occur.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'redactionColor'
+                  description: |
+                    The color to use when redacting content from an image. If not specified, the default is black.
+                  properties:
+                    - !ruby/object:Api::Type::Double
+                      name: red
+                      description: |
+                        The amount of red in the color as a value in the interval [0, 1].
+                      default_value: 0.0
+                    - !ruby/object:Api::Type::Double
+                      name: blue
+                      description: |
+                        The amount of blue in the color as a value in the interval [0, 1].
+                      default_value: 0.0
+                    - !ruby/object:Api::Type::Double
+                      name: green
+                      description: |
+                        The amount of green in the color as a value in the interval [0, 1].
+                      default_value: 0.0
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'selectedInfoTypes'
+                  description: Apply transformation to the selected infoTypes.
+                  properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'infoTypes'
+                    required: true
+                    description: |
+                      InfoTypes to apply the transformation to. Leaving this empty will apply the transformation to apply to
+                      all findings that correspond to infoTypes that were requested in InspectConfig.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          required: true
+                          description: |
+                            Name of the information type.
+                        - !ruby/object:Api::Type::String
+                          name: 'version'
+                          description: |
+                            Version name for this InfoType.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'allInfoTypes'
+                  description: Apply transformation to all findings not specified in other ImageTransformation's selectedInfoTypes.
+                  properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#allinfotypes
+                    # The fields below are necessary to include the "allInfoTypes" transformation in the payload
+                  send_empty_value: true
+                  allow_empty_object: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'allText'
+                  description: Apply transformation to all text that doesn't match an infoType.
+                  properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/projects.deidentifyTemplates#alltext
+                    # The fields below are necessary to include the "allText" transformation in the payload
+                  send_empty_value: true
+                  allow_empty_object: true
       - !ruby/object:Api::Type::NestedObject
         name: 'infoTypeTransformations'
         description: Treat the dataset as free-form text and apply the same free text
@@ -80,6 +165,7 @@ properties:
         exactly_one_of:
           - deidentify_config.0.info_type_transformations
           - deidentify_config.0.record_transformations
+          - deidentify_config.0.image_transformations
         properties:
           - !ruby/object:Api::Type::Array
             name: 'transformations'
@@ -100,6 +186,10 @@ properties:
                         required: true
                         description: |
                           Name of the information type.
+                      - !ruby/object:Api::Type::String
+                        name: 'version'
+                        description: |
+                          Version name for this InfoType.
                 - !ruby/object:Api::Type::NestedObject
                   name: 'primitiveTransformation'
                   required: true
@@ -450,6 +540,23 @@ properties:
                           name: 'radix'
                           description: |
                             The native way to select the alphabet. Must be in the range \[2, 95\].
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'replaceDictionaryConfig'
+                      description: Replace with a value randomly drawn (with replacement)
+                        from a dictionary.
+                      properties:
+                        - !ruby/object:Api::Type::NestedObject
+                          name: 'wordList'
+                          required: true
+                          description: |
+                            A list of words to select from for random replacement. The [limits](https://cloud.google.com/dlp/limits) page contains details about the size limits of dictionaries.
+                          properties:
+                            - !ruby/object:Api::Type::Array
+                              name: 'words'
+                              required: true
+                              description: |
+                                Words or phrases defining the dictionary. The dictionary must contain at least one phrase and every phrase must contain at least 2 characters that are letters or digits.
+                              item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'recordTransformations'
         description: Treat the dataset as structured. Transformations can be applied
@@ -458,6 +565,7 @@ properties:
         exactly_one_of:
           - deidentify_config.0.info_type_transformations
           - deidentify_config.0.record_transformations
+          - deidentify_config.0.image_transformations
         properties:
           - !ruby/object:Api::Type::Array
             name: 'fieldTransformations'

@@ -35,6 +35,7 @@ import(
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func init() {
@@ -71,7 +72,7 @@ func testSweep{{$.TitleCaseFullName}}(region string) error {
 		"billing_account":billingId,
 	}
 
-	client := NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, "", 0)
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, "", 0)
 	err = client.DeleteAll{{$.DCLTitle}}(context.Background(), {{$.SweeperFunctionArgs}} isDeletable{{$.TitleCaseFullName}})
 	if err != nil {
 		return err
