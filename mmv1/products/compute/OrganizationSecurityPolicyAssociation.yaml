@@ -36,6 +36,10 @@ examples:
     min_version: 'beta'
     test_env_vars:
       org_id: :ORG_ID
+    vars:
+      folder_name: 'folder-name'
+      policy_name: 'policy-name'
+      association_name: 'asso-name'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/org_security_policy_association.go.erb
   post_delete: templates/terraform/post_create/org_security_policy_association.go.erb
