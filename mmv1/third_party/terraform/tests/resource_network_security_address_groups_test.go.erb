@@ -13,6 +13,7 @@ func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
     t.Parallel()
 
     addressGroupsName := fmt.Sprintf("tf-test-address-group-%s", RandString(t, 10))
+	projectName := GetTestProjectFromEnv()
 
     VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
@@ -20,7 +21,7 @@ func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
 		CheckDestroy: testAccCheckNetworkSecurityAddressGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityAddressGroups_basic(addressGroupsName),
+				Config: testAccNetworkSecurityAddressGroups_basic(addressGroupsName, projectName),
 			},
 			{
 				ResourceName:      "google_network_security_address_group.foobar",
@@ -28,7 +29,7 @@ func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNetworkSecurityAddressGroups_update(addressGroupsName),
+				Config: testAccNetworkSecurityAddressGroups_update(addressGroupsName, projectName),
 			},
 			{
 				ResourceName:      "google_network_security_address_group.foobar",
@@ -39,10 +40,11 @@ func TestAccNetworkSecurityAddressGroups_update(t *testing.T){
 	})
 }
 
-func testAccNetworkSecurityAddressGroups_basic(addressGroupsName string) string {
+func testAccNetworkSecurityAddressGroups_basic(addressGroupsName, projectName string) string {
     return fmt.Sprintf(`
 resource "google_network_security_address_group" "foobar" {
     name        = "%s"
+    parent 		= "projects/%s"
     location    = "us-central1"
     description = "my address groups"
     type        = "IPV4"
@@ -50,15 +52,16 @@ resource "google_network_security_address_group" "foobar" {
     labels      = {
 		foo = "bar"
     }
-    items = ["208.80.154.224/32"]
+    items 		= ["208.80.154.224/32"]
 }
-`, addressGroupsName)
+`, addressGroupsName, projectName)
 }
 
-func testAccNetworkSecurityAddressGroups_update(addressGroupsName string) string {
+func testAccNetworkSecurityAddressGroups_update(addressGroupsName, projectName string) string {
     return fmt.Sprintf(`
 resource "google_network_security_address_group" "foobar" {
     name        = "%s"
+	parent 		= "projects/%s"
     location    = "us-central1"
     description = "my address groups. Update"
     type        = "IPV4"
@@ -66,9 +69,9 @@ resource "google_network_security_address_group" "foobar" {
     labels      = {
 		foo = "foo"
     }
-    items = ["208.80.155.224/32", "208.80.154.224/32"]
+    items 		= ["208.80.155.224/32", "208.80.154.224/32"]
 }
-`, addressGroupsName)
+`, addressGroupsName, projectName)
 }
 
 <% end -%>
