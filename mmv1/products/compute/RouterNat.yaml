@@ -123,7 +123,7 @@ properties:
     required: true
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateRFC1035Name(2, 63)'
+      function: 'verify.ValidateRFC1035Name(2, 63)'
   - !ruby/object:Api::Type::Enum
     name: 'natIpAllocateOption'
     required: true

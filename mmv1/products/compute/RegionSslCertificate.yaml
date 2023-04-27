@@ -132,7 +132,7 @@ properties:
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'privateKey'
     description: 'The write-only private key in PEM format.'

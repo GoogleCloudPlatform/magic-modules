@@ -235,7 +235,7 @@ properties:
            A base64-encoded string.
         required: false
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'verify.ValidateBase64String'
       - !ruby/object:Api::Type::KeyValuePairs
         name: attributes
         description: |
@@ -314,7 +314,7 @@ properties:
           A base64-encoded string.
         required: false
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'verify.ValidateBase64String'
       - !ruby/object:Api::Type::KeyValuePairs
         name: headers
         description: |
@@ -357,7 +357,7 @@ properties:
           A base64-encoded string.
         required: false
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'verify.ValidateBase64String'
       - !ruby/object:Api::Type::KeyValuePairs
         name: headers
         description: |

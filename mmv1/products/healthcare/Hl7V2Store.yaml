@@ -101,7 +101,7 @@ properties:
 
           A base64-encoded string.
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'verify.ValidateBase64String'
       - !ruby/object:Api::Type::String
         name: schema
         at_least_one_of:

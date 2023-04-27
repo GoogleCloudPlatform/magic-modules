@@ -60,7 +60,7 @@ properties:
     description: The name of the packet mirroring rule
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: description
     description: A human-readable description of the rule.
