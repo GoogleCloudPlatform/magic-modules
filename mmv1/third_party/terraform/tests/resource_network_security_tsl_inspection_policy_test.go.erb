@@ -14,7 +14,7 @@ func TestAccNetworkSecurityTlsInspectionPolicy_update(t *testing.T){
 
     tlsInspectionPolicyName := fmt.Sprintf("tf-test-tls-inspection-policy-%s", RandString(t, 10))
     caPoolName := fmt.Sprintf("tf-test-tls-ca-pool-%s", RandString(t, 10))
-	certificateAuthorityName := fmt.Sprintf("tf-test-tls-certificate-authority-%s", RandString(t, 10))
+	  certificateAuthorityName := fmt.Sprintf("tf-test-tls-certificate-authority-%s", RandString(t, 10))
 
     VcrTest(t, resource.TestCase{
 		PreCheck:     func() { AccTestPreCheck(t) },
@@ -56,6 +56,8 @@ resource "google_privateca_certificate_authority" "default" {
   lifetime = "86400s"
   type = "SELF_SIGNED"
   deletion_protection = false
+  skip_grace_period = true
+  ignore_active_certificates_on_deletion = true
   config {
     subject_config {
       subject {
@@ -106,6 +108,8 @@ resource "google_privateca_certificate_authority" "default" {
   lifetime = "86400s"
   type = "SELF_SIGNED"
   deletion_protection = false
+  skip_grace_period = true
+  ignore_active_certificates_on_deletion = true
   config {
     subject_config {
       subject {

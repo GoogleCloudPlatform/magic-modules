@@ -9,11 +9,13 @@ resource "google_privateca_ca_pool" "default" {
 resource "google_privateca_certificate_authority" "default" {
   provider    = google-beta
   pool = google_privateca_ca_pool.default.name
-  certificate_authority_id = "<%= ctx[:vars]['privateca_certificate_authority_name'] %>"
+  certificate_authority_id = "<%= ctx[:vars]['privateca_certificate_authority_id'] %>"
   location = "us-central1"
   lifetime = "86400s"
   type = "SELF_SIGNED"
   deletion_protection = false
+  skip_grace_period = true
+  ignore_active_certificates_on_deletion = true
   config {
     subject_config {
       subject {
