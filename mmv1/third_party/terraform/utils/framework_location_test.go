@@ -123,7 +123,7 @@ func TestLocationDescription_getRegion(t *testing.T) {
 		},
 		"returns an error that mention non-standard schema field names when region value can't be found": {
 			ld: LocationDescription{
-				ZoneSchemaField: types.StringValue("foobar"),
+				RegionSchemaField: types.StringValue("foobar"),
 			},
 			ExpectedError: true,
 		},
