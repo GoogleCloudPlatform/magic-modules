@@ -253,7 +253,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'containers'
         description: |-
-          Holds the single container that defines the unit of execution for this task.
+          Holds the containers that define the unit of execution for this Service.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -574,6 +574,11 @@ properties:
                         The name of the service to place in the gRPC HealthCheckRequest
                         (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                         If this is not specified, the default behavior is defined by gRPC.
+            - !ruby/object:Api::Type::Array
+              name: 'dependsOn'
+              description: |-
+                Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
+              item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'
         description: |-
