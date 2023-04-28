@@ -88,7 +88,9 @@ parameters:
     name: 'region'
     resource: 'Region'
     imports: 'name'
-    description: 'The region where the tunnel is located. If unset, is set to the region of `target_vpn_gateway`.'
+    description:
+      'The region where the tunnel is located. If unset, is set to the region of
+      `target_vpn_gateway`.'
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
@@ -97,8 +99,8 @@ properties:
     name: 'tunnel_id'
     api_name: 'id'
     description:
-      'The unique identifier for the resource. This identifier is defined
-      by the server.'
+      'The unique identifier for the resource. This identifier is defined by the
+      server.'
     output: true
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

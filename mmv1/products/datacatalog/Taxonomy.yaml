@@ -39,8 +39,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'data_catalog_taxonomy_basic'
     primary_resource_id: 'basic_taxonomy'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf_test_my_taxonomy%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_taxonomy%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       display_name: 'my_taxonomy'

@@ -184,8 +184,7 @@ properties:
             - !ruby/object:Api::Type::Enum
               name: 'algorithm'
               description:
-                String mnemonic specifying the DNSSEC algorithm of this
-                key
+                String mnemonic specifying the DNSSEC algorithm of this key
               values:
                 - 'ecdsap256sha256'
                 - 'ecdsap384sha384'
@@ -271,8 +270,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'gkeClusters'
         description:
-          'The list of Google Kubernetes Engine clusters that can see this
-          zone.'
+          'The list of Google Kubernetes Engine clusters that can see this zone.'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -395,8 +393,8 @@ properties:
     immutable: true
     name: 'serviceDirectoryConfig'
     description:
-      The presence of this field indicates that this zone is backed by
-      Service Directory. The value of this field contains information related to the
+      The presence of this field indicates that this zone is backed by Service
+      Directory. The value of this field contains information related to the
       namespace associated with the zone.
     properties:
       - !ruby/object:Api::Type::NestedObject
@@ -424,5 +422,5 @@ properties:
         name: 'enableLogging'
         required: true
         description:
-          'If set, enable query logging for this ManagedZone. False by
-          default, making logging opt-in.'
+          'If set, enable query logging for this ManagedZone. False by default,
+          making logging opt-in.'

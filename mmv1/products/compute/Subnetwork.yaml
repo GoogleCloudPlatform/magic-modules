@@ -79,8 +79,8 @@ examples:
     vars:
       subnetwork_name: 'test-subnetwork'
       network_name: 'test-network'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\",
+      context[\"\
       random_suffix\"])"
   - !ruby/object:Provider::Terraform::Examples
     name: 'subnetwork_logging_config'

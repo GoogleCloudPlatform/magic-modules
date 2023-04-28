@@ -102,7 +102,9 @@ examples:
       pool_location: 'us-central1'
       deletion_protection: 'true'
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "us-central1").CryptoKey.Name'
+      kms_key_name:
+        'BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN",
+        "us-central1").CryptoKey.Name'
       pool_name: 'BootstrapSharedCaPoolInLocation(t, "us-central1")'
       pool_location: '"us-central1"'
       deletion_protection: 'false'
@@ -195,7 +197,8 @@ properties:
     default_value: :SELF_SIGNED
   - !ruby/object:Api::Type::NestedObject
     name: 'config'
-    description: The config used to create a self-signed X.509 certificate or CSR.
+    description:
+      The config used to create a self-signed X.509 certificate or CSR.
     required: true
     immutable: true
     properties:
@@ -527,7 +530,8 @@ properties:
                 immutable: true
               - !ruby/object:Api::Type::String
                 name: 'province'
-                description: The province, territory, or regional state of the subject.
+                description:
+                  The province, territory, or regional state of the subject.
                 immutable: true
               - !ruby/object:Api::Type::String
                 name: 'streetAddress'
@@ -580,8 +584,8 @@ properties:
               - !ruby/object:Api::Type::Array
                 name: 'ipAddresses'
                 description:
-                  Contains only valid 32-bit IPv4 addresses or RFC 4291
-                  IPv6 addresses.
+                  Contains only valid 32-bit IPv4 addresses or RFC 4291 IPv6
+                  addresses.
                 immutable: true
                 item_type: Api::Type::String
                 at_least_one_of:

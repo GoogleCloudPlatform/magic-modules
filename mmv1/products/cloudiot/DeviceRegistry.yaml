@@ -81,8 +81,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudiot_device_registry_basic'
     primary_resource_id: 'test-registry'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudiot-registry%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudiot-registry%s\",
+      context[\"\
       random_suffix\"])"
     vars:
       cloudiot_registry_name: 'cloudiot-registry'

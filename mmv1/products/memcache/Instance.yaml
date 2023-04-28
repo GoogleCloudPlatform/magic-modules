@@ -108,8 +108,8 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'host'
           description:
-            Hostname or IP address of the Memcached node used by the clients
-            to connect to the Memcached server on this node.
+            Hostname or IP address of the Memcached node used by the clients to
+            connect to the Memcached server on this node.
           output: true
         - !ruby/object:Api::Type::String
           name: state

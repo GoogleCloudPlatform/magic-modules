@@ -17,7 +17,7 @@ base_url: 'projects/{{project}}/locations/global/serviceBindings'
 create_url: 'projects/{{project}}/locations/global/serviceBindings?serviceBindingId={{name}}'
 min_version: beta
 description: |
-  ServiceBinding is the resource that defines a Service Directory Service to be used in a 
+  ServiceBinding is the resource that defines a Service Directory Service to be used in a
   BackendService resource.
 immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -43,7 +43,8 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
-import_format: ['projects/{{project}}/locations/global/serviceBindings/{{name}}']
+import_format:
+  ['projects/{{project}}/locations/global/serviceBindings/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
@@ -59,7 +60,7 @@ parameters:
     required: true
     url_param_only: true
     description: |
-      Name of the ServiceBinding resource. 
+      Name of the ServiceBinding resource.
 properties:
   - !ruby/object:Api::Type::Time
     name: 'createTime'
@@ -82,6 +83,5 @@ properties:
     name: 'service'
     required: true
     description: |
-      The full Service Directory Service name of the format 
+      The full Service Directory Service name of the format
       projects/*/locations/*/namespaces/*/services/*
-

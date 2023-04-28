@@ -38,6 +38,9 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_asset_primary'
     primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]), fmt.Sprintf("tf-test-zone%s", context["random_suffix"]), fmt.Sprintf("tf-test-asset%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-zone%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-asset%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME

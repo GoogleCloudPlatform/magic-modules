@@ -69,7 +69,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 parameters:
   - !ruby/object:Api::Type::String
     name: entitytype
-    description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}/entityTypes/{entitytype}.
+    description:
+      The name of the Featurestore to use, in the format
+      projects/{project}/locations/{location}/featurestores/{featurestore}/entityTypes/{entitytype}.
     url_param_only: true
     immutable: true
     required: true
@@ -77,10 +79,10 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description:
-      The name of the feature. The feature can be up to 64 characters long
-      and can consist only of ASCII Latin letters A-Z and a-z, underscore(_), and
-      ASCII digits 0-9 starting with a letter. The value will be unique given an entity
-      type.
+      The name of the feature. The feature can be up to 64 characters long and
+      can consist only of ASCII Latin letters A-Z and a-z, underscore(_), and
+      ASCII digits 0-9 starting with a letter. The value will be unique given an
+      entity type.
     immutable: true
     url_param_only: true
     pattern: '{{entitytype}}/features/{{name}}'
