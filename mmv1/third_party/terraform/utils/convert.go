@@ -3,6 +3,8 @@ package google
 import (
 	"encoding/json"
 	"reflect"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 // Convert between two types by converting to/from JSON. Intended to switch
@@ -34,18 +36,7 @@ func Convert(item, out interface{}) error {
 // Since this is a known type, we can create it inline instead of needing to
 // pass an object in.
 func ConvertToMap(item interface{}) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-	bytes, err := json.Marshal(item)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(bytes, &out)
-	if err != nil {
-		return nil, err
-	}
-
-	return out, nil
+	return tpgresource.ConvertToMap(item)
 }
 
 func setOmittedFields(item, out interface{}) {
