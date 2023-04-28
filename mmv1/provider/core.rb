@@ -25,12 +25,12 @@ module Provider
   class Core
     include Compile::Core
 
-    TERRAFORM_PROVIDER_GA = 'github.com/hashicorp/terraform-provider-google'
-    TERRAFORM_PROVIDER_BETA = 'github.com/hashicorp/terraform-provider-google-beta'
-    TERRAFORM_PROVIDER_PRIVATE = 'internal/terraform-next'
-    RESOURCE_DIRECTORY_GA = 'google'
-    RESOURCE_DIRECTORY_BETA = 'google-beta'
-    RESOURCE_DIRECTORY_PRIVATE = 'google-private'
+    TERRAFORM_PROVIDER_GA = 'github.com/hashicorp/terraform-provider-google'.freeze
+    TERRAFORM_PROVIDER_BETA = 'github.com/hashicorp/terraform-provider-google-beta'.freeze
+    TERRAFORM_PROVIDER_PRIVATE = 'internal/terraform-next'.freeze
+    RESOURCE_DIRECTORY_GA = 'google'.freeze
+    RESOURCE_DIRECTORY_BETA = 'google-beta'.freeze
+    RESOURCE_DIRECTORY_PRIVATE = 'google-private'.freeze
 
     def initialize(config, api, version_name, start_time)
       @config = config
@@ -221,7 +221,7 @@ module Provider
       File.write("#{output_folder}/#{target}", data)
     end
 
-    def import_path()
+    def import_path
       case @target_version_name
       when 'ga'
         "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}"
