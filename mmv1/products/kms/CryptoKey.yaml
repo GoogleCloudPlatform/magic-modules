@@ -33,18 +33,18 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating a key': 'https://cloud.google.com/kms/docs/creating-keys#create_a_key'
   api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys'
-id_format: "{{key_ring}}/cryptoKeys/{{name}}"
-import_format: ["{{key_ring}}/cryptoKeys/{{name}}"]
+id_format: '{{key_ring}}/cryptoKeys/{{name}}'
+import_format: ['{{key_ring}}/cryptoKeys/{{name}}']
 supports_indirect_user_project_override: true
 schema_version: 1
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "kms_crypto_key_basic"
-    primary_resource_id: "example-key"
+    name: 'kms_crypto_key_basic'
+    primary_resource_id: 'example-key'
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "kms_crypto_key_asymmetric_sign"
-    primary_resource_id: "example-asymmetric-sign-key"
+    name: 'kms_crypto_key_asymmetric_sign'
+    primary_resource_id: 'example-asymmetric-sign-key'
     skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
@@ -66,7 +66,7 @@ parameters:
   - !ruby/object:Api::Type::Boolean
     name: 'skipInitialVersionCreation'
     description: |
-      If set to true, the request will create a CryptoKey without any CryptoKeyVersions. 
+      If set to true, the request will create a CryptoKey without any CryptoKeyVersions.
       You must use the `google_kms_key_ring_import_job` resource to import the CryptoKeyVersion.
     immutable: true
     url_param_only: true
@@ -97,10 +97,10 @@ properties:
       [purpose reference](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose)
       for possible inputs.
     values:
-      - "ENCRYPT_DECRYPT"
-      - "ASYMMETRIC_SIGN"
-      - "ASYMMETRIC_DECRYPT"
-      - "MAC"
+      - 'ENCRYPT_DECRYPT'
+      - 'ASYMMETRIC_SIGN'
+      - 'ASYMMETRIC_DECRYPT'
+      - 'MAC'
     default_value: :ENCRYPT_DECRYPT
     immutable: true
   - !ruby/object:Api::Type::String
@@ -113,15 +113,15 @@ properties:
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'orEmpty(validateKmsCryptoKeyRotationPeriod)'
     update_mask_fields:
-      - "rotationPeriod"
-      - "nextRotationTime"
+      - 'rotationPeriod'
+      - 'nextRotationTime'
   - !ruby/object:Api::Type::NestedObject
     name: 'versionTemplate'
     description: |
       A template describing settings for new crypto key versions.
     default_from_api: true
     update_mask_fields:
-      - "versionTemplate.algorithm"
+      - 'versionTemplate.algorithm'
     properties:
       - !ruby/object:Api::Type::String
         name: 'algorithm'
@@ -134,7 +134,7 @@ properties:
         description: |
           The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC". Defaults to "SOFTWARE".
         immutable: true
-        default_value: "SOFTWARE"
+        default_value: 'SOFTWARE'
   - !ruby/object:Api::Type::Time
     name: 'nextRotationTime'
     description: |

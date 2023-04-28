@@ -40,14 +40,17 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 description: A game server config resource. Configs are global and immutable.
 autogen_async: true
-import_format: ["projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}/configs/{{config_id}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}/configs/{{config_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "game_service_config_basic"
-    primary_resource_id: "default"
+    name: 'game_service_config_basic'
+    primary_resource_id: 'default'
     vars:
-      deployment_id: "tf-test-deployment"
-      config_id: "tf-test-config"
+      deployment_id: 'tf-test-deployment'
+      config_id: 'tf-test-config'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -65,8 +68,8 @@ properties:
       A unique id for the deployment config.
   - !ruby/object:Api::Type::String
     name: location
-  # The only acceptable location currently is 'global'
-  # TODO - either hard code or set as computed
+    # The only acceptable location currently is 'global'
+    # TODO - either hard code or set as computed
     url_param_only: true
     default_value: global
     description: Location of the Deployment.

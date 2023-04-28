@@ -78,6 +78,12 @@ examples:
       backend_service_name: "backend-service"
       http_health_check_name: "health-check"
   - !ruby/object:Provider::Terraform::Examples
+    name: "backend_service_cache_bypass_cache_on_request_headers"
+    primary_resource_id: "default"
+    vars:
+      backend_service_name: "backend-service"
+      http_health_check_name: "health-check"
+  - !ruby/object:Provider::Terraform::Examples
     name: "backend_service_traffic_director_round_robin"
     min_version: beta
     primary_resource_id: "default"
@@ -646,6 +652,18 @@ properties:
         description: |
           Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
         default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: 'bypassCacheOnRequestHeaders'
+        description: |
+          Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified.
+          The cache is bypassed for all cdnPolicy.cacheMode settings.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'headerName'
+              required: true
+              description: |
+                The header field name to match on when bypassing cache. Values are case-insensitive.
   - !ruby/object:Api::Type::NestedObject
     name: 'connectionDraining'
     description: |

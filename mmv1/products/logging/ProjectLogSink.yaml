@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "ProjectLogSink"
+name: 'ProjectLogSink'
 base_url: projects/{{project}}/sinks
 self_link: projects/{{project}}/sinks/{{name}}
 collection_url_key: 'sinks'
