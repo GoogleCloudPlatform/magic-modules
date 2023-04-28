@@ -654,8 +654,6 @@ properties:
         default_from_api: true
       - !ruby/object:Api::Type::Array
         name: 'bypassCacheOnRequestHeaders'
-        max_size: 5
-        send_empty_value: true
         description: |
           Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified.
           The cache is bypassed for all cdnPolicy.cacheMode settings.
@@ -663,6 +661,7 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: 'headerName'
+              required: true
               description: |
                 The header field name to match on when bypassing cache. Values are case-insensitive.
   - !ruby/object:Api::Type::NestedObject
