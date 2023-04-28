@@ -111,6 +111,8 @@ properties:
       This identifier should be treated as an opaque token, as the data format is not specified.
   - !ruby/object:Api::Type::String
     name: bundleId
+    required: true
+    immutable: true
     description: |
       The canonical bundle ID of the Apple app as it would appear in the Apple AppStore.
   - !ruby/object:Api::Type::String
