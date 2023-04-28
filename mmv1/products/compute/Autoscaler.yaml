@@ -48,32 +48,33 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "autoscaler_single_instance"
-    primary_resource_id: "default"
+    name: 'autoscaler_single_instance'
+    primary_resource_id: 'default'
     min_version: 'beta'
     vars:
-      autoscaler_name: "my-autoscaler"
-      instance_template_name: "my-instance-template"
-      target_pool_name: "my-target-pool"
-      igm_name: "my-igm"
-          # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
-          # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
-      provider_name: "google-beta"
-      provider_alias: ""
+      autoscaler_name: 'my-autoscaler'
+      instance_template_name: 'my-instance-template'
+      target_pool_name: 'my-target-pool'
+      igm_name:
+        'my-igm'
+        # Add test_vars_overrides and oics_vars_overrides to fix the failing test,
+        # which is caused by upgradting terraform-plugin-sdk to 2.24.0.
+      provider_name: 'google-beta'
+      provider_alias: ''
     test_vars_overrides:
       provider_name: '"google-beta.us-central1"'
       provider_alias: '"alias  = \"us-central1\""'
     oics_vars_overrides:
-      provider_name: "google-beta"
-      provider_alias: ""
+      provider_name: 'google-beta'
+      provider_alias: ''
   - !ruby/object:Provider::Terraform::Examples
-    name: "autoscaler_basic"
-    primary_resource_id: "foobar"
+    name: 'autoscaler_basic'
+    primary_resource_id: 'foobar'
     vars:
-      autoscaler_name: "my-autoscaler"
-      instance_template_name: "my-instance-template"
-      target_pool_name: "my-target-pool"
-      igm_name: "my-igm"
+      autoscaler_name: 'my-autoscaler'
+      instance_template_name: 'my-instance-template'
+      target_pool_name: 'my-target-pool'
+      igm_name: 'my-igm'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'

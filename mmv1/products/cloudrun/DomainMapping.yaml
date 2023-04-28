@@ -23,18 +23,19 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 description: |-
   Resource to hold the state and status of a user's domain mapping.
 immutable: true
-id_format: "locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"
-import_format: ["locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"]
-error_retry_predicates: ["IsCloudRunCreationConflict"]
+id_format: 'locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}'
+import_format:
+  ['locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}']
+error_retry_predicates: ['IsCloudRunCreationConflict']
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckKnativeStatusFunc(res)
   actions: ['create', 'update']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloud_run_domain_mapping_basic"
-    primary_resource_id: "default"
+    name: 'cloud_run_domain_mapping_basic'
+    primary_resource_id: 'default'
     vars:
-      cloud_run_service_name: "cloudrun-srv"
+      cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       namespace: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -52,7 +53,7 @@ properties:
     name: name
     url_param_only: true
     immutable: true
-  # This is a convenience field handled by terraform encoder/decoders
+    # This is a convenience field handled by terraform encoder/decoders
     exclude: false
     description: |-
       Name should be a [verified](https://support.google.com/webmasters/answer/9008080) domain
