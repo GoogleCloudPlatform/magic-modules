@@ -49,11 +49,11 @@ exclude_import: true
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_dataset"
+    name: 'vertex_ai_dataset'
     skip_import_test: true
-    primary_resource_id: "dataset"
+    primary_resource_id: 'dataset'
     vars:
-      display_name: "terraform"
+      display_name: 'terraform'
 parameters:
   - !ruby/object:Api::Type::String
     name: region

@@ -24,19 +24,19 @@ base_url: projects/{{project}}/instances
 immutable: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "sql_source_representation_instance_basic"
-    primary_resource_id: "instance"
+    name: 'sql_source_representation_instance_basic'
+    primary_resource_id: 'instance'
     vars:
-      name: "my-instance"
+      name: 'my-instance'
     ignore_read_extra:
-      - "password"
+      - 'password'
   - !ruby/object:Provider::Terraform::Examples
-    name: "sql_source_representation_instance_postgres"
-    primary_resource_id: "instance"
+    name: 'sql_source_representation_instance_postgres'
+    primary_resource_id: 'instance'
     vars:
-      name: "my-instance"
+      name: 'my-instance'
     ignore_read_extra:
-    - "password"
+      - 'password'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.erb'
   decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.erb'
@@ -116,5 +116,3 @@ properties:
         name: 'clientKey'
         description: |
           The private key file for the client certificate on the external server. Required only for server-client authentication. Include only if SSL/TLS is used on the external server.
-
-
