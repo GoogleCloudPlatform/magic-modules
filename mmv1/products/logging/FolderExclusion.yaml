@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "FolderExclusion"
+name: 'FolderExclusion'
 base_url: folders/{{folder}}/exclusions
 self_link: folders/{{folder}}/exclusions/{{name}}
 collection_url_key: 'exclusions'
