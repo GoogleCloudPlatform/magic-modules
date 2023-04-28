@@ -14,11 +14,7 @@ import (
 <% end -%>
   "fmt"
   "time"
-<% if version == 'private' -%>
-  transport_tpg "internal/terraform-next/google-private/transport"
-<% else -%>
-  transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
-<% end -%>
+<%= transport_tpg_import() -%>
 )
 
 type <%= product_name -%>OperationWaiter struct {

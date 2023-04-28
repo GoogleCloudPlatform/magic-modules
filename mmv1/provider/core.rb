@@ -214,6 +214,17 @@ module Provider
       File.write("#{output_folder}/#{target}", data)
     end
 
+    def transport_tpg_import()
+      case @target_version_name
+      when 'ga'
+        'transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"'
+      when 'beta'
+        'transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"'
+      else
+        'transport_tpg "internal/terraform-next/google-private/transport"'
+      end
+    end
+
     def generate_objects(output_folder, types, generate_code, generate_docs)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
