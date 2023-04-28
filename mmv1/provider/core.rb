@@ -25,6 +25,13 @@ module Provider
   class Core
     include Compile::Core
 
+    TERRAFORM_PROVIDER_GA = 'github.com/hashicorp/terraform-provider-google'
+    TERRAFORM_PROVIDER_BETA = 'github.com/hashicorp/terraform-provider-google-beta'
+    TERRAFORM_PROVIDER_PRIVATE = 'internal/terraform-next'
+    RESOURCE_DIRECTORY_GA = 'google'
+    RESOURCE_DIRECTORY_BETA = 'google-beta'
+    RESOURCE_DIRECTORY_PRIVATE = 'google-private'
+
     def initialize(config, api, version_name, start_time)
       @config = config
       @api = api
@@ -195,33 +202,33 @@ module Provider
       # Replace the import pathes in utility files
       case @target_version_name
       when 'beta'
-        tpg = 'github.com/hashicorp/terraform-provider-google-beta'
-        dir = 'google-beta'
+        tpg = TERRAFORM_PROVIDER_BETA
+        dir = RESOURCE_DIRECTORY_BETA
       else
-        tpg = 'internal/terraform-next'
-        dir = 'google-private'
+        tpg = TERRAFORM_PROVIDER_PRIVATE
+        dir = RESOURCE_DIRECTORY_PRIVATE
       end
 
       data = File.read("#{output_folder}/#{target}")
       data = data.gsub(
-        'github.com/hashicorp/terraform-provider-google/google',
+        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}",
         "#{tpg}/#{dir}"
       )
       data = data.gsub(
-        'github.com/hashicorp/terraform-provider-google/version',
+        "#{TERRAFORM_PROVIDER_GA}/version",
         "#{tpg}/version"
       )
       File.write("#{output_folder}/#{target}", data)
     end
 
-    def transport_tpg_import()
+    def import_path()
       case @target_version_name
       when 'ga'
-        'transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"'
+        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}"
       when 'beta'
-        'transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"'
+        "#{TERRAFORM_PROVIDER_BETA}/#{RESOURCE_DIRECTORY_BETA}"
       else
-        'transport_tpg "internal/terraform-next/google-private/transport"'
+        "#{TERRAFORM_PROVIDER_PRIVATE}/#{RESOURCE_DIRECTORY_PRIVATE}"
       end
     end
 

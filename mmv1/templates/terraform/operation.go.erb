@@ -14,7 +14,8 @@ import (
 <% end -%>
   "fmt"
   "time"
-<%= transport_tpg_import() -%>
+
+  transport_tpg "<%= import_path() -%>/transport"
 )
 
 type <%= product_name -%>OperationWaiter struct {

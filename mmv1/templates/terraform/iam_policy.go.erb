@@ -23,7 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
-<%= transport_tpg_import() -%>
+	transport_tpg "<%= import_path() -%>/transport"
 )
 <% resource_name = product_ns + object.name -%>
 <%
