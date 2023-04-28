@@ -120,6 +120,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
+			defaultProviderCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
