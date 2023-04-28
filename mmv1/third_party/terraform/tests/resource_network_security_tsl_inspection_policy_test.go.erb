@@ -46,7 +46,25 @@ func testAccNetworkSecurityTlsInspectionPolicy_basic(caPoolName, certificateAuth
 resource "google_privateca_ca_pool" "default" {
   name = "%s"
   location = "us-central1"
-  tier = "ENTERPRISE"
+  tier     = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl = true
+  }
+  maximum_lifetime = "1209600s"
+  baseline_values {
+    ca_options {
+      is_ca = false
+    }
+    key_usage {
+      extended_key_usage {
+        server_auth = true
+      }
+    }
+  }
+  labels = {
+    foo = "bar"
+  }
 }
 
 resource "google_privateca_certificate_authority" "default" {
@@ -97,11 +115,18 @@ resource "google_privateca_ca_pool" "default" {
   name        = "%s"
   description = "my ca pooll"
   location    = "us-central1"
-  tier        = "ENTERPRISE"
+  tier        = "DEVOPS"
+  publishing_options {
+    publish_ca_cert = true
+    publish_crl = false
+  }
+  labels = {
+    foo = "baz"
+  }
 }
 
 resource "google_privateca_certificate_authority" "default" {
-  pool = google_privateca_ca_pool.default.name
+  pool = ""
   certificate_authority_id = "%s"
   location = "us-central1"
   desired_state = "DISABLED"

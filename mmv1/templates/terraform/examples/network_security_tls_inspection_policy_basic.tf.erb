@@ -3,6 +3,24 @@ resource "google_privateca_ca_pool" "default" {
   name      = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
   location  = "us-central1"
   tier      = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = false
+    publish_crl = true
+  }
+  labels = {
+    foo = "bar"
+  }
+  maximum_lifetime = "1209600s"
+  baseline_values {
+    ca_options {
+      is_ca = false
+    }
+    key_usage {
+      extended_key_usage {
+        server_auth = true
+      }
+    }
+  }
 }
 
 resource "google_privateca_certificate_authority" "default" {
