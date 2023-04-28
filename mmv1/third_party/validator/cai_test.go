@@ -3,6 +3,8 @@ package google
 import (
 	"regexp"
 	"testing"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 )
 
 func TestAssetName(t *testing.T) {
@@ -39,7 +41,7 @@ func TestAssetName(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			r := regexp.MustCompile(c.expectedPattern)
 
-			output, err := assetName(c.data, &Config{}, c.template)
+			output, err := assetName(c.data, &transport_tpg.Config{}, c.template)
 			if err != nil {
 				t.Fatal(err)
 			}

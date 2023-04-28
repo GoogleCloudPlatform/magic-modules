@@ -1,4 +1,4 @@
-func expandBigQueryRoutineRoutineReference(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandBigQueryRoutineRoutineReference(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 
         transformed := make(map[string]interface{})
         transformed["datasetId"] = d.Get("dataset_id")

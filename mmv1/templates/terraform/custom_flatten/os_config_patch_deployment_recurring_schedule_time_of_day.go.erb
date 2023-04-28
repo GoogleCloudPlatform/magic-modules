@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -29,7 +29,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	return []interface{}{transformed}
 }
 
-func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDayHours(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDayHours(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := StringToFixed64(strVal); err == nil {
@@ -46,7 +46,7 @@ func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDayHours(v interface{}
 	return v // let terraform core handle it otherwise
 }
 
-func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDayMinutes(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDayMinutes(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := StringToFixed64(strVal); err == nil {
@@ -63,7 +63,7 @@ func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDayMinutes(v interface
 	return v // let terraform core handle it otherwise
 }
 
-func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDaySeconds(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDaySeconds(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := StringToFixed64(strVal); err == nil {
@@ -80,7 +80,7 @@ func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDaySeconds(v interface
 	return v // let terraform core handle it otherwise
 }
 
-func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDayNanos(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenOSConfigPatchDeploymentRecurringScheduleTimeOfDayNanos(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := StringToFixed64(strVal); err == nil {

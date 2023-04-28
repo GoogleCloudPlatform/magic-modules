@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -23,7 +24,7 @@ func resourceConverterProjectBillingInfo() ResourceConverter {
 	}
 }
 
-func GetProjectCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetProjectCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	// use project number if it's available; otherwise, fill in project id so that we
 	// keep the CAI assets apart for different uncreated projects.
 	var linkTmpl string
@@ -52,7 +53,7 @@ func GetProjectCaiObject(d TerraformResourceData, config *Config) ([]Asset, erro
 	}
 }
 
-func GetProjectApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func GetProjectApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	pid := d.Get("project_id").(string)
 
 	project := &cloudresourcemanager.Project{
@@ -96,7 +97,7 @@ func getParentResourceId(d TerraformResourceData, p *cloudresourcemanager.Projec
 	return nil
 }
 
-func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	// use project number if it's available; otherwise, fill in project id so that we
 	// keep the CAI assets apart for different uncreated projects.
 	var linkTmpl string
