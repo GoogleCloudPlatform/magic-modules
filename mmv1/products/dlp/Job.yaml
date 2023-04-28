@@ -1,0 +1,602 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Job'
+create_url: "{{parent}}/dlpJobs"
+self_link: "{{parent}}/dlpJobs/{{name}}"
+base_url: "{{parent}}/dlpJobs"
+immutable: true
+description: |
+  A resource that combines all of the information about a DLP job.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-job-triggers'
+  api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.dlpJobs'
+id_format: "{{parent}}/dlpJobs/{{name}}"
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "dlp_risk_job_with_job_id"
+    primary_resource_id: "basic"
+    vars:
+      name: "tf_test"
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      name: '"tf_test_" + RandString(t, 10)'
+    ignore_read_extra:
+      - state
+      - end_time
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/dlp_job.go.erb
+  encoder: templates/terraform/encoders/dlp_job.go.erb
+  custom_import: templates/terraform/custom_import/dlp_job.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'parent'
+    description: |
+      The parent of the trigger, either in the format `projects/{{project}}` or `projects/{{project}}/locations/{{location}}`
+    required: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The resource name of the job. Set by the server.
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    description: |
+      Time when the job was created.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'startTime'
+    description: |
+      Time when the job started.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'endTime'
+    description: |
+      Time when the job finished.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'type'
+    description: |
+      The type of job.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'state'
+    description: |
+      State of a job.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'jobTriggerName'
+    description: |
+      If created by a job trigger, the resource name of the trigger that instantiated the job.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'jobId'
+    description: |
+      The job id can contain uppercase and lowercase letters, numbers, and hyphens; that is,
+      it must match the regular expression :- [a-zA-Z\d-_]+. The maximum length is 100 characters.
+      Can be empty to allow the system to generate one.
+    default_from_api: true
+    url_param_only: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'riskJob'
+    description: |
+      A risk analysis job calculates re-identification risk metrics for a BigQuery table.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'actions'
+        description: |
+          A task to execute at the completion of the job.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'saveFindings'
+              exactly_one_of:
+                - save_findings
+                - pub_sub
+                - job_notification_emails
+              description: |
+                Save resulting findings in a provided location.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'outputConfig'
+                  required: true
+                  description: |
+                    Location to store findings outside of DLP.
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'table'
+                      required: true
+                      description: |
+                        Information on the location of the target BigQuery Table.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'projectId'
+                          required: true
+                          description: |
+                            The Google Cloud Platform project ID of the project containing the table.
+                        - !ruby/object:Api::Type::String
+                          name: 'datasetId'
+                          required: true
+                          description: |
+                            Dataset ID of the table.
+                        - !ruby/object:Api::Type::String
+                          name: 'tableId'
+                          default_from_api: true
+                          description: |
+                            Name of the table. If it is not set, a new one will be generated for you with
+                            the following format :- `dlp_googleapis_yyyy_mm_dd_[dlp_job_id]`.
+                            Pacific timezone will be used for generating the date details.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'pubSub'
+              exactly_one_of:
+                - save_findings
+                - pub_sub
+                - job_notification_emails
+              description: |
+                Publish a message into a given Pub/Sub topic when the job completes.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'topic'
+                  required: true
+                  description: |
+                    Cloud Pub/Sub topic to send notifications to. The topic must have given publishing access
+                    rights to the DLP API service account executing the long running DlpJob sending the
+                    notifications. Format is projects/{project}/topics/{topic}.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'jobNotificationEmails'
+              exactly_one_of:
+                - save_findings
+                - pub_sub
+                - job_notification_emails
+              description: |
+                Sends an email when the job completes. The email goes to IAM project owners and technical Essential Contacts.
+              allow_empty_object: true
+              send_empty_value: true
+              properties: []
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privacyMetric'
+        required: true
+        description: |
+          Privacy metric to compute.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'numericalStatsConfig'
+            description: |
+              Compute numerical stats over an individual column, including min, max, and quantiles.
+            exactly_one_of:
+              - risk_job.0.privacy_metric.0.numerical_stats_config
+              - risk_job.0.privacy_metric.0.categorical_stats_config
+              - risk_job.0.privacy_metric.0.k_anonymity_config
+              - risk_job.0.privacy_metric.0.l_diversity_config
+              - risk_job.0.privacy_metric.0.k_map_estimation_config
+              - risk_job.0.privacy_metric.0.delta_presence_estimation_config
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: 'field'
+                required: true
+                description: |
+                  Field to compute numerical stats on. Supported types are integer, float, date, datetime, timestamp, time.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'name'
+                    required: true
+                    description: |
+                      Name describing the field.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'categoricalStatsConfig'
+            description: |
+              Compute numerical stats over an individual column, including number of distinct values
+              and value count distribution.
+            exactly_one_of:
+              - risk_job.0.privacy_metric.0.numerical_stats_config
+              - risk_job.0.privacy_metric.0.categorical_stats_config
+              - risk_job.0.privacy_metric.0.k_anonymity_config
+              - risk_job.0.privacy_metric.0.l_diversity_config
+              - risk_job.0.privacy_metric.0.k_map_estimation_config
+              - risk_job.0.privacy_metric.0.delta_presence_estimation_config
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: 'field'
+                required: true
+                description: |
+                  Field to compute categorical stats on. All column types are supported except for
+                  arrays and structs. However, it may be more informative to use NumericalStats when
+                  the field type is supported, depending on the data.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'name'
+                    required: true
+                    description: |
+                      Name describing the field.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'kAnonymityConfig'
+            description: |
+              k-anonymity metric, used for analysis of reidentification risk.
+            exactly_one_of:
+              - risk_job.0.privacy_metric.0.numerical_stats_config
+              - risk_job.0.privacy_metric.0.categorical_stats_config
+              - risk_job.0.privacy_metric.0.k_anonymity_config
+              - risk_job.0.privacy_metric.0.l_diversity_config
+              - risk_job.0.privacy_metric.0.k_map_estimation_config
+              - risk_job.0.privacy_metric.0.delta_presence_estimation_config
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'quasiIds'
+                required: true
+                description: |
+                  Set of fields to compute k-anonymity over. When multiple fields are specified,
+                  they are considered a single composite key. Structs and repeated data types are
+                  not supported; however, nested fields are supported so long as they are not
+                  structs themselves or nested within a repeated field.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'name'
+                      required: true
+                      description: |
+                        Name describing the field.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'entityId'
+                description: |
+                  Message indicating that multiple rows might be associated to a single individual.
+                  If the same entityId is associated to multiple quasi-identifier tuples over distinct
+                  rows, we consider the entire collection of tuples as the composite quasi-identifier.
+                  This collection is a multiset :- the order in which the different tuples appear in
+                  the dataset is ignored, but their frequency is taken into account.
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'field'
+                    required: true
+                    description: |
+                      Composite key indicating which field contains the entity identifier.
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'name'
+                        required: true
+                        description: |
+                          Name describing the field.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'lDiversityConfig'
+            description: |
+              l-diversity metric, used for analysis of reidentification risk.
+            exactly_one_of:
+              - risk_job.0.privacy_metric.0.numerical_stats_config
+              - risk_job.0.privacy_metric.0.categorical_stats_config
+              - risk_job.0.privacy_metric.0.k_anonymity_config
+              - risk_job.0.privacy_metric.0.l_diversity_config
+              - risk_job.0.privacy_metric.0.k_map_estimation_config
+              - risk_job.0.privacy_metric.0.delta_presence_estimation_config
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'quasiIds'
+                required: true
+                description: |
+                  Set of quasi-identifiers indicating how equivalence classes are defined for
+                  the l-diversity computation. When multiple fields are specified, they are
+                  considered a single composite key.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'name'
+                      required: true
+                      description: |
+                        Name describing the field.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'sensitiveAttribute'
+                required: true
+                description: |
+                  Sensitive field for computing the l-value.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'name'
+                    required: true
+                    description: |
+                      Name describing the field.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'kMapEstimationConfig'
+            description: |
+              Reidentifiability metric. This corresponds to a risk model similar to what is called "journalist risk"
+              in the literature, except the attack dataset is statistically modeled instead of being perfectly known.
+              This can be done using publicly available data (like the US Census), or using a custom statistical model
+              (indicated as one or several BigQuery tables), or by extrapolating from the distribution of values
+              in the input dataset.
+            exactly_one_of:
+              - risk_job.0.privacy_metric.0.numerical_stats_config
+              - risk_job.0.privacy_metric.0.categorical_stats_config
+              - risk_job.0.privacy_metric.0.k_anonymity_config
+              - risk_job.0.privacy_metric.0.l_diversity_config
+              - risk_job.0.privacy_metric.0.k_map_estimation_config
+              - risk_job.0.privacy_metric.0.delta_presence_estimation_config
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'quasiIds'
+                required: true
+                description: |
+                  Fields considered to be quasi-identifiers. No two columns can have the same tag.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'field'
+                      required: true
+                      description: |
+                        Identifies the column.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          required: true
+                          description: |
+                            Name describing the field.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'infoType'
+                      description: |
+                        A column can be tagged with a InfoType to use the relevant public dataset as a statistical
+                        model of population, if available. We currently support US ZIP codes, region codes, ages
+                        and genders. To programmatically obtain the list of supported InfoTypes, use infoTypes.list
+                        with the supportedBy=RISK_ANALYSIS filter.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          required: true
+                          description: |
+                            Name of the information type. Either a name of your choosing when creating a CustomInfoType,
+                            or one of the names listed at https://cloud.google.com/dlp/docs/infotypes-reference when
+                            specifying a built-in type. When sending Cloud DLP results to Data Catalog, infoType names
+                            should conform to the pattern [A-Za-z0-9$_-]{1,64}.
+                        - !ruby/object:Api::Type::String
+                          name: 'version'
+                          description: |
+                            Version name for this InfoType.
+                    - !ruby/object:Api::Type::String
+                      name: 'customTag'
+                      description: |
+                        A column can be tagged with a custom tag. In this case, the user must indicate an
+                        auxiliary table that contains statistical information on the possible values of
+                        this column (below).
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'inferred'
+                      description: |
+                        If no semantic tag is indicated, we infer the statistical model from the distribution
+                        of values in the input data.
+                      properties: []
+                      allow_empty_object: true
+                      send_empty_value: true
+              - !ruby/object:Api::Type::String
+                name: 'regionCode'
+                description: |
+                  ISO 3166-1 alpha-2 region code to use in the statistical modeling. Set if no column
+                  is tagged with a region-specific InfoType (like US_ZIP_5) or a region code.
+              - !ruby/object:Api::Type::Array
+                name: 'auxiliaryTables'
+                description: |
+                  Several auxiliary tables can be used in the analysis. Each customTag used to tag a
+                  quasi-identifiers column must appear in exactly one column of one auxiliary table.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'table'
+                      required: true
+                      description: |
+                        Auxiliary table location.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'projectId'
+                          required: true
+                          description: |
+                            The Google Cloud Platform project ID of the project containing the table.
+                        - !ruby/object:Api::Type::String
+                          name: 'datasetId'
+                          required: true
+                          description: |
+                            Dataset ID of the table.
+                        - !ruby/object:Api::Type::String
+                          name: 'tableId'
+                          required: true
+                          description: |
+                            Name of the table.
+                    - !ruby/object:Api::Type::Array
+                      name: 'quasiIds'
+                      required: true
+                      description: |
+                        Quasi-identifier columns.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'field'
+                            required: true
+                            description: |
+                              Identifies the column.
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: 'name'
+                                required: true
+                                description: |
+                                  Name describing the field.
+                          - !ruby/object:Api::Type::String
+                            name: 'customTag'
+                            required: true
+                            description: |
+                              A auxiliary field.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'relativeFrequency'
+                      required: true
+                      description: |
+                        The relative frequency column must contain a floating-point number
+                        between 0 and 1 (inclusive). Null values are assumed to be zero.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          required: true
+                          description: |
+                            Name describing the field.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'deltaPresenceEstimationConfig'
+            description: |
+              δ-presence metric, used to estimate how likely it is for an attacker to figure
+              out that one given individual appears in a de-identified dataset.
+            exactly_one_of:
+              - risk_job.0.privacy_metric.0.numerical_stats_config
+              - risk_job.0.privacy_metric.0.categorical_stats_config
+              - risk_job.0.privacy_metric.0.k_anonymity_config
+              - risk_job.0.privacy_metric.0.l_diversity_config
+              - risk_job.0.privacy_metric.0.k_map_estimation_config
+              - risk_job.0.privacy_metric.0.delta_presence_estimation_config
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'quasiIds'
+                required: true
+                description: |
+                  Fields considered to be quasi-identifiers. No two fields can have the same tag.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'field'
+                      required: true
+                      description: |
+                        Identifies the column.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          required: true
+                          description: |
+                            Name describing the field.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'infoType'
+                      description: |
+                        A column can be tagged with a InfoType to use the relevant public dataset as a statistical
+                        model of population, if available. We currently support US ZIP codes, region codes, ages
+                        and genders. To programmatically obtain the list of supported InfoTypes, use infoTypes.list
+                        with the supportedBy=RISK_ANALYSIS filter.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          required: true
+                          description: |
+                            Name of the information type. Either a name of your choosing when creating a CustomInfoType,
+                            or one of the names listed at https://cloud.google.com/dlp/docs/infotypes-reference when
+                            specifying a built-in type. When sending Cloud DLP results to Data Catalog, infoType names
+                            should conform to the pattern [A-Za-z0-9$_-]{1,64}.
+                        - !ruby/object:Api::Type::String
+                          name: 'version'
+                          description: |
+                            Version name for this InfoType.
+                    - !ruby/object:Api::Type::String
+                      name: 'customTag'
+                      description: |
+                        A column can be tagged with a custom tag. In this case, the user must indicate an
+                        auxiliary table that contains statistical information on the possible values of
+                        this column (below).
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'inferred'
+                      description: |
+                        If no semantic tag is indicated, we infer the statistical model from the distribution
+                        of values in the input data.
+                      properties: []
+                      allow_empty_object: true
+                      send_empty_value: true
+              - !ruby/object:Api::Type::String
+                name: 'regionCode'
+                description: |
+                  ISO 3166-1 alpha-2 region code to use in the statistical modeling. Set if no column
+                  is tagged with a region-specific InfoType (like US_ZIP_5) or a region code.
+              - !ruby/object:Api::Type::Array
+                name: 'auxiliaryTables'
+                description: |
+                  Several auxiliary tables can be used in the analysis. Each customTag used to tag a
+                  quasi-identifiers column must appear in exactly one column of one auxiliary table.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'table'
+                      required: true
+                      description: |
+                        Auxiliary table location.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'projectId'
+                          required: true
+                          description: |
+                            The Google Cloud Platform project ID of the project containing the table.
+                        - !ruby/object:Api::Type::String
+                          name: 'datasetId'
+                          required: true
+                          description: |
+                            Dataset ID of the table.
+                        - !ruby/object:Api::Type::String
+                          name: 'tableId'
+                          required: true
+                          description: |
+                            Name of the table.
+                    - !ruby/object:Api::Type::Array
+                      name: 'quasiIds'
+                      required: true
+                      description: |
+                        Quasi-identifier columns.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'field'
+                            required: true
+                            description: |
+                              Identifies the column.
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: 'name'
+                                required: true
+                                description: |
+                                  Name describing the field.
+                          - !ruby/object:Api::Type::String
+                            name: 'customTag'
+                            required: true
+                            description: |
+                              A column can be tagged with a custom tag. In this case, the user must indicate an
+                              auxiliary table that contains statistical information on the possible values of
+                              this column (below).
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'relativeFrequency'
+                      required: true
+                      description: |
+                        The relative frequency column must contain a floating-point number
+                        between 0 and 1 (inclusive). Null values are assumed to be zero.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'name'
+                          required: true
+                          description: |
+                            Name describing the field.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'sourceTable'
+        required: true
+        description: |
+          Input dataset to compute metrics over.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'projectId'
+            required: true
+            description: |
+              The Google Cloud Platform project ID of the project containing the table.
+          - !ruby/object:Api::Type::String
+            name: 'datasetId'
+            required: true
+            description: |
+              Dataset ID of the table.
+          - !ruby/object:Api::Type::String
+            name: 'tableId'
+            required: true
+            description: |
+              Name of the table.
