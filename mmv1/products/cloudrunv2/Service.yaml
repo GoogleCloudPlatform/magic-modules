@@ -597,6 +597,7 @@ properties:
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'secret'
@@ -634,12 +635,32 @@ properties:
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'instances'
                   description: |-
                     The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
                   item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: 'emptyDir'
+              description: |-
+                Ephemeral storage used as a shared volume.
+              # exactly_one_of:
+              #   - template.0.volumes.0.secret
+              #   - template.0.volumes.0.cloudSqlInstance
+              #   - template.0.volumes.0.emptyDir
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'medium'
+                  description: |-
+                    The different types of medium supported for EmptyDir.
+                  values:
+                    - :MEMORY
+                - !ruby/object:Api::Type::String
+                  name: 'sizeLimit'
+                  description: |-
+                      Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir.
       - !ruby/object:Api::Type::Enum
         name: 'executionEnvironment'
         description: |-
