@@ -7,6 +7,7 @@ import (
 	"time"
 
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 
@@ -30,14 +31,14 @@ func DataSourceGoogleServiceAccountJwt() *schema.Resource {
 			"target_service_account": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: transport_tpg.ValidateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
+				ValidateFunc: verify.ValidateRegexp("(" + strings.Join(PossibleServiceAccountNames, "|") + ")"),
 			},
 			"delegates": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: transport_tpg.ValidateRegexp(ServiceAccountLinkRegex),
+					ValidateFunc: verify.ValidateRegexp(ServiceAccountLinkRegex),
 				},
 			},
 			"jwt": {

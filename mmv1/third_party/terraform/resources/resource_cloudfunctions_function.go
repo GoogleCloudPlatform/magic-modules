@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/cloudfunctions/v1"
 
 	"fmt"
@@ -77,7 +78,7 @@ func parseCloudFunctionId(d *schema.ResourceData, config *transport_tpg.Config) 
 // at start/end
 func validateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []string, errors []error) {
 	re := `^(?:[a-zA-Z](?:[-_a-zA-Z0-9]{0,61}[a-zA-Z0-9])?)$`
-	return transport_tpg.ValidateRegexp(re)(v, k)
+	return verify.ValidateRegexp(re)(v, k)
 }
 
 func partsCompare(a, b, reg string) bool {

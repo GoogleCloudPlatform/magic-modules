@@ -4,10 +4,12 @@ package google
 import (
 	"fmt"
 	"log"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"sort"
 	"strings"
 	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/googleapi"
@@ -50,7 +52,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				ValidateFunc:     transport_tpg.ValidateRegexp(peerNetworkLinkRegex),
+				ValidateFunc:     verify.ValidateRegexp(peerNetworkLinkRegex),
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 				Description:      `The primary network of the peering.`,
 			},
@@ -59,7 +61,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				ValidateFunc:     transport_tpg.ValidateRegexp(peerNetworkLinkRegex),
+				ValidateFunc:     verify.ValidateRegexp(peerNetworkLinkRegex),
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 				Description:      `The peer network in the peering. The peer network may belong to a different project.`,
 			},

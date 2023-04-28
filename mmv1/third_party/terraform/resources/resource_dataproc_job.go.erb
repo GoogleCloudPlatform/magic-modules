@@ -4,9 +4,11 @@ package google
 import (
 	"fmt"
 	"log"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
 	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -69,7 +71,7 @@ func ResourceDataprocJob() *schema.Resource {
 							Optional:     true,
 							ForceNew:     true,
 							Computed:     true,
-							ValidateFunc: transport_tpg.ValidateRegexp("^[a-zA-Z0-9_-]{1,100}$"),
+							ValidateFunc: verify.ValidateRegexp("^[a-zA-Z0-9_-]{1,100}$"),
 						},
 					},
 				},

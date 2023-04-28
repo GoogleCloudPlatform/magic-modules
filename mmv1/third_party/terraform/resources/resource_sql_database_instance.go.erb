@@ -4,11 +4,13 @@ package google
 import (
 	"context"
 	"errors"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"fmt"
 	"log"
 	"strings"
 	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -392,7 +394,7 @@ is set to true. Defaults to ZONAL.`,
 									"private_network": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										ValidateFunc:     orEmpty(transport_tpg.ValidateRegexp(privateNetworkLinkRegex)),
+										ValidateFunc:     orEmpty(verify.ValidateRegexp(privateNetworkLinkRegex)),
 										DiffSuppressFunc: compareSelfLinkRelativePaths,
 										AtLeastOneOf:     ipConfigurationKeys,
 										Description:      `The VPC network from which the Cloud SQL instance is accessible for private IP. For example, projects/myProject/global/networks/default. Specifying a network enables private IP. At least ipv4_enabled must be enabled or a private_network must be configured. This setting can be updated, but it cannot be removed after it is set.`,

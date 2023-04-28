@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -19,7 +20,7 @@ func DataSourceGoogleServiceAccountKey() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: transport_tpg.ValidateRegexp(ServiceAccountKeyNameRegex),
+				ValidateFunc: verify.ValidateRegexp(ServiceAccountKeyNameRegex),
 			},
 			"public_key_type": {
 				Type:         schema.TypeString,

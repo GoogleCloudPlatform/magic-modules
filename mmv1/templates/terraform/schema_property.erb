@@ -44,7 +44,7 @@
 <% end -%>
 <% unless property.validation.nil? || property.output -%>
 	<% if !property.validation.regex.nil? -%>
-  ValidateFunc: transport_tpg.ValidateRegexp(`<%= property.validation.regex -%>`),
+  ValidateFunc: verify.ValidateRegexp(`<%= property.validation.regex -%>`),
 	<% elsif !property.validation.function.nil? -%>
 	ValidateFunc: <%= property.validation.function -%>,
 	<% end # property.validation.nil?  -%>
