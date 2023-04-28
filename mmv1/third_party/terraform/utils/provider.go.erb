@@ -434,6 +434,7 @@ end     # products.each do
 				"google_logging_project_exclusion":             ResourceLoggingExclusion(ProjectLoggingExclusionSchema, NewProjectLoggingExclusionUpdater, ProjectLoggingExclusionIdParseFunc),
 				"google_logging_project_bucket_config":         ResourceLoggingProjectBucketConfig(),
 				"google_monitoring_dashboard":                  ResourceMonitoringDashboard(),
+				"google_monitoring_monitored_project":          ResourceMonitoringMonitoredProject(),
 				<% unless version == 'ga' -%>
 				"google_project_service_identity":              ResourceProjectServiceIdentity(),
 				<% end -%>
