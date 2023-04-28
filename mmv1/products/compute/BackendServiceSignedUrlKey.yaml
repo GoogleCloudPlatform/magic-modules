@@ -57,13 +57,13 @@ exclude_validator: true
 mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "backend_service_signed_url_key"
+    name: 'backend_service_signed_url_key'
     pull_external: true
-    primary_resource_id: "backend_key"
+    primary_resource_id: 'backend_key'
     vars:
-      key_name: "test-key"
-      backend_name: "my-backend-service"
-      igm_name: "my-webservers"
+      key_name: 'test-key'
+      backend_name: 'my-backend-service'
+      igm_name: 'my-webservers'
     skip_test: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef

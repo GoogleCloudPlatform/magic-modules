@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'InspectTemplate'
-create_url: "{{parent}}/inspectTemplates"
-self_link: "{{parent}}/inspectTemplates/{{name}}"
-base_url: "{{parent}}/inspectTemplates"
+create_url: '{{parent}}/inspectTemplates'
+self_link: '{{parent}}/inspectTemplates/{{name}}'
+base_url: '{{parent}}/inspectTemplates'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -24,20 +24,20 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-templates-inspect'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.inspectTemplates'
-id_format: "{{parent}}/inspectTemplates/{{name}}"
+id_format: '{{parent}}/inspectTemplates/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_inspect_template_basic"
-    primary_resource_id: "basic"
+    name: 'dlp_inspect_template_basic'
+    primary_resource_id: 'basic'
     vars:
-      template: "temp"
+      template: 'temp'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_inspect_template_custom_type"
-    primary_resource_id: "custom"
+    name: 'dlp_inspect_template_custom_type'
+    primary_resource_id: 'custom'
     vars:
-      template: "temp"
+      template: 'temp'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
@@ -85,7 +85,8 @@ properties:
         description: When true, excludes type information of the findings.
       - !ruby/object:Api::Type::Boolean
         name: 'includeQuote'
-        description: When true, a contextual quote from the data that triggered a
+        description:
+          When true, a contextual quote from the data that triggered a
           finding is included in the response.
       - !ruby/object:Api::Type::Enum
         name: 'minLikelihood'
@@ -104,12 +105,14 @@ properties:
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'maxFindingsPerItem'
-            description: Max number of findings that will be returned for each item
+            description:
+              Max number of findings that will be returned for each item
               scanned. The maximum returned is 2000.
             required: true
           - !ruby/object:Api::Type::Integer
             name: 'maxFindingsPerRequest'
-            description: Max number of findings that will be returned per request/job.
+            description:
+              Max number of findings that will be returned per request/job.
               The maximum returned is 2000.
             required: true
           - !ruby/object:Api::Type::Array
@@ -210,7 +213,8 @@ properties:
                       - !ruby/object:Api::Type::NestedObject
                         name: 'hotwordRegex'
                         required: true
-                        description: Regular expression pattern defining what qualifies
+                        description:
+                          Regular expression pattern defining what qualifies
                           as a hotword.
                         properties:
                           - !ruby/object:Api::Type::String
@@ -270,7 +274,8 @@ properties:
                               will result in a final likelihood of LIKELY. Either this or fixed_likelihood can be set.
                   - !ruby/object:Api::Type::NestedObject
                     name: 'exclusionRule'
-                    description: The rule that specifies conditions when findings
+                    description:
+                      The rule that specifies conditions when findings
                       of infoTypes specified in InspectionRuleSet are removed from
                       results.
                     properties:
@@ -300,7 +305,8 @@ properties:
                                 item_type: Api::Type::String
                           - !ruby/object:Api::Type::NestedObject
                             name: 'cloudStoragePath'
-                            description: Newline-delimited file of words in Cloud
+                            description:
+                              Newline-delimited file of words in Cloud
                               Storage. Only a single file is accepted.
                             properties:
                               - !ruby/object:Api::Type::String
@@ -325,7 +331,8 @@ properties:
                             item_type: Api::Type::Integer
                       - !ruby/object:Api::Type::NestedObject
                         name: 'excludeInfoTypes'
-                        description: Set of infoTypes for which findings would affect
+                        description:
+                          Set of infoTypes for which findings would affect
                           this rule.
                         properties:
                           - !ruby/object:Api::Type::Array
@@ -464,7 +471,8 @@ properties:
                       item_type: Api::Type::String
                 - !ruby/object:Api::Type::NestedObject
                   name: 'cloudStoragePath'
-                  description: Newline-delimited file of words in Cloud Storage. Only
+                  description:
+                    Newline-delimited file of words in Cloud Storage. Only
                     a single file is accepted.
                   properties:
                     - !ruby/object:Api::Type::String
@@ -491,4 +499,3 @@ properties:
                   description: |
                     Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`
                     or `projects/project-id/storedInfoTypes/432452342`.
-
