@@ -41,31 +41,32 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_origin_basic"
-    primary_resource_id: "default"
+    name: 'network_services_edge_cache_origin_basic'
+    primary_resource_id: 'default'
     vars:
-      resource_name: "my-origin"
+      resource_name: 'my-origin'
     ignore_read_extra:
-      - "timeout"
+      - 'timeout'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_origin_advanced"
-    primary_resource_id: "default"
+    name: 'network_services_edge_cache_origin_advanced'
+    primary_resource_id: 'default'
     vars:
-      resource_name: "my-origin"
-      resource_name_2: "my-fallback"
+      resource_name: 'my-origin'
+      resource_name_2: 'my-fallback'
     ignore_read_extra:
-      - "timeout"
+      - 'timeout'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_origin_v4auth"
-    primary_resource_id: "default"
+    name: 'network_services_edge_cache_origin_v4auth'
+    primary_resource_id: 'default'
     vars:
-      resource_name: "my-origin"
-      secret_name: "secret-name"
+      resource_name: 'my-origin'
+      secret_name: 'secret-name'
     ignore_read_extra:
-      - "timeout"
+      - 'timeout'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -175,7 +176,7 @@ properties:
     name: 'timeout'
     description: |
       The connection and HTTP timeout configuration for this origin.
-    custom_flatten: "templates/terraform/custom_flatten/network_services_timeout_mirror.go.erb"
+    custom_flatten: 'templates/terraform/custom_flatten/network_services_timeout_mirror.go.erb'
     properties:
       - !ruby/object:Api::Type::String
         name: 'connectTimeout'
