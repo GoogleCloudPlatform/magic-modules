@@ -65,9 +65,6 @@ examples:
       billing_account: :BILLING_ACCT
     vars:
       reservation_name: "gce-shared-reservation"
-    skip_docs: true
-        # Resource creation race
-    skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: templates/terraform/update_encoder/reservation.go.erb
   pre_update: templates/terraform/pre_update/shared_reservation_update.go.erb
@@ -135,30 +132,30 @@ properties:
     description: |
       The share setting for reservations.
     default_from_api: true
-    ignore_read: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'shareType'
         values:
           - :LOCAL
+          - :ORGANIZATION
           - :SPECIFIC_PROJECTS
         description: |
           Type of sharing for this shared-reservation
-        default_from_api: true
+        immutable: true
       - !ruby/object:Api::Type::Map
         name: 'projectMap'
         description: |
           A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
         key_name: id
         key_description: |
-          The project id/number which is deleting or adding to the project list.
+          The project number which is deleting or adding to the project list.
         value_type: !ruby/object:Api::Type::NestedObject
           name: projectConfig
           properties:
             - !ruby/object:Api::Type::String
               name: 'projectId'
               description: |
-                The project id/number, should be same as the key of this project config in the project map.
+                The project number, should be same as the key of this project config in the project map.
   - !ruby/object:Api::Type::NestedObject
     name: 'specificReservation'
     required: true
