@@ -1,8 +1,8 @@
 resource "google_privateca_ca_pool" "default" {
-  provider  = google-beta
+  provider = google-beta
   name      = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
   location  = "us-central1"
-  tier      = "ENTERPRISE"
+  tier     = "ENTERPRISE"
   publishing_options {
     publish_ca_cert = false
     publish_crl = true
@@ -10,21 +10,25 @@ resource "google_privateca_ca_pool" "default" {
   labels = {
     foo = "bar"
   }
-  maximum_lifetime = "1209600s"
-  baseline_values {
-    ca_options {
-      is_ca = false
-    }
-    key_usage {
-      extended_key_usage {
-        server_auth = true
+  issuance_policy {
+    maximum_lifetime = "50000s"
+    baseline_values {
+      ca_options {
+        is_ca = false
+      }
+      key_usage {
+        base_key_usage {}
+        extended_key_usage {
+          server_auth = true
+        }
       }
     }
   }
 }
 
+
 resource "google_privateca_certificate_authority" "default" {
-  provider    = google-beta
+  provider = google-beta
   pool = google_privateca_ca_pool.default.name
   certificate_authority_id = "<%= ctx[:vars]['privateca_certificate_authority_id'] %>"
   location = "us-central1"
