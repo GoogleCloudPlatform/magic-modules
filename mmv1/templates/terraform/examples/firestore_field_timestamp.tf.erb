@@ -1,0 +1,8 @@
+resource "google_firestore_field" "<%= ctx[:primary_resource_id] %>" {
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+  collection = "chatrooms_%{random_suffix}"
+  field = "timestamp"
+
+  index_config {}
+  ttl_config {}
+}
