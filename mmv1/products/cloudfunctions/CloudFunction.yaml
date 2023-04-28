@@ -43,18 +43,20 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 
 legacy_name: 'google_cloudfunctions_function'
 id_format: 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
-import_format: ["projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}"]
+import_format:
+  ['projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}']
 exclude_resource: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudfunctions_cloud_function"
-    primary_resource_id: "function"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-function%s\", context[\"random_suffix\"\
+    name: 'cloudfunctions_cloud_function'
+    primary_resource_id: 'function'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-my-function%s\", context[\"random_suffix\"\
       ])"
     vars:
-      function_name: "my-function"
-      bucket_name: "cloudfunctions-function-example-bucket"
-      zip_path: "path/to/index.zip"
+      function_name: 'my-function'
+      bucket_name: 'cloudfunctions-function-example-bucket'
+      zip_path: 'path/to/index.zip'
     test_vars_overrides:
       zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
 parameters:
@@ -204,4 +206,3 @@ properties:
         name: 'service'
         description: |
           The hostname of the service that should be observed.
-

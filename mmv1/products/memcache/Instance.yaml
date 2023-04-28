@@ -30,15 +30,15 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 20
 autogen_async: true
 examples:
-        # Temporary as CI has used up servicenetworking quota
+  # Temporary as CI has used up servicenetworking quota
   - !ruby/object:Provider::Terraform::Examples
     skip_vcr: true
-    name: "memcache_instance_basic"
-    primary_resource_id: "instance"
+    name: 'memcache_instance_basic'
+    primary_resource_id: 'instance'
     vars:
-      instance_name: "test-instance"
-      network_name: "test-network"
-      address_name: "address"
+      instance_name: 'test-instance'
+      network_name: 'test-network'
+      address_name: 'address'
     test_vars_overrides:
       network_name: 'BootstrapSharedTestNetwork(t, "memcache-private")'
 parameters:
@@ -93,7 +93,8 @@ properties:
       properties:
         - !ruby/object:Api::Type::String
           name: 'nodeId'
-          description: Identifier of the Memcached node. The node id does not include
+          description:
+            Identifier of the Memcached node. The node id does not include
             project or location like the Memcached instance name.
           output: true
         - !ruby/object:Api::Type::String
@@ -106,7 +107,8 @@ properties:
           output: true
         - !ruby/object:Api::Type::String
           name: 'host'
-          description: Hostname or IP address of the Memcached node used by the clients
+          description:
+            Hostname or IP address of the Memcached node used by the clients
             to connect to the Memcached server on this node.
           output: true
         - !ruby/object:Api::Type::String
@@ -293,7 +295,6 @@ properties:
                   validation: !ruby/object:Provider::Terraform::Validation
                     function: 'validation.IntBetween(0,999999999)'
 
-
   - !ruby/object:Api::Type::NestedObject
     name: maintenanceSchedule
     description: Output only. Published maintenance schedule.
@@ -321,4 +322,3 @@ properties:
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-

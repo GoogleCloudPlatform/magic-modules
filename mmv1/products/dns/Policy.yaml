@@ -26,12 +26,12 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: 'projects/{{project}}/policies/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_policy_basic"
-    primary_resource_id: "example-policy"
+    name: 'dns_policy_basic'
+    primary_resource_id: 'example-policy'
     vars:
-      policy_name: "example-policy"
-      network_1_name: "network-1"
-      network_2_name: "network-2"
+      policy_name: 'example-policy'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/detach_network.erb
 properties:
@@ -115,7 +115,8 @@ properties:
     required: true
   - !ruby/object:Api::Type::Array
     name: 'networks'
-    description: 'List of network names specifying networks to which this policy is
+    description:
+      'List of network names specifying networks to which this policy is
       applied.'
     update_verb: :PATCH
     update_url: 'projects/{{project}}/policies/{{name}}'

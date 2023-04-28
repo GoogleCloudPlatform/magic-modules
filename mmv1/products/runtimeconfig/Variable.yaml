@@ -42,4 +42,3 @@ properties:
     name: 'text'
     description: |
       The string value of the variable. Either this or `value` can be set.
-
