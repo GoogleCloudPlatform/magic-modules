@@ -73,10 +73,8 @@ parameters:
     url_param_only: true
     description: |
       Name of the AddressGroup resource.
-      It matches pattern: projects/*/locations/{location}/addressGroups/<addressGroup> or organizations/*/locations/{location}/addressGroups/<addressGroup>.
   - !ruby/object:Api::Type::String
     name: "location"
-    default_value: "global"
     description: |
       The location of the gateway security policy.
       The default value is `global`.
