@@ -75,6 +75,7 @@ parameters:
       Name of the AddressGroup resource.
   - !ruby/object:Api::Type::String
     name: "location"
+    required: true
     description: |
       The location of the gateway security policy.
       The default value is `global`.
