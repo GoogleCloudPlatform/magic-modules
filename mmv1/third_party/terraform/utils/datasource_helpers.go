@@ -29,6 +29,6 @@ func addRequiredFieldsToSchema(schema map[string]*schema.Schema, keys ...string)
 	tpgresource.AddRequiredFieldsToSchema(schema, keys...)
 }
 
-func tpgresource.AddOptionalFieldsToSchema(schema map[string]*schema.Schema, keys ...string) {
+func addOptionalFieldsToSchema(schema map[string]*schema.Schema, keys ...string) {
 	tpgresource.AddOptionalFieldsToSchema(schema, keys...)
 }

@@ -56,11 +56,11 @@ properties:
           func(v interface{}) int {
             raw := v.(map[string]interface{})
             if address, ok := raw["ipv4_address"]; ok {
-              hashcode(address.(string))
+              tpgresource.Hashcode(address.(string))
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsPolicyAlternativeNameServerConfigTargetNameServersSchema())
-            return hashcode(buf.String())
+            return tpgresource.Hashcode(buf.String())
           }
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -129,7 +129,7 @@ properties:
         }
         var buf bytes.Buffer
         schema.SerializeResourceForHash(&buf, raw, dnsPolicyNetworksSchema())
-        return hashcode(buf.String())
+        return tpgresource.Hashcode(buf.String())
       }
     item_type: !ruby/object:Api::Type::NestedObject
       properties:

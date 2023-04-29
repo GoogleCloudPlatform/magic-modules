@@ -59,7 +59,7 @@ func compareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) b
 // Hash the relative path of a self link.
 func selfLinkRelativePathHash(selfLink interface{}) int {
 	path, _ := getRelativePath(selfLink.(string))
-	return hashcode(path)
+	return tpgresource.Hashcode(path)
 }
 
 func getRelativePath(selfLink string) (string, error) {
@@ -74,7 +74,7 @@ func getRelativePath(selfLink string) (string, error) {
 // Hash the name path of a self link.
 func selfLinkNameHash(selfLink interface{}) int {
 	name := GetResourceNameFromSelfLink(selfLink.(string))
-	return hashcode(name)
+	return tpgresource.Hashcode(name)
 }
 
 func ConvertSelfLinkToV1(link string) string {

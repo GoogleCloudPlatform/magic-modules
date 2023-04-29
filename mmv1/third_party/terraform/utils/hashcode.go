@@ -1,8 +1,6 @@
 package google
 
-import (
-	"hash/crc32"
-)
+import "github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 // hashcode hashes a string to a unique hashcode.
 //
@@ -10,13 +8,5 @@ import (
 // and non negative integer. Here we cast to an integer
 // and invert it if the result is negative.
 func hashcode(s string) int {
-	v := int(crc32.ChecksumIEEE([]byte(s)))
-	if v >= 0 {
-		return v
-	}
-	if -v >= 0 {
-		return -v
-	}
-	// v == MinInt
-	return 0
+	return tpgresource.Hashcode(s)
 }

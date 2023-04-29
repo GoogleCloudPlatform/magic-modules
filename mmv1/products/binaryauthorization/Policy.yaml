@@ -146,7 +146,7 @@ properties:
         }
         var buf bytes.Buffer
         schema.SerializeResourceForHash(&buf, copy, ResourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
-        return hashcode(buf.String())
+        return tpgresource.Hashcode(buf.String())
       }
   - !ruby/object:Api::Type::NestedObject
     name: defaultAdmissionRule
