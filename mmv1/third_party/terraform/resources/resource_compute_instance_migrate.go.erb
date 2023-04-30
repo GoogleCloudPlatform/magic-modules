@@ -169,7 +169,7 @@ func migrateStateV1toV2(is *terraform.InstanceState) (*terraform.InstanceState, 
 
 	for service_acct_index, newScopes := range newScopesMap {
 		for _, newScope := range newScopes {
-			hash := tpgresource.Hashcode(canonicalizeServiceScope(newScope))
+			hash := tpgresource.Hashcode(tpgresource.CanonicalizeServiceScope(newScope))
 			newKey := fmt.Sprintf("service_account.%s.scopes.%d", service_acct_index, hash)
 			is.Attributes[newKey] = newScope
 		}

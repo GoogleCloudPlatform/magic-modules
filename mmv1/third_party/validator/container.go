@@ -10,8 +10,11 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 const ContainerClusterAssetType string = "container.googleapis.com/Cluster"
@@ -86,7 +89,7 @@ func expandContainerClusterSubnetwork(v interface{}, d TerraformResourceData, co
 func canonicalizeServiceScopesFromSet(scopesSet *schema.Set) (interface{}, error) {
 	scopes := make([]string, scopesSet.Len())
 	for i, scope := range scopesSet.List() {
-		scopes[i] = canonicalizeServiceScope(scope.(string))
+		scopes[i] = tpgresource.CanonicalizeServiceScope(scope.(string))
 	}
 	return scopes, nil
 }

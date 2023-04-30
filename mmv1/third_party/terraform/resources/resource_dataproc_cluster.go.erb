@@ -10,6 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -589,10 +592,10 @@ func ResourceDataprocCluster() *schema.Resource {
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 											StateFunc: func(v interface{}) string {
-												return canonicalizeServiceScope(v.(string))
+												return tpgresource.CanonicalizeServiceScope(v.(string))
 											},
 										},
-										Set: stringScopeHashcode,
+										Set: tpgresource.StringScopeHashcode,
 									},
 
 									"internal_ip_only": {
@@ -1658,7 +1661,7 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 		scopesSet := scopes.(*schema.Set)
 		scopes := make([]string, scopesSet.Len())
 		for i, scope := range scopesSet.List() {
-			scopes[i] = canonicalizeServiceScope(scope.(string))
+			scopes[i] = tpgresource.CanonicalizeServiceScope(scope.(string))
 		}
 		conf.ServiceAccountScopes = scopes
 	}
@@ -2438,7 +2441,7 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 		gceConfig["subnetwork"] = gcc.SubnetworkUri
 	}
 	if len(gcc.ServiceAccountScopes) > 0 {
-		gceConfig["service_account_scopes"] = schema.NewSet(stringScopeHashcode, convertStringArrToInterface(gcc.ServiceAccountScopes))
+		gceConfig["service_account_scopes"] = schema.NewSet(tpgresource.StringScopeHashcode, convertStringArrToInterface(gcc.ServiceAccountScopes))
 	}
 	if gcc.ShieldedInstanceConfig != nil {
 		gceConfig["shielded_instance_config"] = []map[string]interface{}{

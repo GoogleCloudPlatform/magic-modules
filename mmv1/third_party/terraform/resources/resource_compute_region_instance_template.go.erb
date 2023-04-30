@@ -673,10 +673,10 @@ be from 0 to 999,999,999 inclusive.`,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 								StateFunc: func(v interface{}) string {
-									return canonicalizeServiceScope(v.(string))
+									return tpgresource.CanonicalizeServiceScope(v.(string))
 								},
 							},
-							Set: stringScopeHashcode,
+							Set: tpgresource.StringScopeHashcode,
 						},
 					},
 				},
