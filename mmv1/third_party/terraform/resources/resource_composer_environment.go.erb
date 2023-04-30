@@ -8,6 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -530,7 +533,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Computed: true,
 										AtLeastOneOf: composerPrivateEnvironmentConfig,
 										ForceNew: true,
-										DiffSuppressFunc: compareSelfLinkRelativePaths,
+										DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 										Description: `When specified, the environment will use Private Service Connect instead of VPC peerings to connect to Cloud SQL in the Tenant Project, and the PSC endpoint in the Customer Project will use an IP address from this subnetwork. This field is supported for Cloud Composer environments in versions composer-2.*.*-airflow-*.*.* and newer.`,
 									},
 								},
@@ -2084,7 +2087,7 @@ func expandComposerEnvironmentZone(v interface{}, d *schema.ResourceData, config
 		return fmt.Sprintf("projects/%s/zones/%s", project, zone), nil
 	}
 
-	return getRelativePath(zone)
+	return tpgresource.GetRelativePath(zone)
 }
 
 func expandComposerEnvironmentMachineType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, nodeCfgZone string) (string, error) {
@@ -2327,7 +2330,7 @@ func compareServiceAccountEmailToLink(_, old, new string, _ *schema.ResourceData
 	if !strings.HasPrefix("projects/", old) {
 		return old == GetResourceNameFromSelfLink(new)
 	}
-	return compareSelfLinkRelativePaths("", old, new, nil)
+	return tpgresource.CompareSelfLinkRelativePaths("", old, new, nil)
 }
 
 func validateServiceAccountRelativeNameOrEmail(v interface{}, k string) (ws []string, errors []error) {

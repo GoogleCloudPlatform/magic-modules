@@ -4,6 +4,8 @@ package google
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -280,8 +282,8 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 
 		flattened[i] = map[string]interface{}{
 			"network_ip":          iface.NetworkIP,
-			"network":             ConvertSelfLinkToV1(iface.Network),
-			"subnetwork":          ConvertSelfLinkToV1(iface.Subnetwork),
+			"network":             tpgresource.ConvertSelfLinkToV1(iface.Network),
+			"subnetwork":          tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
 			"subnetwork_project":  subnet.Project,
 			"access_config":       ac,
 			"alias_ip_range":      flattenAliasIpRange(iface.AliasIpRanges),

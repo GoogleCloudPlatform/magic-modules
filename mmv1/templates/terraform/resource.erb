@@ -573,7 +573,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%    end -%>
 <%  end -%>
 <%  if object.has_self_link -%>
-    if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
+    if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%  end -%>

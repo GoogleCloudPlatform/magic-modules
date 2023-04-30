@@ -471,7 +471,7 @@ func getDiskFromAutoDeleteAndImage(config *transport_tpg.Config, instance *compu
 		if disk.AutoDelete == autoDelete {
 			// Read the disk to check if its image matches
 			fullDisk := allDisks[GetResourceNameFromSelfLink(disk.Source)]
-			sourceImage, err := getRelativePath(fullDisk.SourceImage)
+			sourceImage, err := tpgresource.GetRelativePath(fullDisk.SourceImage)
 			if err != nil {
 				return nil, err
 			}
@@ -496,7 +496,7 @@ func getDiskFromAutoDeleteAndImage(config *transport_tpg.Config, instance *compu
 		if disk.AutoDelete == autoDelete {
 			// Read the disk to check if its image matches
 			fullDisk := allDisks[GetResourceNameFromSelfLink(disk.Source)]
-			sourceImage, err := getRelativePath(fullDisk.SourceImage)
+			sourceImage, err := tpgresource.GetRelativePath(fullDisk.SourceImage)
 			if err != nil {
 				return nil, err
 			}

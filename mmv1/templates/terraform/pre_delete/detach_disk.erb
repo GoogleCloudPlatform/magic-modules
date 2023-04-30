@@ -10,7 +10,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 
 	for _, instance := range convertStringArr(v) {
 		self := d.Get("self_link").(string)
-		instanceProject, instanceZone, instanceName, err := GetLocationalResourcePropertiesFromSelfLinkString(instance)
+		instanceProject, instanceZone, instanceName, err := tpgresource.GetLocationalResourcePropertiesFromSelfLinkString(instance)
 		if err != nil {
 			return err
 		}

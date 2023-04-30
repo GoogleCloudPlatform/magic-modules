@@ -4,9 +4,11 @@ package google
 import (
 	"fmt"
 	"log"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -172,14 +174,14 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Force the referenced resources to a self-link in state because it's more specific then name.
-	instancePath, err := getRelativePath(instance.SelfLink)
+	instancePath, err := tpgresource.GetRelativePath(instance.SelfLink)
 	if err != nil {
 		return err
 	}
 	if err := d.Set("instance", instancePath); err != nil {
 		return fmt.Errorf("Error setting instance: %s", err)
 	}
-	diskPath, err := getRelativePath(ad.Source)
+	diskPath, err := tpgresource.GetRelativePath(ad.Source)
 	if err != nil {
 		return err
 	}

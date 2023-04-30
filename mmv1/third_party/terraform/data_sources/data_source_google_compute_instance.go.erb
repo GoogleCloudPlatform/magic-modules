@@ -114,7 +114,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 			scratchDisks = append(scratchDisks, flattenScratchDisk(disk))
 		} else {
 			di := map[string]interface{}{
-				"source":      ConvertSelfLinkToV1(disk.Source),
+				"source":      tpgresource.ConvertSelfLinkToV1(disk.Source),
 				"device_name": disk.DeviceName,
 				"mode":        disk.Mode,
 			}
@@ -176,7 +176,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("deletion_protection", instance.DeletionProtection); err != nil {
 		return fmt.Errorf("Error setting deletion_protection: %s", err)
 	}
-	if err := d.Set("self_link", ConvertSelfLinkToV1(instance.SelfLink)); err != nil {
+	if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(instance.SelfLink)); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 	if err := d.Set("instance_id", fmt.Sprintf("%d", instance.Id)); err != nil {

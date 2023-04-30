@@ -2,9 +2,6 @@ package google
 
 import (
 	"errors"
-	"fmt"
-	"net/url"
-	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -20,21 +17,7 @@ func compareResourceNames(_, old, new string, _ *schema.ResourceData) bool {
 
 // Compare only the relative path of two self links.
 func compareSelfLinkRelativePaths(_, old, new string, _ *schema.ResourceData) bool {
-	oldStripped, err := getRelativePath(old)
-	if err != nil {
-		return false
-	}
-
-	newStripped, err := getRelativePath(new)
-	if err != nil {
-		return false
-	}
-
-	if oldStripped == newStripped {
-		return true
-	}
-
-	return false
+	return tpgresource.CompareSelfLinkRelativePaths("", old, new, nil)
 }
 
 // compareSelfLinkOrResourceName checks if two resources are the same resource
@@ -58,17 +41,11 @@ func compareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) b
 
 // Hash the relative path of a self link.
 func selfLinkRelativePathHash(selfLink interface{}) int {
-	path, _ := getRelativePath(selfLink.(string))
-	return tpgresource.Hashcode(path)
+	return tpgresource.SelfLinkRelativePathHash(selfLink)
 }
 
 func getRelativePath(selfLink string) (string, error) {
-	stringParts := strings.SplitAfterN(selfLink, "projects/", 2)
-	if len(stringParts) != 2 {
-		return "", fmt.Errorf("String was not a self link: %s", selfLink)
-	}
-
-	return "projects/" + stringParts[1], nil
+	return tpgresource.GetRelativePath(selfLink)
 }
 
 // Hash the name path of a self link.
@@ -78,8 +55,7 @@ func selfLinkNameHash(selfLink interface{}) int {
 }
 
 func ConvertSelfLinkToV1(link string) string {
-	reg := regexp.MustCompile("/compute/[a-zA-Z0-9]*/projects/")
-	return reg.ReplaceAllString(link, "/compute/v1/projects/")
+	return tpgresource.ConvertSelfLinkToV1(link)
 }
 
 func GetResourceNameFromSelfLink(link string) string {
@@ -143,31 +119,10 @@ func getResourcePropertiesFromSelfLinkOrSchema(d *schema.ResourceData, config *t
 
 // given a full locational (non-global) self link, returns the project + region/zone + name or an error
 func GetLocationalResourcePropertiesFromSelfLinkString(selfLink string) (string, string, string, error) {
-	parsed, err := url.Parse(selfLink)
-	if err != nil {
-		return "", "", "", err
-	}
-
-	s := strings.Split(parsed.Path, "/")
-
-	// This is a pretty bad way to tell if this is a self link, but stops us
-	// from accessing an index out of bounds and causing a panic. generally, we
-	// expect bad values to be partial URIs and names, so this will catch them
-	if len(s) < 9 {
-		return "", "", "", fmt.Errorf("value %s was not a self link", selfLink)
-	}
-
-	return s[4], s[6], s[8], nil
+	return tpgresource.GetLocationalResourcePropertiesFromSelfLinkString(selfLink)
 }
 
 // This function supports selflinks that have regions and locations in their paths
 func GetRegionFromRegionalSelfLink(selfLink string) string {
-	re := regexp.MustCompile("projects/[a-zA-Z0-9-]*/(?:locations|regions)/([a-zA-Z0-9-]*)")
-	switch {
-	case re.MatchString(selfLink):
-		if res := re.FindStringSubmatch(selfLink); len(res) == 2 && res[1] != "" {
-			return res[1]
-		}
-	}
-	return selfLink
+	return tpgresource.GetRegionFromRegionalSelfLink(selfLink)
 }
