@@ -54,6 +54,11 @@ resource "google_gkeonprem_vmware_node_pool" "<%= ctx[:primary_resource_id] %>" 
         key = "key"
         value = "value"
     }
+    taints {
+        key = "key"
+        value = "value"
+        effect = "NO_SCHEDULE"
+    }
     labels = {}
     enable_load_balancer = true
   }

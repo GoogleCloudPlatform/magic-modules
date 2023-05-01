@@ -45,7 +45,6 @@ examples:
       name: "nodepool"
     test_env_vars:
       project: "fake-backend-360322"
-skip_sweeper: true
 parameters:
   - !ruby/object:Api::Type::String
     name: "name"
@@ -89,9 +88,11 @@ properties:
       - !ruby/object:Api::Type::Integer
         name: "minReplicas"
         description: Minimum number of replicas in the NodePool.
+        required: true
       - !ruby/object:Api::Type::Integer
         name: "maxReplicas"
         description: Maximum number of replicas in the NodePool.
+        required: true
   - !ruby/object:Api::Type::NestedObject
     name: "config"
     description: The node configuration of the node pool.
@@ -131,10 +132,12 @@ properties:
               name: "key"
               description: |
                 Key associated with the effect.
+              required: true
             - !ruby/object:Api::Type::String
               name: "value"
               description: |
                 Value associated with the effect.
+              required: true
             - !ruby/object:Api::Type::Enum
               name: "effect"
               description: |
