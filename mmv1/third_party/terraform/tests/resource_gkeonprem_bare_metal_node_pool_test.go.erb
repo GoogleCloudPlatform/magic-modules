@@ -116,7 +116,6 @@ func testAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdateStart(context map[
     location = "us-west1"
     name = "nodepool"
     bare_metal_cluster = google_gkeonprem_bare_metal_cluster.cluster.name
-    description = "test bare metal node pool"
     annotations = {}
     node_pool_config {
       operating_system = "LINUX"
@@ -209,7 +208,6 @@ func testAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdate(context map[strin
     location = "us-west1"
     name = "nodepool"
     bare_metal_cluster = google_gkeonprem_bare_metal_cluster.cluster.name
-    description = "test bare metal node pool updated"
     annotations = {}
     node_pool_config {
       operating_system = "LINUX"

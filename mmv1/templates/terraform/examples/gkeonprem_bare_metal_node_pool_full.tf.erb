@@ -74,7 +74,6 @@ resource "google_gkeonprem_bare_metal_node_pool" "<%= ctx[:primary_resource_id] 
   name =  "np-<%= ctx[:vars]['name'] %>"
   bare_metal_cluster =  google_gkeonprem_bare_metal_cluster.default.name
   location = "us-west1"
-  description = "test bare metal node pool"
   annotations = {}
   node_pool_config {
     operating_system = "LINUX"
