@@ -5,24 +5,18 @@ package google
 import (
 	"fmt"
 	"reflect"
-	"regexp"
-	"sort"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-	"github.com/hashicorp/errwrap"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/googleapi"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type TerraformResourceDataChange interface {
@@ -55,11 +49,7 @@ type TerraformResourceDiff interface {
 // If there aren't enough characters in the input string, an empty string is returned
 // e.g. southamerica-west1-a => southamerica-west1
 func getRegionFromZone(zone string) string {
-	if zone != "" && len(zone) > 2 {
-		region := zone[:len(zone)-2]
-		return region
-	}
-	return ""
+	return tpgresource.GetRegionFromZone(zone)
 }
 
 // Infers the region based on the following (in order of priority):
@@ -88,58 +78,25 @@ func getBillingProject(d TerraformResourceData, config *transport_tpg.Config) (s
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
 func getProjectFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
-	res, ok := d.GetOk("project")
-	if ok {
-		return res.(string), nil
-	}
-	if config.Project != "" {
-		return config.Project, nil
-	}
-	return "", fmt.Errorf("%s: required field is not set", "project")
+	return tpgresource.GetProjectFromDiff(d, config)
 }
 
 func getRouterLockName(region string, router string) string {
-	return fmt.Sprintf("router/%s/%s", region, router)
+	return tpgresource.GetRouterLockName(region, router)
 }
 
 func isFailedPreconditionError(err error) bool {
-	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
-	if !ok {
-		return false
-	}
-	if gerr == nil {
-		return false
-	}
-	if gerr.Code != 400 {
-		return false
-	}
-	for _, e := range gerr.Errors {
-		if e.Reason == "failedPrecondition" {
-			return true
-		}
-	}
-	return false
+	return tpgresource.IsFailedPreconditionError(err)
 }
 
 func isConflictError(err error) bool {
-	if e, ok := err.(*googleapi.Error); ok && (e.Code == 409 || e.Code == 412) {
-		return true
-	} else if !ok && errwrap.ContainsType(err, &googleapi.Error{}) {
-		e := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
-		if e.Code == 409 || e.Code == 412 {
-			return true
-		}
-	}
-	return false
+	return tpgresource.IsConflictError(err)
 }
 
 // gRPC does not return errors of type *googleapi.Error. Instead the errors returned are *status.Error.
 // See the types of codes returned here (https://pkg.go.dev/google.golang.org/grpc/codes#Code).
 func isNotFoundGrpcError(err error) bool {
-	if errorStatus, ok := status.FromError(err); ok && errorStatus.Code() == codes.NotFound {
-		return true
-	}
-	return false
+	return tpgresource.IsNotFoundGrpcError(err)
 }
 
 // expandLabels pulls the value of "labels" out of a TerraformResourceData as a map[string]string.
@@ -169,119 +126,55 @@ func expandStringMap(d TerraformResourceData, key string) map[string]string {
 }
 
 func convertStringMap(v map[string]interface{}) map[string]string {
-	m := make(map[string]string)
-	for k, val := range v {
-		m[k] = val.(string)
-	}
-	return m
+	return tpgresource.ConvertStringMap(v)
 }
 
 func convertStringArr(ifaceArr []interface{}) []string {
-	return convertAndMapStringArr(ifaceArr, func(s string) string { return s })
+	return tpgresource.ConvertStringArr(ifaceArr)
 }
 
 func convertAndMapStringArr(ifaceArr []interface{}, f func(string) string) []string {
-	var arr []string
-	for _, v := range ifaceArr {
-		if v == nil {
-			continue
-		}
-		arr = append(arr, f(v.(string)))
-	}
-	return arr
+	return tpgresource.ConvertAndMapStringArr(ifaceArr, f)
 }
 
 func mapStringArr(original []string, f func(string) string) []string {
-	var arr []string
-	for _, v := range original {
-		arr = append(arr, f(v))
-	}
-	return arr
+	return tpgresource.MapStringArr(original, f)
 }
 
 func convertStringArrToInterface(strs []string) []interface{} {
-	arr := make([]interface{}, len(strs))
-	for i, str := range strs {
-		arr[i] = str
-	}
-	return arr
+	return tpgresource.ConvertStringArrToInterface(strs)
 }
 
 func convertStringSet(set *schema.Set) []string {
-	s := make([]string, 0, set.Len())
-	for _, v := range set.List() {
-		s = append(s, v.(string))
-	}
-	sort.Strings(s)
-
-	return s
+	return tpgresource.ConvertStringSet(set)
 }
 
 func golangSetFromStringSlice(strings []string) map[string]struct{} {
-	set := map[string]struct{}{}
-	for _, v := range strings {
-		set[v] = struct{}{}
-	}
-
-	return set
+	return tpgresource.GolangSetFromStringSlice(strings)
 }
 
 func stringSliceFromGolangSet(sset map[string]struct{}) []string {
-	ls := make([]string, 0, len(sset))
-	for s := range sset {
-		ls = append(ls, s)
-	}
-	sort.Strings(ls)
-
-	return ls
+	return tpgresource.StringSliceFromGolangSet(sset)
 }
 
 func reverseStringMap(m map[string]string) map[string]string {
-	o := map[string]string{}
-	for k, v := range m {
-		o[v] = k
-	}
-	return o
+	return tpgresource.ReverseStringMap(m)
 }
 
 func mergeStringMaps(a, b map[string]string) map[string]string {
-	merged := make(map[string]string)
-
-	for k, v := range a {
-		merged[k] = v
-	}
-
-	for k, v := range b {
-		merged[k] = v
-	}
-
-	return merged
+	return tpgresource.MergeStringMaps(a, b)
 }
 
 func mergeSchemas(a, b map[string]*schema.Schema) map[string]*schema.Schema {
-	merged := make(map[string]*schema.Schema)
-
-	for k, v := range a {
-		merged[k] = v
-	}
-
-	for k, v := range b {
-		merged[k] = v
-	}
-
-	return merged
+	return tpgresource.MergeSchemas(a, b)
 }
 
 func StringToFixed64(v string) (int64, error) {
-	return strconv.ParseInt(v, 10, 64)
+	return tpgresource.StringToFixed64(v)
 }
 
 func extractFirstMapConfig(m []interface{}) map[string]interface{} {
-	if len(m) == 0 || m[0] == nil {
-		return map[string]interface{}{}
-	}
-
-	return m[0].(map[string]interface{})
+	return tpgresource.ExtractFirstMapConfig(m)
 }
 
 func lockedCall(lockKey string, f func() error) error {
@@ -296,10 +189,7 @@ func lockedCall(lockKey string, f func() error) error {
 // This is particularly useful for generated tests, where we don't want to use Printf,
 // since that would require us to generate a very particular ordering of arguments.
 func Nprintf(format string, params map[string]interface{}) string {
-	for key, val := range params {
-		format = strings.Replace(format, "%{"+key+"}", fmt.Sprintf("%v", val), -1)
-	}
-	return format
+	return tpgresource.Nprintf(format, params)
 }
 
 // serviceAccountFQN will attempt to generate the fully qualified name in the format of:
@@ -329,40 +219,11 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *t
 }
 
 func paginatedListRequest(project, baseUrl, userAgent string, config *transport_tpg.Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
-	res, err := transport_tpg.SendRequest(config, "GET", project, baseUrl, userAgent, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	ls := flattener(res)
-	pageToken, ok := res["pageToken"]
-	for ok {
-		if pageToken.(string) == "" {
-			break
-		}
-		url := fmt.Sprintf("%s?pageToken=%s", baseUrl, pageToken.(string))
-		res, err = transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
-		if err != nil {
-			return nil, err
-		}
-		ls = append(ls, flattener(res))
-		pageToken, ok = res["pageToken"]
-	}
-
-	return ls, nil
+	return tpgresource.PaginatedListRequest(project, baseUrl, userAgent, config, flattener)
 }
 
 func getInterconnectAttachmentLink(config *transport_tpg.Config, project, region, ic, userAgent string) (string, error) {
-	if !strings.Contains(ic, "/") {
-		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
-			project, region, ic).Do()
-		if err != nil {
-			return "", fmt.Errorf("Error reading interconnect attachment: %s", err)
-		}
-		ic = icData.SelfLink
-	}
-
-	return ic, nil
+	return tpgresource.GetInterconnectAttachmentLink(config, project, region, ic, userAgent)
 }
 
 // Given two sets of references (with "from" values in self link form),
@@ -399,17 +260,11 @@ func calcAddRemove(from []string, to []string) (add, remove []string) {
 }
 
 func stringInSlice(arr []string, str string) bool {
-	for _, i := range arr {
-		if i == str {
-			return true
-		}
-	}
-
-	return false
+	return tpgresource.StringInSlice(arr, str)
 }
 
 func migrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
-	return is, nil
+	return tpgresource.MigrateStateNoop(v, is, meta)
 }
 
 func expandString(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
@@ -417,16 +272,7 @@ func expandString(v interface{}, d TerraformResourceData, config *transport_tpg.
 }
 
 func changeFieldSchemaToForceNew(sch *schema.Schema) {
-	sch.ForceNew = true
-	switch sch.Type {
-	case schema.TypeList:
-	case schema.TypeSet:
-		if nestedR, ok := sch.Elem.(*schema.Resource); ok {
-			for _, nestedSch := range nestedR.Schema {
-				changeFieldSchemaToForceNew(nestedSch)
-			}
-		}
-	}
+	tpgresource.ChangeFieldSchemaToForceNew(sch)
 }
 
 func generateUserAgentString(d TerraformResourceData, currentUserAgent string) (string, error) {
@@ -449,56 +295,27 @@ func SnakeToPascalCase(s string) string {
 	for i := range split {
 		split[i] = strings.Title(split[i])
 	}
-	return strings.Join(split, "")
+	return tpgresource.SnakeToPascalCase(s)
 }
 
 func checkStringMap(v interface{}) map[string]string {
-	m, ok := v.(map[string]string)
-	if ok {
-		return m
-	}
-	return convertStringMap(v.(map[string]interface{}))
+	return tpgresource.CheckStringMap(v)
 }
 
 // return a fake 404 so requests get retried or nested objects are considered deleted
 func fake404(reasonResourceType, resourceName string) *googleapi.Error {
-	return &googleapi.Error{
-		Code:    404,
-		Message: fmt.Sprintf("%v object %v not found", reasonResourceType, resourceName),
-	}
+	return tpgresource.Fake404(reasonResourceType, resourceName)
 }
 
 // validate name of the gcs bucket. Guidelines are located at https://cloud.google.com/storage/docs/naming-buckets
 // this does not attempt to check for IP addresses or close misspellings of "google"
 func checkGCSName(name string) error {
-	if strings.HasPrefix(name, "goog") {
-		return fmt.Errorf("error: bucket name %s cannot start with %q", name, "goog")
-	}
-
-	if strings.Contains(name, "google") {
-		return fmt.Errorf("error: bucket name %s cannot contain %q", name, "google")
-	}
-
-	valid, _ := regexp.MatchString("^[a-z0-9][a-z0-9_.-]{1,220}[a-z0-9]$", name)
-	if !valid {
-		return fmt.Errorf("error: bucket name validation failed %v. See https://cloud.google.com/storage/docs/naming-buckets", name)
-	}
-
-	for _, str := range strings.Split(name, ".") {
-		valid, _ := regexp.MatchString("^[a-z0-9_-]{1,63}$", str)
-		if !valid {
-			return fmt.Errorf("error: bucket name validation failed %v", str)
-		}
-	}
-	return nil
+	return tpgresource.CheckGCSName(name)
 }
 
 // checkGoogleIamPolicy makes assertions about the contents of a google_iam_policy data source's policy_data attribute
 func checkGoogleIamPolicy(value string) error {
-	if strings.Contains(value, "\"description\":\"\"") {
-		return fmt.Errorf("found an empty description field (should be omitted) in google_iam_policy data source: %s", value)
-	}
-	return nil
+	return tpgresource.CheckGoogleIamPolicy(value)
 }
 
 // Retries an operation while the canonical error code is FAILED_PRECONDTION
@@ -518,23 +335,7 @@ func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f fu
 }
 
 func frameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
-	var diags diag.Diagnostics
-	for _, e := range fwD.Errors() {
-		diags = append(diags, diag.Diagnostic{
-			Detail:   e.Detail(),
-			Severity: diag.Error,
-			Summary:  e.Summary(),
-		})
-	}
-	for _, w := range fwD.Warnings() {
-		diags = append(diags, diag.Diagnostic{
-			Detail:   w.Detail(),
-			Severity: diag.Warning,
-			Summary:  w.Summary(),
-		})
-	}
-
-	return &diags
+	return tpgresource.FrameworkDiagsToSdkDiags(fwD)
 }
 
 // Deprecated: For backward compatibility isEmptyValue is still working,
