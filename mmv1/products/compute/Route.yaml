@@ -65,7 +65,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
-error_retry_predicates: ['IsPeeringOperationInProgress']
+error_retry_predicates: ['transport_tpg.IsPeeringOperationInProgress']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'route_basic'

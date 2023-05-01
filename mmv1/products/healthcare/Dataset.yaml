@@ -26,7 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets'
 id_format: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/datasets/{{name}}']
-error_retry_predicates: ['HealthcareDatasetNotInitialized']
+error_retry_predicates: ['transport_tpg.HealthcareDatasetNotInitialized']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'healthcare_dataset_basic'
