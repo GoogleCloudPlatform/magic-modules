@@ -44,6 +44,8 @@ resource "google_gkeonprem_bare_metal_cluster" "<%= ctx[:primary_resource_id] %>
           "fd00:1::11/128",
           "fd00:1::12/128"
         ]
+        avoid_buggy_ips = true
+        manual_assign = true
       }
     }
   }
