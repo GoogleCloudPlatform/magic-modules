@@ -1,6 +1,6 @@
-resource "google_gkeonprem_bare_metal_cluster" "default" {
+resource "google_gkeonprem_bare_metal_cluster" "default-full" {
   provider = google-beta
-  name = "cluster-<%= ctx[:vars]['name'] %>"
+  name = "default-full"
   location = "us-west1"
   admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
   bare_metal_version = "1.12.3"
@@ -72,7 +72,7 @@ resource "google_gkeonprem_bare_metal_cluster" "default" {
 resource "google_gkeonprem_bare_metal_node_pool" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name =  "np-<%= ctx[:vars]['name'] %>"
-  bare_metal_cluster =  google_gkeonprem_bare_metal_cluster.default.name
+  bare_metal_cluster =  google_gkeonprem_bare_metal_cluster.default-full.name
   location = "us-west1"
   annotations = {}
   node_pool_config {
