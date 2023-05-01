@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceMonitoringNotificationChannel() *schema.Resource {
@@ -24,13 +25,13 @@ func DataSourceMonitoringNotificationChannel() *schema.Resource {
 }
 
 func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{MonitoringBasePath}}v3/projects/{{project}}/notificationChannels")
+	url, err := ReplaceVars(d, config, "{{MonitoringBasePath}}v3/projects/{{project}}/notificationChannels")
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 	params := map[string]string{
 		"filter": filter,
 	}
-	url, err = addQueryParams(url, params)
+	url, err = AddQueryParams(url, params)
 	if err != nil {
 		return err
 	}

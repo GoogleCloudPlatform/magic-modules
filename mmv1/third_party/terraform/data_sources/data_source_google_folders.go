@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleFolders() *schema.Resource {
@@ -59,7 +60,7 @@ func DataSourceGoogleFolders() *schema.Resource {
 }
 
 func dataSourceGoogleFoldersRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -72,7 +73,7 @@ func dataSourceGoogleFoldersRead(d *schema.ResourceData, meta interface{}) error
 		params["parent"] = d.Get("parent_id").(string)
 		url := "https://cloudresourcemanager.googleapis.com/v3/folders"
 
-		url, err := addQueryParams(url, params)
+		url, err := AddQueryParams(url, params)
 		if err != nil {
 			return err
 		}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudfunctions/v1"
 
 	"fmt"
@@ -57,8 +58,8 @@ func (s *cloudFunctionId) locationId() string {
 	return fmt.Sprintf("projects/%s/locations/%s", s.Project, s.Region)
 }
 
-func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*cloudFunctionId, error) {
-	if err := parseImportId([]string{
+func parseCloudFunctionId(d *schema.ResourceData, config *transport_tpg.Config) (*cloudFunctionId, error) {
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/functions/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",
@@ -462,7 +463,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 }
 
 func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -605,7 +606,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 
 		return cloudFunctionsOperationWait(config, op, "Creating CloudFunctions Function", userAgent,
 			d.Timeout(schema.TimeoutCreate))
-	}, d.Timeout(schema.TimeoutCreate), isCloudFunctionsSourceCodeError)
+	}, d.Timeout(schema.TimeoutCreate), IsCloudFunctionsSourceCodeError)
 	if rerr != nil {
 		return rerr
 	}
@@ -614,7 +615,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -744,7 +745,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 
 func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG]: Updating google_cloudfunctions_function")
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -912,7 +913,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

@@ -7,13 +7,15 @@ import (
 	"regexp"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // CA related utilities.
 
-func enableCA(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	enableUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:enable")
+func enableCA(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+	enableUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:enable")
 	if err != nil {
 		return err
 	}
@@ -35,8 +37,8 @@ func enableCA(config *Config, d *schema.ResourceData, project string, billingPro
 	return nil
 }
 
-func disableCA(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
-	disableUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
+func disableCA(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+	disableUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:disable")
 	if err != nil {
 		return err
 	}
@@ -58,7 +60,7 @@ func disableCA(config *Config, d *schema.ResourceData, project string, billingPr
 	return nil
 }
 
-func activateSubCAWithThirdPartyIssuer(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+func activateSubCAWithThirdPartyIssuer(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
 	// 1. prepare parameters
 	signedCACert := d.Get("pem_ca_certificate").(string)
 
@@ -91,7 +93,7 @@ func activateSubCAWithThirdPartyIssuer(config *Config, d *schema.ResourceData, p
 	activateObj["subordinateConfig"].(map[string]interface{})["pemIssuerChain"] = make(map[string]interface{})
 	activateObj["subordinateConfig"].(map[string]interface{})["pemIssuerChain"].(map[string]interface{})["pemCertificates"] = pemIssuerChain
 
-	activateUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:activate")
+	activateUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:activate")
 	if err != nil {
 		return err
 	}
@@ -112,7 +114,7 @@ func activateSubCAWithThirdPartyIssuer(config *Config, d *schema.ResourceData, p
 	return nil
 }
 
-func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
+func activateSubCAWithFirstPartyIssuer(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string) error {
 	// 1. get issuer
 	sc, ok := d.GetOk("subordinate_config")
 	if !ok {
@@ -129,7 +131,7 @@ func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, p
 	issuer := ca.(string)
 
 	// 2. fetch CSR
-	fetchCSRUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
+	fetchCSRUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
 	if err != nil {
 		return err
 	}
@@ -176,12 +178,12 @@ func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, p
 		return err
 	}
 
-	PrivatecaBasePath, err := replaceVars(d, config, "{{PrivatecaBasePath}}")
+	PrivatecaBasePath, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}")
 	if err != nil {
 		return err
 	}
 	signUrl := fmt.Sprintf("%v%v/certificates?certificateId=%v", PrivatecaBasePath, poolName, certId)
-	signUrl, err = addQueryParams(signUrl, map[string]string{"issuingCertificateAuthorityId": issuerId})
+	signUrl, err = AddQueryParams(signUrl, map[string]string{"issuingCertificateAuthorityId": issuerId})
 	if err != nil {
 		return err
 	}
@@ -199,7 +201,7 @@ func activateSubCAWithFirstPartyIssuer(config *Config, d *schema.ResourceData, p
 	activateObj["subordinateConfig"] = make(map[string]interface{})
 	activateObj["subordinateConfig"].(map[string]interface{})["certificateAuthority"] = issuer
 
-	activateUrl, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:activate")
+	activateUrl, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:activate")
 	if err != nil {
 		return err
 	}

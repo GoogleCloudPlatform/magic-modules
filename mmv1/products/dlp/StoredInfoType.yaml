@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'StoredInfoType'
-create_url: "{{parent}}/storedInfoTypes"
-self_link: "{{parent}}/storedInfoTypes/{{name}}"
-base_url: "{{parent}}/storedInfoTypes"
+create_url: '{{parent}}/storedInfoTypes'
+self_link: '{{parent}}/storedInfoTypes/{{name}}'
+base_url: '{{parent}}/storedInfoTypes'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -27,27 +27,29 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckForExistence
   actions: ['create']
-id_format: "{{parent}}/storedInfoTypes/{{name}}"
+id_format: '{{parent}}/storedInfoTypes/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_stored_info_type_basic"
-    primary_resource_id: "basic"
+    name: 'dlp_stored_info_type_basic'
+    primary_resource_id: 'basic'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_stored_info_type_dictionary"
-    primary_resource_id: "dictionary"
+    name: 'dlp_stored_info_type_dictionary'
+    primary_resource_id: 'dictionary'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_stored_info_type_large_custom_dictionary"
-    primary_resource_id: "large"
+    name: 'dlp_stored_info_type_large_custom_dictionary'
+    primary_resource_id: 'large'
     vars:
       bucket_name: tf-test-bucket
       object_name: tf-test-object
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: templates/terraform/resource_definition/dlp_stored_info_type.go.erb
+  constants: templates/terraform/constants/dlp_stored_info_type.go.erb
   decoder: templates/terraform/decoders/dlp_stored_info_type.go.erb
   encoder: templates/terraform/encoders/dlp_stored_info_type.go.erb
   custom_import: templates/terraform/custom_import/dlp_import.go.erb
@@ -82,7 +84,6 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'regex'
     description: Regular expression which defines the rule.
-    immutable: true
     exactly_one_of:
       - dictionary
       - regex
@@ -96,14 +97,12 @@ properties:
           Its syntax (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
       - !ruby/object:Api::Type::Array
         name: 'groupIndexes'
-        immutable: true
         description: |
           The index of the submatch to extract as findings. When not specified, the entire match is returned. No more than 3 may be included.
         item_type: Api::Type::Integer
   - !ruby/object:Api::Type::NestedObject
     name: 'dictionary'
     description: Dictionary which defines the rule.
-    immutable: true
     exactly_one_of:
       - dictionary
       - regex
@@ -125,7 +124,8 @@ properties:
             item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudStoragePath'
-        description: Newline-delimited file of words in Cloud Storage. Only a single
+        description:
+          Newline-delimited file of words in Cloud Storage. Only a single
           file is accepted.
         exactly_one_of:
           - dictionary.0.word_list
@@ -139,7 +139,6 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'largeCustomDictionary'
     description: Dictionary which defines the rule.
-    immutable: true
     exactly_one_of:
       - dictionary
       - regex
@@ -159,7 +158,8 @@ properties:
               A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudStorageFileSet'
-        description: Set of files containing newline-delimited lists of dictionary
+        description:
+          Set of files containing newline-delimited lists of dictionary
           phrases.
         exactly_one_of:
           - large_custom_dictionary.0.cloud_storage_file_set
@@ -172,7 +172,8 @@ properties:
               The url, in the format `gs://<bucket>/<path>`. Trailing wildcard in the path is allowed.
       - !ruby/object:Api::Type::NestedObject
         name: 'bigQueryField'
-        description: Field in a BigQuery table where each cell represents a dictionary
+        description:
+          Field in a BigQuery table where each cell represents a dictionary
           phrase.
         exactly_one_of:
           - large_custom_dictionary.0.cloud_storage_file_set
@@ -180,7 +181,8 @@ properties:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'table'
-            description: Field in a BigQuery table where each cell represents a dictionary
+            description:
+              Field in a BigQuery table where each cell represents a dictionary
               phrase.
             required: true
             properties:

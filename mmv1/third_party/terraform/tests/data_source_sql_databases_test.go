@@ -18,7 +18,7 @@ func TestAccDataSourceSqlDatabases_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -120,7 +120,7 @@ func checkDatabaseFieldsMatchForDataSourceStateAndResourceState(dsAttr, rsAttr m
 	}
 
 	if index == "-1" {
-		return errors.New("The newly created intance is not found in the data source")
+		return errors.New("The newly created instance is not found in the data source")
 	}
 
 	errMsg := ""

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourcePrivatecaCertificateAuthority() *schema.Resource {
@@ -25,13 +26,13 @@ func DataSourcePrivatecaCertificateAuthority() *schema.Resource {
 }
 
 func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return fmt.Errorf("Error generating user agent: %s", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -45,7 +46,7 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 
 	// pem_csr is only applicable for SUBORDINATE CertificateAuthorities when their state is AWAITING_USER_ACTIVATION
 	if d.Get("type") == "SUBORDINATE" && d.Get("state") == "AWAITING_USER_ACTIVATION" {
-		url, err := replaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
+		url, err := ReplaceVars(d, config, "{{PrivatecaBasePath}}projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificateAuthorities/{{certificate_authority_id}}:fetch")
 		if err != nil {
 			return err
 		}

@@ -26,20 +26,21 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "tpu_node_basic"
-    primary_resource_id: "tpu"
+    name: 'tpu_node_basic'
+    primary_resource_id: 'tpu'
     vars:
-      node_name: "test-tpu"
+      node_name: 'test-tpu'
   - !ruby/object:Provider::Terraform::Examples
-    name: "tpu_node_full"
-    primary_resource_id: "tpu"
+    name: 'tpu_node_full'
+    primary_resource_id: 'tpu'
     vars:
-      node_name: "test-tpu"
+      node_name: 'test-tpu'
+      global_address_name: 'my-global-address'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/tpu_node.erb'
   resource_definition: 'templates/terraform/resource_definition/tpu_node.erb'
 parameters:
-                                   # TODO: resourceref?
+  # TODO: resourceref?
   - !ruby/object:Api::Type::String
     name: 'zone'
     description: |
@@ -154,4 +155,3 @@ properties:
     name: 'labels'
     immutable: true
     description: Resource labels to represent user provided metadata.
-

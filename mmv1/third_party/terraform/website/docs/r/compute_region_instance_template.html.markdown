@@ -11,6 +11,8 @@ Manages a VM instance template resource within GCE. For more information see
 and
 [API](https://cloud.google.com/compute/docs/reference/rest/v1/regionInstanceTemplates).
 
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 ## Example Usage
 
@@ -333,7 +335,7 @@ The following arguments are supported:
     this template. This can be specified multiple times for multiple networks.
     Structure is [documented below](#nested_network_interface).
 
-* `network_performance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
+* `network_performance_config` (Optional)
     Configures network performance settings for the instance created from the
     template. Structure is [documented below](#nested_network_performance_config). **Note**: [`machine_type`](#machine_type)
     must be a [supported type](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration),
@@ -367,7 +369,7 @@ The following arguments are supported:
 * `shielded_instance_config` - (Optional) Enable [Shielded VM](https://cloud.google.com/security/shielded-cloud/shielded-vm) on this instance. Shielded VM provides verifiable integrity to prevent against malware and rootkits. Defaults to disabled. Structure is [documented below](#nested_shielded_instance_config).
 	**Note**: [`shielded_instance_config`](#shielded_instance_config) can only be used with boot images with shielded vm support. See the complete list [here](https://cloud.google.com/compute/docs/images#shielded-images).
 
-* `enable_display` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Enable [Virtual Displays](https://cloud.google.com/compute/docs/instances/enable-instance-virtual-display#verify_display_driver) on this instance.
+* `enable_display` - (Optional, ) Enable [Virtual Displays](https://cloud.google.com/compute/docs/instances/enable-instance-virtual-display#verify_display_driver) on this instance.
 **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true in order to update this field.
 
 * `confidential_instance_config` (Optional) - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM. Structure is [documented below](#nested_confidential_instance_config)
@@ -575,7 +577,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     
 * `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 
-* `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
+* `max_run_duration` -  (Optional)  The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
     
 <a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
 
@@ -588,7 +590,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    315,576,000,000 inclusive. Note: these bounds are computed from: 60
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
 
-* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.   
+* `maintenance_interval` - (Optional)  Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.   
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
@@ -639,7 +641,7 @@ The `specific_reservation` block supports:
 
 * `threads_per_core` (Optional) The number of threads per physical core. To disable [simultaneous multithreading (SMT)](https://cloud.google.com/compute/docs/instances/disabling-smt) set this to 1.
 
-* `visible_core_count` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
+* `visible_core_count` (Optional, ) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
 
 ## Attributes Reference
 

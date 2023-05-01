@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"path"
 	"testing"
 
@@ -17,7 +18,7 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 		ExpectedError       bool
 		ExpectedTerraformId string
 		ExpectedFhirStoreId string
-		Config              *Config
+		Config              *transport_tpg.Config
 	}{
 		"id is in project/location/datasetName/fhirStoreName format": {
 			ImportId:            "test-project/us-central1/test-dataset/test-store-name",
@@ -36,17 +37,17 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 			ExpectedError:       false,
 			ExpectedTerraformId: "test-project/us-central1/test-dataset/test-store-name",
 			ExpectedFhirStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/fhirStores/test-store-name",
-			Config:              &Config{Project: "test-project"},
+			Config:              &transport_tpg.Config{Project: "test-project"},
 		},
 		"id is in location/datasetName/fhirStoreName format without project in config": {
 			ImportId:      "us-central1/test-dataset/test-store-name",
 			ExpectedError: true,
-			Config:        &Config{Project: ""},
+			Config:        &transport_tpg.Config{Project: ""},
 		},
 	}
 
 	for tn, tc := range cases {
-		fhirStoreId, err := parseHealthcareFhirStoreId(tc.ImportId, tc.Config)
+		fhirStoreId, err := ParseHealthcareFhirStoreId(tc.ImportId, tc.Config)
 
 		if tc.ExpectedError && err == nil {
 			t.Fatalf("bad: %s, expected an error", tn)
@@ -59,12 +60,12 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 			t.Fatalf("bad: %s, err: %#v", tn, err)
 		}
 
-		if fhirStoreId.terraformId() != tc.ExpectedTerraformId {
-			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, fhirStoreId.terraformId())
+		if fhirStoreId.TerraformId() != tc.ExpectedTerraformId {
+			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, fhirStoreId.TerraformId())
 		}
 
-		if fhirStoreId.fhirStoreId() != tc.ExpectedFhirStoreId {
-			t.Fatalf("bad: %s, expected FhirStore ID to be `%s` but is `%s`", tn, tc.ExpectedFhirStoreId, fhirStoreId.fhirStoreId())
+		if fhirStoreId.FhirStoreId() != tc.ExpectedFhirStoreId {
+			t.Fatalf("bad: %s, expected FhirStore ID to be `%s` but is `%s`", tn, tc.ExpectedFhirStoreId, fhirStoreId.FhirStoreId())
 		}
 	}
 }
@@ -78,7 +79,7 @@ func TestAccHealthcareFhirStore_basic(t *testing.T) {
 	resourceName := "google_healthcare_fhir_store.default"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckHealthcareFhirStoreDestroyProducer(t),
 		Steps: []resource.TestStep{

@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	healthcare "google.golang.org/api/healthcare/v1"
 
 	"github.com/hashicorp/errwrap"
@@ -21,33 +22,33 @@ var IamHealthcareFhirStoreSchema = map[string]*schema.Schema{
 type HealthcareFhirStoreIamUpdater struct {
 	resourceId string
 	d          TerraformResourceData
-	Config     *Config
+	Config     *transport_tpg.Config
 }
 
-func NewHealthcareFhirStoreIamUpdater(d TerraformResourceData, config *Config) (ResourceIamUpdater, error) {
+func NewHealthcareFhirStoreIamUpdater(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
 	fhirStore := d.Get("fhir_store_id").(string)
-	fhirStoreId, err := parseHealthcareFhirStoreId(fhirStore, config)
+	fhirStoreId, err := ParseHealthcareFhirStoreId(fhirStore, config)
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error parsing resource ID for %s: {{err}}", fhirStore), err)
 	}
 
 	return &HealthcareFhirStoreIamUpdater{
-		resourceId: fhirStoreId.fhirStoreId(),
+		resourceId: fhirStoreId.FhirStoreId(),
 		d:          d,
 		Config:     config,
 	}, nil
 }
 
-func FhirStoreIdParseFunc(d *schema.ResourceData, config *Config) error {
-	fhirStoreId, err := parseHealthcareFhirStoreId(d.Id(), config)
+func FhirStoreIdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+	fhirStoreId, err := ParseHealthcareFhirStoreId(d.Id(), config)
 	if err != nil {
 		return err
 	}
-	if err := d.Set("fhir_store_id", fhirStoreId.fhirStoreId()); err != nil {
+	if err := d.Set("fhir_store_id", fhirStoreId.FhirStoreId()); err != nil {
 		return fmt.Errorf("Error setting fhir_store_id: %s", err)
 	}
-	d.SetId(fhirStoreId.fhirStoreId())
+	d.SetId(fhirStoreId.FhirStoreId())
 	return nil
 }
 

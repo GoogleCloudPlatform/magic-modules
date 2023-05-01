@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"strings"
 
@@ -59,20 +60,20 @@ func DataSourceGoogleKmsCryptoKeyVersion() *schema.Resource {
 }
 
 func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}")
+	url, err := ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Getting attributes for CryptoKeyVersion: %#v", url)
 
-	cryptoKeyId, err := parseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
+	cryptoKeyId, err := ParseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
 	if err != nil {
 		return err
 	}
@@ -97,7 +98,7 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error setting CryptoKeyVersion: %s", err)
 	}
 
-	url, err = replaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
+	url, err = ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
 	if err != nil {
 		return err
 	}
@@ -109,13 +110,13 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 	}
 
 	if res["purpose"] == "ASYMMETRIC_SIGN" || res["purpose"] == "ASYMMETRIC_DECRYPT" {
-		url, err = replaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}/publicKey")
+		url, err = ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/{{version}}/publicKey")
 		if err != nil {
 			return err
 		}
 		log.Printf("[DEBUG] Getting public key of CryptoKeyVersion: %#v", url)
 
-		res, err = SendRequestWithTimeout(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil, d.Timeout(schema.TimeoutRead), isCryptoKeyVersionsPendingGeneration)
+		res, err = SendRequestWithTimeout(config, "GET", cryptoKeyId.KeyRingId.Project, url, userAgent, nil, d.Timeout(schema.TimeoutRead), IsCryptoKeyVersionsPendingGeneration)
 
 		if err != nil {
 			log.Printf("Error generating public key: %s", err)

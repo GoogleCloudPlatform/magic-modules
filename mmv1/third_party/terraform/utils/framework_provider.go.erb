@@ -6,6 +6,7 @@ import (
     "net/http"
     "time"
 
+    "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/path"
     "github.com/hashicorp/terraform-plugin-framework/provider"
@@ -14,8 +15,9 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/resource"
     "github.com/hashicorp/terraform-plugin-framework/schema/validator"
     "github.com/hashicorp/terraform-plugin-framework/types"
-    "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+    "golang.org/x/oauth2"
     "google.golang.org/api/option"
 )
 
@@ -37,17 +39,19 @@ func New(version string) provider.ProviderWithMetaSchema {
 }
 
 // frameworkProvider is the provider implementation.
-type frameworkProvider struct{
+type frameworkProvider struct {
     billingProject types.String
     client *http.Client
     context context.Context
     gRPCLoggingOptions []option.ClientOption
     pollInterval time.Duration
     project types.String
-    region string
-    requestBatcherIam *RequestBatcher
-    requestBatcherServiceUsage *RequestBatcher
+    region types.String
+    zone types.String
+    RequestBatcherIam *transport_tpg.RequestBatcher
+    requestBatcherServiceUsage *transport_tpg.RequestBatcher
     scopes []string
+    tokenSource oauth2.TokenSource
     userAgent string
     userProjectOverride bool
     version string
@@ -134,7 +138,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             <% end -%>
@@ -143,63 +147,63 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "cloud_billing_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "composer_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "container_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "dataflow_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "iam_credentials_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "resource_manager_v3_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             <% unless version == "ga" -%>
             "runtimeconfig_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             <% end -%>
             "iam_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "service_networking_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "tags_location_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
 
@@ -207,13 +211,13 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "container_aws_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
             "container_azure_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
-                    CustomEndpointValidator(),
+                    transport_tpg.CustomEndpointValidator(),
                 },
             },
         },
@@ -236,7 +240,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
         },
     }
 
-    configureDCLCustomEndpointAttributesFramework(&resp.Schema)
+    transport_tpg.ConfigureDCLCustomEndpointAttributesFramework(&resp.Schema)
 }
 
 // Configure prepares an API client for data sources and resources.
@@ -264,9 +268,16 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
 // DataSources defines the data sources implemented in the provider.
 func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {
     return []func() datasource.DataSource{
+        NewGoogleClientConfigDataSource,
+        NewGoogleClientOpenIDUserinfoDataSource,
         NewGoogleDnsManagedZoneDataSource,
         NewGoogleDnsRecordSetDataSource,
         NewGoogleDnsKeysDataSource,
+        <% unless version == 'ga' -%>
+        NewGoogleFirebaseAndroidAppConfigDataSource,
+        NewGoogleFirebaseAppleAppConfigDataSource,
+        NewGoogleFirebaseWebAppConfigDataSource,
+        <% end -%>
     }
 }
 

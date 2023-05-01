@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -196,7 +197,7 @@ func mergeDeleteAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBind
 func fetchIamPolicy(
 	newUpdaterFunc newResourceIamUpdaterFunc,
 	d TerraformResourceData,
-	config *Config,
+	config *transport_tpg.Config,
 	assetNameTmpl string,
 	assetType string,
 ) (Asset, error) {

@@ -57,18 +57,18 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_endpoint_group"
-    primary_resource_id: "neg"
+    name: 'network_endpoint_group'
+    primary_resource_id: 'neg'
     vars:
-      neg_name: "my-lb-neg"
-      network_name: "neg-network"
-      subnetwork_name: "neg-subnetwork"
+      neg_name: 'my-lb-neg'
+      network_name: 'neg-network'
+      subnetwork_name: 'neg-subnetwork'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_endpoint_group_non_gcp"
-    primary_resource_id: "neg"
+    name: 'network_endpoint_group_non_gcp'
+    primary_resource_id: 'neg'
     vars:
-      neg_name: "my-lb-neg"
-      network_name: "neg-network"
+      neg_name: 'my-lb-neg'
+      network_name: 'neg-network'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -137,7 +137,7 @@ properties:
     imports: 'selfLink'
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
-    diff_suppress_func: 'compareOptionalSubnet'
+    diff_suppress_func: 'CompareOptionalSubnet'
   - !ruby/object:Api::Type::Integer
     name: 'defaultPort'
     description: |

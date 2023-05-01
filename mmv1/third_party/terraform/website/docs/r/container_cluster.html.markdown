@@ -693,7 +693,7 @@ pick a specific range to use.
 
 * `stack_type` - (Optional) The IP Stack Type of the cluster. 
 Default value is `IPV4`.
-Possible values are `IPV4` and `PV4_IPV6`.
+Possible values are `IPV4` and `IPV4_IPV6`.
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
@@ -742,6 +742,13 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 
 ```hcl
 ephemeral_storage_config {
+  local_ssd_count = 2
+}
+```
+* `ephemeral_storage_local_ssd_config` - (Optional) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_local_ssd_config).
+
+```hcl
+ephemeral_storage_local_ssd_config {
   local_ssd_count = 2
 }
 ```
@@ -888,6 +895,10 @@ linux_node_config {
 * `threads_per_core` - (Required) The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.
 
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
+
+* `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+<a name="nested_ephemeral_storage_local_ssd_config"></a>The `ephemeral_storage_local_ssd_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
 
@@ -1166,11 +1177,11 @@ and all pods running on the nodes. Specified as a map from the key, such as
 
 * `workload_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) WorkloadConfig defines which actions are enabled for a cluster's workload configurations. Structure is [documented below](#nested_workload_config)
 
-* `workload_vulnerability_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode to use for Protect workload vulnerability scanning feature. Accepted values are WORKLOAD_VULNERABILITY_MODE_UNSPECIFIED, DISABLED, BASIC.
+* `workload_vulnerability_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode to use for Protect workload vulnerability scanning feature. Accepted values are DISABLED, BASIC.
 
 <a name="nested_workload_config"></a>The `protect_config.workload_config` block supports:
 
-* `auditMode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) WorkloadConfig defines the flags to enable or disable the workload configurations for the cluster. Accepted values are MODE_UNSPECIFIED, DISABLED, BASIC.
+* `audit_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode of auditing should be used for the cluster's workloads. Accepted values are DISABLED, BASIC.
 
 ## Attributes Reference
 

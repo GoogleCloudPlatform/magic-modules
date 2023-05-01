@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"cloud.google.com/go/bigtable"
 )
@@ -31,7 +34,7 @@ func ResourceBigtableInstance() *schema.Resource {
 		StateUpgraders: []schema.StateUpgrader{
 			{
 				Type:    resourceBigtableInstanceResourceV0().CoreConfigSchema().ImpliedType(),
-				Upgrade: resourceBigtableInstanceUpgradeV0,
+				Upgrade: ResourceBigtableInstanceUpgradeV0,
 				Version: 0,
 			},
 		},
@@ -161,7 +164,7 @@ func ResourceBigtableInstance() *schema.Resource {
 }
 
 func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -212,7 +215,7 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating instance. %s", err)
 	}
 
-	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -222,7 +225,7 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -259,7 +262,17 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 	clusters, err := c.Clusters(ctx, instance.Name)
 	if err != nil {
-		return fmt.Errorf("Error retrieving instance clusters. %s", err)
+		partiallyUnavailableErr, ok := err.(bigtable.ErrPartiallyUnavailable)
+
+		if !ok {
+			return fmt.Errorf("Error retrieving instance clusters. %s", err)
+		}
+
+		unavailableClusterZones := getUnavailableClusterZones(d.Get("cluster").([]interface{}), partiallyUnavailableErr.Locations)
+
+		if len(unavailableClusterZones) > 0 {
+			return fmt.Errorf("Error retrieving instance clusters. The following zones are unavailable: %s", strings.Join(unavailableClusterZones, ", "))
+		}
 	}
 
 	clustersNewState := []map[string]interface{}{}
@@ -289,7 +302,7 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -345,7 +358,7 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -404,7 +417,24 @@ func flattenBigtableCluster(c *bigtable.ClusterInfo) map[string]interface{} {
 	return cluster
 }
 
-func expandBigtableClusters(clusters []interface{}, instanceID string, config *Config) ([]bigtable.ClusterConfig, error) {
+func getUnavailableClusterZones(clusters []interface{}, unavailableZones []string) []string {
+	var zones []string
+
+	for _, c := range clusters {
+		cluster := c.(map[string]interface{})
+		zone := cluster["zone"].(string)
+
+		for _, unavailableZone := range unavailableZones {
+			if zone == unavailableZone {
+				zones = append(zones, zone)
+				break
+			}
+		}
+	}
+	return zones
+}
+
+func expandBigtableClusters(clusters []interface{}, instanceID string, config *transport_tpg.Config) ([]bigtable.ClusterConfig, error) {
 	results := make([]bigtable.ClusterConfig, 0, len(clusters))
 	for _, c := range clusters {
 		cluster := c.(map[string]interface{})
@@ -445,7 +475,7 @@ func expandBigtableClusters(clusters []interface{}, instanceID string, config *C
 
 // getBigtableZone reads the "zone" value from the given resource data and falls back
 // to provider's value if not given.  If neither is provided, returns an error.
-func getBigtableZone(z string, config *Config) (string, error) {
+func getBigtableZone(z string, config *transport_tpg.Config) (string, error) {
 	if z == "" {
 		if config.Zone != "" {
 			return config.Zone, nil
@@ -576,8 +606,8 @@ func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *sch
 }
 
 func resourceBigtableInstanceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	if err := parseImportId([]string{
+	config := meta.(*transport_tpg.Config)
+	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/instances/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",
@@ -586,7 +616,7 @@ func resourceBigtableInstanceImport(d *schema.ResourceData, meta interface{}) ([
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

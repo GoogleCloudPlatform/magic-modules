@@ -65,7 +65,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		<% unless versioned_provider -%>
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		<% else -%>

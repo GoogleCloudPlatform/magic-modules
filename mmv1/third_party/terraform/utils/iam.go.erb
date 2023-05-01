@@ -4,6 +4,7 @@ package google
 
 import (
 	"encoding/json"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"fmt"
 	"log"
 	"reflect"
@@ -47,13 +48,13 @@ type (
 	}
 
 	// Factory for generating ResourceIamUpdater for given ResourceData resource
-	newResourceIamUpdaterFunc func(d TerraformResourceData, config *Config) (ResourceIamUpdater, error)
+	newResourceIamUpdaterFunc func(d TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error)
 
 	// Describes how to modify a policy for a given Terraform IAM (_policy/_member/_binding/_audit_config) resource
 	iamPolicyModifyFunc func(p *cloudresourcemanager.Policy) error
 
 	// Parser for Terraform resource identifier (d.Id) for resource whose IAM policy is being changed
-	resourceIdParserFunc func(d *schema.ResourceData, config *Config) error
+	resourceIdParserFunc func(d *schema.ResourceData, config *transport_tpg.Config) error
 )
 
 // Locking wrapper around read-only operation with retries.
@@ -153,7 +154,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 
 		// retry in the case that a service account is not found. This can happen when a service account is deleted
 		// out of band.
-		if isServiceAccountNotFoundError, _ := iamServiceAccountNotFound(err); isServiceAccountNotFoundError {
+		if isServiceAccountNotFoundError, _ := IamServiceAccountNotFound(err); isServiceAccountNotFoundError {
 			// calling a retryable function within a retry loop is not
 			// strictly the _best_ idea, but this error only happens in
 			// high-traffic projects anyways
@@ -470,4 +471,16 @@ func IamWithGAResourceDeprecation() func (s *IamSettings) {
 	<% else -%>
 	return IamWithDeprecationMessage("")
 	<% end -%>
+}
+
+// Util to deref and print auditConfigs
+func debugPrintAuditConfigs(bs []*cloudresourcemanager.AuditConfig) string {
+	v, _ := json.MarshalIndent(bs, "", "\t")
+	return string(v)
+}
+
+// Util to deref and print bindings
+func debugPrintBindings(bs []*cloudresourcemanager.Binding) string {
+	v, _ := json.MarshalIndent(bs, "", "\t")
+	return string(v)
 }

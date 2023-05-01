@@ -27,7 +27,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://firebase.google.com/docs/android/setup'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.androidApps'
 async: !ruby/object:Api::OpAsync
-  actions: ["create", "delete"]
+  actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
@@ -44,17 +44,21 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-import_format: ["projects/{{project}}/androidApps/{{appId}}", "androidApps/{{appId}}",
-  "{{appId}}"]
+import_format:
+  [
+    'projects/{{project}}/androidApps/{{appId}}',
+    'androidApps/{{appId}}',
+    '{{appId}}',
+  ]
 autogen_async: true
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_android_app_basic"
-    min_version: "beta"
-    primary_resource_id: "basic"
+    name: 'firebase_android_app_basic'
+    min_version: 'beta'
+    primary_resource_id: 'basic'
     vars:
-      display_name: "Display Name Basic"
+      display_name: 'Display Name Basic'
     test_env_vars:
       org_id: :ORG_ID
       project_id: :PROJECT_NAME
@@ -65,7 +69,7 @@ examples:
       - project
       - deletion_policy
 virtual_fields:
-        # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
+  # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
   - !ruby/object:Api::Type::String
     name: 'deletion_policy'
     description: |

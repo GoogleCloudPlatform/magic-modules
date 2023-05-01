@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"testing"
 	"time"
 
@@ -18,7 +19,7 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 		ExpectedError       bool
 		ExpectedTerraformId string
 		ExpectedCryptoKeyId string
-		Config              *Config
+		Config              *transport_tpg.Config
 	}{
 		"id is in project/location/keyRingName/cryptoKeyName format": {
 			ImportId:            "test-project/us-central1/test-key-ring/test-key-name",
@@ -41,17 +42,17 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 			ExpectedError:       false,
 			ExpectedTerraformId: "test-project/us-central1/test-key-ring/test-key-name",
 			ExpectedCryptoKeyId: "projects/test-project/locations/us-central1/keyRings/test-key-ring/cryptoKeys/test-key-name",
-			Config:              &Config{Project: "test-project"},
+			Config:              &transport_tpg.Config{Project: "test-project"},
 		},
 		"id is in location/keyRingName/cryptoKeyName format without project in config": {
 			ImportId:      "us-central1/test-key-ring/test-key-name",
 			ExpectedError: true,
-			Config:        &Config{Project: ""},
+			Config:        &transport_tpg.Config{Project: ""},
 		},
 	}
 
 	for tn, tc := range cases {
-		cryptoKeyId, err := parseKmsCryptoKeyId(tc.ImportId, tc.Config)
+		cryptoKeyId, err := ParseKmsCryptoKeyId(tc.ImportId, tc.Config)
 
 		if tc.ExpectedError && err == nil {
 			t.Fatalf("bad: %s, expected an error", tn)
@@ -64,12 +65,12 @@ func TestCryptoKeyIdParsing(t *testing.T) {
 			t.Fatalf("bad: %s, err: %#v", tn, err)
 		}
 
-		if cryptoKeyId.terraformId() != tc.ExpectedTerraformId {
-			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, cryptoKeyId.terraformId())
+		if cryptoKeyId.TerraformId() != tc.ExpectedTerraformId {
+			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, cryptoKeyId.TerraformId())
 		}
 
-		if cryptoKeyId.cryptoKeyId() != tc.ExpectedCryptoKeyId {
-			t.Fatalf("bad: %s, expected CryptoKey ID to be `%s` but is `%s`", tn, tc.ExpectedCryptoKeyId, cryptoKeyId.cryptoKeyId())
+		if cryptoKeyId.CryptoKeyId() != tc.ExpectedCryptoKeyId {
+			t.Fatalf("bad: %s, expected CryptoKey ID to be `%s` but is `%s`", tn, tc.ExpectedCryptoKeyId, cryptoKeyId.CryptoKeyId())
 		}
 	}
 }
@@ -124,7 +125,7 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
-			Meta: &Config{},
+			Meta: &transport_tpg.Config{},
 		},
 		"key_ring link fmt stays as link fmt": {
 			Attributes: map[string]interface{}{
@@ -133,7 +134,7 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
-			Meta: &Config{},
+			Meta: &transport_tpg.Config{},
 		},
 		"key_ring without project to link fmt": {
 			Attributes: map[string]interface{}{
@@ -142,14 +143,14 @@ func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
-			Meta: &Config{
+			Meta: &transport_tpg.Config{
 				Project: "my-project",
 			},
 		},
 	}
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			actual, err := resourceKMSCryptoKeyUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
+			actual, err := ResourceKMSCryptoKeyUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
 
 			if err != nil {
 				t.Error(err)
@@ -176,7 +177,7 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -222,7 +223,7 @@ func TestAccKmsCryptoKey_rotation(t *testing.T) {
 	updatedRotationPeriod := "7776000s"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -275,7 +276,7 @@ func TestAccKmsCryptoKey_template(t *testing.T) {
 	updatedAlgorithm := "EC_SIGN_P384_SHA384"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -318,7 +319,7 @@ func TestAccKmsCryptoKey_destroyDuration(t *testing.T) {
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -353,7 +354,7 @@ func TestAccKmsCryptoKey_importOnly(t *testing.T) {
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -450,7 +451,7 @@ func TestAccKmsCryptoKeyVersion_basic(t *testing.T) {
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -478,7 +479,7 @@ func TestAccKmsCryptoKeyVersion_skipInitialVersion(t *testing.T) {
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -504,7 +505,7 @@ func TestAccKmsCryptoKeyVersion_patch(t *testing.T) {
 	state := "DISABLED"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{

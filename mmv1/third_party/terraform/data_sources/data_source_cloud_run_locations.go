@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"sort"
 
@@ -27,7 +28,7 @@ func DataSourceGoogleCloudRunLocations() *schema.Resource {
 }
 
 func dataSourceGoogleCloudRunLocationsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -38,7 +39,7 @@ func dataSourceGoogleCloudRunLocationsRead(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	url, err := replaceVars(d, config, "https://run.googleapis.com/v1/projects/{{project}}/locations")
+	url, err := ReplaceVars(d, config, "https://run.googleapis.com/v1/projects/{{project}}/locations")
 	if err != nil {
 		return err
 	}

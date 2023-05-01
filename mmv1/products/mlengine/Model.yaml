@@ -47,13 +47,13 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "ml_model_basic"
-    primary_resource_id: "default"
+    name: 'ml_model_basic'
+    primary_resource_id: 'default'
     vars:
       model_name: 'default'
   - !ruby/object:Provider::Terraform::Examples
-    name: "ml_model_full"
-    primary_resource_id: "default"
+    name: 'ml_model_full'
+    primary_resource_id: 'default'
     vars:
       model_name: 'default'
 properties:
@@ -92,7 +92,8 @@ properties:
     description: If true, online prediction access logs are sent to StackDriver Logging.
   - !ruby/object:Api::Type::Boolean
     name: 'onlinePredictionConsoleLogging'
-    description: If true, online prediction nodes send stderr and stdout streams to
+    description:
+      If true, online prediction nodes send stderr and stdout streams to
       Stackdriver Logging
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'

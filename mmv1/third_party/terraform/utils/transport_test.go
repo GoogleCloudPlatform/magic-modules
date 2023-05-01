@@ -1,109 +1,15 @@
 package google
 
 import (
-	"reflect"
-	"regexp"
-	"strings"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-
-// This function isn't a test of transport.go; instead, it is used as an alternative
-// to replaceVars inside tests.
-func replaceVarsForTest(config *Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
-	re := regexp.MustCompile("{{([[:word:]]+)}}")
-	var project, region, zone string
-
-	if strings.Contains(linkTmpl, "{{project}}") {
-		project = rs.Primary.Attributes["project"]
-	}
-
-	if strings.Contains(linkTmpl, "{{region}}") {
-		region = GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
-	}
-
-	if strings.Contains(linkTmpl, "{{zone}}") {
-		zone = GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
-	}
-
-	replaceFunc := func(s string) string {
-		m := re.FindStringSubmatch(s)[1]
-		if m == "project" {
-			return project
-		}
-		if m == "region" {
-			return region
-		}
-		if m == "zone" {
-			return zone
-		}
-
-		if v, ok := rs.Primary.Attributes[m]; ok {
-			return v
-		}
-
-		// Attempt to draw values from the provider config
-		if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
-			return f.String()
-		}
-
-		return ""
-	}
-
-	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
-}
-
-// This function isn't a test of transport.go; instead, it is used as an alternative
-// to replaceVars inside tests.
-func replaceVarsForFrameworkTest(prov *frameworkProvider, rs *terraform.ResourceState, linkTmpl string) (string, error) {
-	re := regexp.MustCompile("{{([[:word:]]+)}}")
-	var project, region, zone string
-
-	if strings.Contains(linkTmpl, "{{project}}") {
-		project = rs.Primary.Attributes["project"]
-	}
-
-	if strings.Contains(linkTmpl, "{{region}}") {
-		region = GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
-	}
-
-	if strings.Contains(linkTmpl, "{{zone}}") {
-		zone = GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
-	}
-
-	replaceFunc := func(s string) string {
-		m := re.FindStringSubmatch(s)[1]
-		if m == "project" {
-			return project
-		}
-		if m == "region" {
-			return region
-		}
-		if m == "zone" {
-			return zone
-		}
-
-		if v, ok := rs.Primary.Attributes[m]; ok {
-			return v
-		}
-
-		// Attempt to draw values from the provider
-		if f := reflect.Indirect(reflect.ValueOf(prov)).FieldByName(m); f.IsValid() {
-			return f.String()
-		}
-
-		return ""
-	}
-
-	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
-}
 
 func TestReplaceVars(t *testing.T) {
 	cases := map[string]struct {
 		Template      string
 		SchemaValues  map[string]interface{}
-		Config        *Config
+		Config        *transport_tpg.Config
 		Expected      string
 		ExpectedError bool
 	}{
@@ -113,21 +19,21 @@ func TestReplaceVars(t *testing.T) {
 		},
 		"unspecified region fails": {
 			Template: "projects/{{project}}/regions/{{region}}/subnetworks",
-			Config: &Config{
+			Config: &transport_tpg.Config{
 				Project: "default-project",
 			},
 			ExpectedError: true,
 		},
 		"unspecified zone fails": {
 			Template: "projects/{{project}}/zones/{{zone}}/instances",
-			Config: &Config{
+			Config: &transport_tpg.Config{
 				Project: "default-project",
 			},
 			ExpectedError: true,
 		},
 		"regional with default values": {
 			Template: "projects/{{project}}/regions/{{region}}/subnetworks",
-			Config: &Config{
+			Config: &transport_tpg.Config{
 				Project: "default-project",
 				Region:  "default-region",
 			},
@@ -135,7 +41,7 @@ func TestReplaceVars(t *testing.T) {
 		},
 		"zonal with default values": {
 			Template: "projects/{{project}}/zones/{{zone}}/instances",
-			Config: &Config{
+			Config: &transport_tpg.Config{
 				Project: "default-project",
 				Zone:    "default-zone",
 			},
@@ -189,7 +95,7 @@ func TestReplaceVars(t *testing.T) {
 		},
 		"base path recursive replacement": {
 			Template: "{{CloudRunBasePath}}namespaces/{{project}}/services",
-			Config: &Config{
+			Config: &transport_tpg.Config{
 				Project:          "default-project",
 				Region:           "default-region",
 				CloudRunBasePath: "https://{{region}}-run.googleapis.com/",
@@ -199,30 +105,32 @@ func TestReplaceVars(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		d := &ResourceDataMock{
-			FieldsInSchema: tc.SchemaValues,
-		}
-
-		config := tc.Config
-		if config == nil {
-			config = &Config{}
-		}
-
-		v, err := replaceVars(d, config, tc.Template)
-
-		if err != nil {
-			if !tc.ExpectedError {
-				t.Errorf("bad: %s; unexpected error %s", tn, err)
+		t.Run(tn, func(t *testing.T) {
+			d := &ResourceDataMock{
+				FieldsInSchema: tc.SchemaValues,
 			}
-			continue
-		}
 
-		if tc.ExpectedError {
-			t.Errorf("bad: %s; expected error", tn)
-		}
+			config := tc.Config
+			if config == nil {
+				config = &transport_tpg.Config{}
+			}
 
-		if v != tc.Expected {
-			t.Errorf("bad: %s; expected %q, got %q", tn, tc.Expected, v)
-		}
+			v, err := ReplaceVars(d, config, tc.Template)
+
+			if err != nil {
+				if !tc.ExpectedError {
+					t.Errorf("bad: %s; unexpected error %s", tn, err)
+				}
+				return
+			}
+
+			if tc.ExpectedError {
+				t.Errorf("bad: %s; expected error", tn)
+			}
+
+			if v != tc.Expected {
+				t.Errorf("bad: %s; expected %q, got %q", tn, tc.Expected, v)
+			}
+		})
 	}
 }

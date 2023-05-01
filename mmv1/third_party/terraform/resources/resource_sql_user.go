@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -92,7 +94,7 @@ func ResourceSqlUser() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: emptyOrDefaultStringSuppress("BUILT_IN"),
+				DiffSuppressFunc: EmptyOrDefaultStringSuppress("BUILT_IN"),
 				Description: `The user type. It determines the method to authenticate the user during login.
                 The default is the database's built-in user type. Flags include "BUILT_IN", "CLOUD_IAM_USER", or "CLOUD_IAM_SERVICE_ACCOUNT".`,
 				ValidateFunc: validation.StringInSlice([]string{"BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", ""}, false),
@@ -221,7 +223,7 @@ func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolic
 }
 
 func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -298,7 +300,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -423,7 +425,7 @@ func flattenPasswordStatus(status *sqladmin.PasswordStatus) interface{} {
 }
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -474,7 +476,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
 		// Allows for user to be abandoned without deletion to avoid deletion failing
@@ -510,7 +512,7 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		return nil
-	}, d.Timeout(schema.TimeoutDelete), IsSqlOperationInProgressError, isSqlInternalError)
+	}, d.Timeout(schema.TimeoutDelete), IsSqlOperationInProgressError, IsSqlInternalError)
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete"+

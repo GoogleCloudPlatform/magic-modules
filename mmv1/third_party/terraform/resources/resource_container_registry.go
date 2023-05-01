@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceContainerRegistry() *schema.Resource {
@@ -44,7 +45,7 @@ func ResourceContainerRegistry() *schema.Resource {
 }
 
 func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -64,7 +65,7 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	// Performing a token handshake with the GCR API causes the backing bucket to create if it hasn't already.
-	url, err := replaceVars(d, config, fmt.Sprintf("%s?service=gcr.io&scope=repository:{{project}}/my-repo:push,pull", urlBase))
+	url, err := ReplaceVars(d, config, fmt.Sprintf("%s?service=gcr.io&scope=repository:{{project}}/my-repo:push,pull", urlBase))
 	if err != nil {
 		return err
 	}
@@ -78,7 +79,7 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

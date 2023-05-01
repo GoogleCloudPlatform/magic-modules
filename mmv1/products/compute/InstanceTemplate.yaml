@@ -225,9 +225,9 @@ properties:
               values:
                 - :SCSI
                 - :NVME
-          # Ignoring kind - It's a constant and we don't need it.
-          # TODO(alexstephen): Place in licenses - it's a Array of
-          # ResourceRefs
+            # Ignoring kind - It's a constant and we don't need it.
+            # TODO(alexstephen): Place in licenses - it's a Array of
+            # ResourceRefs
             - !ruby/object:Api::Type::Enum
               name: 'mode'
               description: |
@@ -279,7 +279,6 @@ properties:
           Specifies a minimum CPU platform for the VM instance. Applicable
           values are the friendly names of CPU platforms
       # TODO(nelsonjr): Implement updating metadata *after* resource is created.
-
       # Expose instance 'metadata' as a simple name/value pair hash. However the API
       # defines metadata as a NestedObject with the following layout:
       #
@@ -341,7 +340,7 @@ properties:
                 external internet access.
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
-                 # 'kind' is not needed for object convergence
+                  # 'kind' is not needed for object convergence
                   - !ruby/object:Api::Type::String
                     name: 'name'
                     description: |

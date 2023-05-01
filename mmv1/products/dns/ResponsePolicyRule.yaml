@@ -26,17 +26,20 @@ min_version: beta
 identity:
   - ruleName
 id_format: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'
-import_format: ["projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}"]
+import_format:
+  [
+    'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_response_policy_rule_basic"
-    primary_resource_id: "example-response-policy-rule"
+    name: 'dns_response_policy_rule_basic'
+    primary_resource_id: 'example-response-policy-rule'
     vars:
-      response_policy_name: "example-response-policy"
-      network_1_name: "network-1"
-      network_2_name: "network-2"
-      cluster_1_name: "cluster-1"
-      response_policy_rule_name: "example-rule"
+      response_policy_name: 'example-response-policy'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
+      cluster_1_name: 'cluster-1'
+      response_policy_rule_name: 'example-rule'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'response_policy'
@@ -54,7 +57,8 @@ properties:
     required: true
   - !ruby/object:Api::Type::String
     name: 'dnsName'
-    description: The DNS name (wildcard or exact) to apply this rule to. Must be unique
+    description:
+      The DNS name (wildcard or exact) to apply this rule to. Must be unique
       within the Response Policy Rule.
     required: true
     update_verb: :PATCH
@@ -69,7 +73,8 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'localDatas'
-        description: All resource record sets for this selector, one per resource
+        description:
+          All resource record sets for this selector, one per resource
           record type. The name must match the dns_name.
         update_verb: :PATCH
         required: true
@@ -118,7 +123,7 @@ properties:
     conflicts:
       - local_data
     min_version: beta
-    description: Answer this query with a behavior rather than DNS data. Acceptable
+    description:
+      Answer this query with a behavior rather than DNS data. Acceptable
       values are 'behaviorUnspecified', and 'bypassResponsePolicy'
     update_verb: :PATCH
-

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -22,7 +23,7 @@ func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 	})
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
@@ -49,7 +50,7 @@ func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 	accountId := "tf-dm-" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDeploymentManagerDestroyInvalidDeployment(t, deploymentName),
 		Steps: []resource.TestStep{
@@ -69,7 +70,7 @@ func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 	accountId := "tf-dm-" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -97,7 +98,7 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 	})
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
@@ -126,7 +127,7 @@ func TestAccDeploymentManagerDeployment_update(t *testing.T) {
 	accountId2 := "tf-dm-second" + randStr
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
@@ -378,7 +379,7 @@ func testDeploymentManagerDeploymentVerifyServiceAccountExists(t *testing.T, acc
 	}
 }
 
-func testCheckDeploymentServiceAccountExists(accountId string, config *Config) (exists bool, err error) {
+func testCheckDeploymentServiceAccountExists(accountId string, config *transport_tpg.Config) (exists bool, err error) {
 	_, err = config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.Get(
 		fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", GetTestProjectFromEnv(), accountId, GetTestProjectFromEnv())).Do()
 	if err != nil {

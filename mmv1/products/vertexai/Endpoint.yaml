@@ -42,21 +42,23 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-description: "Models are deployed into it, and afterwards Endpoint is called to obtain\
+description:
+  "Models are deployed into it, and afterwards Endpoint is called to obtain\
   \ predictions and explanations."
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_endpoint_network"
-        # Test is covered by handwritten test to include an update.
+    name:
+      'vertex_ai_endpoint_network'
+      # Test is covered by handwritten test to include an update.
     skip_test: true
-    primary_resource_id: "endpoint"
+    primary_resource_id: 'endpoint'
     vars:
-      name: "vertex_ai_endpoint"
-      project: "vertex-ai"
-      endpoint_name: "endpoint-name"
-      address_name: "address-name"
-      kms_key_name: "kms-name"
-      network_name: "network-name"
+      name: 'vertex_ai_endpoint'
+      project: 'vertex-ai'
+      endpoint_name: 'endpoint-name'
+      address_name: 'address-name'
+      kms_key_name: 'kms-name'
+      network_name: 'network-name'
 parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -64,17 +66,24 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - !ruby/object:Api::Type::String
+    name: region
+    description: The region for the resource
+    url_param_only: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    description: The resource name of the Endpoint. The name must be numeric with
+    description:
+      The resource name of the Endpoint. The name must be numeric with
       no leading zeros and can be at most 10 digits.
     url_param_only: true
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
     name: displayName
-    description: Required. The display name of the Endpoint. The name can be up to
+    description:
+      Required. The display name of the Endpoint. The name can be up to
       128 characters long and can consist of any UTF-8 characters.
     required: true
   - !ruby/object:Api::Type::String
@@ -82,20 +91,23 @@ properties:
     description: The description of the Endpoint.
   - !ruby/object:Api::Type::Array
     name: deployedModels
-    description: Output only. The models deployed in this Endpoint. To add or remove
+    description:
+      Output only. The models deployed in this Endpoint. To add or remove
       DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel
       respectively. Models can also be deployed and undeployed using the [Cloud Console](https://console.cloud.google.com/vertex-ai/).
     output: true
     item_type: !ruby/object:Api::Type::NestedObject
       name: deployedModels
-      description: Output only. The models deployed in this Endpoint. To add or remove
+      description:
+        Output only. The models deployed in this Endpoint. To add or remove
         DeployedModels use EndpointService.DeployModel and EndpointService.UndeployModel
         respectively. Models can also be deployed and undeployed using the [Cloud
         Console](https://console.cloud.google.com/vertex-ai/).
       properties:
         - !ruby/object:Api::Type::NestedObject
           name: dedicatedResources
-          description: A description of resources that are dedicated to the DeployedModel,
+          description:
+            A description of resources that are dedicated to the DeployedModel,
             and that need a higher degree of manual configuration.
           output: true
           properties:
@@ -106,7 +118,8 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: machineType
-                  description: 'The type of the machine. See the [list of machine
+                  description:
+                    'The type of the machine. See the [list of machine
                     types supported for prediction](https://cloud.google.com/vertex-ai/docs/predictions/configure-compute#machine-types)
                     See the [list of machine types supported for custom training](https://cloud.google.com/vertex-ai/docs/training/configure-compute#machine-types).
                     For DeployedModel this field is optional, and the default value
@@ -116,7 +129,8 @@ properties:
                   output: true
                 - !ruby/object:Api::Type::String
                   name: acceleratorType
-                  description: The type of accelerator(s) that may be attached to
+                  description:
+                    The type of accelerator(s) that may be attached to
                     the machine as per accelerator_count. See possible values [here](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec#AcceleratorType).
                   output: true
                 - !ruby/object:Api::Type::Integer
@@ -125,7 +139,8 @@ properties:
                   output: true
             - !ruby/object:Api::Type::Integer
               name: minReplicaCount
-              description: The minimum number of machine replicas this DeployedModel
+              description:
+                The minimum number of machine replicas this DeployedModel
                 will be always deployed on. This value must be greater than or equal
                 to 1. If traffic against the DeployedModel increases, it may dynamically
                 be deployed onto more replicas, and as traffic decreases, some of
@@ -133,7 +148,8 @@ properties:
               output: true
             - !ruby/object:Api::Type::Integer
               name: maxReplicaCount
-              description: The maximum number of replicas this DeployedModel may be
+              description:
+                The maximum number of replicas this DeployedModel may be
                 deployed on when the traffic against it increases. If the requested
                 value is too large, the deployment will error, but if deployment succeeds
                 then the ability to scale the model to that many replicas is guaranteed
@@ -147,7 +163,8 @@ properties:
               output: true
             - !ruby/object:Api::Type::Array
               name: autoscalingMetricSpecs
-              description: The metric specifications that overrides a resource utilization
+              description:
+                The metric specifications that overrides a resource utilization
                 metric (CPU utilization, accelerator's duty cycle, and so on) target
                 value (default to 60 if not set). At most one entry is allowed per
                 metric. If machine_spec.accelerator_count is above 0, the autoscaling
@@ -164,7 +181,8 @@ properties:
               output: true
               item_type: !ruby/object:Api::Type::NestedObject
                 name: autoscalingMetricSpecs
-                description: The metric specifications that overrides a resource utilization
+                description:
+                  The metric specifications that overrides a resource utilization
                   metric (CPU utilization, accelerator's duty cycle, and so on) target
                   value (default to 60 if not set). At most one entry is allowed per
                   metric. If machine_spec.accelerator_count is above 0, the autoscaling
@@ -181,26 +199,30 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: metricName
-                    description: 'The resource metric name. Supported metrics: * For
+                    description:
+                      'The resource metric name. Supported metrics: * For
                       Online Prediction: * `aiplatform.googleapis.com/prediction/online/accelerator/duty_cycle`
                       * `aiplatform.googleapis.com/prediction/online/cpu/utilization`'
                     output: true
                   - !ruby/object:Api::Type::Integer
                     name: target
-                    description: The target resource utilization in percentage (1%
+                    description:
+                      The target resource utilization in percentage (1%
                       - 100%) for the given metric; once the real usage deviates from
                       the target by a certain percentage, the machine replicas change.
                       The default value is 60 (representing 60%) if not provided.
                     output: true
         - !ruby/object:Api::Type::NestedObject
           name: automaticResources
-          description: A description of resources that to large degree are decided
+          description:
+            A description of resources that to large degree are decided
             by Vertex AI, and require only a modest additional configuration.
           output: true
           properties:
             - !ruby/object:Api::Type::Integer
               name: minReplicaCount
-              description: The minimum number of replicas this DeployedModel will
+              description:
+                The minimum number of replicas this DeployedModel will
                 be always deployed on. If traffic against it increases, it may dynamically
                 be deployed onto more replicas up to max_replica_count, and as traffic
                 decreases, some of these extra replicas may be freed. If the requested
@@ -208,7 +230,8 @@ properties:
               output: true
             - !ruby/object:Api::Type::Integer
               name: maxReplicaCount
-              description: The maximum number of replicas this DeployedModel may be
+              description:
+                The maximum number of replicas this DeployedModel may be
                 deployed on when the traffic against it increases. If the requested
                 value is too large, the deployment will error, but if deployment succeeds
                 then the ability to scale the model to that many replicas is guaranteed
@@ -220,13 +243,15 @@ properties:
               output: true
         - !ruby/object:Api::Type::String
           name: id
-          description: The ID of the DeployedModel. If not provided upon deployment,
+          description:
+            The ID of the DeployedModel. If not provided upon deployment,
             Vertex AI will generate a value for this ID. This value should be 1-10
             characters, and valid characters are /[0-9]/.
           output: true
         - !ruby/object:Api::Type::String
           name: model
-          description: The name of the Model that this is the deployment of. Note
+          description:
+            The name of the Model that this is the deployment of. Note
             that the Model may be in a different location than the DeployedModel's
             Endpoint.
           output: true
@@ -236,7 +261,8 @@ properties:
           output: true
         - !ruby/object:Api::Type::String
           name: displayName
-          description: The display name of the DeployedModel. If not provided upon
+          description:
+            The display name of the DeployedModel. If not provided upon
             creation, the Model's display_name is used.
           output: true
         - !ruby/object:Api::Type::String
@@ -245,7 +271,8 @@ properties:
           output: true
         - !ruby/object:Api::Type::String
           name: serviceAccount
-          description: The service account that the DeployedModel's container runs
+          description:
+            The service account that the DeployedModel's container runs
             as. Specify the email address of the service account. If this service
             account is not specified, the container runs as a service account that
             doesn't have access to the resource project. Users deploying the Model
@@ -253,7 +280,8 @@ properties:
           output: true
         - !ruby/object:Api::Type::Boolean
           name: enableAccessLogging
-          description: These logs are like standard server access logs, containing
+          description:
+            These logs are like standard server access logs, containing
             information like timestamp and latency for each prediction request. Note
             that Stackdriver logs may incur a cost, especially if your project receives
             prediction requests at a high queries per second rate (QPS). Estimate
@@ -261,7 +289,8 @@ properties:
           output: true
         - !ruby/object:Api::Type::NestedObject
           name: privateEndpoints
-          description: Output only. Provide paths for users to send predict/explain/health
+          description:
+            Output only. Provide paths for users to send predict/explain/health
             requests directly to the deployed model services running on Cloud via
             private services access. This field is populated if network is configured.
           output: true
@@ -280,29 +309,34 @@ properties:
               output: true
             - !ruby/object:Api::Type::String
               name: serviceAttachment
-              description: Output only. The name of the service attachment resource.
+              description:
+                Output only. The name of the service attachment resource.
                 Populated if private service connect is enabled.
               output: true
         - !ruby/object:Api::Type::String
           name: sharedResources
-          description: 'The resource name of the shared DeploymentResourcePool to
+          description:
+            'The resource name of the shared DeploymentResourcePool to
             deploy on. Format: projects/{project}/locations/{location}/deploymentResourcePools/{deployment_resource_pool}'
           output: true
         - !ruby/object:Api::Type::Boolean
           name: enableContainerLogging
-          description: If true, the container of the DeployedModel instances will
+          description:
+            If true, the container of the DeployedModel instances will
             send `stderr` and `stdout` streams to Stackdriver Logging. Only supported
             for custom-trained Models and AutoML Tabular Models.
           output: true
   - !ruby/object:Api::Type::String
     name: etag
-    description: Used to perform consistent read-modify-write updates. If not set,
+    description:
+      Used to perform consistent read-modify-write updates. If not set,
       a blind "overwrite" update happens.
     output: true
     ignore_read: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: labels
-    description: The labels with user-defined metadata to organize your Endpoints.
+    description:
+      The labels with user-defined metadata to organize your Endpoints.
       Label keys and values can be no longer than 64 characters (Unicode codepoints),
       can only contain lowercase letters, numeric characters, underscores and dashes.
       International characters are allowed. See https://goo.gl/xmQnxf for more information
@@ -317,13 +351,15 @@ properties:
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: encryptionSpec
-    description: Customer-managed encryption key spec for an Endpoint. If set, this
+    description:
+      Customer-managed encryption key spec for an Endpoint. If set, this
       Endpoint and all sub-resources of this Endpoint will be secured by this key.
     immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: kmsKeyName
-        description: 'Required. The Cloud KMS resource identifier of the customer
+        description:
+          'Required. The Cloud KMS resource identifier of the customer
           managed encryption key used to protect a resource. Has the form: `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
           The key needs to be in the same region as where the compute resource is
           created.'
@@ -331,7 +367,8 @@ properties:
         immutable: true
   - !ruby/object:Api::Type::String
     name: network
-    description: 'The full name of the Google Compute Engine [network](https://cloud.google.com//compute/docs/networks-and-firewalls#networks)
+    description:
+      'The full name of the Google Compute Engine [network](https://cloud.google.com//compute/docs/networks-and-firewalls#networks)
       to which the Endpoint should be peered. Private services access must already
       be configured for the network. If left unspecified, the Endpoint is not peered
       with any network. Only one of the fields, network or enable_private_service_connect,
@@ -341,7 +378,8 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::String
     name: modelDeploymentMonitoringJob
-    description: 'Output only. Resource name of the Model Monitoring job associated
+    description:
+      'Output only. Resource name of the Model Monitoring job associated
       with this Endpoint if monitoring is enabled by CreateModelDeploymentMonitoringJob.
       Format: `projects/{project}/locations/{location}/modelDeploymentMonitoringJobs/{model_deployment_monitoring_job}`'
     output: true

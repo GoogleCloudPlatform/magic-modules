@@ -4,6 +4,7 @@ package google
 <% unless version == 'ga' -%>
 import (
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"time"
 
@@ -44,13 +45,13 @@ func ResourceProjectServiceIdentity() *schema.Resource {
 }
 
 func resourceProjectServiceIdentityCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{ServiceUsageBasePath}}projects/{{project}}/services/{{service}}:generateServiceIdentity")
+	url, err := ReplaceVars(d, config, "{{ServiceUsageBasePath}}projects/{{project}}/services/{{service}}:generateServiceIdentity")
 	if err != nil {
 		return err
 	}
@@ -82,7 +83,7 @@ func resourceProjectServiceIdentityCreate(d *schema.ResourceData, meta interface
 
 	log.Printf("[DEBUG] Finished creating Service Identity %q: %#v", d.Id(), res)
 
-	id, err := replaceVars(d, config, "projects/{{project}}/services/{{service}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/services/{{service}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

@@ -15,7 +15,7 @@
 name: Service
 base_url: v3/projects/{{project}}/services
 create_url: v3/projects/{{project}}/services?serviceId={{service_id}}
-self_link: "v3/{{name}}"
+self_link: 'v3/{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -29,16 +29,16 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
 legacy_name: 'google_monitoring_custom_service'
-id_format: "{{name}}"
-import_format: ["{{name}}"]
-error_retry_predicates: ["isMonitoringConcurrentEditError"]
+id_format: '{{name}}'
+import_format: ['{{name}}']
+error_retry_predicates: ['IsMonitoringConcurrentEditError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "monitoring_service_custom"
-    primary_resource_id: "custom"
+    name: 'monitoring_service_custom'
+    primary_resource_id: 'custom'
     vars:
-      service_id: "custom-srv"
-      resource_name: "//product.googleapis.com/foo/foo/services/test"
+      service_id: 'custom-srv'
+      resource_name: '//product.googleapis.com/foo/foo/services/test'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   encoder: templates/terraform/encoders/monitoring_service.go.erb
@@ -87,4 +87,3 @@ properties:
           The full name of the resource that defines this service.
           Formatted as described in
           https://cloud.google.com/apis/design/resource_names.
-

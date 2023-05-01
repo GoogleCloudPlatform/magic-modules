@@ -26,7 +26,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package google
+package transport
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -66,16 +66,16 @@ func HandleDCLCustomEndpointDefaults(d *schema.ResourceData) {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
 	if d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey) == "" {
-		d.Set({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey, MultiEnvSearch([]string{
+		d.Set({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_{{$pkg.BasePathIdentifier.ToUpper}}_CUSTOM_ENDPOINT",
-		}))
+		}, ""))
 	}
 {{- end}}
 {{- end}}
 }
 
 // plugin-framework provider set-up
-func configureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_schema.Schema) {
+func ConfigureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_schema.Schema) {
 {{- range $index, $pkg := . }}
 {{- if $pkg.ShouldWriteProductBasePath }}
 	frameworkSchema.Attributes["{{$pkg.BasePathIdentifier}}_custom_endpoint"] = framework_schema.StringAttribute{
@@ -97,4 +97,3 @@ func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	return config
 }
-

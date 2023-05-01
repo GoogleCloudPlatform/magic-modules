@@ -27,7 +27,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://firebase.google.com/'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps'
 async: !ruby/object:Api::OpAsync
-  actions: ["create", "delete"]
+  actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
@@ -48,13 +48,14 @@ import_format: ['{{project}} {{name}}']
 autogen_async: true
 skip_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_web_app_basic"
-    min_version: "beta"
-    primary_resource_id: "basic"
+  - !ruby/object:Provider::Terraform::Examples # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
+    skip_vcr: true
+    name: 'firebase_web_app_basic'
+    min_version: 'beta'
+    primary_resource_id: 'basic'
     vars:
-      display_name: "Display Name Basic"
-      bucket_name: "fb-webapp-"
+      display_name: 'Display Name Basic'
+      bucket_name: 'fb-webapp-'
     test_env_vars:
       org_id: :ORG_ID
     test_vars_overrides:
@@ -63,7 +64,7 @@ examples:
       - project
       - deletion_policy
 virtual_fields:
-      # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
+  # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
   - !ruby/object:Api::Type::String
     name: 'deletion_policy'
     description: |

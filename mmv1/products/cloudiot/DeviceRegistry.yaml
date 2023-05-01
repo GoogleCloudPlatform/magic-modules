@@ -28,11 +28,14 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'name'
-  import_format: ["projects/{{project}}/locations/{{location}}/registries/{{name}}",
-    "{{name}}"]
-legacy_name: "google_cloudiot_registry"
-import_format: ["{{project}}/locations/{{region}}/registries/{{name}}"]
-id_format: "projects/{{project}}/locations/{{region}}/registries/{{name}}"
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/registries/{{name}}',
+      '{{name}}',
+    ]
+legacy_name: 'google_cloudiot_registry'
+import_format: ['{{project}}/locations/{{region}}/registries/{{name}}']
+id_format: 'projects/{{project}}/locations/{{region}}/registries/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/cloudiot.go.erb
   decoder: templates/terraform/decoders/cloudiot_device_registry.go.erb
@@ -76,33 +79,34 @@ docs: !ruby/object:Provider::Terraform::Docs
     * `certificate` - The certificate data.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudiot_device_registry_basic"
-    primary_resource_id: "test-registry"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudiot-registry%s\", context[\"\
+    name: 'cloudiot_device_registry_basic'
+    primary_resource_id: 'test-registry'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-cloudiot-registry%s\", context[\"\
       random_suffix\"])"
     vars:
-      cloudiot_registry_name: "cloudiot-registry"
+      cloudiot_registry_name: 'cloudiot-registry'
     test_env_vars:
       project: :PROJECT_NAME
       region: :REGION
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudiot_device_registry_single_event_notification_configs"
-    primary_resource_id: "test-registry"
+    name: 'cloudiot_device_registry_single_event_notification_configs'
+    primary_resource_id: 'test-registry'
     vars:
-      cloudiot_registry_name: "cloudiot-registry"
-      cloudiot_device_telemetry_topic_name: "default-telemetry"
+      cloudiot_registry_name: 'cloudiot-registry'
+      cloudiot_device_telemetry_topic_name: 'default-telemetry'
     test_env_vars:
       project: :PROJECT_NAME
       region: :REGION
   - !ruby/object:Provider::Terraform::Examples
-    name: "cloudiot_device_registry_full"
-    primary_resource_id: "test-registry"
+    name: 'cloudiot_device_registry_full'
+    primary_resource_id: 'test-registry'
     vars:
-      cloudiot_registry_name: "cloudiot-registry"
-      cloudiot_device_status_topic_name: "default-devicestatus"
-      cloudiot_device_telemetry_topic_name: "default-telemetry"
-      cloudiot_additional_device_telemetry_topic_name: "additional-telemetry"
-      cloudiot_subfolder_matches_additional_device_telemetry_topic: "test/path"
+      cloudiot_registry_name: 'cloudiot-registry'
+      cloudiot_device_status_topic_name: 'default-devicestatus'
+      cloudiot_device_telemetry_topic_name: 'default-telemetry'
+      cloudiot_additional_device_telemetry_topic_name: 'additional-telemetry'
+      cloudiot_subfolder_matches_additional_device_telemetry_topic: 'test/path'
     test_env_vars:
       project: :PROJECT_NAME
       region: :REGION
@@ -126,7 +130,7 @@ properties:
       A unique name for the resource, required by device registry.
     api_name: 'id'
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateCloudIotDeviceRegistryID'
+      function: 'ValidateCloudIotDeviceRegistryID'
   - !ruby/object:Api::Type::Array
     name: 'eventNotificationConfigs'
     description: |
@@ -208,7 +212,7 @@ properties:
       - :ERROR
       - :INFO
       - :DEBUG
-    diff_suppress_func: 'emptyOrDefaultStringSuppress("NONE")'
+    diff_suppress_func: 'EmptyOrDefaultStringSuppress("NONE")'
   - !ruby/object:Api::Type::Array
     name: 'credentials'
     description: |

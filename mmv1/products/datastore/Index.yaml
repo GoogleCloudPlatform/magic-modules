@@ -13,8 +13,8 @@
 
 --- !ruby/object:Api::Resource
 name: 'Index'
-base_url: "projects/{{project}}/indexes"
-self_link: "projects/{{project}}/indexes/{{index_id}}"
+base_url: 'projects/{{project}}/indexes'
+self_link: 'projects/{{project}}/indexes/{{index_id}}'
 immutable: true
 collection_url_key: indexes
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -25,8 +25,8 @@ identity:
   - indexId
 description: |
   Describes a composite index for Cloud Datastore.
-id_format: "projects/{{project}}/indexes/{{index_id}}"
-error_retry_predicates: ["datastoreIndex409Contention"]
+id_format: 'projects/{{project}}/indexes/{{index_id}}'
+error_retry_predicates: ['DatastoreIndex409Contention']
 autogen_async: true
 skip_sweeper: true
 timeouts: !ruby/object:Api::Timeouts
@@ -41,11 +41,11 @@ docs: !ruby/object:Provider::Terraform::Docs
     Datastore location will be the same as the App Engine location specified.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastore_index"
-    primary_resource_id: "default"
+    name: 'datastore_index'
+    primary_resource_id: 'default'
     vars:
-      property_name_1: "property_a"
-      property_name_2: "property_b"
+      property_name_1: 'property_a'
+      property_name_2: 'property_b'
 properties:
   - !ruby/object:Api::Type::String
     name: 'indexId'
@@ -85,4 +85,3 @@ properties:
             - :DESCENDING
           description: |
             The direction the index should optimize for sorting.
-

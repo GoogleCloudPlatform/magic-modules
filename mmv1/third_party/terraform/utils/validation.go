@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 const (
@@ -103,15 +104,7 @@ or be the value of [%d], got %d`, k, GcpRouterPartnerAsn, value))
 }
 
 func validateRegexp(re string) schema.SchemaValidateFunc {
-	return func(v interface{}, k string) (ws []string, errors []error) {
-		value := v.(string)
-		if !regexp.MustCompile(re).MatchString(value) {
-			errors = append(errors, fmt.Errorf(
-				"%q (%q) doesn't match regexp %q", k, value, re))
-		}
-
-		return
-	}
+	return transport_tpg.ValidateRegexp(re)
 }
 
 func validateEnum(values []string) schema.SchemaValidateFunc {
@@ -354,4 +347,32 @@ func validateADDomainName() schema.SchemaValidateFunc {
 		}
 		return
 	}
+}
+
+func testStringValidationCases(cases []StringValidationTestCase, validationFunc schema.SchemaValidateFunc) []error {
+	es := make([]error, 0)
+	for _, c := range cases {
+		es = append(es, testStringValidation(c, validationFunc)...)
+	}
+
+	return es
+}
+
+func testStringValidation(testCase StringValidationTestCase, validationFunc schema.SchemaValidateFunc) []error {
+	_, es := validationFunc(testCase.Value, testCase.TestName)
+	if testCase.ExpectError {
+		if len(es) > 0 {
+			return nil
+		} else {
+			return []error{fmt.Errorf("Didn't see expected error in case \"%s\" with string \"%s\"", testCase.TestName, testCase.Value)}
+		}
+	}
+
+	return es
+}
+
+type StringValidationTestCase struct {
+	TestName    string
+	Value       string
+	ExpectError bool
 }

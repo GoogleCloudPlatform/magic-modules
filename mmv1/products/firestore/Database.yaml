@@ -19,7 +19,11 @@ update_verb: :PATCH
 update_mask: true
 description: |
   A Cloud Firestore Database. Currently only one database is allowed per
-  cloud project; this database must have a `database_id` of '(default)'.
+  Cloud project; this database must have a `database_id` of '(default)'.
+
+  If you wish to use Firestore with App Engine, use the
+  [`google_app_engine_application`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/app_engine_application)
+  resource instead.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/firestore/docs/'
@@ -44,36 +48,40 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 skip_delete: true
 autogen_async: true
-id_format: "projects/{{project}}/databases/{{name}}"
+id_format: 'projects/{{project}}/databases/{{name}}'
 import_format:
-  - "projects/{{project}}/databases/{{name}}"
-  - "{{project}}/{{name}}"
-  - "{{name}}"
+  - 'projects/{{project}}/databases/{{name}}'
+  - '{{project}}/{{name}}'
+  - '{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_database"
-    primary_resource_id: "database"
+    name: 'firestore_database'
+    primary_resource_id: 'database'
     pull_external: true
     test_env_vars:
       org_id: :ORG_ID
     ignore_read_extra:
       - project
       - etag
+    vars:
+      project_id: 'my-project'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firestore_database_datastore_mode"
-    primary_resource_id: "datastore_mode_database"
+    name: 'firestore_database_datastore_mode'
+    primary_resource_id: 'datastore_mode_database'
     pull_external: true
     test_env_vars:
       org_id: :ORG_ID
     ignore_read_extra:
       - project
       - etag
+    vars:
+      project_id: 'my-project'
 properties:
   - !ruby/object:Api::Type::String
     name: name
     required: true
     description: |
-      Required. The ID to use for the database, which will become the final
+      The ID to use for the database, which will become the final
       component of the database's resource name. This value should be 4-63
       characters. Valid characters are /[a-z][0-9]-/ with first character
       a letter and the last a letter or a number. Must not be

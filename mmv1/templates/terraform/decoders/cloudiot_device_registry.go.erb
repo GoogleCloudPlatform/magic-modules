@@ -1,4 +1,4 @@
-config := meta.(*Config)
+config := meta.(*transport_tpg.Config)
 
 log.Printf("[DEBUG] Decoding state notification config: %q", d.Id())
 log.Printf("[DEBUG] State notification config before decoding: %v", d.Get("state_notification_config"))

@@ -29,46 +29,47 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
 docs: !ruby/object:Provider::Terraform::Docs
   note: |
-    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding 
+    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
     by using the `google_project_service_identity` resource.
-   # PubSub resources don't have operations but are negatively cached
-    # and eventually consistent.
-    # Because some users check whether the PubSub resource exists prior
-    # to applying a new resource, we need to add this PollAsync to GET the
-    # resource until it exists and the negative cached result goes away.
-    # Context: hashicorp/terraform-provider-google#4993
+  # PubSub resources don't have operations but are negatively cached
+  # and eventually consistent.
+  # Because some users check whether the PubSub resource exists prior
+  # to applying a new resource, we need to add this PollAsync to GET the
+  # resource until it exists and the negative cached result goes away.
+  # Context: hashicorp/terraform-provider-google#4993
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckForExistence
   actions: ['create']
   suppress_error: true
-error_retry_predicates: ["pubsubTopicProjectNotReady"]
+error_retry_predicates: ['PubsubTopicProjectNotReady']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_topic_basic"
-    primary_resource_id: "example"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\", context[\"random_suffix\"\
+    name: 'pubsub_topic_basic'
+    primary_resource_id: 'example'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-example-topic%s\", context[\"random_suffix\"\
       ])"
     vars:
-      topic_name: "example-topic"
+      topic_name: 'example-topic'
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_topic_cmek"
-    primary_resource_id: "example"
+    name: 'pubsub_topic_cmek'
+    primary_resource_id: 'example'
     skip_test: true
     vars:
-      topic_name: "example-topic"
-      key_name: "example-key"
-      keyring_name: "example-keyring"
+      topic_name: 'example-topic'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_topic_geo_restricted"
-    primary_resource_id: "example"
+    name: 'pubsub_topic_geo_restricted'
+    primary_resource_id: 'example'
     vars:
-      topic_name: "example-topic"
+      topic_name: 'example-topic'
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_topic_schema_settings"
-    primary_resource_id: "example"
+    name: 'pubsub_topic_schema_settings'
+    primary_resource_id: 'example'
     vars:
-      topic_name: "example-topic"
-      schema_name: "example"
+      topic_name: 'example-topic'
+      schema_name: 'example'
     test_env_vars:
       project_name: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode

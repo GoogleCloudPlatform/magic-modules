@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -19,6 +21,8 @@ var (
 		"transfer_spec.0.object_conditions.0.max_time_elapsed_since_last_modification",
 		"transfer_spec.0.object_conditions.0.include_prefixes",
 		"transfer_spec.0.object_conditions.0.exclude_prefixes",
+		"transfer_spec.0.object_conditions.0.last_modified_since",
+		"transfer_spec.0.object_conditions.0.last_modified_before",
 	}
 
 	transferOptionsKeys = []string{
@@ -293,6 +297,20 @@ func objectConditionsSchema() *schema.Schema {
 					},
 					Description: `exclude_prefixes must follow the requirements described for include_prefixes.`,
 				},
+				"last_modified_since": {
+					Type:         schema.TypeString,
+					ValidateFunc: validateRFC3339Date,
+					Optional:     true,
+					AtLeastOneOf: objectConditionsKeys,
+					Description:  `If specified, only objects with a "last modification time" on or after this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
+				},
+				"last_modified_before": {
+					Type:         schema.TypeString,
+					ValidateFunc: validateRFC3339Date,
+					Optional:     true,
+					AtLeastOneOf: objectConditionsKeys,
+					Description:  `If specified, only objects with a "last modification time" before this timestamp and objects that don't have a "last modification time" are transferred. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".`,
+				},
 			},
 		},
 		Description: `Only objects that satisfy these object conditions are included in the set of data source and data sink objects. Object conditions based on objects' last_modification_time do not exclude objects in a data sink.`,
@@ -524,7 +542,7 @@ func diffSuppressEmptyStartTimeOfDay(k, old, new string, d *schema.ResourceData)
 }
 
 func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -567,7 +585,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -627,7 +645,7 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -699,7 +717,7 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -1033,6 +1051,8 @@ func expandObjectConditions(conditions []interface{}) *storagetransfer.ObjectCon
 		IncludePrefixes:                     convertStringArr(condition["include_prefixes"].([]interface{})),
 		MaxTimeElapsedSinceLastModification: condition["max_time_elapsed_since_last_modification"].(string),
 		MinTimeElapsedSinceLastModification: condition["min_time_elapsed_since_last_modification"].(string),
+		LastModifiedSince:                   condition["last_modified_since"].(string),
+		LastModifiedBefore:                  condition["last_modified_before"].(string),
 	}
 }
 
@@ -1042,6 +1062,8 @@ func flattenObjectCondition(condition *storagetransfer.ObjectConditions) []map[s
 		"include_prefixes":                         condition.IncludePrefixes,
 		"max_time_elapsed_since_last_modification": condition.MaxTimeElapsedSinceLastModification,
 		"min_time_elapsed_since_last_modification": condition.MinTimeElapsedSinceLastModification,
+		"last_modified_since":                      condition.LastModifiedSince,
+		"last_modified_before":                     condition.LastModifiedBefore,
 	}
 	return []map[string]interface{}{data}
 }

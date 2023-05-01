@@ -46,138 +46,152 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "internal_http_lb_with_mig_backend"
-    primary_resource_id: "google_compute_forwarding_rule"
+    name: 'internal_http_lb_with_mig_backend'
+    primary_resource_id: 'google_compute_forwarding_rule'
     vars:
-      ilb_network_name: "l7-ilb-network"
-      proxy_subnet_name: "l7-ilb-proxy-subnet"
-      backend_subnet_name: "l7-ilb-subnet"
-      forwarding_rule_name: "l7-ilb-forwarding-rule"
-      target_http_proxy_name: "l7-ilb-target-http-proxy"
-      regional_url_map_name: "l7-ilb-regional-url-map"
-      backend_service_name: "l7-ilb-backend-subnet"
-      mig_template_name: "l7-ilb-mig-template"
-      hc_name: "l7-ilb-hc"
-      mig_name: "l7-ilb-mig1"
-      fw_allow_iap_hc_name: "l7-ilb-fw-allow-iap-hc"
-      fw_allow_ilb_to_backends_name: "l7-ilb-fw-allow-ilb-to-backends"
-      vm_test_name: "l7-ilb-test-vm"
+      ilb_network_name: 'l7-ilb-network'
+      proxy_subnet_name: 'l7-ilb-proxy-subnet'
+      backend_subnet_name: 'l7-ilb-subnet'
+      forwarding_rule_name: 'l7-ilb-forwarding-rule'
+      target_http_proxy_name: 'l7-ilb-target-http-proxy'
+      regional_url_map_name: 'l7-ilb-regional-url-map'
+      backend_service_name: 'l7-ilb-backend-subnet'
+      mig_template_name: 'l7-ilb-mig-template'
+      hc_name: 'l7-ilb-hc'
+      mig_name: 'l7-ilb-mig1'
+      fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
+      fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
+      vm_test_name: 'l7-ilb-test-vm'
     min_version: beta
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "internal_tcp_udp_lb_with_mig_backend"
-    primary_resource_id: "google_compute_forwarding_rule"
+    name: 'internal_tcp_udp_lb_with_mig_backend'
+    primary_resource_id: 'google_compute_forwarding_rule'
     vars:
-      ilb_network_name: "l4-ilb-network"
-      backend_subnet_name: "l4-ilb-subnet"
-      forwarding_rule_name: "l4-ilb-forwarding-rule"
-      backend_service_name: "l4-ilb-backend-subnet"
-      mig_template_name: "l4-ilb-mig-template"
-      hc_name: "l4-ilb-hc"
-      mig_name: "l4-ilb-mig1"
-      fw_allow_hc_name: "l4-ilb-fw-allow-hc"
-      fw_allow_ilb_to_backends_name: "l4-ilb-fw-allow-ilb-to-backends"
-      fw_allow_ilb_ssh_name: "l4-ilb-fw-ssh"
-      vm_test_name: "l4-ilb-test-vm"
+      ilb_network_name: 'l4-ilb-network'
+      backend_subnet_name: 'l4-ilb-subnet'
+      forwarding_rule_name: 'l4-ilb-forwarding-rule'
+      backend_service_name: 'l4-ilb-backend-subnet'
+      mig_template_name: 'l4-ilb-mig-template'
+      hc_name: 'l4-ilb-hc'
+      mig_name: 'l4-ilb-mig1'
+      fw_allow_hc_name: 'l4-ilb-fw-allow-hc'
+      fw_allow_ilb_to_backends_name: 'l4-ilb-fw-allow-ilb-to-backends'
+      fw_allow_ilb_ssh_name: 'l4-ilb-fw-ssh'
+      vm_test_name: 'l4-ilb-test-vm'
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
-    name: "forwarding_rule_externallb"
-    primary_resource_id: "default"
+    name: 'forwarding_rule_externallb'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "website-forwarding-rule"
-      backend_name: "website-backend"
-      network_name: "website-net"
+      forwarding_rule_name: 'website-forwarding-rule'
+      backend_name: 'website-backend'
+      network_name: 'website-net'
     min_version: beta
     ignore_read_extra:
-      - "port_range"
+      - 'port_range'
   - !ruby/object:Provider::Terraform::Examples
-    name: "forwarding_rule_global_internallb"
-    primary_resource_id: "default"
+    name: 'forwarding_rule_global_internallb'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "website-forwarding-rule"
-      backend_name: "website-backend"
-      network_name: "website-net"
+      forwarding_rule_name: 'website-forwarding-rule'
+      backend_name: 'website-backend'
+      network_name: 'website-net'
   - !ruby/object:Provider::Terraform::Examples
-    name: "forwarding_rule_basic"
-    primary_resource_id: "default"
+    name: 'forwarding_rule_basic'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "website-forwarding-rule"
-      target_pool_name: "website-target-pool"
+      forwarding_rule_name: 'website-forwarding-rule'
+      target_pool_name: 'website-target-pool'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "forwarding_rule_l3_default"
-    primary_resource_id: "fwd_rule"
+    name: 'forwarding_rule_l3_default'
+    primary_resource_id: 'fwd_rule'
     vars:
-      forwarding_rule_name: "l3-forwarding-rule"
-      service_name: "service"
-      health_check_name: "health-check"
+      forwarding_rule_name: 'l3-forwarding-rule'
+      service_name: 'service'
+      health_check_name: 'health-check'
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
-    name: "forwarding_rule_internallb"
-    primary_resource_id: "default"
+    name: 'forwarding_rule_internallb'
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "website-forwarding-rule"
-      backend_name: "website-backend"
-      network_name: "website-net"
+      forwarding_rule_name: 'website-forwarding-rule'
+      backend_name: 'website-backend'
+      network_name: 'website-net'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "forwarding_rule_http_lb"
+    name: 'forwarding_rule_http_lb'
     min_version: 'beta'
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "website-forwarding-rule"
-      region_target_http_proxy_name: "website-proxy"
-      region_url_map_name: "website-map"
-      region_backend_service_name: "website-backend"
-      region_health_check_name: "website-hc"
-      rigm_name: "website-rigm"
-      network_name: "website-net"
-      fw_name: "website-fw"
+      forwarding_rule_name: 'website-forwarding-rule'
+      region_target_http_proxy_name: 'website-proxy'
+      region_url_map_name: 'website-map'
+      region_backend_service_name: 'website-backend'
+      region_health_check_name: 'website-hc'
+      rigm_name: 'website-rigm'
+      network_name: 'website-net'
+      fw_name: 'website-fw'
     ignore_read_extra:
-      - "port_range"
-      - "target"
+      - 'port_range'
+      - 'target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "forwarding_rule_regional_http_xlb"
+    name: 'forwarding_rule_regional_http_xlb'
     min_version: 'beta'
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "website-forwarding-rule"
-      region_target_http_proxy_name: "website-proxy"
-      region_url_map_name: "website-map"
-      region_backend_service_name: "website-backend"
-      region_health_check_name: "website-hc"
-      rigm_name: "website-rigm"
-      network_name: "website-net"
-      fw_name: "website-fw"
-      ip_name: "website-ip"
+      forwarding_rule_name: 'website-forwarding-rule'
+      region_target_http_proxy_name: 'website-proxy'
+      region_url_map_name: 'website-map'
+      region_backend_service_name: 'website-backend'
+      region_health_check_name: 'website-hc'
+      rigm_name: 'website-rigm'
+      network_name: 'website-net'
+      fw_name: 'website-fw'
+      ip_name: 'website-ip'
     ignore_read_extra:
-      - "port_range"
-      - "target"
-      - "ip_address"
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "forwarding_rule_vpc_psc"
+    name: 'forwarding_rule_vpc_psc'
     min_version: 'beta'
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      forwarding_rule_name: "psc-endpoint"
-      consumer_network_name: "consumer-net"
-      ip_name: "website-ip"
-      producer_network_name: "producer-net"
-      producer_psc_network_name: "producer-psc-net"
-      service_attachment_name: "producer-service"
-      producer_forwarding_rule_name: "producer-forwarding-rule"
-      producer_backend_name: "producer-service-backend"
-      producer_healthcheck_name: "producer-service-health-check"
+      forwarding_rule_name: 'psc-endpoint'
+      consumer_network_name: 'consumer-net'
+      ip_name: 'website-ip'
+      producer_network_name: 'producer-net'
+      producer_psc_network_name: 'producer-psc-net'
+      service_attachment_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
+      producer_backend_name: 'producer-service-backend'
+      producer_healthcheck_name: 'producer-service-health-check'
     ignore_read_extra:
-      - "port_range"
-      - "target"
-      - "ip_address"
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'forwarding_rule_regional_steering'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      forwarding_rule_name: 'steering-rule'
+      ip_name: 'website-ip'
+      external_forwarding_rule_name: 'forwarding-rule'
+      backend_name: 'service-backend'
+      healthcheck_name: 'service-health-check'
+    ignore_read_extra:
+      - 'port_range'
+      - 'target'
+      - 'ip_address'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 parameters:
@@ -211,9 +225,19 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'pscConnectionStatus'
-    description: 'The PSC connection status of the PSC Forwarding Rule. Possible values:
+    description:
+      'The PSC connection status of the PSC Forwarding Rule. Possible values:
       STATUS_UNSPECIFIED, PENDING, ACCEPTED, REJECTED, CLOSED'
     output: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'allowPscGlobalAccess'
+    min_version: beta
+    send_empty_value: true
+    update_verb: :PATCH
+    update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
+    description: |
+      This is used in PSC consumer ForwardingRule to control 
+      whether the PSC endpoint can be accessed from another region.
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -223,7 +247,7 @@ properties:
     name: 'id'
     description: 'The unique identifier for the resource.'
     output: true
-  # This is a multi-resource resource reference (Address, GlobalAddress)
+    # This is a multi-resource resource reference (Address, GlobalAddress)
     exclude: true
   - !ruby/object:Api::Type::String
     name: 'IPAddress'
@@ -245,7 +269,7 @@ properties:
       For Private Service Connect forwarding rules that forward traffic to
       Google APIs, IP address must be provided.
     default_from_api: true
-    diff_suppress_func: 'internalIpDiffSuppress'
+    diff_suppress_func: 'InternalIpDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -261,9 +285,9 @@ properties:
       - :SCTP
       - :ICMP
       - :L3_DEFAULT
-  # This is a multi-resource resource reference (BackendService (global), RegionBackendService)
-  # We have custom expands that manage this.
-    diff_suppress_func: 'caseDiffSuppress'
+    # This is a multi-resource resource reference (BackendService (global), RegionBackendService)
+    # We have custom expands that manage this.
+    diff_suppress_func: 'CaseDiffSuppress'
     default_from_api: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'backendService'
@@ -313,10 +337,10 @@ properties:
       the load balanced IP should belong to for this Forwarding Rule. If
       this field is not specified, the default network will be used.
       This field is only used for INTERNAL load balancing.
-  # TODO(nelsonjr): When implementing new types enable converting the
-  # manifest input from a single value to a range of form NN-NN. The API
-  # accepts a single value, e.g. '80', but the API stores and returns
-  # '80-80'. This causes idempotency false positive.
+    # TODO(nelsonjr): When implementing new types enable converting the
+    # manifest input from a single value to a range of form NN-NN. The API
+    # accepts a single value, e.g. '80', but the API stores and returns
+    # '80-80'. This causes idempotency false positive.
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'portRange'
@@ -340,7 +364,7 @@ properties:
       * TargetSslProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
                         1883, 5222
       * TargetVpnGateway: 500, 4500
-    diff_suppress_func: 'portRangeDiffSuppress'
+    diff_suppress_func: 'PortRangeDiffSuppress'
   - !ruby/object:Api::Type::Array
     name: 'ports'
     max_size: 5
@@ -371,9 +395,9 @@ properties:
       If the network specified is in auto subnet mode, this field is
       optional. However, if the network is in custom subnet mode, a
       subnetwork must be specified.
-  # This is a multi-resource resource reference (TargetHttp(s)Proxy,
-  # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
-  # TargetInstance)
+    # This is a multi-resource resource reference (TargetHttp(s)Proxy,
+    # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
+    # TargetInstance)
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'target'
@@ -409,8 +433,8 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
     update_verb: :POST
     min_version: beta
-  # While this field doesn't appear in the resource definition in the docs,
-  # it's present in Get and Insert, and the resource has no Update/Patch call.
+    # While this field doesn't appear in the resource definition in the docs,
+    # it's present in Get and Insert, and the resource has no Update/Patch call.
     exclude: false
   - !ruby/object:Api::Type::Boolean
     name: 'allPorts'
@@ -436,7 +460,7 @@ properties:
     name: 'serviceDirectoryRegistrations'
     description: |
       Service Directory resources to register this forwarding rule with. Currently,
-      only supports a single Service Directory resource.  
+      only supports a single Service Directory resource.
     min_size: 0
     max_size: 1
     immutable: true

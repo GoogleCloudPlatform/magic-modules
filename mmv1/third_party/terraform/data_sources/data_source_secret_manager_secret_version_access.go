@@ -3,6 +3,7 @@ package google
 import (
 	"encoding/base64"
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"regexp"
 
@@ -42,7 +43,7 @@ func DataSourceSecretManagerSecretVersionAccess() *schema.Resource {
 }
 
 func dataSourceSecretManagerSecretVersionAccessRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -67,12 +68,12 @@ func dataSourceSecretManagerSecretVersionAccessRead(d *schema.ResourceData, meta
 	versionNum := d.Get("version")
 
 	if versionNum != "" {
-		url, err = replaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/{{version}}")
+		url, err = ReplaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/{{version}}")
 		if err != nil {
 			return err
 		}
 	} else {
-		url, err = replaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/latest")
+		url, err = ReplaceVars(d, config, "{{SecretManagerBasePath}}projects/{{project}}/secrets/{{secret}}/versions/latest")
 		if err != nil {
 			return err
 		}

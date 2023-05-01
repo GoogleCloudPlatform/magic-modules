@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccEndpointsService_basic(t *testing.T) {
@@ -18,7 +19,7 @@ func TestAccEndpointsService_basic(t *testing.T) {
 	serviceId := "tf-test" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		CheckDestroy:             testAccCheckEndpointServiceDestroyProducer(t),
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -43,7 +44,7 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 	serviceId := "tf-test" + RandString(t, 10)
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckEndpointServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -73,7 +74,7 @@ func TestEndpointsService_grpcMigrateState(t *testing.T) {
 				"protoc_output":        "",
 				"name":                 "testcase",
 			},
-			Meta: &Config{Project: "gcp-project", Region: "us-central1"},
+			Meta: &transport_tpg.Config{Project: "gcp-project", Region: "us-central1"},
 		},
 		"update from non-protoc_output": {
 			StateVersion: 0,
@@ -85,7 +86,7 @@ func TestEndpointsService_grpcMigrateState(t *testing.T) {
 				"openapi_config": "foo bar baz",
 				"name":           "testcase-2",
 			},
-			Meta: &Config{Project: "gcp-project", Region: "us-central1"},
+			Meta: &transport_tpg.Config{Project: "gcp-project", Region: "us-central1"},
 		},
 	}
 

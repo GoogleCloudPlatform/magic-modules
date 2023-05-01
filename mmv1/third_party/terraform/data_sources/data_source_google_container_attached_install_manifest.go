@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleContainerAttachedInstallManifest() *schema.Resource {
@@ -36,7 +37,7 @@ func DataSourceGoogleContainerAttachedInstallManifest() *schema.Resource {
 }
 
 func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -58,7 +59,7 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
-	url, err := replaceVars(d, config, "{{ContainerAttachedBasePath}}projects/{{project}}/locations/{{location}}:generateAttachedClusterInstallManifest")
+	url, err := ReplaceVars(d, config, "{{ContainerAttachedBasePath}}projects/{{project}}/locations/{{location}}:generateAttachedClusterInstallManifest")
 	if err != nil {
 		return err
 	}
@@ -66,7 +67,7 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 		"attached_cluster_id": clusterId,
 		"platform_version":    platformVersion,
 	}
-	url, err = addQueryParams(url, params)
+	url, err = AddQueryParams(url, params)
 	if err != nil {
 		return err
 	}

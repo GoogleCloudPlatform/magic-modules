@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 var loggingBucketConfigSchema = map[string]*schema.Schema{
@@ -88,7 +89,7 @@ See [Enabling CMEK for Logging Buckets](https://cloud.google.com/logging/docs/ro
 	},
 }
 
-type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *Config) (string, error)
+type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *transport_tpg.Config) (string, error)
 
 // ResourceLoggingBucketConfig creates a resource definition by merging a unique field (eg: folder) to a generic logging bucket
 // config resource. In practice the only difference between these resources is the url location.
@@ -149,7 +150,7 @@ func resourceLoggingBucketConfigImportState(parent string) schema.StateFunc {
 
 func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggingBucketConfigIDFunc) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		config := meta.(*Config)
+		config := meta.(*transport_tpg.Config)
 		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
@@ -164,7 +165,7 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 			//logging bucket can be created only at the project level, in future api may allow for folder, org and other parent resources
 
 			log.Printf("[DEBUG] Fetching logging bucket config: %#v", id)
-			url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", id))
+			url, err := ReplaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", id))
 			if err != nil {
 				return err
 			}
@@ -185,7 +186,7 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 }
 
 func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{}, id string) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -198,7 +199,7 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 	obj["locked"] = d.Get("locked")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
 
-	url, err := replaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
+	url, err := ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
 	if err != nil {
 		return err
 	}
@@ -230,7 +231,7 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 }
 
 func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -238,7 +239,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 
 	log.Printf("[DEBUG] Fetching logging bucket config: %#v", d.Id())
 
-	url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
+	url, err := ReplaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
 	if err != nil {
 		return err
 	}
@@ -272,7 +273,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -280,7 +281,7 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 
 	obj := make(map[string]interface{})
 
-	url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
+	url, err := ReplaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
 	if err != nil {
 		return err
 	}
@@ -299,7 +300,7 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	if d.HasChange("cmek_settings") {
 		updateMask = append(updateMask, "cmekSettings")
 	}
-	url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
 	}
@@ -321,12 +322,12 @@ func resourceLoggingBucketConfigDelete(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
-	url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
+	url, err := ReplaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
 	if err != nil {
 		return err
 	}

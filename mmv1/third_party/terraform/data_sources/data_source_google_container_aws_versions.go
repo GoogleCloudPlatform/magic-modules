@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleContainerAwsVersions() *schema.Resource {
@@ -34,7 +35,7 @@ func DataSourceGoogleContainerAwsVersions() *schema.Resource {
 }
 
 func dataSourceGoogleContainerAwsVersionsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -53,7 +54,7 @@ func dataSourceGoogleContainerAwsVersionsRead(d *schema.ResourceData, meta inter
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
-	url, err := replaceVars(d, config, "{{ContainerAwsBasePath}}projects/{{project}}/locations/{{location}}/awsServerConfig")
+	url, err := ReplaceVars(d, config, "{{ContainerAwsBasePath}}projects/{{project}}/locations/{{location}}/awsServerConfig")
 	if err != nil {
 		return err
 	}

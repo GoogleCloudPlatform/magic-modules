@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceDialogflowCXEnvironment() *schema.Resource {
@@ -79,7 +80,7 @@ Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.`,
 }
 
 func resourceDialogflowCXEnvironmentCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -105,7 +106,7 @@ func resourceDialogflowCXEnvironmentCreate(d *schema.ResourceData, meta interfac
 		obj["versionConfigs"] = versionConfigsProp
 	}
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/environments")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/environments")
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,7 @@ func resourceDialogflowCXEnvironmentCreate(d *schema.ResourceData, meta interfac
 	}
 
 	// Store the ID now
-	id, err := replaceVars(d, config, "{{parent}}/environments/{{name}}")
+	id, err := ReplaceVars(d, config, "{{parent}}/environments/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -162,7 +163,7 @@ func resourceDialogflowCXEnvironmentCreate(d *schema.ResourceData, meta interfac
 	}
 
 	// This may have caused the ID to update - update it if so.
-	id, err = replaceVars(d, config, "{{parent}}/environments/{{name}}")
+	id, err = ReplaceVars(d, config, "{{parent}}/environments/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -174,13 +175,13 @@ func resourceDialogflowCXEnvironmentCreate(d *schema.ResourceData, meta interfac
 }
 
 func resourceDialogflowCXEnvironmentRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/environments/{{name}}")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/environments/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -231,7 +232,7 @@ func resourceDialogflowCXEnvironmentRead(d *schema.ResourceData, meta interface{
 }
 
 func resourceDialogflowCXEnvironmentUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -259,7 +260,7 @@ func resourceDialogflowCXEnvironmentUpdate(d *schema.ResourceData, meta interfac
 		obj["versionConfigs"] = versionConfigsProp
 	}
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/environments/{{name}}")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/environments/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -278,9 +279,9 @@ func resourceDialogflowCXEnvironmentUpdate(d *schema.ResourceData, meta interfac
 	if d.HasChange("version_configs") {
 		updateMask = append(updateMask, "versionConfigs")
 	}
-	// updateMask is a URL parameter but not present in the schema, so replaceVars
+	// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 	// won't set it
-	url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
 	}
@@ -325,7 +326,7 @@ func resourceDialogflowCXEnvironmentUpdate(d *schema.ResourceData, meta interfac
 }
 
 func resourceDialogflowCXEnvironmentDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -333,7 +334,7 @@ func resourceDialogflowCXEnvironmentDelete(d *schema.ResourceData, meta interfac
 
 	billingProject := ""
 
-	url, err := replaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/environments/{{name}}")
+	url, err := ReplaceVars(d, config, "{{DialogflowCXBasePath}}{{parent}}/environments/{{name}}")
 	if err != nil {
 		return err
 	}
@@ -379,10 +380,10 @@ func resourceDialogflowCXEnvironmentDelete(d *schema.ResourceData, meta interfac
 }
 
 func resourceDialogflowCXEnvironmentImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	// current import_formats can't import fields with forward slashes in their value and parent contains slashes
-	if err := parseImportId([]string{
+	if err := ParseImportId([]string{
 		"(?P<parent>.+)/environments/(?P<name>[^/]+)",
 		"(?P<parent>.+)/(?P<name>[^/]+)",
 	}, d, config); err != nil {
@@ -390,7 +391,7 @@ func resourceDialogflowCXEnvironmentImport(d *schema.ResourceData, meta interfac
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "{{parent}}/environments/{{name}}")
+	id, err := ReplaceVars(d, config, "{{parent}}/environments/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -399,22 +400,22 @@ func resourceDialogflowCXEnvironmentImport(d *schema.ResourceData, meta interfac
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenDialogflowCXEnvironmentName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXEnvironmentName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
 	return NameFromSelfLinkStateFunc(v)
 }
 
-func flattenDialogflowCXEnvironmentDisplayName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXEnvironmentDisplayName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXEnvironmentDescription(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXEnvironmentDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXEnvironmentVersionConfigs(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXEnvironmentVersionConfigs(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
@@ -432,23 +433,23 @@ func flattenDialogflowCXEnvironmentVersionConfigs(v interface{}, d *schema.Resou
 	}
 	return transformed
 }
-func flattenDialogflowCXEnvironmentVersionConfigsVersion(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXEnvironmentVersionConfigsVersion(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXEnvironmentUpdateTime(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXEnvironmentUpdateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func expandDialogflowCXEnvironmentDisplayName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDialogflowCXEnvironmentDisplayName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandDialogflowCXEnvironmentDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDialogflowCXEnvironmentDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandDialogflowCXEnvironmentVersionConfigs(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDialogflowCXEnvironmentVersionConfigs(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -470,6 +471,6 @@ func expandDialogflowCXEnvironmentVersionConfigs(v interface{}, d TerraformResou
 	return req, nil
 }
 
-func expandDialogflowCXEnvironmentVersionConfigsVersion(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDialogflowCXEnvironmentVersionConfigsVersion(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

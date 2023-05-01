@@ -4,6 +4,7 @@ package google
 
 import (
 	"context"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"fmt"
 	"reflect"
 	"strings"
@@ -476,7 +477,7 @@ Google Cloud KMS.`,
 										Type:             schema.TypeString,
 										Required:         true,
 										ForceNew:         true,
-										DiffSuppressFunc: ipCidrRangeDiffSuppress,
+										DiffSuppressFunc: IpCidrRangeDiffSuppress,
 										Description:      `The IP CIDR range represented by this alias IP range. This IP CIDR range must belong to the specified subnetwork and cannot contain IP addresses reserved by system or used by other network interfaces. At the time of writing only a netmask (e.g. /24) may be supplied, with a CIDR format resulting in an API error.`,
 									},
 									"subnetwork_range_name": {
@@ -602,7 +603,7 @@ Google Cloud KMS.`,
 							AtLeastOneOf:     schedulingInstTemplateKeys,
 							ForceNew:         true,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
+							DiffSuppressFunc: EmptyOrDefaultStringSuppress(""),
 							Description:      `Specifies node affinities or anti-affinities to determine which sole-tenant nodes your instances and managed instance groups will use as host systems.`,
 						},
 						"min_node_cpus": {
@@ -670,6 +671,12 @@ be from 0 to 999,999,999 inclusive.`,
 				Description: `The URI of the created resource.`,
 			},
 
+			"self_link_unique": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `A special URI of the created resource that uniquely identifies this instance template.`,
+			},
+
 			"service_account": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -712,7 +719,7 @@ be from 0 to 999,999,999 inclusive.`,
 				// Since this block is used by the API based on which
 				// image being used, the field needs to be marked as Computed.
 				Computed:         true,
-				DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
+				DiffSuppressFunc: EmptyOrDefaultStringSuppress(""),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_secure_boot": {
@@ -910,7 +917,7 @@ be from 0 to 999,999,999 inclusive.`,
 }
 
 func resourceComputeInstanceTemplateSourceImageCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	numDisks := diff.Get("disk.#").(int)
 	for i := 0; i < numDisks; i++ {
@@ -1003,7 +1010,7 @@ func resourceComputeInstanceTemplateBootDiskCustomizeDiff(_ context.Context, dif
 	return nil
 }
 
-func buildDisks(d *schema.ResourceData, config *Config) ([]*compute.AttachedDisk, error) {
+func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*compute.AttachedDisk, error) {
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
@@ -1136,7 +1143,7 @@ func buildDisks(d *schema.ResourceData, config *Config) ([]*compute.AttachedDisk
 // 'zones/us-east1-b/acceleratorTypes/nvidia-tesla-k80'.
 // Accelerator type 'zones/us-east1-b/acceleratorTypes/nvidia-tesla-k80'
 // must be a valid resource name (not an url).
-func expandInstanceTemplateGuestAccelerators(d TerraformResourceData, config *Config) []*compute.AcceleratorConfig {
+func expandInstanceTemplateGuestAccelerators(d TerraformResourceData, config *transport_tpg.Config) []*compute.AcceleratorConfig {
 	configs, ok := d.GetOk("guest_accelerator")
 	if !ok {
 		return nil
@@ -1164,7 +1171,7 @@ func expandInstanceTemplateResourcePolicies(d TerraformResourceData, dataKey str
 }
 
 func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -1256,6 +1263,8 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 
 	// Store the ID now
 	d.SetId(fmt.Sprintf("projects/%s/global/instanceTemplates/%s", project, instanceTemplate.Name))
+	// And also the unique ID
+	d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", d.Id(), op.TargetId))
 
 	err = ComputeOperationWaitTime(config, op, project, "Creating Instance Template", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
@@ -1487,7 +1496,7 @@ func flattenDisks(disks []*compute.AttachedDisk, d *schema.ResourceData, default
 }
 
 func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -1498,12 +1507,16 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	splits := strings.Split(d.Id(), "/")
+	idStr := d.Id()
+	if v, ok := d.GetOk("self_link_unique"); ok && v != "" {
+		idStr = ConvertToUniqueIdWhenPresent(v.(string))
+	}
+
+	splits := strings.Split(idStr, "/")
 	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
 	}
-
 	// Set the metadata fingerprint if there is one.
 	if instanceTemplate.Properties.Metadata != nil {
 		if err = d.Set("metadata_fingerprint", instanceTemplate.Properties.Metadata.Fingerprint); err != nil {
@@ -1544,6 +1557,9 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	}
 	if err = d.Set("self_link", instanceTemplate.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
+	}
+	if err = d.Set("self_link_unique", fmt.Sprintf("%v?uniqueId=%v", instanceTemplate.SelfLink, instanceTemplate.Id)); err != nil {
+		return fmt.Errorf("Error setting self_link_unique: %s", err)
 	}
 	if err = d.Set("name", instanceTemplate.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
@@ -1662,7 +1678,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 }
 
 func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -1714,13 +1730,13 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 }
 
 func resourceComputeInstanceTemplateImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/global/instanceTemplates/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+	config := meta.(*transport_tpg.Config)
+	if err := ParseImportId([]string{"projects/(?P<project>[^/]+)/global/instanceTemplates/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "projects/{{project}}/global/instanceTemplates/{{name}}")
+	id, err := ReplaceVars(d, config, "projects/{{project}}/global/instanceTemplates/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

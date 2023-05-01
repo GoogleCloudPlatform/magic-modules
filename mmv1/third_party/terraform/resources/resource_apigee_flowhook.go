@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceApigeeFlowhook() *schema.Resource {
@@ -68,7 +69,7 @@ func ResourceApigeeFlowhook() *schema.Resource {
 }
 
 func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -94,7 +95,7 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 		obj["continueOnError"] = continue_on_errorProp
 	}
 
-	url, err := replaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	url, err := ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return err
 	}
@@ -113,7 +114,7 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	// Store the ID now
-	id, err := replaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	id, err := ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -125,13 +126,13 @@ func resourceApigeeFlowhookCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := replaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	url, err := ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return err
 	}
@@ -166,7 +167,7 @@ func resourceApigeeFlowhookRead(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -174,7 +175,7 @@ func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) erro
 
 	billingProject := ""
 
-	url, err := replaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	url, err := ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return err
 	}
@@ -197,8 +198,8 @@ func resourceApigeeFlowhookDelete(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceApigeeFlowhookImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-	if err := parseImportId([]string{
+	config := meta.(*transport_tpg.Config)
+	if err := ParseImportId([]string{
 		"organizations/(?P<org_id>[^/]+)/environments/(?P<environment>[^/]+)/flowhooks/(?P<flow_hook_point>[^/]+)",
 		"(?P<org_id>[^/]+)/(?P<environment>[^/]+)/(?P<flow_hook_point>[^/]+)",
 	}, d, config); err != nil {
@@ -206,7 +207,7 @@ func resourceApigeeFlowhookImport(d *schema.ResourceData, meta interface{}) ([]*
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
+	id, err := ReplaceVars(d, config, "organizations/{{org_id}}/environments/{{environment}}/flowhooks/{{flow_hook_point}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -215,26 +216,26 @@ func resourceApigeeFlowhookImport(d *schema.ResourceData, meta interface{}) ([]*
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenApigeeFlowhookDescription(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeFlowhookDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeFlowhookSharedflow(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeFlowhookSharedflow(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeFlowhookContinueOnError(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeFlowhookContinueOnError(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func expandApigeeFlowhookDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandApigeeFlowhookDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeFlowhookSharedflow(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandApigeeFlowhookSharedflow(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandApigeeFlowhookContinueOnError(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandApigeeFlowhookContinueOnError(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
