@@ -8,11 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
-<% if version == 'private' -%>
-	"internal/terraform-next/google-private/acctest"
-<% else -%>
-	"github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/acctest"
-<% end -%>
+	"<%= import_path() -%>/acctest"
 )
 
 <%# Since most resources define a "basic" config as their first example, we can reuse that config to create a resource to test IAM resources with. -%>
