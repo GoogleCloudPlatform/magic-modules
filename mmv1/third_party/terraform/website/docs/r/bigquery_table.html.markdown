@@ -185,7 +185,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `schema` - (Optional) A JSON schema for the external table. Schema is required
     for CSV and JSON formats if autodetect is not on. Schema is disallowed
-    for Google Cloud Bigtable, Cloud Datastore backups, Avro, ORC and Parquet formats.
+    for Google Cloud Bigtable, Cloud Datastore backups, Avro, Iceberg, ORC and Parquet formats.
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     Furthermore drift for this field cannot not be detected because BigQuery
@@ -196,7 +196,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     `google_bigquery_table.schema`
 
 * `source_format` (Required) - The data format. Supported values are:
-    "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "PARQUET", "ORC",
+    "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "ICEBERG", "PARQUET", "ORC",
     "DATSTORE_BACKUP", and "BIGTABLE". To use "GOOGLE_SHEETS"
     the `scopes` must include
     "https://www.googleapis.com/auth/drive.readonly".
