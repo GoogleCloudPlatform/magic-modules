@@ -15,6 +15,8 @@ import (
 <% unless object.skip_delete -%>
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 <% end -%>
+
+  transport_tpg "<%= import_path() -%>/transport"
 )
 <%
 
@@ -130,7 +132,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			billingProject = config.BillingProject
 		}
 
-		_, err = SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+		_, err = transport_tpg.SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, config.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 		if err == nil {
 				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 			}
