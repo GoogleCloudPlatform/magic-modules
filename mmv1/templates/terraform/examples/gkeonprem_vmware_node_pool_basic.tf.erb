@@ -1,7 +1,7 @@
-resource "google_gkeonprem_vmware_cluster" "default" {
+resource "google_gkeonprem_vmware_cluster" "default-basic" {
   provider = google-beta
   location = "us-west1"
-  name = "default"
+  name = "default-basic"
   admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
   description = "test cluster"
   on_prem_version = "1.13.1-gke.35"
@@ -41,7 +41,7 @@ resource "google_gkeonprem_vmware_node_pool" "<%= ctx[:primary_resource_id] %>" 
   provider = google-beta
   location = "us-west1"
   name = "np-<%= ctx[:vars]['name'] %>"
-  vmware_cluster = google_gkeonprem_vmware_cluster.default.name
+  vmware_cluster = google_gkeonprem_vmware_cluster.default-basic.name
   config {
     replicas = 3
     image_type = "ubuntu_containerd"
