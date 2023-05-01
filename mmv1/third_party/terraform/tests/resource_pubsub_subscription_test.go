@@ -285,13 +285,8 @@ func TestGetComputedTopicName(t *testing.T) {
 func testAccCheckPubsubSubscriptionCache404(t *testing.T, subName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := GoogleProviderConfig(t)
-<<<<<<< HEAD
-		url := fmt.Sprintf("%sprojects/%s/subscriptions/%s", config.PubsubBasePath, GetTestProjectFromEnv(), subName)
-		resp, err := transport_tpg.SendRequest(config, "GET", "", url, config.UserAgent, nil)
-=======
 		url := fmt.Sprintf("%sprojects/%s/subscriptions/%s", config.PubsubBasePath, acctest.GetTestProjectFromEnv(), subName)
-		resp, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
->>>>>>> 5be991d23 (Add acctest package to .go files)
+		resp, err := transport_tpg.SendRequest(config, "GET", "", url, config.UserAgent, nil)
 		if err == nil {
 			return fmt.Errorf("Expected Pubsub Subscription %q not to exist, was found", resp["name"])
 		}

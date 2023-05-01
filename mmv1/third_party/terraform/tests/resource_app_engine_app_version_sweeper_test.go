@@ -5,11 +5,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-<<<<<<< HEAD
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-=======
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
->>>>>>> fc783cece (Move gcp_sweeper.go to the acctest package)
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // This will sweep both Standard and Flexible App Engine App Versions

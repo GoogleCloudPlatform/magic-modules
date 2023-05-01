@@ -8,11 +8,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-<<<<<<< HEAD
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-=======
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
->>>>>>> 5be991d23 (Add acctest package to .go files)
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func init() {
