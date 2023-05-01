@@ -1,6 +1,6 @@
 config := GoogleProviderConfig(t)
 
-url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org}}")
+url, err := acctest.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org}}")
 if err != nil {
     return err
 }
