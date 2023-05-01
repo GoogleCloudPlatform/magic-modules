@@ -41,7 +41,7 @@ examples:
     name: 'iap_app_engine_version'
     primary_resource_id: 'version'
     primary_resource_name:
-      "GetTestProjectFromEnv(), \"default\", context[\"random_suffix\"\
+      "acctest.GetTestProjectFromEnv(), \"default\", context[\"random_suffix\"\
       ]"
 properties:
   - !ruby/object:Api::Type::String
