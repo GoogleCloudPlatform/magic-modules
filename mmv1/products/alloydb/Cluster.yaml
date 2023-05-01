@@ -223,15 +223,15 @@ properties:
                 - !ruby/object:Api::Type::Integer
                   name: minutes
                   description: |
-                    Minutes of hour of day. Must be from 0 to 59.
+                    Minutes of hour of day. Currently, only the value 0 is supported.
                 - !ruby/object:Api::Type::Integer
                   name: seconds
                   description: |
-                    Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
+                    Seconds of minutes of the time. Currently, only the value 0 is supported.
                 - !ruby/object:Api::Type::Integer
                   name: nanos
                   description: |
-                    Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                    Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
       - !ruby/object:Api::Type::NestedObject
         name: 'timeBasedRetention'
         description: |
