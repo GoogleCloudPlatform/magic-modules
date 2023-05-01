@@ -138,7 +138,7 @@ properties:
             - !ruby/object:Api::Type::Enum
               name: "effect"
               description: |
-                Specifies the nodes operating system (default: LINUX).
+                Available taint effects.
               values:
                 - EFFECT_UNSPECIFIED
                 - NO_SCHEDULE
