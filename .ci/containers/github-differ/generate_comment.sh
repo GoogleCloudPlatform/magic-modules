@@ -12,7 +12,7 @@ if [ -z "$GITHUB_TOKEN" ]; then
 fi
 
 # make utility functions avalible
-/utils.sh
+source /utils.sh
 
 PR_NUMBER=$1
 NEW_BRANCH=auto-pr-$PR_NUMBER
