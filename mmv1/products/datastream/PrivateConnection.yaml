@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'PrivateConnection'
-base_url: "projects/{{project}}/locations/{{location}}/privateConnections"
-create_url: "projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}"
-self_link: "projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}"
+base_url: 'projects/{{project}}/locations/{{location}}/privateConnections'
+create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/datastream/docs/create-a-private-connectivity-configuration'
@@ -24,14 +24,17 @@ description: |
   The PrivateConnection resource is used to establish private connectivity between Datastream and a customer's network.
 immutable: true
 id_format: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
-import_format: ["projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_private_connection_full"
-    primary_resource_id: "default"
+    name: 'datastream_private_connection_full'
+    primary_resource_id: 'default'
     vars:
-      private_connection_id: "my-connection"
-      network_name: "my-network"
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/private_connection.go.erb
   post_create: templates/terraform/post_create/private_connection.go.erb

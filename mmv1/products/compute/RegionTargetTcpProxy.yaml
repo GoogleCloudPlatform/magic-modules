@@ -44,12 +44,12 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_target_tcp_proxy_basic"
-    primary_resource_id: "default"
+    name: 'region_target_tcp_proxy_basic'
+    primary_resource_id: 'default'
     vars:
-      region_target_tcp_proxy_name: "test-proxy"
-      region_backend_service_name: "backend-service"
-      health_check_name: "health-check"
+      region_target_tcp_proxy_name: 'test-proxy'
+      region_backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'

@@ -14,11 +14,8 @@ import (
 <% end -%>
   "fmt"
   "time"
-<% if version == 'private' -%>
-  transport_tpg "internal/terraform-next/google-private/transport"
-<% else -%>
-  transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
-<% end -%>
+
+  transport_tpg "<%= import_path() -%>/transport"
 )
 
 type <%= product_name -%>OperationWaiter struct {
@@ -44,7 +41,7 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   url := fmt.Sprintf("%s<%= [async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s')-%>", w.Config.<%= product_name -%>BasePath, w.CommonOperationWaiter.Op.Name)
   <% end -%>
 
-  return SendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+  return transport_tpg.SendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
 <%  if object.__product.operation_retry -%>

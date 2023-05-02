@@ -51,25 +51,25 @@ docs: !ruby/object:Provider::Terraform::Docs
     Terraform to delete and recreate the node group.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_group_basic"
-    primary_resource_id: "nodes"
+    name: 'node_group_basic'
+    primary_resource_id: 'nodes'
     vars:
-      group_name: "soletenant-group"
-      template_name: "soletenant-tmpl"
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_group_autoscaling_policy"
-    primary_resource_id: "nodes"
+    name: 'node_group_autoscaling_policy'
+    primary_resource_id: 'nodes'
     vars:
-      group_name: "soletenant-group"
-      template_name: "soletenant-tmpl"
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_group_share_settings"
-    primary_resource_id: "nodes"
+    name: 'node_group_share_settings'
+    primary_resource_id: 'nodes'
     vars:
-      group_name: "soletenant-group"
-      template_name: "soletenant-tmpl"
-      guest_project_id: "project-id"
-      guest_project_name: "project-name"
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
+      guest_project_id: 'project-id'
+      guest_project_name: 'project-name'
     test_env_vars:
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode

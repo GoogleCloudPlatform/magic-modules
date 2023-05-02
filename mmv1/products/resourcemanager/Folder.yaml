@@ -15,7 +15,8 @@
 name: 'Folder'
 base_url: 'folders?parent={{parent}}'
 self_link: '{{name}}'
-description: A Folder in an Organization's resource hierarchy, used to organize that
+description:
+  A Folder in an Organization's resource hierarchy, used to organize that
   Organization's resources.
 exclude: true
 parameters:

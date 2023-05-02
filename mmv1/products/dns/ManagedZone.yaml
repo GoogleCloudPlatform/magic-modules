@@ -26,7 +26,11 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'managed_zone'
   set_iam_policy_verb: :POST
-  import_format: ["projects/{{project}}/managedZones/{{managed_zone}}", "{{project}}/{{managed_zone}}"]
+  import_format:
+    [
+      'projects/{{project}}/managedZones/{{managed_zone}}',
+      '{{project}}/{{managed_zone}}',
+    ]
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Managing Zones': 'https://cloud.google.com/dns/zones/'
@@ -34,70 +38,72 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: 'projects/{{project}}/managedZones/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_quickstart"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-example-zone-googlecloudexample%s\"\
+    name: 'dns_managed_zone_quickstart'
+    primary_resource_id: 'default'
+    primary_resource_name:
+      "fmt.Sprintf(\"tf-test-example-zone-googlecloudexample%s\"\
       , context[\"random_suffix\"])"
     skip_docs: true
     vars:
-      dns_compute_instance: "dns-compute-instance"
-      allow_http_traffic: "allow-http-traffic"
-      example_zone_googlecloudexample: "example-zone-googlecloudexample"
+      dns_compute_instance: 'dns-compute-instance'
+      allow_http_traffic: 'allow-http-traffic'
+      example_zone_googlecloudexample: 'example-zone-googlecloudexample'
     ignore_read_extra:
-      - "force_destroy"
+      - 'force_destroy'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_record_set_basic"
-    primary_resource_id: "parent-zone"
+    name: 'dns_record_set_basic'
+    primary_resource_id: 'parent-zone'
     skip_docs: true
     vars:
-      sample_zone: "sample-zone"
+      sample_zone: 'sample-zone'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_basic"
-    primary_resource_id: "example-zone"
-    pull_external: true
-        # Randomness from random provider
+    name: 'dns_managed_zone_basic'
+    primary_resource_id: 'example-zone'
+    pull_external:
+      true
+      # Randomness from random provider
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_private"
-    primary_resource_id: "private-zone"
+    name: 'dns_managed_zone_private'
+    primary_resource_id: 'private-zone'
     vars:
-      zone_name: "private-zone"
-      network_1_name: "network-1"
-      network_2_name: "network-2"
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_private_forwarding"
-    primary_resource_id: "private-zone"
+    name: 'dns_managed_zone_private_forwarding'
+    primary_resource_id: 'private-zone'
     skip_test: true
     vars:
-      zone_name: "private-zone"
-      network_1_name: "network-1"
-      network_2_name: "network-2"
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_private_gke"
-    primary_resource_id: "private-zone-gke"
+    name: 'dns_managed_zone_private_gke'
+    primary_resource_id: 'private-zone-gke'
     vars:
-      zone_name: "private-zone"
-      network_1_name: "network-1"
-      cluster_1_name: "cluster-1"
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+      cluster_1_name: 'cluster-1'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_private_peering"
-    primary_resource_id: "peering-zone"
+    name: 'dns_managed_zone_private_peering'
+    primary_resource_id: 'peering-zone'
     vars:
-      zone_name: "peering-zone"
-      network_source_name: "network-source"
-      network_target_name: "network-target"
+      zone_name: 'peering-zone'
+      network_source_name: 'network-source'
+      network_target_name: 'network-target'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_service_directory"
+    name: 'dns_managed_zone_service_directory'
     min_version: 'beta'
-    primary_resource_id: "sd-zone"
+    primary_resource_id: 'sd-zone'
     vars:
-      zone_name: "peering-zone"
-      network_name: "network"
+      zone_name: 'peering-zone'
+      network_name: 'network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_managed_zone_cloud_logging"
-    primary_resource_id: "cloud-logging-enabled-zone"
+    name: 'dns_managed_zone_cloud_logging'
+    primary_resource_id: 'cloud-logging-enabled-zone'
     vars:
-      zone_name: "cloud-logging-enabled-zone"
+      zone_name: 'cloud-logging-enabled-zone'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'force_destroy'
@@ -145,8 +151,8 @@ properties:
           Specifies the mechanism used to provide authenticated denial-of-existence responses.
           non_existence can only be updated when the state is `off`.
         values:
-          - "nsec"
-          - "nsec3"
+          - 'nsec'
+          - 'nsec3'
         default_from_api: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
@@ -157,9 +163,9 @@ properties:
           - dnssec_config.0.default_key_specs
         description: Specifies whether DNSSEC is enabled, and what mode it is in
         values:
-          - "off"
-          - "on"
-          - "transfer"
+          - 'off'
+          - 'on'
+          - 'transfer'
       - !ruby/object:Api::Type::Array
         name: 'defaultKeySpecs'
         at_least_one_of:
@@ -177,14 +183,15 @@ properties:
           properties:
             - !ruby/object:Api::Type::Enum
               name: 'algorithm'
-              description: String mnemonic specifying the DNSSEC algorithm of this
+              description:
+                String mnemonic specifying the DNSSEC algorithm of this
                 key
               values:
-                - "ecdsap256sha256"
-                - "ecdsap384sha384"
-                - "rsasha1"
-                - "rsasha256"
-                - "rsasha512"
+                - 'ecdsap256sha256'
+                - 'ecdsap384sha384'
+                - 'rsasha1'
+                - 'rsasha256'
+                - 'rsasha512'
             - !ruby/object:Api::Type::Integer
               name: 'keyLength'
               description: Length of the keys in bits
@@ -198,8 +205,8 @@ properties:
                 not have the Secure Entry Point flag set and will be used
                 to sign all other types of resource record sets.
               values:
-                - "keySigning"
-                - "zoneSigning"
+                - 'keySigning'
+                - 'zoneSigning'
             - !ruby/object:Api::Type::String
               name: 'kind'
               description: 'Identifies what kind of resource this is'
@@ -263,15 +270,16 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'gkeClusters'
-        description: 'The list of Google Kubernetes Engine clusters that can see this
+        description:
+          'The list of Google Kubernetes Engine clusters that can see this
           zone.'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: 'gkeClusterName'
               description: |
-                The resource name of the cluster to bind this ManagedZone to.  
-                This should be specified in the format like  
+                The resource name of the cluster to bind this ManagedZone to.
+                This should be specified in the format like
                 `projects/*/locations/*/clusters/*`
               required: true
       - !ruby/object:Api::Type::Array
@@ -386,7 +394,8 @@ properties:
     min_version: beta
     immutable: true
     name: 'serviceDirectoryConfig'
-    description: The presence of this field indicates that this zone is backed by
+    description:
+      The presence of this field indicates that this zone is backed by
       Service Directory. The value of this field contains information related to the
       namespace associated with the zone.
     properties:
@@ -414,5 +423,6 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enableLogging'
         required: true
-        description: 'If set, enable query logging for this ManagedZone. False by
+        description:
+          'If set, enable query logging for this ManagedZone. False by
           default, making logging opt-in.'

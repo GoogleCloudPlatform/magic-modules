@@ -14,10 +14,11 @@
 --- !ruby/object:Api::Resource
 name: 'TagValue'
 base_url: tagValues
-self_link: "tagValues/{{name}}"
+self_link: 'tagValues/{{name}}'
 update_verb: :PATCH
 update_mask: true
-description: A TagValue is a child of a particular TagKey. TagValues are used to group
+description:
+  A TagValue is a child of a particular TagKey. TagValues are used to group
   cloud resources for the purpose of controlling them using policies.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -30,16 +31,16 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 autogen_async: true
 exclude_validator: true
 mutex: tagValues/{{parent}}
-id_format: "tagValues/{{name}}"
-import_format: ["tagValues/{{name}}", "{{name}}"]
+id_format: 'tagValues/{{name}}'
+import_format: ['tagValues/{{name}}', '{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "tag_value_basic"
+    name: 'tag_value_basic'
     skip_test: true
-    primary_resource_id: "value"
+    primary_resource_id: 'value'
     vars:
-      key_short_name: "keyname"
-      value_short_name: "valuename"
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
     test_vars_overrides:
       key_short_name: '"tf-test-key-" + RandString(t, 10)'
       value_short_name: '"tf-test-value-" + RandString(t, 10)'

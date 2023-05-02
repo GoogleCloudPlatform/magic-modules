@@ -42,7 +42,7 @@ id_format: '{{name}}'
 import_format: ['{{name}}']
 delete_url: 'v3/{{name}}?force={{force_delete}}'
 mutex: stackdriver/notifications/{{project}}
-error_retry_predicates: ['IsMonitoringConcurrentEditError']
+error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'notification_channel_basic'

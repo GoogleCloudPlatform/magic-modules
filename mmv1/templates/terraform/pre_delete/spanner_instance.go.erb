@@ -5,10 +5,10 @@ if d.Get("force_destroy").(bool) {
 		return err
 	}
 
-	resp, err := SendRequest(config, "GET", billingProject, backupsUrl, userAgent, nil)
+	resp, err := transport_tpg.SendRequest(config, "GET", billingProject, backupsUrl, userAgent, nil)
 	if err != nil {
 		// API returns 200 if no backups exist but the instance still exists, hence the error check.
-		return handleNotFoundError(err, d, fmt.Sprintf("SpannerInstance %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SpannerInstance %q", d.Id()))
 	}
 
 	err = deleteSpannerBackups(d, config, resp, billingProject, userAgent)

@@ -1,6 +1,6 @@
-readRes, err := SendRequest(config, "GET", project, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+readRes, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 if err != nil {
-	return handleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
+	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
 }
 
 // if disks are attached to instances, they must be detached before the disk can be deleted

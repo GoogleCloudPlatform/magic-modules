@@ -51,10 +51,10 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "https_health_check_basic"
-    primary_resource_id: "default"
+    name: 'https_health_check_basic'
+    primary_resource_id: 'default'
     vars:
-      https_health_check_name: "authentication-health-check"
+      https_health_check_name: 'authentication-health-check'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'checkIntervalSec'
@@ -113,7 +113,7 @@ properties:
     description: |
       The request path of the HTTPS health check request.
       The default value is /.
-    default_value: "/"
+    default_value: '/'
   - !ruby/object:Api::Type::Integer
     name: 'timeoutSec'
     description: |
