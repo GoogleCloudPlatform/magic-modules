@@ -108,7 +108,7 @@ properties:
       projects/{project}/locations/{location}/clusters/{clusterId}).'
     required: true
     immutable: true
-    diff_suppress_func: 'ProjectNumberDiffSuppress'
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'User-defined labels for the alloydb backup.'

@@ -172,7 +172,7 @@ properties:
               description: |
                 Base64 encoded content of the file.
               validation: !ruby/object:Provider::Terraform::Validation
-                function: 'validateBase64String'
+                function: 'verify.ValidateBase64String'
   - !ruby/object:Api::Type::Array
     name: 'grpcServices'
     description: |
@@ -208,7 +208,7 @@ properties:
               description: |
                 Base64 encoded content of the file.
               validation: !ruby/object:Provider::Terraform::Validation
-                function: 'validateBase64String'
+                function: 'verify.ValidateBase64String'
         - !ruby/object:Api::Type::Array
           name: 'source'
           description: |
@@ -228,7 +228,7 @@ properties:
                 description: |
                   Base64 encoded content of the file.
                 validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validateBase64String'
+                  function: 'verify.ValidateBase64String'
   - !ruby/object:Api::Type::Array
     name: 'managedServiceConfigs'
     description: |
