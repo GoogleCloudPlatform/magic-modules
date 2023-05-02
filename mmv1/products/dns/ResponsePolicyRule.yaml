@@ -52,7 +52,8 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'ruleName'
-    description: An identifier for this rule. Must be unique with the ResponsePolicy.
+    description:
+      An identifier for this rule. Must be unique with the ResponsePolicy.
     immutable: true
     required: true
   - !ruby/object:Api::Type::String
@@ -74,8 +75,8 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'localDatas'
         description:
-          All resource record sets for this selector, one per resource
-          record type. The name must match the dns_name.
+          All resource record sets for this selector, one per resource record
+          type. The name must match the dns_name.
         update_verb: :PATCH
         required: true
         item_type: !ruby/object:Api::Type::NestedObject
@@ -124,6 +125,6 @@ properties:
       - local_data
     min_version: beta
     description:
-      Answer this query with a behavior rather than DNS data. Acceptable
-      values are 'behaviorUnspecified', and 'bypassResponsePolicy'
+      Answer this query with a behavior rather than DNS data. Acceptable values
+      are 'behaviorUnspecified', and 'bypassResponsePolicy'
     update_verb: :PATCH

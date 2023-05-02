@@ -20,8 +20,9 @@ update_verb: :PATCH
 update_mask: true
 min_version: beta
 description:
-  "A set of configuration options describing how a workstation will be\
-  \ run. Workstation configurations are intended to be shared across multiple workstations."
+  'A set of configuration options describing how a workstation will be run.
+  Workstation configurations are intended to be shared across multiple
+  workstations.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Workstations': 'https://cloud.google.com/workstations/docs/'
@@ -66,7 +67,9 @@ examples:
     name: 'workstation_config_basic'
     min_version: beta
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])'
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
@@ -139,8 +142,8 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description:
-      "Client-specified labels that are applied to the resource and that\
-      \ are also propagated to the underlying Compute Engine resources."
+      'Client-specified labels that are applied to the resource and that are
+      also propagated to the underlying Compute Engine resources.'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'annotations'
     description: 'Client-specified annotations. This is distinct from labels.'

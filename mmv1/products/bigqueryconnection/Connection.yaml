@@ -50,8 +50,8 @@ examples:
     pull_external: true
     region_override: 'US'
     primary_resource_id: 'connection'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-connection%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-connection%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       connection_id: 'my-connection'
@@ -171,7 +171,8 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'instanceId'
-        description: Cloud SQL instance ID in the form project:location:instance.
+        description:
+          Cloud SQL instance ID in the form project:location:instance.
         required: true
       - !ruby/object:Api::Type::String
         name: 'database'
@@ -204,8 +205,8 @@ properties:
         name: 'serviceAccountId'
         description:
           When the connection is used in the context of an operation in
-          BigQuery, this service account will serve as the identity being used for
-          connecting to the CloudSQL instance specified in this connection.
+          BigQuery, this service account will serve as the identity being used
+          for connecting to the CloudSQL instance specified in this connection.
         output: true
   - !ruby/object:Api::Type::NestedObject
     name: aws
@@ -229,15 +230,15 @@ properties:
           - !ruby/object:Api::Type::String
             name: iamRoleId
             description:
-              The user’s AWS IAM Role that trusts the Google-owned AWS
-              IAM user Connection.
+              The user’s AWS IAM Role that trusts the Google-owned AWS IAM user
+              Connection.
             required: true
           - !ruby/object:Api::Type::String
             name: identity
             description:
               A unique Google-owned and Google-generated identity for the
-              Connection. This identity will be used to access the user's AWS IAM
-              Role.
+              Connection. This identity will be used to access the user's AWS
+              IAM Role.
             output: true
   - !ruby/object:Api::Type::NestedObject
     name: azure
@@ -271,8 +272,8 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'federatedApplicationClientId'
         description:
-          The Azure Application (client) ID where the federated credentials
-          will be hosted.
+          The Azure Application (client) ID where the federated credentials will
+          be hosted.
       - !ruby/object:Api::Type::String
         name: 'redirectUri'
         output: true
@@ -282,8 +283,9 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'identity'
         description:
-          A unique Google-owned and Google-generated identity for the Connection.
-          This identity will be used to access the user's Azure Active Directory Application.
+          A unique Google-owned and Google-generated identity for the
+          Connection. This identity will be used to access the user's Azure
+          Active Directory Application.
         output: true
   - !ruby/object:Api::Type::NestedObject
     name: cloudSpanner
@@ -297,16 +299,19 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'database'
-        description: Cloud Spanner database in the form `project/instance/database'
+        description:
+          Cloud Spanner database in the form `project/instance/database'
         required: true
       - !ruby/object:Api::Type::Boolean
         name: 'useParallelism'
-        description: If parallelism should be used when reading from Cloud Spanner
+        description:
+          If parallelism should be used when reading from Cloud Spanner
       - !ruby/object:Api::Type::Boolean
         name: 'useServerlessAnalytics'
         description:
-          If the serverless analytics service should be used to read data
-          from Cloud Spanner. useParallelism must be set when using serverless analytics
+          If the serverless analytics service should be used to read data from
+          Cloud Spanner. useParallelism must be set when using serverless
+          analytics
   - !ruby/object:Api::Type::NestedObject
     name: cloudResource
     description:

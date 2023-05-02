@@ -69,8 +69,8 @@ examples:
     name: 'bigquery_job_load_geojson'
     primary_resource_id: 'job'
     vars:
-      job_id: "job_load"
-      bucket_name: "bq-geojson" # Keep small(er) to avoid downstream acctest having too-long a bucket name
+      job_id: 'job_load'
+      bucket_name: 'bq-geojson' # Keep small(er) to avoid downstream acctest having too-long a bucket name
     test_env_vars:
       project: :PROJECT_NAME
     ignore_read_extra:
@@ -222,8 +222,8 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: 'resourceUri'
                   description:
-                    'A code resource to load from a Google Cloud Storage
-                    URI (gs://bucket/path).'
+                    'A code resource to load from a Google Cloud Storage URI
+                    (gs://bucket/path).'
                   # TODO (mbang): exactly_one_of: resourceUri, inlineCode
                 - !ruby/object:Api::Type::String
                   name: 'inlineCode'

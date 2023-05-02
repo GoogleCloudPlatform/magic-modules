@@ -101,19 +101,19 @@ properties:
       The type of endpoint policy. This is primarily used to validate the configuration.
     required: true
     values:
-        - :SIDECAR_PROXY
-        - :GRPC_SERVER
+      - :SIDECAR_PROXY
+      - :GRPC_SERVER
   - !ruby/object:Api::Type::NestedObject
     name: 'trafficPortSelector'
     description: |
       Port selector for the (matched) endpoints. If no port selector is provided, the matched config is applied to all ports.
     properties:
-       - !ruby/object:Api::Type::Array
-         name: 'ports'
-         description: |
-           List of ports. Can be port numbers or port range (example, [80-90] specifies all ports from 80 to 90, including 80 and 90) or named ports or * to specify all ports. If the list is empty, all ports are selected.
-         item_type: Api::Type::String
-         required: true
+      - !ruby/object:Api::Type::Array
+        name: 'ports'
+        description: |
+          List of ports. Can be port numbers or port range (example, [80-90] specifies all ports from 80 to 90, including 80 and 90) or named ports or * to specify all ports. If the list is empty, all ports are selected.
+        item_type: Api::Type::String
+        required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'endpointMatcher'
     description: |
@@ -137,7 +137,7 @@ properties:
           - !ruby/object:Api::Type::Array
             name: metadataLabels
             description: |
-               The list of label value pairs that must match labels in the provided metadata based on filterMatchCriteria
+              The list of label value pairs that must match labels in the provided metadata based on filterMatchCriteria
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
@@ -150,4 +150,3 @@ properties:
                   description: |
                     Required. Label value presented as value corresponding to the above key, in xDS Node Metadata.
                   required: true
-

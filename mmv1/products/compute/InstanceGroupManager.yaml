@@ -184,7 +184,8 @@ properties:
             long, and comply with RFC1035.
         - !ruby/object:Api::Type::Integer
           name: 'port'
-          description: The port number, which can be a value between 1 and 65535.
+          description:
+            The port number, which can be a value between 1 and 65535.
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'

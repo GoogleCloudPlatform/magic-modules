@@ -53,16 +53,16 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_basic'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_sql'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
@@ -76,8 +76,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
@@ -87,8 +87,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_secret'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
@@ -318,8 +318,9 @@ properties:
                     Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
                     This field is not supported in Cloud Run Job currently.
                   deprecation_message:
-                    Cloud Run Job does not support liveness probe
-                    and `liveness_probe` field will be removed in a future major release.
+                    Cloud Run Job does not support liveness probe and
+                    `liveness_probe` field will be removed in a future major
+                    release.
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: 'initialDelaySeconds'
@@ -395,8 +396,9 @@ properties:
                     Startup probe of application within the container. All other probes are disabled if a startup probe is provided, until it succeeds. Container will not be added to service endpoints if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
                     This field is not supported in Cloud Run Job currently.
                   deprecation_message:
-                    Cloud Run Job does not support startup probe
-                    and `startup_probe` field will be removed in a future major release.
+                    Cloud Run Job does not support startup probe and
+                    `startup_probe` field will be removed in a future major
+                    release.
                   default_from_api: true
                   properties:
                     - !ruby/object:Api::Type::Integer

@@ -81,7 +81,9 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     output: true
-    description: 'The unique name of the domain using the format: `projects/{project}/locations/global/domains/{domainName}`.'
+    description:
+      'The unique name of the domain using the format:
+      `projects/{project}/locations/global/domains/{domainName}`.'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: 'Resource labels that can contain user-provided metadata'
