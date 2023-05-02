@@ -48,7 +48,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 exclude_import: true
 skip_sweeper: true
 exclude_validator: true
-error_retry_predicates: ['IsBigqueryIAMQuotaError']
+error_retry_predicates: ['transport_tpg.IsBigqueryIAMQuotaError']
 mutex: '{{dataset_id}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples

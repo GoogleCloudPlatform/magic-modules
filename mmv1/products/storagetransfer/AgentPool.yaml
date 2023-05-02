@@ -77,6 +77,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'limitMbps'
         description:
-          'Bandwidth rate in megabytes per second, distributed across all
-          the agents in the pool.'
+          'Bandwidth rate in megabytes per second, distributed across all the
+          agents in the pool.'
         required: true

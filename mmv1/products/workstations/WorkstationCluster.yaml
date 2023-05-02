@@ -90,8 +90,8 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description:
-      "Client-specified labels that are applied to the resource and that\
-      \ are also propagated to the underlying Compute Engine resources."
+      'Client-specified labels that are applied to the resource and that are
+      also propagated to the underlying Compute Engine resources.'
   - !ruby/object:Api::Type::String
     name: 'network'
     required: true

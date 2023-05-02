@@ -1974,7 +1974,7 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: 'stripQuery'
         required: true
-        description:  |
+        description: |
           If set to true, any accompanying query portion of the original URL is removed prior
           to redirecting the request. If set to false, the query portion of the original URL is
           retained. The default is set to false.
@@ -2025,7 +2025,6 @@ properties:
                 The full or partial URL to the default BackendService resource. Before forwarding the
                 request to backendService, the loadbalancer applies any relevant headerActions
                 specified as part of this backendServiceWeight.
-              custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
             - !ruby/object:Api::Type::Integer
               name: 'weight'
               description: |
@@ -2149,7 +2148,6 @@ properties:
           - default_route_action.0.request_mirror_policy
           - default_route_action.0.cors_policy
           - default_route_action.0.fault_injection_policy
-        default_from_api: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'seconds'
@@ -2266,7 +2264,6 @@ properties:
             description: |
               The full or partial URL to the BackendService resource being mirrored to.
             required: true
-            custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
       - !ruby/object:Api::Type::NestedObject
         name: 'corsPolicy'
         description: |

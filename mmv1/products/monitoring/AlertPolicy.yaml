@@ -28,7 +28,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: '{{name}}'
 import_format: ['{{name}}']
 mutex: alertPolicy/{{project}}
-error_retry_predicates: ['IsMonitoringConcurrentEditError']
+error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
 examples:
   # skipping tests because the API is full of race conditions
   - !ruby/object:Provider::Terraform::Examples

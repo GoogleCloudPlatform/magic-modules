@@ -45,7 +45,8 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
-import_format: ['projects/{{project}}/locations/{{location}}/clientTlsPolicies/{{name}}']
+import_format:
+  ['projects/{{project}}/locations/{{location}}/clientTlsPolicies/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
@@ -159,4 +160,3 @@ properties:
               description: |
                 Plugin instance name, used to locate and load CertificateProvider instance configuration. Set to "google_cloud_private_spiffe" to use Certificate Authority Service certificate provider instance.
               required: true
-

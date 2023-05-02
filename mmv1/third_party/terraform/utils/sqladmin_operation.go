@@ -3,9 +3,10 @@ package google
 import (
 	"bytes"
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
@@ -69,13 +70,13 @@ func (w *SqlAdminOperationWaiter) QueryOp() (interface{}, error) {
 
 	var op interface{}
 	var err error
-	err = RetryTimeDuration(
+	err = transport_tpg.RetryTimeDuration(
 		func() error {
 			op, err = w.Service.Operations.Get(w.Project, w.Op.Name).Do()
 			return err
 		},
 
-		DefaultRequestTimeout,
+		transport_tpg.DefaultRequestTimeout,
 	)
 
 	return op, err
@@ -131,4 +132,20 @@ func (e SqlAdminOperationError) Error() string {
 	}
 
 	return buf.String()
+}
+
+// Retry if Cloud SQL operation returns a 429 with a specific message for
+// concurrent operations.
+func IsSqlInternalError(err error) (bool, string) {
+	if gerr, ok := err.(*SqlAdminOperationError); ok {
+		// SqlAdminOperationError is a non-interface type so we need to cast it through
+		// a layer of interface{}.  :)
+		var ierr interface{}
+		ierr = gerr
+		if serr, ok := ierr.(*sqladmin.OperationErrors); ok && serr.Errors[0].Code == "INTERNAL_ERROR" {
+			return true, "Received an internal error, which is sometimes retryable for some SQL resources.  Optimistically retrying."
+		}
+
+	}
+	return false, ""
 }

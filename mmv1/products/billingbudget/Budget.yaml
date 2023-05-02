@@ -250,7 +250,9 @@ properties:
           - :QUARTER
           - :YEAR
           - :CALENDAR_PERIOD_UNSPECIFIED
-        diff_suppress_func: 'checkValAndDefaultStringSuppress("MONTH", "budget_filter.0.custom_period.0.start_date")'
+        diff_suppress_func:
+          'checkValAndDefaultStringSuppress("MONTH",
+          "budget_filter.0.custom_period.0.start_date")'
       - !ruby/object:Api::Type::NestedObject
         name: customPeriod
         at_least_one_of:

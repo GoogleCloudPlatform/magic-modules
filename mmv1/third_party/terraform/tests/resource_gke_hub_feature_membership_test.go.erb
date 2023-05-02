@@ -4,6 +4,7 @@ package google
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"fmt"
 	"testing"
 
@@ -16,17 +17,17 @@ import (
 
 func TestAccGKEHubFeatureMembership_gkehubFeatureAcmUpdate(t *testing.T) {
   // Multiple fine-grained resources cause VCR to fail
-  SkipIfVcr(t)
+  acctest.SkipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{
     "random_suffix":   RandString(t, 10),
-    "org_id":          GetTestOrgFromEnv(t),
-    "billing_account": GetTestBillingAccountFromEnv(t),
+    "org_id":          acctest.GetTestOrgFromEnv(t),
+    "billing_account": acctest.GetTestBillingAccountFromEnv(t),
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -326,17 +327,17 @@ resource "google_gke_hub_feature_membership" "feature_member_3" {
 
 func TestAccGKEHubFeatureMembership_gkehubFeatureAcmAllFields(t *testing.T) {
   // VCR fails to handle batched project services
-  SkipIfVcr(t)
+  acctest.SkipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{
     "random_suffix":   RandString(t, 10),
-    "org_id":          GetTestOrgFromEnv(t),
-    "billing_account": GetTestBillingAccountFromEnv(t),
+    "org_id":          acctest.GetTestOrgFromEnv(t),
+    "billing_account": acctest.GetTestBillingAccountFromEnv(t),
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -585,17 +586,17 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 
 func TestAccGKEHubFeatureMembership_gkehubFeatureAcmOci(t *testing.T) {
   // Multiple fine-grained resources cause VCR to fail
-  SkipIfVcr(t)
+  acctest.SkipIfVcr(t)
   t.Parallel()
 
   context := map[string]interface{}{
     "random_suffix":   RandString(t, 10),
-    "org_id":          GetTestOrgFromEnv(t),
-    "billing_account": GetTestBillingAccountFromEnv(t),
+    "org_id":          acctest.GetTestOrgFromEnv(t),
+    "billing_account": acctest.GetTestBillingAccountFromEnv(t),
   }
 
   VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { AccTestPreCheck(t) },
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
     CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
     Steps: []resource.TestStep{
@@ -783,17 +784,17 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 
 func TestAccGKEHubFeatureMembership_gkehubFeatureMesh(t *testing.T) {
 	// VCR fails to handle batched project services
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix":   RandString(t, 10),
-		"org_id":          GetTestOrgFromEnv(t),
-		"billing_account": GetTestBillingAccountFromEnv(t),
+		"org_id":          acctest.GetTestOrgFromEnv(t),
+		"billing_account": acctest.GetTestBillingAccountFromEnv(t),
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{

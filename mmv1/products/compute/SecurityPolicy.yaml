@@ -63,8 +63,8 @@ properties:
         - !ruby/object:Api::Type::NestedObject
           name: 'match'
           description:
-            A match condition that incoming traffic is evaluated against.
-            If it evaluates to true, the corresponding 'action' is enforced.
+            A match condition that incoming traffic is evaluated against. If it
+            evaluates to true, the corresponding 'action' is enforced.
           properties:
             - !ruby/object:Api::Type::String
               name: 'description'
@@ -73,8 +73,8 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'expr'
               description:
-                User defined CEVAL expression. A CEVAL expression is used
-                to specify match criteria such as origin.ip, source.region_code and
+                User defined CEVAL expression. A CEVAL expression is used to
+                specify match criteria such as origin.ip, source.region_code and
                 contents in the request header.
               properties:
                 - !ruby/object:Api::Type::String
@@ -105,9 +105,10 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'config'
               description:
-                The configuration options available when specifying versionedExpr.
-                This field must be specified if versionedExpr is specified and cannot
-                be specified if versionedExpr is not specified.
+                The configuration options available when specifying
+                versionedExpr. This field must be specified if versionedExpr is
+                specified and cannot be specified if versionedExpr is not
+                specified.
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'srcIpRanges'

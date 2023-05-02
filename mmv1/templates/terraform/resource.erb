@@ -37,11 +37,8 @@ import (
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
   "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-<% if version == 'private' -%>
-    transport_tpg "internal/terraform-next/google-private/transport"
-<% else -%>
-    transport_tpg "github.com/hashicorp/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>/transport"
-<% end -%>
+  transport_tpg "<%= import_path() -%>/transport"
+  "<%= import_path() -%>/verify"
 
 <% if object.gettable_properties.reject { |p| p.ignore_read }.any? { |prop| prop.flatten_object } -%>
   "google.golang.org/api/googleapi"
@@ -225,7 +222,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return err
     }
 <%    if object.update_mask -%>
-    url, err = AddQueryParams(url, map[string]string{"updateMask": "<%= object.nested_query.keys.join('.') -%>"})
+    url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "<%= object.nested_query.keys.join('.') -%>"})
     if err != nil {
         return err
     }
@@ -253,7 +250,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
 <%= lines(compile(pwd + '/' + object.custom_code.pre_create)) if object.custom_code.pre_create -%>
-    res, err := SendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := transport_tpg.SendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.custom_code.post_create_failure && object.async.nil? # Only add if not handled by async error handling -%>
         resource<%= resource_name -%>PostCreateFailure(d, meta)
@@ -419,7 +416,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 
-        res, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        res, err := transport_tpg.SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return res, err
         }
@@ -484,12 +481,12 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 
     <%= lines(compile(pwd + '/' + object.custom_code.pre_read)) if object.custom_code.pre_read -%>
-    res, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := transport_tpg.SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.read_error_transform -%>
-        return handleNotFoundError(<%= object.read_error_transform %>(err), d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+        return transport_tpg.HandleNotFoundError(<%= object.read_error_transform %>(err), d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 <%  else -%>
-        return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+        return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 <%  end -%>
     }
 
@@ -675,7 +672,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 <% end -%>
-    res, err := SendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := transport_tpg.SendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 
     if err != nil {
         return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
@@ -733,9 +730,9 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         billingProject = bp
         }
 
-        getRes, err := SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        getRes, err := transport_tpg.SendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, userAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
-            return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+            return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
         }
 
         obj["<%= key[:fingerprint_name] %>"] = getRes["<%= key[:fingerprint_name] %>"]
@@ -810,7 +807,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         billingProject = bp
         }
 
-        res, err := SendRequestWithTimeout(config, "<%= key[:update_verb] -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        res, err := transport_tpg.SendRequestWithTimeout(config, "<%= key[:update_verb] -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         } else {
@@ -900,10 +897,10 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%# Keep this after mutex - patch request data relies on current resource state %>
     obj, err = resource<%= resource_name -%>PatchDeleteEncoder(d, meta, obj)
     if err != nil {
-        return handleNotFoundError(err, d, "<%= object.name -%>")
+        return transport_tpg.HandleNotFoundError(err, d, "<%= object.name -%>")
     }
 <%    if object.update_mask -%>
-    url, err = AddQueryParams(url, map[string]string{"updateMask": "<%= object.nested_query.keys.join('.') -%>"})
+    url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "<%= object.nested_query.keys.join('.') -%>"})
     if err != nil {
         return err
     }
@@ -923,9 +920,9 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
       billingProject = bp
     }
 
-    res, err := SendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := transport_tpg.SendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
-        return handleNotFoundError(err, d, "<%= object.name -%>")
+        return transport_tpg.HandleNotFoundError(err, d, "<%= object.name -%>")
     }
 
 <%  if object.async&.allow?('delete') -%>

@@ -52,7 +52,8 @@ properties:
     description: The role this project has in a shared VPC configuration.
   - !ruby/object:Api::Type::String
     name: defaultNetworkTier
-    description: The default network tier used for configuring resources in this project
+    description:
+      The default network tier used for configuring resources in this project
   - !ruby/object:Api::Type::Array
     name: 'quotas'
     description: |

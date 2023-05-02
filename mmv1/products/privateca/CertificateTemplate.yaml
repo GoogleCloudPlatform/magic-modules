@@ -29,8 +29,8 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_template_basic'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-template%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-template%s\",
+      context[\"random_suffix\"\
       ])"
     primary_resource_id: 'default'
     vars:

@@ -43,8 +43,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_analyticshub_data_exchange_basic'
     primary_resource_id: 'data_exchange'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf_test_my_data_exchange%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
       random_suffix\"])"
     region_override: 'US'
     vars:

@@ -59,7 +59,8 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'metastore-srv'

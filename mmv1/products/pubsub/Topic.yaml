@@ -41,13 +41,13 @@ async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckForExistence
   actions: ['create']
   suppress_error: true
-error_retry_predicates: ['PubsubTopicProjectNotReady']
+error_retry_predicates: ['transport_tpg.PubsubTopicProjectNotReady']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'pubsub_topic_basic'
     primary_resource_id: 'example'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-example-topic%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       topic_name: 'example-topic'

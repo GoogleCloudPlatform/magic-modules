@@ -26,7 +26,7 @@ immutable: true
 id_format: 'locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}'
 import_format:
   ['locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}']
-error_retry_predicates: ['IsCloudRunCreationConflict']
+error_retry_predicates: ['transport_tpg.IsCloudRunCreationConflict']
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: PollCheckKnativeStatusFunc(res)
   actions: ['create', 'update']
@@ -132,7 +132,8 @@ properties:
         description: The name of the route that the mapping currently points to.
   - !ruby/object:Api::Type::String
     name: apiVersion
-    description: The API version for this call such as "serving.knative.dev/v1alpha1".
+    description:
+      The API version for this call such as "serving.knative.dev/v1alpha1".
     exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: spec

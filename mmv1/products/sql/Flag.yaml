@@ -14,7 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'Flag'
 kind: 'sql#flag'
-description: 'Represents a flag that can be configured for a Cloud SQL instance.'
+description:
+  'Represents a flag that can be configured for a Cloud SQL instance.'
 base_url: flags
 self_link: flags
 nested_query: !ruby/object:Api::Resource::NestedQuery
@@ -25,7 +26,8 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'allowedStringValues'
     item_type: Api::Type::String
-    description: 'For STRING flags, List of strings that the value can be set to.'
+    description:
+      'For STRING flags, List of strings that the value can be set to.'
     output: true
   - !ruby/object:Api::Type::Array
     name: 'appliesTo'

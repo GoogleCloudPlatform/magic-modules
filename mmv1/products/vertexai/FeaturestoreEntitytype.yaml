@@ -62,8 +62,10 @@ examples:
     primary_resource_id: 'entity'
     primary_resource_name:
       "fmt.Sprintf(\"projects/%s/locations/%s/featurestores/%s\"\
-      , GetTestProjectFromEnv(), GetTestRegionFromEnv(), fmt.Sprintf(\"terraform%s\"\
-      , context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\", context[\"random_suffix\"\
+      , acctest.GetTestProjectFromEnv(), acctest.GetTestRegionFromEnv(),
+      fmt.Sprintf(\"terraform%s\"\
+      , context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       name: 'terraform'
@@ -96,7 +98,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 parameters:
   - !ruby/object:Api::Type::String
     name: featurestore
-    description: The name of the Featurestore to use, in the format projects/{project}/locations/{location}/featurestores/{featurestore}.
+    description:
+      The name of the Featurestore to use, in the format
+      projects/{project}/locations/{location}/featurestores/{featurestore}.
     url_param_only: true
     immutable: true
     required: true
@@ -104,8 +108,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description:
-      The name of the EntityType. This value may be up to 60 characters,
-      and valid characters are [a-z0-9_]. The first character cannot be a number.
+      The name of the EntityType. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
     immutable: true
     url_param_only: true
     pattern: '{featurestore}}/entityTypes/{{name}}'
@@ -153,8 +157,8 @@ properties:
             name: 'monitoringInterval'
             min_version: beta
             deprecation_message:
-              This field is unavailable in the GA provider and
-              will be removed from the beta provider in a future release.
+              This field is unavailable in the GA provider and will be removed
+              from the beta provider in a future release.
             description: |
               Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
 
