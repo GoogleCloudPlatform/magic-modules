@@ -104,7 +104,7 @@ properties:
     immutable: true
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
     # TODO: Change subnetworks to ResourceRef
   - !ruby/object:Api::Type::Array
     name: 'subnetworks'
