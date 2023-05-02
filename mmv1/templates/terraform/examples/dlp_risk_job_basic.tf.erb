@@ -1,0 +1,64 @@
+resource "google_data_loss_prevention_job" "basic" {
+  parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+
+  risk_job {
+    actions {
+      job_notification_emails {}
+    }
+    source_table {
+      project_id = "<%= ctx[:test_env_vars]['project'] %>"
+      dataset_id = google_bigquery_dataset.default.dataset_id
+      table_id   = google_bigquery_table.default.table_id
+    }
+    privacy_metric {
+      categorical_stats_config {
+        field {
+          name = "state"
+        }
+      }
+    }
+  }
+}
+
+resource "google_bigquery_dataset" "default" {
+  dataset_id                  = "<%= ctx[:vars]['name'] %>"
+  friendly_name               = "terraform-test"
+  description                 = "Description for the dataset created by terraform"
+  location                    = "US"
+  default_table_expiration_ms = 3600000
+
+  labels = {
+    env = "default"
+  }
+}
+
+resource "google_bigquery_table" "default" {
+  dataset_id          = google_bigquery_dataset.default.dataset_id
+  table_id            = "<%= ctx[:vars]['name'] %>"
+  deletion_protection = false
+
+  time_partitioning {
+    type = "DAY"
+  }
+
+  labels = {
+    env = "default"
+  }
+
+  schema = <<EOF
+   [
+    {
+     "name": "permalink",
+     "type": "NUMERIC",
+     "mode": "NULLABLE",
+     "description": "The Permalink"
+    },
+    {
+     "name": "state",
+     "type": "STRING",
+     "mode": "NULLABLE",
+     "description": "State where the head office is located"
+    }
+   ]
+  EOF
+}

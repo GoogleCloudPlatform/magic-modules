@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'Job'
-create_url: "{{parent}}/dlpJobs"
-self_link: "{{parent}}/dlpJobs/{{name}}"
-base_url: "{{parent}}/dlpJobs"
+create_url: '{{parent}}/dlpJobs'
+self_link: '{{parent}}/dlpJobs/{{name}}'
+base_url: '{{parent}}/dlpJobs'
 immutable: true
 description: |
   A resource that combines all of the information about a DLP job.
@@ -23,13 +23,25 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-job-triggers'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.dlpJobs'
-id_format: "{{parent}}/dlpJobs/{{name}}"
+id_format: '{{parent}}/dlpJobs/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_risk_job_with_job_id"
-    primary_resource_id: "basic"
+    name: 'dlp_risk_job_with_job_id'
+    primary_resource_id: 'basic'
     vars:
-      name: "tf_test"
+      name: 'tf_test'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      name: '"tf_test_" + RandString(t, 10)'
+    ignore_read_extra:
+      - state
+      - end_time
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_risk_job_basic'
+    primary_resource_id: 'basic'
+    vars:
+      name: 'tf_test'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
