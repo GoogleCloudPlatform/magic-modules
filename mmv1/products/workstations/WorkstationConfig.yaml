@@ -239,7 +239,7 @@ properties:
             custom_flatten: 'templates/terraform/custom_flatten/workstations_config_confidential_instance.go.erb'
             properties:
               - !ruby/object:Api::Type::Boolean
-                name: "enableConfidentialCompute"
+                name: 'enableConfidentialCompute'
                 # TODO(esu): Change this to required in next breaking release.
                 description: |
                   Whether the instance has confidential compute enabled.
