@@ -37,8 +37,8 @@ examples:
     name: 'dataproc_autoscaling_policy_basic'
     skip_docs: true
     primary_resource_id: 'basic'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-dataproc-policy%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-dataproc-policy%s\",
+      context[\"\
       random_suffix\"])"
     vars:
       name: 'dataproc-policy'

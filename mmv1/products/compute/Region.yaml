@@ -103,8 +103,8 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'owner'
           description:
-            'Owning resource. This is the resource on which this quota
-            is applied.'
+            'Owning resource. This is the resource on which this quota is
+            applied.'
           output: true
   - !ruby/object:Api::Type::Enum
     name: 'status'

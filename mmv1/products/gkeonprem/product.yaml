@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Product
+--- !ruby/object:Api::Product
 name: Gkeonprem
 display_name: Anthos On-Prem
 versions:
@@ -27,19 +26,19 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/gkeonprem.googleapis.com
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
-    kind: "gkeonprem#operation"
-    path: "name"
-    base_url: "{{op_id}}"
+    kind: 'gkeonprem#operation'
+    path: 'name'
+    base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
-    path: "response"
+    path: 'response'
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: "true"
+    path: 'done'
+    complete: 'true'
     allowed:
-      - "true"
-      - "false"
+      - 'true'
+      - 'false'
   error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
+    path: 'error'
+    message: 'message'

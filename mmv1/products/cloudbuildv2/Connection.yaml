@@ -39,8 +39,8 @@ examples:
     name: 'cloudbuildv2_connection'
     min_version: beta
     primary_resource_id: 'my-connection'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-connection%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-connection%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       connection_name: 'tf-test-connection'

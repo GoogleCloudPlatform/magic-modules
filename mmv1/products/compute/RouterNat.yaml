@@ -326,7 +326,8 @@ properties:
           required: true
         - !ruby/object:Api::Type::NestedObject
           name: 'action'
-          description: 'The action to be enforced for traffic that matches this rule.'
+          description:
+            'The action to be enforced for traffic that matches this rule.'
           default_from_api: true
           properties:
             - !ruby/object:Api::Type::Array
@@ -342,7 +343,8 @@ properties:
                 name: 'address'
                 resource: 'Address'
                 imports: 'selfLink'
-                description: 'A reference to an address associated with this NAT'
+                description:
+                  'A reference to an address associated with this NAT'
             - !ruby/object:Api::Type::Array
               name: 'sourceNatDrainIps'
               description: |
@@ -357,7 +359,8 @@ properties:
                 name: 'address'
                 resource: 'Address'
                 imports: 'selfLink'
-                description: 'A reference to an address associated with this NAT'
+                description:
+                  'A reference to an address associated with this NAT'
   - !ruby/object:Api::Type::Boolean
     name: enableEndpointIndependentMapping
     description: |

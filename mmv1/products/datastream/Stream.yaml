@@ -132,7 +132,8 @@ examples:
       bigquery_destination_table_kms_key_name: 'bigquery-kms-name'
     test_vars_overrides:
       deletion_protection: 'false'
-      bigquery_destination_table_kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      bigquery_destination_table_kms_key_name:
+        'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 
 parameters:
   - !ruby/object:Api::Type::String

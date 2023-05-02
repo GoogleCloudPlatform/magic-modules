@@ -56,16 +56,16 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\",
+      context[\"\
       random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
@@ -79,8 +79,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
@@ -90,16 +90,16 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
@@ -331,7 +331,7 @@ properties:
                   description: |-
                     Determines whether CPU should be throttled or not outside of requests.
                 - !ruby/object:Api::Type::Boolean
-                  name: "startupCpuBoost"
+                  name: 'startupCpuBoost'
                   description: |-
                     Determines whether CPU should be boosted on startup of a new container instance above the requested CPU threshold, this can help reduce cold-start latency.
             - !ruby/object:Api::Type::Array
@@ -438,9 +438,9 @@ properties:
                   description: |-
                     TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
                   deprecation_message:
-                    Cloud Run does not support tcp socket in liveness
-                    probe and `liveness_probe.tcp_socket` field will be removed in
-                    a future major release.
+                    Cloud Run does not support tcp socket in liveness probe and
+                    `liveness_probe.tcp_socket` field will be removed in a
+                    future major release.
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
@@ -652,7 +652,7 @@ properties:
           Sets the maximum number of requests that each serving instance can receive.
         default_from_api: true
       - !ruby/object:Api::Type::Boolean
-        name: "sessionAffinity"
+        name: 'sessionAffinity'
         description: |-
           Enables session affinity. For more information, go to https://cloud.google.com/run/docs/configuring/session-affinity
   - !ruby/object:Api::Type::Array
