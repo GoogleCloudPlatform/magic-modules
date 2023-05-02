@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"time"
@@ -11,3 +13,4 @@ func NetworkSecurityAddressGroupOperationWaitTime(config *transport_tpg.Config, 
 	// project is not necessary for this operation.
 	return NetworkSecurityOperationWaitTime(config, op, "", activity, userAgent, timeout)
 }
+<% end -%>
