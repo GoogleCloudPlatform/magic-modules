@@ -133,7 +133,7 @@ properties:
           there can be up to 100 domains in this list.
         max_size: 100
         required: true
-        diff_suppress_func: 'verify.AbsoluteDomainSuppress'
+        diff_suppress_func: 'tpgresource.AbsoluteDomainSuppress'
         item_type: Api::Type::String
   - !ruby/object:Api::Type::Enum
     name: 'type'

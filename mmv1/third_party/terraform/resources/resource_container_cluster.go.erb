@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
@@ -419,7 +420,7 @@ func ResourceContainerCluster() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 										// We can't use a Terraform-level default because it won't be true when the block is disabled: true
-										DiffSuppressFunc: verify.EmptyOrDefaultStringSuppress("AUTH_NONE"),
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("AUTH_NONE"),
 										ValidateFunc:     validation.StringInSlice([]string{"AUTH_NONE", "AUTH_MUTUAL_TLS"}, false),
 										Description:      `The authentication type between services in Istio. Available options include AUTH_MUTUAL_TLS.`,
 									},
@@ -555,7 +556,7 @@ func ResourceContainerCluster() *schema.Resource {
 									"min_cpu_platform": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										DiffSuppressFunc: verify.EmptyOrDefaultStringSuppress("automatic"),
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("automatic"),
 										Description:      `Minimum CPU platform to be used by this instance. The instance may be scheduled on the specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such as Intel Haswell.`,
 									},
 									"boot_disk_kms_key": {
@@ -945,7 +946,7 @@ func ResourceContainerCluster() *schema.Resource {
 										Type:             schema.TypeString,
 										Required:         true,
 										ValidateFunc:     verify.ValidateRFC3339Time,
-										DiffSuppressFunc: verify.Rfc3339TimeDiffSuppress,
+										DiffSuppressFunc: tpgresource.Rfc3339TimeDiffSuppress,
 									},
 									"duration": {
 										Type:     schema.TypeString,
@@ -1291,7 +1292,7 @@ func ResourceContainerCluster() *schema.Resource {
 							Default:          "PROVIDER_UNSPECIFIED",
 							Optional:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"PROVIDER_UNSPECIFIED", "CALICO"}, false),
-							DiffSuppressFunc: verify.EmptyOrDefaultStringSuppress("PROVIDER_UNSPECIFIED"),
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("PROVIDER_UNSPECIFIED"),
 							Description:      `The selected network policy provider. Defaults to PROVIDER_UNSPECIFIED.`,
 						},
 					},
@@ -1794,7 +1795,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Computed:         true,
 				Description:      `The desired datapath provider for this cluster. By default, uses the IPTables-based kube-proxy implementation.`,
 				ValidateFunc:     validation.StringInSlice([]string{"DATAPATH_PROVIDER_UNSPECIFIED", "LEGACY_DATAPATH", "ADVANCED_DATAPATH"}, false),
-				DiffSuppressFunc: verify.EmptyOrDefaultStringSuppress("DATAPATH_PROVIDER_UNSPECIFIED"),
+				DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("DATAPATH_PROVIDER_UNSPECIFIED"),
 			},
 
 			"enable_intranode_visibility": {

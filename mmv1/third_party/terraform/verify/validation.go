@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 const (
@@ -87,7 +86,7 @@ var Rfc1918Networks = []string{
 // https://cloud.google.com/compute/docs/naming-resources#resource-name-format
 func ValidateGCEName(v interface{}, k string) (ws []string, errors []error) {
 	re := `^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$`
-	return transport_tpg.ValidateRegexp(re)(v, k)
+	return ValidateRegexp(re)(v, k)
 }
 
 // Ensure that the BGP ASN value of Cloud Router is a valid value as per RFC6996 or a value of 16550
@@ -159,7 +158,7 @@ func ValidateRFC1035Name(min, max int) schema.SchemaValidateFunc {
 		}
 	}
 
-	return transport_tpg.ValidateRegexp(fmt.Sprintf("^"+RFC1035NameTemplate+"$", min-2, max-2))
+	return ValidateRegexp(fmt.Sprintf("^"+RFC1035NameTemplate+"$", min-2, max-2))
 }
 
 func ValidateIpCidrRange(v interface{}, k string) (warnings []string, errors []error) {

@@ -212,7 +212,7 @@ properties:
       - :ERROR
       - :INFO
       - :DEBUG
-    diff_suppress_func: 'verify.EmptyOrDefaultStringSuppress("NONE")'
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("NONE")'
   - !ruby/object:Api::Type::Array
     name: 'credentials'
     description: |

@@ -342,7 +342,7 @@ properties:
     default_value: US
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.erb
-    diff_suppress_func: 'verify.CaseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
   - !ruby/object:Api::Type::NestedObject
     name: 'defaultEncryptionConfiguration'
     description: |

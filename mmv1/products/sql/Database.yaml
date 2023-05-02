@@ -86,7 +86,7 @@ properties:
       for more details and supported values. Postgres databases only support
       a value of `UTF8` at creation time.
     default_from_api: true
-    diff_suppress_func: 'verify.CaseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'collation'
     description: |

@@ -10,8 +10,8 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
@@ -98,7 +98,7 @@ func TestIpCidrRangeDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if verify.IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -141,7 +141,7 @@ func TestRfc3339TimeDiffSuppress(t *testing.T) {
 		},
 	}
 	for tn, tc := range cases {
-		if verify.Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if tpgresource.Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, '%s' => '%s' expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -701,7 +701,7 @@ func TestDatasourceSchemaFromResourceSchema(t *testing.T) {
 }
 
 func TestEmptyOrDefaultStringSuppress(t *testing.T) {
-	testFunc := verify.EmptyOrDefaultStringSuppress("default value")
+	testFunc := tpgresource.EmptyOrDefaultStringSuppress("default value")
 
 	cases := map[string]struct {
 		Old, New           string

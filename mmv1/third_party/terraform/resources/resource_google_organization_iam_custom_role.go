@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/iam/v1"
@@ -53,7 +54,7 @@ func ResourceGoogleOrganizationIamCustomRole() *schema.Resource {
 				Default:          "GA",
 				Description:      `The current launch stage of the role. Defaults to GA.`,
 				ValidateFunc:     validation.StringInSlice([]string{"ALPHA", "BETA", "GA", "DEPRECATED", "DISABLED", "EAP"}, false),
-				DiffSuppressFunc: verify.EmptyOrDefaultStringSuppress("ALPHA"),
+				DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("ALPHA"),
 			},
 			"description": {
 				Type:        schema.TypeString,

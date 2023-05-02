@@ -116,7 +116,7 @@ properties:
     values:
       - :IPV4
       - :IPV6
-    diff_suppress_func: 'verify.EmptyOrDefaultStringSuppress("IPV4")'
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("IPV4")'
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
@@ -144,7 +144,7 @@ properties:
       - :EXTERNAL
       - :INTERNAL
     default_value: :EXTERNAL
-    diff_suppress_func: 'verify.EmptyOrDefaultStringSuppress("EXTERNAL")'
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("EXTERNAL")'
   - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |

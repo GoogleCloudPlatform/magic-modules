@@ -1,13 +1,14 @@
 <% autogen_exception -%>
 // Contains common diff suppress functions.
 
-package verify
+package tpgresource
 
 import (
 	"crypto/sha256"
 	"log"
 	"encoding/hex"
 	"net"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -102,6 +103,39 @@ func Rfc3339TimeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		return true
 	}
 	return false
+}
+
+func EmptyOrUnsetBlockDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	o, n := d.GetChange(strings.TrimSuffix(k, ".#"))
+	return EmptyOrUnsetBlockDiffSuppressLogic(k, old, new, o, n)
+}
+
+// The core logic for EmptyOrUnsetBlockDiffSuppress, in a format that is more conducive
+// to unit testing.
+func EmptyOrUnsetBlockDiffSuppressLogic(k, old, new string, o, n interface{}) bool {
+	if !strings.HasSuffix(k, ".#") {
+		return false
+	}
+	var l []interface{}
+	if old == "0" && new == "1" {
+		l = n.([]interface{})
+	} else if new == "0" && old == "1" {
+		l = o.([]interface{})
+	} else {
+		// we don't have one set and one unset, so don't suppress the diff
+		return false
+	}
+
+	contents, ok := l[0].(map[string]interface{})
+	if !ok {
+		return false
+	}
+	for _, v := range contents {
+		if !IsEmptyValue(reflect.ValueOf(v)) {
+			return false
+		}
+	}
+	return true
 }
 
 // Suppress diffs for values that are equivalent except for their use of the words "location"
