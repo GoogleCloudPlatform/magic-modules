@@ -77,7 +77,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 parameters:
   - !ruby/object:Api::Type::String
     name: 'appProfileId'
-    description: 'The unique name of the app profile in the form `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+    description:
+      'The unique name of the app profile in the form
+      `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
     required: true
     immutable: true
     url_param_only: true
@@ -89,15 +91,16 @@ parameters:
     diff_suppress_func: compareResourceNames
   - !ruby/object:Api::Type::Boolean
     name: 'ignoreWarnings'
-    description: 'If true, ignore safety checks when deleting/updating the app profile.'
+    description:
+      'If true, ignore safety checks when deleting/updating the app profile.'
     default_value: false
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description:
-      'The unique name of the requested app profile. Values are of the
-      form `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
+      'The unique name of the requested app profile. Values are of the form
+      `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
     output: true
   - !ruby/object:Api::Type::String
     name: 'description'

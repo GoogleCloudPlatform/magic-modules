@@ -75,10 +75,14 @@ properties:
     required: true
   - !ruby/object:Api::Type::String
     name: 'parentPrefix'
-    description: The URL of parent prefix. Either PublicAdvertisedPrefix or PublicDelegatedPrefix.
+    description:
+      The URL of parent prefix. Either PublicAdvertisedPrefix or
+      PublicDelegatedPrefix.
     required: true
     diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
-    description: The IPv4 address range, in CIDR format, represented by this public advertised prefix.
+    description:
+      The IPv4 address range, in CIDR format, represented by this public
+      advertised prefix.
     required: true

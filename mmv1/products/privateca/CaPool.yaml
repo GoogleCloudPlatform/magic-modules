@@ -50,8 +50,8 @@ import_format: ['projects/{{project}}/locations/{{location}}/caPools/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_capool_basic'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-pool%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-pool%s\",
+      context[\"random_suffix\"\
       ])"
     primary_resource_id: 'default'
     vars:
@@ -454,7 +454,7 @@ properties:
     name: 'publishingOptions'
     description: |
       The PublishingOptions to follow when issuing Certificates from any CertificateAuthority in this CaPool.
-    diff_suppress_func: 'EmptyOrUnsetBlockDiffSuppress'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'publishCaCert'

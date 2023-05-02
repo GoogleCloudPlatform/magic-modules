@@ -42,9 +42,10 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_analyticshub_listing_basic'
     primary_resource_id: 'listing'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf_test_my_data_exchange%s\", context[\"\
-      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
+      context[\"random_suffix\"\
       ])"
     region_override: 'US'
     vars:
@@ -117,8 +118,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: publisher
     description:
-      Details of the publisher who owns the listing and who can share the
-      source data.
+      Details of the publisher who owns the listing and who can share the source
+      data.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -139,6 +140,8 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'dataset'
-        description: Resource name of the dataset source for this listing. e.g. projects/myproject/datasets/123
+        description:
+          Resource name of the dataset source for this listing. e.g.
+          projects/myproject/datasets/123
         required: true
-        diff_suppress_func: 'ProjectNumberDiffSuppress'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'

@@ -75,4 +75,5 @@ properties:
   - !ruby/object:Api::Type::String
     name: defaultUrl
     output: true
-    description: The default URL for the site in the form of https://{name}.web.app
+    description:
+      The default URL for the site in the form of https://{name}.web.app

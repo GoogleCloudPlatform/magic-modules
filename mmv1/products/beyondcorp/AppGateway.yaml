@@ -13,10 +13,10 @@
 
 --- !ruby/object:Api::Resource
 name: 'AppGateway'
-description:
-  "A BeyondCorp AppGateway resource represents a BeyondCorp protected AppGateway\
-  \ to a remote application. It creates \nall the necessary GCP components needed\
-  \ for creating a BeyondCorp protected AppGateway. Multiple connectors can be \n\
+description: "A BeyondCorp AppGateway resource represents a BeyondCorp protected
+  AppGateway to a remote application. It creates \nall the necessary GCP
+  components needed for creating a BeyondCorp protected AppGateway. Multiple
+  connectors can be \n\
   authorised for a single AppGateway.\n"
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -53,16 +53,14 @@ examples:
     name: 'beyondcorp_app_gateway_basic'
     primary_resource_id: 'app_gateway'
     primary_resource_name:
-      "fmt.Sprintf(\"tf_test_my_app_gateway%s\", context[\"random_suffix\"\
-      ])"
+      'fmt.Sprintf("tf_test_my_app_gateway%s", context["random_suffix"])'
     vars:
       app_gateway_name: 'my-app-gateway'
   - !ruby/object:Provider::Terraform::Examples
     name: 'beyondcorp_app_gateway_full'
     primary_resource_id: 'app_gateway'
     primary_resource_name:
-      "fmt.Sprintf(\"tf_test_my_app_gateway%s\", context[\"random_suffix\"\
-      ])"
+      'fmt.Sprintf("tf_test_my_app_gateway%s", context["random_suffix"])'
     vars:
       app_gateway_name: 'my-app-gateway'
       display_name: 'some display name'
