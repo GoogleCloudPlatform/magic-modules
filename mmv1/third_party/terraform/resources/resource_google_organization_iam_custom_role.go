@@ -22,10 +22,11 @@ func ResourceGoogleOrganizationIamCustomRole() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"role_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: `The role id to use for this role.`,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				Description:  `The role id to use for this role.`,
+				ValidateFunc: validateIAMCustomRoleID,
 			},
 			"org_id": {
 				Type:        schema.TypeString,
@@ -101,7 +102,7 @@ func resourceGoogleOrganizationIamCustomRoleCreate(d *schema.ResourceData, meta 
 			// If a role with same name exists and is enabled, just return error
 			return fmt.Errorf("Custom project role %s already exists and must be imported", roleId)
 		}
-	} else if err := handleNotFoundError(err, d, fmt.Sprintf("Custom Organization Role %q", roleId)); err == nil {
+	} else if err := transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Custom Organization Role %q", roleId)); err == nil {
 		// If no role was found, actually create a new role.
 		role, err := config.NewIamClient(userAgent).Organizations.Roles.Create(orgId, &iam.CreateRoleRequest{
 			RoleId: d.Get("role_id").(string),
@@ -133,7 +134,7 @@ func resourceGoogleOrganizationIamCustomRoleRead(d *schema.ResourceData, meta in
 
 	role, err := config.NewIamClient(userAgent).Organizations.Roles.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, d.Id())
+		return transport_tpg.HandleNotFoundError(err, d, d.Id())
 	}
 
 	parsedRoleName, err := ParseOrganizationCustomRoleName(role.Name)

@@ -24,23 +24,24 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/hosting'
   api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites'
-import_format: ['projects/{{project}}/sites/{{site_id}}', 'sites/{{site_id}}', '{{site_id}}']
+import_format:
+  ['projects/{{project}}/sites/{{site_id}}', 'sites/{{site_id}}', '{{site_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_site_basic"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasehosting_site_basic'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       site_id: site-no-app
     test_env_vars:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_site_full"
-    min_version: "beta"
-    primary_resource_id: "full"
+    name: 'firebasehosting_site_full'
+    min_version: 'beta'
+    primary_resource_id: 'full'
     vars:
       site_id: site-with-app
-      display_name: "Test web app for Firebase Hosting"
+      display_name: 'Test web app for Firebase Hosting'
     test_env_vars:
       project_id: :PROJECT_NAME
     test_vars_overrides:

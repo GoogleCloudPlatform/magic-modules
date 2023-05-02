@@ -24,9 +24,9 @@ description: |
   please use the GCP Console.
 
 
-  ~> **Note:** Brands can only be created once for a Google Cloud 
-  project and the underlying Google API doesn't not support DELETE or PATCH methods. 
-  Destroying a Terraform-managed Brand will remove it from state 
+  ~> **Note:** Brands can only be created once for a Google Cloud
+  project and the underlying Google API doesn't not support DELETE or PATCH methods.
+  Destroying a Terraform-managed Brand will remove it from state
   but *will not delete it from Google Cloud.*
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -37,12 +37,16 @@ async: !ruby/object:Provider::Terraform::PollAsync
   target_occurrences: 5
   actions: ['create']
 id_format: '{{name}}'
-import_format: ["projects/{{project_number}}/brands/{{brand_id}}", "projects/{{project_id}}/brands/{{brand_id}}"]
+import_format:
+  [
+    'projects/{{project_number}}/brands/{{brand_id}}',
+    'projects/{{project_id}}/brands/{{brand_id}}',
+  ]
 skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "iap_brand"
-    primary_resource_id: "project_brand"
+    name: 'iap_brand'
+    primary_resource_id: 'project_brand'
     vars:
       project_id: 'my-project'
     test_env_vars:

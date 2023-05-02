@@ -45,17 +45,17 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_address_basic"
-    primary_resource_id: "default"
+    name: 'global_address_basic'
+    primary_resource_id: 'default'
     vars:
-      global_address_name: "global-appserver-ip"
+      global_address_name: 'global-appserver-ip'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_address_private_services_connect"
+    name: 'global_address_private_services_connect'
     min_version: beta
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      global_address_name: "global-psconnect-ip"
-      network_name: "my-network-name"
+      global_address_name: 'global-psconnect-ip'
+      network_name: 'my-network-name'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 properties:

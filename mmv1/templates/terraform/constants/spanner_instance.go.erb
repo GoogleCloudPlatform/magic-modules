@@ -39,7 +39,7 @@ func deleteSpannerBackups(d *schema.ResourceData, config *transport_tpg.Config, 
 			return err
 		}
 
-		_, err = SendRequest(config, "DELETE", billingProject, url, userAgent, nil)
+		_, err = transport_tpg.SendRequest(config, "DELETE", billingProject, url, userAgent, nil)
 		if err != nil {
 			return err
 		}

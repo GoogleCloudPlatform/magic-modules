@@ -26,26 +26,26 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Use with Kubernetes': 'https://cloud.google.com/filestore/docs/accessing-fileshares'
     'Copying Data In/Out': 'https://cloud.google.com/filestore/docs/copying-data'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
-error_retry_predicates: ["transport_tpg.IsNotFilestoreQuotaError"]
+error_retry_predicates: ['transport_tpg.IsNotFilestoreQuotaError']
 autogen_async: true
 schema_version: 1
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_instance_basic"
-    primary_resource_id: "instance"
+    name: 'filestore_instance_basic'
+    primary_resource_id: 'instance'
     vars:
-      instance_name: "test-instance"
+      instance_name: 'test-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_instance_full"
-    primary_resource_id: "instance"
+    name: 'filestore_instance_full'
+    primary_resource_id: 'instance'
     vars:
-      instance_name: "test-instance"
+      instance_name: 'test-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "filestore_instance_enterprise"
-    primary_resource_id: "instance"
+    name: 'filestore_instance_enterprise'
+    primary_resource_id: 'instance'
     skip_test: true
     vars:
-      instance_name: "test-instance"
+      instance_name: 'test-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/filestore.erb
   pre_create: templates/terraform/pre_create/filestore_instance.go.erb
@@ -54,7 +54,7 @@ parameters:
     name: 'zone'
     description: |
       The name of the Filestore zone of the instance.
-    deprecation_message: "Deprecated in favor of location."
+    deprecation_message: 'Deprecated in favor of location.'
     exactly_one_of:
       - 'zone'
       - 'location'

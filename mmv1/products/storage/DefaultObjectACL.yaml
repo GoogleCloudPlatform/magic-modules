@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: "DefaultObjectAccessControl"
+name: 'DefaultObjectAccessControl'
 kind: 'storage#objectAccessControl'
 base_url: b/{{bucket}}/defaultObjectAcl
 self_link: b/{{bucket}}/defaultObjectAcl/{{entity}}
@@ -36,13 +36,13 @@ description: |
   uses READER and OWNER instead of READ and FULL_CONTROL.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "storage_default_object_access_control_public"
-    primary_resource_id: "public_rule"
+    name: 'storage_default_object_access_control_public'
+    primary_resource_id: 'public_rule'
     vars:
-      bucket_name: "static-content-bucket"
-id_format: "{{bucket}}/{{entity}}"
-import_format: ["{{bucket}}/{{entity}}"]
-mutex: "storage/buckets/{{bucket}}"
+      bucket_name: 'static-content-bucket'
+id_format: '{{bucket}}/{{entity}}'
+import_format: ['{{bucket}}/{{entity}}']
+mutex: 'storage/buckets/{{bucket}}'
 skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::ResourceRef

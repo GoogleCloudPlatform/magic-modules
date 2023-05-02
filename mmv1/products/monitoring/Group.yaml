@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'Group'
 base_url: v3/projects/{{project}}/groups
-self_link: "v3/{{name}}"
+self_link: 'v3/{{name}}'
 update_verb: :PUT
 description: |
   The description of a dynamic collection of monitored resources. Each group
@@ -25,22 +25,22 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/monitoring/groups/'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.groups'
-id_format: "{{name}}"
-import_format: ["{{name}}"]
+id_format: '{{name}}'
+import_format: ['{{name}}']
 mutex: stackdriver/groups/{{project}}
-error_retry_predicates: ["IsMonitoringConcurrentEditError"]
+error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "monitoring_group_basic"
-    primary_resource_id: "basic"
+    name: 'monitoring_group_basic'
+    primary_resource_id: 'basic'
     vars:
-      display_name: "MonitoringGroup"
+      display_name: 'MonitoringGroup'
   - !ruby/object:Provider::Terraform::Examples
-    name: "monitoring_group_subgroup"
-    primary_resource_id: "subgroup"
+    name: 'monitoring_group_subgroup'
+    primary_resource_id: 'subgroup'
     vars:
-      display_name: "MonitoringParentGroup"
-      display_name2: "MonitoringSubGroup"
+      display_name: 'MonitoringParentGroup'
+      display_name2: 'MonitoringSubGroup'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
@@ -78,4 +78,3 @@ properties:
     description: |
       The filter used to determine which monitored resources
       belong to this group.
-

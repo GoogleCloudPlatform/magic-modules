@@ -17,12 +17,12 @@ updateMask = append(updateMask, "activeKeyVersion")
 
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
-url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
 	return err
 }
 
-res, err := SendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+res, err := transport_tpg.SendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {
 	return fmt.Errorf("Error emptying OrganizationSettings %q: %s", d.Id(), err)
