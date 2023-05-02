@@ -17,7 +17,6 @@ func TestAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	org := acctest.GetTestOrgFromEnv(t)
-	projects := BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := RandString(t, 10)
 	perimeterTitle := "perimeter"
 
@@ -26,7 +25,7 @@ func TestAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitle, projects[0].ProjectNumber),
+				Config: testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitle),
 			},
 			{
 				ResourceName:      "google_access_context_manager_ingress_policy.test-access1",
@@ -50,7 +49,7 @@ func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) 
 
 			config := GoogleProviderConfig(t)
 
-			url, err := acctest.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{ingress_policy_name}}")
+			url, err := acctest.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{perimeter}}")
 			if err != nil {
 				return err
 			}
@@ -66,7 +65,7 @@ func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) 
 			}
 
 			res = v.(map[string]interface{})
-			v, ok = res["resources"]
+			v, ok = res["ingress_policies"]
 			if !ok || v == nil {
 				return nil
 			}
@@ -83,14 +82,13 @@ func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) 
 	}
 }
 
-func testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitleName string, projectNumber1 int64) string {
+func testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
 
 resource "google_access_context_manager_ingress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
-  ingress_policy       = "projects/%d"
-  ingress_policies {
+  ingress_policy {
 	ingress_from {
 		identity_type = "ANY_IDENTITY"
 	  }
@@ -123,7 +121,7 @@ resource "google_access_context_manager_ingress_policy" "test-access1" {
   }
 }
 
-`, testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber1)
+`, testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
 }
 
 func testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {
@@ -142,7 +140,7 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
   }
 
   lifecycle {
-  	ignore_changes = [status[0].resources]
+  	ignore_changes = [status[0].ingress_policies]
   }
 }
 `, org, policyTitle, perimeterTitleName, perimeterTitleName)
