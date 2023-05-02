@@ -1075,10 +1075,11 @@ func TestProvider_providerConfigure_userProjectOverride(t *testing.T) {
 
 func TestProvider_providerConfigure_scopes(t *testing.T) {
 	cases := map[string]struct {
-		ConfigValues  map[string]interface{}
-		EnvVariables  map[string]string
-		ExpectedValue []string
-		ExpectError   bool
+		ConfigValues        map[string]interface{}
+		EnvVariables        map[string]string
+		ExpectedSchemaValue []string
+		ExpectedConfigValue []string
+		ExpectError         bool
 	}{
 		"scopes are set in the provider config as a list": {
 			ConfigValues: map[string]interface{}{
@@ -1089,7 +1090,12 @@ func TestProvider_providerConfigure_scopes(t *testing.T) {
 					"fizzbuzz",
 				},
 			},
-			ExpectedValue: []string{
+			ExpectedSchemaValue: []string{
+				"fizz",
+				"buzz",
+				"fizzbuzz",
+			},
+			ExpectedConfigValue: []string{
 				"fizz",
 				"buzz",
 				"fizzbuzz",
@@ -1099,7 +1105,8 @@ func TestProvider_providerConfigure_scopes(t *testing.T) {
 			ConfigValues: map[string]interface{}{
 				"credentials": testFakeCredentialsPath,
 			},
-			ExpectedValue: []string{},
+			ExpectedSchemaValue: nil,
+			ExpectedConfigValue: transport_tpg.DefaultClientScopes,
 		},
 	}
 
@@ -1123,32 +1130,32 @@ func TestProvider_providerConfigure_scopes(t *testing.T) {
 				// Return early in tests where errors expected
 				return
 			}
-
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
-			v, ok := d.GetOk("scoops")
+			v, ok := d.GetOk("scopes")
 			if ok {
-				val := v.([]string)
+				val := v.([]interface{})
 
-				if len(val) != len(tc.ExpectedValue) {
-					t.Fatalf("expected scopes value set in provider data to be %v, got %v", tc.ExpectedValue, val)
+				if len(val) != len(tc.ExpectedSchemaValue) {
+					t.Fatalf("expected %v scopes set in provider data, got %v", len(tc.ExpectedSchemaValue), len(val))
 				}
 				for i, el := range val {
-					if el != tc.ExpectedValue[i] {
-						t.Fatalf("expected scopes value set in provider data to be %v, got %v", tc.ExpectedValue, val)
-					}
-				}
-
-				if len(config.Scopes) != len(tc.ExpectedValue) {
-					t.Fatalf("expected scopes value in provider struct to be %v, got %v", tc.ExpectedValue, config.Scopes)
-				}
-				for i, el := range config.Scopes {
-					if el != tc.ExpectedValue[i] {
-						t.Fatalf("expected scopes value set in provider data to be %v, got %v", tc.ExpectedValue, val)
+					scope := el.(string)
+					if scope != tc.ExpectedSchemaValue[i] {
+						t.Fatalf("expected scopes value set in provider data to be %v, got %v", tc.ExpectedSchemaValue, val)
 					}
 				}
 			}
-			if !ok && (len(tc.ExpectedValue) > 0) {
-				t.Fatalf("expected scopes value in provider struct to be %v, got %v", tc.ExpectedValue, config.Scopes)
+			if !ok && (len(tc.ExpectedSchemaValue) > 0) {
+				t.Fatalf("expected %v scopes to be set in the provider data, but is unset", tc.ExpectedSchemaValue)
+			}
+
+			if len(config.Scopes) != len(tc.ExpectedConfigValue) {
+				t.Fatalf("expected %v scopes set in the config struct, got %v", len(tc.ExpectedConfigValue), len(config.Scopes))
+			}
+			for i, el := range config.Scopes {
+				if el != tc.ExpectedConfigValue[i] {
+					t.Fatalf("expected scopes value set in provider data to be %v, got %v", tc.ExpectedConfigValue, config.Scopes)
+				}
 			}
 		})
 	}
