@@ -46,16 +46,13 @@ func testAccNetworkSecurityTlsInspectionPolicy_basic(caPoolName, certificateAuth
 resource "google_privateca_ca_pool" "default" {
   name = "%s"
   location = "us-central1"
-  tier     = "ENTERPRISE"
+  tier     = "DEVOPS"
   publishing_options {
     publish_ca_cert = false
-    publish_crl = true
-  }
-  labels = {
-    foo = "bar"
+    publish_crl = false
   }
   issuance_policy {
-    maximum_lifetime = "50000s"
+    maximum_lifetime = "1209600s"
     baseline_values {
       ca_options {
         is_ca = false
@@ -96,7 +93,9 @@ resource "google_privateca_certificate_authority" "default" {
           cert_sign = true
           crl_sign = true
         }
-        extended_key_usage {}
+        extended_key_usage {
+          server_auth = false
+        }
       }
     }
   }
@@ -109,6 +108,7 @@ resource "google_network_security_tls_inspection_policy" "foobar" {
   name     = "%s"
   location = "us-central1"
   ca_pool    = google_privateca_ca_pool.default.id
+  depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default]
 }
 `, caPoolName, certificateAuthorityName, tlsInspectionPolicyName)
 }
@@ -117,23 +117,20 @@ func testAccNetworkSecurityTlsInspectionPolicy_update(caPoolName, certificateAut
     return fmt.Sprintf(`
 resource "google_privateca_ca_pool" "default" {
   name        = "%s"
-  description = "my ca pooll"
   location    = "us-central1"
-  tier     = "ENTERPRISE"
+  tier     = "DEVOPS"
   publishing_options {
     publish_ca_cert = false
-    publish_crl = true
-  }
-  labels = {
-    foo = "bar"
+    publish_crl = false
   }
   issuance_policy {
-    maximum_lifetime = "50000s"
+    maximum_lifetime = "1209600s"
     baseline_values {
       ca_options {
         is_ca = false
       }
       key_usage {
+        base_key_usage {}
         extended_key_usage {
           server_auth = true
         }
@@ -147,7 +144,6 @@ resource "google_privateca_certificate_authority" "default" {
   pool = google_privateca_ca_pool.default.name
   certificate_authority_id = "%s"
   location = "us-central1"
-  desired_state = "DISABLED"
   lifetime = "86400s"
   type = "SELF_SIGNED"
   deletion_protection = false
@@ -169,7 +165,9 @@ resource "google_privateca_certificate_authority" "default" {
           cert_sign = true
           crl_sign = true
         }
-        extended_key_usage {}
+        extended_key_usage {
+          server_auth = false
+        }
       }
     }
   }
@@ -183,6 +181,7 @@ resource "google_network_security_tls_inspection_policy" "foobar" {
   location    = "us-central1"
   description = "my tls inspection policy updated"
   ca_pool     = google_privateca_ca_pool.default.id
+  depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default]
 }
 `, caPoolName, certificateAuthorityName, tlsInspectionPolicyName)
 }

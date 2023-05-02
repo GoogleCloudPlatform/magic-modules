@@ -2,16 +2,13 @@ resource "google_privateca_ca_pool" "default" {
   provider = google-beta
   name      = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
   location  = "us-central1"
-  tier     = "ENTERPRISE"
+  tier     = "DEVOPS"
   publishing_options {
     publish_ca_cert = false
-    publish_crl = true
-  }
-  labels = {
-    foo = "bar"
+    publish_crl = false
   }
   issuance_policy {
-    maximum_lifetime = "50000s"
+    maximum_lifetime = "1209600s"
     baseline_values {
       ca_options {
         is_ca = false
@@ -53,7 +50,9 @@ resource "google_privateca_certificate_authority" "default" {
           cert_sign = true
           crl_sign = true
         }
-        extended_key_usage {}
+        extended_key_usage {
+          server_auth = false
+        }
       }
     }
   }
@@ -67,4 +66,5 @@ resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resou
   name     = "<%= ctx[:vars]['resource_name'] %>"
   location = "us-central1"
   ca_pool  = google_privateca_ca_pool.default.id
+  depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default]
 }
