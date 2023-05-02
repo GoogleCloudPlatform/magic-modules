@@ -13,7 +13,7 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
-func testAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
+func TestAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	org := acctest.GetTestOrgFromEnv(t)
@@ -88,8 +88,37 @@ func testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterT
 %s
 
 resource "google_access_context_manager_ingress_policy" "test-access1" {
-  ingress_policy_name = google_access_context_manager_service_perimeter.test-access.name
-  resource            = "projects/%d"
+  perimeter = google_access_context_manager_service_perimeter.test-access.name
+  resource       = "projects/%d"
+  ingress_from {
+    identity_type = "ANY_IDENTITY"
+  }
+  ingress_to {
+	resources = [ "*" ]
+	operations {
+		service_name = "bigquery.googleapis.com"
+
+		method_selectors {
+			method = "BigQueryStorage.ReadRows"
+		}
+
+		method_selectors {
+			method = "TableService.ListTables"
+		}
+
+		method_selectors {
+			permission = "bigquery.jobs.get"
+		}
+	}
+
+	operations {
+		service_name = "storage.googleapis.com"
+
+		method_selectors {
+			method = "google.storage.objects.create"
+		}
+	}
+  }
 }
 
 `, testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber1)
@@ -108,38 +137,6 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
   title          = "%s"
   status {
     restricted_services = ["storage.googleapis.com"]
-	ingress_policies {
-		ingress_from {
-			identity_type = "ANY_IDENTITY"
-		}
-
-		ingress_to {
-			resources = [ "*" ]
-			operations {
-				service_name = "bigquery.googleapis.com"
-
-				method_selectors {
-					method = "BigQueryStorage.ReadRows"
-				}
-
-				method_selectors {
-					method = "TableService.ListTables"
-				}
-
-				method_selectors {
-					permission = "bigquery.jobs.get"
-				}
-			}
-
-			operations {
-				service_name = "storage.googleapis.com"
-
-				method_selectors {
-					method = "google.storage.objects.create"
-				}
-			}
-		}
-	}
   }
 
   lifecycle {
