@@ -70,7 +70,8 @@ properties:
           description: 'Current usage of this metric'
         - !ruby/object:Api::Type::String
           name: 'owner'
-          description: Owning resource. This is the resource on which this quota is
+          description:
+            Owning resource. This is the resource on which this quota is
             applied.
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'

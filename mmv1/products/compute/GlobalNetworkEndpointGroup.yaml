@@ -49,15 +49,15 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_network_endpoint_group"
-    primary_resource_id: "neg"
+    name: 'global_network_endpoint_group'
+    primary_resource_id: 'neg'
     vars:
-      neg_name: "my-lb-neg"
+      neg_name: 'my-lb-neg'
   - !ruby/object:Provider::Terraform::Examples
-    name: "global_network_endpoint_group_ip_address"
-    primary_resource_id: "neg"
+    name: 'global_network_endpoint_group_ip_address'
+    primary_resource_id: 'neg'
     vars:
-      neg_name: "my-lb-neg"
+      neg_name: 'my-lb-neg'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'id'

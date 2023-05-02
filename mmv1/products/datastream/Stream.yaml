@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'Stream'
-base_url: "projects/{{project}}/locations/{{location}}/streams"
-create_url: "projects/{{project}}/locations/{{location}}/streams?streamId={{stream_id}}"
-self_link: "projects/{{project}}/locations/{{location}}/streams/{{stream_id}}"
+base_url: 'projects/{{project}}/locations/{{location}}/streams'
+create_url: 'projects/{{project}}/locations/{{location}}/streams?streamId={{stream_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/streams/{{stream_id}}'
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -25,7 +25,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 description: |
   A resource representing streaming data from a source to a destination.
 id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
-import_format: ["projects/{{project}}/locations/{{location}}/streams/{{stream_id}}"]
+import_format:
+  ['projects/{{project}}/locations/{{location}}/streams/{{stream_id}}']
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'desired_state'
@@ -46,88 +47,91 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   resource_definition: 'templates/terraform/resource_definition/datastream_stream.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_basic"
+    name: 'datastream_stream_basic'
     pull_external: true
-    primary_resource_id: "default"
-    skip_docs: true
-        # Random provider
+    primary_resource_id: 'default'
+    skip_docs:
+      true
+      # Random provider
     skip_vcr: true
     vars:
-      stream_id: "my-stream"
-      private_connection_id: "my-connection"
-      network_name: "my-network"
-      source_connection_profile_id: "source-profile"
-      database_instance_name: "my-instance"
-      deletion_protection: "true"
-      bucket_name: "my-bucket"
-      destination_connection_profile_id: "destination-profile"
+      stream_id: 'my-stream'
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+      source_connection_profile_id: 'source-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+      bucket_name: 'my-bucket'
+      destination_connection_profile_id: 'destination-profile'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_full"
+    name: 'datastream_stream_full'
     pull_external: true
-    primary_resource_id: "default"
-        # Random provider
+    primary_resource_id:
+      'default'
+      # Random provider
     skip_vcr: true
     vars:
-      stream_id: "my-stream"
-      private_connection_id: "my-connection"
-      network_name: "my-network"
-      source_connection_profile_id: "source-profile"
-      database_instance_name: "my-instance"
-      deletion_protection: "true"
-      bucket_name: "my-bucket"
-      destination_connection_profile_id: "destination-profile"
-      stream_cmek: "kms-name"
+      stream_id: 'my-stream'
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+      source_connection_profile_id: 'source-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+      bucket_name: 'my-bucket'
+      destination_connection_profile_id: 'destination-profile'
+      stream_cmek: 'kms-name'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
       stream_cmek: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_postgresql"
-    primary_resource_id: "default"
+    name: 'datastream_stream_postgresql'
+    primary_resource_id: 'default'
     skip_test: true
     vars:
-      stream_id: "my-stream"
-      source_connection_profile_id: "source-profile"
-      destination_connection_profile_id: "destination-profile"
+      stream_id: 'my-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_oracle"
-    primary_resource_id: "default"
+    name: 'datastream_stream_oracle'
+    primary_resource_id: 'default'
     skip_test: true
     vars:
-      stream_id: "my-stream"
-      source_connection_profile_id: "source-profile"
-      destination_connection_profile_id: "destination-profile"
+      stream_id: 'my-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_postgresql_bigquery_dataset_id"
-    primary_resource_id: "default"
+    name: 'datastream_stream_postgresql_bigquery_dataset_id'
+    primary_resource_id: 'default'
     vars:
-      dataset_id: "postgres"
-      stream_id: "postgres-bigquery"
-      dest_connection_profile_id: "dest-profile"
-      instance_name: "instance-name"
-      sql_user_name: "my-user"
-      source_connection_profile_id: "source-profile"
+      dataset_id: 'postgres'
+      stream_id: 'postgres-bigquery'
+      dest_connection_profile_id: 'dest-profile'
+      instance_name: 'instance-name'
+      sql_user_name: 'my-user'
+      source_connection_profile_id: 'source-profile'
     pull_external: true
     # Random provider
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_bigquery"
+    name: 'datastream_stream_bigquery'
     pull_external: true
-    primary_resource_id: "default"
-        # Random provider
+    primary_resource_id:
+      'default'
+      # Random provider
     skip_vcr: true
     vars:
-      stream_id: "my-stream"
-      private_connection_id: "my-connection"
-      network_name: "my-network"
-      source_connection_profile_id: "source-profile"
-      database_instance_name: "my-instance"
-      deletion_protection: "true"
-      destination_connection_profile_id: "destination-profile"
-      bigquery_destination_table_kms_key_name: "bigquery-kms-name"
+      stream_id: 'my-stream'
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+      source_connection_profile_id: 'source-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+      bigquery_destination_table_kms_key_name: 'bigquery-kms-name'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
       bigquery_destination_table_kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 
 parameters:
@@ -169,7 +173,7 @@ properties:
         required: true
         description: |
           Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: "ProjectNumberDiffSuppress"
+        diff_suppress_func: 'ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::NestedObject
         name: 'mysqlSourceConfig'
         allow_empty_object: true
@@ -755,7 +759,7 @@ properties:
         required: true
         description: |
           Destination connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: "ProjectNumberDiffSuppress"
+        diff_suppress_func: 'ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::NestedObject
         name: 'gcsDestinationConfig'
         exactly_one_of:
@@ -1144,4 +1148,3 @@ properties:
     description: |
       A reference to a KMS encryption key. If provided, it will be used to encrypt the data. If left blank, data
       will be encrypted using an internal Stream-specific encryption key provisioned through KMS.
-

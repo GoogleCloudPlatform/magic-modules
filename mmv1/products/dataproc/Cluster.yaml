@@ -13,8 +13,8 @@
 
 --- !ruby/object:Api::Resource
 name: 'Cluster'
-base_url: "projects/{{project}}/regions/{{region}}/clusters"
-self_link: "projects/{{project}}/regions/{{region}}/clusters/{{clusterName}}"
+base_url: 'projects/{{project}}/regions/{{region}}/clusters'
+self_link: 'projects/{{project}}/regions/{{region}}/clusters/{{clusterName}}'
 description: |
   Describes an autoscaling policy for Dataproc cluster autoscaler.
 exclude: true
@@ -421,4 +421,3 @@ properties:
                 name: 'realm'
                 description: |
                   The name of the on-cluster Kerberos realm.
-

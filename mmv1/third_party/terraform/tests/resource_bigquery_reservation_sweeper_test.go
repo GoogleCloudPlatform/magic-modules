@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 // This will sweep BigqueryReservation Reservation and Assignment resources
@@ -22,7 +23,7 @@ func testSweepBigqueryReservation(region string) error {
 	resourceName := "BigqueryReservation"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	config, err := SharedConfigForRegion(region)
+	config, err := acctest.SharedConfigForRegion(region)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
 		return err
@@ -34,7 +35,7 @@ func testSweepBigqueryReservation(region string) error {
 		return err
 	}
 	servicesUrl := config.BigqueryReservationBasePath + "projects/" + config.Project + "/locations/" + region + "/reservations"
-	res, err := SendRequest(config, "GET", config.Project, servicesUrl, config.UserAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", config.Project, servicesUrl, config.UserAgent, nil)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", servicesUrl, err)
 		return nil
@@ -62,7 +63,7 @@ func testSweepBigqueryReservation(region string) error {
 		reservationNameParts := strings.Split(reservationName, "/")
 		reservationShortName := reservationNameParts[len(reservationNameParts)-1]
 		// Increment count and skip if resource is not sweepable.
-		if !IsSweepableTestResource(reservationShortName) {
+		if !acctest.IsSweepableTestResource(reservationShortName) {
 			nonPrefixCount++
 			continue
 		}
@@ -71,7 +72,7 @@ func testSweepBigqueryReservation(region string) error {
 
 		deleteUrl := servicesUrl + "/" + reservationShortName
 		// Don't wait on operations as we may have a lot to delete
-		_, err = SendRequest(config, "DELETE", config.Project, deleteUrl, config.UserAgent, nil)
+		_, err = transport_tpg.SendRequest(config, "DELETE", config.Project, deleteUrl, config.UserAgent, nil)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {
@@ -89,7 +90,7 @@ func testSweepBigqueryReservation(region string) error {
 func deleteAllAssignments(config *transport_tpg.Config, reservationName string) {
 	assignmentListUrl := config.BigqueryReservationBasePath + reservationName + "/assignments"
 
-	assignmentRes, err := SendRequest(config, "GET", config.Project, assignmentListUrl, config.UserAgent, nil)
+	assignmentRes, err := transport_tpg.SendRequest(config, "GET", config.Project, assignmentListUrl, config.UserAgent, nil)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", assignmentListUrl, err)
 		return
@@ -108,7 +109,7 @@ func deleteAllAssignments(config *transport_tpg.Config, reservationName string) 
 		name := obj["name"].(string)
 
 		deleteUrl := config.BigqueryReservationBasePath + name
-		_, err = SendRequest(config, "DELETE", config.Project, deleteUrl, config.UserAgent, nil)
+		_, err = transport_tpg.SendRequest(config, "DELETE", config.Project, deleteUrl, config.UserAgent, nil)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {

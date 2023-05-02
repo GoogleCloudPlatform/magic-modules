@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Page'
-base_url: "{{parent}}/pages"
+base_url: '{{parent}}/pages'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -33,13 +33,13 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dialogflowcx_page_full"
-    primary_resource_id: "basic_page"
+    name: 'dialogflowcx_page_full'
+    primary_resource_id: 'basic_page'
     vars:
-      agent_name: "dialogflowcx-agent"
+      agent_name: 'dialogflowcx-agent'
 skip_sweeper: true
-id_format: "{{parent}}/pages/{{name}}"
-import_format: ["{{parent}}/pages/{{name}}"]
+id_format: '{{parent}}/pages/{{name}}'
+import_format: ['{{parent}}/pages/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
