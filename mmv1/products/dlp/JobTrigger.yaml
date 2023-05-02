@@ -790,7 +790,6 @@ properties:
                 values:
                   - :TOP
                   - :RANDOM_START
-                default_value: :TOP
               - !ruby/object:Api::Type::Array
                 name: 'identifyingFields'
                 description: |
