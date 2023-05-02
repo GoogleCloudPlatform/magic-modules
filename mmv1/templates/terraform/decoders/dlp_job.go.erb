@@ -15,13 +15,13 @@
 // The GET endpoint contains the configuration used for creating the risk job
 // inside the 'riskDetails.requestedOptions.jobConfig' field. Hence, this field
 // is getting extracted into a new field named 'riskJob' in the response body.
-vRD, ok := res["riskDetails"]
-if ok && vRD != nil {
-    vrRO, ok := vRD.(map[string]interface{})["requestedOptions"]
-    if ok && vrRO != nil {
-        vRJC, ok := vrRO.(map[string]interface{})["jobConfig"]
-        if ok && vRJC != nil {
-            res["riskJob"] = vRJC.(map[string]interface{})
+riskDetails, ok := res["riskDetails"]
+if ok && riskDetails != nil {
+    requestedOptionsRiskJob, ok := riskDetails.(map[string]interface{})["requestedOptions"]
+    if ok && requestedOptionsRiskJob != nil {
+        riskJobConfig, ok := requestedOptionsRiskJob.(map[string]interface{})["jobConfig"]
+        if ok && riskJobConfig != nil {
+            res["riskJob"] = riskJobConfig.(map[string]interface{})
         }
     }
 }
@@ -36,9 +36,9 @@ if jobIdAsInterface == nil {
 }
 jobIdAsString := fmt.Sprintf("%v", jobIdAsInterface)
 
-// jobId returned from the API will contain the prefix 'r-' or 'i-' based on the
-// type of job being created. Hence, to avoid state drift, we are trimming such
-// prefix from the jobId.
+// jobId returned in the name field from the API will contain the prefix 'r-' 
+// or 'i-' based on the type of job being created. Hence, to avoid state drift,
+// we are trimming such prefix from the jobId.
 jobIdAsString = strings.TrimPrefix(jobIdAsString, "r-")
 if err := d.Set("job_id", jobIdAsString); err != nil {
     return nil, fmt.Errorf(`Error setting field "job_id": %s`, err)
