@@ -144,4 +144,4 @@ properties:
           Resource name of the dataset source for this listing. e.g.
           projects/myproject/datasets/123
         required: true
-        diff_suppress_func: 'ProjectNumberDiffSuppress'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'

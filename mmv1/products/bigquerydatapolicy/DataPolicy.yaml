@@ -73,7 +73,7 @@ properties:
     description: |-
       Policy tag resource name, in the format of projects/{project_number}/locations/{locationId}/taxonomies/{taxonomyId}/policyTags/{policyTag_id}.
     required: true
-    diff_suppress_func: 'ProjectNumberDiffSuppress'
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: dataPolicyType
     description: |

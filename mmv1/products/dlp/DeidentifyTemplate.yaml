@@ -675,7 +675,7 @@ properties:
                                           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
                                         validation:
                                           !ruby/object:Provider::Terraform::Validation
-                                          function: 'validateRFC3339Date'
+                                          function: 'verify.ValidateRFC3339Date'
                                       - !ruby/object:Api::Type::NestedObject
                                         name: timeValue
                                         description: Represents a time of day.
@@ -805,7 +805,7 @@ properties:
                                 A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
                               validation:
                                 !ruby/object:Provider::Terraform::Validation
-                                function: 'validateRFC3339Date'
+                                function: 'verify.ValidateRFC3339Date'
                             - !ruby/object:Api::Type::NestedObject
                               name: timeValue
                               description: Represents a time of day.

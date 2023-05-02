@@ -76,7 +76,7 @@ parameters:
       The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions,
       https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateADDomainName()'
+      function: 'verify.ValidateADDomainName()'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
