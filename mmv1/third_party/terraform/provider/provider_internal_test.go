@@ -8,11 +8,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/magic-modules/mmv1/third_party/terraform/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
+	"github.com/hashicorp/magic-modules/mmv1/third_party/terraform/envvar"
+	"github.com/hashicorp/magic-modules/mmv1/third_party/terraform/tpgresource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
@@ -1026,7 +1023,7 @@ func TestProvider_providerConfigure_userProjectOverride(t *testing.T) {
 			ExpectError: true,
 		},
 		"when no values are provided via config or environment variables, the field remains unset without error": {
-			ExpectError:      true,
+			ExpectError:      false,
 			ExpectFieldUnset: true,
 		},
 	}
