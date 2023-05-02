@@ -42,7 +42,7 @@ func (ld *LocationDescription) getLocation() (types.String, error) {
 	}
 
 	// Location from zone in provider config
-	if !ld.ProviderZone.IsNull() {
+	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() {
 		return ld.ProviderZone, nil
 	}
 
@@ -61,11 +61,11 @@ func (ld *LocationDescription) getRegion() (types.String, error) {
 		return types.StringValue(region), nil
 	}
 	// Region from provider config
-	if !ld.ProviderRegion.IsNull() {
+	if !ld.ProviderRegion.IsNull() && !ld.ProviderRegion.IsUnknown() {
 		return ld.ProviderRegion, nil
 	}
 	// Region from zone in provider config
-	if !ld.ProviderZone.IsNull() {
+	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() {
 		region := getRegionFromZone(ld.ProviderZone.ValueString())
 		return types.StringValue(region), nil
 	}
@@ -85,7 +85,7 @@ func (ld *LocationDescription) getZone() (types.String, error) {
 		zone := GetResourceNameFromSelfLink(ld.ResourceZone.ValueString())
 		return types.StringValue(zone), nil
 	}
-	if !ld.ProviderZone.IsNull() {
+	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() {
 		return ld.ProviderZone, nil
 	}
 
