@@ -89,35 +89,37 @@ func testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterT
 
 resource "google_access_context_manager_ingress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
-  resource       = "projects/%d"
-  ingress_from {
-    identity_type = "ANY_IDENTITY"
-  }
-  ingress_to {
-	resources = [ "*" ]
-	operations {
-		service_name = "bigquery.googleapis.com"
-
-		method_selectors {
-			method = "BigQueryStorage.ReadRows"
+  ingress_policy       = "projects/%d"
+  ingress_policies {
+	ingress_from {
+		identity_type = "ANY_IDENTITY"
+	  }
+	  ingress_to {
+		resources = [ "*" ]
+		operations {
+			service_name = "bigquery.googleapis.com"
+	
+			method_selectors {
+				method = "BigQueryStorage.ReadRows"
+			}
+	
+			method_selectors {
+				method = "TableService.ListTables"
+			}
+	
+			method_selectors {
+				permission = "bigquery.jobs.get"
+			}
 		}
-
-		method_selectors {
-			method = "TableService.ListTables"
+	
+		operations {
+			service_name = "storage.googleapis.com"
+	
+			method_selectors {
+				method = "google.storage.objects.create"
+			}
 		}
-
-		method_selectors {
-			permission = "bigquery.jobs.get"
-		}
-	}
-
-	operations {
-		service_name = "storage.googleapis.com"
-
-		method_selectors {
-			method = "google.storage.objects.create"
-		}
-	}
+  	}
   }
 }
 
