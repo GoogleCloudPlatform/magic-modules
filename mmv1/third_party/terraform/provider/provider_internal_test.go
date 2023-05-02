@@ -1076,6 +1076,87 @@ func TestProvider_providerConfigure_userProjectOverride(t *testing.T) {
 	}
 }
 
+func TestProvider_providerConfigure_scopes(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValues  map[string]interface{}
+		EnvVariables  map[string]string
+		ExpectedValue []string
+		ExpectError   bool
+	}{
+		"scopes are set in the provider config as a list": {
+			ConfigValues: map[string]interface{}{
+				"credentials": testFakeCredentialsPath,
+				"scopes": []string{
+					"fizz",
+					"buzz",
+					"fizzbuzz",
+				},
+			},
+			ExpectedValue: []string{
+				"fizz",
+				"buzz",
+				"fizzbuzz",
+			},
+		},
+		"scopes can be left unset in the provider config without any issues": {
+			ConfigValues: map[string]interface{}{
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectedValue: []string{},
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			ctx, p, d := setupSDKProviderConfigTest(t, tc.ConfigValues, tc.EnvVariables)
+
+			// Act
+			c, diags := providerConfigure(ctx, d, p)
+
+			// Assert
+			if diags.HasError() && !tc.ExpectError {
+				t.Fatalf("unexpected error(s): %#v", diags)
+			}
+			if !diags.HasError() && tc.ExpectError {
+				t.Fatal("expected error(s) but got none")
+			}
+			if diags.HasError() && tc.ExpectError {
+				// Return early in tests where errors expected
+				return
+			}
+
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			v, ok := d.GetOk("scoops")
+			if ok {
+				val := v.([]string)
+
+				if len(val) != len(tc.ExpectedValue) {
+					t.Fatalf("expected scopes value set in provider data to be %v, got %v", tc.ExpectedValue, val)
+				}
+				for i, el := range val {
+					if el != tc.ExpectedValue[i] {
+						t.Fatalf("expected scopes value set in provider data to be %v, got %v", tc.ExpectedValue, val)
+					}
+				}
+
+				if len(config.Scopes) != len(tc.ExpectedValue) {
+					t.Fatalf("expected scopes value in provider struct to be %v, got %v", tc.ExpectedValue, config.Scopes)
+				}
+				for i, el := range config.Scopes {
+					if el != tc.ExpectedValue[i] {
+						t.Fatalf("expected scopes value set in provider data to be %v, got %v", tc.ExpectedValue, val)
+					}
+				}
+			}
+			if !ok && (len(tc.ExpectedValue) > 0) {
+				t.Fatalf("expected scopes value in provider struct to be %v, got %v", tc.ExpectedValue, config.Scopes)
+			}
+		})
+	}
+}
+
 func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
