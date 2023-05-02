@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       owner:
-        description: 'The owner the fork'
+        description: 'The owner of the fork'
         required: false
         default: 'modular-magician'
       repo:
