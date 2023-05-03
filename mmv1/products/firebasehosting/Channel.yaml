@@ -20,7 +20,7 @@ create_url: sites/{{site_id}}/channels?channelId={{channel_id}}
 update_verb: :PATCH
 update_mask: true
 description: |
-  A `Channel` represents a stream of releases for a site. All sites have a default 
+  A `Channel` represents a stream of releases for a site. All sites have a default
   `live` channel that serves content to the Firebase-provided subdomains and any
   connected custom domains.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -30,18 +30,18 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 import_format: ['sites/{{site_id}}/channels/{{channel_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_channel_basic"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebasehosting_channel_basic'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
       site_id: site-with-channel
       channel_id: channel-basic
     test_env_vars:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_channel_full"
-    min_version: "beta"
-    primary_resource_id: "full"
+    name: 'firebasehosting_channel_full'
+    min_version: 'beta'
+    primary_resource_id: 'full'
     vars:
       site_id: site-with-channel
       channel_id: channel-full

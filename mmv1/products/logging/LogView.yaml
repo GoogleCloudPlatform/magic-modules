@@ -16,20 +16,21 @@ name: LogView
 base_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views'
 create_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views?viewId={{name}}'
 self_link: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
-import_format: ['{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}']
+import_format:
+  ['{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}']
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://cloud.google.com/logging/docs/apis"
-  api: "https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.locations.buckets.views"
-description: "Describes a view over log entries in a bucket."
+    'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
+  api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.locations.buckets.views'
+description: 'Describes a view over log entries in a bucket.'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'logging_log_view_basic'
     primary_resource_id: 'logging_log_view'
     vars:
-      log_view_name: "my-view"
+      log_view_name: 'my-view'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
@@ -50,12 +51,13 @@ parameters:
     diff_suppress_func: 'compareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: location
-    description: 'The location of the resource. The supported locations are: global, us-central1, us-east1, us-west1, asia-east1, europe-west1.'
+    description:
+      'The location of the resource. The supported locations are: global,
+      us-central1, us-east1, us-west1, asia-east1, europe-west1.'
     url_param_only: true
     immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    # Make this a String for now since we don't have a good way to reference multiple resources.
+  - !ruby/object:Api::Type::String # Make this a String for now since we don't have a good way to reference multiple resources.
     name: bucket
     description: The bucket of the resource
     url_param_only: true
@@ -65,7 +67,9 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    description: 'The resource name of the view. For example: \`projects/my-project/locations/global/buckets/my-bucket/views/my-view\`'
+    description:
+      'The resource name of the view. For example:
+      \`projects/my-project/locations/global/buckets/my-bucket/views/my-view\`'
     required: true
     immutable: true
     ignore_read: true
@@ -83,5 +87,9 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: filter
-    description: 'Filter that restricts which log entries in a bucket are visible in this view. Filters are restricted to be a logical AND of ==/!= of any of the following: - originating project/folder/organization/billing account. - resource type - log id For example: SOURCE("projects/myproject") AND resource.type = "gce_instance" AND LOG_ID("stdout")'
-
+    description:
+      'Filter that restricts which log entries in a bucket are visible in this
+      view. Filters are restricted to be a logical AND of ==/!= of any of the
+      following: - originating project/folder/organization/billing account. -
+      resource type - log id For example: SOURCE("projects/myproject") AND
+      resource.type = "gce_instance" AND LOG_ID("stdout")'

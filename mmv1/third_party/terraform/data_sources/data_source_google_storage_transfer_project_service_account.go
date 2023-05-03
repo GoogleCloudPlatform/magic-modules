@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleStorageTransferProjectServiceAccount() *schema.Resource {
@@ -32,7 +33,7 @@ func DataSourceGoogleStorageTransferProjectServiceAccount() *schema.Resource {
 }
 
 func dataSourceGoogleStorageTransferProjectServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -45,7 +46,7 @@ func dataSourceGoogleStorageTransferProjectServiceAccountRead(d *schema.Resource
 
 	serviceAccount, err := config.NewStorageTransferClient(userAgent).GoogleServiceAccounts.Get(project).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, "Google Cloud Storage Transfer service account not found")
+		return transport_tpg.HandleNotFoundError(err, d, "Google Cloud Storage Transfer service account not found")
 	}
 
 	d.SetId(serviceAccount.AccountEmail)

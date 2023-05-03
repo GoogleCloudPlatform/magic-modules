@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceAccessApprovalFolderServiceAccount() *schema.Resource {
@@ -28,7 +29,7 @@ func DataSourceAccessApprovalFolderServiceAccount() *schema.Resource {
 }
 
 func dataSourceAccessApprovalFolderServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -46,9 +47,9 @@ func dataSourceAccessApprovalFolderServiceAccountRead(d *schema.ResourceData, me
 		billingProject = bp
 	}
 
-	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("AccessApprovalFolderServiceAccount %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("AccessApprovalFolderServiceAccount %q", d.Id()))
 	}
 
 	if err := d.Set("name", res["name"]); err != nil {

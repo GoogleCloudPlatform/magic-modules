@@ -5,6 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/cloudfunctions/v1"
 
 	"fmt"
@@ -57,7 +59,7 @@ func (s *cloudFunctionId) locationId() string {
 	return fmt.Sprintf("projects/%s/locations/%s", s.Project, s.Region)
 }
 
-func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*cloudFunctionId, error) {
+func parseCloudFunctionId(d *schema.ResourceData, config *transport_tpg.Config) (*cloudFunctionId, error) {
 	if err := ParseImportId([]string{
 		"projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/functions/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
@@ -76,7 +78,7 @@ func parseCloudFunctionId(d *schema.ResourceData, config *Config) (*cloudFunctio
 // at start/end
 func validateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []string, errors []error) {
 	re := `^(?:[a-zA-Z](?:[-_a-zA-Z0-9]{0,61}[a-zA-Z0-9])?)$`
-	return validateRegexp(re)(v, k)
+	return verify.ValidateRegexp(re)(v, k)
 }
 
 func partsCompare(a, b, reg string) bool {
@@ -462,7 +464,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 }
 
 func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -593,7 +595,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	// We retry the whole create-and-wait because Cloud Functions
 	// will sometimes fail a creation operation entirely if it fails to pull
 	// source code and we need to try the whole creation again.
-	rerr := RetryTimeDuration(func() error {
+	rerr := transport_tpg.RetryTimeDuration(func() error {
 		op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Create(
 			cloudFuncId.locationId(), function).Do()
 		if err != nil {
@@ -614,7 +616,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -627,7 +629,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 
 	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
 	}
 
 	if err := d.Set("name", cloudFuncId.Name); err != nil {
@@ -744,7 +746,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 
 func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG]: Updating google_cloudfunctions_function")
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -763,7 +765,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	// The full function needs to supplied in the PATCH call to evaluate some Organization Policies. https://github.com/hashicorp/terraform-provider-google/issues/6603
 	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
 	}
 
 	// The full function may contain a reference to manually uploaded code if the function was imported from gcloud
@@ -892,7 +894,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if len(updateMaskArr) > 0 {
 		log.Printf("[DEBUG] Send Patch CloudFunction Configuration request: %#v", function)
 		updateMask := strings.Join(updateMaskArr, ",")
-		rerr := RetryTimeDuration(func() error {
+		rerr := transport_tpg.RetryTimeDuration(func() error {
 			op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Patch(function.Name, function).
 				UpdateMask(updateMask).Do()
 			if err != nil {
@@ -912,7 +914,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

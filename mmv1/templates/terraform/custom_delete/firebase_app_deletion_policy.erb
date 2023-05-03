@@ -27,9 +27,9 @@
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, "App")
+		return transport_tpg.HandleNotFoundError(err, d, "App")
 	}
 
 	err = FirebaseOperationWaitTime(

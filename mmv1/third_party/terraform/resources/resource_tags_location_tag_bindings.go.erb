@@ -4,6 +4,7 @@ package google
 import (
 	"fmt"
 	"log"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"reflect"
 	"strings"
 	"time"
@@ -57,7 +58,7 @@ Examples: US, EU, asia-northeast1. The default value is US.`,
 }
 
 func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -92,7 +93,7 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating LocationTagBinding: %s", err)
 	}
@@ -137,7 +138,7 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 }
 
 func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -155,9 +156,9 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		billingProject = bp
 	}
 
-	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 	}
 	log.Printf("[DEBUG] Skipping res with name for import = %#v,)", res)
 
@@ -170,13 +171,13 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 	//if there are more than 300 bindings - handling pagination over here
 	if pageToken, ok := res["nextPageToken"].(string); ok {
 		for pageToken != "" {
-			url, err = AddQueryParams(url, map[string]string{"pageToken": fmt.Sprintf("%s", res["nextPageToken"])})
+			url, err = transport_tpg.AddQueryParams(url, map[string]string{"pageToken": fmt.Sprintf("%s", res["nextPageToken"])})
 			if err != nil {
-				return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
+				return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 			}
-			resp, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
+			resp, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
 			if err != nil {
-				return handleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
+				return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagsLocationTagBinding %q", d.Id()))
 			}
 			if resp == nil {
 				d.SetId("")
@@ -217,7 +218,7 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 }
 
 func resourceTagsLocationTagBindingDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -238,9 +239,9 @@ func resourceTagsLocationTagBindingDelete(d *schema.ResourceData, meta interface
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, "LocationTagBinding")
+		return transport_tpg.HandleNotFoundError(err, d, "LocationTagBinding")
 	}
 
 	err = TagsLocationOperationWaitTime(
@@ -256,7 +257,7 @@ func resourceTagsLocationTagBindingDelete(d *schema.ResourceData, meta interface
 }
 
 func resourceTagsLocationTagBindingImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	if err := ParseImportId([]string{"(?P<location>[^/]+)/tagBindings/(?P<parent>[^/]+)/tagValues/(?P<tag_value>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
@@ -274,23 +275,23 @@ func resourceTagsLocationTagBindingImport(d *schema.ResourceData, meta interface
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenNestedTagsLocationTagBindingName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenNestedTagsLocationTagBindingName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenNestedTagsLocationTagBindingParent(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenNestedTagsLocationTagBindingParent(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenNestedTagsLocationTagBindingTagValue(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenNestedTagsLocationTagBindingTagValue(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func expandNestedTagsLocationTagBindingParent(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandNestedTagsLocationTagBindingParent(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandNestedTagsLocationTagBindingTagValue(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandNestedTagsLocationTagBindingTagValue(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
@@ -323,7 +324,7 @@ func flattenNestedTagsLocationTagBinding(d *schema.ResourceData, meta interface{
 
 func resourceTagsLocationTagBindingFindNestedObjectInList(d *schema.ResourceData, meta interface{}, items []interface{}) (index int, item map[string]interface{}, err error) {
 	expectedName := d.Get("name")
-	expectedFlattenedName := flattenNestedTagsLocationTagBindingName(expectedName, d, meta.(*Config))
+	expectedFlattenedName := flattenNestedTagsLocationTagBindingName(expectedName, d, meta.(*transport_tpg.Config))
 
 	// Search list for this resource.
 	for idx, itemRaw := range items {
@@ -332,7 +333,7 @@ func resourceTagsLocationTagBindingFindNestedObjectInList(d *schema.ResourceData
 		}
 
 		item := itemRaw.(map[string]interface{})
-		itemName := flattenNestedTagsLocationTagBindingName(item["name"], d, meta.(*Config))
+		itemName := flattenNestedTagsLocationTagBindingName(item["name"], d, meta.(*transport_tpg.Config))
 		// isEmptyValue check so that if one is nil and the other is "", that's considered a match
 		if !(isEmptyValue(reflect.ValueOf(itemName)) && isEmptyValue(reflect.ValueOf(expectedFlattenedName))) && !reflect.DeepEqual(itemName, expectedFlattenedName) {
 			log.Printf("[DEBUG] Skipping item with name= %#v, looking for %#v)", itemName, expectedFlattenedName)

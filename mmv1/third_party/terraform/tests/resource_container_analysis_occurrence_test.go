@@ -3,6 +3,8 @@ package google
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"io/ioutil"
 	"testing"
 
@@ -28,7 +30,7 @@ func getTestOccurrenceAttestationPayload(t *testing.T) string {
 }
 
 func getSignedTestOccurrenceAttestationPayload(
-	t *testing.T, config *Config,
+	t *testing.T, config *transport_tpg.Config,
 	signingKey BootstrappedKMS, rawPayload string) string {
 	pbytes := []byte(rawPayload)
 	ssum := sha512.Sum512(pbytes)
@@ -70,7 +72,7 @@ func TestAccContainerAnalysisOccurrence_basic(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -122,7 +124,7 @@ func TestAccContainerAnalysisOccurrence_multipleSignatures(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerAnalysisNoteDestroyProducer(t),
 		Steps: []resource.TestStep{

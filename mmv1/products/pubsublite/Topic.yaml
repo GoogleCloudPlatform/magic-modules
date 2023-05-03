@@ -26,15 +26,17 @@ update_mask: true
 update_url: projects/{{project}}/locations/{{zone}}/topics/{{name}}
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "pubsub_lite_topic_basic"
-    primary_resource_id: "example"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\", context[\"random_suffix\"\
+    name: 'pubsub_lite_topic_basic'
+    primary_resource_id: 'example'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      reservation_name: "example-reservation"
-      topic_name: "example-topic"
+      reservation_name: 'example-reservation'
+      topic_name: 'example-topic'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/pubsub_lite.erb
+  encoder:
+    templates/terraform/encoders/pubsub_lite.erb
     #   update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
 parameters:
   - !ruby/object:Api::Type::String

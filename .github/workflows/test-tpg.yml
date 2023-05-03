@@ -1,10 +1,12 @@
 name: Build and Unit Test GA Provider
 
+permissions: read-all
+
 on:
   workflow_dispatch:
     inputs:
       owner:
-        description: 'The owner the fork'
+        description: 'The owner of the fork'
         required: false
         default: 'modular-magician'
       repo:
@@ -37,8 +39,11 @@ jobs:
       run: |
         cd provider
         make lint
+      if: ${{ always() }} # This step will always run, even if the previous fails
     - name: Test
       run: |
         cd provider
         make test
+      if: ${{ always() }} # This step will always run, even if the previous fails
+
 

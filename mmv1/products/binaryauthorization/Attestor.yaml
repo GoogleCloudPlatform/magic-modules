@@ -25,27 +25,28 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/binary-authorization/'
   api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
-import_format: ["projects/{{project}}/attestors/{{name}}"]
+import_format: ['projects/{{project}}/attestors/{{name}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/binaryauthorization_attestor.go'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "binary_authorization_attestor_basic"
-    primary_resource_id: "attestor"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-test-attestor%s\", context[\"random_suffix\"\
+    name: 'binary_authorization_attestor_basic'
+    primary_resource_id: 'attestor'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-attestor%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      attestor_name: "test-attestor"
-      note_name: "test-attestor-note"
+      attestor_name: 'test-attestor'
+      note_name: 'test-attestor-note'
   - !ruby/object:Provider::Terraform::Examples
-    name: "binary_authorization_attestor_kms"
-    primary_resource_id: "attestor"
+    name: 'binary_authorization_attestor_kms'
+    primary_resource_id: 'attestor'
     skip_test: true
     vars:
-      attestor_name: "test-attestor"
-      note_name: "test-attestor-note"
-      key_name: "test-attestor-key"
-      keyring_name: "test-attestor-key-ring"
+      attestor_name: 'test-attestor'
+      note_name: 'test-attestor-note'
+      key_name: 'test-attestor-key'
+      keyring_name: 'test-attestor-key-ring'
 properties:
   - !ruby/object:Api::Type::String
     name: name

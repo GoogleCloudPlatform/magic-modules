@@ -2,6 +2,8 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"path"
 	"testing"
 
@@ -17,7 +19,7 @@ func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
 		ExpectedError        bool
 		ExpectedTerraformId  string
 		ExpectedDicomStoreId string
-		Config               *Config
+		Config               *transport_tpg.Config
 	}{
 		"id is in project/location/datasetName/dicomStoreName format": {
 			ImportId:             "test-project/us-central1/test-dataset/test-store-name",
@@ -36,12 +38,12 @@ func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
 			ExpectedError:        false,
 			ExpectedTerraformId:  "test-project/us-central1/test-dataset/test-store-name",
 			ExpectedDicomStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/dicomStores/test-store-name",
-			Config:               &Config{Project: "test-project"},
+			Config:               &transport_tpg.Config{Project: "test-project"},
 		},
 		"id is in location/datasetName/dicomStoreName format without project in config": {
 			ImportId:      "us-central1/test-dataset/test-store-name",
 			ExpectedError: true,
-			Config:        &Config{Project: ""},
+			Config:        &transport_tpg.Config{Project: ""},
 		},
 	}
 
@@ -78,7 +80,7 @@ func TestAccHealthcareDicomStore_basic(t *testing.T) {
 	resourceName := "google_healthcare_dicom_store.default"
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckHealthcareDicomStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -164,7 +166,7 @@ func testAccCheckGoogleHealthcareDicomStoreUpdate(t *testing.T, pubsubTopic stri
 
 			config := GoogleProviderConfig(t)
 
-			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/dicomStores/{{name}}")
+			gcpResourceUri, err := acctest.ReplaceVarsForTest(config, rs, "{{dataset}}/dicomStores/{{name}}")
 			if err != nil {
 				return err
 			}

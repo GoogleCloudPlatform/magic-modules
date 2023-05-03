@@ -13,6 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
 	"google.golang.org/api/dataproc/v1"
 )
 
@@ -1004,14 +1007,14 @@ by Dataproc`,
 							AtLeastOneOf:     clusterConfigKeys,
 							MaxItems:         1,
 							Description:      `The autoscaling policy config associated with the cluster.`,
-							DiffSuppressFunc: EmptyOrUnsetBlockDiffSuppress,
+							DiffSuppressFunc: tpgresource.EmptyOrUnsetBlockDiffSuppress,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"policy_uri": {
 										Type:             schema.TypeString,
 										Required:         true,
 										Description:      `The autoscaling policy used by the cluster.`,
-										DiffSuppressFunc: LocationDiffSuppress,
+										DiffSuppressFunc: tpgresource.LocationDiffSuppress,
 									},
 								},
 							},
@@ -1063,7 +1066,7 @@ by Dataproc`,
 										Type:             schema.TypeString,
 										Optional:         true,
 										Description:      `The time when cluster will be auto-deleted. A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".`,
-										DiffSuppressFunc: TimestampDiffSuppress(time.RFC3339Nano),
+										DiffSuppressFunc: tpgresource.TimestampDiffSuppress(time.RFC3339Nano),
 										AtLeastOneOf: []string{
 											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
 											"cluster_config.0.lifecycle_config.0.auto_delete_time",
@@ -1294,7 +1297,7 @@ func acceleratorsSchema() *schema.Resource {
 }
 
 func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -1354,7 +1357,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 	return resourceDataprocClusterRead(d, meta)
 }
 
-func expandVirtualClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.VirtualClusterConfig, error) {
+func expandVirtualClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (*dataproc.VirtualClusterConfig, error) {
 	conf := &dataproc.VirtualClusterConfig{}
 
 	if v, ok := d.GetOk("virtual_cluster_config"); ok {
@@ -1536,7 +1539,7 @@ func expandGkeNodePoolAutoscalingConfig(cfg map[string]interface{}) *dataproc.Gk
 	return conf
 }
 
-func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.ClusterConfig, error) {
+func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (*dataproc.ClusterConfig, error) {
 	conf := &dataproc.ClusterConfig{
 		// SDK requires GceClusterConfig to be specified,
 		// even if no explicit values specified
@@ -1617,7 +1620,7 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 	return conf, nil
 }
 
-func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.GceClusterConfig, error) {
+func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (*dataproc.GceClusterConfig, error) {
 	conf := &dataproc.GceClusterConfig{}
 
 	v, ok := d.GetOk("cluster_config.0.gce_cluster_config")
@@ -1944,7 +1947,7 @@ func expandAccelerators(configured []interface{}) []*dataproc.AcceleratorConfig 
 }
 
 func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -2051,7 +2054,7 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -2068,7 +2071,7 @@ func resourceDataprocClusterRead(d *schema.ResourceData, meta interface{}) error
 	cluster, err := config.NewDataprocClient(userAgent).Projects.Regions.Clusters.Get(
 		project, region, clusterName).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Dataproc Cluster %q", clusterName))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Dataproc Cluster %q", clusterName))
 	}
 
 	if err := d.Set("name", cluster.ClusterName); err != nil {
@@ -2533,7 +2536,7 @@ func extractInitTimeout(t string) (int, error) {
 }
 
 func resourceDataprocClusterDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

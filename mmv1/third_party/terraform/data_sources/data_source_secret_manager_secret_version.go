@@ -3,6 +3,7 @@ package google
 import (
 	"encoding/base64"
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"regexp"
 
@@ -54,7 +55,7 @@ func DataSourceSecretManagerSecretVersion() *schema.Resource {
 }
 
 func dataSourceSecretManagerSecretVersionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -91,7 +92,7 @@ func dataSourceSecretManagerSecretVersionRead(d *schema.ResourceData, meta inter
 	}
 
 	var version map[string]interface{}
-	version, err = SendRequest(config, "GET", project, url, userAgent, nil)
+	version, err = transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving available secret manager secret versions: %s", err.Error())
 	}
@@ -111,7 +112,7 @@ func dataSourceSecretManagerSecretVersionRead(d *schema.ResourceData, meta inter
 	}
 
 	url = fmt.Sprintf("%s:access", url)
-	resp, err := SendRequest(config, "GET", project, url, userAgent, nil)
+	resp, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving available secret manager secret version access: %s", err.Error())
 	}

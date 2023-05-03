@@ -2,6 +2,8 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"sort"
 	"testing"
 
@@ -15,10 +17,10 @@ import (
 func TestAccFolderIamBinding_basic(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
@@ -45,13 +47,13 @@ func TestAccFolderIamBinding_basic(t *testing.T) {
 // Test that multiple IAM bindings can be applied to a folder, one at a time
 func TestAccFolderIamBinding_multiple(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
@@ -92,13 +94,13 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 // Test that multiple IAM bindings can be applied to a folder all at once
 func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
@@ -130,10 +132,10 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 func TestAccFolderIamBinding_update(t *testing.T) {
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
@@ -180,13 +182,13 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 // Test that an IAM binding can be removed from a folder
 func TestAccFolderIamBinding_remove(t *testing.T) {
 	// Multiple fine-grained resources
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
 	fname := "tf-test-" + RandString(t, 10)
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new folder
@@ -253,7 +255,7 @@ func testAccCheckGoogleFolderIamBindingExists(t *testing.T, expected *cloudresou
 	}
 }
 
-func getFolderIamPolicyByParentAndDisplayName(parent, displayName string, config *Config) (*cloudresourcemanager.Policy, error) {
+func getFolderIamPolicyByParentAndDisplayName(parent, displayName string, config *transport_tpg.Config) (*cloudresourcemanager.Policy, error) {
 	var folderMatch *resourceManagerV3.Folder
 	token := ""
 

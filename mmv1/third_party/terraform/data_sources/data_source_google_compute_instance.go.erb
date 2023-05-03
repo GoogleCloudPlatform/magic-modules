@@ -4,6 +4,7 @@ package google
 import (
 	"fmt"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -21,7 +22,7 @@ func DataSourceGoogleComputeInstance() *schema.Resource {
 }
 
 func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -34,7 +35,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", name))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", name))
 	}
 
 	md := flattenMetadataBeta(instance.Metadata)

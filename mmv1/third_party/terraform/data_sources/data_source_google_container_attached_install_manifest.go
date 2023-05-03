@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleContainerAttachedInstallManifest() *schema.Resource {
@@ -36,7 +37,7 @@ func DataSourceGoogleContainerAttachedInstallManifest() *schema.Resource {
 }
 
 func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -66,11 +67,11 @@ func dataSourceGoogleContainerAttachedInstallManifestRead(d *schema.ResourceData
 		"attached_cluster_id": clusterId,
 		"platform_version":    platformVersion,
 	}
-	url, err = AddQueryParams(url, params)
+	url, err = transport_tpg.AddQueryParams(url, params)
 	if err != nil {
 		return err
 	}
-	res, err := SendRequest(config, "GET", project, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return err
 	}

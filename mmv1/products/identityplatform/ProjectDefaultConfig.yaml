@@ -30,11 +30,12 @@ docs: !ruby/object:Provider::Terraform::Docs
     in the provider configuration. Otherwise the ACM API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-id_format: "{{project}}"
+id_format: '{{project}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "identity_platform_project_default_config"
-    primary_resource_id: "default"
+    name: 'identity_platform_project_default_config'
+    primary_resource_id:
+      'default'
       # skip tests for this resource until we ensure other settings will not be cleared
       # see https://github.com/hashicorp/terraform-provider-google/issues/13327
     skip_test: true
@@ -62,8 +63,8 @@ properties:
           - !ruby/object:Api::Type::Boolean
             name: 'passwordRequired'
             description: |
-              Whether a password is required for email auth or not. If true, both an email and 
-              password must be provided to sign in. If false, a user may sign in via either 
+              Whether a password is required for email auth or not. If true, both an email and
+              password must be provided to sign in. If false, a user may sign in via either
               email/password or email link.
       - !ruby/object:Api::Type::NestedObject
         name: phoneNumber
@@ -123,4 +124,3 @@ properties:
             output: true
             description: |
               Memory cost for hash calculation. Used by scrypt and other similar password derivation algorithms. See https://tools.ietf.org/html/rfc7914 for explanation of field.
-

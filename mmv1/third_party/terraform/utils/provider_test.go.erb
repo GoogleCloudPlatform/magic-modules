@@ -4,6 +4,8 @@ package google
 import (
 	"context"
 	"errors"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"fmt"
 	"io/ioutil"
 	"regexp"
@@ -121,7 +123,16 @@ func setupSDKProviderConfigTest(t *testing.T, configValues map[string]interface{
 		}
 	}
 
-	// Set ENVs
+	// Unset any ENVs in the test environment here
+	// The testing package restores the original values afterwards
+	envs := acctest.ProviderConfigEnvNames()
+	if len(envs) > 0 {
+		for _, k := range envs {
+			t.Setenv(k, "")
+		}
+	}
+
+	// Set ENVs for the test case
 	if len(envValues) > 0 {
 		for k, v := range envValues {
 			t.Setenv(k, v)
@@ -277,7 +288,7 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 
 			v := d.Get("credentials")
 			val := v.(string)
-			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
 			if v != tc.ExpectedSchemaValue {
 				t.Fatalf("expected credentials value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
@@ -369,7 +380,7 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 
 			v := d.Get("access_token")
 			val := v.(string)
-			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
 			if val != tc.ExpectedSchemaValue {
 				t.Fatalf("expected access_token value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
@@ -450,7 +461,7 @@ func TestProvider_providerConfigure_impersonateServiceAccount(t *testing.T) {
 
 			v := d.Get("impersonate_service_account")
 			val := v.(string)
-			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected impersonate_service_account value set in provider data to be %s, got %s", tc.ExpectedValue, val)
@@ -526,7 +537,7 @@ func TestProvider_providerConfigure_impersonateServiceAccountDelegates(t *testin
 
 			v := d.Get("impersonate_service_account_delegates")
 			val := v.([]interface{})
-			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
 			if len(val) != len(tc.ExpectedValue) {
 				t.Fatalf("expected impersonate_service_account_delegates value set in provider data to be %#v, got %#v", tc.ExpectedValue, val)
@@ -659,7 +670,7 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 
 			v := d.Get("project")
 			val := v.(string)
-			config := c.(*Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected project value set in provider data to be %s, got %s", tc.ExpectedValue, val)
@@ -675,7 +686,7 @@ func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -695,7 +706,7 @@ func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
 	t.Parallel()
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -712,7 +723,7 @@ func TestAccProviderMeta_setModuleName(t *testing.T) {
 
 	moduleName := "my-module"
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -730,11 +741,11 @@ func TestAccProviderMeta_setModuleName(t *testing.T) {
 
 func TestAccProviderUserProjectOverride(t *testing.T) {
 	// Parallel fine-grained resource creation
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	billing := GetTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billing := acctest.GetTestBillingAccountFromEnv(t)
 	pid := "tf-test-" + RandString(t, 10)
 	topicName := "tf-test-topic-" + RandString(t, 10)
 
@@ -745,7 +756,7 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		// No TestDestroy since that's not really the point of this test
 		Steps: []resource.TestStep{
@@ -772,11 +783,11 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 // a reference to a different resource instead of a project field.
 func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 	// Parallel fine-grained resource creation
-	SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	org := GetTestOrgFromEnv(t)
-	billing := GetTestBillingAccountFromEnv(t)
+	org := acctest.GetTestOrgFromEnv(t)
+	billing := acctest.GetTestBillingAccountFromEnv(t)
 	pid := "tf-test-" + RandString(t, 10)
 
 	config := BootstrapConfig(t)
@@ -786,7 +797,7 @@ func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		// No TestDestroy since that's not really the point of this test
 		Steps: []resource.TestStep{

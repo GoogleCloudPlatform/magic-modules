@@ -43,13 +43,13 @@ identity:
   - entity
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "storage_bucket_access_control_public_bucket"
-    primary_resource_id: "public_rule"
+    name: 'storage_bucket_access_control_public_bucket'
+    primary_resource_id: 'public_rule'
     vars:
-      bucket_name: "static-content-bucket"
-id_format: "{{bucket}}/{{entity}}"
-import_format: ["{{bucket}}/{{entity}}"]
-mutex: "storage/buckets/{{bucket}}"
+      bucket_name: 'static-content-bucket'
+id_format: '{{bucket}}/{{entity}}'
+import_format: ['{{bucket}}/{{entity}}']
+mutex: 'storage/buckets/{{bucket}}'
 skip_sweeper: true
 properties:
   - !ruby/object:Api::Type::ResourceRef
@@ -92,7 +92,7 @@ properties:
     name: 'entityId'
     description: 'The ID for the entity'
     output: true
-  # | 'etag' is not applicable for state convergence.
+    # | 'etag' is not applicable for state convergence.
     exclude: true
   - !ruby/object:Api::Type::String
     name: 'id'

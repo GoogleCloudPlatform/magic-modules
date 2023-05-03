@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleComputeGlobalAddress() *schema.Resource {
@@ -76,7 +77,7 @@ func DataSourceGoogleComputeGlobalAddress() *schema.Resource {
 }
 
 func dataSourceGoogleComputeGlobalAddressRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -89,7 +90,7 @@ func dataSourceGoogleComputeGlobalAddressRead(d *schema.ResourceData, meta inter
 	name := d.Get("name").(string)
 	address, err := config.NewComputeClient(userAgent).GlobalAddresses.Get(project, name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Global Address Not Found : %s", name))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Global Address Not Found : %s", name))
 	}
 
 	if err := d.Set("address", address.Address); err != nil {

@@ -25,6 +25,13 @@ module Provider
   class Core
     include Compile::Core
 
+    TERRAFORM_PROVIDER_GA = 'github.com/hashicorp/terraform-provider-google'.freeze
+    TERRAFORM_PROVIDER_BETA = 'github.com/hashicorp/terraform-provider-google-beta'.freeze
+    TERRAFORM_PROVIDER_PRIVATE = 'internal/terraform-next'.freeze
+    RESOURCE_DIRECTORY_GA = 'google'.freeze
+    RESOURCE_DIRECTORY_BETA = 'google-beta'.freeze
+    RESOURCE_DIRECTORY_PRIVATE = 'google-private'.freeze
+
     def initialize(config, api, version_name, start_time)
       @config = config
       @api = api
@@ -195,23 +202,34 @@ module Provider
       # Replace the import pathes in utility files
       case @target_version_name
       when 'beta'
-        tpg = 'github.com/hashicorp/terraform-provider-google-beta'
-        dir = 'google-beta'
+        tpg = TERRAFORM_PROVIDER_BETA
+        dir = RESOURCE_DIRECTORY_BETA
       else
-        tpg = 'github.com/hashicorp/terraform-provider-google-private'
-        dir = 'google-private'
+        tpg = TERRAFORM_PROVIDER_PRIVATE
+        dir = RESOURCE_DIRECTORY_PRIVATE
       end
 
       data = File.read("#{output_folder}/#{target}")
       data = data.gsub(
-        'github.com/hashicorp/terraform-provider-google/google',
+        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}",
         "#{tpg}/#{dir}"
       )
       data = data.gsub(
-        'github.com/hashicorp/terraform-provider-google/version',
+        "#{TERRAFORM_PROVIDER_GA}/version",
         "#{tpg}/version"
       )
       File.write("#{output_folder}/#{target}", data)
+    end
+
+    def import_path
+      case @target_version_name
+      when 'ga'
+        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}"
+      when 'beta'
+        "#{TERRAFORM_PROVIDER_BETA}/#{RESOURCE_DIRECTORY_BETA}"
+      else
+        "#{TERRAFORM_PROVIDER_PRIVATE}/#{RESOURCE_DIRECTORY_PRIVATE}"
+      end
     end
 
     def generate_objects(output_folder, types, generate_code, generate_docs)

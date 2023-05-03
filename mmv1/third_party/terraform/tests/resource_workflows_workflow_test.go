@@ -3,9 +3,11 @@ package google
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccWorkflowsWorkflow_Update(t *testing.T) {
@@ -15,7 +17,7 @@ func TestAccWorkflowsWorkflow_Update(t *testing.T) {
 	workflowName := fmt.Sprintf("tf-test-acc-workflow-%d", RandInt(t))
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkflowsWorkflowDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -118,7 +120,7 @@ func TestWorkflowsWorkflowStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"name": "my-workflow",
 			},
-			Meta: &Config{},
+			Meta: &transport_tpg.Config{},
 		},
 		"short name stays": {
 			Attributes: map[string]interface{}{
@@ -127,7 +129,7 @@ func TestWorkflowsWorkflowStateUpgradeV0(t *testing.T) {
 			Expected: map[string]string{
 				"name": "my-workflow",
 			},
-			Meta: &Config{},
+			Meta: &transport_tpg.Config{},
 		},
 	}
 	for tn, tc := range cases {
@@ -159,7 +161,7 @@ func TestAccWorkflowsWorkflow_CMEK(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkflowsWorkflowDestroyProducer(t),
 		Steps: []resource.TestStep{

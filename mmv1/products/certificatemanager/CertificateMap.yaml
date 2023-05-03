@@ -39,13 +39,14 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/certificateMaps/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/global/certificateMaps/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "certificate_manager_certificate_map_basic"
-    primary_resource_id: "default"
+    name: 'certificate_manager_certificate_map_basic'
+    primary_resource_id: 'default'
     vars:
-      cert_map_name: "cert-map"
+      cert_map_name: 'cert-map'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'

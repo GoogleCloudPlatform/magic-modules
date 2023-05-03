@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"log"
 	"sort"
 
@@ -27,7 +28,7 @@ func DataSourceGoogleCloudRunLocations() *schema.Resource {
 }
 
 func dataSourceGoogleCloudRunLocationsRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -43,7 +44,7 @@ func dataSourceGoogleCloudRunLocationsRead(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	res, err := SendRequest(config, "GET", project, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error listing Cloud Run Locations : %s", err)
 	}

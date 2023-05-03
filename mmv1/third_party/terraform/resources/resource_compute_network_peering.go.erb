@@ -11,6 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/googleapi"
 
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
 <% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
 <% else -%>
@@ -18,7 +21,7 @@ import (
 <% end -%>
 )
 
-const peerNetworkLinkRegex = "projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
+const peerNetworkLinkRegex = "projects/(" + verify.ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
 
 func ResourceComputeNetworkPeering() *schema.Resource {
 	return &schema.Resource{
@@ -41,7 +44,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateGCEName,
+				ValidateFunc: verify.ValidateGCEName,
 				Description:  `Name of the peering.`,
 			},
 
@@ -49,7 +52,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				ValidateFunc:     validateRegexp(peerNetworkLinkRegex),
+				ValidateFunc:     verify.ValidateRegexp(peerNetworkLinkRegex),
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 				Description:      `The primary network of the peering.`,
 			},
@@ -58,7 +61,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				ValidateFunc:     validateRegexp(peerNetworkLinkRegex),
+				ValidateFunc:     verify.ValidateRegexp(peerNetworkLinkRegex),
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 				Description:      `The peer network in the peering. The peer network may belong to a different project.`,
 			},
@@ -107,7 +110,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 }
 
 func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -149,7 +152,7 @@ func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{
 }
 
 func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -163,7 +166,7 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 
 	network, err := config.NewComputeClient(userAgent).Networks.Get(networkFieldValue.Project, networkFieldValue.Name).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Network %q", networkFieldValue.Name))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Network %q", networkFieldValue.Name))
 	}
 
 	peering := findPeeringFromNetwork(network, peeringName)
@@ -202,7 +205,7 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 }
 
 func resourceComputeNetworkPeeringUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -242,7 +245,7 @@ func resourceComputeNetworkPeeringUpdate(d *schema.ResourceData, meta interface{
 }
 
 func resourceComputeNetworkPeeringDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -321,7 +324,7 @@ func sortedNetworkPeeringMutexKeys(networkName, peerNetworkName *GlobalFieldValu
 }
 
 func resourceComputeNetworkPeeringImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	splits := strings.Split(d.Id(), "/")
 	if len(splits) != 3 {
 		return nil, fmt.Errorf("Error parsing network peering import format, expected: {project}/{network}/{name}")
@@ -339,7 +342,7 @@ func resourceComputeNetworkPeeringImport(d *schema.ResourceData, meta interface{
 	// just read the network self link from the API.
 	net, err := config.NewComputeClient(userAgent).Networks.Get(project, network).Do()
 	if err != nil {
-		return nil, handleNotFoundError(err, d, fmt.Sprintf("Network %q", splits[1]))
+		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Network %q", splits[1]))
 	}
 
 	if err := d.Set("network", ConvertSelfLinkToV1(net.SelfLink)); err != nil {

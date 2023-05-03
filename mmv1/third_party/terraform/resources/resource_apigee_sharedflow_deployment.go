@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceApigeeSharedFlowDeployment() *schema.Resource {
@@ -61,7 +62,7 @@ func ResourceApigeeSharedFlowDeployment() *schema.Resource {
 }
 
 func resourceApigeeSharedflowDeploymentCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -80,7 +81,7 @@ func resourceApigeeSharedflowDeploymentCreate(d *schema.ResourceData, meta inter
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating SharedflowDeployment: %s", err)
 	}
@@ -98,7 +99,7 @@ func resourceApigeeSharedflowDeploymentCreate(d *schema.ResourceData, meta inter
 }
 
 func resourceApigeeSharedflowDeploymentRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -118,9 +119,9 @@ func resourceApigeeSharedflowDeploymentRead(d *schema.ResourceData, meta interfa
 
 	log.Printf("[DEBUG] Reading SharedflowDeployment at %s", url)
 
-	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("ApigeeSharedflowDeployment %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ApigeeSharedflowDeployment %q", d.Id()))
 	}
 	log.Printf("[DEBUG] ApigeeSharedflowDeployment deployStartTime %s", res["deployStartTime"])
 
@@ -128,7 +129,7 @@ func resourceApigeeSharedflowDeploymentRead(d *schema.ResourceData, meta interfa
 }
 
 func resourceApigeeSharedflowDeploymentDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -149,9 +150,9 @@ func resourceApigeeSharedflowDeploymentDelete(d *schema.ResourceData, meta inter
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, "SharedflowDeployment")
+		return transport_tpg.HandleNotFoundError(err, d, "SharedflowDeployment")
 	}
 
 	log.Printf("[DEBUG] Finished deleting SharedflowDeployment %q: %#v", d.Id(), res)
@@ -159,7 +160,7 @@ func resourceApigeeSharedflowDeploymentDelete(d *schema.ResourceData, meta inter
 }
 
 func resourceApigeeSharedflowDeploymentImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	if err := ParseImportId([]string{
 		"organizations/(?P<org_id>[^/]+)/environments/(?P<environment>[^/]+)/sharedflows/(?P<sharedflow_id>[^/]+)/revisions/(?P<revision>[^/]+)",
 		"(?P<org_id>[^/]+)/(?P<environment>[^/]+)/(?P<sharedflow_id>[^/]+)/(?P<revision>[^/]+)",
@@ -177,22 +178,22 @@ func resourceApigeeSharedflowDeploymentImport(d *schema.ResourceData, meta inter
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenApigeeSharedflowDeploymentOrgId(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedflowDeploymentOrgId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedflowDeploymentEnvironment(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedflowDeploymentEnvironment(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedflowDeploymentSharedflowId(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedflowDeploymentSharedflowId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedflowDeploymentRevision(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedflowDeploymentRevision(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenApigeeSharedflowDeploymentServiceAccount(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenApigeeSharedflowDeploymentServiceAccount(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }

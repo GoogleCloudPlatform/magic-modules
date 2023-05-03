@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -36,7 +37,7 @@ func ResourceStorageDefaultObjectAcl() *schema.Resource {
 }
 
 func resourceStorageDefaultObjectAclCreateUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -82,7 +83,7 @@ func resourceStorageDefaultObjectAclCreateUpdate(d *schema.ResourceData, meta in
 }
 
 func resourceStorageDefaultObjectAclRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -91,7 +92,7 @@ func resourceStorageDefaultObjectAclRead(d *schema.ResourceData, meta interface{
 	bucket := d.Get("bucket").(string)
 	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Projection("full").Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Default Storage Object ACL for Bucket %q", d.Get("bucket").(string)))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Default Storage Object ACL for Bucket %q", d.Get("bucket").(string)))
 	}
 
 	var roleEntities []string
@@ -111,7 +112,7 @@ func resourceStorageDefaultObjectAclRead(d *schema.ResourceData, meta interface{
 }
 
 func resourceStorageDefaultObjectAclDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err

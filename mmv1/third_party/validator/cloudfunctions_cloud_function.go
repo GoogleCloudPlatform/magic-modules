@@ -1,6 +1,10 @@
 package google
 
-import "reflect"
+import (
+	"reflect"
+
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
+)
 
 const CloudFunctionsCloudFunctionAssetType string = "cloudfunctions.googleapis.com/CloudFunction"
 
@@ -11,7 +15,7 @@ func resourceConverterCloudFunctionsCloudFunction() ResourceConverter {
 	}
 }
 
-func GetCloudFunctionsCloudFunctionCaiObject(d TerraformResourceData, config *Config) ([]Asset, error) {
+func GetCloudFunctionsCloudFunctionCaiObject(d TerraformResourceData, config *transport_tpg.Config) ([]Asset, error) {
 	name, err := assetName(d, config, "//cloudfunctions.googleapis.com/projects/{{project}}/locations/{{region}}/functions/{{name}}")
 	if err != nil {
 		return []Asset{}, err
@@ -32,7 +36,7 @@ func GetCloudFunctionsCloudFunctionCaiObject(d TerraformResourceData, config *Co
 	}
 }
 
-func GetCloudFunctionsCloudFunctionApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+func GetCloudFunctionsCloudFunctionApiObject(d TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	nameProp, err := expandCloudFunctionsCloudFunctionName(d.Get("name"), d, config)
 	if err != nil {
@@ -128,31 +132,31 @@ func GetCloudFunctionsCloudFunctionApiObject(d TerraformResourceData, config *Co
 	return obj, nil
 }
 
-func expandCloudFunctionsCloudFunctionName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionEntryPoint(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionEntryPoint(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionRuntime(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionRuntime(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionTimeout(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionTimeout(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionAvailableMemoryMb(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionAvailableMemoryMb(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionLabels(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
+func expandCloudFunctionsCloudFunctionLabels(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -163,7 +167,7 @@ func expandCloudFunctionsCloudFunctionLabels(v interface{}, d TerraformResourceD
 	return m, nil
 }
 
-func expandCloudFunctionsCloudFunctionEnvironmentVariables(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
+func expandCloudFunctionsCloudFunctionEnvironmentVariables(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -174,15 +178,15 @@ func expandCloudFunctionsCloudFunctionEnvironmentVariables(v interface{}, d Terr
 	return m, nil
 }
 
-func expandCloudFunctionsCloudFunctionSourceArchiveUrl(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionSourceArchiveUrl(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionSourceUploadUrl(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionSourceUploadUrl(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionSourceRepository(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionSourceRepository(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -208,19 +212,19 @@ func expandCloudFunctionsCloudFunctionSourceRepository(v interface{}, d Terrafor
 	return transformed, nil
 }
 
-func expandCloudFunctionsCloudFunctionSourceRepositoryUrl(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionSourceRepositoryUrl(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionSourceRepositoryDeployedUrl(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionSourceRepositoryDeployedUrl(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionHttpsTriggerUrl(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionHttpsTriggerUrl(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionEventTrigger(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionEventTrigger(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -253,22 +257,22 @@ func expandCloudFunctionsCloudFunctionEventTrigger(v interface{}, d TerraformRes
 	return transformed, nil
 }
 
-func expandCloudFunctionsCloudFunctionEventTriggerEventType(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionEventTriggerEventType(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionEventTriggerResource(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionEventTriggerResource(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionEventTriggerService(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionEventTriggerService(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionRegion(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionRegion(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandCloudFunctionsCloudFunctionTriggerHttp(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudFunctionsCloudFunctionTriggerHttp(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

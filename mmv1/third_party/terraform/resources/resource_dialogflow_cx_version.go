@@ -10,6 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
 func ResourceDialogflowCXVersion() *schema.Resource {
@@ -74,7 +76,7 @@ The score values range from 0.0 (completely uncertain) to 1.0 (completely certai
 						"model_training_mode": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validateEnum([]string{"MODEL_TRAINING_MODE_AUTOMATIC", "MODEL_TRAINING_MODE_MANUAL", ""}),
+							ValidateFunc: verify.ValidateEnum([]string{"MODEL_TRAINING_MODE_AUTOMATIC", "MODEL_TRAINING_MODE_MANUAL", ""}),
 							Description: `Indicates NLU model training mode.
 * MODEL_TRAINING_MODE_AUTOMATIC: NLU model training is automatically triggered when a flow gets modified. User can also manually trigger model training in this mode.
 * MODEL_TRAINING_MODE_MANUAL: User needs to manually trigger NLU model training. Best for large flows whose models take long time to train. Possible values: ["MODEL_TRAINING_MODE_AUTOMATIC", "MODEL_TRAINING_MODE_MANUAL"]`,
@@ -82,7 +84,7 @@ The score values range from 0.0 (completely uncertain) to 1.0 (completely certai
 						"model_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validateEnum([]string{"MODEL_TYPE_STANDARD", "MODEL_TYPE_ADVANCED", ""}),
+							ValidateFunc: verify.ValidateEnum([]string{"MODEL_TYPE_STANDARD", "MODEL_TYPE_ADVANCED", ""}),
 							Description: `Indicates the type of NLU model.
 * MODEL_TYPE_STANDARD: Use standard NLU model.
 * MODEL_TYPE_ADVANCED: Use advanced NLU model. Possible values: ["MODEL_TYPE_STANDARD", "MODEL_TYPE_ADVANCED"]`,
@@ -104,7 +106,7 @@ The score values range from 0.0 (completely uncertain) to 1.0 (completely certai
 }
 
 func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -151,7 +153,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
-	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Version: %s", err)
 	}
@@ -193,7 +195,7 @@ func resourceDialogflowCXVersionCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -225,9 +227,9 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
-	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("DialogflowCXVersion %q", d.Id()))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("DialogflowCXVersion %q", d.Id()))
 	}
 
 	if err := d.Set("name", flattenDialogflowCXVersionName(res["name"], d, config)); err != nil {
@@ -253,7 +255,7 @@ func resourceDialogflowCXVersionRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -292,7 +294,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 	}
 	// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 	// won't set it
-	url, err = AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
 	}
@@ -317,7 +319,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return fmt.Errorf("Error updating Version %q: %s", d.Id(), err)
@@ -337,7 +339,7 @@ func resourceDialogflowCXVersionUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -373,9 +375,9 @@ func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{})
 		billingProject = bp
 	}
 
-	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := transport_tpg.SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return handleNotFoundError(err, d, "Version")
+		return transport_tpg.HandleNotFoundError(err, d, "Version")
 	}
 
 	err = DialogflowCXOperationWaitTime(
@@ -391,7 +393,7 @@ func resourceDialogflowCXVersionDelete(d *schema.ResourceData, meta interface{})
 }
 
 func resourceDialogflowCXVersionImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 
 	// current import_formats can't import fields with forward slashes in their value and parent contains slashes
 	if err := ParseImportId([]string{
@@ -411,22 +413,22 @@ func resourceDialogflowCXVersionImport(d *schema.ResourceData, meta interface{})
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenDialogflowCXVersionName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
 	return NameFromSelfLinkStateFunc(v)
 }
 
-func flattenDialogflowCXVersionDisplayName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionDisplayName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionDescription(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionNluSettings(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionNluSettings(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -443,30 +445,30 @@ func flattenDialogflowCXVersionNluSettings(v interface{}, d *schema.ResourceData
 		flattenDialogflowCXVersionNluSettingsModelTrainingMode(original["modelTrainingMode"], d, config)
 	return []interface{}{transformed}
 }
-func flattenDialogflowCXVersionNluSettingsModelType(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionNluSettingsModelType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionNluSettingsClassificationThreshold(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionNluSettingsClassificationThreshold(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionNluSettingsModelTrainingMode(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionNluSettingsModelTrainingMode(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionCreateTime(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionCreateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func flattenDialogflowCXVersionState(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenDialogflowCXVersionState(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
-func expandDialogflowCXVersionDisplayName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDialogflowCXVersionDisplayName(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandDialogflowCXVersionDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandDialogflowCXVersionDescription(v interface{}, d TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleServiceAccount() *schema.Resource {
@@ -44,7 +45,7 @@ func DataSourceGoogleServiceAccount() *schema.Resource {
 }
 
 func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -57,7 +58,7 @@ func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}
 
 	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(serviceAccountName).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
 	}
 
 	d.SetId(sa.Name)
