@@ -9,7 +9,7 @@ if err := ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
 // Re-populate split fields from the name.
 re := regexp.MustCompile("^projects/([^/]+)/databases/([^/]+)/collectionGroups/([^/]+)/fields/(.+)$")
 match := re.FindStringSubmatch(d.Get("name").(string))
-if len(match) > 0{
+if len(match) > 0 {
 	if err := d.Set("project", match[1]); err != nil {
 		return nil, fmt.Errorf("Error setting project: %s", err)
 	}

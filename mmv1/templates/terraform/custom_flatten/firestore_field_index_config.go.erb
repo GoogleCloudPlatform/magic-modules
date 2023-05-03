@@ -15,7 +15,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	}
 
 	if indexConfig["indexes"] == nil {
-		// No indexes, return a existing, but empty index config.
+		// No indexes, return an existing, but empty index config.
 		return [1]interface{}{nil}
 	}
 

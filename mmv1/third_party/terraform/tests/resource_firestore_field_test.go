@@ -122,9 +122,9 @@ resource "google_firestore_field" "%{resource_name}" {
         order = "ASCENDING"
         query_scope = "COLLECTION_GROUP"
     }
-    indexes {
-        array_config = "CONTAINS"
-    }
+	indexes {
+		array_config = "CONTAINS"
+	}
 	indexes {
 		order = "DESCENDING"
 		query_scope = "COLLECTION_GROUP"

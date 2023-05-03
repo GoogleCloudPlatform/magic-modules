@@ -102,13 +102,18 @@ properties:
       `projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/fields/{{field}}`
   - !ruby/object:Api::Type::NestedObject
     name: indexConfig
+    description: |
+      The single field index configuration for this field.
+      Creating an index configuration for this field will override any inherited configuration with the
+      indexes specified. Configuring the index configuration with an empty block disables all indexes on
+      the field.
     send_empty_value: true
     custom_expand: templates/terraform/custom_expand/firestore_field_index_config.go.erb
     custom_flatten: templates/terraform/custom_flatten/firestore_field_index_config.go.erb
     properties:
     - !ruby/object:Api::Type::Array
       name: indexes
-      description: The indexes
+      description: The indexes to configure on the field. Order or array contains must be specified.
       is_set: true
       item_type: !ruby/object:Api::Type::NestedObject
         properties:
@@ -125,7 +130,7 @@ properties:
         - !ruby/object:Api::Type::Enum
           name: 'order'
           description: |
-            Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
+            Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=, !=.
             Only one of `order` and `arrayConfig` can be specified.
           values:
             - :ASCENDING
