@@ -45,9 +45,25 @@ func TestAccComputeDiskAsyncReplication(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDiskAsyncReplication_basicZonal(region, secondaryRegion, primaryDisk, secondaryDisk),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_disk_async_replication.replication", "secondary_disk.0.state", "ACTIVE"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk_async_replication.replication",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeDiskAsyncReplication_basicRegional(region, secondaryRegion, primaryRegionalDisk, secondaryRegionalDisk),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_disk_async_replication.replication", "secondary_disk.0.state", "ACTIVE"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk_async_replication.replication",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

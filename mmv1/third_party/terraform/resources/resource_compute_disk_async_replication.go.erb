@@ -22,7 +22,6 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDiskAsyncReplicationCreate,
 		Read:   resourceDiskAsyncReplicationRead,
-		Update: resourceDiskAsyncReplicationUpdate,
 		Delete: resourceDiskAsyncReplicationDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -30,9 +29,8 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(300 * time.Second),
-			Update: schema.DefaultTimeout(300 * time.Second),
-			Delete: schema.DefaultTimeout(300 * time.Second),
+			Create: schema.DefaultTimeout(5 * time.Minute),
+			Delete: schema.DefaultTimeout(5 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -46,6 +44,7 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 			"secondary_disk": {
 				Type:        schema.TypeList,
 				Required:    true,
+				ForceNew:    true,
 				MaxItems:    1,
 				Description: `Secondary disk for asynchronous replication.`,
 				Elem: &schema.Resource{
@@ -70,7 +69,7 @@ func ResourceComputeDiskAsyncReplication() *schema.Resource {
 	}
 }
 
-func getComputeClientForAsyncReplication(d *schema.ResourceData, meta interface{}) (*compute.Service, error) {
+func asyncReplicationGetComputeClient(d *schema.ResourceData, meta interface{}) (*compute.Service, error) {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -81,10 +80,9 @@ func getComputeClientForAsyncReplication(d *schema.ResourceData, meta interface{
 	return clientCompute, nil
 }
 
-func getDiskFromConfig(disk string, d *schema.ResourceData, meta interface{}) (zonal bool, zv *ZonalFieldValue, rv *RegionalFieldValue, resourceId string, err error) {
+func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta interface{}) (zv *ZonalFieldValue, rv *RegionalFieldValue, resourceId string, err error) {
 	config := meta.(*transport_tpg.Config)
 
-	zonal = true
 	var zonalMatch bool
 	zonalMatch, err = regexp.MatchString(fmt.Sprintf(zonalLinkBasePattern, "disks"), disk)
 	if err != nil {
@@ -92,7 +90,6 @@ func getDiskFromConfig(disk string, d *schema.ResourceData, meta interface{}) (z
 	}
 	zv, parseErr := ParseDiskFieldValue(disk, d, config)
 	if !zonalMatch || parseErr != nil {
-		zonal = false
 		rv, err = ParseRegionDiskFieldValue(disk, d, config)
 		if err != nil {
 			return
@@ -110,8 +107,8 @@ func getDiskFromConfig(disk string, d *schema.ResourceData, meta interface{}) (z
 	return
 }
 
-func getComputeDiskStatus(client *compute.Service, zonal bool, zv *ZonalFieldValue, rv *RegionalFieldValue) (diskStatus *compute.Disk, err error) {
-	if zonal {
+func asyncReplicationGetDiskStatus(client *compute.Service, zv *ZonalFieldValue, rv *RegionalFieldValue) (diskStatus *compute.Disk, err error) {
+	if rv == nil { // Zonal disk
 		diskStatus, err = client.Disks.Get(zv.Project, zv.Zone, zv.Name).Do()
 		log.Printf("[DEBUG] Get disk zones/%s/%s: %v", zv.Zone, zv.Name, diskStatus)
 	} else {
@@ -122,68 +119,63 @@ func getComputeDiskStatus(client *compute.Service, zonal bool, zv *ZonalFieldVal
 }
 
 func resourceDiskAsyncReplicationCreate(d *schema.ResourceData, meta interface{}) error {
-	clientCompute, err := getComputeClientForAsyncReplication(d, meta)
+	clientCompute, err := asyncReplicationGetComputeClient(d, meta)
 	if err != nil {
 		return err
 	}
 
-	zonal, zv, rv, resourceId, err := getDiskFromConfig(d.Get("primary_disk").(string), d, meta)
+	zv, rv, resourceId, err := asyncReplicationGetDiskFromConfig(d.Get("primary_disk").(string), d, meta)
 	if err != nil {
 		return err
 	}
 
-	for _, secondaryDiskIter := range d.Get("secondary_disk").([]interface{}) {
-		secondaryDiskMap := secondaryDiskIter.(map[string]interface{})
-		secondaryDisk := secondaryDiskMap["disk"].(string)
-		if zonal {
-			replicationRequest := compute.DisksStartAsyncReplicationRequest{
-				AsyncSecondaryDisk: secondaryDisk,
-			}
-			_, err = clientCompute.Disks.StartAsyncReplication(zv.Project, zv.Zone, zv.Name, &replicationRequest).Do()
-			if err != nil {
-				return err
-			}
-		} else {
-			replicationRequest := compute.RegionDisksStartAsyncReplicationRequest{
-				AsyncSecondaryDisk: secondaryDisk,
-			}
-			_, err = clientCompute.RegionDisks.StartAsyncReplication(rv.Project, rv.Region, rv.Name, &replicationRequest).Do()
-			if err != nil {
-				return err
-			}
+	secondaryDiskList := d.Get("secondary_disk").([]interface{})
+	secondaryDiskMap := secondaryDiskList[0].(map[string]interface{})
+	secondaryDisk := secondaryDiskMap["disk"].(string)
+	if rv == nil { // Zonal disk
+		replicationRequest := compute.DisksStartAsyncReplicationRequest{
+			AsyncSecondaryDisk: secondaryDisk,
 		}
-		err = resource.Retry(time.Minute*time.Duration(5), func() *resource.RetryError {
-			diskStatus, err := getComputeDiskStatus(clientCompute, zonal, zv, rv)
-			if err != nil {
-				return resource.NonRetryableError(err)
-			}
-			if diskStatus.ResourceStatus == nil {
-				return resource.NonRetryableError(fmt.Errorf("no resource status for disk: %s", resourceId))
-			}		
-			if secondaryState, ok := diskStatus.ResourceStatus.AsyncSecondaryDisks[secondaryDisk]; ok {
-				if secondaryState.State != "ACTIVE" {
-					time.Sleep(5 * time.Second)
-					return resource.RetryableError(fmt.Errorf("secondary disk %s state (%s) is not: ACTIVE", secondaryDisk, secondaryState))
-				}
-				return nil
-			}
-			time.Sleep(5 * time.Second)
-			return resource.RetryableError(fmt.Errorf("secondary disk %s state not available", secondaryDisk))
-		})
+		_, err = clientCompute.Disks.StartAsyncReplication(zv.Project, zv.Zone, zv.Name, &replicationRequest).Do()
 		if err != nil {
 			return err
 		}
+	} else {
+		replicationRequest := compute.RegionDisksStartAsyncReplicationRequest{
+			AsyncSecondaryDisk: secondaryDisk,
+		}
+		_, err = clientCompute.RegionDisks.StartAsyncReplication(rv.Project, rv.Region, rv.Name, &replicationRequest).Do()
+		if err != nil {
+			return err
+		}
+	}
+	err = resource.Retry(time.Minute*time.Duration(5), func() *resource.RetryError {
+		diskStatus, err := asyncReplicationGetDiskStatus(clientCompute, zv, rv)
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+		if diskStatus.ResourceStatus == nil {
+			return resource.NonRetryableError(fmt.Errorf("no resource status for disk: %s", resourceId))
+		}		
+		if secondaryState, ok := diskStatus.ResourceStatus.AsyncSecondaryDisks[secondaryDisk]; ok {
+			if secondaryState.State != "ACTIVE" {
+				time.Sleep(5 * time.Second)
+				return resource.RetryableError(fmt.Errorf("secondary disk %s state (%s) is not: ACTIVE", secondaryDisk, secondaryState))
+			}
+			return nil
+		}
+		time.Sleep(5 * time.Second)
+		return resource.RetryableError(fmt.Errorf("secondary disk %s state not available", secondaryDisk))
+	})
+	if err != nil {
+		return err
 	}
 	d.SetId(resourceId)
 	return resourceDiskAsyncReplicationRead(d, meta)
 }
 
-func resourceDiskAsyncReplicationUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceDiskAsyncReplicationRead(d, meta)
-}
-
 func resourceDiskAsyncReplicationRead(d *schema.ResourceData, meta interface{}) error {
-	clientCompute, err := getComputeClientForAsyncReplication(d, meta)
+	clientCompute, err := asyncReplicationGetComputeClient(d, meta)
 	if err != nil {
 		return err
 	}
@@ -194,12 +186,12 @@ func resourceDiskAsyncReplicationRead(d *schema.ResourceData, meta interface{}) 
 		d.Set("primary_disk", primaryDisk)
 	}
 
-	zonal, zv, rv, resourceId, err := getDiskFromConfig(primaryDisk, d, meta)
+	zv, rv, resourceId, err := asyncReplicationGetDiskFromConfig(primaryDisk, d, meta)
 	if err != nil {
 		return err
 	}
 
-	diskStatus, err := getComputeDiskStatus(clientCompute, zonal, zv, rv)
+	diskStatus, err := asyncReplicationGetDiskStatus(clientCompute, zv, rv)
 	if err != nil {
 		return err
 	}
@@ -209,7 +201,7 @@ func resourceDiskAsyncReplicationRead(d *schema.ResourceData, meta interface{}) 
 	for _, disk := range diskStatus.AsyncSecondaryDisks {
 		secondaryDisk := make(map[string]string)
 
-		_, _, _, resourceName, err := getDiskFromConfig(disk.AsyncReplicationDisk.Disk, d, meta)
+		_, _, resourceName, err := asyncReplicationGetDiskFromConfig(disk.AsyncReplicationDisk.Disk, d, meta)
 		if err != nil {
 			return err
 		}
@@ -221,7 +213,7 @@ func resourceDiskAsyncReplicationRead(d *schema.ResourceData, meta interface{}) 
 		secondaryDisk["disk"] = resourceName
 		existingSecondaryDisks[resourceName] = true
 		if secondaryState, ok := diskStatus.ResourceStatus.AsyncSecondaryDisks[resourceName]; ok {
-			// Note this mi:ght be other than ACTIVE or STOPPED, but we wait for proper state
+			// Note this might be other than ACTIVE or STOPPED, but we wait for proper state
 			// on replication start/stop so it shouldnt affect Terraform
 			log.Printf("[DEBUG] Secondary disk %s is in state: %s", resourceName, secondaryState.State)
 			secondaryDisk["state"] = secondaryState.State
@@ -238,80 +230,75 @@ func resourceDiskAsyncReplicationRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceDiskAsyncReplicationDelete(d *schema.ResourceData, meta interface{}) error {
-	clientCompute, err := getComputeClientForAsyncReplication(d, meta)
+	clientCompute, err := asyncReplicationGetComputeClient(d, meta)
 	if err != nil {
 		return err
 	}
 
-	zonal, zv, rv, _, err := getDiskFromConfig(d.Get("primary_disk").(string), d, meta)
+	zv, rv, _, err := asyncReplicationGetDiskFromConfig(d.Get("primary_disk").(string), d, meta)
 	if err != nil {
 		return err
 	}
 
 	var replicationStopped bool = false
-	for _, secondaryDiskIter := range d.Get("secondary_disk").([]interface{}) {
-		secondaryDiskMap := secondaryDiskIter.(map[string]interface{})
-		secondaryDisk := secondaryDiskMap["disk"].(string)
+	secondaryDiskList := d.Get("secondary_disk").([]interface{})
+	secondaryDiskMap := secondaryDiskList[0].(map[string]interface{})
+	secondaryDisk := secondaryDiskMap["disk"].(string)
+	_, _, resourceName, err := asyncReplicationGetDiskFromConfig(secondaryDisk, d, meta)
+	if err != nil {
+		return err
+	}
 
-		_, _, _, resourceName, err := getDiskFromConfig(secondaryDisk, d, meta)
-		if err != nil {
-			return err
-		}
+	diskStatus, err := asyncReplicationGetDiskStatus(clientCompute, zv, rv)
+	if err != nil {
+		return err
+	}
 
-		diskStatus, err := getComputeDiskStatus(clientCompute, zonal, zv, rv)
-		if err != nil {
-			return err
-		}
+	if diskStatus.ResourceStatus == nil {
+		// Nothing to do, replication not running
+		return nil
+	}
 
-		if diskStatus.ResourceStatus == nil {
-			continue
-		}
-
-		if secondaryState, ok := diskStatus.ResourceStatus.AsyncSecondaryDisks[resourceName]; ok {
-			if secondaryState.State != "STOPPED" {
-				replicationStopped = true
-				if zonal {
-					_, err = clientCompute.Disks.StopAsyncReplication(zv.Project, zv.Zone, zv.Name).Do()
-					if err != nil {
-						return err
-					}
-				} else {
-					_, err = clientCompute.RegionDisks.StopAsyncReplication(rv.Project, rv.Region, rv.Name).Do()
-					if err != nil {
-						return err
-					}
+	if secondaryState, ok := diskStatus.ResourceStatus.AsyncSecondaryDisks[resourceName]; ok {
+		if secondaryState.State != "STOPPED" {
+			replicationStopped = true
+			if rv == nil { // Zonal disk
+				_, err = clientCompute.Disks.StopAsyncReplication(zv.Project, zv.Zone, zv.Name).Do()
+				if err != nil {
+					return err
 				}
-				err = resource.Retry(time.Minute*time.Duration(5), func() *resource.RetryError {
-					diskStatus, err := getComputeDiskStatus(clientCompute, zonal, zv, rv)
-					if err != nil {
-						return resource.NonRetryableError(err)
-					}
-					if secondaryState, ok := diskStatus.ResourceStatus.AsyncSecondaryDisks[resourceName]; ok {
-						if secondaryState.State != "STOPPED" {
-							time.Sleep(5 * time.Second)
-							return resource.RetryableError(fmt.Errorf("secondary disk %s state (%s) is not STOPPED", secondaryDisk, secondaryState))
-						}
-						return nil
-					}
-					return resource.NonRetryableError(fmt.Errorf("secondary disk %s state not available", secondaryDisk))
-				})
+			} else {
+				_, err = clientCompute.RegionDisks.StopAsyncReplication(rv.Project, rv.Region, rv.Name).Do()
 				if err != nil {
 					return err
 				}
 			}
-		} else {
-			return fmt.Errorf("could not find secondary disk: %s", secondaryDisk)
+			err = resource.Retry(time.Minute*time.Duration(5), func() *resource.RetryError {
+				diskStatus, err := asyncReplicationGetDiskStatus(clientCompute, zv, rv)
+				if err != nil {
+					return resource.NonRetryableError(err)
+				}
+				if secondaryState, ok := diskStatus.ResourceStatus.AsyncSecondaryDisks[resourceName]; ok {
+					if secondaryState.State != "STOPPED" {
+						time.Sleep(5 * time.Second)
+						return resource.RetryableError(fmt.Errorf("secondary disk %s state (%s) is not STOPPED", secondaryDisk, secondaryState))
+					}
+					return nil
+				}
+				return resource.NonRetryableError(fmt.Errorf("secondary disk %s state not available", secondaryDisk))
+			})
+			if err != nil {
+				return err
+			}
 		}
+	} else {
+		return fmt.Errorf("could not find secondary disk: %s", secondaryDisk)
 	}
+
 	if replicationStopped {
 		// Allow the replication to quiescence
 		time.Sleep(5000 * time.Millisecond)
 	}
-
 	return nil
-}
-
-func resourceDiskAsyncReplicationImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	return []*schema.ResourceData{}, nil
 }
 <% end -%>
