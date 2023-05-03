@@ -288,7 +288,7 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 	}
 
 	op := &compute.Operation{}
-	err = Convert(res, op)
+	err = tpgresource.Convert(res, op)
 	if err != nil {
 		return err
 	}

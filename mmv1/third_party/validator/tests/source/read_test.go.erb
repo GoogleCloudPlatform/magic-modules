@@ -69,7 +69,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Error parsing %s: %s", f, err)
 			}
-			got, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
+			got, err := tfplan2cai.tpgresource.Convert(ctx, jsonPlan, &tfplan2cai.Options{
 				ConvertUnchanged: false,
 				ErrorLogger:      zaptest.NewLogger(t),
 				Offline:          true,
@@ -131,7 +131,7 @@ func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Error parsing %s: %s", f, err)
 			}
-			got, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
+			got, err := tfplan2cai.tpgresource.tpgresource.Convert(ctx, jsonPlan, &tfplan2cai.Options{
 				ConvertUnchanged: false,
 				ErrorLogger:      zaptest.NewLogger(t),
 				Offline:          true,

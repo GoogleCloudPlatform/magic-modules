@@ -5,6 +5,7 @@ import (
 
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 )
 
 const ComputeSecurityPolicyAssetType string = "compute.googleapis.com/SecurityPolicy"
@@ -42,19 +43,19 @@ func GetComputeSecurityPolicyApiObject(d TerraformResourceData, config *transpor
 	nameProp, err := expandComputeSecurityPolicyName(d.Get("name"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+	} else if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
 		obj["name"] = nameProp
 	}
 	typeProp, err := expandComputeSecurityPolicyName(d.Get("type"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("type"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, typeProp)) {
+	} else if v, ok := d.GetOkExists("type"); !tpgresource.IsEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, typeProp)) {
 		obj["type"] = typeProp
 	}
 	rulesProp, err := expandComputeSecurityPolicyRules(d.Get("rule"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("rule"); !isEmptyValue(reflect.ValueOf(rulesProp)) && (ok || !reflect.DeepEqual(v, rulesProp)) {
+	} else if v, ok := d.GetOkExists("rule"); !tpgresource.IsEmptyValue(reflect.ValueOf(rulesProp)) && (ok || !reflect.DeepEqual(v, rulesProp)) {
 		obj["rule"] = rulesProp
 	}
 
@@ -79,42 +80,42 @@ func expandComputeSecurityPolicyRules(v interface{}, d TerraformResourceData, co
 		transformedDescription, err := expandComputeSecurityPolicyRulesDescription(original["description"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["description"] = transformedDescription
 		}
 
 		transformedType, err := expandComputeSecurityPolicyRulesDescription(original["type"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedType); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedType); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["type"] = transformedType
 		}
 
 		transformedPriority, err := expandComputeSecurityPolicyRulesPriority(original["priority"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedPriority); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedPriority); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["priority"] = transformedPriority
 		}
 
 		transformedAction, err := expandComputeSecurityPolicyRulesAction(original["action"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedAction); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedAction); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["action"] = transformedAction
 		}
 
 		transformedPreview, err := expandComputeSecurityPolicyRulesPreview(original["preview"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedPreview); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedPreview); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["preview"] = transformedPreview
 		}
 
 		transformedMatch, err := expandComputeSecurityPolicyRulesMatch(original["match"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedMatch); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedMatch); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["match"] = transformedMatch
 		}
 
@@ -151,28 +152,28 @@ func expandComputeSecurityPolicyRulesMatch(v interface{}, d TerraformResourceDat
 	transformedDescription, err := expandComputeSecurityPolicyRulesMatchDescription(original["description"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["description"] = transformedDescription
 	}
 
 	transformedExpr, err := expandComputeSecurityPolicyRulesMatchExpr(original["expr"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedExpr); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedExpr); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["expr"] = transformedExpr
 	}
 
 	transformedVersionedExpr, err := expandComputeSecurityPolicyRulesMatchVersionedExpr(original["versioned_expr"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedVersionedExpr); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedVersionedExpr); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["versionedExpr"] = transformedVersionedExpr
 	}
 
 	transformedConfig, err := expandComputeSecurityPolicyRulesMatchConfig(original["config"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedConfig); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedConfig); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["config"] = transformedConfig
 	}
 
@@ -195,28 +196,28 @@ func expandComputeSecurityPolicyRulesMatchExpr(v interface{}, d TerraformResourc
 	transformedExpression, err := expandComputeSecurityPolicyRulesMatchExprExpression(original["expression"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedExpression); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedExpression); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["expression"] = transformedExpression
 	}
 
 	transformedTitle, err := expandComputeSecurityPolicyRulesMatchExprTitle(original["title"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedTitle); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedTitle); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["title"] = transformedTitle
 	}
 
 	transformedDescription, err := expandComputeSecurityPolicyRulesMatchExprDescription(original["description"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["description"] = transformedDescription
 	}
 
 	transformedLocation, err := expandComputeSecurityPolicyRulesMatchExprLocation(original["location"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedLocation); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedLocation); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["location"] = transformedLocation
 	}
 
@@ -255,7 +256,7 @@ func expandComputeSecurityPolicyRulesMatchConfig(v interface{}, d TerraformResou
 	transformedSrcIpRanges, err := expandComputeSecurityPolicyRulesMatchConfigSrcIpRanges(original["src_ip_ranges"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedSrcIpRanges); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedSrcIpRanges); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["srcIpRanges"] = transformedSrcIpRanges
 	}
 

@@ -5,6 +5,7 @@ import (
 
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 )
 
 const ProjectIAMCustomRoleAssetType string = "iam.googleapis.com/Role"
@@ -43,28 +44,28 @@ func GetProjectIAMCustomRoleApiObject(d TerraformResourceData, config *transport
 	descriptionProp, err := expandProjectIAMCustomRoleDescription(d.Get("description"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
 
 	titleProp, err := expandProjectIAMCustomRoleTitle(d.Get("title"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("title"); !isEmptyValue(reflect.ValueOf(titleProp)) && (ok || !reflect.DeepEqual(v, titleProp)) {
+	} else if v, ok := d.GetOkExists("title"); !tpgresource.IsEmptyValue(reflect.ValueOf(titleProp)) && (ok || !reflect.DeepEqual(v, titleProp)) {
 		obj["title"] = titleProp
 	}
 
 	stageProp, err := expandProjectIAMCustomRoleStage(d.Get("stage"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("stage"); !isEmptyValue(reflect.ValueOf(stageProp)) && (ok || !reflect.DeepEqual(v, stageProp)) {
+	} else if v, ok := d.GetOkExists("stage"); !tpgresource.IsEmptyValue(reflect.ValueOf(stageProp)) && (ok || !reflect.DeepEqual(v, stageProp)) {
 		obj["stage"] = stageProp
 	}
 
 	includedPermissionsProp, err := expandProjectIAMCustomRolePermissions(d.Get("permissions"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("permissions"); !isEmptyValue(reflect.ValueOf(includedPermissionsProp)) && (ok || !reflect.DeepEqual(v, includedPermissionsProp)) {
+	} else if v, ok := d.GetOkExists("permissions"); !tpgresource.IsEmptyValue(reflect.ValueOf(includedPermissionsProp)) && (ok || !reflect.DeepEqual(v, includedPermissionsProp)) {
 		obj["includedPermissions"] = includedPermissionsProp
 	}
 

@@ -1522,7 +1522,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		metadataV1 := &compute.Metadata{}
-		if err := Convert(metadata, metadataV1); err != nil {
+		if err := tpgresource.Convert(metadata, metadataV1); err != nil {
 			return err
 		}
 
@@ -1560,7 +1560,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("tags") {
 		tags := resourceInstanceTags(d)
 		tagsV1 := &compute.Tags{}
-		if err := Convert(tags, tagsV1); err != nil {
+		if err := tpgresource.Convert(tags, tagsV1); err != nil {
 			return err
 		}
 		op, err := config.NewComputeClient(userAgent).Instances.SetTags(
@@ -1839,7 +1839,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			if _, ok := oDisks[hash]; !ok {
 				computeDiskV1 := &compute.AttachedDisk{}
-				err = Convert(computeDisk, computeDiskV1)
+				err = tpgresource.Convert(computeDisk, computeDiskV1)
 				if err != nil {
 					return err
 				}

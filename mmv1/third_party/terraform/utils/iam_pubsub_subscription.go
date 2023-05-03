@@ -111,7 +111,7 @@ func (u *PubsubSubscriptionIamUpdater) DescribeResource() string {
 // v1 and v2 policy are identical
 func resourceManagerToPubsubPolicy(in *cloudresourcemanager.Policy) (*pubsub.Policy, error) {
 	out := &pubsub.Policy{}
-	err := Convert(in, out)
+	err := tpgresource.Convert(in, out)
 	if err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a v1 policy to a pubsub policy: {{err}}", err)
 	}
@@ -120,7 +120,7 @@ func resourceManagerToPubsubPolicy(in *cloudresourcemanager.Policy) (*pubsub.Pol
 
 func pubsubToResourceManagerPolicy(in *pubsub.Policy) (*cloudresourcemanager.Policy, error) {
 	out := &cloudresourcemanager.Policy{}
-	err := Convert(in, out)
+	err := tpgresource.Convert(in, out)
 	if err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a pubsub policy to a v1 policy: {{err}}", err)
 	}
