@@ -6,7 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -27,7 +29,7 @@ func ResourceGoogleProjectIamCustomRole() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				Description:  `The camel case role id to use for this role. Cannot contain - characters.`,
-				ValidateFunc: validateIAMCustomRoleID,
+				ValidateFunc: verify.ValidateIAMCustomRoleID,
 			},
 			"title": {
 				Type:        schema.TypeString,
@@ -54,7 +56,7 @@ func ResourceGoogleProjectIamCustomRole() *schema.Resource {
 				Default:          "GA",
 				Description:      `The current launch stage of the role. Defaults to GA.`,
 				ValidateFunc:     validation.StringInSlice([]string{"ALPHA", "BETA", "GA", "DEPRECATED", "DISABLED", "EAP"}, false),
-				DiffSuppressFunc: EmptyOrDefaultStringSuppress("ALPHA"),
+				DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("ALPHA"),
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -103,7 +105,7 @@ func resourceGoogleProjectIamCustomRoleCreate(d *schema.ResourceData, meta inter
 			// If a role with same name exists and is enabled, just return error
 			return fmt.Errorf("Custom project role %s already exists and must be imported", roleId)
 		}
-	} else if err := handleNotFoundError(err, d, fmt.Sprintf("Custom Project Role %q", roleId)); err == nil {
+	} else if err := transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Custom Project Role %q", roleId)); err == nil {
 		// If no role is found, actually create a new role.
 		role, err := config.NewIamClient(userAgent).Projects.Roles.Create("projects/"+project, &iam.CreateRoleRequest{
 			RoleId: d.Get("role_id").(string),
@@ -143,7 +145,7 @@ func resourceGoogleProjectIamCustomRoleRead(d *schema.ResourceData, meta interfa
 
 	role, err := config.NewIamClient(userAgent).Projects.Roles.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, d.Id())
+		return transport_tpg.HandleNotFoundError(err, d, d.Id())
 	}
 
 	if err := d.Set("role_id", GetResourceNameFromSelfLink(role.Name)); err != nil {

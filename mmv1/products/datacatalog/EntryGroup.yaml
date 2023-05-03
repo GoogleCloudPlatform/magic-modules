@@ -15,7 +15,7 @@
 name: EntryGroup
 base_url: projects/{{project}}/locations/{{region}}/entryGroups
 create_url: projects/{{project}}/locations/{{region}}/entryGroups?entryGroupId={{entry_group_id}}
-self_link: "{{name}}"
+self_link: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -28,25 +28,30 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   parent_resource_attribute: 'entry_group'
-  import_format: ["projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}",
-    "{{entry_group}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}',
+      '{{entry_group}}',
+    ]
   base_url: projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}
-import_format: ["{{name}}"]
+import_format: ['{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_entry_group_basic"
-    primary_resource_id: "basic_entry_group"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_group%s\", context[\"random_suffix\"\
+    name: 'data_catalog_entry_group_basic'
+    primary_resource_id: 'basic_entry_group'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_group%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      entry_group_id: "my_group"
+      entry_group_id: 'my_group'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_catalog_entry_group_full"
-    primary_resource_id: "basic_entry_group"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_group%s\", context[\"random_suffix\"\
+    name: 'data_catalog_entry_group_full'
+    primary_resource_id: 'basic_entry_group'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_group%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      entry_group_id: "my_group"
+      entry_group_id: 'my_group'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/data_catalog_entry_group.go.erb
 parameters:

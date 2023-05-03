@@ -40,95 +40,95 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_basic"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_basic'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      login_region_backend_service_name: "login"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      login_region_backend_service_name: 'login'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_default_route_action"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_default_route_action'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      login_region_backend_service_name: "login"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      login_region_backend_service_name: 'login'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_l7_ilb_path"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_l7_ilb_path'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_l7_ilb_path_partial"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_l7_ilb_path_partial'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_l7_ilb_route"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_l7_ilb_route'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_url_map_l7_ilb_route_partial"
-    primary_resource_id: "regionurlmap"
+    name: 'region_url_map_l7_ilb_route_partial'
+    primary_resource_id: 'regionurlmap'
     vars:
-      region_url_map_name: "regionurlmap"
-      home_region_backend_service_name: "home"
-      region_health_check_name: "health-check"
+      region_url_map_name: 'regionurlmap'
+      home_region_backend_service_name: 'home'
+      region_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "int_https_lb_https_redirect"
-    primary_resource_id: "redirect"
+    name: 'int_https_lb_https_redirect'
+    primary_resource_id: 'redirect'
     skip_test: true
     vars:
-      l7_ilb_network: "l7-ilb-network"
-      l7_ilb_proxy_subnet: "l7-ilb-proxy-subnet"
-      l7_ilb_subnet: "l7-ilb-subnet"
-      l7_ilb_ip: "l7-ilb-ip"
-      l7_ilb_forwarding_rule: "l7-ilb-forwarding-rule"
-      l7_ilb_target_https_proxy: "l7-ilb-target-https-proxy"
-      l7_ilb_regional_url_map: "l7-ilb-regional-url-map"
-      l7_ilb_backend_service: "l7-ilb-backend-service"
-      l7_ilb_mig_template: "l7-ilb-mig-template"
-      l7_ilb_hc: "l7-ilb-hc"
-      l7_ilb_mig1: "l7-ilb-mig1"
-      l7_ilb_fw_allow_hc: "l7-ilb-fw-allow-hc"
-      l7_ilb_fw_allow_ilb_to_backends: "l7-ilb-fw-allow-ilb-to-backends"
-      l7_ilb_test_vm: "l7-ilb-test-vm"
-      l7_ilb_redirect: "l7-ilb-redirect"
-      l7_ilb_target_http_proxy: "l7-ilb-target-http-proxy"
-      l7_ilb_redirect_url_map: "l7-ilb-redirect-url-map"
+      l7_ilb_network: 'l7-ilb-network'
+      l7_ilb_proxy_subnet: 'l7-ilb-proxy-subnet'
+      l7_ilb_subnet: 'l7-ilb-subnet'
+      l7_ilb_ip: 'l7-ilb-ip'
+      l7_ilb_forwarding_rule: 'l7-ilb-forwarding-rule'
+      l7_ilb_target_https_proxy: 'l7-ilb-target-https-proxy'
+      l7_ilb_regional_url_map: 'l7-ilb-regional-url-map'
+      l7_ilb_backend_service: 'l7-ilb-backend-service'
+      l7_ilb_mig_template: 'l7-ilb-mig-template'
+      l7_ilb_hc: 'l7-ilb-hc'
+      l7_ilb_mig1: 'l7-ilb-mig1'
+      l7_ilb_fw_allow_hc: 'l7-ilb-fw-allow-hc'
+      l7_ilb_fw_allow_ilb_to_backends: 'l7-ilb-fw-allow-ilb-to-backends'
+      l7_ilb_test_vm: 'l7-ilb-test-vm'
+      l7_ilb_redirect: 'l7-ilb-redirect'
+      l7_ilb_target_http_proxy: 'l7-ilb-target-http-proxy'
+      l7_ilb_redirect_url_map: 'l7-ilb-redirect-url-map'
     min_version: beta
     ignore_read_extra:
-      - "target"
-      - "ip_address"
+      - 'target'
+      - 'ip_address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "regional_external_http_load_balancer"
-    primary_resource_type: "google_compute_region_url_map"
-    primary_resource_id: "default"
+    name: 'regional_external_http_load_balancer'
+    primary_resource_type: 'google_compute_region_url_map'
+    primary_resource_id: 'default'
     vars:
-      lb_network: "lb-network"
-      backend_subnet: "backend-subnet"
-      proxy_only_subnet: "proxy-only-subnet"
-      fw_allow_health_check: "fw-allow-health-check"
-      fw_allow_proxies: "fw-allow-proxies"
-      l7_xlb_backend_template: "l7-xlb-backend-template"
-      l7_xlb_backend_example: "l7-xlb-backend-example"
-      address_name: "address-name"
-      l7_xlb_basic_check: "l7-xlb-basic-check"
-      l7_xlb_backend_service: "l7-xlb-backend-service"
-      regional_l7_xlb_map: "regional-l7-xlb-map"
-      l7_xlb_proxy: "l7-xlb-proxy"
-      l7_xlb_forwarding_rule: "l7-xlb-forwarding-rule"
+      lb_network: 'lb-network'
+      backend_subnet: 'backend-subnet'
+      proxy_only_subnet: 'proxy-only-subnet'
+      fw_allow_health_check: 'fw-allow-health-check'
+      fw_allow_proxies: 'fw-allow-proxies'
+      l7_xlb_backend_template: 'l7-xlb-backend-template'
+      l7_xlb_backend_example: 'l7-xlb-backend-example'
+      address_name: 'address-name'
+      l7_xlb_basic_check: 'l7-xlb-basic-check'
+      l7_xlb_backend_service: 'l7-xlb-backend-service'
+      regional_l7_xlb_map: 'regional-l7-xlb-map'
+      l7_xlb_proxy: 'l7-xlb-proxy'
+      l7_xlb_forwarding_rule: 'l7-xlb-forwarding-rule'
     skip_docs: true
-    skip_test: true     # Similar to other samples
+    skip_test: true # Similar to other samples
     min_version: beta
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -169,7 +169,7 @@ properties:
       you create the resource.
   # 'fingerprint' used internally for object consistency.
   - !ruby/object:Api::Type::Array
-    name: "host_rule"
+    name: 'host_rule'
     api_name: 'hostRules'
     is_set: true
     description: 'The list of HostRules to use against the URL.'
@@ -219,7 +219,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
   - !ruby/object:Api::Type::Array
-    name: "path_matcher"
+    name: 'path_matcher'
     api_name: 'pathMatchers'
     description: 'The list of named PathMatchers to use against the URL.'
     item_type: !ruby/object:Api::Type::NestedObject
@@ -1449,7 +1449,7 @@ properties:
                 retained.
                  This field is required to ensure an empty block is not set. The normal default value is false.
   - !ruby/object:Api::Type::Array
-    name: "test"
+    name: 'test'
     api_name: tests
     description: |
       The list of expected URL mappings. Requests to update this UrlMap will
@@ -1472,8 +1472,9 @@ properties:
           required: true
           resource: 'RegionBackendService'
           imports: 'selfLink'
-          description: A reference to expected RegionBackendService resource the given
-            URL should be mapped to.
+          description:
+            A reference to expected RegionBackendService resource the given URL
+            should be mapped to.
   - !ruby/object:Api::Type::NestedObject
     name: 'defaultUrlRedirect'
     exactly_one_of:
@@ -1541,7 +1542,7 @@ properties:
           - :TEMPORARY_REDIRECT
       - !ruby/object:Api::Type::Boolean
         name: 'stripQuery'
-        description:  |
+        description: |
           If set to true, any accompanying query portion of the original URL is removed prior
           to redirecting the request. If set to false, the query portion of the original URL is
           retained.

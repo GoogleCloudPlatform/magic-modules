@@ -14,9 +14,9 @@
 ---
 !ruby/object:Api::Resource
 name: "AddressGroup"
-base_url: "projects/{{project}}/locations/{{location}}/addressGroups"
-create_url: "projects/{{project}}/locations/{{location}}/addressGroups?addressGroupId={{name}}"
-self_link: "projects/{{project}}/locations/{{location}}/addressGroups/{{name}}"
+base_url: "{{parent}}/locations/{{location}}/addressGroups"
+create_url: "{{parent}}/locations/{{location}}/addressGroups?addressGroupId={{name}}"
+self_link: "{{parent}}/locations/{{location}}/addressGroups/{{name}}"
 min_version: beta
 update_verb: :PATCH
 update_mask: true
@@ -27,29 +27,9 @@ references:
   guides:
     "Use AddressGroups": "https://cloud.google.com/vpc/docs/use-address-groups-firewall-policies"
   api: "https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/organizations.locations.addressGroups"
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 30
-      update_minutes: 30
-      delete_minutes: 30
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
-autogen_async: true
-import_format:
-  ["projects/{{project}}/locations/{{location}}/addressGroups/{{name}}"]
+# Prevent the operation from being generated so we can call the custom one.
+autogen_async: false
+import_format: ["{{%parent}}/locations/{{location}}/addressGroups/{{name}}"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
@@ -57,22 +37,45 @@ examples:
     primary_resource_id: "default"
     vars:
       resource_name: "my-address-groups"
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: beta
+    name: "network_security_address_groups_organization_basic"
+    primary_resource_id: "default"
+    vars:
+      resource_name: "my-address-groups"
+    test_env_vars:
+      org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
     name: "network_security_address_groups_advanced"
     primary_resource_id: "default"
     vars:
       resource_name: "my-address-groups"
+    test_env_vars:
+      project: :PROJECT_NAME
+custom_code:
+  !ruby/object:Provider::Terraform::CustomCode # Calling custom operation that are different from other network security resources.
+  post_create: templates/terraform/post_create/network_security_address_group_operation.go.erb
+  post_update: templates/terraform/post_update/network_security_address_group_operation.go.erb
+  post_delete: templates/terraform/post_delete/network_security_address_group_operation.go.erb
 parameters:
+  - !ruby/object:Api::Type::String
+    name: parent
+    url_param_only: true
+    immutable: true
+    description: |
+      The name of the parent this address group belongs to. Format: organizations/{organization_id} or projects/{project_id}.
   - !ruby/object:Api::Type::String
     name: "name"
     required: true
     url_param_only: true
     description: |
-      Name of the AddressGroup resource. It matches pattern projects/*/locations/{location}/addressGroups/<addressGroup>.
+      Name of the AddressGroup resource.
   - !ruby/object:Api::Type::String
     name: "location"
-    default_value: "global"
+    required: true
     description: |
       The location of the gateway security policy.
       The default value is `global`.

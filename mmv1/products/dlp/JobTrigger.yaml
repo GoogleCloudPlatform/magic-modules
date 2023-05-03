@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'JobTrigger'
-create_url: "{{parent}}/jobTriggers"
-self_link: "{{parent}}/jobTriggers/{{name}}"
-base_url: "{{parent}}/jobTriggers"
+create_url: '{{parent}}/jobTriggers'
+self_link: '{{parent}}/jobTriggers/{{name}}'
+base_url: '{{parent}}/jobTriggers'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -24,69 +24,69 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-job-triggers'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.jobTriggers'
-id_format: "{{parent}}/jobTriggers/{{name}}"
+id_format: '{{parent}}/jobTriggers/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_job_trigger_basic"
-    primary_resource_id: "basic"
+    name: 'dlp_job_trigger_basic'
+    primary_resource_id: 'basic'
     vars:
-      trigger: "trigger"
+      trigger: 'trigger'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_job_trigger_bigquery_row_limit"
-    primary_resource_id: "bigquery_row_limit"
+    name: 'dlp_job_trigger_bigquery_row_limit'
+    primary_resource_id: 'bigquery_row_limit'
     vars:
-      trigger: "trigger"
+      trigger: 'trigger'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_job_trigger_bigquery_row_limit_percentage"
-    primary_resource_id: "bigquery_row_limit_percentage"
+    name: 'dlp_job_trigger_bigquery_row_limit_percentage'
+    primary_resource_id: 'bigquery_row_limit_percentage'
     vars:
-      trigger: "trigger"
+      trigger: 'trigger'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_job_trigger_data_catalog_output"
-    primary_resource_id: "data_catalog_output"
+    name: 'dlp_job_trigger_data_catalog_output'
+    primary_resource_id: 'data_catalog_output'
     vars:
-      trigger: "trigger"
-    test_env_vars:
-      project: :PROJECT_NAME
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_job_trigger_scc_output"
-    primary_resource_id: "scc_output"
-    vars:
-      trigger: "trigger"
+      trigger: 'trigger'
     test_env_vars:
       project: :PROJECT_NAME
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_job_trigger_job_notification_emails"
-    primary_resource_id: "job_notification_emails"
+    name: 'dlp_job_trigger_scc_output'
+    primary_resource_id: 'scc_output'
+    vars:
+      trigger: 'trigger'
+    test_env_vars:
+      project: :PROJECT_NAME
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_job_trigger_job_notification_emails'
+    primary_resource_id: 'job_notification_emails'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_job_trigger_deidentify"
-    primary_resource_id: "deidentify"
+    name: 'dlp_job_trigger_deidentify'
+    primary_resource_id: 'deidentify'
     vars:
-      name: "tf_test"
+      name: 'tf_test'
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
       name: '"tf_test_" + RandString(t, 10)'
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_job_trigger_hybrid"
-    primary_resource_id: "hybrid_trigger"
+    name: 'dlp_job_trigger_hybrid'
+    primary_resource_id: 'hybrid_trigger'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: "dlp_job_trigger_inspect"
-    primary_resource_id: "inspect"
+    name: 'dlp_job_trigger_inspect'
+    primary_resource_id: 'inspect'
     vars:
-      trigger: "trigger"
+      trigger: 'trigger'
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -185,7 +185,8 @@ properties:
             description: When true, excludes type information of the findings.
           - !ruby/object:Api::Type::Boolean
             name: 'includeQuote'
-            description: When true, a contextual quote from the data that triggered a
+            description:
+              When true, a contextual quote from the data that triggered a
               finding is included in the response.
           - !ruby/object:Api::Type::Enum
             name: 'minLikelihood'
@@ -200,11 +201,13 @@ properties:
             default_value: :POSSIBLE
           - !ruby/object:Api::Type::NestedObject
             name: 'limits'
-            description: Configuration to control the number of findings returned.
+            description:
+              Configuration to control the number of findings returned.
             properties:
               - !ruby/object:Api::Type::Integer
                 name: 'maxFindingsPerItem'
-                description: Max number of findings that will be returned for each item
+                description:
+                  Max number of findings that will be returned for each item
                   scanned. The maximum returned is 2000.
                 at_least_one_of:
                   - inspect_job.0.inspect_config.0.limits.0.max_findings_per_item
@@ -212,7 +215,8 @@ properties:
                   - inspect_job.0.inspect_config.0.limits.0.max_findings_per_info_type
               - !ruby/object:Api::Type::Integer
                 name: 'maxFindingsPerRequest'
-                description: Max number of findings that will be returned per request/job.
+                description:
+                  Max number of findings that will be returned per request/job.
                   The maximum returned is 2000.
                 at_least_one_of:
                   - inspect_job.0.inspect_config.0.limits.0.max_findings_per_item
@@ -304,7 +308,8 @@ properties:
                         properties:
                           - !ruby/object:Api::Type::NestedObject
                             name: 'hotwordRegex'
-                            description: Regular expression pattern defining what qualifies
+                            description:
+                              Regular expression pattern defining what qualifies
                               as a hotword.
                             properties:
                               - !ruby/object:Api::Type::String
@@ -361,9 +366,10 @@ properties:
                                   will result in a final likelihood of LIKELY. Either this or fixed_likelihood can be set.
                       - !ruby/object:Api::Type::NestedObject
                         name: 'exclusionRule'
-                        description: The rule that specifies conditions when findings
-                          of infoTypes specified in InspectionRuleSet are removed from
-                          results.
+                        description:
+                          The rule that specifies conditions when findings of
+                          infoTypes specified in InspectionRuleSet are removed
+                          from results.
                         properties:
                           - !ruby/object:Api::Type::Enum
                             name: 'matchingType'
@@ -380,7 +386,8 @@ properties:
                             properties:
                               - !ruby/object:Api::Type::NestedObject
                                 name: 'wordList'
-                                description: List of words or phrases to search for.
+                                description:
+                                  List of words or phrases to search for.
                                 properties:
                                   - !ruby/object:Api::Type::Array
                                     name: 'words'
@@ -391,7 +398,8 @@ properties:
                                     item_type: Api::Type::String
                               - !ruby/object:Api::Type::NestedObject
                                 name: 'cloudStoragePath'
-                                description: Newline-delimited file of words in Cloud
+                                description:
+                                  Newline-delimited file of words in Cloud
                                   Storage. Only a single file is accepted.
                                 properties:
                                   - !ruby/object:Api::Type::String
@@ -401,7 +409,8 @@ properties:
                                       A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
                           - !ruby/object:Api::Type::NestedObject
                             name: 'regex'
-                            description: Regular expression which defines the rule.
+                            description:
+                              Regular expression which defines the rule.
                             properties:
                               - !ruby/object:Api::Type::String
                                 name: 'pattern'
@@ -416,7 +425,8 @@ properties:
                                 item_type: Api::Type::Integer
                           - !ruby/object:Api::Type::NestedObject
                             name: 'excludeInfoTypes'
-                            description: Set of infoTypes for which findings would affect
+                            description:
+                              Set of infoTypes for which findings would affect
                               this rule.
                             properties:
                               - !ruby/object:Api::Type::Array
@@ -438,12 +448,15 @@ properties:
                                         Version of the information type to use. By default, the version is set to stable.
                           - !ruby/object:Api::Type::NestedObject
                             name: 'excludeByHotword'
-                            description: Drop if the hotword rule is contained in the proximate context.
+                            description:
+                              Drop if the hotword rule is contained in the
+                              proximate context.
                             properties:
                               - !ruby/object:Api::Type::NestedObject
                                 name: 'hotwordRegex'
-                                description: Regular expression pattern defining what qualifies
-                                  as a hotword.
+                                description:
+                                  Regular expression pattern defining what
+                                  qualifies as a hotword.
                                 properties:
                                   - !ruby/object:Api::Type::String
                                     name: 'pattern'
@@ -548,8 +561,9 @@ properties:
                           item_type: Api::Type::String
                     - !ruby/object:Api::Type::NestedObject
                       name: 'cloudStoragePath'
-                      description: Newline-delimited file of words in Cloud Storage. Only
-                        a single file is accepted.
+                      description:
+                        Newline-delimited file of words in Cloud Storage. Only a
+                        single file is accepted.
                       properties:
                         - !ruby/object:Api::Type::String
                           name: 'path'
@@ -558,14 +572,15 @@ properties:
                             A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
                 - !ruby/object:Api::Type::NestedObject
                   name: 'storedType'
-                  description: A reference to a StoredInfoType to use with scanning.
+                  description:
+                    A reference to a StoredInfoType to use with scanning.
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'name'
                       required: true
                       description: |
                         Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`
-                        or `projects/project-id/storedInfoTypes/432452342`.                
+                        or `projects/project-id/storedInfoTypes/432452342`.
                     - !ruby/object:Api::Type::String
                       name: 'createTime'
                       description: |
@@ -576,7 +591,7 @@ properties:
                   description: |
                     Message for detecting output from deidentification transformations that support reversing.
                   properties: [] # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
-                  # The fields below are necessary to include the "surrogateType" in the payload                      
+                  # The fields below are necessary to include the "surrogateType" in the payload
                   send_empty_value: true
                   allow_empty_object: true
       - !ruby/object:Api::Type::NestedObject
@@ -599,8 +614,9 @@ properties:
                 at_least_one_of:
                   - inspect_job.0.storage_config.0.timespan_config.0.start_time
                   - inspect_job.0.storage_config.0.timespan_config.0.end_time
-                description: Exclude files or rows newer than this value. If set to
-                  zero, no upper time limit is applied.
+                description:
+                  Exclude files or rows newer than this value. If set to zero,
+                  no upper time limit is applied.
               - !ruby/object:Api::Type::Boolean
                 name: 'enableAutoPopulationOfTimespanConfig'
                 description: |
@@ -626,7 +642,8 @@ properties:
                       timestamp property does not exist or its value is empty or invalid.
           - !ruby/object:Api::Type::NestedObject
             name: 'datastoreOptions'
-            description: Options defining a data set within Google Cloud Datastore.
+            description:
+              Options defining a data set within Google Cloud Datastore.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'partitionId'
@@ -638,10 +655,12 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: 'projectId'
                     required: true
-                    description: The ID of the project to which the entities belong.
+                    description:
+                      The ID of the project to which the entities belong.
                   - !ruby/object:Api::Type::String
                     name: 'namespaceId'
-                    description: If not empty, the ID of the namespace to which the
+                    description:
+                      If not empty, the ID of the namespace to which the
                       entities belong.
               - !ruby/object:Api::Type::NestedObject
                 name: 'kind'
@@ -655,8 +674,9 @@ properties:
                     description: The name of the Datastore kind.
           - !ruby/object:Api::Type::NestedObject
             name: 'cloudStorageOptions'
-            description: Options defining a file or a set of files within a Google
-              Cloud Storage bucket.
+            description:
+              Options defining a file or a set of files within a Google Cloud
+              Storage bucket.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'fileSet'
@@ -773,19 +793,19 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: 'rowsLimit'
                 description: |
-                  Max number of rows to scan. If the table has more rows than this value, the rest of the rows are omitted. 
-                  If not set, or if set to 0, all rows will be scanned. Only one of rowsLimit and rowsLimitPercent can be 
+                  Max number of rows to scan. If the table has more rows than this value, the rest of the rows are omitted.
+                  If not set, or if set to 0, all rows will be scanned. Only one of rowsLimit and rowsLimitPercent can be
                   specified. Cannot be used in conjunction with TimespanConfig.
               - !ruby/object:Api::Type::Integer
                 name: 'rowsLimitPercent'
                 description: |
-                  Max percentage of rows to scan. The rest are omitted. The number of rows scanned is rounded down. 
-                  Must be between 0 and 100, inclusively. Both 0 and 100 means no limit. Defaults to 0. Only one of 
+                  Max percentage of rows to scan. The rest are omitted. The number of rows scanned is rounded down.
+                  Must be between 0 and 100, inclusively. Both 0 and 100 means no limit. Defaults to 0. Only one of
                   rowsLimit and rowsLimitPercent can be specified. Cannot be used in conjunction with TimespanConfig.
               - !ruby/object:Api::Type::Enum
                 name: 'sampleMethod'
                 description: |
-                  How to sample rows if not all rows are scanned. Meaningful only when used in conjunction with either 
+                  How to sample rows if not all rows are scanned. Meaningful only when used in conjunction with either
                   rowsLimit or rowsLimitPercent. If not specified, rows are scanned in the order BigQuery reads them.
                 values:
                   - :TOP
@@ -979,7 +999,7 @@ properties:
               description: |
                 Sends an email when the job completes. The email goes to IAM project owners and technical Essential Contacts.
             - !ruby/object:Api::Type::NestedObject
-              name: 'deidentify'  
+              name: 'deidentify'
               exactly_one_of:
                 - save_findings
                 - pub_sub
@@ -995,21 +1015,21 @@ properties:
                   required: true
                   description: |
                     User settable Cloud Storage bucket and folders to store de-identified files.
-                    
+
                     This field must be set for cloud storage deidentification.
-                    
+
                     The output Cloud Storage bucket must be different from the input bucket.
-                    
+
                     De-identified files will overwrite files in the output path.
-                    
+
                     Form of: gs://bucket/folder/ or gs://bucket
                 - !ruby/object:Api::Type::Array
                   name: 'fileTypesToTransform'
                   description: |
                     List of user-specified file type groups to transform. If specified, only the files with these filetypes will be transformed.
 
-                    If empty, all supported files will be transformed. Supported types may be automatically added over time. 
-                    
+                    If empty, all supported files will be transformed. Supported types may be automatically added over time.
+
                     If a file type is set in this field that isn't supported by the Deidentify action then the job will fail and will not be successfully created/started.
                   item_type: !ruby/object:Api::Type::Enum
                     name: 'fileType'
@@ -1047,15 +1067,17 @@ properties:
                       name: 'table'
                       required: true
                       description: |
-                        The BigQuery table in which to store the output. 
+                        The BigQuery table in which to store the output.
                       properties:
                         - !ruby/object:Api::Type::String
                           name: 'datasetId'
-                          description: The ID of the dataset containing this table.
+                          description:
+                            The ID of the dataset containing this table.
                           required: true
                         - !ruby/object:Api::Type::String
                           name: 'projectId'
-                          description: The ID of the project containing this table.
+                          description:
+                            The ID of the project containing this table.
                           required: true
                         - !ruby/object:Api::Type::String
                           name: 'tableId'

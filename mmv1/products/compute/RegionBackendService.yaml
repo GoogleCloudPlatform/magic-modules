@@ -44,60 +44,61 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_basic"
-    primary_resource_id: "default"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-region-service%s\", context[\"random_suffix\"\
+    name: 'region_backend_service_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-region-service%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_cache"
-    primary_resource_id: "default"
+    name: 'region_backend_service_cache'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_ilb_round_robin"
-    primary_resource_id: "default"
+    name: 'region_backend_service_ilb_round_robin'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_external"
-    primary_resource_id: "default"
+    name: 'region_backend_service_external'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_external_weighted"
-    primary_resource_id: "default"
+    name: 'region_backend_service_external_weighted'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_ilb_ring_hash"
-    primary_resource_id: "default"
+    name: 'region_backend_service_ilb_ring_hash'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_balancing_mode"
-    primary_resource_id: "default"
+    name: 'region_backend_service_balancing_mode'
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      rigm_name: "rbs-rigm"
-      region_health_check_name: "rbs-health-check"
-      network_name: "rbs-net"
+      region_backend_service_name: 'region-service'
+      rigm_name: 'rbs-rigm'
+      region_health_check_name: 'rbs-health-check'
+      network_name: 'rbs-net'
   - !ruby/object:Provider::Terraform::Examples
-    name: "region_backend_service_connection_tracking"
+    name: 'region_backend_service_connection_tracking'
     min_version: 'beta'
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     vars:
-      region_backend_service_name: "region-service"
-      health_check_name: "rbs-health-check"
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: '/'
   fetch_iam_policy_verb: :GET

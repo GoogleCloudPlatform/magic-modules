@@ -27,7 +27,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://firebase.google.com/docs/ios/setup'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.iosApps'
 async: !ruby/object:Api::OpAsync
-  actions: ["create", "delete"]
+  actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
@@ -44,43 +44,44 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-import_format: ["projects/{{project}}/iosApps/{{appId}}", "iosApps/{{appId}}", "{{appId}}"]
+import_format:
+  ['projects/{{project}}/iosApps/{{appId}}', 'iosApps/{{appId}}', '{{appId}}']
 autogen_async: true
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_apple_app_basic"
-    min_version: "beta"
-    primary_resource_id: "default"
+    name: 'firebase_apple_app_basic'
+    min_version: 'beta'
+    primary_resource_id: 'default'
     vars:
-      display_name: "Display Name Basic"
-      bundle_id: "apple.app.12345"
+      display_name: 'Display Name Basic'
+      bundle_id: 'apple.app.12345'
     test_env_vars:
       org_id: :ORG_ID
       project_id: :PROJECT_NAME
     test_vars_overrides:
       display_name: '"tf-test Display Name Basic"'
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_apple_app_full"
-    min_version: "beta"
-    primary_resource_id: "full"
+    name: 'firebase_apple_app_full'
+    min_version: 'beta'
+    primary_resource_id: 'full'
     vars:
-      display_name: "Display Name Full"
-      bundle_id: "apple.app.12345"
-      app_store_id: "12345"
-      team_id: "9987654321"     # Has to be a 10-digit number.
+      display_name: 'Display Name Full'
+      bundle_id: 'apple.app.12345'
+      app_store_id: '12345'
+      team_id: '9987654321' # Has to be a 10-digit number.
     test_env_vars:
       org_id: :ORG_ID
       project_id: :PROJECT_NAME
     test_vars_overrides:
-      app_store_id: "12345"
-      team_id: "9987654321"
+      app_store_id: '12345'
+      team_id: '9987654321'
       display_name: '"tf-test Display Name Full"'
     ignore_read_extra:
       - project
       - deletion_policy
 virtual_fields:
-        # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
+  # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
   - !ruby/object:Api::Type::String
     name: 'deletion_policy'
     description: |
@@ -111,6 +112,8 @@ properties:
       This identifier should be treated as an opaque token, as the data format is not specified.
   - !ruby/object:Api::Type::String
     name: bundleId
+    required: true
+    immutable: true
     description: |
       The canonical bundle ID of the Apple app as it would appear in the Apple AppStore.
   - !ruby/object:Api::Type::String
@@ -121,4 +124,3 @@ properties:
     name: teamId
     description: |
       The Apple Developer Team ID associated with the App in the App Store.
-

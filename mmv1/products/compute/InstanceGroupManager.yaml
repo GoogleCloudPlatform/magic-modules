@@ -172,7 +172,8 @@ properties:
   # TODO(nelsonjr): Make namedPorts a NameValue(name[string], port[integer])
   - !ruby/object:Api::Type::Array
     name: 'namedPorts'
-    description: Named ports configured for the Instance Groups complementary to this
+    description:
+      Named ports configured for the Instance Groups complementary to this
       Instance Group Manager.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -183,7 +184,8 @@ properties:
             long, and comply with RFC1035.
         - !ruby/object:Api::Type::Integer
           name: 'port'
-          description: The port number, which can be a value between 1 and 65535.
+          description:
+            The port number, which can be a value between 1 and 65535.
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'

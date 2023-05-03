@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Instance'
-base_url: "projects/{{project}}/locations/{{region}}/instances"
+base_url: 'projects/{{project}}/locations/{{region}}/instances'
 create_url: projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
 update_verb: :PATCH
 description: |
@@ -25,8 +25,11 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'name'
   method_name_separator: ':'
-  import_format: ["projects/{{project}}/locations/{{location}}/instances/{{name}}",
-    "{{name}}"]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/instances/{{name}}',
+      '{{name}}',
+    ]
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 90
   update_minutes: 25
@@ -34,51 +37,52 @@ timeouts: !ruby/object:Api::Timeouts
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_fusion_instance_basic"
-    primary_resource_id: "basic_instance"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"\
+    name: 'data_fusion_instance_basic'
+    primary_resource_id: 'basic_instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
-      instance_name: "my-instance"
-      prober_test_run: ""
+      instance_name: 'my-instance'
+      prober_test_run: ''
     test_vars_overrides:
-          # Mark for testing to avoid service networking connection usage that is not cleaned up
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
       prober_test_run: '`options = { prober_test_run = "true" }`'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_fusion_instance_full"
-    primary_resource_id: "extended_instance"
+    name: 'data_fusion_instance_full'
+    primary_resource_id: 'extended_instance'
     vars:
-      instance_name: "my-instance"
-      ip_alloc: "datafusion-ip-alloc"
-      network_name: "datafusion-full-network"
-      prober_test_run: ""
+      instance_name: 'my-instance'
+      ip_alloc: 'datafusion-ip-alloc'
+      network_name: 'datafusion-full-network'
+      prober_test_run: ''
     test_vars_overrides:
-          # Mark for testing to avoid service networking connection usage that is not cleaned up
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
       prober_test_run: '`options = { prober_test_run = "true" }`'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_fusion_instance_cmek"
-    primary_resource_id: "cmek"
+    name: 'data_fusion_instance_cmek'
+    primary_resource_id: 'cmek'
     vars:
-      instance_name: "my-instance"
+      instance_name: 'my-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_fusion_instance_enterprise"
-    primary_resource_id: "enterprise_instance"
+    name: 'data_fusion_instance_enterprise'
+    primary_resource_id: 'enterprise_instance'
     vars:
-      instance_name: "my-instance"
-      prober_test_run: ""
+      instance_name: 'my-instance'
+      prober_test_run: ''
     test_vars_overrides:
-          # Mark for testing to avoid service networking connection usage that is not cleaned up
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
       prober_test_run: '`options = { prober_test_run = "true" }`'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_fusion_instance_event"
-    primary_resource_id: "event"
+    name: 'data_fusion_instance_event'
+    primary_resource_id: 'event'
     vars:
-      instance_name: "my-instance"
+      instance_name: 'my-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "data_fusion_instance_zone"
-    primary_resource_id: "zone"
+    name: 'data_fusion_instance_zone'
+    primary_resource_id: 'zone'
     vars:
-      instance_name: "my-instance"
+      instance_name: 'my-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_update: templates/terraform/pre_update/datafusion_instance_update.go.erb
   constants: templates/terraform/constants/data_fusion_instance_option.go.erb
@@ -118,7 +122,7 @@ properties:
       - ENTERPRISE: Enterprise Data Fusion instance. In Enterprise type, the user will have more features
       available, such as support for streaming pipelines, higher number of concurrent pipelines, etc.
       - DEVELOPER: Developer Data Fusion instance. In Developer type, the user will have all features available but
-      with restrictive capabilities. This is to help enterprises design and develop their data ingestion and integration 
+      with restrictive capabilities. This is to help enterprises design and develop their data ingestion and integration
       pipelines at low cost.
     values:
       - :BASIC
@@ -195,8 +199,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'serviceAccount'
     min_version: beta # This field is deprecated and needs to be absent in GA provider.
-    deprecation_message: Use `tenant_project_id` instead to extract the tenant project
-      ID.
+    deprecation_message:
+      Use `tenant_project_id` instead to extract the tenant project ID.
     output: true
     description: |
       Deprecated. Use `tenant_project_id` instead to extract the tenant project ID.
@@ -297,7 +301,7 @@ properties:
     description: |
       List of accelerators enabled for this CDF instance.
 
-      If accelerators are enabled it is possible a permadiff will be created with the Options field. 
+      If accelerators are enabled it is possible a permadiff will be created with the Options field.
       Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
     item_type: !ruby/object:Api::Type::NestedObject
       properties:

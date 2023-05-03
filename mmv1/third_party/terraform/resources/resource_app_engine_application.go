@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 	appengine "google.golang.org/api/appengine/v1"
 )
 
@@ -39,7 +40,7 @@ func ResourceAppEngineApplication() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				ValidateFunc: validateProjectID(),
+				ValidateFunc: verify.ValidateProjectID(),
 				Description:  `The project ID to create the application under.`,
 			},
 			"auth_domain": {
@@ -251,7 +252,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 
 	app, err := config.NewAppEngineClient(userAgent).Apps.Get(pid).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("App Engine Application %q", pid))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("App Engine Application %q", pid))
 	}
 	if err := d.Set("auth_domain", app.AuthDomain); err != nil {
 		return fmt.Errorf("Error setting auth_domain: %s", err)

@@ -37,8 +37,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_bigquery_table'
     primary_resource_id: 'test'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf_test_dataset_id%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\",
+      context[\"random_suffix\"\
       ]), fmt.Sprintf(\"tf_test_table_id%s\", context[\"random_suffix\"])"
     vars:
       dataset_id: 'dataset_id'
@@ -335,8 +335,7 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'schema'
         description:
-          'The schema for the data. Schema is required for CSV and JSON
-          formats'
+          'The schema for the data. Schema is required for CSV and JSON formats'
         properties:
           - !ruby/object:Api::Type::Array
             name: 'fields'
@@ -377,7 +376,8 @@ properties:
                     - :RECORD
       - !ruby/object:Api::Type::NestedObject
         name: 'googleSheetsOptions'
-        description: 'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
+        description:
+          'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'skipLeadingRows'
@@ -410,7 +410,8 @@ properties:
             description: 'The separator for fields in a CSV file'
           - !ruby/object:Api::Type::String
             name: 'quote'
-            description: 'The value that is used to quote data sections in a CSV file'
+            description:
+              'The value that is used to quote data sections in a CSV file'
           - !ruby/object:Api::Type::Integer
             name: 'skipLeadingRows'
             description: |
@@ -448,8 +449,7 @@ properties:
                       - !ruby/object:Api::Type::Enum
                         name: 'encoding'
                         description:
-                          The encoding of the values when the type is not
-                          STRING
+                          The encoding of the values when the type is not STRING
                         values:
                           - :TEXT
                           - :BINARY
@@ -471,8 +471,7 @@ properties:
                       - !ruby/object:Api::Type::Enum
                         name: 'type'
                         description:
-                          The type to convert the value in cells of this
-                          column
+                          The type to convert the value in cells of this column
                         values:
                           - :BYTES
                           - :STRING
@@ -481,7 +480,8 @@ properties:
                           - :BOOLEAN
                 - !ruby/object:Api::Type::Enum
                   name: 'encoding'
-                  description: The encoding of the values when the type is not STRING
+                  description:
+                    The encoding of the values when the type is not STRING
                   values:
                     - :TEXT
                     - :BINARY
@@ -496,8 +496,7 @@ properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'type'
                   description:
-                    The type to convert the value in cells of this column
-                    family
+                    The type to convert the value in cells of this column family
                   values:
                     - :BYTES
                     - :STRING
