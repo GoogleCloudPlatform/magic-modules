@@ -135,6 +135,9 @@ func DurationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 // Use this method when the field accepts either an IP address or a
 // self_link referencing a resource (such as google_compute_route's
 // next_hop_ilb)
+//
+// Deprecated: For backward compatibility CompareIpAddressOrSelfLinkOrResourceName is still working,
+// but all new code should use CompareIpAddressOrSelfLinkOrResourceName in the tpgresource package instead.
 func CompareIpAddressOrSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) bool {
 	return tpgresource.CompareIpAddressOrSelfLinkOrResourceName("", old, new, nil)
 }
@@ -150,6 +153,9 @@ func AlwaysDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 
 // Use this method when subnet is optioanl and auto_create_subnetworks = true
 // API sometimes choose a subnet so the diff needs to be ignored
+//
+// Deprecated: For backward compatibility CompareOptionalSubnet is still working,
+// but all new code should use CompareOptionalSubnet in the tpgresource package instead.
 func CompareOptionalSubnet(_, old, new string, _ *schema.ResourceData) bool {
 	return tpgresource.CompareOptionalSubnet("", old, new, nil)
 }

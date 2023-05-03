@@ -21,7 +21,7 @@ var StorageBucketIamSchema = map[string]*schema.Schema{
 }
 
 func StorageBucketDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	return compareResourceNames("", old, new, nil)
+	return tpgresource.CompareResourceNames("", old, new, nil)
 }
 
 type StorageBucketIamUpdater struct {

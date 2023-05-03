@@ -105,7 +105,7 @@ func tfvConvert(t *testing.T, dir, tfPlanFile string, offline bool, withProject 
 			data.Provider["project"]: data.Ancestry,
 		}
 	}
-	got, err := tfplan2cai.tpgresource.Convert(ctx, jsonPlan, opts)
+	got, err := tfplan2cai.Convert(ctx, jsonPlan, opts)
 	if err != nil {
 		t.Fatalf("Error converting %s: %s", tfPlanFile, err)
 	}

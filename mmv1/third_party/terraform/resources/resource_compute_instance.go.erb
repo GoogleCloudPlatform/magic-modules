@@ -1254,7 +1254,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("can_ip_forward", instance.CanIpForward); err != nil {
 		return fmt.Errorf("Error setting can_ip_forward: %s", err)
 	}
-	if err := d.Set("machine_type", GetResourceNameFromSelfLink(instance.MachineType)); err != nil {
+	if err := d.Set("machine_type", tpgresource.GetResourceNameFromSelfLink(instance.MachineType)); err != nil {
 		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
 <% unless version == 'ga' -%>
@@ -1402,7 +1402,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	zone := GetResourceNameFromSelfLink(instance.Zone)
+	zone := tpgresource.GetResourceNameFromSelfLink(instance.Zone)
 
 	if err := d.Set("service_account", flattenServiceAccounts(instance.ServiceAccounts)); err != nil {
 		return fmt.Errorf("Error setting service_account: %s", err)
@@ -2521,7 +2521,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 		}
 	} else {
 		result["initialize_params"] = []map[string]interface{}{{
-			"type": GetResourceNameFromSelfLink(diskDetails.Type),
+			"type": tpgresource.GetResourceNameFromSelfLink(diskDetails.Type),
 			// If the config specifies a family name that doesn't match the image name, then
 			// the diff won't be properly suppressed. See DiffSuppressFunc for this field.
 			"image":  diskDetails.SourceImage,

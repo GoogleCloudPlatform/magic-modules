@@ -654,7 +654,7 @@ properties:
         exactly_one_of:
           - subordinate_config.0.certificate_authority
           - subordinate_config.0.pem_issuer_chain
-        diff_suppress_func: 'compareResourceNames'
+        diff_suppress_func: 'tpgresource.CompareResourceNames'
       - !ruby/object:Api::Type::NestedObject
         name: 'pemIssuerChain'
         description: |

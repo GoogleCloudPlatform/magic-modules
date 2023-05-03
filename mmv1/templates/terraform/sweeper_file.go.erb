@@ -109,9 +109,9 @@ func testSweep<%= sweeper_name -%>(region string) error {
 		var name string
 		// Id detected in the delete URL, attempt to use id.
 		if obj["id"] != nil {
-			name = GetResourceNameFromSelfLink(obj["id"].(string))
+			name = tpgresource.GetResourceNameFromSelfLink(obj["id"].(string))
 		} else if obj["name"] != nil {
-			name = GetResourceNameFromSelfLink(obj["name"].(string))
+			name = tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
 		} else {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource name and id were nil", resourceName)
 			return nil
@@ -122,7 +122,7 @@ func testSweep<%= sweeper_name -%>(region string) error {
 			return nil
 		}
 
-		name := GetResourceNameFromSelfLink(obj["name"].(string))
+		name := tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
 		<% end -%>
 		// Skip resources that shouldn't be sweeped
 		if !acctest.IsSweepableTestResource(name) {
@@ -136,7 +136,7 @@ func testSweep<%= sweeper_name -%>(region string) error {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource zone was nil", resourceName)
 			return nil
 		}
-		zone := GetResourceNameFromSelfLink(obj["zone"].(string))
+		zone := tpgresource.GetResourceNameFromSelfLink(obj["zone"].(string))
 		deleteTemplate = strings.Replace(deleteTemplate, "{{zone}}", zone, -1)
 
 		<% end -%>

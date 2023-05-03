@@ -82,10 +82,10 @@ func (w *ComputeOperationWaiter) QueryOp() (interface{}, error) {
 		}
 	}
 	if w.Op.Zone != "" {
-		zone := GetResourceNameFromSelfLink(w.Op.Zone)
+		zone := tpgresource.GetResourceNameFromSelfLink(w.Op.Zone)
 		return w.Service.ZoneOperations.Get(w.Project, zone, w.Op.Name).Do()
 	} else if w.Op.Region != "" {
-		region := GetResourceNameFromSelfLink(w.Op.Region)
+		region := tpgresource.GetResourceNameFromSelfLink(w.Op.Region)
 		return w.Service.RegionOperations.Get(w.Project, region, w.Op.Name).Do()
 <% unless version == 'ga' -%>
 	} else if w.Parent != "" {

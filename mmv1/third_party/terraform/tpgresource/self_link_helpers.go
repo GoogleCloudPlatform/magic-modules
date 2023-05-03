@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func GetResourceNameFromSelfLink(link string) string {
-	parts := strings.Split(link, "/")
-	return parts[len(parts)-1]
+// Compare only the resource name of two self links/paths.
+func CompareResourceNames(_, old, new string, _ *schema.ResourceData) bool {
+	return GetResourceNameFromSelfLink(old) == GetResourceNameFromSelfLink(new)
 }
 
 // Compare only the relative path of two self links.
@@ -76,6 +76,19 @@ func SelfLinkNameHash(selfLink interface{}) int {
 func ConvertSelfLinkToV1(link string) string {
 	reg := regexp.MustCompile("/compute/[a-zA-Z0-9]*/projects/")
 	return reg.ReplaceAllString(link, "/compute/v1/projects/")
+}
+
+func GetResourceNameFromSelfLink(link string) string {
+	parts := strings.Split(link, "/")
+	return parts[len(parts)-1]
+}
+
+func NameFromSelfLinkStateFunc(v interface{}) string {
+	return GetResourceNameFromSelfLink(v.(string))
+}
+
+func StoreResourceName(resourceLink interface{}) string {
+	return GetResourceNameFromSelfLink(resourceLink.(string))
 }
 
 // given a full locational (non-global) self link, returns the project + region/zone + name or an error

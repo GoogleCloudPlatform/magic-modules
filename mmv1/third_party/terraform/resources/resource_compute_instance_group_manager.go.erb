@@ -754,7 +754,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err := d.Set("name", manager.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("zone", GetResourceNameFromSelfLink(manager.Zone)); err != nil {
+	if err := d.Set("zone", tpgresource.GetResourceNameFromSelfLink(manager.Zone)); err != nil {
 		return fmt.Errorf("Error setting zone: %s", err)
 	}
 	if err := d.Set("description", manager.Description); err != nil {

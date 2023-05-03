@@ -137,7 +137,7 @@ properties:
 
       The value of timeout.maxAttemptsTimeout dictates the timeout across all origins.
       A reference to a Topic resource.
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::Array
     name: 'retryConditions' # default CONNECT_FAILURE from api
     description: |

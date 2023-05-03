@@ -1900,7 +1900,7 @@ func expandInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGro
 		icg.NumInstances = int64(v.(int))
 	}
 	if v, ok := cfg["machine_type"]; ok {
-		icg.MachineTypeUri = GetResourceNameFromSelfLink(v.(string))
+		icg.MachineTypeUri = tpgresource.GetResourceNameFromSelfLink(v.(string))
 	}
 	if v, ok := cfg["min_cpu_platform"]; ok {
 		icg.MinCpuPlatform = v.(string)
@@ -2390,7 +2390,7 @@ func flattenAccelerators(accelerators []*dataproc.AcceleratorConfig) interface{}
 	acceleratorsTypeSet := schema.NewSet(schema.HashResource(acceleratorsSchema()), []interface{}{})
 	for _, accelerator := range accelerators {
 		data := map[string]interface{}{
-			"accelerator_type":  GetResourceNameFromSelfLink(accelerator.AcceleratorTypeUri),
+			"accelerator_type":  tpgresource.GetResourceNameFromSelfLink(accelerator.AcceleratorTypeUri),
 			"accelerator_count": int(accelerator.AcceleratorCount),
 		}
 
@@ -2426,7 +2426,7 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 	gceConfig := map[string]interface{}{
 		"tags":             schema.NewSet(schema.HashString, convertStringArrToInterface(gcc.Tags)),
 		"service_account":  gcc.ServiceAccount,
-		"zone":             GetResourceNameFromSelfLink(gcc.ZoneUri),
+		"zone":             tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
 		"internal_ip_only": gcc.InternalIpOnly,
 		"metadata":         gcc.Metadata,
 	}
@@ -2510,7 +2510,7 @@ func flattenInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGr
 
 	if icg != nil {
 		data["num_instances"] = icg.NumInstances
-		data["machine_type"] = GetResourceNameFromSelfLink(icg.MachineTypeUri)
+		data["machine_type"] = tpgresource.GetResourceNameFromSelfLink(icg.MachineTypeUri)
 		data["min_cpu_platform"] = icg.MinCpuPlatform
 		data["image_uri"] = icg.ImageUri
 		data["instance_names"] = icg.InstanceNames

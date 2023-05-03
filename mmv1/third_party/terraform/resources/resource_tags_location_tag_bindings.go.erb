@@ -336,7 +336,7 @@ func resourceTagsLocationTagBindingFindNestedObjectInList(d *schema.ResourceData
 
 		item := itemRaw.(map[string]interface{})
 		itemName := flattenNestedTagsLocationTagBindingName(item["name"], d, meta.(*transport_tpg.Config))
-		// tpgresource.IsEmptyValue check so that if one is nil and the other is "", that's considered a match
+		// IsEmptyValue check so that if one is nil and the other is "", that's considered a match
 		if !(tpgresource.IsEmptyValue(reflect.ValueOf(itemName)) && tpgresource.IsEmptyValue(reflect.ValueOf(expectedFlattenedName))) && !reflect.DeepEqual(itemName, expectedFlattenedName) {
 			log.Printf("[DEBUG] Skipping item with name= %#v, looking for %#v)", itemName, expectedFlattenedName)
 			continue

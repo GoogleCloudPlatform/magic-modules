@@ -681,7 +681,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 			Pages(ctx, func(r *serviceusage.ListServicesResponse) error {
 				for _, v := range r.Services {
 					// services are returned as "projects/{{project}}/services/{{name}}"
-					name := GetResourceNameFromSelfLink(v.Name)
+					name := tpgresource.GetResourceNameFromSelfLink(v.Name)
 
 					// if name not in ignoredProjectServicesSet
 					if _, ok := ignoredProjectServicesSet[name]; !ok {

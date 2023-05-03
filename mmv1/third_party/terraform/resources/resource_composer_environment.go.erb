@@ -952,7 +952,7 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("region", envName.Region); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}
-	if err := d.Set("name", GetResourceNameFromSelfLink(res.Name)); err != nil {
+	if err := d.Set("name", tpgresource.GetResourceNameFromSelfLink(res.Name)); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}
 	if err := d.Set("config", flattenComposerEnvironmentConfig(res.Config)); err != nil {
@@ -2069,7 +2069,7 @@ func expandComposerEnvironmentServiceAccount(v interface{}, d *schema.ResourceDa
 		return "", nil
 	}
 
-	return GetResourceNameFromSelfLink(serviceAccount), nil
+	return tpgresource.GetResourceNameFromSelfLink(serviceAccount), nil
 }
 
 func expandComposerEnvironmentZone(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
@@ -2090,7 +2090,7 @@ func expandComposerEnvironmentZone(v interface{}, d *schema.ResourceData, config
 
 func expandComposerEnvironmentMachineType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, nodeCfgZone string) (string, error) {
 	machineType := v.(string)
-	requiredZone := GetResourceNameFromSelfLink(nodeCfgZone)
+	requiredZone := tpgresource.GetResourceNameFromSelfLink(nodeCfgZone)
 
 	fv, err := ParseMachineTypesFieldValue(v.(string), d, config)
 	if err != nil {
@@ -2104,7 +2104,7 @@ func expandComposerEnvironmentMachineType(v interface{}, d *schema.ResourceData,
 		fv = &ZonalFieldValue{
 			Project:      project,
 			Zone:         requiredZone,
-			Name:         GetResourceNameFromSelfLink(machineType),
+			Name:         tpgresource.GetResourceNameFromSelfLink(machineType),
 			resourceType: "machineTypes",
 		}
 	}
@@ -2326,7 +2326,7 @@ func (n *composerEnvironmentName) parentName() string {
 func compareServiceAccountEmailToLink(_, old, new string, _ *schema.ResourceData) bool {
 	// old is the service account email returned from the server.
 	if !strings.HasPrefix("projects/", old) {
-		return old == GetResourceNameFromSelfLink(new)
+		return old == tpgresource.GetResourceNameFromSelfLink(new)
 	}
 	return tpgresource.CompareSelfLinkRelativePaths("", old, new, nil)
 }

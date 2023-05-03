@@ -283,7 +283,7 @@ Google Cloud KMS.`,
 							Description: `A list (short name or id) of resource policies to attach to this disk. Currently a max of 1 resource policy is supported.`,
 							Elem: &schema.Schema{
 								Type:             schema.TypeString,
-								DiffSuppressFunc: compareResourceNames,
+								DiffSuppressFunc: tpgresource.CompareResourceNames,
 							},
 						},
 					},
@@ -835,7 +835,7 @@ be from 0 to 999,999,999 inclusive.`,
 				Description: `A list of self_links of resource policies to attach to the instance. Currently a max of 1 resource policy is supported.`,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
-					DiffSuppressFunc: compareResourceNames,
+					DiffSuppressFunc: tpgresource.CompareResourceNames,
 				},
 			},
 

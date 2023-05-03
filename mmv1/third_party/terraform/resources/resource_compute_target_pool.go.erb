@@ -449,7 +449,7 @@ func resourceComputeTargetPoolRead(d *schema.ResourceData, meta interface{}) err
 	if err := d.Set("name", tpool.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("region", GetResourceNameFromSelfLink(tpool.Region)); err != nil {
+	if err := d.Set("region", tpgresource.GetResourceNameFromSelfLink(tpool.Region)); err != nil {
 		return fmt.Errorf("Error setting region: %s", err)
 	}
 	if err := d.Set("session_affinity", tpool.SessionAffinity); err != nil {

@@ -141,7 +141,7 @@ properties:
         }
         at := copy["require_attestations_by"].(*schema.Set)
         if at != nil {
-          t := convertAndMapStringArr(at.List(), GetResourceNameFromSelfLink)
+          t := convertAndMapStringArr(at.List(), tpgresource.GetResourceNameFromSelfLink)
           copy["require_attestations_by"] = schema.NewSet(tpgresource.SelfLinkNameHash, convertStringArrToInterface(t))
         }
         var buf bytes.Buffer

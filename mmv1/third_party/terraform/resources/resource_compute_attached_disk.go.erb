@@ -97,7 +97,7 @@ func resourceAttachedDiskCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	disk := d.Get("disk").(string)
-	diskName := GetResourceNameFromSelfLink(disk)
+	diskName := tpgresource.GetResourceNameFromSelfLink(disk)
 	diskSrc := fmt.Sprintf("projects/%s/zones/%s/disks/%s", zv.Project, zv.Zone, diskName)
 
 	// Check if the disk is a regional disk
@@ -150,7 +150,7 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting zone: %s", err)
 	}
 
-	diskName := GetResourceNameFromSelfLink(d.Get("disk").(string))
+	diskName := tpgresource.GetResourceNameFromSelfLink(d.Get("disk").(string))
 
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(zv.Project, zv.Zone, zv.Name).Do()
 	if err != nil {
@@ -204,7 +204,7 @@ func resourceAttachedDiskDelete(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	diskName := GetResourceNameFromSelfLink(d.Get("disk").(string))
+	diskName := tpgresource.GetResourceNameFromSelfLink(d.Get("disk").(string))
 
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(zv.Project, zv.Zone, zv.Name).Do()
 	if err != nil {

@@ -16,5 +16,5 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     if v == nil {
         return v
     }
-	return NameFromSelfLinkStateFunc(v)
+	return tpgresource.NameFromSelfLinkStateFunc(v)
 }

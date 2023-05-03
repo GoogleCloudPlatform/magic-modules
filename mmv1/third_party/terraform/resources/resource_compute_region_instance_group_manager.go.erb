@@ -700,7 +700,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("name", manager.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("region", GetResourceNameFromSelfLink(manager.Region)); err != nil {
+	if err := d.Set("region", tpgresource.GetResourceNameFromSelfLink(manager.Region)); err != nil {
 		return fmt.Errorf("Error setting region: %s", err)
 	}
 	if err := d.Set("description", manager.Description); err != nil {
@@ -1080,7 +1080,7 @@ func flattenDistributionPolicy(distributionPolicy *compute.DistributionPolicy) [
 
 	if distributionPolicy != nil {
 		for _, zone := range distributionPolicy.Zones {
-			zones = append(zones, GetResourceNameFromSelfLink(zone.Zone))
+			zones = append(zones, tpgresource.GetResourceNameFromSelfLink(zone.Zone))
 		}
 	}
 
