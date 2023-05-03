@@ -16,6 +16,7 @@ description: Creates a Firebase Rules Release to Cloud Firestore
 type: release
 versions:
 - ga
+- beta
 resource: ./firestore_release.tf.tmpl
 updates:
 - resource: ./firestore_release_update.tf.tmpl

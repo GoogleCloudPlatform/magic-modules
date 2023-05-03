@@ -16,6 +16,7 @@ description: Creates a Firebase Rules Release for a Storage bucket
 type: release
 versions:
 - ga
+- beta
 resource: ./storage_release.tf.tmpl
 variables:
 - name: project
