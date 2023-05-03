@@ -9,3 +9,7 @@
   details:
     message: >-
       version is not useful as a configurable field, and will be removed in the future.
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

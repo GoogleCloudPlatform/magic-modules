@@ -1,2 +1,6 @@
 - type: EXCLUDE
   field: monitoring_config
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

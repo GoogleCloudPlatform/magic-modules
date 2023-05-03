@@ -5,3 +5,7 @@
 - type: PRODUCT_DOCS_SECTION
   details:
     docssection: Cloud (Stackdriver) Monitoring
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

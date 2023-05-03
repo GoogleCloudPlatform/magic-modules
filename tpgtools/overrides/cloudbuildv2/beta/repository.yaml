@@ -3,3 +3,7 @@
   field: connection
   details:
     name: parent_connection
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

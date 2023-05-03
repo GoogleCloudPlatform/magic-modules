@@ -6,3 +6,7 @@
 - type: PRODUCT_DOCS_SECTION
   details:
     docssection: Compute Engine
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

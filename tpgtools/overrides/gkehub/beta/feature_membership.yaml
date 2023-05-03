@@ -24,4 +24,7 @@
   field: mesh.control_plane
   details:
     message: >-
-      Deprecated in favor of the `management` field
+      Deprecated in favor of the `management` field- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

@@ -4,3 +4,7 @@
     diffsuppressfunc: compareResourceNames
 - type: EXCLUDE
   field: etag
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

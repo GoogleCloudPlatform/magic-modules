@@ -3,3 +3,7 @@
 - type: PRODUCT_DOCS_SECTION
   details:
     docssection: Cloud Deploy
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

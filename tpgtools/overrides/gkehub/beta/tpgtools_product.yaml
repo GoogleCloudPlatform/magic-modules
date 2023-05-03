@@ -4,3 +4,7 @@
 - type: PRODUCT_BASE_PATH
   details:
     basepathidentifier: gkehub_feature
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

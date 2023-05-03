@@ -18,3 +18,7 @@
   details:
     old: v1beta
     new: v1
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

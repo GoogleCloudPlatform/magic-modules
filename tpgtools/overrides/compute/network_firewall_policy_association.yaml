@@ -31,3 +31,7 @@
     - "projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}"
     - "{{project}}/{{firewall_policy}}/{{name}}"
   location: global 
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

@@ -18,4 +18,7 @@
 - type: NO_SWEEPER
 - type: CUSTOM_TERRAFORM_PRODUCT_NAME
   details:
-    product: gke_hub
+    product: gke_hub- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

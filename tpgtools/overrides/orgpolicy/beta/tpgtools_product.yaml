@@ -3,3 +3,7 @@
 - type: PRODUCT_BASE_PATH
   details:
     skip: true
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

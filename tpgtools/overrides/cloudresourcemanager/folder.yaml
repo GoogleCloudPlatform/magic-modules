@@ -3,3 +3,7 @@
   details:
     # Produces the correct resource name: `google_folder`
     product: ""
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

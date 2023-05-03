@@ -15,3 +15,7 @@
   details:
     id: projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}
   location: region
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

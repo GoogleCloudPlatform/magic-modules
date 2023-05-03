@@ -5,4 +5,7 @@
     skip: true
 - type: PRODUCT_DOCS_SECTION
   details:
-    docssection: OS Config
+    docssection: OS Config- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

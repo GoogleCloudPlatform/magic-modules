@@ -6,3 +6,7 @@
   details:
     # Produces the correct resource name: `google_project`
     product: ""
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

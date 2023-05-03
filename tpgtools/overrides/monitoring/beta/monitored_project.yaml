@@ -15,3 +15,7 @@
 - type: APPEND_TO_BASE_PATH
   details:
     string: v1
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

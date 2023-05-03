@@ -14,3 +14,7 @@
 
 # Skip this sweeper because regions are not supported by the list endpoint.
 - type: NO_SWEEPER
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

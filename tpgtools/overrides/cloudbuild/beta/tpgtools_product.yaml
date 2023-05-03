@@ -4,3 +4,7 @@
 - type: PRODUCT_TITLE # used to align with mmv1 product
   details:
     title: "cloudbuild"
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

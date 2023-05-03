@@ -6,3 +6,7 @@
 - type: PRODUCT_DOCS_SECTION
   details:
     docssection: Certificate Authority Service
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

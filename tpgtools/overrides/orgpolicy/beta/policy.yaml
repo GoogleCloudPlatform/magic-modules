@@ -7,3 +7,7 @@
   field: spec.rules.deny_all
 - type: ENUM_BOOL
   field: spec.rules.enforce
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff

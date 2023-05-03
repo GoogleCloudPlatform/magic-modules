@@ -6,4 +6,7 @@
     skip: true
 - type: PRODUCT_DOCS_SECTION
   details:
-    docssection: BigQuery Reservation
+    docssection: BigQuery Reservation- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - defaultProviderCustomizeDiff
