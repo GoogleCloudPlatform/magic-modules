@@ -63,7 +63,6 @@ examples:
     test_vars_overrides:
       kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoders/vertex_model.go.erb
   encoder: templates/terraform/encoders/vertex_model.go.erb
   update_encoder: templates/terraform/encoders/vertex_model_update.go.erb
 parameters:
@@ -79,6 +78,7 @@ properties:
     description: The resource name of the Model.
     required: true
     immutable: true
+    url_param_only: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::Array
     name: versionAliases
