@@ -23,6 +23,7 @@ ENV['TZ'] = 'UTC'
 
 require 'active_support/inflector'
 require 'api/compiler'
+require 'compile/openapi_parser'
 require 'google/logger'
 require 'optparse'
 require 'pathname'
@@ -42,6 +43,7 @@ force_provider = nil
 types_to_generate = []
 version = 'ga'
 override_dir = nil
+openapi_generate = false
 
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
@@ -88,6 +90,9 @@ OptionParser.new do |opt|
   opt.on('-g', '--no-docs', 'Do not generate documentation') do
     generate_docs = false
   end
+  opt.on('--openapi-generate', 'Generate MMv1 YAML from openapi directory') do
+    openapi_generate = true
+  end
 end.parse!
 # rubocop:enable Metrics/BlockLength
 
@@ -97,6 +102,13 @@ raise 'Either -p/--products OR -a/--all must be present' \
   if products_to_generate.nil? && !all_products
 raise 'Option -o/--output is a required parameter' if output_path.nil?
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
+
+if openapi_generate
+  # Test write OpenAPI --> YAML
+  Dir['openapi/*'].each do |openapi_file|
+    write_yaml(openapi_file)
+  end
+end
 
 all_product_files = []
 Dir['products/**/api.yaml'].each do |file_path|
@@ -317,4 +329,7 @@ if generate_code
     )
   end
 end
+
+
+
 # rubocop:enable Metrics/BlockLength
