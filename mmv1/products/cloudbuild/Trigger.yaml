@@ -987,7 +987,7 @@ properties:
                 Error information will be reported in the `failureDetail` field.
 
                 `allowExitCodes` takes precedence over this field.
-            - !ruby/object:Api:Type::Array
+            - !ruby/object:Api::Type::Array
               name: 'allowExitCodes'
               item_type: Api::Type::Integer
               description: |
