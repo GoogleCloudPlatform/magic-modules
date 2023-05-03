@@ -207,8 +207,8 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-    mutexKV.Lock(lockName)
-    defer mutexKV.Unlock(lockName)
+    transport_tpg.MutexStore.Lock(lockName)
+    defer transport_tpg.MutexStore.Unlock(lockName)
 <%  end -%>
 
     url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
@@ -640,8 +640,8 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-    mutexKV.Lock(lockName)
-    defer mutexKV.Unlock(lockName)
+    transport_tpg.MutexStore.Lock(lockName)
+    defer transport_tpg.MutexStore.Unlock(lockName)
 <%  end -%>
 
     url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
@@ -788,8 +788,8 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         if err != nil {
             return err
         }
-        mutexKV.Lock(lockName)
-        defer mutexKV.Unlock(lockName)
+        transport_tpg.MutexStore.Lock(lockName)
+        defer transport_tpg.MutexStore.Unlock(lockName)
 <%      end -%>
 
         url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
@@ -883,8 +883,8 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-    mutexKV.Lock(lockName)
-    defer mutexKV.Unlock(lockName)
+    transport_tpg.MutexStore.Lock(lockName)
+    defer transport_tpg.MutexStore.Unlock(lockName)
 <%  end -%>
 
     url, err := ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")

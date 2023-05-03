@@ -3,6 +3,7 @@ package verify
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -178,7 +179,7 @@ func TestValidateRFC1035Name(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		errors := testStringValidation(StringValidationTestCase{
+		errors := TestStringValidation(StringValidationTestCase{
 			TestName:    c.TestName,
 			Value:       c.Value,
 			ExpectError: c.ExpectError,

@@ -2197,8 +2197,8 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		Cluster: cluster,
 	}
 
-	mutexKV.Lock(containerClusterMutexKey(project, location, clusterName))
-	defer mutexKV.Unlock(containerClusterMutexKey(project, location, clusterName))
+	transport_tpg.MutexStore.Lock(containerClusterMutexKey(project, location, clusterName))
+	defer transport_tpg.MutexStore.Unlock(containerClusterMutexKey(project, location, clusterName))
 
 	parent := fmt.Sprintf("projects/%s/locations/%s", project, location)
 	var op *container.Operation
@@ -3762,8 +3762,8 @@ func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) er
 	}
 
 	log.Printf("[DEBUG] Deleting GKE cluster %s", d.Get("name").(string))
-	mutexKV.Lock(containerClusterMutexKey(project, location, clusterName))
-	defer mutexKV.Unlock(containerClusterMutexKey(project, location, clusterName))
+	transport_tpg.MutexStore.Lock(containerClusterMutexKey(project, location, clusterName))
+	defer transport_tpg.MutexStore.Unlock(containerClusterMutexKey(project, location, clusterName))
 
 	var op *container.Operation
 	var count = 0

@@ -222,8 +222,8 @@ func extractFirstMapConfig(m []interface{}) map[string]interface{} {
 }
 
 func lockedCall(lockKey string, f func() error) error {
-	mutexKV.Lock(lockKey)
-	defer mutexKV.Unlock(lockKey)
+	transport_tpg.MutexStore.Lock(lockKey)
+	defer transport_tpg.MutexStore.Unlock(lockKey)
 
 	return f()
 }

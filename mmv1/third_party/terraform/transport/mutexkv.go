@@ -1,4 +1,4 @@
-package google
+package transport
 
 import (
 	"log"
@@ -64,3 +64,6 @@ func NewMutexKV() *MutexKV {
 		store: make(map[string]*sync.RWMutex),
 	}
 }
+
+// Global MutexKV
+var MutexStore = NewMutexKV()
