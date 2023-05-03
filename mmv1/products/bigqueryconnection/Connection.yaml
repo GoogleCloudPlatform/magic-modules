@@ -71,7 +71,7 @@ examples:
     oics_vars_overrides:
       deletion_protection: 'false'
     ignore_read_extra:
-      - 'cloud_sql.0.credential' # password removed
+      - 'cloud_sql.0.credential'  # password removed
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_full'
     pull_external: true
@@ -89,7 +89,7 @@ examples:
     oics_vars_overrides:
       deletion_protection: 'false'
     ignore_read_extra:
-      - 'cloud_sql.0.credential' # password removed
+      - 'cloud_sql.0.credential'  # password removed
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_aws'
     pull_external: true

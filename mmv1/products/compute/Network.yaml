@@ -105,8 +105,8 @@ properties:
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
-    # TODO: Change subnetworks to ResourceRef
   - !ruby/object:Api::Type::Array
+    # TODO: Change subnetworks to ResourceRef
     name: 'subnetworks'
     description: |
       Server-defined fully-qualified URLs for all subnetworks in this

@@ -46,7 +46,7 @@ async: !ruby/object:Api::OpAsync
 id_format: 'projects/{{project}}/deployments/{{name}}'
 import_format: ['projects/{{project}}/deployments/{{name}}']
 timeouts:
-  !ruby/object:Api::Timeouts # Very long to support very long deployments
+  !ruby/object:Api::Timeouts  # Very long to support very long deployments
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
@@ -84,7 +84,7 @@ examples:
       deployment_name: 'my-deployment'
     skip_test: true
 custom_code:
-  !ruby/object:Provider::Terraform::CustomCode # post-create failure: Delete deployment if an invalid deployment was created
+  !ruby/object:Provider::Terraform::CustomCode  # post-create failure: Delete deployment if an invalid deployment was created
   post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'
   # Custom diff to force new if 'preview' is true
   constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'

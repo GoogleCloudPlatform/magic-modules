@@ -96,7 +96,7 @@ properties:
       When providing an FQDN (hostname), it must be publicly resolvable (e.g. via Google public DNS) and IP addresses must be publicly routable.  It must not contain a protocol (e.g., https://) and it must not contain any slashes.
       If a Cloud Storage bucket is provided, it must be in the canonical "gs://bucketname" format. Other forms, such as "storage.googleapis.com", will be rejected.
   - !ruby/object:Api::Type::Enum
-    name: 'protocol' # default http2 from api
+    name: 'protocol'  # default http2 from api
     description: |
       The protocol to use to connect to the configured origin. Defaults to HTTP2, and it is strongly recommended that users use HTTP2 for both security & performance.
 
@@ -107,7 +107,7 @@ properties:
       - :HTTP
     default_from_api: true
   - !ruby/object:Api::Type::Integer
-    name: 'port' # default from api
+    name: 'port'  # default from api
     description: |
       The port to connect to the origin on.
       Defaults to port 443 for HTTP2 and HTTPS protocols, and port 80 for HTTP.
@@ -139,7 +139,7 @@ properties:
       A reference to a Topic resource.
     diff_suppress_func: 'compareResourceNames'
   - !ruby/object:Api::Type::Array
-    name: 'retryConditions' # default CONNECT_FAILURE from api
+    name: 'retryConditions'  # default CONNECT_FAILURE from api
     description: |
       Specifies one or more retry conditions for the configured origin.
 

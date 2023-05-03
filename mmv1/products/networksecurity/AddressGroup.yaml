@@ -23,7 +23,7 @@ update_mask: true
 description: |
   AddressGroup is a resource that specifies how a collection of IP/DNS used in Firewall Policy.
 references:
-  !ruby/object:Api::Resource::ReferenceLinks # TODO(diogoesteves): change the url to GA once it is available.
+  !ruby/object:Api::Resource::ReferenceLinks  # TODO(diogoesteves): change the url to GA once it is available.
   guides:
     "Use AddressGroups": "https://cloud.google.com/vpc/docs/use-address-groups-firewall-policies"
   api: "https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/organizations.locations.addressGroups"
@@ -56,7 +56,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
 custom_code:
-  !ruby/object:Provider::Terraform::CustomCode # Calling custom operation that are different from other network security resources.
+  !ruby/object:Provider::Terraform::CustomCode  # Calling custom operation that are different from other network security resources.
   post_create: templates/terraform/post_create/network_security_address_group_operation.go.erb
   post_update: templates/terraform/post_update/network_security_address_group_operation.go.erb
   post_delete: templates/terraform/post_delete/network_security_address_group_operation.go.erb

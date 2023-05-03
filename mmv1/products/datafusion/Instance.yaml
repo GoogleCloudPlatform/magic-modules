@@ -198,7 +198,7 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'serviceAccount'
-    min_version: beta # This field is deprecated and needs to be absent in GA provider.
+    min_version: beta  # This field is deprecated and needs to be absent in GA provider.
     deprecation_message:
       Use `tenant_project_id` instead to extract the tenant project ID.
     output: true
