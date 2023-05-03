@@ -103,8 +103,8 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'denialCondition'
               description:
-                User defined CEVAL expression. A CEVAL expression is used
-                to specify match criteria such as origin.ip, source.region_code and
+                User defined CEVAL expression. A CEVAL expression is used to
+                specify match criteria such as origin.ip, source.region_code and
                 contents in the request header.
               properties:
                 - !ruby/object:Api::Type::String

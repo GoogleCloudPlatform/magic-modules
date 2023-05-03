@@ -241,7 +241,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'InternalIpDiffSuppress'
+    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -262,7 +262,7 @@ properties:
       - :AH
       - :SCTP
       - :ICMP
-    diff_suppress_func: 'CaseDiffSuppress'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
     default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
@@ -414,7 +414,7 @@ properties:
       * TargetSslProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
                         1883, 5222
       * TargetVpnGateway: 500, 4500
-    diff_suppress_func: 'PortRangeDiffSuppress'
+    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
     # This is a multi-resource resource reference (TargetHttp(s)Proxy,
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)

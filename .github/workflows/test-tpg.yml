@@ -1,0 +1,49 @@
+name: Build and Unit Test GA Provider
+
+permissions: read-all
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner:
+        description: 'The owner of the fork'
+        required: false
+        default: 'modular-magician'
+      repo:
+        description: 'The Base Repository to pull from'
+        required: false
+        default: 'terraform-provider-google'
+      branch:
+        description: 'The branch or sha to execute against'
+        required: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ github.event.client_payload.owner }}/${{ github.event.client_payload.repo }}
+        ref: ${{ github.event.client_payload.branch }}
+        path: provider
+    - name: Set up Go
+      uses: golang/setup-go@v2
+      with:
+        go-version: '1.19.x'
+    - name: Build
+      run: |
+        cd provider
+        go build
+    - name: Lint
+      run: |
+        cd provider
+        make lint
+      if: ${{ always() }} # This step will always run, even if the previous fails
+    - name: Test
+      run: |
+        cd provider
+        make test
+      if: ${{ always() }} # This step will always run, even if the previous fails
+
+

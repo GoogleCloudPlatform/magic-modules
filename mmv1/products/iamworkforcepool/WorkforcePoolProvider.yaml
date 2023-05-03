@@ -110,7 +110,9 @@ properties:
       characters.
   - !ruby/object:Api::Type::String
     name: 'description'
-    description: A user-specified description of the provider. Cannot exceed 256 characters.
+    description:
+      A user-specified description of the provider. Cannot exceed 256
+      characters.
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
@@ -241,13 +243,14 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: issuerUri
-        description: The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
+        description:
+          The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
         required: true
       - !ruby/object:Api::Type::String
         name: clientId
         description:
-          The client ID. Must match the audience claim of the JWT issued
-          by the identity provider.
+          The client ID. Must match the audience claim of the JWT issued by the
+          identity provider.
         required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'webSsoConfig'

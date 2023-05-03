@@ -105,7 +105,8 @@ properties:
         name: gkeClusterReference
         required: true
         immutable: true
-        description: Reference of the GKE cluster where the game servers are installed.
+        description:
+          Reference of the GKE cluster where the game servers are installed.
         properties:
           - !ruby/object:Api::Type::String
             name: cluster

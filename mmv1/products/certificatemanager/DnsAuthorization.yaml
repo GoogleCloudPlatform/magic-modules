@@ -64,7 +64,8 @@ properties:
       A human-readable description of the resource.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
-    description: 'Set of label tags associated with the DNS Authorization resource.'
+    description:
+      'Set of label tags associated with the DNS Authorization resource.'
   - !ruby/object:Api::Type::String
     name: 'domain'
     immutable: true

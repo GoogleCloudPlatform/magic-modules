@@ -48,8 +48,8 @@ autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'notebook_runtime_basic'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-notebooks-runtime%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime%s\",
+      context[\"\
       random_suffix\"])"
     primary_resource_id: 'runtime'
     region_override: 'us-central1'
@@ -58,8 +58,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'notebook_runtime_basic_gpu'
     primary_resource_id: 'runtime_gpu'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-notebooks-runtime-gpu%s\", context[\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-runtime-gpu%s\",
+      context[\"\
       random_suffix\"])"
     region_override: 'us-central1'
     vars:

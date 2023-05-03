@@ -89,7 +89,8 @@ properties:
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Boolean
     name: 'onlinePredictionLogging'
-    description: If true, online prediction access logs are sent to StackDriver Logging.
+    description:
+      If true, online prediction access logs are sent to StackDriver Logging.
   - !ruby/object:Api::Type::Boolean
     name: 'onlinePredictionConsoleLogging'
     description:

@@ -132,7 +132,7 @@ properties:
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateGCEName'
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'privateKey'
     description: 'The write-only private key in PEM format.'
@@ -141,4 +141,4 @@ properties:
     sensitive: true
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
-    diff_suppress_func: 'Sha256DiffSuppress'
+    diff_suppress_func: 'tpgresource.Sha256DiffSuppress'

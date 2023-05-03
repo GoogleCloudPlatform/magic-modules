@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Workstations
-display_name: Workstations
+display_name: Cloud Workstations
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
@@ -22,5 +22,5 @@ scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: Workstations API
+    name: Cloud Workstations API
     url: https://console.cloud.google.com/apis/library/workstations.googleapis.com
