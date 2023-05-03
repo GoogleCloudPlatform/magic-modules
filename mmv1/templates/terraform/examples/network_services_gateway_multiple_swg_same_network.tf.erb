@@ -1,12 +1,12 @@
-# TODO(felipegc) The certificate manager must be provisioned using location. Waiting for a related pull requested being merged.
-# resource "google_certificate_manager_certificate" "default" {
-#   provider    = google-beta
-#   name        = "ca-manager-for-swg"
-#   self_managed {
-#     pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
-#     pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
-#   }
-# }
+resource "google_certificate_manager_certificate" "default" {
+  provider    = google-beta
+  name        = "<%= ctx[:vars]['certificate_name'] %>"
+  location    = "us-central1"
+  self_managed {
+    pem_certificate = file("test-fixtures/certificatemanager/cert.pem")
+    pem_private_key = file("test-fixtures/certificatemanager/private-key.pem")
+  }
+}
 
 resource "google_compute_network" "default" {
   provider                = google-beta
@@ -60,8 +60,7 @@ resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
   type                                 = "SECURE_WEB_GATEWAY"
   ports                                = [443]
   scope                                = "<%= ctx[:vars]['scope_1'] %>"
-  # TODO(felipegc) reference the created one for this example.
-  certificate_urls                     = ["projects/felipegc-test-swg/locations/us-central1/certificates/felipegc-certificate"]
+  certificate_urls                     = [google_certificate_manager_certificate.default.id]
   gateway_security_policy              = google_network_security_gateway_security_policy.default.id
   network                              = google_compute_network.default.id
   subnetwork                           = google_compute_subnetwork.default.id
@@ -77,8 +76,7 @@ resource "google_network_services_gateway" "gateway2" {
   type                                 = "SECURE_WEB_GATEWAY"
   ports                                = [443]
   scope                                = "<%= ctx[:vars]['scope_2'] %>"
-  # TODO(felipegc) reference the created one for this example.
-  certificate_urls                     = ["projects/felipegc-test-swg/locations/us-central1/certificates/felipegc-certificate"]
+  certificate_urls                     = [google_certificate_manager_certificate.default.id]
   gateway_security_policy              = google_network_security_gateway_security_policy.default.id
   network                              = google_compute_network.default.id
   subnetwork                           = google_compute_subnetwork.default.id

@@ -66,6 +66,7 @@ examples:
     name: 'network_services_gateway_swg'
     primary_resource_id: 'default'
     vars:
+      certificate_name: 'my-certificate'
       network_name: 'my-network'
       subnetwork_name: 'my-subnetwork-name'
       proxy_only_subnetwork_name: 'my-proxy-only-subnetwork'
@@ -80,6 +81,7 @@ examples:
     name: 'network_services_gateway_multiple_swg_same_network'
     primary_resource_id: 'default'
     vars:
+      certificate_name: 'my-certificate'
       network_name: 'my-network'
       subnetwork_name: 'my-subnetwork-name'
       proxy_only_subnetwork_name: 'my-proxy-only-subnetwork'

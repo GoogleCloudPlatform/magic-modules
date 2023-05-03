@@ -13,7 +13,7 @@
 	# limitations under the License.
 -%>
 // Checks if there is another gateway under the same location.
-func gatewaysSameLocation(d *schema.ResourceData, config *Config, billingProject, userAgent string) ([]interface{}, error) {
+func gatewaysSameLocation(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) ([]interface{}, error) {
 	var gateways []interface{}
 
 	gatewaysUrl, err := ReplaceVars(d, config, "{{NetworkServicesBasePath}}projects/{{project}}/locations/{{location}}/gateways")
@@ -59,7 +59,7 @@ func isLastSWGGateway(gateways []interface{}) bool {
 }
 
 //Deletes the swg-autogen-router if the current gateway being deleted is the type of swg so there is no other gateway using it.
-func deleteSWGAutoGenRouter(d *schema.ResourceData, config *Config, billingProject, userAgent string) error {
+func deleteSWGAutoGenRouter(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) error {
 	log.Printf("[DEBUG] Searching the network id by name %q.", d.Get("network"))
 
 	networkPath := fmt.Sprintf("{{ComputeBasePath}}%s", d.Get("network"))
