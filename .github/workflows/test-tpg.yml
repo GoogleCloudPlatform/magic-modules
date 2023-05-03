@@ -28,9 +28,9 @@ jobs:
         ref: ${{ github.event.client_payload.branch }}
         path: provider
     - name: Set up Go
-      uses: golang/setup-go@v2
+      uses: actions/setup-go@v4
       with:
-        go-version: '1.19.x'
+        go-version: '^1.19.1'
     - name: Build
       run: |
         cd provider
