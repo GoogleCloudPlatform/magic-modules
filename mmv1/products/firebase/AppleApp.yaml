@@ -69,7 +69,7 @@ examples:
       display_name: 'Display Name Full'
       bundle_id: 'apple.app.12345'
       app_store_id: '12345'
-      team_id: '9987654321' # Has to be a 10-digit number.
+      team_id: '9987654321'  # Has to be a 10-digit number.
     test_env_vars:
       org_id: :ORG_ID
       project_id: :PROJECT_NAME

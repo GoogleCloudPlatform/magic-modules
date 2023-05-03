@@ -368,4 +368,4 @@ properties:
       - :READY
       - :PENDING
       - :FAILED
-  # State is not applicable for state convergence.
+# State is not applicable for state convergence.

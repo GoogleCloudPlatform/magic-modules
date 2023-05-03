@@ -1244,7 +1244,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: 'clientTlsPolicy'
-        resource: 'Region' # TODO: 'Region' is incorrect and should be 'ClientTlsPolicy'
+        resource: 'Region'  # TODO: 'Region' is incorrect and should be 'ClientTlsPolicy'
         imports: 'name'
         description: |
           ClientTlsPolicy is a resource that specifies how a client should authenticate

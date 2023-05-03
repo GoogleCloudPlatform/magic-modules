@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
+--- !ruby/object:Api::Resource  # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
 name: 'ServicePerimeters'
 base_url: '{{parent}}/servicePerimeters:replaceAll'
 update_url: '{{parent}}/servicePerimeters:replaceAll'

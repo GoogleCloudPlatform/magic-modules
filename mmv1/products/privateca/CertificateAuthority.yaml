@@ -86,9 +86,9 @@ examples:
       deletion_protection: 'false'
     ignore_read_extra:
       - 'deletion_protection'
-        # Skip test because it depends on a beta resource, but PrivateCA does
-        # not have a beta endpoint
   - !ruby/object:Provider::Terraform::Examples
+    # Skip test because it depends on a beta resource, but PrivateCA does
+    # not have a beta endpoint
     skip_test: true
     name: 'privateca_certificate_authority_byo_key'
     primary_resource_id:
@@ -599,7 +599,7 @@ properties:
       The desired lifetime of the CA certificate. Used to create the "notBeforeTime" and
       "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
       fractional digits, terminated by 's'. Example: "3.5s".
-    default_value: 315360000s # 10 years
+    default_value: 315360000s  # 10 years
     immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'keySpec'
