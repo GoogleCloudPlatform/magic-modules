@@ -33,7 +33,7 @@ examples:
     name: 'cloudids_endpoint'
     primary_resource_id:
       'example-endpoint'
-      #Skip_test set to true since the example is identical to what's in the _test.go file.
+    # skip_test set to true since the example is identical to what's in the _test.go file.
     skip_test: true
 parameters:
   - !ruby/object:Api::Type::String

@@ -170,12 +170,6 @@ properties:
         immutable: true
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^projects/[0-9]+$'
-      # If the user doesn't specify a loggingConfig, the server will supply a default value. Instead of
-      # letting that happen and allowing the config and state to get mismatched, just manually send an
-      # empty object if the user doesn't set anything and require the user to explicitly set the field if a
-      # value is desired.
-      # If the loggingConfig passed to the server is empty, an empty object is returned, so the diff in that
-      # case needs to be ignored.
   - !ruby/object:Api::Type::String
     name: state
     description: |
@@ -240,6 +234,12 @@ properties:
     name: loggingConfig
     description: |
       Logging configuration.
+    # If the user doesn't specify a loggingConfig, the server will supply a default value. Instead of
+    # letting that happen and allowing the config and state to get mismatched, just manually send an
+    # empty object if the user doesn't set anything and require the user to explicitly set the field if a
+    # value is desired.
+    # If the loggingConfig passed to the server is empty, an empty object is returned, so the diff in that
+    # case needs to be ignored.
     send_empty_value: true
     allow_empty_object: true
     custom_expand: 'templates/terraform/custom_expand/containerattached_cluster_empty_logging.go.erb'

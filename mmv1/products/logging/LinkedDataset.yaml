@@ -67,7 +67,7 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String # Make this a String for now since we don't have a good way to reference multiple resources.
+  - !ruby/object:Api::Type::String  # Make this a String for now since we don't have a good way to reference multiple resources.
     name: bucket
     description: The bucket to which the linked dataset is attached.
     url_param_only: true
