@@ -48,6 +48,7 @@ examples:
         # Resource creation race
     skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
 properties:
   - !ruby/object:Api::Type::String

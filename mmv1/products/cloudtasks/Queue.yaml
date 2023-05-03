@@ -26,7 +26,8 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
     ['projects/{{project}}/locations/{{location}}/queues/{{name}}', '{{name}}']
 id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go'
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  constants: "templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go"
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     This resource requires an App Engine application to be created on the

@@ -27,6 +27,7 @@ description: |
 id_format: '{{parent}}/customConstraints/{{name}}'
 import_format: ['{{%parent}}/customConstraints/{{name}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   update_encoder: 'templates/terraform/update_encoder/org_policy_custom_constraint.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples

@@ -76,6 +76,7 @@ examples:
       network_name: 'neg-network'
       subnetwork_name: 'neg-subnetwork'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   pre_delete: templates/terraform/pre_delete/compute_network_endpoint.go.erb
   custom_import: templates/terraform/custom_import/compute_network_endpoint.go.erb
   decoder: templates/terraform/decoders/unwrap_resource.go.erb

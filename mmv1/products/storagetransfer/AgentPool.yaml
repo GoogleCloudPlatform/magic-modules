@@ -37,6 +37,7 @@ examples:
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 30
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   constants: templates/terraform/constants/agent_pool.go.erb
   post_create: templates/terraform/post_create/agent_pool.go.erb
   pre_update: templates/terraform/pre_update/agent_pool.go.erb

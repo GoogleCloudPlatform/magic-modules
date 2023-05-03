@@ -71,6 +71,7 @@ virtual_fields:
       immediately after network creation. Defaults to `false`.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
 properties:
   - !ruby/object:Api::Type::String

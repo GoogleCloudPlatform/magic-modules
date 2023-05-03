@@ -45,6 +45,7 @@ examples:
       namespace_id: 'example-namespace'
     min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   custom_import: templates/terraform/custom_import/service_directory_service.go.erb
 parameters:
   - !ruby/object:Api::Type::String

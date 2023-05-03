@@ -70,6 +70,7 @@ docs: !ruby/object:Provider::Terraform::Docs
     You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
     by using the `google_project_service_identity` resource.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   constants: templates/terraform/constants/subscription.go.erb
   encoder: templates/terraform/encoders/no_send_name.go.erb
   update_encoder: templates/terraform/update_encoder/pubsub_subscription.erb

@@ -47,6 +47,7 @@ examples:
     vars:
       instance_name: 'test-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   constants: templates/terraform/constants/filestore.erb
   pre_create: templates/terraform/pre_create/filestore_instance.go.erb
 parameters:

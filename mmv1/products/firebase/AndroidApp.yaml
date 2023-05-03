@@ -82,6 +82,7 @@ virtual_fields:
       serving traffic. Set to `DELETE` to delete the AndroidApp. Defaults to `DELETE`.
     default_value: DELETE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
 properties:
   - !ruby/object:Api::Type::String

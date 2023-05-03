@@ -60,6 +60,7 @@ examples:
     test_env_vars:
       project_id: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   decoder: templates/terraform/decoders/firebasehosting_release.go.erb
   post_create: templates/terraform/post_create/firebasehosting_release.erb
 parameters:

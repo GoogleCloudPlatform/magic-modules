@@ -94,6 +94,7 @@ import_format:
 skip_sweeper: true
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   test_check_destroy: templates/terraform/custom_check_destroy/consumer_quota_override.go.erb
 parameters:
   - !ruby/object:Api::Type::String

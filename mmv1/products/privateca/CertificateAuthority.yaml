@@ -126,6 +126,7 @@ virtual_fields:
       - :DISABLED
       - :STAGED
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   constants: 'templates/terraform/constants/privateca_certificate_authority.go.erb'
   resource_definition: 'templates/terraform/resource_definition/privateca_certificate_authority.go.erb'
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb

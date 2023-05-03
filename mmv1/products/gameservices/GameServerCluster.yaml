@@ -56,7 +56,8 @@ examples:
     test_vars_overrides:
       agones_cluster: '"bootstrapped-agones-cluster"'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/gameserver_cluster_custom_diff.go'
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  constants: "templates/terraform/constants/gameserver_cluster_custom_diff.go"
 properties:
   - !ruby/object:Api::Type::String
     immutable: true

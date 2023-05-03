@@ -77,6 +77,7 @@ virtual_fields:
       When deleting a spanner instance, this boolean option will delete all backups of this instance.
       This must be set to true if you created a backup manually in the console.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   encoder: templates/terraform/encoders/spanner_instance.go.erb
   update_encoder: templates/terraform/encoders/spanner_instance_update.go.erb
   decoder: templates/terraform/decoders/spanner_instance.go.erb

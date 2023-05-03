@@ -64,6 +64,7 @@ examples:
       kms_key_name: 'kms-name'
     min_version: beta
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
   pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
 parameters:

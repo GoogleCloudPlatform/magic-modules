@@ -33,6 +33,7 @@ examples:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   encoder: templates/terraform/encoders/pubsub_lite.erb
 
 parameters:

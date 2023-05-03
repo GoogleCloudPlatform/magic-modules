@@ -69,6 +69,7 @@ examples:
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef

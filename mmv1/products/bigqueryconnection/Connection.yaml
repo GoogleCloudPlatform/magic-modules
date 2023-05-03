@@ -41,6 +41,7 @@ import_format:
     '{{location}}/{{connection_id}}',
   ]
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   post_create: templates/terraform/post_create/bigquery_connection_id.go.erb
   encoder: templates/terraform/encoders/bigquery_connection.go.erb
 examples:

@@ -119,6 +119,7 @@ examples:
     vars:
       health_check_name: 'grpc-region-health-check'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   encoder: templates/terraform/encoders/health_check_type.erb
   resource_definition: templates/terraform/resource_definition/health_check.erb
 parameters:

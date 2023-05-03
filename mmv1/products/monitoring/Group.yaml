@@ -42,6 +42,7 @@ examples:
       display_name: 'MonitoringParentGroup'
       display_name2: 'MonitoringSubGroup'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
 

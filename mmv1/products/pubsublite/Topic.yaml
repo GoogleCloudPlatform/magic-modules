@@ -35,8 +35,8 @@ examples:
       reservation_name: 'example-reservation'
       topic_name: 'example-topic'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder:
-    templates/terraform/encoders/pubsub_lite.erb
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
+  encoder: templates/terraform/encoders/pubsub_lite.erb
     #   update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
 parameters:
   - !ruby/object:Api::Type::String

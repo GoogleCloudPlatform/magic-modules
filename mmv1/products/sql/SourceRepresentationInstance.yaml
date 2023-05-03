@@ -38,6 +38,7 @@ examples:
     ignore_read_extra:
       - 'password'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.erb'
   decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.erb'
 properties:

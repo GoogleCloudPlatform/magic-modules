@@ -47,6 +47,7 @@ examples:
       account_id: 'my-account'
       topic_name: 'my-topic'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   constants: templates/terraform/constants/source_repo_repository.go.erb
   update_encoder: templates/terraform/update_encoder/source_repo_repository.erb
   post_create: templates/terraform/post_create/source_repo_repository_update.go.erb

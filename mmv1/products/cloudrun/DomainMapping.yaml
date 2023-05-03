@@ -39,6 +39,7 @@ examples:
     test_env_vars:
       namespace: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   encoder: 'templates/terraform/encoders/cloud_run_domain_mapping.go.erb'
   decoder: 'templates/terraform/decoders/cloud_run.go.erb'
   constants: templates/terraform/constants/cloud_run_domain_mapping.go.erb

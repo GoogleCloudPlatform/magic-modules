@@ -72,6 +72,7 @@ examples:
       subnetwork_name: 'container-subnetwork'
       gke_cluster_name: 'my-cluster'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   encoder: 'templates/terraform/encoders/normalize_group.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef

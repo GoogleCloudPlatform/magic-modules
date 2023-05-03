@@ -63,6 +63,7 @@ examples:
     vars:
       service_perimeter_name: 'restrict_all'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef

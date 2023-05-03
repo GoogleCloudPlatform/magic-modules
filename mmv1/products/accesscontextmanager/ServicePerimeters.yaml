@@ -39,6 +39,7 @@ examples:
       access_level_name: 'chromeos_no_lock'
       service_perimeter_name: 'restrict_storage'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   custom_import: templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.erb
   custom_delete: templates/terraform/custom_delete/replace_all_service_perimeters_empty_list.go.erb
 parameters:

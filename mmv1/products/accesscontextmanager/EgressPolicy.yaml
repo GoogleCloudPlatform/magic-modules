@@ -45,6 +45,7 @@ skip_sweeper: true
 id_format: '{{egress_policy_name}}/{{resource}}'
 import_format: ['{{egress_policy_name}}/{{resource}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_egress_policy.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef

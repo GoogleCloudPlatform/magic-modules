@@ -71,6 +71,7 @@ examples:
     vars:
       neg_name: 'my-lb-neg'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   pre_delete: templates/terraform/pre_delete/compute_global_network_endpoint.go.erb
   decoder: templates/terraform/decoders/network_endpoint.go.erb
   encoder: templates/terraform/encoders/compute_global_network_endpoint.go.erb

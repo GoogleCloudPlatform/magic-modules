@@ -119,6 +119,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'name'
   allowed_iam_role: 'roles/compute.admin'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
   constants: 'templates/terraform/constants/backend_service.go.erb'
   encoder: 'templates/terraform/encoders/backend_service.go.erb'
   decoder: 'templates/terraform/decoders/backend_service.go.erb'
