@@ -12,7 +12,7 @@ if [ -z "$GITHUB_TOKEN" ]; then
 fi
 
 # make utility functions avalible
-/utils.sh
+source /utils.sh
 
 PR_NUMBER=$1
 NEW_BRANCH=auto-pr-$PR_NUMBER
@@ -42,14 +42,15 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
     DIFFS="${DIFFS}${NEWLINE}Terraform GA: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
+TPG_LOCAL_PATH_OLD="${TPG_LOCAL_PATH}old"
+mkdir -p $TPG_LOCAL_PATH_OLD
+cp -r $TPG_LOCAL_PATH/. $TPG_LOCAL_PATH_OLD
+
 git checkout origin/$NEW_BRANCH
 update_package_name "github.com/hashicorp/terraform-provider-google" "google/provider/new"
 popd
 
 ## Breaking change setup and execution
-TPG_LOCAL_PATH_OLD="${TPG_LOCAL_PATH}old"
-mkdir -p $TPG_LOCAL_PATH_OLD
-cp -r $TPG_LOCAL_PATH/. $TPG_LOCAL_PATH_OLD
 pushd $TPG_LOCAL_PATH_OLD
 git checkout origin/$OLD_BRANCH
 update_package_name "github.com/hashicorp/terraform-provider-google" "google/provider/old"
@@ -78,15 +79,15 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
     DIFFS="${DIFFS}${NEWLINE}Terraform Beta: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
+TPGB_LOCAL_PATH_OLD="${TPGB_LOCAL_PATH}old"
+mkdir -p $TPGB_LOCAL_PATH_OLD
+cp -r $TPGB_LOCAL_PATH/. $TPGB_LOCAL_PATH_OLD
+
 git checkout origin/$NEW_BRANCH
 update_package_name "github.com/hashicorp/terraform-provider-google-beta" "google/provider/new"
 popd
 
 
-## Breaking change setup and execution
-TPGB_LOCAL_PATH_OLD="${TPGB_LOCAL_PATH}old"
-mkdir -p $TPGB_LOCAL_PATH_OLD
-cp -r $TPGB_LOCAL_PATH/. $TPGB_LOCAL_PATH_OLD
 pushd $TPGB_LOCAL_PATH_OLD
 git checkout origin/$OLD_BRANCH
 update_package_name "github.com/hashicorp/terraform-provider-google-beta" "google/provider/old"
