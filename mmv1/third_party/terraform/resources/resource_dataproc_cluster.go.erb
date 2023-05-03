@@ -10,9 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -551,7 +548,7 @@ func ResourceDataprocCluster() *schema.Resource {
 										AtLeastOneOf:     gceClusterConfigKeys,
 										ForceNew:         true,
 										ConflictsWith:    []string{"cluster_config.0.gce_cluster_config.0.subnetwork"},
-										DiffSuppressFunc: compareSelfLinkOrResourceName,
+										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 										Description:      `The name or self_link of the Google Compute Engine network to the cluster will be part of. Conflicts with subnetwork. If neither is specified, this defaults to the "default" network.`,
 									},
 
@@ -561,7 +558,7 @@ func ResourceDataprocCluster() *schema.Resource {
 										AtLeastOneOf:     gceClusterConfigKeys,
 										ForceNew:         true,
 										ConflictsWith:    []string{"cluster_config.0.gce_cluster_config.0.network"},
-										DiffSuppressFunc: compareSelfLinkOrResourceName,
+										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 										Description:      `The name or self_link of the Google Compute Engine subnetwork the cluster will be part of. Conflicts with network.`,
 									},
 
@@ -703,7 +700,7 @@ func ResourceDataprocCluster() *schema.Resource {
 													ForceNew:     true,
 													Required:     true,
 													Description:  `The URI of a sole-tenant that the cluster will be created on.`,
-													DiffSuppressFunc: compareSelfLinkOrResourceName,
+													DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 												},
 											},
 										},

@@ -60,7 +60,7 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: location
     description: The location of the linked dataset.

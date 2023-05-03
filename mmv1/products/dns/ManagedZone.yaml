@@ -297,7 +297,7 @@ properties:
             }
             raw := v.(map[string]interface{})
             if url, ok := raw["network_url"]; ok {
-              return selfLinkNameHash(url)
+              return tpgresource.SelfLinkNameHash(url)
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
@@ -314,7 +314,7 @@ properties:
                 This should be formatted like `projects/{project}/global/networks/{network}` or
                 `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
               required: true
-              diff_suppress_func: 'compareSelfLinkOrResourceName'
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'forwardingConfig'
     description: |
@@ -376,7 +376,7 @@ properties:
               This should be formatted like `projects/{project}/global/networks/{network}` or
               `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
             custom_expand: templates/terraform/custom_expand/network_full_url.erb
-            diff_suppress_func: 'compareSelfLinkOrResourceName'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Boolean
     name: 'reverseLookup'
     api_name: reverseLookupConfig

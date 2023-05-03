@@ -799,7 +799,7 @@ properties:
                       The Origin resource that requests to this route should fetch from when a matching response is not in cache. Origins can be defined as short names ("my-origin") or fully-qualified resource URLs - e.g. "networkservices.googleapis.com/projects/my-project/global/edgecacheorigins/my-origin"
 
                       Only one of origin or urlRedirect can be set.
-                    diff_suppress_func: 'compareSelfLinkOrResourceName'
+                    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
                   - !ruby/object:Api::Type::NestedObject
                     name: urlRedirect
                     description: |

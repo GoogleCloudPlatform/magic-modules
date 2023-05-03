@@ -2,7 +2,6 @@ package google
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -25,18 +24,7 @@ func compareSelfLinkRelativePaths(_, old, new string, _ *schema.ResourceData) bo
 // Use this method when the field accepts either a name or a self_link referencing a resource.
 // The value we store (i.e. `old` in this method), must be a self_link.
 func compareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) bool {
-	newParts := strings.Split(new, "/")
-
-	if len(newParts) == 1 {
-		// `new` is a name
-		// `old` is always a self_link
-		if GetResourceNameFromSelfLink(old) == newParts[0] {
-			return true
-		}
-	}
-
-	// The `new` string is a self_link
-	return compareSelfLinkRelativePaths("", old, new, nil)
+	return tpgresource.CompareSelfLinkOrResourceName("", old, new, nil)
 }
 
 // Hash the relative path of a self link.
@@ -50,8 +38,7 @@ func getRelativePath(selfLink string) (string, error) {
 
 // Hash the name path of a self link.
 func selfLinkNameHash(selfLink interface{}) int {
-	name := GetResourceNameFromSelfLink(selfLink.(string))
-	return tpgresource.Hashcode(name)
+	return tpgresource.SelfLinkNameHash(selfLink)
 }
 
 func ConvertSelfLinkToV1(link string) string {

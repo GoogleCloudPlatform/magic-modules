@@ -235,7 +235,7 @@ func calcAddRemove(from []string, to []string) (add, remove []string) {
 	for _, u := range to {
 		found := false
 		for _, v := range from {
-			if compareSelfLinkOrResourceName("", v, u, nil) {
+			if tpgresource.CompareSelfLinkOrResourceName("", v, u, nil) {
 				found = true
 				break
 			}
@@ -247,7 +247,7 @@ func calcAddRemove(from []string, to []string) (add, remove []string) {
 	for _, u := range from {
 		found := false
 		for _, v := range to {
-			if compareSelfLinkOrResourceName("", u, v, nil) {
+			if tpgresource.CompareSelfLinkOrResourceName("", u, v, nil) {
 				found = true
 				break
 			}

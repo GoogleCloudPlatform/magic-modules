@@ -91,7 +91,7 @@ properties:
       If not provided, workflow will use the project's default service account.
       Modifying this field for an existing workflow results in a new workflow revision.
     default_from_api: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'sourceContents'
     description: |
