@@ -390,6 +390,7 @@ end     # products.each do
 				"google_compute_attached_disk":                 ResourceComputeAttachedDisk(),
 				"google_compute_instance":                      ResourceComputeInstance(),
 				<% unless version == 'ga' -%>
+				"google_compute_disk_async_replication":        ResourceComputeDiskAsyncReplication(),
 				"google_compute_instance_from_machine_image":   ResourceComputeInstanceFromMachineImage(),
 				<% end -%>
 				"google_compute_instance_from_template":        ResourceComputeInstanceFromTemplate(),
