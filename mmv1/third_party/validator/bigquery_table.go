@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources/transport"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 const BigQueryTableAssetType string = "bigquery.googleapis.com/Table"

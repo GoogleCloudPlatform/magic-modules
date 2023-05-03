@@ -283,7 +283,7 @@ func resourceComputeTargetPoolUpdate(d *schema.ResourceData, meta interface{}) e
 		if err != nil {
 			return err
 		}
-		add, remove := calcAddRemove(fromUrls, toUrls)
+		add, remove := tpgresource.CalcAddRemove(fromUrls, toUrls)
 
 		removeReq := &compute.TargetPoolsRemoveHealthCheckRequest{
 			HealthChecks: make([]*compute.HealthCheckReference, len(remove)),

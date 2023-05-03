@@ -716,7 +716,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	}
 
 	// Wait for the operation to complete
-	opAsMap, err := ConvertToMap(op)
+	opAsMap, err := tpgresource.ConvertToMap(op)
 	if err != nil {
 		return "", err
 	}
@@ -747,7 +747,7 @@ func setupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	}
 
 	// Wait for the operation to complete
-	opAsMap, err = ConvertToMap(op)
+	opAsMap, err = tpgresource.ConvertToMap(op)
 	if err != nil {
 		return "", err
 	}

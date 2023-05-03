@@ -278,6 +278,39 @@ func GetInterconnectAttachmentLink(config *transport_tpg.Config, project, region
 	return ic, nil
 }
 
+// Given two sets of references (with "from" values in self link form),
+// determine which need to be added or removed // during an update using
+// addX/removeX APIs.
+func CalcAddRemove(from []string, to []string) (add, remove []string) {
+	add = make([]string, 0)
+	remove = make([]string, 0)
+	for _, u := range to {
+		found := false
+		for _, v := range from {
+			if CompareSelfLinkOrResourceName("", v, u, nil) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			add = append(add, u)
+		}
+	}
+	for _, u := range from {
+		found := false
+		for _, v := range to {
+			if CompareSelfLinkOrResourceName("", u, v, nil) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			remove = append(remove, u)
+		}
+	}
+	return add, remove
+}
+
 func StringInSlice(arr []string, str string) bool {
 	for _, i := range arr {
 		if i == str {

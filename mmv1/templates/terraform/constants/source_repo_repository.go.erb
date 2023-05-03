@@ -26,5 +26,5 @@ func resourceSourceRepoRepositoryPubSubConfigsHash(v interface{}) int {
                 buf.WriteString(fmt.Sprintf("%s-", v.(string)))
         }
 
-        return hashcode(buf.String())
+        return tpgresource.Hashcode(buf.String())
 }

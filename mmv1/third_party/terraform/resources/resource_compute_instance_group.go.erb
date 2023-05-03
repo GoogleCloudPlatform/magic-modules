@@ -345,7 +345,7 @@ func resourceComputeInstanceGroupUpdate(d *schema.ResourceData, meta interface{}
 			return fmt.Errorf("Error invalid instance URLs: %v", to)
 		}
 
-		add, remove := calcAddRemove(from, to)
+		add, remove := tpgresource.CalcAddRemove(from, to)
 
 		if len(remove) > 0 {
 			removeReq := &compute.InstanceGroupsRemoveInstancesRequest{

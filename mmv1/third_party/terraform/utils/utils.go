@@ -230,33 +230,7 @@ func getInterconnectAttachmentLink(config *transport_tpg.Config, project, region
 // determine which need to be added or removed // during an update using
 // addX/removeX APIs.
 func calcAddRemove(from []string, to []string) (add, remove []string) {
-	add = make([]string, 0)
-	remove = make([]string, 0)
-	for _, u := range to {
-		found := false
-		for _, v := range from {
-			if tpgresource.CompareSelfLinkOrResourceName("", v, u, nil) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			add = append(add, u)
-		}
-	}
-	for _, u := range from {
-		found := false
-		for _, v := range to {
-			if tpgresource.CompareSelfLinkOrResourceName("", u, v, nil) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			remove = append(remove, u)
-		}
-	}
-	return add, remove
+	return tpgresource.CalcAddRemove(from, to)
 }
 
 func stringInSlice(arr []string, str string) bool {
