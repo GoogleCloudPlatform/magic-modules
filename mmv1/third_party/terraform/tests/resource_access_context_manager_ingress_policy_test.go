@@ -28,7 +28,7 @@ func TestAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
 				Config: testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitle),
 			},
 			{
-				ResourceName:      "google_access_context_manager_ingress_policy.test-access1",
+				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -86,7 +86,7 @@ func testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterT
 	return fmt.Sprintf(`
 %s
 
-resource "google_access_context_manager_ingress_policy" "test-access1" {
+resource "google_access_context_manager_ingress_policy" "test-access" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
   ingress_policy {
 	ingress_from {

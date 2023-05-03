@@ -41,8 +41,8 @@ autogen_async: true
 exclude_validator: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter/IngressPolicy
 skip_sweeper: true
-id_format: '{{perimeter}}/{{resource}}'
-import_format: ['{{perimeter}}/{{resource}}']
+id_format: '{{perimeter}}'
+import_format: ['{{perimeter}}']
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.erb
 parameters:
