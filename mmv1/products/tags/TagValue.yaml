@@ -46,6 +46,8 @@ examples:
       value_short_name: '"tf-test-value-" + RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: name

@@ -25,6 +25,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
 # Used as a resource reference
 exclude: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

@@ -92,6 +92,8 @@ parameters:
     description: |
       A reference to the region where the Serverless NEGs Reside.
     required: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

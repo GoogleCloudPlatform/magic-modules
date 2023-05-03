@@ -44,6 +44,8 @@ examples:
     primary_resource_id: 'basic'
     test_env_vars:
       org_id: :ORG_ID
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: locationId

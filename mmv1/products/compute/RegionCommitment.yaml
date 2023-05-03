@@ -76,6 +76,8 @@ parameters:
     required: false
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'commitment_id'

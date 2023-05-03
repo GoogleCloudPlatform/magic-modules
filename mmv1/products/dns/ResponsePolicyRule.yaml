@@ -49,6 +49,8 @@ parameters:
     imports: 'responsePolicyName'
     description: |
       Identifies the response policy addressed by this request.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'ruleName'

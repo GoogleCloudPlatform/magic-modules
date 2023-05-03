@@ -67,6 +67,8 @@ parameters:
     url_param_only: true
     immutable: true
     description: ''
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: name

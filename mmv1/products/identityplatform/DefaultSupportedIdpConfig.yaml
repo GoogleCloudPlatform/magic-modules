@@ -33,6 +33,8 @@ examples:
       # Skip test due to operating on singleton and the handwritten update test handles this
       # If we could spin up a project and enable identity platform we could test this separately
     skip_test: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

@@ -55,6 +55,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       https_health_check_name: 'authentication-health-check'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  resource_definition: 'templates/terraform/resource_definition/default_provider_values.erb'
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'checkIntervalSec'
