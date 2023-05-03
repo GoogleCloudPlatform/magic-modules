@@ -44,31 +44,32 @@ docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     These resources require allow-listing to use, and are not openly available to all Cloud customers. Engage with your Cloud account team to discuss how to onboard.
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/edgeCacheServices/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/global/edgeCacheServices/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_service_basic"
-    primary_resource_id: "instance"
+    name: 'network_services_edge_cache_service_basic'
+    primary_resource_id: 'instance'
     vars:
-      bucket_name: "my-bucket"
-      origin_name: "my-origin"
-      service_name: "my-service"
+      bucket_name: 'my-bucket'
+      origin_name: 'my-origin'
+      service_name: 'my-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_service_advanced"
-    primary_resource_id: "instance"
+    name: 'network_services_edge_cache_service_advanced'
+    primary_resource_id: 'instance'
     vars:
-      bucket_name: "my-bucket"
-      origin_name: "my-origin"
-      origin_google: "origin-google"
-      service_name: "my-service"
+      bucket_name: 'my-bucket'
+      origin_name: 'my-origin'
+      origin_google: 'origin-google'
+      service_name: 'my-service'
   - !ruby/object:Provider::Terraform::Examples
-    name: "network_services_edge_cache_service_dual_token"
-    primary_resource_id: "instance"
+    name: 'network_services_edge_cache_service_dual_token'
+    primary_resource_id: 'instance'
     vars:
-      secret_name: "secret-name"
-      keyset_name: "keyset-name"
-      origin_name: "my-origin"
-      service_name: "my-service"
+      secret_name: 'secret-name'
+      keyset_name: 'keyset-name'
+      origin_name: 'my-origin'
+      service_name: 'my-service'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -141,7 +142,7 @@ properties:
       Defines how requests are routed, modified, cached and/or which origin content is filled from.
     properties:
       - !ruby/object:Api::Type::Array
-        name: "host_rule"
+        name: 'host_rule'
         api_name: 'hostRules'
         description: |
           The list of hostRules to match against. These rules define which hostnames the EdgeCacheService will match against, and which route configurations apply.
@@ -185,7 +186,7 @@ properties:
               description: |
                 The name of the pathMatcher associated with this hostRule.
       - !ruby/object:Api::Type::Array
-        name: "path_matcher"
+        name: 'path_matcher'
         api_name: 'pathMatchers'
         description: |
           The list of pathMatchers referenced via name by hostRules. PathMatcher is used to match the path portion of the URL when a HostRule matches the URL's host portion.
@@ -874,4 +875,3 @@ properties:
     name: 'edgeSecurityPolicy'
     description: |
       Resource URL that points at the Cloud Armor edge security policy that is applied on each request against the EdgeCacheService.
-

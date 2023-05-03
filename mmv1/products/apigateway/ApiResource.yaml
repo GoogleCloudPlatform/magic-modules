@@ -44,7 +44,8 @@ examples:
     min_version: beta
     name: 'apigateway_api_basic'
     primary_resource_id: 'api'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
     vars:
       api_id: 'my-api'
   - !ruby/object:Provider::Terraform::Examples
@@ -52,7 +53,8 @@ examples:
     min_version: beta
     name: 'apigateway_api_full'
     primary_resource_id: 'api'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
     vars:
       api_id: 'my-api'
 parameters:

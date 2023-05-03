@@ -38,14 +38,15 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 docs: !ruby/object:Provider::Terraform::Docs
 autogen_async: true
-import_format: ["projects/{{project}}/locations/global/dnsAuthorizations/{{name}}"]
+import_format:
+  ['projects/{{project}}/locations/global/dnsAuthorizations/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "certificate_manager_dns_authorization_basic"
-    primary_resource_id: "default"
+    name: 'certificate_manager_dns_authorization_basic'
+    primary_resource_id: 'default'
     vars:
-      dns_auth_name: "dns-auth"
-      zone_name: "my-zone"
+      dns_auth_name: 'dns-auth'
+      zone_name: 'my-zone'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -63,7 +64,8 @@ properties:
       A human-readable description of the resource.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
-    description: 'Set of label tags associated with the DNS Authorization resource.'
+    description:
+      'Set of label tags associated with the DNS Authorization resource.'
   - !ruby/object:Api::Type::String
     name: 'domain'
     immutable: true

@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'ConnectionProfile'
-base_url: "projects/{{project}}/locations/{{location}}/connectionProfiles"
-create_url: "projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}"
-self_link: "projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}"
+base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
+create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -25,35 +25,40 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 description: |
   A set of reusable connection configurations to be used as a source or destination for a stream.
 id_format: projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}
-import_format: ["projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}"]
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_connection_profile_basic"
-    primary_resource_id: "default"
+    name: 'datastream_connection_profile_basic'
+    primary_resource_id: 'default'
     vars:
-      connection_profile_id: "my-profile"
+      connection_profile_id: 'my-profile'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_connection_profile_bigquery_private_connection"
-    primary_resource_id: "default"
+    name: 'datastream_connection_profile_bigquery_private_connection'
+    primary_resource_id: 'default'
     vars:
-      private_connection_id: "my-connection"
-      connection_profile_id: "my-profile"
-      network_name: "my-network"
+      private_connection_id: 'my-connection'
+      connection_profile_id: 'my-profile'
+      network_name: 'my-network'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_connection_profile_full"
-    primary_resource_id: "default"
-        # Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410
+    name: 'datastream_connection_profile_full'
+    primary_resource_id:
+      'default'
+      # Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410
     ignore_read_extra:
-      - "forward_ssh_connectivity.0.password"
+      - 'forward_ssh_connectivity.0.password'
     vars:
-      connection_profile_id: "my-profile"
+      connection_profile_id: 'my-profile'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_connection_profile_postgres"
-    primary_resource_id: "default"
+    name: 'datastream_connection_profile_postgres'
+    primary_resource_id: 'default'
     vars:
-      connection_profile_id: "my-profile"
-      database_instance_name: "my-instance"
-      deletion_protection: "true"
+      connection_profile_id: 'my-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection:
+        'true'
         # This is covered by the update tests.
     skip_test: true
 parameters:

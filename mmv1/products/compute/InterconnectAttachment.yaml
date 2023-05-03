@@ -41,20 +41,20 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "interconnect_attachment_basic"
-    primary_resource_id: "on_prem"
+    name: 'interconnect_attachment_basic'
+    primary_resource_id: 'on_prem'
     vars:
-      interconnect_attachment_name: "on-prem-attachment"
-      router_name: "router-1"
-      network_name: "network-1"
+      interconnect_attachment_name: 'on-prem-attachment'
+      router_name: 'router-1'
+      network_name: 'network-1'
   - !ruby/object:Provider::Terraform::Examples
-    name: "compute_interconnect_attachment_ipsec_encryption"
-    primary_resource_id: "ipsec-encrypted-interconnect-attachment"
+    name: 'compute_interconnect_attachment_ipsec_encryption'
+    primary_resource_id: 'ipsec-encrypted-interconnect-attachment'
     vars:
-      interconnect_attachment_name: "test-interconnect-attachment"
-      address_name: "test-address"
-      router_name: "test-router"
-      network_name: "test-network"
+      interconnect_attachment_name: 'test-interconnect-attachment'
+      address_name: 'test-address'
+      router_name: 'test-router'
+      network_name: 'test-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/interconnect_attachment.go.erb
   post_create: templates/terraform/post_create/interconnect_attachment.go.erb
