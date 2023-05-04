@@ -199,7 +199,7 @@ properties:
             partial URL.
           required: true
           custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
-          diff_suppress_func: 'compareSelfLinkRelativePaths'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
         - !ruby/object:Api::Type::Integer
           name: 'maxConnections'
           default_from_api: true
@@ -725,7 +725,7 @@ properties:
 
       For internal load balancing, a URL to a HealthCheck resource must be specified instead.
     is_set: true
-    set_hash_func: 'selfLinkRelativePathHash'
+    set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
     custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Integer
@@ -1228,12 +1228,12 @@ properties:
     name: 'securityPolicy'
     description: |
       The security policy associated with this backend service.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'edgeSecurityPolicy'
     description: |
       The resource URL for the edge security policy associated with this backend service.
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'securitySettings'
     description: |

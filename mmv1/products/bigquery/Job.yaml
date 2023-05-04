@@ -220,7 +220,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Array
             name: 'userDefinedFunctionResources'
             description: |
@@ -277,7 +277,7 @@ properties:
                   The dataset. Can be specified `{{dataset_id}}` if `project_id` is also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               - !ruby/object:Api::Type::String
                 name: 'projectId'
                 description: 'The ID of the project containing this table.'
@@ -434,7 +434,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -658,7 +658,7 @@ properties:
                     The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                     or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                   required: true
-                  diff_suppress_func: 'compareSelfLinkRelativePaths'
+                  diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::NestedObject
             name: 'destinationTable'
             description: 'The destination table.'
@@ -681,7 +681,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -793,7 +793,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::NestedObject
             name: 'sourceModel'
             description: |

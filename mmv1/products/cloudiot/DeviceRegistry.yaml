@@ -155,7 +155,7 @@ properties:
           required: true
           description: |
             PubSub topic name to publish device events.
-          diff_suppress_func: 'compareSelfLinkOrResourceName'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'stateNotificationConfig'
     description: |
