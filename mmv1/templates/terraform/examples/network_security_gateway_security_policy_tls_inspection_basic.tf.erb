@@ -63,7 +63,7 @@ resource "google_privateca_certificate_authority" "default" {
 
 resource "google_network_security_tls_inspection_policy" "default" {
   provider = google-beta
-  name     = "<%= ctx[:vars]['resource_name'] %>"
+  name     = "<%= ctx[:vars]['privateca_ca_tls_name'] %>"
   location = "us-central1"
   ca_pool  = google_privateca_ca_pool.default.id
   depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default]
@@ -73,6 +73,7 @@ resource "google_network_security_gateway_security_policy" "<%= ctx[:primary_res
   provider    = google-beta
   name        = "<%= ctx[:vars]['resource_name'] %>"
   location    = "us-central1"
-  tls_inspection_policy = google_network_security_tls_inspection_policy.default.name
   description = "my description"
+  tls_inspection_policy = google_network_security_tls_inspection_policy.default.id
+  depends_on = [google_network_security_tls_inspection_policy.default]
 }
