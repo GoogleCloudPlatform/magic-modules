@@ -16,7 +16,7 @@ type ProviderModel struct {
 	Region                             types.String `tfsdk:"region"`
 	Zone                               types.String `tfsdk:"zone"`
 	Scopes                             types.List   `tfsdk:"scopes"`
-	Batching                           types.Object `tfsdk:"batching"`
+	Batching                           types.List   `tfsdk:"batching"`
 	UserProjectOverride                types.Bool   `tfsdk:"user_project_override"`
 	RequestTimeout                     types.String `tfsdk:"request_timeout"`
 	RequestReason                      types.String `tfsdk:"request_reason"`
