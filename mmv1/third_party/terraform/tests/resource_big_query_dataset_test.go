@@ -376,7 +376,7 @@ resource "google_project_iam_member" "kms-project-binding" {
 resource "google_bigquery_dataset" "test" {
   dataset_id                  = "%s"
   friendly_name               = "test"
-  description                 = "This is a test description"
+  description                 = "This is a test description (test)"
   location                    = "US"
   default_table_expiration_ms = 3600000
 
