@@ -10,7 +10,7 @@ resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
     step {
       name = "ubuntu"
       args = ["-c", "exit 1"]
-      allowFailure = true # using allowFailure field
+      allow_failure = true
     }
 
     source {

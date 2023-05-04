@@ -10,7 +10,7 @@ resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
     step {
       name = "ubuntu"
       args = ["-c", "exit 1"]
-      allowExitCodes = [1] # using allowExitCodes field
+      allow_exit_codes = [1,3]
     }
 
     source {

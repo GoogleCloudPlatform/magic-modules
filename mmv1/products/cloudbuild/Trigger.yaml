@@ -81,6 +81,12 @@ examples:
     name: 'cloudbuild_trigger_github_enterprise'
     primary_resource_id: 'ghe-trigger'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_allow_failure'
+    primary_resource_id: 'allow-failure-trigger'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuild_trigger_allow_exit_codes'
+    primary_resource_id: 'allow-exit-codes-trigger'
 
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_read: templates/terraform/pre_read/cloudbuild_trigger.go.erb
