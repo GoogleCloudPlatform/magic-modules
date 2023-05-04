@@ -838,7 +838,7 @@ func TestRetryTimeDuration_URLTimeoutsShouldRetry(t *testing.T) {
 		runCount++
 		if runCount == 1 {
 			return &url.Error{
-				Err: &acctest.TimeoutError{Timeout: true},
+				Err: acctest.TimeoutErr,
 			}
 		}
 		return nil

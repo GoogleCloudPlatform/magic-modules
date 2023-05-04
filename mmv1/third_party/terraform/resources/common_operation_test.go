@@ -35,7 +35,7 @@ func (w *TestWaiter) QueryOp() (interface{}, error) {
 	w.runCount++
 	if w.runCount == 1 {
 		return nil, &url.Error{
-			Err: &acctest.TimeoutError{Timeout: true},
+			Err: acctest.TimeoutErr,
 		}
 	}
 	return "my return value", nil

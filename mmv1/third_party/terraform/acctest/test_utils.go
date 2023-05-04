@@ -159,9 +159,15 @@ func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 }
 
 type TimeoutError struct {
-	Timeout bool
+	timeout bool
+}
+
+func (e *TimeoutError) Timeout() bool {
+	return e.timeout
 }
 
 func (e *TimeoutError) Error() string {
 	return "timeout error"
 }
+
+var TimeoutErr = &TimeoutError{timeout: true}
