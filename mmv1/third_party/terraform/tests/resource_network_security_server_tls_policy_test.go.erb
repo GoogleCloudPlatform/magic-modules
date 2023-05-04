@@ -65,7 +65,7 @@ func testAccNetworkSecurityServerTlsPolicy_update(serverTlsPolicyName string) st
       foo = "bar"
     }
     description            = "updated description"
-		allow_open             = "false"
+    allow_open             = "false"
     server_certificate {
       certificate_provider_instance {
         plugin_instance = "google_cloud_private_spiffe"
