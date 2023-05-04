@@ -125,8 +125,8 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudStoragePath'
         description:
-          Newline-delimited file of words in Cloud Storage. Only a single
-          file is accepted.
+          Newline-delimited file of words in Cloud Storage. Only a single file
+          is accepted.
         exactly_one_of:
           - dictionary.0.word_list
           - dictionary.0.cloud_storage_path
@@ -159,8 +159,7 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudStorageFileSet'
         description:
-          Set of files containing newline-delimited lists of dictionary
-          phrases.
+          Set of files containing newline-delimited lists of dictionary phrases.
         exactly_one_of:
           - large_custom_dictionary.0.cloud_storage_file_set
           - large_custom_dictionary.0.big_query_field

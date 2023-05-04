@@ -67,8 +67,8 @@ examples:
     primary_resource_id: 'example'
     vars:
       image_name: 'example-image'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-example-image%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-image%s\",
+      context[\"random_suffix\"\
       ])"
   - !ruby/object:Provider::Terraform::Examples
     name: 'image_guest_os'
@@ -368,4 +368,4 @@ properties:
       - :READY
       - :PENDING
       - :FAILED
-  # State is not applicable for state convergence.
+# State is not applicable for state convergence.

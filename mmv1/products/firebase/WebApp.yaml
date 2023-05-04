@@ -48,7 +48,7 @@ import_format: ['{{project}} {{name}}']
 autogen_async: true
 skip_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
+  - !ruby/object:Provider::Terraform::Examples  # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
     skip_vcr: true
     name: 'firebase_web_app_basic'
     min_version: 'beta'

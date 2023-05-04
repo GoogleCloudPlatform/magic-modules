@@ -71,5 +71,7 @@ properties:
     required: true
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
-    description: The IPv4 address range, in CIDR format, represented by this public advertised prefix.
+    description:
+      The IPv4 address range, in CIDR format, represented by this public
+      advertised prefix.
     required: true

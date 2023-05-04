@@ -31,8 +31,8 @@ examples:
     name: 'runtimeconfig_config_basic'
     min_version: beta
     primary_resource_id: 'config'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-config%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-config%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       config_name: 'my-config'

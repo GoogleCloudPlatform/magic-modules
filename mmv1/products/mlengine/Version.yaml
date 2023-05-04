@@ -47,8 +47,8 @@ parameters:
   - !ruby/object:Api::Type::Boolean
     name: 'isDefault'
     description:
-      If true, this version will be used to handle prediction requests
-      that do not specify a version
+      If true, this version will be used to handle prediction requests that do
+      not specify a version
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -63,8 +63,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'deploymentUri'
     description:
-      The Cloud Storage location of the trained model used to create the
-      version
+      The Cloud Storage location of the trained model used to create the version
     required: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
@@ -80,8 +79,8 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'machineType'
     description:
-      The type of machine on which to serve the model. Currently only applies
-      to online prediction service.
+      The type of machine on which to serve the model. Currently only applies to
+      online prediction service.
     values:
       - mls1-c1-m2
       - mls1-c4-m2
@@ -103,19 +102,20 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'packageUris'
     description:
-      Cloud Storage paths (gs://…) of packages for custom prediction routines
-      or scikit-learn pipelines with custom code.
+      Cloud Storage paths (gs://…) of packages for custom prediction routines or
+      scikit-learn pipelines with custom code.
     output: true
     item_type: Api::Type::String
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
-    description: One or more labels that you can add, to organize your model versions
-    # no etag since it's immutable: true
+    description:
+      One or more labels that you can add, to organize your model versions
+  # no etag since it's immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'framework'
     description:
-      The machine learning framework AI Platform uses to train this version
-      of the model
+      The machine learning framework AI Platform uses to train this version of
+      the model
     values:
       - FRAMEWORK_UNSPECIFIED
       - TENSORFLOW
@@ -159,8 +159,8 @@ properties:
       - !ruby/object:Api::Type::Integer
         name: 'nodes'
         description:
-          The number of nodes to allocate for this model. These nodes are
-          always up, starting from the time the model is deployed
+          The number of nodes to allocate for this model. These nodes are always
+          up, starting from the time the model is deployed
   - !ruby/object:Api::Type::String
     name: 'predictionClass'
     description: |

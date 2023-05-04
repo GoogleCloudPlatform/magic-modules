@@ -106,7 +106,7 @@ properties:
       The desired lifetime of the CA certificate. Used to create the "notBeforeTime" and
       "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
       fractional digits, terminated by 's'. Example: "3.5s".
-    default_value: 315360000s # 10 years
+    default_value: 315360000s  # 10 years
     immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'revocationDetails'
@@ -779,7 +779,8 @@ properties:
       - config
   - !ruby/object:Api::Type::NestedObject
     name: 'config'
-    description: The config used to create a self-signed X.509 certificate or CSR.
+    description:
+      The config used to create a self-signed X.509 certificate or CSR.
     exactly_one_of:
       - pem_csr
       - config
@@ -1112,7 +1113,8 @@ properties:
                 immutable: true
               - !ruby/object:Api::Type::String
                 name: 'province'
-                description: The province, territory, or regional state of the subject.
+                description:
+                  The province, territory, or regional state of the subject.
                 immutable: true
               - !ruby/object:Api::Type::String
                 name: 'streetAddress'
@@ -1165,8 +1167,8 @@ properties:
               - !ruby/object:Api::Type::Array
                 name: 'ipAddresses'
                 description:
-                  Contains only valid 32-bit IPv4 addresses or RFC 4291
-                  IPv6 addresses.
+                  Contains only valid 32-bit IPv4 addresses or RFC 4291 IPv6
+                  addresses.
                 item_type: Api::Type::String
                 at_least_one_of:
                   - config.0.subject_config.0.subject_alt_name.0.dns_names

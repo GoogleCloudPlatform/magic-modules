@@ -43,7 +43,8 @@ properties:
     description: 'The object entity tag.'
   - !ruby/object:Api::Type::Integer
     name: 'generation'
-    description: 'The content generation of this object. Used for object versioning.'
+    description:
+      'The content generation of this object. Used for object versioning.'
   - !ruby/object:Api::Type::String
     name: 'id'
     description:

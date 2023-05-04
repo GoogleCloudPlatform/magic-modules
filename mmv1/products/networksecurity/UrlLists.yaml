@@ -22,9 +22,10 @@ update_mask: true
 description: |
   UrlList proto helps users to set reusable, independently manageable lists of hosts, host patterns, URLs, URL patterns.
 references:
-  !ruby/object:Api::Resource::ReferenceLinks # TODO(diogoesteves): change the url to beta once it is available.
+  !ruby/object:Api::Resource::ReferenceLinks  # TODO(diogoesteves): change the url to beta once it is available.
   guides:
-    'Use UrlLists': ' https://cloud.google.com/secure-web-proxy/docs/use-url-list'
+    'Use UrlLists':
+      ' https://cloud.google.com/secure-web-proxy/docs/use-url-list'
   api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1alpha1/projects.locations.urlLists'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation

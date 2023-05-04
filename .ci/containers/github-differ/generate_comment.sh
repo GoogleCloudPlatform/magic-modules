@@ -11,6 +11,9 @@ if [ -z "$GITHUB_TOKEN" ]; then
     exit 1
 fi
 
+# make utility functions avalible
+source /utils.sh
+
 PR_NUMBER=$1
 NEW_BRANCH=auto-pr-$PR_NUMBER
 OLD_BRANCH=auto-pr-$PR_NUMBER-old
@@ -21,6 +24,7 @@ TPGB_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magi
 TPGB_LOCAL_PATH=$PWD/../tpgb
 TFOICS_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/docs-examples
 TFOICS_LOCAL_PATH=$PWD/../tfoics
+BREAKING_CHANGE_BUILD_FAILURE=0
 
 # For backwards compatibility until at least Nov 15 2021
 TFC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/terraform-google-conversion
@@ -38,20 +42,18 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
     DIFFS="${DIFFS}${NEWLINE}Terraform GA: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
-git checkout origin/$NEW_BRANCH
-popd
-
-if ! git diff --exit-code origin/main tools; then
-    ## Run unit tests for breaking change and missing test detector.
-    /test_tools.sh $MM_LOCAL_PATH $TPG_LOCAL_PATH $COMMIT_SHA $BUILD_ID $BUILD_STEP $PROJECT_ID
-fi
-
-## Breaking change setup and execution
 TPG_LOCAL_PATH_OLD="${TPG_LOCAL_PATH}old"
 mkdir -p $TPG_LOCAL_PATH_OLD
 cp -r $TPG_LOCAL_PATH/. $TPG_LOCAL_PATH_OLD
+
+git checkout origin/$NEW_BRANCH
+update_package_name "github.com/hashicorp/terraform-provider-google" "google/provider/new"
+popd
+
+## Breaking change setup and execution
 pushd $TPG_LOCAL_PATH_OLD
 git checkout origin/$OLD_BRANCH
+update_package_name "github.com/hashicorp/terraform-provider-google" "google/provider/old"
 popd
 set +e
 pushd $MM_LOCAL_PATH/tools/breaking-change-detector
@@ -63,6 +65,7 @@ export TPG_BREAKING="$(go run .)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
     export TPG_BREAKING=""
+    BREAKING_CHANGE_BUILD_FAILURE=$?
 fi
 set -e
 popd
@@ -76,16 +79,18 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
     DIFFS="${DIFFS}${NEWLINE}Terraform Beta: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
-git checkout origin/$NEW_BRANCH
-popd
-
-
-## Breaking change setup and execution
 TPGB_LOCAL_PATH_OLD="${TPGB_LOCAL_PATH}old"
 mkdir -p $TPGB_LOCAL_PATH_OLD
 cp -r $TPGB_LOCAL_PATH/. $TPGB_LOCAL_PATH_OLD
+
+git checkout origin/$NEW_BRANCH
+update_package_name "github.com/hashicorp/terraform-provider-google-beta" "google/provider/new"
+popd
+
+
 pushd $TPGB_LOCAL_PATH_OLD
 git checkout origin/$OLD_BRANCH
+update_package_name "github.com/hashicorp/terraform-provider-google-beta" "google/provider/old"
 popd
 set +e
 pushd $MM_LOCAL_PATH/tools/breaking-change-detector
@@ -97,6 +102,7 @@ export TPGB_BREAKING="$(go run .)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
     export TPGB_BREAKING=""
+    BREAKING_CHANGE_BUILD_FAILURE=$?
 fi
 BREAKINGCHANGES="$(/compare_breaking_changes.sh)"
 set -e
@@ -188,3 +194,8 @@ curl \
 curl -H "Authorization: token ${GITHUB_TOKEN}" \
       -d "$(jq -r --arg diffs "$MESSAGE" -n "{body: \$diffs}")" \
       "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
+
+if ! git diff --exit-code origin/main tools || [ "$BREAKING_CHANGE_BUILD_FAILURE" -ne 0 ]; then
+    ## Run unit tests for breaking change and missing test detector.
+    /test_tools.sh $MM_LOCAL_PATH $TPG_LOCAL_PATH $COMMIT_SHA $BUILD_ID $BUILD_STEP $PROJECT_ID
+fi

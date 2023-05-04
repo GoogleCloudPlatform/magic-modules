@@ -26,8 +26,8 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
 identity:
   - name
 description:
-  A Lien represents an encumbrance on the actions that can be performed
-  on a resource.
+  A Lien represents an encumbrance on the actions that can be performed on a
+  resource.
 immutable: true
 id_format: '{{name}}'
 import_format: ['{{parent}}/{{name}}']
