@@ -1189,6 +1189,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 	}
 
 	return *creds, nil
+}
 
 // Remove the `/{{version}}/` from a base path if present.
 func RemoveBasePathVersion(url string) string {
