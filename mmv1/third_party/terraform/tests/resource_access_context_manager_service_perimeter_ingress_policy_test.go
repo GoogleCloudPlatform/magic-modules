@@ -13,7 +13,7 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
-func TestAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
+func TestAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	org := acctest.GetTestOrgFromEnv(t)
@@ -25,7 +25,7 @@ func TestAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitle),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitle),
 			},
 			{
 				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
@@ -33,14 +33,14 @@ func TestAccAccessContextManagerIngressPolicy_basicTest(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitle),
-				Check:  testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitle),
+				Check:  testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProducer(t),
 			},
 		},
 	})
 }
 
-func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_access_context_manager_ingress_policy" {
@@ -82,11 +82,11 @@ func testAccCheckAccessContextManagerIngressPolicyDestroyProducer(t *testing.T) 
 	}
 }
 
-func testAccAccessContextManagerIngressPolicy_basic(org, policyTitle, perimeterTitleName string) string {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "google_access_context_manager_ingress_policy" "test-access" {
+resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
   ingress_policy {
 	ingress_from {
@@ -121,10 +121,10 @@ resource "google_access_context_manager_ingress_policy" "test-access" {
   }
 }
 
-`, testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
+`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
 }
 
-func testAccAccessContextManagerIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
