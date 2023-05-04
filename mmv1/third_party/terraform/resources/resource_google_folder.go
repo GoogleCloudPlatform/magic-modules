@@ -30,6 +30,10 @@ func ResourceGoogleFolder() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			// Format is either folders/{folder_id} or organizations/{org_id}.
 			"parent": {

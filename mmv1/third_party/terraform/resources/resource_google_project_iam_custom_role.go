@@ -23,6 +23,10 @@ func ResourceGoogleProjectIamCustomRole() *schema.Resource {
 			State: resourceGoogleProjectIamCustomRoleImport,
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"role_id": {
 				Type:         schema.TypeString,

@@ -32,6 +32,7 @@ func ResourceAppEngineApplication() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
 			appEngineApplicationLocationIDCustomizeDiff,
 		),
 

@@ -48,6 +48,7 @@ func ResourceContainerNodePool() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
 			resourceNodeConfigEmptyGuestAccelerator,
 		),
 

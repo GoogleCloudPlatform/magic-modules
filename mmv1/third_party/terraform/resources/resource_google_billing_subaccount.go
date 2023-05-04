@@ -23,6 +23,10 @@ func ResourceBillingSubaccount() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"display_name": {
 				Type:     schema.TypeString,

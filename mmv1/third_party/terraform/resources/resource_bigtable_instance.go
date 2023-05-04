@@ -28,6 +28,7 @@ func ResourceBigtableInstance() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
 			resourceBigtableInstanceClusterReorderTypeList,
 		),
 

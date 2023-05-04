@@ -61,6 +61,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 			State: resourceStorageTransferJobStateImporter,
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,

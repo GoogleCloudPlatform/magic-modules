@@ -24,6 +24,10 @@ func ResourceComputeSharedVpcHostProject() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:        schema.TypeString,

@@ -37,6 +37,10 @@ func ResourceStorageBucketObject() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:        schema.TypeString,

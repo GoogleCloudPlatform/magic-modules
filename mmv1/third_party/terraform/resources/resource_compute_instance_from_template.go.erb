@@ -32,7 +32,10 @@ func ResourceComputeInstanceFromTemplate() *schema.Resource {
 		Timeouts: ResourceComputeInstance().Timeouts,
 
 		Schema:        computeInstanceFromTemplateSchema(),
-		CustomizeDiff: ResourceComputeInstance().CustomizeDiff,
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+			ResourceComputeInstance().CustomizeDiff,
+		),
 		UseJSONNumber: true,
 	}
 }

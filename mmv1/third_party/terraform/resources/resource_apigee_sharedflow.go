@@ -37,6 +37,7 @@ func ResourceApigeeSharedFlow() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
 			/*
 				If any of the config_bundle, detect_md5hash or md5hash is changed,
 				then an update is expected, so we tell Terraform core to expect update on meta_data,

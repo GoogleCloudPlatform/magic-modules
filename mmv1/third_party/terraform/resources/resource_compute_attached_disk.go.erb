@@ -35,6 +35,10 @@ func ResourceComputeAttachedDisk() *schema.Resource {
 			Delete: schema.DefaultTimeout(300 * time.Second),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"disk": {
 				Type:             schema.TypeString,

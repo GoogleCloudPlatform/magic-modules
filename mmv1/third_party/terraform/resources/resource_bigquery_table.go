@@ -373,6 +373,7 @@ func ResourceBigQueryTable() *schema.Resource {
 			State: resourceBigQueryTableImport,
 		},
 		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
 			resourceBigQueryTableSchemaCustomizeDiff,
 		),
 		Schema: map[string]*schema.Schema{

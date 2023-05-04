@@ -32,6 +32,10 @@ func ResourceGoogleProjectDefaultServiceAccounts() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:         schema.TypeString,

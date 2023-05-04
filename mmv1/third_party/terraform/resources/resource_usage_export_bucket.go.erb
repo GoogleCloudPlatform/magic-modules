@@ -32,10 +32,14 @@ func ResourceProjectUsageBucket() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"bucket_name": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Required:    true,Í
 				ForceNew:    true,
 				Description: `The bucket to store reports in.`,
 			},

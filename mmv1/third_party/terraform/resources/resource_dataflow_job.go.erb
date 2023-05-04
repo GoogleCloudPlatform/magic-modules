@@ -61,6 +61,7 @@ func ResourceDataflowJob() *schema.Resource {
 			Update: schema.DefaultTimeout(10 * time.Minute),
 		},
 		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
 			resourceDataflowJobTypeCustomizeDiff,
 		),
 		Importer: &schema.ResourceImporter{

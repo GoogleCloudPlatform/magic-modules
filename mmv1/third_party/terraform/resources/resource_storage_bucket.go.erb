@@ -36,6 +36,7 @@ func ResourceStorageBucket() *schema.Resource {
 			State: resourceStorageBucketStateImporter,
 		},
 		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
 		),
 

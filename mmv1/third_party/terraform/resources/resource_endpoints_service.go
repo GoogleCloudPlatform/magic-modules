@@ -148,7 +148,10 @@ func ResourceEndpointsService() *schema.Resource {
 				},
 			},
 		},
-		CustomizeDiff: predictServiceId,
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+			predictServiceId,
+		),
 		UseJSONNumber: true,
 	}
 }

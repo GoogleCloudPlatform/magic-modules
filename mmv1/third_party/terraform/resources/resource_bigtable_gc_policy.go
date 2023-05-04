@@ -67,7 +67,10 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 		Read:          resourceBigtableGCPolicyRead,
 		Delete:        resourceBigtableGCPolicyDestroy,
 		Update:        resourceBigtableGCPolicyUpsert,
-		CustomizeDiff: resourceBigtableGCPolicyCustomizeDiff,
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+			resourceBigtableGCPolicyCustomizeDiff,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"instance_name": {

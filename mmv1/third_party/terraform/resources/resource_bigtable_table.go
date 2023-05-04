@@ -34,6 +34,10 @@ func ResourceBigtableTable() *schema.Resource {
 		// IMPORTANT: Do not add any additional ForceNew fields to this resource.
 		// Destroying/recreating tables can lead to data loss for users.
 		// ----------------------------------------------------------------------
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,

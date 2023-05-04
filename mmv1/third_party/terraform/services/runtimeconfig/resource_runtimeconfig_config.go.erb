@@ -27,6 +27,10 @@ func ResourceRuntimeconfigConfig() *schema.Resource {
 			State: resourceRuntimeconfigConfigImport,
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,

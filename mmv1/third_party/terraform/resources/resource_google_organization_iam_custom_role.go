@@ -22,6 +22,10 @@ func ResourceGoogleOrganizationIamCustomRole() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"role_id": {
 				Type:         schema.TypeString,

@@ -40,6 +40,10 @@ func ResourceComputeInstanceGroup() *schema.Resource {
 		SchemaVersion: 2,
 		MigrateState:  resourceComputeInstanceGroupMigrateState,
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,

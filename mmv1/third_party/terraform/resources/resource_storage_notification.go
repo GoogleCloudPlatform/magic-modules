@@ -20,6 +20,10 @@ func ResourceStorageNotification() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:        schema.TypeString,

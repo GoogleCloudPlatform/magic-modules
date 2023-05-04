@@ -21,7 +21,10 @@ func ResourceStorageBucketAcl() *schema.Resource {
 		Read:          resourceStorageBucketAclRead,
 		Update:        resourceStorageBucketAclUpdate,
 		Delete:        resourceStorageBucketAclDelete,
-		CustomizeDiff: resourceStorageRoleEntityCustomizeDiff,
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+			resourceStorageRoleEntityCustomizeDiff,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {

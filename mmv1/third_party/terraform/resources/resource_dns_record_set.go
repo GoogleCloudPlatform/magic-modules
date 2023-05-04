@@ -81,6 +81,10 @@ func ResourceDnsRecordSet() *schema.Resource {
 			State: resourceDnsRecordSetImportState,
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"managed_zone": {
 				Type:             schema.TypeString,

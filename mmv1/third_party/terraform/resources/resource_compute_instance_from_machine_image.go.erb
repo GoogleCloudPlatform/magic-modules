@@ -32,7 +32,10 @@ func ResourceComputeInstanceFromMachineImage() *schema.Resource {
 		Timeouts: ResourceComputeInstance().Timeouts,
 
 		Schema:        computeInstanceFromMachineImageSchema(),
-		CustomizeDiff: ResourceComputeInstance().CustomizeDiff,
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+			ResourceComputeInstance().CustomizeDiff,
+		),
 		UseJSONNumber: true,
 	}
 }

@@ -35,6 +35,10 @@ func ResourceComputeProjectMetadata() *schema.Resource {
 
 		SchemaVersion: 0,
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"metadata": {
 				Type:        schema.TypeMap,

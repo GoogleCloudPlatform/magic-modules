@@ -30,6 +30,10 @@ func ResourceGoogleServiceNetworkingPeeredDNSDomain() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:        schema.TypeString,

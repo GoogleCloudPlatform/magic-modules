@@ -115,12 +115,12 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
 			customdiff.ForceNewIfChange("master_instance_name", isMasterInstanceNameSet),
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
-			defaultProviderCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{

@@ -18,6 +18,10 @@ func ResourceGoogleServiceAccountKey() *schema.Resource {
 		Create: resourceGoogleServiceAccountKeyCreate,
 		Read:   resourceGoogleServiceAccountKeyRead,
 		Delete: resourceGoogleServiceAccountKeyDelete,
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			// Required
 			"service_account_id": {

@@ -25,6 +25,10 @@ func ResourceSqlSslCert() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"common_name": {
 				Type:        schema.TypeString,

@@ -32,6 +32,10 @@ func ResourceDialogflowCXEnvironment() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"display_name": {
 				Type:         schema.TypeString,

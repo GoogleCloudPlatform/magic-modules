@@ -20,7 +20,10 @@ func ResourceLoggingProjectSink() *schema.Resource {
 		Delete:        resourceLoggingProjectSinkDelete,
 		Update:        resourceLoggingProjectSinkUpdate,
 		Schema:        resourceLoggingSinkSchema(),
-		CustomizeDiff: resourceLoggingProjectSinkCustomizeDiff,
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+			resourceLoggingProjectSinkCustomizeDiff,
+		),
 		Importer: &schema.ResourceImporter{
 			State: resourceLoggingSinkImportState("project"),
 		},

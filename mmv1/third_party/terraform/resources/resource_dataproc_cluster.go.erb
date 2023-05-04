@@ -162,6 +162,10 @@ func ResourceDataprocCluster() *schema.Resource {
 			Delete: schema.DefaultTimeout(45 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,

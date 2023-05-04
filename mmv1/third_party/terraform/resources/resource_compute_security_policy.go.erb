@@ -32,13 +32,19 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceSecurityPolicyStateImporter,
 		},
-		CustomizeDiff: rulesCustomizeDiff,
-
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+			rulesCustomizeDiff,
+		),
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(8 * time.Minute),
 			Update: schema.DefaultTimeout(8 * time.Minute),
 			Delete: schema.DefaultTimeout(8 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"name": {

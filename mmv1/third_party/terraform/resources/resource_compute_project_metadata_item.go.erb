@@ -35,6 +35,10 @@ func ResourceComputeProjectMetadataItem() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"key": {
 				Type:        schema.TypeString,

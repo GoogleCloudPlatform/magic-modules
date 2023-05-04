@@ -51,6 +51,10 @@ func ResourceMonitoringDashboard() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"dashboard_json": {
 				Type:             schema.TypeString,

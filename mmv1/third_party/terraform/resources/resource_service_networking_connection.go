@@ -33,6 +33,10 @@ func ResourceServiceNetworkingConnection() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"network": {
 				Type:             schema.TypeString,

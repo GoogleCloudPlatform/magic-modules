@@ -50,6 +50,10 @@ func ResourceGoogleProject() *schema.Resource {
 
 		MigrateState: resourceGoogleProjectMigrateState,
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:         schema.TypeString,

@@ -16,6 +16,10 @@ func ResourceContainerRegistry() *schema.Resource {
 		Read:   resourceContainerRegistryRead,
 		Delete: resourceContainerRegistryDelete,
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"location": {
 				Type:     schema.TypeString,

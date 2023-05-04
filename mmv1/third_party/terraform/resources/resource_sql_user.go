@@ -59,6 +59,10 @@ func ResourceSqlUser() *schema.Resource {
 		SchemaVersion: 1,
 		MigrateState:  resourceSqlUserMigrateState,
 
+		CustomizeDiff: customdiff.All(
+			defaultProviderCustomizeDiff,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"host": {
 				Type:        schema.TypeString,
