@@ -39,8 +39,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'data_fusion_instance_basic'
     primary_resource_id: 'basic_instance'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       instance_name: 'my-instance'
@@ -198,10 +198,9 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'serviceAccount'
-    min_version: beta # This field is deprecated and needs to be absent in GA provider.
+    min_version: beta  # This field is deprecated and needs to be absent in GA provider.
     deprecation_message:
-      Use `tenant_project_id` instead to extract the tenant project
-      ID.
+      Use `tenant_project_id` instead to extract the tenant project ID.
     output: true
     description: |
       Deprecated. Use `tenant_project_id` instead to extract the tenant project ID.

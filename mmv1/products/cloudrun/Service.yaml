@@ -46,8 +46,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_run_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-srv'
@@ -56,8 +56,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_run_service_sql'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-srv'
@@ -72,8 +72,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_run_service_noauth'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-srv'
@@ -82,8 +82,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_run_service_multiple_environment_variables'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-srv'
@@ -95,8 +95,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_run_service_secret_environment_variables'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-srv'
@@ -109,8 +109,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_run_service_secret_volumes'
     primary_resource_id: 'default'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       cloud_run_service_name: 'cloudrun-srv'
@@ -164,7 +164,8 @@ properties:
     exclude: false
   - !ruby/object:Api::Type::String
     name: apiVersion
-    description: The API version for this call such as "serving.knative.dev/v1alpha1".
+    description:
+      The API version for this call such as "serving.knative.dev/v1alpha1".
     exclude: true
   - !ruby/object:Api::Type::String
     name: kind
@@ -332,8 +333,8 @@ properties:
             name: spec
             required: true
             description:
-              RevisionSpec holds the desired state of the Revision (from
-              the client).
+              RevisionSpec holds the desired state of the Revision (from the
+              client).
             default_from_api: true
             properties:
               - !ruby/object:Api::Type::Array
@@ -348,7 +349,8 @@ properties:
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
-                      deprecation_message: 'Not supported by Cloud Run fully managed'
+                      deprecation_message:
+                        'Not supported by Cloud Run fully managed'
                       name: workingDir
                       immutable: true
                       description: |-
@@ -363,7 +365,8 @@ properties:
                       item_type: Api::Type::String
                     - !ruby/object:Api::Type::Array
                       name: envFrom
-                      deprecation_message: 'Not supported by Cloud Run fully managed'
+                      deprecation_message:
+                        'Not supported by Cloud Run fully managed'
                       immutable: true
                       description: |-
                         List of sources to populate environment variables in the container.
@@ -475,21 +478,21 @@ properties:
                           - !ruby/object:Api::Type::String
                             name: name
                             description:
-                              If specified, used to specify which protocol
-                              to use. Allowed values are "http1" (HTTP/1) and "h2c"
+                              If specified, used to specify which protocol to
+                              use. Allowed values are "http1" (HTTP/1) and "h2c"
                               (HTTP/2 end-to-end). Defaults to "http1".
                             default_from_api: true
                           - !ruby/object:Api::Type::String
                             name: protocol
                             description:
-                              Protocol for port. Must be "TCP". Defaults
-                              to "TCP".
+                              Protocol for port. Must be "TCP". Defaults to
+                              "TCP".
                           - !ruby/object:Api::Type::Integer
                             name: containerPort
                             description:
-                              Port number the container listens on. This
-                              must be a valid port number (between 1 and 65535). Defaults
-                              to "8080".
+                              Port number the container listens on. This must be
+                              a valid port number (between 1 and 65535).
+                              Defaults to "8080".
                     - !ruby/object:Api::Type::NestedObject
                       name: resources
                       description: |-

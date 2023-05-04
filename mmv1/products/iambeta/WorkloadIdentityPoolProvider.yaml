@@ -198,8 +198,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: aws
     description:
-      An Amazon Web Services identity provider. Not compatible with the
-      property oidc.
+      An Amazon Web Services identity provider. Not compatible with the property
+      oidc.
     exactly_one_of:
       - aws
       - oidc
@@ -211,8 +211,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: oidc
     description:
-      An OpenId Connect 1.0 identity provider. Not compatible with the
-      property aws.
+      An OpenId Connect 1.0 identity provider. Not compatible with the property
+      aws.
     exactly_one_of:
       - aws
       - oidc

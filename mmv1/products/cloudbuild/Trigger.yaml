@@ -29,7 +29,7 @@ docs: !ruby/object:Provider::Terraform::Docs
 import_format:
   - 'projects/{{project}}/triggers/{{trigger_id}}'
   - 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
-    # For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
+# For global triggers, the id format is changed to projects/{{project}}/triggers/{{trigger_id}} via code overrides.
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 schema_version: 2
 examples:
@@ -42,6 +42,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_service_account'
     primary_resource_id: 'service-account-trigger'
+    vars:
+      sa_name: 'cloud-sa'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuild_trigger_include_build_logs'
     primary_resource_id: 'include-build-logs-trigger'

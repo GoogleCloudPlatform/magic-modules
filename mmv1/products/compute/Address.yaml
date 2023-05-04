@@ -79,7 +79,7 @@ examples:
     vars:
       address_name: 'my-internal-address'
     skip_docs:
-      true # It is almost identical to internal_with_gce_endpoint
+      true  # It is almost identical to internal_with_gce_endpoint
       # TODO(rileykarson): Remove this example when instance is supported
   - !ruby/object:Provider::Terraform::Examples
     name: 'instance_with_ip'

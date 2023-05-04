@@ -111,7 +111,7 @@ properties:
       the format of a decimal number with up to 9 fractional digits, followed by the
       letter `s` (seconds). It must be greater than a day (ie, 86400).
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'orEmpty(validateKmsCryptoKeyRotationPeriod)'
+      function: 'verify.OrEmpty(validateKmsCryptoKeyRotationPeriod)'
     update_mask_fields:
       - 'rotationPeriod'
       - 'nextRotationTime'

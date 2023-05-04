@@ -48,8 +48,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_basic'
     primary_resource_id: 'my-repo'
-    primary_resource_name:
-      "fmt.Sprintf(\"tf-test-my-repository%s\", context[\"random_suffix\"\
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-repository%s\",
+      context[\"random_suffix\"\
       ])"
     vars:
       repository_id: 'my-repository'

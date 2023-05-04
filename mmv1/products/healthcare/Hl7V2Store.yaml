@@ -101,7 +101,7 @@ properties:
 
           A base64-encoded string.
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateBase64String'
+          function: 'verify.ValidateBase64String'
       - !ruby/object:Api::Type::String
         name: schema
         at_least_one_of:
@@ -115,8 +115,8 @@ properties:
         custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
         custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
         state_func:
-          'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-          return s }'
+          'func(v interface{}) string { s, _ :=
+          structure.NormalizeJsonString(v); return s }'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.StringIsJSON'
       - !ruby/object:Api::Type::Enum

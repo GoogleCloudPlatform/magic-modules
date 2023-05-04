@@ -64,7 +64,7 @@ parameters:
     immutable: true
     url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validateRFC1035Name(2, 63)'
+      function: 'verify.ValidateRFC1035Name(2, 63)'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

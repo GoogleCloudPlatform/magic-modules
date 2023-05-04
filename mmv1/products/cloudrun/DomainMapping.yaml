@@ -132,7 +132,8 @@ properties:
         description: The name of the route that the mapping currently points to.
   - !ruby/object:Api::Type::String
     name: apiVersion
-    description: The API version for this call such as "serving.knative.dev/v1alpha1".
+    description:
+      The API version for this call such as "serving.knative.dev/v1alpha1".
     exclude: true
   - !ruby/object:Api::Type::NestedObject
     name: spec

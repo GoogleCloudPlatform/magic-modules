@@ -54,4 +54,4 @@ properties:
     required: true
     immutable: true
 
-    diff_suppress_func: ProjectNumberDiffSuppress
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
