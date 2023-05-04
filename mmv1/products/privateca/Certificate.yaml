@@ -764,7 +764,7 @@ properties:
       the caller must have the necessary permission to use this template. If this is
       omitted, no template will be used. This template must be in the same location
       as the Certificate.
-    diff_suppress_func: 'compareResourceNames'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     description: |

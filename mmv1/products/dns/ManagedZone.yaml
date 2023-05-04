@@ -297,11 +297,11 @@ properties:
             }
             raw := v.(map[string]interface{})
             if url, ok := raw["network_url"]; ok {
-              return selfLinkNameHash(url)
+              return tpgresource.SelfLinkNameHash(url)
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
-            return hashcode(buf.String())
+            return tpgresource.Hashcode(buf.String())
           }
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -314,7 +314,7 @@ properties:
                 This should be formatted like `projects/{project}/global/networks/{network}` or
                 `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
               required: true
-              diff_suppress_func: 'compareSelfLinkOrResourceName'
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::NestedObject
     name: 'forwardingConfig'
     description: |
@@ -334,11 +334,11 @@ properties:
           func(v interface{}) int {
             raw := v.(map[string]interface{})
             if address, ok := raw["ipv4_address"]; ok {
-              hashcode(address.(string))
+              tpgresource.Hashcode(address.(string))
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
-            return hashcode(buf.String())
+            return tpgresource.Hashcode(buf.String())
           }
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -376,7 +376,7 @@ properties:
               This should be formatted like `projects/{project}/global/networks/{network}` or
               `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
             custom_expand: templates/terraform/custom_expand/network_full_url.erb
-            diff_suppress_func: 'compareSelfLinkOrResourceName'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Boolean
     name: 'reverseLookup'
     api_name: reverseLookupConfig

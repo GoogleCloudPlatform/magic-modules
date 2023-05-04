@@ -22,7 +22,7 @@ func resourceNameSetFromSelfLinkSet(v interface{}) *schema.Set {
 		if v == nil {
 			continue
 		}
-		ls = append(ls, GetResourceNameFromSelfLink(v.(string)))
+		ls = append(ls, tpgresource.GetResourceNameFromSelfLink(v.(string)))
 	}
 	return schema.NewSet(schema.HashString, ls)
 }
@@ -86,7 +86,7 @@ func computeRouterNatSubnetworkHash(v interface{}) int {
 		}
 	}
 	
-	return schema.HashString(NameFromSelfLinkStateFunc(name)) + sourceIpRangesHash + secondaryIpRangeHash
+	return schema.HashString(tpgresource.NameFromSelfLinkStateFunc(name)) + sourceIpRangesHash + secondaryIpRangeHash
 }
 
 func computeRouterNatIPsHash(v interface{}) int {
@@ -95,7 +95,7 @@ func computeRouterNatIPsHash(v interface{}) int {
 	if len(newParts) == 1 {
 		return schema.HashString(newParts[0])
 	}
-	return schema.HashString(GetResourceNameFromSelfLink(val))
+	return schema.HashString(tpgresource.GetResourceNameFromSelfLink(val))
 }
 
 func computeRouterNatRulesHash(v interface{}) int {

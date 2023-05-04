@@ -79,7 +79,7 @@ properties:
       The URL of parent prefix. Either PublicAdvertisedPrefix or
       PublicDelegatedPrefix.
     required: true
-    diff_suppress_func: 'compareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
     description:
