@@ -23,4 +23,7 @@ var ErrEmptyIdentityField = errors.New("empty identity field")
 var ErrResourceInaccessible = errors.New("resource does not exist or service account is lacking sufficient permissions")
 
 // Global MutexKV
-var mutexKV = transport_tpg.NewMutexKV()
+//
+// Deprecated: For backward compatibility mutexKV is still working,
+// but all new code should use MutexStore in the transport_tpg package instead.
+var mutexKV = transport_tpg.MutexStore
