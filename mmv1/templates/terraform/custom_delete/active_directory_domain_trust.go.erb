@@ -14,37 +14,37 @@
     targetDomainNameProp, err := expandNestedActiveDirectoryDomainTrustTargetDomainName(d.Get("target_domain_name"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("target_domain_name"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, targetDomainNameProp)) {
+    } else if v, ok := d.GetOkExists("target_domain_name"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, targetDomainNameProp)) {
         obj["targetDomainName"] = targetDomainNameProp
     }
     trustTypeProp, err := expandNestedActiveDirectoryDomainTrustTrustType(d.Get("trust_type"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("trust_type"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustTypeProp)) {
+    } else if v, ok := d.GetOkExists("trust_type"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustTypeProp)) {
         obj["trustType"] = trustTypeProp
     }
     trustDirectionProp, err := expandNestedActiveDirectoryDomainTrustTrustDirection(d.Get("trust_direction"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("trust_direction"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustDirectionProp)) {
+    } else if v, ok := d.GetOkExists("trust_direction"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustDirectionProp)) {
         obj["trustDirection"] = trustDirectionProp
     }
     selectiveAuthenticationProp, err := expandNestedActiveDirectoryDomainTrustSelectiveAuthentication(d.Get("selective_authentication"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("selective_authentication"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, selectiveAuthenticationProp)) {
+    } else if v, ok := d.GetOkExists("selective_authentication"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, selectiveAuthenticationProp)) {
         obj["selectiveAuthentication"] = selectiveAuthenticationProp
     }
     targetDnsIpAddressesProp, err := expandNestedActiveDirectoryDomainTrustTargetDnsIpAddresses(d.Get("target_dns_ip_addresses"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("target_dns_ip_addresses"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, targetDnsIpAddressesProp)) {
+    } else if v, ok := d.GetOkExists("target_dns_ip_addresses"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, targetDnsIpAddressesProp)) {
         obj["targetDnsIpAddresses"] = targetDnsIpAddressesProp
     }
     trustHandshakeSecretProp, err := expandNestedActiveDirectoryDomainTrustTrustHandshakeSecret(d.Get("trust_handshake_secret"), d, config)
     if err != nil {
         return err
-    } else if v, ok := d.GetOkExists("trust_handshake_secret"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustHandshakeSecretProp)) {
+    } else if v, ok := d.GetOkExists("trust_handshake_secret"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, trustHandshakeSecretProp)) {
         obj["trustHandshakeSecret"] = trustHandshakeSecretProp
     }
 

@@ -76,8 +76,8 @@ func resourceBigQueryDatasetAccessReassignIamMemberInNestedObjectList(d *schema.
 		item := itemRaw.(map[string]interface{})
 
 		itemRole := flattenNestedBigQueryDatasetAccessRole(item["role"], d, meta.(*transport_tpg.Config))
-		// isEmptyValue check so that if one is nil and the other is "", that's considered a match
-		if !(isEmptyValue(reflect.ValueOf(itemRole)) && isEmptyValue(reflect.ValueOf(expectedFlattenedRole))) && !reflect.DeepEqual(itemRole, expectedFlattenedRole) {
+		// tpgresource.IsEmptyValue check so that if one is nil and the other is "", that's considered a match
+		if !(tpgresource.IsEmptyValue(reflect.ValueOf(itemRole)) && tpgresource.IsEmptyValue(reflect.ValueOf(expectedFlattenedRole))) && !reflect.DeepEqual(itemRole, expectedFlattenedRole) {
 			log.Printf("[DEBUG] Skipping item with role= %#v, looking for %#v)", itemRole, expectedFlattenedRole)
 			continue
 		}

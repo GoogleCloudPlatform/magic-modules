@@ -82,7 +82,7 @@ func asyncReplicationGetComputeClient(d *schema.ResourceData, meta interface{}) 
 	return clientCompute, nil
 }
 
-func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta interface{}) (zv *ZonalFieldValue, rv *RegionalFieldValue, resourceId string, err error) {
+func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta interface{}) (zv *tpgresource.ZonalFieldValue, rv *tpgresource.RegionalFieldValue, resourceId string, err error) {
 	config := meta.(*transport_tpg.Config)
 
 	var zonalMatch bool
@@ -109,7 +109,7 @@ func asyncReplicationGetDiskFromConfig(disk string, d *schema.ResourceData, meta
 	return
 }
 
-func asyncReplicationGetDiskStatus(client *compute.Service, zv *ZonalFieldValue, rv *RegionalFieldValue) (diskStatus *compute.Disk, err error) {
+func asyncReplicationGetDiskStatus(client *compute.Service, zv *tpgresource.ZonalFieldValue, rv *tpgresource.RegionalFieldValue) (diskStatus *compute.Disk, err error) {
 	if rv == nil { // Zonal disk
 		diskStatus, err = client.Disks.Get(zv.Project, zv.Zone, zv.Name).Do()
 		log.Printf("[DEBUG] Get disk zones/%s/%s: %v", zv.Zone, zv.Name, diskStatus)

@@ -187,9 +187,9 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%    if prop.send_empty_value -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 <%    elsif prop.flatten_object -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%    else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !tpgresource.IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%    end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
@@ -614,9 +614,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%      if prop.send_empty_value -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 <%      elsif prop.flatten_object -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%      else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
@@ -767,9 +767,9 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%          if prop.send_empty_value -%>
         } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 <%          elsif prop.flatten_object -%>
-        } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+        } else if !tpgresource.IsEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%          else -%>
-        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%          end -%>
             obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
         }

@@ -28,14 +28,14 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 	transformedGkeClusters, err := expandDNSManagedZonePrivateVisibilityConfigGkeClusters(original["gke_clusters"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedGkeClusters); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedGkeClusters); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["gkeClusters"] = transformedGkeClusters
 	}
 
 	transformedNetworks, err := expandDNSManagedZonePrivateVisibilityConfigNetworks(original["networks"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedNetworks); val.IsValid() && !isEmptyValue(val) {
+	} else if val := reflect.ValueOf(transformedNetworks); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["networks"] = transformedNetworks
 	}
 
@@ -56,7 +56,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>Networks(v interfac
 		transformedNetworkUrl, err := expandDNSManagedZonePrivateVisibilityConfigNetworksNetworkUrl(original["network_url"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedNetworkUrl); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedNetworkUrl); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["networkUrl"] = transformedNetworkUrl
 		}
 
@@ -78,7 +78,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>GkeClusters(v inter
 		transformedGkeClusterName, err := expandDNSManagedZonePrivateVisibilityConfigGkeClustersGkeClusterName(original["gke_cluster_name"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedGkeClusterName); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedGkeClusterName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["gkeClusterName"] = transformedGkeClusterName
 		}
 

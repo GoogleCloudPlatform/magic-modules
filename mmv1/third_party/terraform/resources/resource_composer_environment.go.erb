@@ -2101,11 +2101,11 @@ func expandComposerEnvironmentMachineType(v interface{}, d *schema.ResourceData,
 			return "", err
 		}
 
-		fv = &ZonalFieldValue{
+		fv = &tpgresource.ZonalFieldValue{
 			Project:      project,
 			Zone:         requiredZone,
 			Name:         tpgresource.GetResourceNameFromSelfLink(machineType),
-			resourceType: "machineTypes",
+			ResourceType: "machineTypes",
 		}
 	}
 

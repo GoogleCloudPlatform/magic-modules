@@ -5,7 +5,7 @@ func expandCloudIotDeviceRegistryHTTPConfig(v interface{}, d tpgresource.Terrafo
     transformedHTTPEnabledState, err := expandCloudIotDeviceRegistryHTTPEnabledState(original["http_enabled_state"], d, config)
     if err != nil {
         return nil, err
-    } else if val := reflect.ValueOf(transformedHTTPEnabledState); val.IsValid() && !isEmptyValue(val) {
+    } else if val := reflect.ValueOf(transformedHTTPEnabledState); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         transformed["httpEnabledState"] = transformedHTTPEnabledState
     }
 
@@ -23,7 +23,7 @@ func expandCloudIotDeviceRegistryMqttConfig(v interface{}, d tpgresource.Terrafo
     transformedMqttEnabledState, err := expandCloudIotDeviceRegistryMqttEnabledState(original["mqtt_enabled_state"], d, config)
     if err != nil {
         return nil, err
-    } else if val := reflect.ValueOf(transformedMqttEnabledState); val.IsValid() && !isEmptyValue(val) {
+    } else if val := reflect.ValueOf(transformedMqttEnabledState); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         transformed["mqttEnabledState"] = transformedMqttEnabledState
     }
 
@@ -41,7 +41,7 @@ func expandCloudIotDeviceRegistryStateNotificationConfig(v interface{}, d tpgres
     transformedPubsubTopicName, err := expandCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(original["pubsub_topic_name"], d, config)
     if err != nil {
         return nil, err
-    } else if val := reflect.ValueOf(transformedPubsubTopicName); val.IsValid() && !isEmptyValue(val) {
+    } else if val := reflect.ValueOf(transformedPubsubTopicName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         transformed["pubsubTopicName"] = transformedPubsubTopicName
     }
 
@@ -66,7 +66,7 @@ func expandCloudIotDeviceRegistryCredentials(v interface{}, d tpgresource.Terraf
 		transformedPublicKeyCertificate, err := expandCloudIotDeviceRegistryCredentialsPublicKeyCertificate(original["public_key_certificate"], d, config)
 		if err != nil {
 			return nil, err
-		} else if val := reflect.ValueOf(transformedPublicKeyCertificate); val.IsValid() && !isEmptyValue(val) {
+		} else if val := reflect.ValueOf(transformedPublicKeyCertificate); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 			transformed["publicKeyCertificate"] = transformedPublicKeyCertificate
 		}
 
@@ -83,14 +83,14 @@ func expandCloudIotDeviceRegistryCredentialsPublicKeyCertificate(v interface{}, 
     transformedFormat, err := expandCloudIotDeviceRegistryPublicKeyCertificateFormat(original["format"], d, config)
     if err != nil {
         return nil, err
-    } else if val := reflect.ValueOf(transformedFormat); val.IsValid() && !isEmptyValue(val) {
+    } else if val := reflect.ValueOf(transformedFormat); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         transformed["format"] = transformedFormat
     }
 
     transformedCertificate, err := expandCloudIotDeviceRegistryPublicKeyCertificateCertificate(original["certificate"], d, config)
     if err != nil {
         return nil, err
-    } else if val := reflect.ValueOf(transformedCertificate); val.IsValid() && !isEmptyValue(val) {
+    } else if val := reflect.ValueOf(transformedCertificate); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         transformed["certificate"] = transformedCertificate
     }
 
@@ -205,7 +205,7 @@ func flattenCloudIotDeviceRegistryStateNotificationConfig(v interface{}, d *sche
     transformed := make(map[string]interface{})
 
     transformedPubsubTopicName := flattenCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(original["pubsubTopicName"], d, config)
-    if val := reflect.ValueOf(transformedPubsubTopicName); val.IsValid() && !isEmptyValue(val) {
+    if val := reflect.ValueOf(transformedPubsubTopicName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         log.Printf("[DEBUG] pubsub topic name is not null: %v", d.Get("pubsub_topic_name"))
         transformed["pubsub_topic_name"] = transformedPubsubTopicName
     }

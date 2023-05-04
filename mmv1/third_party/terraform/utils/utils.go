@@ -121,7 +121,7 @@ func expandBuildEnvironmentVariables(d *schema.ResourceData) map[string]string {
 // Deprecated: For backward compatibility expandStringMap is still working,
 // but all new code should use ExpandStringMap in the tpgresource package instead.
 func expandStringMap(d tpgresource.TerraformResourceData, key string) map[string]string {
-	return tpgresource.ExpandStringMap(d)
+	return tpgresource.ExpandStringMap(d, key)
 }
 
 // Deprecated: For backward compatibility convertStringMap is still working,
@@ -363,9 +363,6 @@ func frameworkDiagsToSdkDiags(fwD fwDiags.Diagnostics) *diag.Diagnostics {
 	return tpgresource.FrameworkDiagsToSdkDiags(fwD)
 }
 
-// Deprecated: For backward compatibility isEmptyValue is still working,
-// but all new code should use IsEmptyValue in the verify package instead.
-//
 // Deprecated: For backward compatibility isEmptyValue is still working,
 // but all new code should use IsEmptyValue in the tpgresource package instead.
 func isEmptyValue(v reflect.Value) bool {

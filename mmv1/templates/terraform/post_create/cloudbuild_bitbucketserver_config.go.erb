@@ -1,6 +1,6 @@
 log.Printf("[DEBUG] Finished creating BitbucketServerConfig without connected repos: %q: %#v", d.Id(), res)
 
-if v, ok := d.GetOkExists("connected_repositories"); !isEmptyValue(reflect.ValueOf(connectedRepositoriesProp)) && (ok || !reflect.DeepEqual(v, connectedRepositoriesProp)) {
+if v, ok := d.GetOkExists("connected_repositories"); !tpgresource.IsEmptyValue(reflect.ValueOf(connectedRepositoriesProp)) && (ok || !reflect.DeepEqual(v, connectedRepositoriesProp)) {
     connectedReposPropArray, ok := connectedRepositoriesProp.([]interface{})
     if !ok {
         return fmt.Errorf("Error reading connected_repositories")

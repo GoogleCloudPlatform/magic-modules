@@ -328,14 +328,14 @@ func expandNetworkPeering(d *schema.ResourceData) *compute.NetworkPeering {
 
 func flattenNetworkPeeringStackType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// To prevent the perma-diff caused by the absence of `stack_type` in API responses for older resource
-	if v == nil || isEmptyValue(reflect.ValueOf(v)) {
+	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
 		return "IPV4_ONLY"
 	}
 
 	return v
 }
 
-func sortedNetworkPeeringMutexKeys(networkName, peerNetworkName *GlobalFieldValue) []string {
+func sortedNetworkPeeringMutexKeys(networkName, peerNetworkName *tpgresource.GlobalFieldValue) []string {
 	// Whether you delete the peering from network A to B or the one from B to A, they
 	// cannot happen at the same time.
 	networks := []string{

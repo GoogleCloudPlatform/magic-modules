@@ -40,7 +40,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
     } else {
       transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
     <%       else -%>
-    } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+    } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !tpgresource.IsEmptyValue(val) {
       transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
     <%       end -%>
     }
@@ -83,7 +83,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
   } else {
     transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 <%       else -%>
-  } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+  } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !tpgresource.IsEmptyValue(val) {
     transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 <%       end -%>
   }
@@ -134,7 +134,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
       if err != nil {
         return nil, err
 <%         unless prop.send_empty_value -%>
-      } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+      } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 <%         else -%>
       } else {

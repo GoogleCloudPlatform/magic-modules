@@ -14,7 +14,7 @@ if minAction == "" {
 obj["minimalAction"] = minAction
 
 mostDisruptiveAction := d.Get("most_disruptive_allowed_action")
-if isEmptyValue(reflect.ValueOf(mostDisruptiveAction)) {
+if tpgresource.IsEmptyValue(reflect.ValueOf(mostDisruptiveAction)) {
 	mostDisruptiveAction = "REPLACE"
 }
 obj["mostDisruptiveAllowedAction"] = mostDisruptiveAction

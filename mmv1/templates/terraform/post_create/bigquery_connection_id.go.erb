@@ -1,4 +1,4 @@
-if isEmptyValue(reflect.ValueOf(d.Get("connection_id"))) {
+if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("connection_id"))) {
 	// connection id is set by API when unset and required to GET the connection
 	// it is set by reading the "name" field rather than a field in the response
 	if err := d.Set("connection_id", flattenBigqueryConnectionConnectionConnectionId("", d, config)); err != nil {
