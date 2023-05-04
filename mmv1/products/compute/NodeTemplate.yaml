@@ -46,15 +46,15 @@ async: !ruby/object:Api::OpAsync
 collection_url_key: 'items'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_template_basic"
-    primary_resource_id: "template"
+    name: 'node_template_basic'
+    primary_resource_id: 'template'
     vars:
-      template_name: "soletenant-tmpl"
+      template_name: 'soletenant-tmpl'
   - !ruby/object:Provider::Terraform::Examples
-    name: "node_template_server_binding"
-    primary_resource_id: "template"
+    name: 'node_template_server_binding'
+    primary_resource_id: 'template'
     vars:
-      template_name: "soletenant-with-licenses"
+      template_name: 'soletenant-with-licenses'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'

@@ -12,7 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
 const (
@@ -71,7 +74,7 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: compareResourceNames,
+				DiffSuppressFunc: tpgresource.CompareResourceNames,
 				Description:      `The name of the Bigtable instance.`,
 			},
 
@@ -132,7 +135,7 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 							Computed:     true,
 							ForceNew:     true,
 							Description:  `Duration before applying GC policy`,
-							ValidateFunc: validateDuration(),
+							ValidateFunc: verify.ValidateDuration(),
 							ExactlyOneOf: []string{"max_age.0.days", "max_age.0.duration"},
 						},
 					},
@@ -193,7 +196,7 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
@@ -222,7 +225,7 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 	// Mutations to gc policies can only happen one-at-a-time and take some amount of time.
 	// Use a fixed polling rate of 30s based on the RetryInfo returned by the server rather than
 	// the standard up-to-10s exponential backoff for those operations.
-	_, err = retryWithPolling(retryFunc, timeout, pollInterval, transport_tpg.IsBigTableRetryableError)
+	_, err = transport_tpg.RetryWithPolling(retryFunc, timeout, pollInterval, transport_tpg.IsBigTableRetryableError)
 	if err != nil {
 		return err
 	}
@@ -254,7 +257,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
@@ -396,7 +399,7 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
+	instanceName := tpgresource.GetResourceNameFromSelfLink(d.Get("instance_name").(string))
 	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
@@ -411,7 +414,7 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 	// The default delete timeout is 20 minutes.
 	timeout := d.Timeout(schema.TimeoutDelete)
 	pollInterval := time.Duration(30) * time.Second
-	_, err = retryWithPolling(retryFunc, timeout, pollInterval, transport_tpg.IsBigTableRetryableError)
+	_, err = transport_tpg.RetryWithPolling(retryFunc, timeout, pollInterval, transport_tpg.IsBigTableRetryableError)
 	if err != nil {
 		return err
 	}

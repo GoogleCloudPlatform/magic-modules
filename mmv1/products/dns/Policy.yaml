@@ -26,12 +26,12 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 id_format: 'projects/{{project}}/policies/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "dns_policy_basic"
-    primary_resource_id: "example-policy"
+    name: 'dns_policy_basic'
+    primary_resource_id: 'example-policy'
     vars:
-      policy_name: "example-policy"
-      network_1_name: "network-1"
-      network_2_name: "network-2"
+      policy_name: 'example-policy'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/detach_network.erb
 properties:
@@ -56,11 +56,11 @@ properties:
           func(v interface{}) int {
             raw := v.(map[string]interface{})
             if address, ok := raw["ipv4_address"]; ok {
-              hashcode(address.(string))
+              tpgresource.Hashcode(address.(string))
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsPolicyAlternativeNameServerConfigTargetNameServersSchema())
-            return hashcode(buf.String())
+            return tpgresource.Hashcode(buf.String())
           }
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -115,7 +115,8 @@ properties:
     required: true
   - !ruby/object:Api::Type::Array
     name: 'networks'
-    description: 'List of network names specifying networks to which this policy is
+    description:
+      'List of network names specifying networks to which this policy is
       applied.'
     update_verb: :PATCH
     update_url: 'projects/{{project}}/policies/{{name}}'
@@ -124,11 +125,11 @@ properties:
       func(v interface{}) int {
         raw := v.(map[string]interface{})
         if url, ok := raw["network_url"]; ok {
-          return selfLinkNameHash(url)
+          return tpgresource.SelfLinkNameHash(url)
         }
         var buf bytes.Buffer
         schema.SerializeResourceForHash(&buf, raw, dnsPolicyNetworksSchema())
-        return hashcode(buf.String())
+        return tpgresource.Hashcode(buf.String())
       }
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
@@ -140,4 +141,4 @@ properties:
             This should be formatted like `projects/{project}/global/networks/{network}` or
             `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
           custom_expand: templates/terraform/custom_expand/network_full_url.erb
-          diff_suppress_func: 'compareSelfLinkOrResourceName'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'

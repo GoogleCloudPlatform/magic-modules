@@ -1,6 +1,7 @@
 resource "google_network_security_address_group" "<%= ctx[:primary_resource_id] %>" {
   provider    = google-beta
   name        = "<%= ctx[:vars]['resource_name'] %>"
+  parent      = "projects/<%= ctx[:test_env_vars]['project'] %>"
   location    = "us-central1"
   description = "my description"
   type        = "IPV4"

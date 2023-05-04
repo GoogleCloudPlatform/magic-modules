@@ -21,8 +21,8 @@ update_verb: :PATCH
 update_mask: true
 description: |
   The GatewaySecurityPolicy resource contains a collection of GatewaySecurityPolicyRules and associated metadata.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  # TODO(felipegc): change the url to beta once it is available.
+references:
+  !ruby/object:Api::Resource::ReferenceLinks  # TODO(felipegc): change the url to beta once it is available.
   api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1alpha1/projects.locations.gatewaySecurityPolicies'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -45,7 +45,10 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
-import_format: ['projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{name}}']
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{name}}',
+  ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
@@ -92,7 +95,7 @@ properties:
     name: 'description'
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  # TODO(felipegc) - once the resource tlsInspectionPolicies is developed enable this field and create a proper test for it.    
+  # TODO(felipegc) - once the resource tlsInspectionPolicies is developed enable this field and create a proper test for it.
   # - !ruby/object:Api::Type::String
   #   name: 'tlsInspectionPolicy'
   #   description: |

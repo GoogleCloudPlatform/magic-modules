@@ -5,6 +5,7 @@ import (
 	neturl "net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -20,8 +21,8 @@ func dataSourceMonitoringServiceType(
 	typeStateSetter monitoringServiceTypeStateSetter) *schema.Resource {
 
 	// Convert monitoring schema to ds schema
-	dsSchema := datasourceSchemaFromResourceSchema(ResourceMonitoringService().Schema)
-	addOptionalFieldsToSchema(dsSchema, "project")
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceMonitoringService().Schema)
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
 	// Add schema specific to the service type
 	dsSchema = mergeSchemas(typeSchema, dsSchema)
@@ -59,7 +60,7 @@ func dataSourceMonitoringServiceTypeReadFromList(listFilter string, typeStateSet
 			return err
 		}
 
-		resp, err := SendRequest(config, "GET", project, url, userAgent, nil, IsMonitoringConcurrentEditError)
+		resp, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil, transport_tpg.IsMonitoringConcurrentEditError)
 		if err != nil {
 			return fmt.Errorf("unable to list Monitoring Service for data source: %v", err)
 		}

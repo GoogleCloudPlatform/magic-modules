@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/davecgh/go-spew/spew"
@@ -19,7 +20,7 @@ func iamMemberCaseDiffSuppress(k, old, new string, d *schema.ResourceData) bool 
 	if isCaseSensitive {
 		return old == new
 	}
-	return CaseDiffSuppress(k, old, new, d)
+	return tpgresource.CaseDiffSuppress(k, old, new, d)
 }
 
 func validateIAMMember(i interface{}, k string) ([]string, []error) {
@@ -252,7 +253,7 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 		eCondition := conditionKeyFromCondition(eMember.Condition)
 		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Member: Role %q Member %q", updater.DescribeResource(), eMember.Role, eMember.Members[0]))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Member: Role %q Member %q", updater.DescribeResource(), eMember.Role, eMember.Members[0]))
 		}
 		log.Print(spew.Sprintf("[DEBUG]: Retrieved policy for %s: %#v\n", updater.DescribeResource(), p))
 		log.Printf("[DEBUG]: Looking for binding with role %q and condition %#v", eMember.Role, eCondition)
@@ -323,7 +324,7 @@ func resourceIamMemberDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 			err = iamPolicyReadModifyWrite(updater, modifyF)
 		}
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Resource %s for IAM Member (role %q, %q)", updater.GetResourceId(), memberBind.Members[0], memberBind.Role))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %s for IAM Member (role %q, %q)", updater.GetResourceId(), memberBind.Members[0], memberBind.Role))
 		}
 		return resourceIamMemberRead(newUpdaterFunc)(d, meta)
 	}

@@ -77,7 +77,7 @@ module Api
       attr_reader :test_project_name
 
       # Resource name may need a custom diff suppress function. Default is to use
-      # compareSelfLinkOrResourceName
+      # CompareSelfLinkOrResourceName
       attr_reader :custom_diff_suppress
 
       # Some resources (IAP) use fields named differently from the parent resource.

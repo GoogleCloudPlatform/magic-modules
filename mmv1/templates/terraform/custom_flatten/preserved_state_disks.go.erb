@@ -20,7 +20,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	transformed := make([]interface{}, 0, len(disks))
 	for devName, deleteRuleRaw := range disks {
 		diskObj := deleteRuleRaw.(map[string]interface{})
-		source, err := getRelativePath(diskObj["source"].(string))
+		source, err := tpgresource.GetRelativePath(diskObj["source"].(string))
 		if err != nil {
 			source = diskObj["source"].(string)
 		}

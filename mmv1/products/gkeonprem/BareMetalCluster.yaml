@@ -227,24 +227,25 @@ properties:
                   An object containing a list of "key": value pairs.
                   Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
                 default_from_api: true
-      - !ruby/object:Api::Type::NestedObject
+      - !ruby/object:Api::Type::Array
         name: "apiServerArgs"
         description: |
           Customizes the default API server args. Only a subset of
           customized flags are supported. Please refer to the API server
           documentation below to know the exact format:
           https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/
-        properties:
-          - !ruby/object:Api::Type::String
-            name: "argument"
-            required: true
-            description: |
-              The argument name as it appears on the API Server command line please make sure to remove the leading dashes.
-          - !ruby/object:Api::Type::String
-            name: "value"
-            required: true
-            description: |
-              The value of the arg as it will be passed to the API Server command line.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "argument"
+              required: true
+              description: |
+                The argument name as it appears on the API Server command line please make sure to remove the leading dashes.
+            - !ruby/object:Api::Type::String
+              name: "value"
+              required: true
+              description: |
+                The value of the arg as it will be passed to the API Server command line.
   - !ruby/object:Api::Type::NestedObject
     name: "loadBalancer"
     description: |
@@ -310,7 +311,7 @@ properties:
                   description: |
                     If true, avoid using IPs ending in .0 or .255.
                     This avoids buggy consumer devices mistakenly dropping IPv4 traffic for those special IP addresses.
-                - !ruby/object:Api::Type::String
+                - !ruby/object:Api::Type::Boolean
                   name: "manualAssign"
                   description: |
                     If true, prevent IP addresses from being automatically assigned.
@@ -554,69 +555,8 @@ properties:
                   - !ruby/object:Api::Type::NestedObject
                     name: "kubeletConfig"
                     description: |
-                      The kubelet CPU manager policy.
-                      Requires the CPUManager feature gate to be enabled. This field should not
-                      be updated without a full node reboot. It is safest to keep this value the
-                      same as the local /var/lib/kubelet/cpu_manager_state value. See
-                      https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#configuration.
+                      The modifiable kubelet configurations for the baremetal machines.
                     properties:
-                      - !ruby/object:Api::Type::Enum
-                        name: "cpuManagerPolicy"
-                        description: The lifecycle state of the condition.
-                        values:
-                          - NONE
-                          - STATIC
-                      - !ruby/object:Api::Type::Boolean
-                        name: "cpuCfsQuotaDisabled"
-                        description: |
-                          Disables CPU Completely Fair Scheduler (CFS)  quota enforcement for
-                          containers that specify CPU limits.
-                          Disabling this field may reduce node stability.
-                      - !ruby/object:Api::Type::NestedObject
-                        name: "cpuCfsQuotaPeriod"
-                        description: |
-                          The CPU Completely Fair Scheduler (CFS) quota period value.
-                          The value must be between 1 ms and 1 second, inclusive. Requires the
-                          CustomCPUCFSQuotaPeriod feature gate to be enabled. When
-                          updating this field, consider that limits set for containers will result in
-                          different cpu.cfs_quota settings. This will trigger container restarts on
-                          the node being reconfigured.
-                          Defaults to "100ms".
-                        properties:
-                          - !ruby/object:Api::Type::Integer
-                            name: "seconds"
-                            description: |
-                              Signed seconds of the span of time. Must be from -315,576,000,000
-                              to +315,576,000,000 inclusive. Note: these bounds are computed from
-                              60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
-                          - !ruby/object:Api::Type::Integer
-                            name: "nanos"
-                            description: |
-                              Signed fractions of a second at nanosecond resolution of the span
-                              of time. Durations less than one second are represented with a 0
-                              `seconds` field and a positive or negative `nanos` field. For durations
-                              of one second or more, a non-zero value for the `nanos` field must be
-                              of the same sign as the `seconds` field. Must be from -999,999,999
-                              to +999,999,999 inclusive.
-                      - !ruby/object:Api::Type::KeyValuePairs
-                        name: "featureGates"
-                        description: |
-                          A map of feature names to bools that enable or disable
-                          experimental features.
-                          This field modifies the built-in default values from
-                          "k8s.io/kubernetes/pkg/features/kube_features.go". Consider the
-                          documentation for the features you are enabling or disabling. While we
-                          encourage feature developers to make it possible to enable and disable
-                          features, some changes may require node reboots, and some features may
-                          require careful coordination to retroactively disable.
-                      - !ruby/object:Api::Type::Integer
-                        name: "podPidsLimit"
-                        description: |
-                          The maximum number of PIDs in any pod.
-                          Lowering this may prevent container processes from forking after the
-                          change.
-                          Defaults to -1.
-                        default_value: -1
                       - !ruby/object:Api::Type::Integer
                         name: "registryPullQps"
                         description: |

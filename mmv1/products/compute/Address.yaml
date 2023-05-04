@@ -57,41 +57,42 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "address_basic"
-    primary_resource_id: "ip_address"
+    name: 'address_basic'
+    primary_resource_id: 'ip_address'
     vars:
-      address_name: "my-address"
+      address_name: 'my-address'
   - !ruby/object:Provider::Terraform::Examples
-    name: "address_with_subnetwork"
-    primary_resource_id: "internal_with_subnet_and_address"
+    name: 'address_with_subnetwork'
+    primary_resource_id: 'internal_with_subnet_and_address'
     vars:
-      address_name: "my-internal-address"
-      network_name: "my-network"
-      subnetwork_name: "my-subnet"
+      address_name: 'my-internal-address'
+      network_name: 'my-network'
+      subnetwork_name: 'my-subnet'
   - !ruby/object:Provider::Terraform::Examples
-    name: "address_with_gce_endpoint"
-    primary_resource_id: "internal_with_gce_endpoint"
+    name: 'address_with_gce_endpoint'
+    primary_resource_id: 'internal_with_gce_endpoint'
     vars:
-      address_name: "my-internal-address-"
+      address_name: 'my-internal-address-'
   - !ruby/object:Provider::Terraform::Examples
-    name: "address_with_shared_loadbalancer_vip"
-    primary_resource_id: "internal_with_shared_loadbalancer_vip"
+    name: 'address_with_shared_loadbalancer_vip'
+    primary_resource_id: 'internal_with_shared_loadbalancer_vip'
     vars:
-      address_name: "my-internal-address"
-    skip_docs: true      # It is almost identical to internal_with_gce_endpoint
+      address_name: 'my-internal-address'
+    skip_docs:
+      true  # It is almost identical to internal_with_gce_endpoint
       # TODO(rileykarson): Remove this example when instance is supported
   - !ruby/object:Provider::Terraform::Examples
-    name: "instance_with_ip"
-    primary_resource_id: "static"
+    name: 'instance_with_ip'
+    primary_resource_id: 'static'
     vars:
-      address_name: "ipv4-address"
-      instance_name: "vm-instance"
+      address_name: 'ipv4-address'
+      instance_name: 'vm-instance'
   - !ruby/object:Provider::Terraform::Examples
-    name: "compute_address_ipsec_interconnect"
-    primary_resource_id: "ipsec-interconnect-address"
+    name: 'compute_address_ipsec_interconnect'
+    primary_resource_id: 'ipsec-interconnect-address'
     vars:
-      address_name: "test-address"
-      network_name: "test-network"
+      address_name: 'test-address'
+      network_name: 'test-network'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
 parameters:
@@ -181,8 +182,8 @@ properties:
     values:
       - :PREMIUM
       - :STANDARD
-  # TODO(alexstephen): Add in status with exclude attribute. What does this
-  # mean?
+    # TODO(alexstephen): Add in status with exclude attribute. What does this
+    # mean?
     default_from_api: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'

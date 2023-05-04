@@ -4,7 +4,7 @@ func getExistingFirebaseProjectId(config *transport_tpg.Config, d *schema.Resour
 		return "", err
 	}
 
-	_, err = SendRequest(config, "GET", billingProject, url, userAgent, nil)
+	_, err = transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err == nil {
 		id, err := ReplaceVars(d, config, "projects/{{project}}")
 		if err != nil {
@@ -13,7 +13,7 @@ func getExistingFirebaseProjectId(config *transport_tpg.Config, d *schema.Resour
 		return id, nil
 	}
 
-	if !IsGoogleApiErrorWithCode(err, 404) {
+	if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		return "", err
 	}
 

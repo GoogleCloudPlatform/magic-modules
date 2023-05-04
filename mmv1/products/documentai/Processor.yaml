@@ -23,16 +23,16 @@ description: |
   The first-class citizen for Document AI. Each processor defines how to extract structural information from a document.
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "documentai_processor"
-    primary_resource_id: "processor"
+    name: 'documentai_processor'
+    primary_resource_id: 'processor'
     vars:
-      processor_name: "test-processor"
+      processor_name: 'test-processor'
   - !ruby/object:Provider::Terraform::Examples
-    name: "documentai_processor_eu"
-    primary_resource_id: "processor"
+    name: 'documentai_processor_eu'
+    primary_resource_id: 'processor'
     skip_docs: true
     vars:
-      processor_name: "test-processor"
+      processor_name: 'test-processor'
 parameters:
   - !ruby/object:Api::Type::String
     name: location

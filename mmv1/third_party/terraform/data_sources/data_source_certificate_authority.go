@@ -4,15 +4,16 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourcePrivatecaCertificateAuthority() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(ResourcePrivatecaCertificateAuthority().Schema)
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "location")
-	addOptionalFieldsToSchema(dsSchema, "pool")
-	addOptionalFieldsToSchema(dsSchema, "certificate_authority_id")
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourcePrivatecaCertificateAuthority().Schema)
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "location")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "pool")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "certificate_authority_id")
 
 	dsSchema["pem_csr"] = &schema.Schema{
 		Type:     schema.TypeString,
@@ -64,9 +65,9 @@ func dataSourcePrivatecaCertificateAuthorityRead(d *schema.ResourceData, meta in
 			billingProject = bp
 		}
 
-		res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
+		res, err := transport_tpg.SendRequest(config, "GET", billingProject, url, userAgent, nil)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("PrivatecaCertificateAuthority %q", d.Id()))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("PrivatecaCertificateAuthority %q", d.Id()))
 		}
 		if err := d.Set("pem_csr", res["pemCsr"]); err != nil {
 			return fmt.Errorf("Error fetching CertificateAuthority: %s", err)

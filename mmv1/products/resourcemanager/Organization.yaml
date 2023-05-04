@@ -15,7 +15,8 @@
 name: 'Organization'
 base_url: 'organizations'
 collection_url: organizations:search
-description: A Folder in an Organization's resource hierarchy, used to organize that
+description:
+  A Folder in an Organization's resource hierarchy, used to organize that
   Organization's resources.
 exclude: true
 properties:
@@ -55,4 +56,3 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'directoryCustomerId'
         description: The G Suite customer id used in the Directory API
-

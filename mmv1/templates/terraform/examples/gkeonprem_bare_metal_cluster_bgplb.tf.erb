@@ -10,6 +10,12 @@ resource "google_gkeonprem_bare_metal_cluster" "<%= ctx[:primary_resource_id] %>
       pod_address_cidr_blocks = ["10.240.0.0/13"]
     }
     advanced_networking = true
+    multiple_network_interfaces_config {
+      enabled = true
+    }
+    sr_iov_config {
+      enabled = true
+    }
   }
   control_plane {
     control_plane_node_pool_config {
@@ -20,7 +26,16 @@ resource "google_gkeonprem_bare_metal_cluster" "<%= ctx[:primary_resource_id] %>
           labels = {}
           node_ip = "10.200.0.9"
         }
+        taints {
+          key = "test-key"
+          value = "test-value"
+          effect = "NO_EXECUTE"
+        }
       }
+    }
+    api_server_args {
+      argument = "test-argument"
+      value = "test-value"
     }
   }
   load_balancer {
@@ -60,6 +75,16 @@ resource "google_gkeonprem_bare_metal_cluster" "<%= ctx[:primary_resource_id] %>
             labels = {}
             node_ip = "10.200.0.9"
           }
+          taints {
+            key = "test-key"
+            value = "test-value"
+            effect = "NO_EXECUTE"
+          }
+          kubelet_config {
+            registry_pull_qps = 10
+            registry_burst = 12
+            serialize_image_pulls_disabled = true
+          }
         }
       }
     }
@@ -83,5 +108,25 @@ resource "google_gkeonprem_bare_metal_cluster" "<%= ctx[:primary_resource_id] %>
         username = "admin@hashicorptest.com"
       }
     }
+  }
+  proxy {
+    uri = "http://test-domain/test"
+    no_proxy = ["127.0.0.1"]
+  }
+  cluster_operations {
+    enable_application_logs = true
+  }
+  maintenance_config {
+    maintenance_address_cidr_blocks = ["192.168.0.1/20"] 
+  }
+  node_config {
+    max_pods_per_node = 10
+    container_runtime = "CONTAINERD"
+  }
+  node_access_config {
+    login_user = "test@example.com"
+  }
+  os_environment_config {
+    package_repo_excluded = true
   }
 }

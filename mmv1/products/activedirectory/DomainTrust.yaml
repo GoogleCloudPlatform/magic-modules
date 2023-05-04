@@ -85,8 +85,8 @@ properties:
     name: 'targetDomainName'
     required: true
     description:
-      'The fully qualified target domain name which will be in trust with
-      the current domain.'
+      'The fully qualified target domain name which will be in trust with the
+      current domain.'
   - !ruby/object:Api::Type::Enum
     name: 'trustType'
     required: true

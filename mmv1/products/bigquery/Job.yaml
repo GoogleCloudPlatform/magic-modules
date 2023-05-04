@@ -70,9 +70,17 @@ examples:
     primary_resource_id: 'job'
     vars:
       job_id: 'job_load'
-      bucket_name: 'bq-geojson-sample'
+      bucket_name: 'bq-geojson'  # Keep small(er) to avoid downstream acctest having too-long a bucket name
     test_env_vars:
       project: :PROJECT_NAME
+    ignore_read_extra:
+      - 'etag'
+      - 'status.0.state'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_job_load_parquet'
+    primary_resource_id: 'job'
+    vars:
+      job_id: "job_load"
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
@@ -85,7 +93,7 @@ examples:
       - 'etag'
       - 'load.0.destination_table.0.table_id'
       - 'status.0.state'
-    skip_docs: true # there are a lot of examples for this resource, so omitting some that are similar to others
+    skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_job_copy'
     primary_resource_id: 'job'
@@ -115,7 +123,7 @@ examples:
       - 'copy.0.source_tables.0.table_id'
       - 'copy.0.source_tables.1.table_id'
       - 'status.0.state'
-    skip_docs: true # there are a lot of examples for this resource, so omitting some that are similar to others
+    skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_job_extract'
     primary_resource_id: 'job'
@@ -135,7 +143,7 @@ examples:
       - 'etag'
       - 'extract.0.source_table.0.table_id'
       - 'status.0.state'
-    skip_docs: true # there are a lot of examples for this resource, so omitting some that are similar to others
+    skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_job.go
   encoder: templates/terraform/encoders/bigquery_job.go.erb
@@ -212,7 +220,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Array
             name: 'userDefinedFunctionResources'
             description: |
@@ -221,16 +229,16 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'resourceUri'
-                  description:
-                    'A code resource to load from a Google Cloud Storage
-                    URI (gs://bucket/path).'
                   # TODO (mbang): exactly_one_of: resourceUri, inlineCode
+                  description:
+                    'A code resource to load from a Google Cloud Storage URI
+                    (gs://bucket/path).'
                 - !ruby/object:Api::Type::String
                   name: 'inlineCode'
+                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
                   description: |
                     An inline resource that contains code for a user-defined function (UDF).
                     Providing a inline code resource is equivalent to providing a URI for a file containing the same code.
-                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -269,7 +277,7 @@ properties:
                   The dataset. Can be specified `{{dataset_id}}` if `project_id` is also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               - !ruby/object:Api::Type::String
                 name: 'projectId'
                 description: 'The ID of the project containing this table.'
@@ -426,7 +434,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -600,6 +608,22 @@ properties:
                 description: |
                   Describes the Cloud KMS encryption key version used to protect destination BigQuery table.
                 output: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'parquetOptions'
+            description: |
+              Parquet Options for load and make external tables.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'enumAsString'
+                description: |
+                  If sourceFormat is set to PARQUET, indicates whether to infer Parquet ENUM logical type as STRING instead of BYTES by default.
+              - !ruby/object:Api::Type::Boolean
+                name: 'enableListInference'
+                description: |
+                  If sourceFormat is set to PARQUET, indicates whether to use schema inference specifically for Parquet LIST logical type.
+                at_least_one_of:
+                  - configuration.0.load.0.parquet_options.0.enum_as_string
+                  - configuration.0.load.0.parquet_options.0.enable_list_inference
       - !ruby/object:Api::Type::NestedObject
         name: 'copy'
         description: 'Copies a table.'
@@ -634,7 +658,7 @@ properties:
                     The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                     or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                   required: true
-                  diff_suppress_func: 'compareSelfLinkRelativePaths'
+                  diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::NestedObject
             name: 'destinationTable'
             description: 'The destination table.'
@@ -657,7 +681,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::Enum
             name: 'createDisposition'
             description: |
@@ -769,7 +793,7 @@ properties:
                   The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
                   or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
                 required: true
-                diff_suppress_func: 'compareSelfLinkRelativePaths'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - !ruby/object:Api::Type::NestedObject
             name: 'sourceModel'
             description: |

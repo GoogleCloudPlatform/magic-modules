@@ -52,6 +52,3 @@ mmv1/build/*
 tpgtools/temp.serial
 
 tpgtools/serialization.go
-
-# Used by tfv/tgc
-mmv1/third_party/validator/tests/source/

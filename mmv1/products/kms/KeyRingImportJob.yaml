@@ -30,16 +30,16 @@ description: |
 
   ~> **Note:** KeyRingImportJobs cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed KeyRingImportJob will remove it from state but
-  *will not delete the resource from the project.* 
-id_format: "{{name}}"
-import_format: ["{{name}}"]
+  *will not delete the resource from the project.*
+id_format: '{{name}}'
+import_format: ['{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "kms_key_ring_import_job"
-    primary_resource_id: "import-job"
+    name: 'kms_key_ring_import_job'
+    primary_resource_id: 'import-job'
     vars:
-      keyring: "keyring-example"
-      cryptokey: "cryptokey-example"
+      keyring: 'keyring-example'
+      cryptokey: 'cryptokey-example'
     skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/kms_key_ring_import_job.go.erb

@@ -5,18 +5,19 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceMonitoringNotificationChannel() *schema.Resource {
-	dsSchema := datasourceSchemaFromResourceSchema(ResourceMonitoringNotificationChannel().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceMonitoringNotificationChannel().Schema)
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "display_name")
-	addOptionalFieldsToSchema(dsSchema, "project")
-	addOptionalFieldsToSchema(dsSchema, "type")
-	addOptionalFieldsToSchema(dsSchema, "labels")
-	addOptionalFieldsToSchema(dsSchema, "user_labels")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "display_name")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "type")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "labels")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "user_labels")
 
 	return &schema.Resource{
 		Read:   dataSourceMonitoringNotificationChannelRead,
@@ -75,7 +76,7 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 	params := map[string]string{
 		"filter": filter,
 	}
-	url, err = AddQueryParams(url, params)
+	url, err = transport_tpg.AddQueryParams(url, params)
 	if err != nil {
 		return err
 	}
@@ -85,7 +86,7 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 		return err
 	}
 
-	response, err := SendRequest(config, "GET", project, url, userAgent, nil)
+	response, err := transport_tpg.SendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving NotificationChannels: %s", err)
 	}

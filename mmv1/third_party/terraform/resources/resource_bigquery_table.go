@@ -16,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/bigquery/v2"
 )
@@ -180,7 +182,7 @@ func bigQueryTableConnectionIdSuppress(name, old, new string, _ *schema.Resource
 	// "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}".
 	// but always returns "{{project}}.{{location}}.{{connection_id}}"
 
-	if isEmptyValue(reflect.ValueOf(old)) || isEmptyValue(reflect.ValueOf(new)) {
+	if tpgresource.IsEmptyValue(reflect.ValueOf(old)) || tpgresource.IsEmptyValue(reflect.ValueOf(new)) {
 		return false
 	}
 
@@ -1148,7 +1150,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 	res, err := config.NewBigQueryClient(userAgent).Tables.Get(project, datasetID, tableID).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
 	}
 
 	if err := d.Set("project", project); err != nil {

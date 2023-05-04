@@ -1,11 +1,13 @@
 <% autogen_exception -%>
 package google
-<% if version == 'beta' -%>
+<% unless version == 'ga' -%>
 import (
 	"encoding/json"
 	"fmt"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -68,7 +70,7 @@ func (w *gkeonpremOperationWaiter) IsRetryable(error) bool {
 }
 
 func (w *gkeonpremOperationWaiter) SetOp(op interface{}) error {
-	if err := Convert(op, &w.Op); err != nil {
+	if err := tpgresource.Convert(op, &w.Op); err != nil {
 		return err
 	}
 	return nil
@@ -97,7 +99,7 @@ func (w *gkeonpremOperationWaiter) QueryOp() (interface{}, error) {
 	// Returns the proper get.
 	url := fmt.Sprintf("%s%s", w.Config.GkeonpremBasePath, w.Op.Name)
 
-	return SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
+	return transport_tpg.SendRequest(w.Config, "GET", w.Project, url, w.UserAgent, nil)
 }
 
 func creategkeonpremWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*gkeonpremOperationWaiter, error) {
