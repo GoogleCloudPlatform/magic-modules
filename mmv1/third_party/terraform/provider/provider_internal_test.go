@@ -230,6 +230,7 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 		},
 		// NOTE: these tests can't run in Cloud Build due to ADC locating credentials despite `GOOGLE_APPLICATION_CREDENTIALS` being unset
 		// See https://cloud.google.com/docs/authentication/application-default-credentials#search_order
+		// Also, when running these tests locally you need to run `gcloud auth application-default revoke` to ensure your machine isn't supplying ADCs
 		// "error returned if credentials is set as an empty string and GOOGLE_APPLICATION_CREDENTIALS is unset": {
 		// 	ConfigValues: map[string]interface{}{
 		// 		"credentials": "",
@@ -282,10 +283,13 @@ func TestProvider_providerConfigure_credentials(t *testing.T) {
 				return
 			}
 
-			v := d.Get("credentials")
-			val := v.(string)
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
+			v, ok := d.GetOk("credentials")
+			val := v.(string)
+			if ok && tc.ExpectFieldUnset {
+				t.Fatal("expected credentials value to be unset in provider data")
+			}
 			if v != tc.ExpectedSchemaValue {
 				t.Fatalf("expected credentials value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
 			}
@@ -341,6 +345,26 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 			ExpectedSchemaValue: "",
 			ExpectedConfigValue: "value-from-GOOGLE_OAUTH_ACCESS_TOKEN",
 		},
+		"when no values are provided via config or environment variables, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				// access_token unset
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectError:         false,
+			ExpectFieldUnset:    true,
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
+		},
+		"when access_token is set as an empty array the field is treated as if it's unset, without error": {
+			ConfigValues: map[string]interface{}{
+				"access_token": "",
+				"credentials":  testFakeCredentialsPath,
+			},
+			ExpectError:         false,
+			ExpectFieldUnset:    true,
+			ExpectedSchemaValue: "",
+			ExpectedConfigValue: "",
+		},
 	}
 
 	for tn, tc := range cases {
@@ -378,10 +402,13 @@ func TestProvider_providerConfigure_accessToken(t *testing.T) {
 				return
 			}
 
-			v := d.Get("access_token")
-			val := v.(string)
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
+			v, ok := d.GetOk("access_token")
+			val := v.(string)
+			if ok && tc.ExpectFieldUnset {
+				t.Fatal("expected access_token value to be unset in provider data")
+			}
 			if val != tc.ExpectedSchemaValue {
 				t.Fatalf("expected access_token value set in provider data to be %s, got %s", tc.ExpectedSchemaValue, val)
 			}
@@ -413,6 +440,7 @@ func TestProvider_providerConfigure_impersonateServiceAccount(t *testing.T) {
 		},
 		"impersonate_service_account value can be set by environment variable": {
 			ConfigValues: map[string]interface{}{
+				// impersonate_service_account unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
 			EnvVariables: map[string]string{
@@ -422,9 +450,21 @@ func TestProvider_providerConfigure_impersonateServiceAccount(t *testing.T) {
 		},
 		"when no values are provided via config or environment variables, the field remains unset without error": {
 			ConfigValues: map[string]interface{}{
+				// impersonate_service_account unset
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
+			ExpectError:      false,
 			ExpectFieldUnset: true,
+			ExpectedValue:    "",
+		},
+		"when impersonate_service_account is set as an empty array the field is treated as if it's unset, without error": {
+			ConfigValues: map[string]interface{}{
+				"impersonate_service_account": "",
+				"credentials":                 testFakeCredentialsPath,
+			},
+			ExpectError:      false,
+			ExpectFieldUnset: true,
+			ExpectedValue:    "",
 		},
 	}
 
@@ -463,10 +503,13 @@ func TestProvider_providerConfigure_impersonateServiceAccount(t *testing.T) {
 				return
 			}
 
-			v := d.Get("impersonate_service_account")
-			val := v.(string)
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
+			v, ok := d.GetOk("impersonate_service_account")
+			val := v.(string)
+			if ok && tc.ExpectFieldUnset {
+				t.Fatal("expected impersonate_service_account value to be unset in provider data")
+			}
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected impersonate_service_account value set in provider data to be %s, got %s", tc.ExpectedValue, val)
 			}
@@ -500,6 +543,24 @@ func TestProvider_providerConfigure_impersonateServiceAccountDelegates(t *testin
 			},
 		},
 		// No environment variables can be used for impersonate_service_account_delegates
+		"when no impersonate_service_account_delegates value is provided via config, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				// impersonate_service_account_delegates unset
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectError:      false,
+			ExpectFieldUnset: true,
+			ExpectedValue:    nil,
+		},
+		"when project is set as an empty array the field is treated as if it's unset, without error": {
+			ConfigValues: map[string]interface{}{
+				"impersonate_service_account_delegates": []string{},
+				"credentials":                           testFakeCredentialsPath,
+			},
+			ExpectError:      false,
+			ExpectFieldUnset: true,
+			ExpectedValue:    nil,
+		},
 	}
 
 	for tn, tc := range cases {
@@ -537,16 +598,17 @@ func TestProvider_providerConfigure_impersonateServiceAccountDelegates(t *testin
 							t.Fatalf("expected impersonate_service_account_delegates value set in provider data to be %#v, got %#v", tc.ExpectedValue, val)
 						}
 					}
-
 				}
 				// Return early in tests where errors expected
 				return
 			}
 
-			v := d.Get("impersonate_service_account_delegates")
-			val := v.([]interface{})
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
-
+			v, ok := d.GetOk("impersonate_service_account_delegates")
+			val := v.([]interface{})
+			if ok && tc.ExpectFieldUnset {
+				t.Fatal("expected impersonate_service_account_delegates value to be unset in provider data")
+			}
 			if len(val) != len(tc.ExpectedValue) {
 				t.Fatalf("expected impersonate_service_account_delegates value set in provider data to be %#v, got %#v", tc.ExpectedValue, val)
 			}
@@ -643,6 +705,14 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 			},
 			ExpectedValue: "",
 		},
+		"when project is set as an empty string the field is treated as if it's unset, without error": {
+			ConfigValues: map[string]interface{}{
+				"project":     "",
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectFieldUnset: true,
+			ExpectedValue:    "",
+		},
 	}
 
 	for tn, tc := range cases {
@@ -680,10 +750,13 @@ func TestProvider_providerConfigure_project(t *testing.T) {
 				return
 			}
 
-			v := d.Get("project")
-			val := v.(string)
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
+			v, ok := d.GetOk("project")
+			val := v.(string)
+			if ok && tc.ExpectFieldUnset {
+				t.Fatal("expected project value to be unset in provider data")
+			}
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected project value set in provider data to be %s, got %s", tc.ExpectedValue, val)
 			}
@@ -728,7 +801,17 @@ func TestProvider_providerConfigure_billingProject(t *testing.T) {
 				// billing_project unset
 				"credentials": testFakeCredentialsPath,
 			},
-			ExpectedValue: "",
+			ExpectError:      false,
+			ExpectFieldUnset: true,
+			ExpectedValue:    "",
+		},
+		"when billing_project is set as an empty string the field is treated as if it's unset, without error": {
+			ConfigValues: map[string]interface{}{
+				"billing_project": "",
+				"credentials":     testFakeCredentialsPath,
+			},
+			ExpectFieldUnset: true,
+			ExpectedValue:    "",
 		},
 	}
 
@@ -763,10 +846,13 @@ func TestProvider_providerConfigure_billingProject(t *testing.T) {
 				return
 			}
 
-			v := d.Get("billing_project")
-			val := v.(string)
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
+			v, ok := d.GetOk("billing_project")
+			val := v.(string)
+			if ok && tc.ExpectFieldUnset {
+				t.Fatal("expected billing_project value to be unset in provider data")
+			}
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected billing_project value set in provider data to be %s, got %s", tc.ExpectedValue, val)
 			}
@@ -796,7 +882,7 @@ func TestProvider_providerConfigure_region(t *testing.T) {
 			},
 			ExpectedValue: "my-region-from-config",
 		},
-		"region value can be set by environment variable: GOOGLE_PROJECT is used first": {
+		"region value can be set by environment variable: GOOGLE_REGION is used": {
 			ConfigValues: map[string]interface{}{
 				// region unset
 				"credentials": testFakeCredentialsPath,
@@ -811,7 +897,17 @@ func TestProvider_providerConfigure_region(t *testing.T) {
 				// region unset
 				"credentials": testFakeCredentialsPath,
 			},
-			ExpectedValue: "",
+			ExpectError:      false,
+			ExpectFieldUnset: true,
+			ExpectedValue:    "",
+		},
+		"when region is set as an empty string the field is treated as if it's unset, without error": {
+			ConfigValues: map[string]interface{}{
+				"region":      "",
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectFieldUnset: true,
+			ExpectedValue:    "",
 		},
 	}
 
@@ -846,10 +942,13 @@ func TestProvider_providerConfigure_region(t *testing.T) {
 				return
 			}
 
-			v := d.Get("region")
-			val := v.(string)
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
+			v, ok := d.GetOk("region")
+			val := v.(string)
+			if ok && tc.ExpectFieldUnset {
+				t.Fatal("expected region value to be unset in provider data")
+			}
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected region value set in provider data to be %s, got %s", tc.ExpectedValue, val)
 			}
@@ -915,6 +1014,23 @@ func TestProvider_providerConfigure_zone(t *testing.T) {
 			},
 			ExpectedValue: "zone-from-CLOUDSDK_COMPUTE_ZONE",
 		},
+		"when no values are provided via config or environment variables, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				// zone unset
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectError:      false,
+			ExpectFieldUnset: true,
+			ExpectedValue:    "",
+		},
+		"when zone is set as an empty string the field is treated as if it's unset, without error": {
+			ConfigValues: map[string]interface{}{
+				"zone":        "",
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectFieldUnset: true,
+			ExpectedValue:    "",
+		},
 	}
 
 	for tn, tc := range cases {
@@ -948,10 +1064,13 @@ func TestProvider_providerConfigure_zone(t *testing.T) {
 				return
 			}
 
-			v := d.Get("zone")
-			val := v.(string)
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
+			v, ok := d.GetOk("zone")
+			val := v.(string)
+			if ok && tc.ExpectFieldUnset {
+				t.Fatal("expected zone value to be unset in provider data")
+			}
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected zone value set in provider data to be %s, got %s", tc.ExpectedValue, val)
 			}
@@ -1023,9 +1142,15 @@ func TestProvider_providerConfigure_userProjectOverride(t *testing.T) {
 			ExpectError: true,
 		},
 		"when no values are provided via config or environment variables, the field remains unset without error": {
+			ConfigValues: map[string]interface{}{
+				// user_project_override unset
+				"credentials": testFakeCredentialsPath,
+			},
 			ExpectError:      false,
 			ExpectFieldUnset: true,
+			ExpectedValue:    false,
 		},
+		// There isn't an equivalent test case for 'user sets value as empty string' because user_project_override is a boolean; true/false both valid.
 	}
 
 	for tn, tc := range cases {
@@ -1059,10 +1184,13 @@ func TestProvider_providerConfigure_userProjectOverride(t *testing.T) {
 				return
 			}
 
-			v := d.Get("user_project_override")
-			val := v.(bool)
 			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
 
+			v, ok := d.GetOk("user_project_override")
+			val := v.(bool)
+			if ok && tc.ExpectFieldUnset {
+				t.Fatal("expected user_project_override value to be unset in provider data")
+			}
 			if val != tc.ExpectedValue {
 				t.Fatalf("expected user_project_override value set in provider data to be %v, got %v", tc.ExpectedValue, val)
 			}
@@ -1079,6 +1207,7 @@ func TestProvider_providerConfigure_scopes(t *testing.T) {
 		EnvVariables        map[string]string
 		ExpectedSchemaValue []string
 		ExpectedConfigValue []string
+		ExpectFieldUnset    bool
 		ExpectError         bool
 	}{
 		"scopes are set in the provider config as a list": {
@@ -1101,10 +1230,21 @@ func TestProvider_providerConfigure_scopes(t *testing.T) {
 				"fizzbuzz",
 			},
 		},
-		"scopes can be left unset in the provider config without any issues": {
+		"scopes can be left unset in the provider config without any issues, and a default value is used": {
 			ConfigValues: map[string]interface{}{
+				// scopes unset
 				"credentials": testFakeCredentialsPath,
 			},
+			ExpectedSchemaValue: nil,
+			ExpectedConfigValue: transport_tpg.DefaultClientScopes,
+		},
+		"scopes set as an empty list the field is treated as if it's unset and a default value is used without errors": {
+			ConfigValues: map[string]interface{}{
+				"scopes":      []string{},
+				"credentials": testFakeCredentialsPath,
+			},
+			ExpectError:         false,
+			ExpectFieldUnset:    true, //unset in provider config data, not the subsequent Config struct
 			ExpectedSchemaValue: nil,
 			ExpectedConfigValue: transport_tpg.DefaultClientScopes,
 		},
@@ -1127,6 +1267,21 @@ func TestProvider_providerConfigure_scopes(t *testing.T) {
 				t.Fatal("expected error(s) but got none")
 			}
 			if diags.HasError() && tc.ExpectError {
+				v, ok := d.GetOk("scopes")
+				if ok {
+					val := v.([]interface{})
+					if tc.ExpectFieldUnset {
+						t.Fatalf("expected scopes value to not be set in provider data, got %#v", val)
+					}
+					if len(val) != len(tc.ExpectedSchemaValue) {
+						t.Fatalf("expected scopes value set in provider data to be %#v, got %#v", tc.ExpectedSchemaValue, val)
+					}
+					for i := 0; i < len(val); i++ {
+						if val[i].(string) != tc.ExpectedSchemaValue[i] {
+							t.Fatalf("expected scopes value set in provider data to be %#v, got %#v", tc.ExpectedSchemaValue, val)
+						}
+					}
+				}
 				// Return early in tests where errors expected
 				return
 			}
